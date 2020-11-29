@@ -541,6 +541,17 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
     return true;
 }
 
+bool CLR_DBG_Debugger::Monitor_TargetInfo(WP_Message *msg)
+{
+    Monitor_TargetInfo_Reply cmdReply;
+
+    bool fOK = nanoBooter_GetTargetInfo(&cmdReply.m_TargetInfo) == true;
+
+    WP_ReplyToCommand(msg, fOK, false, &cmdReply, sizeof(cmdReply));
+
+    return true;
+}
+
 //--//
 
 bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
@@ -699,11 +710,25 @@ void CLR_DBG_Debugger::AccessMemory(
                     case AccessMemory_Read:
                         if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
                         {
-                            memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+                            // memory block support XIP, OK to read directly from address
+                            if (mode == AccessMemory_Check)
+                            {
+                                // compute CRC32 of the memory segment
+                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
+                                    SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, 0);
+                            }
+                            else
+                            {
+                                // copy memory segment to buffer
+                                memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+                            }
+
+                            // done here
                             proceed = true;
                         }
                         else
                         {
+                            // need to use driver to access storage block
                             if (mode == AccessMemory_Check)
                             {
                                 bufPtr = (unsigned char *)CLR_RT_Memory::Allocate(lengthInBytes, true);
@@ -713,7 +738,7 @@ void CLR_DBG_Debugger::AccessMemory(
                                     TRACE0("=> Failed to allocate data buffer\n");
 
                                     // set error code
-                                    *errorCode = AccessMemoryErrorCode_PermissionDenied;
+                                    *errorCode = AccessMemoryErrorCode_FailedToAllocateReadBuffer;
 
                                     // done here
                                     return;
@@ -728,7 +753,9 @@ void CLR_DBG_Debugger::AccessMemory(
 
                             if (mode == AccessMemory_Check)
                             {
-                                *(unsigned int *)buf = SUPPORT_ComputeCRC(bufPtr, NumOfBytes, *(unsigned int *)buf);
+                                // compute CRC32 of the memory segment
+                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
+                                    SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
 
                                 CLR_RT_Memory::Release(bufPtr);
                             }
@@ -933,7 +960,7 @@ bool CLR_DBG_Debugger::Monitor_CheckMemory(WP_Message *msg)
     g_CLR_DBG_Debugger
         ->AccessMemory(cmd->address, cmd->length, (unsigned char *)&cmdReply, AccessMemory_Check, &errorCode);
 
-    WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(msg, errorCode == AccessMemoryErrorCode_NoError, false, &cmdReply, sizeof(cmdReply));
 
     return true;
 }

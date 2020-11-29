@@ -910,6 +910,7 @@ public:
 
     static bool Monitor_Ping                            ( WP_Message *msg );
     static bool Monitor_Reboot                          ( WP_Message *msg );
+    static bool Monitor_TargetInfo                      ( WP_Message *msg );
     static bool Debugging_Execution_QueryCLRCapabilities( WP_Message *msg );
 
     static bool Monitor_ReadMemory                      ( WP_Message *msg );

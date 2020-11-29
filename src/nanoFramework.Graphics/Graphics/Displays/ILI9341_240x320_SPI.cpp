@@ -8,7 +8,6 @@
 #include "DisplayInterface.h"
 #include "Display.h"
 
-
 /*
 ILI9341 is a 262,144-color single-chip SOC driver for a-TFT liquid crystal display with resolution of 240RGBx320
 dots, comprising a 720-channel source driver, a 320-channel gate driver, 172,800 bytes GRAM for graphic
@@ -26,13 +25,13 @@ Power saving mode:
 This implementation was initially written for 16 bit colour.
 */
 
-
 /*
  Using the default endian order for transferring bytes
  Normal (MSB first, default)
   */
 
-#define CommandData(c)   c,(CLR_UINT8 *)(CLR_UINT8[c])  // Macro to simplify visualisation of passing pointer to parameters;
+#define CommandData(c)                                                                                                 \
+    c, (CLR_UINT8 *)(CLR_UINT8[c]) // Macro to simplify visualisation of passing pointer to parameters;
 
 struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
@@ -54,6 +53,7 @@ enum ILI9341_CMD : CLR_UINT8
     Partial_Area = 0x30,
     Memory_Access_Control = 0x36,
     Pixel_Format_Set = 0x3A,
+    Memory_Write_Continue = 0x3C,
     Write_Display_Brightness = 0x51,
     Frame_Rate_Control_Normal = 0xB1,
     Display_Function_Control = 0xB6,
@@ -93,36 +93,70 @@ bool DisplayDriver::Initialize()
     // g_DisplayInterface.SendCommand(SOFTWARE_RESET);
     // g_DisplayInterface.SendCommand(Display_OFF);
 
-    g_DisplayInterface.SendCommand(4,Power_Control_B, 0x00, 0x83, 0X30);
-    g_DisplayInterface.SendCommand(5,Power_On_Sequence, 0x64, 0x03, 0X12, 0X81);
-    g_DisplayInterface.SendCommand(4,Driver_Timing_Control_A, 0x85, 0x01, 0x79);
-    g_DisplayInterface.SendCommand(6,Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
+    g_DisplayInterface.SendCommand(4, Power_Control_B, 0x00, 0x83, 0X30);
+    g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0X12, 0X81);
+    g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x01, 0x79);
+    g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
 
-    g_DisplayInterface.SendCommand(2,Pump_Ratio_Control, 0x20);
-    g_DisplayInterface.SendCommand(3,Driver_Timing_Control_B, 0x00, 0x00);
-    g_DisplayInterface.SendCommand(2,Power_Control_1, 0x26);
-    g_DisplayInterface.SendCommand(2,Power_Control_2, 0x11);
-    g_DisplayInterface.SendCommand(3,VCOM_Control_1, 0x35, 0x3E);
-    g_DisplayInterface.SendCommand(2,VCOM_Control_2, 0xBE);
-    g_DisplayInterface.SendCommand(2,Memory_Access_Control, 0x28);                  // Portrait?
-    g_DisplayInterface.SendCommand(2,Pixel_Format_Set, 0x55);                       // 0x55 -> 16 bit 
-    g_DisplayInterface.SendCommand(3,Frame_Rate_Control_Normal, 0x00, 0x1B);
-    g_DisplayInterface.SendCommand(2,Enable_3G, 0x08);
-    g_DisplayInterface.SendCommand(2,Gamma_Set, 0x01);                              // Gamma curve selected (0x01, 0x02, 0x04, 0x08)
-    g_DisplayInterface.SendCommand(16,Positive_Gamma_Correction, 0x1F, 0x1A, 0x18, 0x0A, 0x0F, 0x06, 0x45, 0X87, 0x32, 0x0A, 0x07, 0x02, 0x07, 0x05, 0x00); //gamma set 4
-    g_DisplayInterface.SendCommand(16,Negative_Gamma_Correction, 0x00, 0x25, 0x27, 0x05, 0x10, 0x09, 0x3A, 0x78, 0x4D, 0x05, 0x18, 0x0D, 0x38, 0x3A, 0x1F);
-    g_DisplayInterface.SendCommand(5,Column_Address_Set, 0x00, 0x00, 0x00, 0xEF);   // Size = 239
-    g_DisplayInterface.SendCommand(5,Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);     // Size = 319
-    g_DisplayInterface.SendCommand(1,Memory_Write);
-    g_DisplayInterface.SendCommand(2,Entry_Mode_Set, 0x07);                         // Entry mode set
-    g_DisplayInterface.SendCommand(5,Display_Function_Control, 0x0A, 0x82, 0x27, 0x00);
+    g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
+    g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
+    g_DisplayInterface.SendCommand(2, Power_Control_1, 0x26);
+    g_DisplayInterface.SendCommand(2, Power_Control_2, 0x11);
+    g_DisplayInterface.SendCommand(3, VCOM_Control_1, 0x35, 0x3E);
+    g_DisplayInterface.SendCommand(2, VCOM_Control_2, 0xBE);
+    g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0x28); // Portrait?
+    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit
+    g_DisplayInterface.SendCommand(3, Frame_Rate_Control_Normal, 0x00, 0x1B);
+    g_DisplayInterface.SendCommand(2, Enable_3G, 0x08);
+    g_DisplayInterface.SendCommand(2, Gamma_Set, 0x01); // Gamma curve selected (0x01, 0x02, 0x04, 0x08)
+    g_DisplayInterface.SendCommand(
+        16,
+        Positive_Gamma_Correction,
+        0x1F,
+        0x1A,
+        0x18,
+        0x0A,
+        0x0F,
+        0x06,
+        0x45,
+        0X87,
+        0x32,
+        0x0A,
+        0x07,
+        0x02,
+        0x07,
+        0x05,
+        0x00); // gamma set 4
+    g_DisplayInterface.SendCommand(
+        16,
+        Negative_Gamma_Correction,
+        0x00,
+        0x25,
+        0x27,
+        0x05,
+        0x10,
+        0x09,
+        0x3A,
+        0x78,
+        0x4D,
+        0x05,
+        0x18,
+        0x0D,
+        0x38,
+        0x3A,
+        0x1F);
+    g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
+    g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
+    g_DisplayInterface.SendCommand(1, Memory_Write);
+    g_DisplayInterface.SendCommand(2, Entry_Mode_Set, 0x07); // Entry mode set
+    g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x0A, 0x82, 0x27, 0x00);
 
-    g_DisplayInterface.SendCommand(1,Sleep_Out);
-    OS_DELAY(20);                                   // Send Sleep Out command to display : no parameter
-    g_DisplayInterface.SendCommand(1,Display_ON);
-    OS_DELAY(20);                                   // Send Sleep Out command to display : no parameter
-    g_DisplayInterface.SendCommand(1,NOP);          // End of sequence
-    OS_DELAY(20);                                   // Send Sleep Out command to display : no parameter
+    g_DisplayInterface.SendCommand(1, Sleep_Out);
+    OS_DELAY(20); // Send Sleep Out command to display : no parameter
+    g_DisplayInterface.SendCommand(1, Display_ON);
+    OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
+    g_DisplayInterface.SendCommand(1, NOP); // End of sequence
+    OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
 
     SetDefaultOrientation();
 
@@ -140,16 +174,36 @@ void DisplayDriver::SetupDisplayAttributes()
     return;
 }
 
+bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
+{
+    switch (orientation)
+    {
+        case PORTRAIT:
+        case PORTRAIT180:
+            return false;
+
+        case LANDSCAPE:
+        case LANDSCAPE180:
+            Attributes.Height = Attributes.ShorterSide;
+            Attributes.Width = Attributes.LongerSide;
+            g_DisplayInterface.SendCommand(
+                2,
+                Memory_Access_Control,
+                (MADCTL_MY | MADCTL_MX | MADCTL_MV | MADCTL_BGR)); // Landscape  + BGR
+            break;
+    }
+    return true;
+}
+
 void DisplayDriver::SetDefaultOrientation()
 {
-    Attributes.Height = Attributes.ShorterSide;
-    Attributes.Width = Attributes.LongerSide;
-    g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0xE8); // Landscape
+    ChangeOrientation(LANDSCAPE);
 }
 
 bool DisplayDriver::Uninitialize()
 {
     Clear();
+
     // Anything else to Uninitialize?
     return TRUE;
 }
@@ -158,85 +212,143 @@ void DisplayDriver::PowerSave(PowerSaveState powerState)
 {
     switch (powerState)
     {
-    default:
-        // Illegal fall through to Power on
-    case PowerSaveState::NORMAL:
-        g_DisplayInterface.SendCommand(3,POWER_STATE, 0x00,0x00);  // leave sleep mode
-        break;
-    case PowerSaveState::SLEEP:
-        g_DisplayInterface.SendCommand(3, POWER_STATE, 0x00,0x01);  // enter sleep mode
-        break;
+        default:
+            // Illegal fall through to Power on
+        case PowerSaveState::NORMAL:
+            g_DisplayInterface.SendCommand(3, POWER_STATE, 0x00, 0x00); // leave sleep mode
+            break;
+        case PowerSaveState::SLEEP:
+            g_DisplayInterface.SendCommand(3, POWER_STATE, 0x00, 0x01); // enter sleep mode
+            break;
     }
     return;
 }
 
 void DisplayDriver::Clear()
 {
-    //reset the cursor pos to the begining
-    // Clear the ILI9341 controller 
-    return;
+    // Clear the ILI9341 controller frame
+    SetWindow(0, 0, Attributes.Width - 1, Attributes.Height - 1);
 
+    // Clear buffer
+    memset(Attributes.TransferBuffer, 0, Attributes.TransferBufferSize);
+
+    int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
+    int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
+    int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
+
+    CLR_UINT8 command = Memory_Write;
+    for (int i = 0; i < fullTransferBuffersCount; i++)
+    {
+        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, Attributes.TransferBufferSize);
+        command = Memory_Write_Continue;
+    }
+
+    if (remainderTransferBuffer > 0)
+    {
+        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, remainderTransferBuffer);
+    }
 }
 
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 {
     _ASSERTE(brightness >= 0 && brightness <= 100);
-    g_DisplayInterface.SendCommand(2,Write_Display_Brightness, (CLR_UINT8)brightness);
-    return;
+    g_DisplayInterface.SendCommand(2, Write_Display_Brightness, (CLR_UINT8)brightness);
+}
 
+bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
+{
+    CLR_UINT8 Column_Address_Set_Data[4];
+    Column_Address_Set_Data[0] = (x1 >> 8) & 0xFF;
+    Column_Address_Set_Data[1] = x1 & 0xFF;
+    Column_Address_Set_Data[2] = (x2 >> 8) & 0xFF;
+    Column_Address_Set_Data[3] = x2 & 0xFF;
+    g_DisplayInterface.SendCommand(
+        5,
+        Column_Address_Set,
+        Column_Address_Set_Data[0],
+        Column_Address_Set_Data[1],
+        Column_Address_Set_Data[2],
+        Column_Address_Set_Data[3]);
+
+    CLR_UINT8 Page_Address_Set_Data[4];
+    Page_Address_Set_Data[0] = (y1 >> 8) & 0xFF;
+    Page_Address_Set_Data[1] = y1 & 0xFF;
+    Page_Address_Set_Data[2] = (y2 >> 8) & 0xFF;
+    Page_Address_Set_Data[3] = y2 & 0xFF;
+    g_DisplayInterface.SendCommand(
+        5,
+        Page_Address_Set,
+        Page_Address_Set_Data[0],
+        Page_Address_Set_Data[1],
+        Page_Address_Set_Data[2],
+        Page_Address_Set_Data[3]);
+    return true;
 }
 
 void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
 {
-    // With the current design the Colour data is packed into the lower two bytes of each data array element
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
     ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
     ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
-    CLR_UINT8* pui8Data = (CLR_UINT8*)data;
 
-    CLR_UINT8  Column_Address_Set_Data[4];
-    Column_Address_Set_Data[0] = (x >> 8) & 0xFF;
-    Column_Address_Set_Data[1] = x & 0xFF;
-    Column_Address_Set_Data[2] = ((x + width) >> 8) & 0xFF;
-    Column_Address_Set_Data[3] = (x + width) & 0xFF;
-    g_DisplayInterface.SendCommand(5, Column_Address_Set, Column_Address_Set_Data[0], Column_Address_Set_Data[1], Column_Address_Set_Data[2], Column_Address_Set_Data[3]);
+    SetWindow(x, y, (x + width - 1), (y + height - 1));
 
-    CLR_INT16 numberOfBytesPerPage = width * 2;   //16 bit colour
-    CLR_INT16 TotalNumberOfPages = Attributes.Height;
-    CLR_INT16 NumberOfPagesPerTransferBuffer = Attributes.TransferBufferSize / numberOfBytesPerPage;   // Maximum pages per buffer transfer
-    CLR_INT16 TotalNumberOfSpiTransfers = TotalNumberOfPages / NumberOfPagesPerTransferBuffer;
-    CLR_INT16 numberOfBytesPerTransfer = numberOfBytesPerPage * NumberOfPagesPerTransferBuffer;   //16 bit colour 
-    int iFirstPageOfTransfer = 0;
+    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
 
-    for (int iSpiTransfer = 0; iSpiTransfer < TotalNumberOfSpiTransfers; iSpiTransfer++) {
+    // Position to offset in data[] for start of window
+    CLR_UINT16 offset = (y * Attributes.Width) + x;
+    StartOfLine_src += offset;
 
-        // Change endian for ILI9341 SPI mode and store in Spi transfer buffer before SPI Transfer
-        CLR_UINT8* transferBufferIndex = Attributes.TransferBuffer;
-        CLR_INT16 numberOf16BitWordsPerTransfer = numberOfBytesPerTransfer / 2;
-        for (int idataByte = 0; idataByte < numberOf16BitWordsPerTransfer; idataByte++)
+    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
+    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
+    CLR_UINT8 command = Memory_Write;
+
+    while (height--)
+    {
+        CLR_UINT16 *src;
+        int xCount;
+
+        src = StartOfLine_src;
+        xCount = width;
+
+        while (xCount--)
         {
-            // Swap bytes of the word to match endianess of the ILI9341
-            *transferBufferIndex = *(pui8Data + 1);
-            transferBufferIndex++;
-            *transferBufferIndex = *(pui8Data);
-            transferBufferIndex++;
-            pui8Data += 2;
+            CLR_UINT16 data = *src++;
+            *transferBufferIndex++ = (data >> 8);
+            *transferBufferIndex++ = data & 0xff;
+            transferBufferCount -= 2;
+
+            // Send over SPI if no room for another 2 bytes
+            if (transferBufferCount < 1)
+            {
+                // Transfer buffer full, send it
+                g_DisplayInterface.WriteToFrameBuffer(
+                    command,
+                    Attributes.TransferBuffer,
+                    (Attributes.TransferBufferSize - transferBufferCount));
+
+                // Reset transfer ptrs/count
+                transferBufferIndex = Attributes.TransferBuffer;
+                transferBufferCount = Attributes.TransferBufferSize;
+                command = Memory_Write_Continue;
+            }
         }
 
-        // Setup the area to update the ILI9341
-        CLR_UINT8  Page_Address_Set_Data[4];
-        Page_Address_Set_Data[0] = (iFirstPageOfTransfer >> 8) & 0xFF;
-        Page_Address_Set_Data[1] = iFirstPageOfTransfer & 0xFF;
-        Page_Address_Set_Data[2] = ((iFirstPageOfTransfer + NumberOfPagesPerTransferBuffer) >> 8) & 0xFF;
-        Page_Address_Set_Data[3] = (iFirstPageOfTransfer + NumberOfPagesPerTransferBuffer) & 0xFF;
-        g_DisplayInterface.SendCommand(5, Page_Address_Set, Page_Address_Set_Data[0], Page_Address_Set_Data[1], Page_Address_Set_Data[2], Page_Address_Set_Data[3]);
-
-        // Send the data to the ILI9341 via SPI
-        g_DisplayInterface.WriteToFrameBuffer(Memory_Write, Attributes.TransferBuffer, numberOfBytesPerTransfer);
-
-        iFirstPageOfTransfer += NumberOfPagesPerTransferBuffer;
+        // Next row in data[]
+        StartOfLine_src += Attributes.Width;
     }
+
+    // Send remaining data in transfer buffer to SPI
+    if (transferBufferCount < Attributes.TransferBufferSize)
+    {
+        // Transfer buffer full, send it
+        g_DisplayInterface.WriteToFrameBuffer(
+            command,
+            Attributes.TransferBuffer,
+            (Attributes.TransferBufferSize - transferBufferCount));
+    }
+
     return;
 }
 
@@ -259,5 +371,3 @@ CLR_UINT32 DisplayDriver::SizeInBytes()
 {
     return (SizeInWords() * sizeof(CLR_UINT32));
 }
-
-

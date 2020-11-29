@@ -695,6 +695,27 @@ endif()
 
 #################################################################
 
+#################################################################
+# Baudrate for serial communication 
+
+if(TARGET_SERIAL_BAUDRATE)
+    message(STATUS "Baudrate for serial communication was set to ${TARGET_SERIAL_BAUDRATE}.")
+endif()
+
+#################################################################
+
+#################################################################
+# Override target name on device properties
+
+if(TARGET_NAME)
+    message(STATUS "Target name set to ${TARGET_NAME}.")
+else()
+    # use target board as the name
+    set(TARGET_NAME ${TARGET_BOARD})
+endif()
+
+#################################################################
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)

@@ -7,9 +7,9 @@
 #ifndef _WIREPROTOCOL_COMMANDS_H_
 #define _WIREPROTOCOL_COMMANDS_H_
 
+#include <nanoHAL_v2.h>
 #include "WireProtocol.h"
 #include "WireProtocol_Message.h"
-#include <nanoPackStruct.h>
 
 // clang-format off
 
@@ -33,7 +33,7 @@ typedef enum Monitor_Reboot_Options
 // structure for Access Memory operations
 typedef enum AccessMemory_Operations
 {
-    // check if memory space is erased
+    // compute CRC32 of the of a block of data starting at a given address
     AccessMemory_Check                      = 0x00,
 
     // read block of data starting at a given address
@@ -81,6 +81,13 @@ typedef struct Monitor_OemInfo_Reply
     ReleaseInfo m_releaseInfo;
 
 } Monitor_OemInfo_Reply;
+
+// structure with reply for Target information command
+typedef struct Monitor_TargetInfo_Reply
+{
+    TargetInfo m_TargetInfo;
+
+} Monitor_TargetInfo_Reply;
 
 typedef struct CLR_DBG_Commands_Monitor_ReadMemory
 {
@@ -183,6 +190,12 @@ extern "C"
     int Monitor_CheckMemory(WP_Message *message);
     int Monitor_MemoryMap(WP_Message *message);
     int Monitor_FlashSectorMap(WP_Message *message);
+    int Monitor_TargetInfo(WP_Message *message);
+
+    // helper functions
+    int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode);
+    int nanoBooter_GetTargetInfo(TargetInfo *targetInfo);
+    int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo);
 
 #ifdef __cplusplus
 }
