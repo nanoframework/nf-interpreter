@@ -12,6 +12,16 @@ namespace System.Runtime.CompilerServices
             return new AsyncVoidMethodBuilder();
         }
 
+        void AwaitOnCompletedInternal(object awaiter, object stateMachine)
+        {
+            //awaiter.OnCompleted(() =>
+            //{
+            //    stateMachine.MoveNext();
+            //});
+            ////GetResult will suspend the calling thread, start a new one
+            ///*new Threading.Thread(() =>*/ stateMachine.MoveNext()/*)*/;
+        }
+
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
@@ -38,6 +48,7 @@ namespace System.Runtime.CompilerServices
             });
         }
 
+        }
         public void SetException(Exception exception)
         {
             Debug.WriteLine($"AsyncVoidMethodBuilder:SetException");

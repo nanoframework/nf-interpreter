@@ -334,7 +334,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
             res.m_dt = DATATYPE_CLASS;
 
-            if (cls.ResolveToken(CLR_TkFromStream(m_sig), m_assm) == false)
+            if (cls.ResolveToken(CLR_TkFromStream(m_sig), m_assm, NULL) == false)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
@@ -434,7 +434,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         {
                             CLR_RT_TypeDef_Instance cls;
 
-                            if (cls.ResolveToken(tk, m_assm) == false)
+                            if (cls.ResolveToken(tk, m_assm, NULL) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -1483,7 +1483,7 @@ bool CLR_RT_ExceptionHandler::ConvertFromEH(
         case CLR_RECORD_EH::EH_Catch:
         {
             CLR_RT_TypeDef_Instance cls;
-            if (cls.ResolveToken(eh.GetToken(), owner.m_assm) == false)
+            if (cls.ResolveToken(eh.GetToken(), owner.m_assm, NULL) == false)
                 return false;
             m_typeFilter = cls;
         }
