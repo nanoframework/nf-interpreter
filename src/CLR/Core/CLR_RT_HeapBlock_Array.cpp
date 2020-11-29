@@ -95,7 +95,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_TypeDef_Instance cls;
     CLR_RT_TypeSpec_Instance def;
 
-    if (cls.ResolveToken(tk, assm))
+    if(cls.ResolveToken( tk, assm, &reference ))
     {
         ref.SetReflection(cls);
     }
