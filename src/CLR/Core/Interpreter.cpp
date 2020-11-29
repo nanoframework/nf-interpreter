@@ -808,7 +808,9 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke( CLR_RT_StackFrame& stackArg )
     CLR_RT_HeapBlock*           ptr;
     CLR_UINT32                  num;
 
-    ptr = &stack->m_arguments[ 0 ]; if(ptr->DataType() != DATATYPE_OBJECT) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    ptr = &stack->m_arguments[ 0 ];
+    if(ptr->DataType() != DATATYPE_OBJECT)
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     dlg = ptr->DereferenceDelegate(); FAULT_ON_NULL(dlg);
 
     md = stack->m_call.m_target;
@@ -1845,7 +1847,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance calleeInst; 
+                if(calleeInst.ResolveToken( arg, assm ) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Index      cls;
                 CLR_RT_HeapBlock*         pThis;
 #if defined(NANOCLR_APPDOMAINS)                
@@ -2016,7 +2020,8 @@ Execute_RestartDecoding:
                 CLR_RT_TypeDef_Instance type;
                 CLR_RT_TypeDef_Index    cls;
 
-                if(type.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                if(type.ResolveToken( arg, assm, evalPos) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
 
@@ -2063,7 +2068,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance calleeInst; if(calleeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance calleeInst; 
+                if(calleeInst.ResolveToken( arg, assm ) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Instance   cls;
                 CLR_RT_HeapBlock*         top;
                 CLR_INT32                 changes;
@@ -2226,7 +2233,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; 
+                if(fieldInst.ResolveToken( arg, assm ) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 0 ];
                 CLR_DataType             dt  = obj->DataType();
 
@@ -2272,7 +2281,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; 
+                if(fieldInst.ResolveToken( arg, assm ) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 0 ];
                 CLR_DataType             dt  = obj->DataType();
 
@@ -2306,7 +2317,9 @@ Execute_RestartDecoding:
 
                 evalPos -= 2; CHECKSTACK(stack,evalPos);
 
-                CLR_RT_FieldDef_Instance fieldInst; if(fieldInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance fieldInst; 
+                if(fieldInst.ResolveToken( arg, assm ) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_HeapBlock*        obj = &evalPos[ 1 ];
                 CLR_DataType             dt  = obj->DataType();
 
@@ -2353,9 +2366,13 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; 
+                if(field.ResolveToken( arg, assm ) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); 
+                if(ptr == NULL)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
@@ -2371,9 +2388,13 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; 
+                if(field.ResolveToken( arg, assm ) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); 
+                if(ptr == NULL)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
@@ -2388,9 +2409,13 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_FIELDTOKEN(arg,ip);
 
-                CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_FieldDef_Instance field; 
+                if(field.ResolveToken( arg, assm ) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
-                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field ); if(ptr == NULL) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_HeapBlock* ptr = CLR_RT_ExecutionEngine::AccessStaticField( field );
+                if(ptr == NULL)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 evalPos--; CHECKSTACK(stack,evalPos);
 
@@ -2405,7 +2430,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip);
 
-                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance typeInst; 
+                if(typeInst.ResolveToken( arg, assm, evalPos) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
@@ -2431,7 +2458,9 @@ Execute_RestartDecoding:
                 //extracts the value contained within obj (of type O).  (It is equivalent to unbox followed by ldobj.)  
                 //When applied to a reference type, the unbox.any instruction has the same effect as castclass typeTok. 
 
-                CLR_RT_TypeDef_Instance typeInst; if(typeInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance typeInst; 
+                if (typeInst.ResolveToken(arg, assm, evalPos) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
@@ -2569,7 +2598,7 @@ Execute_RestartDecoding:
                 CLR_RT_TypeDef_Instance type;
                 CLR_RT_TypeDef_Index cls;
 
-                if( !type.ResolveToken( arg, assm ) )
+                if (!type.ResolveToken(arg, assm, evalPos))
                     NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
@@ -2666,7 +2695,9 @@ Execute_RestartDecoding:
                 {
                 case TBL_TypeSpec:
                     {
-                        CLR_RT_TypeSpec_Instance sig; if(sig.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_TypeSpec_Instance sig;
+                        if(sig.ResolveToken( arg, assm ) == false) 
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( sig );
                     }
@@ -2675,7 +2706,9 @@ Execute_RestartDecoding:
                 case TBL_TypeRef:
                 case TBL_TypeDef:
                     {
-                        CLR_RT_TypeDef_Instance cls; if(cls.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_TypeDef_Instance cls;
+                        if (cls.ResolveToken(arg, assm, evalPos) == false)
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( cls );
                     }
@@ -2684,7 +2717,9 @@ Execute_RestartDecoding:
                 case TBL_FieldRef:
                 case TBL_FieldDef:
                     {
-                        CLR_RT_FieldDef_Instance field; if(field.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_FieldDef_Instance field;
+                        if(field.ResolveToken( arg, assm ) == false)
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( field );
                     }
@@ -2693,7 +2728,9 @@ Execute_RestartDecoding:
                 case TBL_MethodRef:
                 case TBL_MethodDef:
                     {
-                        CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        CLR_RT_MethodDef_Instance method; 
+                        if(method.ResolveToken( arg, assm ) == false) 
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                         evalPos[ 0 ].SetReflection( method );
                     }
@@ -2833,7 +2870,9 @@ Execute_RestartDecoding:
 
                 evalPos++; CHECKSTACK(stack,evalPos);
 
-                CLR_RT_MethodDef_Instance method; if(method.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance method; 
+                if(method.ResolveToken( arg, assm ) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                 UPDATESTACK(stack,evalPos);
 
@@ -2847,7 +2886,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_METHODTOKEN(arg,ip);
 
-                CLR_RT_MethodDef_Instance callee; if(callee.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_MethodDef_Instance callee; 
+                if(callee.ResolveToken( arg, assm ) == false) 
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_RT_TypeDef_Index      cls;
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject( evalPos[ 0 ], cls ));
@@ -2908,7 +2949,9 @@ Execute_RestartDecoding:
             {
                 FETCH_ARG_COMPRESSED_TYPETOKEN(arg,ip);
 
-                CLR_RT_TypeDef_Instance clsInst; if(clsInst.ResolveToken( arg, assm ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                CLR_RT_TypeDef_Instance clsInst;
+                if (clsInst.ResolveToken(arg, assm, evalPos) == false)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                 CLR_INT32               len;
 
                 if(clsInst.m_target->dataType)
