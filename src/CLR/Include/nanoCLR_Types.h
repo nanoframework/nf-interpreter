@@ -455,7 +455,9 @@ inline CLR_UINT32 CLR_UncompressStringToken( CLR_UINT32 tk )
 
 inline CLR_UINT32 CLR_UncompressTypeToken( CLR_UINT32 tk )
 {
-    static const CLR_TABLESENUM c_lookup[3] = { TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec };
+    //TODO: length of this table should be 4 as it is dereferenced with two bits masked from token
+    //The fourth value is undefined/random
+    static const CLR_TABLESENUM c_lookup[3] = { TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec }; 
     return CLR_TkFromType( c_lookup[(tk >> 14) & 3], 0x3fff & tk );
 }
 
