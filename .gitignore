@@ -62,3 +62,4 @@ CMake/Modules/FindINTEROP*.cmake
 **/packages/*
 # except build/, which is used as an MSBuild target.
 !**/packages/build/
+/targets/os/win32/.vs/nanoCLR/v16

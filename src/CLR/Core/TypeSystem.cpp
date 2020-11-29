@@ -334,7 +334,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
             res.m_dt = DATATYPE_CLASS;
 
-            if (cls.ResolveToken(CLR_TkFromStream(m_sig), m_assm) == false)
+            if (cls.ResolveToken(CLR_TkFromStream(m_sig), m_assm, NULL) == false)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
@@ -434,7 +434,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         {
                             CLR_RT_TypeDef_Instance cls;
 
-                            if (cls.ResolveToken(tk, m_assm) == false)
+                            if (cls.ResolveToken(tk, m_assm, NULL) == false)
                             {
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
@@ -694,7 +694,9 @@ void CLR_RT_TypeDef_Instance::Clear()
     m_target = NULL;
 }
 
-bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
+// if type token is not generic, we are going to resolve from the assembly else from the heapblock that may contains
+// generic parameter
+bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *heap)
 {
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
@@ -717,6 +719,21 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
                 return true;
 
             default:
+                // handle generic type
+                if (heap != NULL)
+                {
+                    // CLR_RT_TypeDef_Index cls;
+                    CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*heap, *this);
+                    m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    m_target = m_assm->GetTypeDef(Type());
+                }
+                else
+                {
+                    m_data = g_CLR_RT_WellKnownTypes.m_Object.m_data;
+                    m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.m_Object.Assembly() - 1];
+                    m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.m_Object.Type());
+                }
+                return true;
                 // the remaining data types aren't to be handled
                 break;
         }
@@ -1467,7 +1484,7 @@ bool CLR_RT_ExceptionHandler::ConvertFromEH(
         case CLR_RECORD_EH::EH_Catch:
         {
             CLR_RT_TypeDef_Instance cls;
-            if (cls.ResolveToken(eh.GetToken(), owner.m_assm) == false)
+            if (cls.ResolveToken(eh.GetToken(), owner.m_assm, NULL) == false)
                 return false;
             m_typeFilter = cls;
         }
