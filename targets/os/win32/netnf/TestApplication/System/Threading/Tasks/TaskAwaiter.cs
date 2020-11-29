@@ -1,92 +1,46 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    public readonly struct TaskAwaiter : INotifyCompletion
+    public struct TaskAwaiter : INotifyCompletion
     {
-        //readonly bool _isCompleted;
-        //readonly Exception _exception;
-        //readonly Action _continuation;
-        readonly Task _task;
-
-        public TaskAwaiter(Task task)
-        {
-            _task = task;
-        }
-
-        public bool IsCompleted => _task.IsCompleted;
-
+        readonly bool isCompleted;
+        public bool IsCompleted => isCompleted;
+        Thread getResultThread;
         public void GetResult()
         {
-            _task.GetResult();
+            //if (isCompleted)
+            //    return;
+            //getResultThread = Thread.CurrentThread;
+            //getResultThread.Suspend();
         }
-
+        Action _continuation;
         public void OnCompleted(Action continuation)
         {
-            _task.OnCompleted(continuation);
+            _continuation = continuation;
         }
-
         public void UnsafeOnCompleted(Action continuation)
         {
-            _task.OnCompleted(continuation);
+            _continuation = continuation;
         }
-
-        //public void CompleteWithException(Exception e)
-        //{
-        //    _exception = e;
-        //    _isCompleted = true;
-        //    _continuation?.Invoke();
-        //}
-
-        //public void Complete()
-        //{
-        //    _isCompleted = true;
-        //    _continuation?.Invoke();
-        //}
     }
 
     public readonly struct TaskAwaiter<TResult> : ICriticalNotifyCompletion, INotifyCompletion
     {
-        readonly Task<TResult> _task;
-
-        public TaskAwaiter(Task<TResult> task)
-        {
-            Debug.WriteLine("TaskAwaiter<T>:ctor(task)");
-            _task = task;
-
-        }
-        public bool IsCompleted => _task.IsCompleted;
-
+        public bool IsCompleted { get; }
         public TResult GetResult()
         {
-            return _task.GetResult();
+            return default;
         }
-
         public void OnCompleted(Action continuation)
         {
-            _task.OnCompleted(continuation);
-        }
 
+        }
         public void UnsafeOnCompleted(Action continuation)
         {
-            _task.OnCompleted(continuation);
+
         }
-
-        //public void CompleteWithException(Exception e)
-        //{
-        //    _exception = e;
-        //    _isCompleted = true;
-        //    _continuation?.Invoke();
-        //}
-
-        //public void Complete(TResult result)
-        //{
-        //    _result = result;
-        //    _isCompleted = true;
-        //    _continuation?.Invoke();
-        //}
     }
 
 }
