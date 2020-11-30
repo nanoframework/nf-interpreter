@@ -98,7 +98,7 @@ void Esp_Gpio_fire_event(gpio_input_state *pState)
     bool actual = CPU_GPIO_GetPinState(pState->pinNumber); // get current pin state
     if (actual == pState->expected)
     {
-        pState->isrPtr(pState->pinNumber, actual);
+        pState->isrPtr(pState->pinNumber, actual, pState->param);
 
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {

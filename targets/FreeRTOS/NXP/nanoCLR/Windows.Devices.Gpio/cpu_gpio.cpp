@@ -122,7 +122,7 @@ void GPIO_Main_IRQHandler(int portIndex, GPIO_Type *portBase)
                         {
                             GpioPinValue PinState =
                                 (GpioPinValue)GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber));
-                            pState->isrPtr(pState->pinNumber, PinState);
+                            pState->isrPtr(pState->pinNumber, PinState, pState->param);
                         }
                     }
                 } // if pin setup in nanoFramework

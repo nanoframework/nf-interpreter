@@ -265,7 +265,7 @@ static void GpioEventCallback(uint_least8_t index)
             else
             {
                 // No debounce so just post a managed event with the current pin reading
-                pState->isrPtr(pState->pinNumber, pinState);
+                pState->isrPtr(pState->pinNumber, pinState, pState->param);
             }
         }
     }

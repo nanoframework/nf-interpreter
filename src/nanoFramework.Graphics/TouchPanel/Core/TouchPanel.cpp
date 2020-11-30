@@ -454,9 +454,10 @@ TouchPoint* TouchPanelDriver::AddTouchPoint(CLR_UINT16 source, CLR_UINT16 x, CLR
     return &point;
 }
 
-void TouchPanelDriver::TouchIsrProc(GPIO_PIN pin, bool pinState)
+void TouchPanelDriver::TouchIsrProc(GPIO_PIN pin, bool pinState, void *pArg)
 {
     (void)pin;
+    (void)pArg;
 
     // Question does this method work?
     if (pinState == g_TouchPanel_Sampling_Settings.ActivePinStateForTouchDown)
