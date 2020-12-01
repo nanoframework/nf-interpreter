@@ -224,7 +224,7 @@ static void DebounceTimerCallback(UArg arg)
         if (pinState == pState->expected)
         {
             // post a managed event with the current pin reading
-            pState->isrPtr(pState->pinNumber, pinState);
+            pState->isrPtr(pState->pinNumber, pinState, pState->param);
         }
 
         pState->waitingDebounce = false;
