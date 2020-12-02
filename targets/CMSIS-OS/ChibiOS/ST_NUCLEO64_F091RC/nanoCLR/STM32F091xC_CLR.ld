@@ -12,18 +12,25 @@
  */
 MEMORY
 {
-    flash       : org = 0x08002800, len = 256k - 10k - 88k   /* flash size less the space reserved for nanoBooter and application deployment*/
-    config      : org = 0x00000000, len = 0                  /* space reserved for configuration block */
-    deployment  : org = 0x0802A000, len = 88k                /* space reserved for application deployment */
-    ramvt       : org = 0x20000000, len = 0xC0               /* initial RAM address is reserved for a copy of the vector table */
-    ram0        : org = 0x200000C0, len = 32k - 0xC0 - 48    /* remaining RAM is free for use */
-    ram1        : org = 0x00000000, len = 0
-    ram2        : org = 0x00000000, len = 0
-    ram3        : org = 0x00000000, len = 0
-    ram4        : org = 0x00000000, len = 0
-    ram5        : org = 0x00000000, len = 0
-    ram6        : org = 0x00000000, len = 0
-    ram7        : org = 0x00000000, len = 0
+    flash0     (rx) : org = 0x08002800, len = 256k - 10k - 88k   /* flash size less the space reserved for nanoBooter and application deployment*/
+    flash1     (rx) : org = 0x00000000, len = 0
+    flash2     (rx) : org = 0x00000000, len = 0
+    flash3     (rx) : org = 0x00000000, len = 0
+    flash4     (rx) : org = 0x00000000, len = 0
+    flash5     (rx) : org = 0x00000000, len = 0
+    flash6     (rx) : org = 0x00000000, len = 0
+    flash7     (rx) : org = 0x00000000, len = 0
+    config     (rw) : org = 0x00000000, len = 0                  /* space reserved for configuration block */
+    deployment (rx) : org = 0x0802A000, len = 88k                /* space reserved for application deployment */
+    ramvt      (wx) : org = 0x20000000, len = 0xC0               /* initial RAM address is reserved for a copy of the vector table */
+    ram0       (wx) : org = 0x200000C0, len = 32k - 0xC0 - 48    /* remaining RAM is free for use */
+    ram1       (wx) : org = 0x00000000, len = 0
+    ram2       (wx) : org = 0x00000000, len = 0
+    ram3       (wx) : org = 0x00000000, len = 0
+    ram4       (wx) : org = 0x00000000, len = 0
+    ram5       (wx) : org = 0x00000000, len = 0
+    ram6       (wx) : org = 0x00000000, len = 0
+    ram7       (wx) : org = 0x00000000, len = 0
     bootclpbrd  : org = 0x20007FD0, len = 48                 /* boot clipboard area */
 }
 
@@ -31,27 +38,27 @@ MEMORY
    and a load region (_LMA suffix).*/
 
 /* Flash region to be used for exception vectors.*/
-REGION_ALIAS("VECTORS_FLASH", flash);
-REGION_ALIAS("VECTORS_FLASH_LMA", flash);
+REGION_ALIAS("VECTORS_FLASH", flash0);
+REGION_ALIAS("VECTORS_FLASH_LMA", flash0);
 
 /* Flash region to be used for constructors and destructors.*/
-REGION_ALIAS("XTORS_FLASH", flash);
-REGION_ALIAS("XTORS_FLASH_LMA", flash);
+REGION_ALIAS("XTORS_FLASH", flash0);
+REGION_ALIAS("XTORS_FLASH_LMA", flash0);
 
 /* Flash region to be used for code text.*/
-REGION_ALIAS("TEXT_FLASH", flash);
-REGION_ALIAS("TEXT_FLASH_LMA", flash);
+REGION_ALIAS("TEXT_FLASH", flash0);
+REGION_ALIAS("TEXT_FLASH_LMA", flash0);
 
 /* Flash region to be used for read only data.*/
-REGION_ALIAS("RODATA_FLASH", flash);
-REGION_ALIAS("RODATA_FLASH_LMA", flash);
+REGION_ALIAS("RODATA_FLASH", flash0);
+REGION_ALIAS("RODATA_FLASH_LMA", flash0);
 
 /* Flash region to be used for various.*/
-REGION_ALIAS("VARIOUS_FLASH", flash);
-REGION_ALIAS("VARIOUS_FLASH_LMA", flash);
+REGION_ALIAS("VARIOUS_FLASH", flash0);
+REGION_ALIAS("VARIOUS_FLASH_LMA", flash0);
 
 /* Flash region to be used for RAM(n) initialization data.*/
-REGION_ALIAS("RAM_INIT_FLASH_LMA", flash);
+REGION_ALIAS("RAM_INIT_FLASH_LMA", flash0);
 
 /* RAM region to be used for Main stack. This stack accommodates the processing
    of all exceptions and interrupts.*/
@@ -63,7 +70,7 @@ REGION_ALIAS("PROCESS_STACK_RAM", ram0);
 
 /* RAM region to be used for data segment.*/
 REGION_ALIAS("DATA_RAM", ram0);
-REGION_ALIAS("DATA_RAM_LMA", flash);
+REGION_ALIAS("DATA_RAM_LMA", flash0);
 
 /* RAM region to be used for BSS segment.*/
 REGION_ALIAS("BSS_RAM", ram0);
