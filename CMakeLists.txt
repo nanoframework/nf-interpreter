@@ -504,7 +504,9 @@ if( API_System.Net OR
     endif()
 
     if(NF_NETWORKING_ENC28J60)
-        set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28j60 network driver")
+        set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28J60 network driver")
+    else()
+        set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
     endif()
 
    if(API_Windows.Devices.Wifi)
