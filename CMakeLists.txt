@@ -425,6 +425,9 @@ option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provi
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
 
+# (default is OFF so driver is NOT used)
+option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
+
 #################################################################
 
 #############################################
@@ -500,7 +503,13 @@ if( API_System.Net OR
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(API_Windows.Devices.Wifi)
+    if(NF_NETWORKING_ENC28J60)
+        set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28J60 network driver")
+    else()
+        set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
+    endif()
+
+   if(API_Windows.Devices.Wifi)
         set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
     else()
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
@@ -642,6 +651,10 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for networking enabled with security")
     else()
         message(STATUS "Support for networking enabled WITHOUT security")
+    endif()
+
+    if(NF_NETWORKING_ENC28J60)
+        message(STATUS "Support for ENC28j60 network driver enabled")
     endif()
 
     # sanity check for missing configuration block option
