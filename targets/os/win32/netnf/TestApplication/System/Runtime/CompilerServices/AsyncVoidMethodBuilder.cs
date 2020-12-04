@@ -1,4 +1,7 @@
 ﻿
+using System.Diagnostics;
+using System.Threading;
+
 namespace System.Runtime.CompilerServices
 {
     public struct AsyncVoidMethodBuilder
@@ -8,18 +11,23 @@ namespace System.Runtime.CompilerServices
             return new AsyncVoidMethodBuilder();
         }
 
-        void AwaitOnCompletedInternal(object awaiter, object stateMachine)
-        {
-            //awaiter.OnCompleted(() =>
-            //{
-            //    stateMachine.MoveNext();
-            //});
-            ////GetResult will suspend the calling thread, start a new one
-            ///*new Threading.Thread(() =>*/ stateMachine.MoveNext()/*)*/;
-        }
-
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
+            where TStateMachine : IAsyncStateMachine
+        {
+            Debug.WriteLine($"AwaitOnCompleted1");
+            var _stateMachine = stateMachine;
+            Debug.WriteLine("AwaitOnCompleted2");
+            awaiter.OnCompleted(() =>
+            {
+                Debug.WriteLine("On completed");
+                _stateMachine.MoveNext();
+                Debug.WriteLine("On completed end");
+            });
+        }
+
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+            where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
             var _stateMachine = stateMachine;
@@ -29,12 +37,6 @@ namespace System.Runtime.CompilerServices
             });
         }
 
-        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
-            where TAwaiter : ICriticalNotifyCompletion
-            where TStateMachine : IAsyncStateMachine
-        {
-
-        }
         public void SetException(Exception exception)
         {
 
@@ -49,6 +51,7 @@ namespace System.Runtime.CompilerServices
         }
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
+            Debug.WriteLine($"AsynVoid:Start:{stateMachine.GetHashCode()}");
             stateMachine.MoveNext();
         }
     }

@@ -45,22 +45,65 @@ namespace NF.TestApplication_NEW
             }
         }
 
-        static async Task B()
+        static Task B()
         {
-
+            Debug.WriteLine("B");
+            return new Task(() =>
+            {
+                Debug.WriteLine("B:Task");
+                for (int i = 0; i < 10000; i++)
+                {
+                }
+                Debug.WriteLine("B:Done");
+            });
         }
+
+        static Task<int> C()
+        {
+            Debug.WriteLine("C");
+            var task = new Task<int>(() =>
+            {
+                Debug.WriteLine("C:Task");
+                for (int i = 0; i < 1000000; i++)
+                {
+                }
+                Debug.WriteLine("C:Done");
+                return 1;
+            });
+            Debug.WriteLine("C:End");
+            return task;
+        }
+
         static async void A()
         {
             await B();
             await B();
+            Debug.WriteLine("XXX");
+            var t = C();
+            Debug.WriteLine("Got C");
+            var c = await t;
+            Debug.WriteLine($"Result {c}");
+        }
+
+
+        class TClass<T>
+        {
+            public void Do(T t)
+            {
+                T t2 = t;
+                Debug.WriteLine($"Do {t2}");
+            }
         }
 
         public static void Main()
         {
-            Debug.WriteLine("Hello World");
+            Debug.WriteLine("Hello");
+            //var m  = new TClass<int>();
+            //m.Do(1);
+            Debug.WriteLine("World");
             A();
-            Do(new IntDo(), new StringDo());
-            Do(new StringDo(), new IntDo());
+            //Do(new IntDo(), new StringDo());
+            //Do(new StringDo(), new IntDo());
             while (true)
             {
                 Thread.Sleep(1000);

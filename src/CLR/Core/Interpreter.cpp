@@ -1857,7 +1857,7 @@ Execute_RestartDecoding:
 #endif
 
                 pThis = &evalPos[1-calleeInst.m_target->numArgs]; // Point to the first arg, 'this' if an instance method
-               
+
                 if(calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
                 {
                     CLR_RT_HeapBlock_Delegate* dlg = pThis->DereferenceDelegate(); FAULT_ON_NULL(dlg);
@@ -2042,6 +2042,7 @@ Execute_RestartDecoding:
 
                     NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
 
+                    NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeSource));
                 }
                 
                 goto Execute_LoadAndPromote;
