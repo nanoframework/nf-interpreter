@@ -332,7 +332,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-2019'
 
   steps:
   - task: NuGetToolInstaller@0
