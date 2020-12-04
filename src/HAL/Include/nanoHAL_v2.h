@@ -290,7 +290,7 @@ extern "C"
 #else
 #if defined(_DEBUG)
 #if !defined _ASSERTE
-#error
+//#error
 #endif
 #define ASSERT(i)        _ASSERTE(i)
 #define _SIDE_ASSERTE(i) _ASSERTE(i)
