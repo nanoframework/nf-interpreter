@@ -3,44 +3,88 @@ using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    public struct TaskAwaiter : INotifyCompletion
+    public readonly struct TaskAwaiter : INotifyCompletion
     {
-        readonly bool isCompleted;
-        public bool IsCompleted => isCompleted;
-        Thread getResultThread;
+        //readonly bool _isCompleted;
+        //readonly Exception _exception;
+        //readonly Action _continuation;
+        readonly Task _task;
+
+        public TaskAwaiter(Task task)
+        {
+            _task = task;
+        }
+
+        public bool IsCompleted => _task.IsCompleted;
+
         public void GetResult()
         {
-            //if (isCompleted)
-            //    return;
-            //getResultThread = Thread.CurrentThread;
-            //getResultThread.Suspend();
+            _task.GetResult();
         }
-        Action _continuation;
+
         public void OnCompleted(Action continuation)
         {
-            _continuation = continuation;
+            _task.OnCompleted(continuation);
         }
+
         public void UnsafeOnCompleted(Action continuation)
         {
-            _continuation = continuation;
+            _task.OnCompleted(continuation);
         }
+
+        //public void CompleteWithException(Exception e)
+        //{
+        //    _exception = e;
+        //    _isCompleted = true;
+        //    _continuation?.Invoke();
+        //}
+
+        //public void Complete()
+        //{
+        //    _isCompleted = true;
+        //    _continuation?.Invoke();
+        //}
     }
 
     public readonly struct TaskAwaiter<TResult> : ICriticalNotifyCompletion, INotifyCompletion
     {
-        public bool IsCompleted { get; }
+        readonly Task<TResult> _task;
+
+        public TaskAwaiter(Task<TResult> task)
+        {
+            _task = task;
+
+        }
+        public bool IsCompleted => _task.IsCompleted;
+
         public TResult GetResult()
         {
-            return default;
+            return _task.GetResult();
         }
+
         public void OnCompleted(Action continuation)
         {
-
+            _task.OnCompleted(continuation);
         }
+
         public void UnsafeOnCompleted(Action continuation)
         {
-
+            _task.OnCompleted(continuation);
         }
+
+        //public void CompleteWithException(Exception e)
+        //{
+        //    _exception = e;
+        //    _isCompleted = true;
+        //    _continuation?.Invoke();
+        //}
+
+        //public void Complete(TResult result)
+        //{
+        //    _result = result;
+        //    _isCompleted = true;
+        //    _continuation?.Invoke();
+        //}
     }
 
 }
