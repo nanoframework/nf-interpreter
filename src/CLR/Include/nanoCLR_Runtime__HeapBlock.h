@@ -1041,7 +1041,7 @@ struct CLR_RT_HeapBlock
     {
         CLR_RT_HeapBlock *obj;
 
-        //If already a ref type, dereference it
+        // If already a ref type, dereference it
         if (dst.DataType() == DATATYPE_BYREF)
         {
             obj = dst.Dereference();
@@ -1051,7 +1051,7 @@ struct CLR_RT_HeapBlock
         // so getting a reference to a ValueType has to be treated like getting a reference to object, not to its
         // holder!
         //
-        else if(dst.IsAValueType())
+        else if (dst.IsAValueType())
         {
             obj = dst.Dereference();
         }
