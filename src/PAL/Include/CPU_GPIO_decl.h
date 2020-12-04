@@ -71,7 +71,7 @@ enum GPIO_INT_EDGE
 //     GPIO_RESISTOR Resistor;
 // };
 
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState);
+typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState, void *pArg);
 
 bool CPU_GPIO_Initialize();
 bool CPU_GPIO_Uninitialize();

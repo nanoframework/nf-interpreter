@@ -56,7 +56,7 @@ void Gpio_DebounceHandler(TimerHandle_t xTimer)
 
     if (actual == pState->expected)
     {
-        pState->isrPtr(pState->pinNumber, actual);
+        pState->isrPtr(pState->pinNumber, actual, pState->param);
 
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {                          // both edges
@@ -122,7 +122,7 @@ void GPIO_Main_IRQHandler(int portIndex, GPIO_Type *portBase)
                         {
                             GpioPinValue PinState =
                                 (GpioPinValue)GPIO_PinRead(GPIO_BASE(pState->pinNumber), GPIO_PIN(pState->pinNumber));
-                            pState->isrPtr(pState->pinNumber, PinState);
+                            pState->isrPtr(pState->pinNumber, PinState, pState->param);
                         }
                     }
                 } // if pin setup in nanoFramework

@@ -332,10 +332,13 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-2019'
 
   steps:
   - task: NuGetToolInstaller@0
+    inputs:
+      versionSpec: '5.8.0'
+    displayName: 'Install specifc version of NuGet'
 
   - task: VSBuild@1
     inputs:

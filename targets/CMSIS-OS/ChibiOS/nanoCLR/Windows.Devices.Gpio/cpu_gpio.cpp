@@ -51,7 +51,7 @@ static void DebounceTimerCallback(void *arg)
     bool actual = palReadLine(GetIoLine(pState->pinNumber));
     if (actual == pState->expected)
     {
-        pState->isrPtr(pState->pinNumber, actual);
+        pState->isrPtr(pState->pinNumber, actual, pState->param);
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {
             // both edges
@@ -92,7 +92,7 @@ static void GpioEventCallback(void *arg)
         ioline_t ioLine = GetIoLine(pGpio->pinNumber);
 
         chSysUnlockFromISR();
-        pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine));
+        pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine), pGpio->param);
         chSysLockFromISR();
     }
 

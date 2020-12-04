@@ -6,8 +6,8 @@
 //
 */
 
-__nanoImage_start__     = ORIGIN(flash);
-__nanoImage_size__      = LENGTH(flash);
+__nanoImage_start__     = ORIGIN(flash0);
+__nanoImage_size__      = LENGTH(flash0);
 __nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;
 __nanoConfig_start__    = ORIGIN(config);
 __nanoConfig_size__     = LENGTH(config);
@@ -64,8 +64,10 @@ SECTIONS
 
     .ARM.exidx : {
         __exidx_base__ = .;
+        __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
         __exidx_end__ = .;
+        __exidx_end = .;
      } > VARIOUS_FLASH AT > VARIOUS_FLASH_LMA
 
     .eh_frame_hdr :
