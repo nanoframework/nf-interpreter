@@ -43,6 +43,11 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const c
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch(hr)
     {
+        //TODO: Remove case
+        case CLR_E_WRONG_TYPE:
+        case CLR_E_NULL_REFERENCE:
+            hr = hr;
+            break;
     case CLR_E_ENTRY_NOT_FOUND:
     case CLR_E_PROCESS_EXCEPTION:
     case CLR_E_THREAD_WAITING:
@@ -213,7 +218,9 @@ void CLR_Debug::Emit( const char *text, int len )
         if(s_chars > 80 || strchr( s_buffer, '\n' ))
         {
             Watchdog_Reset();
-
+ #ifdef WIN32
+            OutputDebugStringA(s_buffer);
+#endif
 #if defined(PLATFORM_WINDOWS_EMULATOR)
             HAL_Windows_Debug_Print( s_buffer );
 #endif

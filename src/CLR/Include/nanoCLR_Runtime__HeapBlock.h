@@ -788,7 +788,20 @@ public:
 
     //--//
 
-    CLR_DataType DataType () const { return (CLR_DataType)m_id.type.dataType; }
+    CLR_DataType DataType() const // FIX: To handle generic types
+    {
+        CLR_DataType dataType = (CLR_DataType)m_id.type.dataType;
+        if (dataType == DATATYPE_VOID)
+        {
+            CLR_RT_HeapBlock *ref = Dereference();
+            if (ref != NULL)
+            {
+                dataType = ref->DataType();
+            }
+        }
+        return dataType;
+    }
+
     CLR_UINT8    DataFlags() const { return               m_id.type.flags   ; }
     CLR_UINT16   DataSize () const { return               m_id.type.size    ; }
     
@@ -903,11 +916,16 @@ public:
     {
         CLR_RT_HeapBlock* obj;
 
+        //If already a ref type, dereference it
+        if (dst.DataType() == DATATYPE_BYREF)
+        {
+            obj = dst.Dereference();
+        }
         //
         // ValueTypes are implemented as pointers to objects,
         // so getting a reference to a ValueType has to be treated like getting a reference to object, not to its holder!
         //
-        if(dst.IsAValueType())
+        else if(dst.IsAValueType())
         {
             obj = dst.Dereference();
         }
