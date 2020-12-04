@@ -69,7 +69,6 @@ namespace System.Threading.Tasks
             _task.OnCompleted(continuation);
         }
 
-        }
         public void UnsafeOnCompleted(Action continuation)
         {
             _task.OnCompleted(continuation);

@@ -49,7 +49,6 @@ namespace System.Runtime.CompilerServices
             task?.Complete(result);
         }
 
-        }
         public void SetStateMachine(IAsyncStateMachine stateMachine)
         {
             Debug.WriteLine($"AsyncTaskMethodBuilder:SetStateMachine");
@@ -60,8 +59,6 @@ namespace System.Runtime.CompilerServices
             Debug.WriteLine($"AsyncTaskMethodBuilder:Start");
             task = new Task<TResult>();
             stateMachine.MoveNext();
-            task = new Task();
         }
     }
-
 }

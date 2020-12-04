@@ -109,6 +109,16 @@ namespace NF.TestApplication_NEW
             }
         }
 
+
+        class TClass<T>
+        {
+            public void Do(T t)
+            {
+                T t2 = t;
+                Debug.WriteLine($"Do {t2}");
+            }
+        }
+
         public static void Main()
         {
             Debug.WriteLine("Hello");
