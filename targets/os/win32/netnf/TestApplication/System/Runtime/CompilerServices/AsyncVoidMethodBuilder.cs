@@ -8,6 +8,7 @@ namespace System.Runtime.CompilerServices
     {
         public static AsyncVoidMethodBuilder Create()
         {
+            Debug.WriteLine($"AsyncVoidMethodBuilder:Create");
             return new AsyncVoidMethodBuilder();
         }
 
@@ -15,14 +16,12 @@ namespace System.Runtime.CompilerServices
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
-            Debug.WriteLine($"AwaitOnCompleted1");
+            Debug.WriteLine($"AsyncVoidMethodBuilder:AwaitOnCompleted");
             var _stateMachine = stateMachine;
-            Debug.WriteLine("AwaitOnCompleted2");
             awaiter.OnCompleted(() =>
             {
-                Debug.WriteLine("On completed");
+                Debug.WriteLine($"AsyncVoidMethodBuilder:OnCompleted");
                 _stateMachine.MoveNext();
-                Debug.WriteLine("On completed end");
             });
         }
 
@@ -30,28 +29,30 @@ namespace System.Runtime.CompilerServices
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
+            Debug.WriteLine($"AsyncVoidMethodBuilder:AwaitUnsafeOnCompleted");
             var _stateMachine = stateMachine;
             awaiter.OnCompleted(() =>
             {
+                Debug.WriteLine($"AsyncVoidMethodBuilder:OnCompleted");
                 _stateMachine.MoveNext();
             });
         }
 
         public void SetException(Exception exception)
         {
-
+            Debug.WriteLine($"AsyncVoidMethodBuilder:SetException");
         }
         public void SetResult()
         {
-
+            Debug.WriteLine($"AsyncVoidMethodBuilder:SetResult");
         }
         public void SetStateMachine(IAsyncStateMachine stateMachine)
         {
-
+            Debug.WriteLine($"AsyncVoidMethodBuilder:SetStateMachine");
         }
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
-            Debug.WriteLine($"AsynVoid:Start:{stateMachine.GetHashCode()}");
+            Debug.WriteLine($"AsyncVoidMethodBuilder:Start");
             stateMachine.MoveNext();
         }
     }
