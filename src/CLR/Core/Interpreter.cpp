@@ -2298,21 +2298,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 OPDEF(CEE_LDSTR, "ldstr", Pop0, PushRef, InlineString, IObjModel, 1, 0xFF, 0x72, NEXT)
                 {
-<<<<<<< Updated upstream
                     FETCH_ARG_COMPRESSED_STRINGTOKEN(arg, ip);
-=======
-                    //
-                    // Save the pointer to the object to load/copy and protect it from GC.
-                    //
-                    CLR_RT_HeapBlock     safeSource; safeSource.Assign( evalPos[ 0 ] );
-                    CLR_RT_ProtectFromGC gc( safeSource );
-
-                    NANOCLR_CHECK_HRESULT(evalPos[ 0 ].LoadFromReference( safeSource ));
-                }
-                
-                goto Execute_LoadAndPromote;
-            }
->>>>>>> Stashed changes
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
