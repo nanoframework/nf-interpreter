@@ -697,9 +697,6 @@ void CLR_RT_TypeDef_Instance::Clear()
 // if type token is not generic, we are going to resolve from the assembly else from the heapblock that may contains
 // generic parameter
 bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData)
-=======
-bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData)
->>>>>>> Stashed changes
 {
     NATIVE_PROFILE_CLR_CORE();
     if (assm)

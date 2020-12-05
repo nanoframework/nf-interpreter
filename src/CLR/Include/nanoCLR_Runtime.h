@@ -1186,7 +1186,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(_WIN32)
     int m_maxOpcodes;
@@ -2970,7 +2970,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                  // However, if this thread was spawned on behalf of the debugger to evaluate
                                  // a property or function call, it points to the object coresponding to the
                                  // thread that is currently selected in the debugger.
-#endif                           //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
