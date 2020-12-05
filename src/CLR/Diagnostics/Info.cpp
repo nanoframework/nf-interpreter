@@ -42,15 +42,6 @@ HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const ch
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     switch (hr)
     {
-<<<<<<< Updated upstream
-        // TODO: Remove case
-=======
-        // TODO: Remove case used to break on error
->>>>>>> Stashed changes
-        case CLR_E_WRONG_TYPE:
-        case CLR_E_NULL_REFERENCE:
-            hr = hr;
-            break;
         case CLR_E_ENTRY_NOT_FOUND:
         case CLR_E_PROCESS_EXCEPTION:
         case CLR_E_THREAD_WAITING:
