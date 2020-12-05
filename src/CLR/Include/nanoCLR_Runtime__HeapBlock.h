@@ -803,11 +803,15 @@ struct CLR_RT_HeapBlock
         CLR_DataType dataType = (CLR_DataType)m_id.type.dataType;
         if (dataType == DATATYPE_VOID)
         {
-            CLR_RT_HeapBlock *ref = Dereference();
-            if (ref != NULL)
-            {
-                dataType = ref->DataType();
-            }
+            dataType = dataType;
+            //if (genericType != DATATYPE_VOID)
+            //    return genericType;
+            //// TODO: this will sometimes fail if the generic datatype is not a reference type 
+            //CLR_RT_HeapBlock *ref = Dereference(); 
+            //if (ref != NULL)
+            //{
+            //    dataType = ref->DataType();
+            //}
         }
         return dataType;
     }
@@ -1296,8 +1300,13 @@ struct CLR_RT_HeapBlock
 
         this->m_data = value.m_data;
 
+<<<<<<< Updated upstream
         if (this->DataType() > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
             this->m_id = value.m_id;
+=======
+        CLR_DataType dt = DataType();
+        if(dt > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE || dt == DATATYPE_VOID) this->m_id = value.m_id; //FIX handle generic type
+>>>>>>> Stashed changes
     }
 
     void AssignPreserveTypeCheckPinned(const CLR_RT_HeapBlock &value)
