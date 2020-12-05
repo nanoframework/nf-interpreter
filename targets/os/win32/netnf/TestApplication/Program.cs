@@ -112,10 +112,16 @@ namespace NF.TestApplication_NEW
 
         class TClass<T>
         {
-            public void Do(T t)
+            public void InstanceGenericDo(T t)
             {
                 T t2 = t;
-                Debug.WriteLine($"Do {t2}");
+                Debug.WriteLine($"TClassDo {t2}");
+            }
+
+            public void InstanceGenericDo2<T2>(T t, T2 t2)
+            {
+                T _t = t;
+                Debug.WriteLine($"TClassDo {_t} {t2}");
             }
         }
 

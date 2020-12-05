@@ -18,12 +18,10 @@ namespace System.Runtime.CompilerServices
         {
             Debug.WriteLine($"AsyncVoidMethodBuilder:AwaitOnCompleted");
             var _stateMachine = stateMachine;
-            Debug.WriteLine("AwaitOnCompleted2");
             awaiter.OnCompleted(() =>
             {
                 Debug.WriteLine($"AsyncVoidMethodBuilder:OnCompleted");
                 _stateMachine.MoveNext();
-                Debug.WriteLine("On completed end");
             });
         }
 
