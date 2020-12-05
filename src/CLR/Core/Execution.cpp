@@ -66,7 +66,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 #if !defined(NANOCLR_APPDOMAINS)
     m_globalLock = NULL;           // CLR_RT_HeapBlock*                   m_globalLock;
     m_outOfMemoryException = NULL; // CLR_RT_HeapBlock*                   m_outOfMemoryException;
-#endif                             //
+#endif //
 
     m_currentUICulture = NULL; // CLR_RT_HeapBlock*                   m_currentUICulture;
 
@@ -77,7 +77,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL; // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif                        //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_APPDOMAINS)
     m_appDomains.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_appDomains;
@@ -874,7 +874,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     // 1. Destroy constructor thread.
     pCctorThread->DestroyInstance();
 }
-#else  // NANOCLR_APPDOMAINS
+#else // NANOCLR_APPDOMAINS
 
 bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assembly, const CLR_RT_MethodDef_Index &idx)
 {
