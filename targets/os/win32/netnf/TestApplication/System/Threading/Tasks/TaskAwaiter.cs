@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
@@ -52,6 +53,7 @@ namespace System.Threading.Tasks
 
         public TaskAwaiter(Task<TResult> task)
         {
+            Debug.WriteLine("TaskAwaiter<T>:ctor(task)");
             _task = task;
 
         }

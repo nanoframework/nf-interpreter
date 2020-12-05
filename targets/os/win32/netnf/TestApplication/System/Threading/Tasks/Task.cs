@@ -38,6 +38,14 @@ namespace System.Threading.Tasks
             }
         }
 
+        public static Task<TResult> FromResult<TResult>(TResult result)
+        {
+            var task = new Task<TResult>();
+            task.Complete(result);
+            Debug.WriteLine("FromResult: Complete");
+            return task;
+        }
+
         public static Task FromException(Exception e)
         {
             var task = new Task();
@@ -73,6 +81,7 @@ namespace System.Threading.Tasks
 
         public Task()
         {
+            Debug.WriteLine("Task:ctor()");
             awaiter = new TaskAwaiter(this);
         }
 
@@ -103,8 +112,8 @@ namespace System.Threading.Tasks
                 Debug.WriteLine("Continue");
                 _continue();
             }
-            Debug.WriteLine("Continuations OK");
             _continuations.Clear();
+            Debug.WriteLine("Continuations OK");
         }
 
         public TaskAwaiter GetAwaiter()
@@ -170,22 +179,27 @@ namespace System.Threading.Tasks
 
         public Task()
         {
+            Debug.WriteLine("Task<T>:ctor()");
             awaiter = new TaskAwaiter<TResult>(this);
         }
 
         public Task(Func<TResult> action):this()
         {
+            Debug.WriteLine("Task<T>:ctor(action)");
             new Thread(() =>
             {
-                try
-                {
+                Debug.WriteLine("Task<T>:Start");
+                //try
+                //{
                     var result = action();
                     Complete(result);
-                }catch(Exception e)
-                {
-                    CompleteWithException(e);
-                }
+                //}catch(Exception e)
+                //{
+                //    CompleteWithException(e);
+                //}
+                Debug.WriteLine("Task<T>:End");
             }).Start();
+            Debug.WriteLine("Task<T>:ctor(action):ends");
         }
 
         internal void OnCompleted(Action<TResult> continuation)
@@ -203,6 +217,7 @@ namespace System.Threading.Tasks
             IsCompleted = true;
             Result = result;
             RunContinuations();
+            Debug.WriteLine("Complete Dome");
         }
 
         public new TaskAwaiter<TResult> GetAwaiter()

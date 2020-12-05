@@ -15,8 +15,10 @@ namespace NF.TestApplication_NEW
             void Do1();
             void Do2();
         }
-        public static void Do<T1, T2>(T1 val, T2 val2) where T1:TInt where T2 : TInt
+
+        public static void StaticGenericDo<T1, T2>(T1 val, T2 val2) where T1:TInt where T2 : TInt
         {
+            Debug.WriteLine("Doing things");
             val.Do1();
             val.Do2();
             val2.Do1();
@@ -27,10 +29,12 @@ namespace NF.TestApplication_NEW
         {
             public void Do1()
             {
+                Debug.WriteLine("Int::Do1");
             }
 
             public void Do2()
             {
+                Debug.WriteLine("Int::Do2");
             }
         }
 
@@ -38,10 +42,12 @@ namespace NF.TestApplication_NEW
         {
             public void Do1()
             {
+                Debug.WriteLine("String::Do1");
             }
 
             public void Do2()
             {
+                Debug.WriteLine("String::Do1");
             }
         }
 
@@ -61,49 +67,62 @@ namespace NF.TestApplication_NEW
         static Task<int> C()
         {
             Debug.WriteLine("C");
-            var task = new Task<int>(() =>
-            {
-                Debug.WriteLine("C:Task");
-                for (int i = 0; i < 1000000; i++)
-                {
-                }
-                Debug.WriteLine("C:Done");
-                return 1;
-            });
+            //var task = new Task<int>(() =>
+            //{
+            //    Debug.WriteLine("C:Task");
+            //    for (int i = 0; i < 1000000; i++)
+            //    {
+            //    }
+            //    Debug.WriteLine("C:Done");
+            //    return 1;
+            //});
             Debug.WriteLine("C:End");
+            var task = Task.FromResult(1);
+            Debug.WriteLine("C:Ret");
             return task;
         }
 
-        static async void A()
+        static async void AsyncTest()
         {
             await B();
             await B();
-            Debug.WriteLine("XXX");
-            var t = C();
-            Debug.WriteLine("Got C");
-            var c = await t;
-            Debug.WriteLine($"Result {c}");
+            //Debug.WriteLine("XXX");
+            //var t = C();
+            //Debug.WriteLine("Got C");
+            //var c = await t;
+            //int c = 1;
+            //Debug.WriteLine($"Result {c}");
         }
 
 
-        class TClass<T>
+        class GenericClass<T>
         {
-            public void Do(T t)
+            public void InstanceGenericDo(T t)
             {
                 T t2 = t;
-                Debug.WriteLine($"Do {t2}");
+                Debug.WriteLine($"TClassDo {t2}");
+            }
+
+            public void InstanceGenericDo2<T2>(T t, T2 t2)
+            {
+                T _t = t;
+                Debug.WriteLine($"TClassDo {_t} {t2}");
             }
         }
 
         public static void Main()
         {
-            Debug.WriteLine("Hello");
-            //var m  = new TClass<int>();
-            //m.Do(1);
-            Debug.WriteLine("World");
-            A();
-            //Do(new IntDo(), new StringDo());
-            //Do(new StringDo(), new IntDo());
+            //Debug.WriteLine("Hello");
+            var m = new GenericClass<int>();
+            m.InstanceGenericDo(1);
+            m.InstanceGenericDo2(1, "OK");
+            var m2 = new GenericClass<string>();
+            m2.InstanceGenericDo("OK");
+            m2.InstanceGenericDo2("OK", "Now");
+            StaticGenericDo(new IntDo(), new StringDo());
+            StaticGenericDo(new StringDo(), new IntDo());
+            //Debug.WriteLine("World");
+            AsyncTest();
             while (true)
             {
                 Thread.Sleep(1000);
