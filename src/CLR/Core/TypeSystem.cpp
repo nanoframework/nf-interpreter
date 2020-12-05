@@ -696,7 +696,11 @@ void CLR_RT_TypeDef_Instance::Clear()
 
 // if type token is not generic, we are going to resolve from the assembly else from the heapblock that may contains
 // generic parameter
+<<<<<<< Updated upstream
 bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *heap)
+=======
+bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData)
+>>>>>>> Stashed changes
 {
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
@@ -719,11 +723,15 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                 return true;
 
             default:
-                // handle generic type
-                if (heap != NULL)
+                // handle generic type from provided data
+                if (sampleData != NULL)
                 {
+<<<<<<< Updated upstream
                     // CLR_RT_TypeDef_Index cls;
                     CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*heap, *this);
+=======
+                    CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*sampleData, *this);
+>>>>>>> Stashed changes
                     m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                     m_target = m_assm->GetTypeDef(Type());
                 }

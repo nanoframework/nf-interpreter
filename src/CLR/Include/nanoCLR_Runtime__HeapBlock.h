@@ -1286,8 +1286,13 @@ struct CLR_RT_HeapBlock
 
         this->m_data = value.m_data;
 
+<<<<<<< Updated upstream
         if (this->DataType() > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
             this->m_id = value.m_id;
+=======
+        CLR_DataType dt = DataType();
+        if(dt > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE || dt == DATATYPE_VOID) this->m_id = value.m_id; //FIX handle generic type
+>>>>>>> Stashed changes
     }
 
     void AssignPreserveTypeCheckPinned(const CLR_RT_HeapBlock &value)
