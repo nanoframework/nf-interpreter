@@ -2064,7 +2064,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
 
     CLR_RT_TypeDef_Instance res;
 
-    if (res.ResolveToken(tk, assm, &reference) == false)
+    if (res.ResolveToken(tk, assm) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, res));
@@ -2922,7 +2922,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     if (FAILED(desc.InitializeFromObject(obj)))
         return false;
 
-    if (clsTarget.ResolveToken(token, assm, &obj))
+    if (clsTarget.ResolveToken(token, assm))
     {
         //
         // Shortcut for identity.
