@@ -67,31 +67,30 @@ namespace NF.TestApplication_NEW
         static Task<int> C()
         {
             Debug.WriteLine("C");
-            //var task = new Task<int>(() =>
-            //{
-            //    Debug.WriteLine("C:Task");
-            //    for (int i = 0; i < 1000000; i++)
-            //    {
-            //    }
-            //    Debug.WriteLine("C:Done");
-            //    return 1;
-            //});
-            Debug.WriteLine("C:End");
-            var task = Task.FromResult(1);
+            var task = new Task<int>(() =>
+            {
+                Debug.WriteLine("C:Long Task");
+                for (int i = 0; i < 1000000; i++)
+                {
+                }
+                Debug.WriteLine("C:Done");
+                return 1;
+            });
+            //Debug.WriteLine("C:End");
+            //var task = Task.FromResult(1);
             Debug.WriteLine("C:Ret");
             return task;
         }
 
         static async void AsyncTest()
         {
-            await B();
-            await B();
-            //Debug.WriteLine("XXX");
-            //var t = C();
-            //Debug.WriteLine("Got C");
-            //var c = await t;
-            //int c = 1;
-            //Debug.WriteLine($"Result {c}");
+            //await B();
+            //await B();
+            Debug.WriteLine("XXX");
+            var t = C();
+            Debug.WriteLine("Got C");
+            var c = await t;
+            Debug.WriteLine($"Result {c}");
         }
 
 
@@ -112,7 +111,7 @@ namespace NF.TestApplication_NEW
 
         public static void Main()
         {
-            //Debug.WriteLine("Hello");
+            Debug.WriteLine("Hello");
             var m = new GenericClass<int>();
             m.InstanceGenericDo(1);
             m.InstanceGenericDo2(1, "OK");
@@ -121,7 +120,7 @@ namespace NF.TestApplication_NEW
             m2.InstanceGenericDo2("OK", "Now");
             StaticGenericDo(new IntDo(), new StringDo());
             StaticGenericDo(new StringDo(), new IntDo());
-            //Debug.WriteLine("World");
+            Debug.WriteLine("World");
             AsyncTest();
             while (true)
             {

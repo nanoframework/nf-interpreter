@@ -78,6 +78,7 @@ namespace System.Threading.Tasks
         ArrayList _continuations = new ArrayList();
         public bool IsCompleted { get; protected set; }
         public Exception Exception { get; protected set; }
+        public bool IsCompletedSuccessfully => IsCompleted && Exception == null;
 
         public Task()
         {
@@ -87,20 +88,21 @@ namespace System.Threading.Tasks
 
         public Task(Action action):this()
         {
-            new Thread(() =>
+            var syncContext = SynchronizationContext.Current;
+            ThreadPool.QueueUserWorkItem((_) =>
             {
-                //try
+                try
                 {
                     action();
                     Debug.WriteLine("Calling Complete");
-                    Complete();
+                    syncContext.Post((__) => Complete(), null);
                     Debug.WriteLine("Called Complete");
                 }
-                //catch (Exception e)
-                //{
-                //    awaiter.CompleteWithException(e);
-                //}
-            }).Start();
+                catch (Exception e)
+                {
+                    syncContext.Post((ex) => CompleteWithException((Exception)ex), e);
+                }
+            });
         }
 
         protected void RunContinuations()
@@ -119,6 +121,17 @@ namespace System.Threading.Tasks
         public TaskAwaiter GetAwaiter()
         {
             return awaiter;
+        }
+
+        public Task ContinueWith(Action continuation)
+        {
+            Task task = new Task();
+            task.OnCompleted(continuation);
+            OnCompleted(() =>
+            {
+                task.Complete();
+            });
+            return task;
         }
 
         internal void OnCompleted(Action continuation)
@@ -186,20 +199,32 @@ namespace System.Threading.Tasks
         public Task(Func<TResult> action):this()
         {
             Debug.WriteLine("Task<T>:ctor(action)");
-            new Thread(() =>
+            var syncContext = SynchronizationContext.Current;
+            ThreadPool.QueueUserWorkItem((_) =>
             {
                 Debug.WriteLine("Task<T>:Start");
-                //try
-                //{
+                try
+                {
                     var result = action();
-                    Complete(result);
-                //}catch(Exception e)
-                //{
-                //    CompleteWithException(e);
-                //}
+                    syncContext.Post((r) => Complete((TResult)r), result);
+                }
+                catch (Exception e)
+                {
+                    syncContext.Post((ex) => CompleteWithException((Exception)ex), e);
+                }
                 Debug.WriteLine("Task<T>:End");
-            }).Start();
+            });
             Debug.WriteLine("Task<T>:ctor(action):ends");
+        }
+
+        public Task<TNewResult> ContinueWith<TNewResult>(Func<TResult, TNewResult> continuation)
+        {
+            Task<TNewResult> task = new Task<TNewResult>();
+            OnCompleted((result) =>
+            {
+                task.Complete(continuation(result));
+            });
+            return task;
         }
 
         internal void OnCompleted(Action<TResult> continuation)
