@@ -930,8 +930,6 @@ void CLR_RT_StackFrame::Pop()
                 //
                 // Push the return, if any.
                 //
-                // TODO: if a method returns generic type, the retVal is DATA_VOID and result is not pushed onto the calling stack
-                //corrupting the calling stack in the process
                 if (m_call.m_target->retVal != DATATYPE_VOID)
                 {
                     if (m_owningThread->m_currentException.Dereference() == NULL)
