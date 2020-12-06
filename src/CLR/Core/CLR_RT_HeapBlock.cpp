@@ -680,8 +680,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject( const CLR_RT_HeapBlock& val
     m_data = value.m_data;
 
     // Leave the same logic as in AssignAndPreserveType
-    CLR_DataType dt = DataType();
-    if(dt > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE || dt == DATATYPE_VOID)// FIX: assigning value to a generic field
+    if (DataType() > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
     { 
         m_id.type.dataType = value.m_id.type.dataType;
         m_id.type.size     = value.m_id.type.size;
