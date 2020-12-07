@@ -364,11 +364,12 @@ enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
 #endif
     DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, // All the above types don't need fix-up on assignment.
 
-    DATATYPE_OBJECT,    // Shortcut for System.Object
-    DATATYPE_CLASS,     // CLASS <class Token>
-    DATATYPE_VALUETYPE, // VALUETYPE <class Token>
-    DATATYPE_SZARRAY,   // Shortcut for single dimension zero lower bound array SZARRAY <type>
-    DATATYPE_BYREF,     // BYREF <type>
+    DATATYPE_OBJECT,                    // Shortcut for System.Object
+    DATATYPE_GENERIC = DATATYPE_OBJECT, // shortcut for generic type
+    DATATYPE_CLASS,                     // CLASS <class Token>
+    DATATYPE_VALUETYPE,                 // VALUETYPE <class Token>
+    DATATYPE_SZARRAY,                   // Shortcut for single dimension zero lower bound array SZARRAY <type>
+    DATATYPE_BYREF,                     // BYREF <type>
 
     ////////////////////////////////////////
 
