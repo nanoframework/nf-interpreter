@@ -674,6 +674,13 @@ struct Library_corlib_native_System_Enum
     //--//
 };
 
+struct Library_corlib_native_System_EventArgs
+{
+    static const int FIELD_STATIC__Empty = 9;
+
+    //--//
+};
+
 struct Library_corlib_native_System_GC
 {
 
