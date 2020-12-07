@@ -19,11 +19,6 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="System\Runtime\CompilerServices\AsyncTaskMethodBuilder.cs" />
-    <Compile Include="System\Runtime\CompilerServices\AsyncVoidMethodBuilder.cs" />
-    <Compile Include="System\Runtime\CompilerServices\IAsyncStateMachine.cs" />
-    <Compile Include="System\Runtime\CompilerServices\ICriticalNotifyCompletion.cs" />
-    <Compile Include="System\Runtime\CompilerServices\INotifyCompletion.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
