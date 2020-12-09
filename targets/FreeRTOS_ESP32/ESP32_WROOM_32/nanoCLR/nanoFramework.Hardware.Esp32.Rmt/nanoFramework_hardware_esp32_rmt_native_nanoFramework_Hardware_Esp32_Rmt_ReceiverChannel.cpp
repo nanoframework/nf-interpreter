@@ -15,7 +15,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     CLR_INT32 bufferSizeRmtItems;
     CLR_INT32 clockDiv = 80; // Default
     gpio_number = (gpio_num_t)stack.Arg1().NumericByRef().s1;
-    bufferSizeRmtItems = (CLR_INT32)stack.Arg2().NumericByRef().s1;
+    bufferSizeRmtItems = (CLR_INT32)stack.Arg2().NumericByRef().s4;
 
     channel = RmtChannel::FindNextChannel();
     if (channel < 0)
