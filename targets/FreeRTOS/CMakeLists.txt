@@ -7,6 +7,9 @@ include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)
@@ -20,7 +23,7 @@ if(NOT "${TOOL_SRECORD_PREFIX}" STREQUAL "")
         message(STATUS "")
         message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
         message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
-        message(STATUS "If you don't have this tool download it from hhttps://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
         message(STATUS "")
         message(FATAL_ERROR "srec_cat tool not found")
     else()
@@ -40,29 +43,26 @@ if(NO_RTOS_SOURCE_FOLDER)
     endif()
 
     # FreeRTOS version
-    set(FREERTOS_VERSION_EMPTY TRUE)
+    set(RTOS_VERSION_EMPTY TRUE)
 
     # check if build was requested with a specifc FreeRTOS version
-    if(DEFINED FREERTOS_VERSION)
-        if(NOT "${FREERTOS_VERSION}" STREQUAL "")
-            set(FREERTOS_VERSION_EMPTY FALSE)
+    if(DEFINED RTOS_VERSION)
+        if(NOT "${RTOS_VERSION}" STREQUAL "")
+            set(RTOS_VERSION_EMPTY FALSE)
         endif()
     endif()
 
     # check if build was requested with a specifc FreeRTOS version
-    if(FREERTOS_VERSION_EMPTY)
+    if(RTOS_VERSION_EMPTY)
         # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FREERTOS_VERSION_TAG "V10.4.1-kernel-only")
-    else()
-        # set SVN tag
-        set(FREERTOS_VERSION_TAG "${FREERTOS_VERSION}")
+        set(RTOS_VERSION "V10.4.1-kernel-only")
     endif()
 
-    message(STATUS "RTOS is: FreeRTOS ${FREERTOS_VERSION} from GitHub repo")
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/FreeRTOS.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/FreeRTOS.CMakeLists.cmake.in"
     "${CMAKE_BINARY_DIR}/FreeRTOS_Download/CMakeLists.txt")
 
     # setup CMake project for FreeRTOS download
@@ -165,11 +165,11 @@ if(NO_CMSIS_SOURCE)
         set(CMSIS_GIT_TAG "${CMSIS_VERSION}")
     endif()            
 
-    message(STATUS "CMSIS v${CMSIS_VERSION} from GitHub repo")
+    message(STATUS "CMSIS v${CMSIS_GIT_TAG} from GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
+    configure_file("${CMAKE_SOURCE_DIR}/CMake/CMSIS.CMakeLists.cmake.in"
                 "${CMAKE_BINARY_DIR}/CMSIS_Download/CMakeLists.txt")
 
     # setup CMake project for CMSIS download
@@ -203,7 +203,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${CMSIS_SOURCE}/")
-        message(STATUS "CMSIS ${CMSIS_VERSION} (source from: ${CMSIS_SOURCE})")
+        message(STATUS "CMSIS (source from: ${CMSIS_SOURCE})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/CMSIS_Source/ SOURCE_EXISTS)
@@ -241,79 +241,79 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/common)
 # try to find board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
 
     # board found
-    message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/${FREERTOS_BOARD})
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP)
 
     # add TARGET board directory
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP/${FREERTOS_BOARD})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP/${TARGET_BOARD})
 
 # try to find board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
+elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 
     # board found
-    message(STATUS "Support for target board '${FREERTOS_BOARD}' found")
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/${FREERTOS_BOARD})
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 
     # add TARGET board directory
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST/${FREERTOS_BOARD})
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST/${TARGET_BOARD})
 
 else()
 
     # try to find NXP board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${FREERTOS_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
     # try to find STM board in the Community targets folder
-    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+    elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${FREERTOS_BOARD}' found in Community targets")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/FreeRTOS/ST/${FREERTOS_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
     else()
 
         # board NOT found in targets folder
-        message(FATAL_ERROR "\n\nSorry but support for ${FREERTOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
 
     endif()
 

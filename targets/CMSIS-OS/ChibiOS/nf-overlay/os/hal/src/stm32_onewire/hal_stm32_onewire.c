@@ -17,7 +17,15 @@
 /* Driver local definitions.                                                 */
 /*===========================================================================*/
 
-#define PAGE_LENGTH 64
+// option to use CRC8 pre-computed table
+// the default for this is to use the table
+// compute CRC8 using lookup table (FLASH expensive)
+// compute CRC8 using running algorithm (slower but saves FLASH)
+#if !defined(ONEWIRE_CRC8_TABLE)
+#define ONEWIRE_CRC8_TABLE TRUE
+#endif
+
+#define PAGE_LENGTH       64
 #define PAGE_LENGTH_HYGRO 32
 
 /*===========================================================================*/
@@ -39,25 +47,21 @@ uint8_t LastDevice;
 
 uint8_t SerialNum[8];
 
-#if ONEWIRE_CRC8_TABLE
+#ifdef ONEWIRE_CRC8_TABLE
 
 static const uint8_t dscrc_table[] = {
-  0, 94,188,226, 97, 63,221,131,194,156,126, 32,163,253, 31, 65,
-  157,195, 33,127,252,162, 64, 30, 95,  1,227,189, 62, 96,130,220,
-  35,125,159,193, 66, 28,254,160,225,191, 93,  3,128,222, 60, 98,
-  190,224,  2, 92,223,129, 99, 61,124, 34,192,158, 29, 67,161,255,
-  70, 24,250,164, 39,121,155,197,132,218, 56,102,229,187, 89,  7,
-  219,133,103, 57,186,228,  6, 88, 25, 71,165,251,120, 38,196,154,
-  101, 59,217,135,  4, 90,184,230,167,249, 27, 69,198,152,122, 36,
-  248,166, 68, 26,153,199, 37,123, 58,100,134,216, 91,  5,231,185,
-  140,210, 48,110,237,179, 81, 15, 78, 16,242,172, 47,113,147,205,
-  17, 79,173,243,112, 46,204,146,211,141,111, 49,178,236, 14, 80,
-  175,241, 19, 77,206,144,114, 44,109, 51,209,143, 12, 82,176,238,
-  50,108,142,208, 83, 13,239,177,240,174, 76, 18,145,207, 45,115,
-  202,148,118, 40,171,245, 23, 73,  8, 86,180,234,105, 55,213,139,
-  87,  9,235,181, 54,104,138,212,149,203, 41,119,244,170, 72, 22,
-  233,183, 85, 11,136,214, 52,106, 43,117,151,201, 74, 20,246,168,
-  116, 42,200,150, 21, 75,169,247,182,232, 10, 84,215,137,107, 53};
+    0,   94,  188, 226, 97,  63,  221, 131, 194, 156, 126, 32,  163, 253, 31,  65,  157, 195, 33,  127, 252, 162,
+    64,  30,  95,  1,   227, 189, 62,  96,  130, 220, 35,  125, 159, 193, 66,  28,  254, 160, 225, 191, 93,  3,
+    128, 222, 60,  98,  190, 224, 2,   92,  223, 129, 99,  61,  124, 34,  192, 158, 29,  67,  161, 255, 70,  24,
+    250, 164, 39,  121, 155, 197, 132, 218, 56,  102, 229, 187, 89,  7,   219, 133, 103, 57,  186, 228, 6,   88,
+    25,  71,  165, 251, 120, 38,  196, 154, 101, 59,  217, 135, 4,   90,  184, 230, 167, 249, 27,  69,  198, 152,
+    122, 36,  248, 166, 68,  26,  153, 199, 37,  123, 58,  100, 134, 216, 91,  5,   231, 185, 140, 210, 48,  110,
+    237, 179, 81,  15,  78,  16,  242, 172, 47,  113, 147, 205, 17,  79,  173, 243, 112, 46,  204, 146, 211, 141,
+    111, 49,  178, 236, 14,  80,  175, 241, 19,  77,  206, 144, 114, 44,  109, 51,  209, 143, 12,  82,  176, 238,
+    50,  108, 142, 208, 83,  13,  239, 177, 240, 174, 76,  18,  145, 207, 45,  115, 202, 148, 118, 40,  171, 245,
+    23,  73,  8,   86,  180, 234, 105, 55,  213, 139, 87,  9,   235, 181, 54,  104, 138, 212, 149, 203, 41,  119,
+    244, 170, 72,  22,  233, 183, 85,  11,  136, 214, 52,  106, 43,  117, 151, 201, 74,  20,  246, 168, 116, 42,
+    200, 150, 21,  75,  169, 247, 182, 232, 10,  84,  215, 137, 107, 53};
 
 #endif // ONEWIRE_CRC8_TABLE
 
@@ -69,45 +73,48 @@ static const uint8_t dscrc_table[] = {
 /* Driver exported functions.                                                */
 /*===========================================================================*/
 
-
 // Initializes the ONEWIRE Driver
-void oneWireInit(void) {
-  oneWire_lld_init();
+void oneWireInit(void)
+{
+    oneWire_lld_init();
 }
 
 // Configures and activates the CRC peripheral
-void oneWireStart() {
+void oneWireStart()
+{
 
     // better lock this to setup the driver and start the peripheral
     osalSysLock();
-    
+
     oneWire_lld_start();
 
     osalSysUnlock();
 }
 
 // Deactivates the ONEWIRE peripheral
-void oneWireStop() {
+void oneWireStop()
+{
 
     // better lock this to stop the peripheral
     osalSysLock();
-  
+
     oneWire_lld_stop();
-    
+
     osalSysUnlock();
 }
 
-
 #if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)
 
-void oneWireAcquireModule() {
+void oneWireAcquireModule()
+{
 
-  oneWire_lld_aquire();
+    oneWire_lld_aquire();
 }
 
-void oneWireReleaseModule() {
+void oneWireReleaseModule()
+{
 
-  oneWire_lld_release();  
+    oneWire_lld_release();
 }
 
 #endif /* ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE */
@@ -116,7 +123,7 @@ void oneWireReleaseModule() {
 // CRC16 and also update the global variable CRC16.
 uint32_t docrc16(uint32_t cdata)
 {
-    uint8_t oddparity[] = { 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 };
+    uint8_t oddparity[] = {0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0};
 
     cdata = (cdata ^ (utilcrc16 & 0xff)) & 0xff;
     utilcrc16 >>= 8;
@@ -140,9 +147,7 @@ void setcrc16(uint32_t reset)
     utilcrc16 = reset;
 }
 
-#if ONEWIRE_CRC8_TABLE
-
-// compute CRC8 using lookup table (FLASH expensive)
+#ifdef ONEWIRE_CRC8_TABLE
 
 uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
 {
@@ -150,8 +155,6 @@ uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
 }
 
 #else
-
-// compute CRC8 using running algorith (slower but saves FLASH)
 
 uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
 {
@@ -161,15 +164,15 @@ uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
     {
         uint8_t mix = (crc ^ x) & 0x01;
         crc >>= 1;
-        if (mix) crc ^= 0x8C;
+        if (mix)
+            crc ^= 0x8C;
         x >>= 1;
     }
-    
+
     return crc;
 }
 
 #endif // ONEWIRE_CRC8_TABLE
-
 
 /*******************************************************************************
 ** NAME: oneWireTouchReset *************************************************
@@ -178,18 +181,18 @@ uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
 DESCRIPTION:
 Reset all of the devices on the 1-Wire Net and return the result.
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
 COMMENTS:
 --------------------------------------------------------------------------
- 
+
  Returns: TRUE(1):  presense pulse(s) detected, device(s) reset
           FALSE(0): no presense pulses detected
 
 *******************************************************************************/
-uint8_t oneWireTouchReset(void) 
+uint8_t oneWireTouchReset(void)
 {
     return oneWire_lld_TouchReset();
 }
@@ -206,14 +209,14 @@ DESCRIPTION:
  * @return a SMALLINT with  0 bit read from sendbit or 1 bit read fromsendbit
  * @param sendbit the least significant bit is the bit to send
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
 COMMENTS:
 
 *******************************************************************************/
-bool oneWireTouchBit(bool sendbit) 
+bool oneWireTouchBit(bool sendbit)
 {
     return oneWire_lld_TouchBit(sendbit);
 }
@@ -232,7 +235,7 @@ DESCRIPTION:
   //
   // Returns:  8 bits read from sendbyte
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -258,7 +261,7 @@ DESCRIPTION:
   // Returns:  TRUE: bytes written and echo was the same
   //           FALSE: echo was not the same
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -267,7 +270,7 @@ COMMENTS:
 *******************************************************************************/
 uint8_t oneWireWriteByte(uint8_t sendbyte)
 {
-  return (oneWireTouchByte(sendbyte) == sendbyte) ? TRUE : FALSE;
+    return (oneWireTouchByte(sendbyte) == sendbyte) ? TRUE : FALSE;
 }
 
 /*******************************************************************************
@@ -280,7 +283,7 @@ DESCRIPTION:
   //
   // Returns:  8 bytes read from 1-Wire Net
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -289,7 +292,7 @@ COMMENTS:
 *******************************************************************************/
 uint8_t oneWireReadByte(void)
 {
-  return oneWireTouchByte(0xFF);
+    return oneWireTouchByte(0xFF);
 }
 
 /*******************************************************************************
@@ -313,34 +316,34 @@ DESCRIPTION:
      //                   serial number.
      //
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
 COMMENTS:
 
 *******************************************************************************/
-void oneWireSerialNum(uint8_t* serialnum_buf, uint8_t do_read)
+void oneWireSerialNum(uint8_t *serialnum_buf, uint8_t do_read)
 {
-     uint8_t i;
-     
-     //-------------------------------------------------//
-     // read the internal buffer and place in 'serialnum_buf'
-     if (do_read) 
-     {
-         for (i = 0; i < 8; i++)
-         {
-             serialnum_buf[i] = SerialNum[i];
-         }
-     }
-     // set the internal buffer from the data in 'serialnum_buf'
-     else 
-     {
-         for (i = 0; i < 8; i++)
-         {
-             SerialNum[i] = serialnum_buf[i];
-         }
-     }
+    uint8_t i;
+
+    //-------------------------------------------------//
+    // read the internal buffer and place in 'serialnum_buf'
+    if (do_read)
+    {
+        for (i = 0; i < 8; i++)
+        {
+            serialnum_buf[i] = SerialNum[i];
+        }
+    }
+    // set the internal buffer from the data in 'serialnum_buf'
+    else
+    {
+        for (i = 0; i < 8; i++)
+        {
+            SerialNum[i] = serialnum_buf[i];
+        }
+    }
 }
 
 /*******************************************************************************
@@ -360,7 +363,7 @@ DESCRIPTION:
   //                       are not correct.
   //
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -369,49 +372,49 @@ COMMENTS:
 *******************************************************************************/
 uint8_t oneWireAccess(void)
 {
-  uint8_t sendpacket[9];
-  uint8_t i;
-  
-  //
-  //-------------------------------------------------//
-  // reset the 1-wire
-  if (oneWireTouchReset()) 
-  {
-      // create a buffer to use with block function
-      // match Serial Number command 0x55
-      sendpacket[0] = MATCH_ROM;
-      // Serial Number
-      for (i = 1; i < 9; i++)
-      {
-          sendpacket[i] = SerialNum[i-1];
-      }
-      
-      // send/recieve the transfer buffer
-      if (oneWireBlock(FALSE, sendpacket, 9)) 
-      {
-          // verify that the echo of the writes was correct
-          for (i = 1; i < 9; i++)
-          {
-            if (sendpacket[i] != SerialNum[i-1])
+    uint8_t sendpacket[9];
+    uint8_t i;
+
+    //
+    //-------------------------------------------------//
+    // reset the 1-wire
+    if (oneWireTouchReset())
+    {
+        // create a buffer to use with block function
+        // match Serial Number command 0x55
+        sendpacket[0] = MATCH_ROM;
+        // Serial Number
+        for (i = 1; i < 9; i++)
+        {
+            sendpacket[i] = SerialNum[i - 1];
+        }
+
+        // send/recieve the transfer buffer
+        if (oneWireBlock(FALSE, sendpacket, 9))
+        {
+            // verify that the echo of the writes was correct
+            for (i = 1; i < 9; i++)
             {
-              return FALSE;
+                if (sendpacket[i] != SerialNum[i - 1])
+                {
+                    return FALSE;
+                }
             }
-          }
-        
-          if (sendpacket[0] != MATCH_ROM) 
-          {
-              //OWERROR(//OWERROR_WRITE_VERIFY_FAILED);
-              return FALSE;
-          }
-          else
-          {
-              return TRUE;
-          }
-      }
-  }
-    
-  // reset or match echo failed
-  return FALSE;
+
+            if (sendpacket[0] != MATCH_ROM)
+            {
+                // OWERROR(//OWERROR_WRITE_VERIFY_FAILED);
+                return FALSE;
+            }
+            else
+            {
+                return TRUE;
+            }
+        }
+    }
+
+    // reset or match echo failed
+    return FALSE;
 }
 
 /*******************************************************************************
@@ -439,42 +442,42 @@ DESCRIPTION:
   //
   //  The maximum tran_len is 160
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireBlock(uint8_t doReset, uint8_t* tran_buf, uint8_t tran_len)
+uint8_t oneWireBlock(uint8_t doReset, uint8_t *tran_buf, uint8_t tran_len)
 {
-  uint8_t i;
-  //
-  //-------------------------------------------------//
-  // check for a block too big
-  if (tran_len > 160) 
-  {
-      // error: BLOCK TOO BIG
-      return FALSE;
-  }
-  
-  // check if need to do a owTouchReset first
-  if (doReset)
-  {
-      if (!oneWireTouchReset())
-      {
-          // error: NO DEVICES ON NET
-          return FALSE;
-      }
-  }
-  
-  // send and receive the buffer
-  for (i = 0; i < tran_len; i++)
-  {
-      tran_buf[i] = oneWireTouchByte(tran_buf[i]);
-  }
-  
-  return TRUE;
+    uint8_t i;
+    //
+    //-------------------------------------------------//
+    // check for a block too big
+    if (tran_len > 160)
+    {
+        // error: BLOCK TOO BIG
+        return FALSE;
+    }
+
+    // check if need to do a owTouchReset first
+    if (doReset)
+    {
+        if (!oneWireTouchReset())
+        {
+            // error: NO DEVICES ON NET
+            return FALSE;
+        }
+    }
+
+    // send and receive the buffer
+    for (i = 0; i < tran_len; i++)
+    {
+        tran_buf[i] = oneWireTouchByte(tran_buf[i]);
+    }
+
+    return TRUE;
 }
 
 /*******************************************************************************
@@ -484,22 +487,22 @@ uint8_t oneWireBlock(uint8_t doReset, uint8_t* tran_buf, uint8_t tran_len)
 DESCRIPTION:
 write block of memory to iButton memory
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
 COMMENTS:
 
 *******************************************************************************/
-uint8_t oneWireWriteMemory(uint8_t* buf, uint32_t ln, uint32_t adr) 
+uint8_t oneWireWriteMemory(uint8_t *buf, uint32_t ln, uint32_t adr)
 {
-  //-------------------------------------------------//
-  // write to scratch and then copy
-  if (oneWireWriteScratchpad(buf, ln, adr)) 
-      return oneWireCopyScratchpad(ln, adr);
-  
-  // end function
-  return FALSE;
+    //-------------------------------------------------//
+    // write to scratch and then copy
+    if (oneWireWriteScratchpad(buf, ln, adr))
+        return oneWireCopyScratchpad(ln, adr);
+
+    // end function
+    return FALSE;
 }
 
 /*******************************************************************************
@@ -509,7 +512,7 @@ uint8_t oneWireWriteMemory(uint8_t* buf, uint32_t ln, uint32_t adr)
 DESCRIPTION:
 copy scratchpad contempts
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -517,32 +520,33 @@ COMMENTS:
 Only valid for DS1921G,H,Z
 
 *******************************************************************************/
-uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr) 
+uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr)
 {
-  // local variables
-  uint8_t i;
-  uint8_t pbuf[15];
+    // local variables
+    uint8_t i;
+    uint8_t pbuf[15];
 
-  //-------------------------------------------------//
-  // check for presence indicator 
-  if (oneWireAccess()) 
-  {
-      // construct a packet to send 
-      pbuf[0] = COPY_SCRPAD;           // copy scratch command 
-      pbuf[1] = (adr & 0xFF);          // address 1 
-      pbuf[2] = ((adr >> 8) & 0xFF);   // address 2 
-      pbuf[3] = (adr + ln - 1) & 0x1F; // offset 
-      for (i = 0; i <= 9; i++)
-          pbuf[4 + i] = 0xFF;           // result of copy 
-      // perform the block 
-      if (oneWireBlock(FALSE, pbuf, 14)) {
-          if ((pbuf[13] == 0x55) || (pbuf[13] == 0xAA)) 
-              return TRUE;
-      }
-  }
-  
-  // end function
-  return FALSE;
+    //-------------------------------------------------//
+    // check for presence indicator
+    if (oneWireAccess())
+    {
+        // construct a packet to send
+        pbuf[0] = COPY_SCRPAD;           // copy scratch command
+        pbuf[1] = (adr & 0xFF);          // address 1
+        pbuf[2] = ((adr >> 8) & 0xFF);   // address 2
+        pbuf[3] = (adr + ln - 1) & 0x1F; // offset
+        for (i = 0; i <= 9; i++)
+            pbuf[4 + i] = 0xFF; // result of copy
+        // perform the block
+        if (oneWireBlock(FALSE, pbuf, 14))
+        {
+            if ((pbuf[13] == 0x55) || (pbuf[13] == 0xAA))
+                return TRUE;
+        }
+    }
+
+    // end function
+    return FALSE;
 }
 
 /*******************************************************************************
@@ -552,7 +556,7 @@ uint8_t oneWireCopyScratchpad(uint32_t ln, uint32_t adr)
 DESCRIPTION:
 copy scratchpad contempts
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -560,66 +564,67 @@ COMMENTS:
 Only valid for DS1921G,H,Z
 
 *******************************************************************************/
-uint8_t oneWireWriteScratchpad(uint8_t* buf, uint32_t ln, uint32_t adr)
+uint8_t oneWireWriteScratchpad(uint8_t *buf, uint32_t ln, uint32_t adr)
 {
-  uint8_t i;
-  uint8_t pbuf[40];
-  
-  //-------------------------------------------------//
-  // check for presence indicator 
-  if (oneWireAccess())
-  {
-    // construct a packet to send  
-    pbuf[0] = WR_SCRPAD; // write scratch command 
-    pbuf[1] = (adr & 0xFF); // address 1 
-    pbuf[2] = ((adr >> 8) & 0xFF); // address 2 
-    
-    // the write bytes 
-    for (i = 0; i < ln; i++)
-        pbuf[3 + i] = (uint8_t)(buf[i]); // data 
-    
-    // perform the block 
-    if (!oneWireBlock(FALSE, pbuf, ln+3))
-        return FALSE;
-    
-    // Now read back the scratch 
-    if (oneWireAccess()) {
-        // construct a packet to send 
-        pbuf[0] = RD_SCRPAD; // read scratch command 
-        pbuf[1] = 0xFF; // address 1 
-        pbuf[2] = 0xFF; // address 2 
-        pbuf[3] = 0xFF; // offset 
-        
-        // the write bytes 
-        for (i = 0; i < ln; i++)
-            pbuf[4 + i] = 0xFF; // data 
-        
-        // perform the block  
-        if (!oneWireBlock(FALSE, pbuf, ln+4))
-        return FALSE;
-        
-        // read address 1 
-        if (pbuf[1] != (adr & 0xFF)) 
-            return FALSE;
-        // read address 2 
-        if (pbuf[2] != ((adr >> 8) & 0xFF)) 
-            return FALSE;
-        // read the offset 
-        if (pbuf[3] != ((adr + ln - 1) & 0x1F)) 
-            return FALSE;
-        // read and compare the contents 
-        for (i = 0; i < ln; i++) {
-            if (pbuf[4 + i] != buf[i]) 
-                return FALSE;
-        }
-        // success
-        return TRUE;
-    }
-  }
+    uint8_t i;
+    uint8_t pbuf[40];
 
-  // end function
-  return FALSE;
-        
+    //-------------------------------------------------//
+    // check for presence indicator
+    if (oneWireAccess())
+    {
+        // construct a packet to send
+        pbuf[0] = WR_SCRPAD;           // write scratch command
+        pbuf[1] = (adr & 0xFF);        // address 1
+        pbuf[2] = ((adr >> 8) & 0xFF); // address 2
+
+        // the write bytes
+        for (i = 0; i < ln; i++)
+            pbuf[3 + i] = (uint8_t)(buf[i]); // data
+
+        // perform the block
+        if (!oneWireBlock(FALSE, pbuf, ln + 3))
+            return FALSE;
+
+        // Now read back the scratch
+        if (oneWireAccess())
+        {
+            // construct a packet to send
+            pbuf[0] = RD_SCRPAD; // read scratch command
+            pbuf[1] = 0xFF;      // address 1
+            pbuf[2] = 0xFF;      // address 2
+            pbuf[3] = 0xFF;      // offset
+
+            // the write bytes
+            for (i = 0; i < ln; i++)
+                pbuf[4 + i] = 0xFF; // data
+
+            // perform the block
+            if (!oneWireBlock(FALSE, pbuf, ln + 4))
+                return FALSE;
+
+            // read address 1
+            if (pbuf[1] != (adr & 0xFF))
+                return FALSE;
+            // read address 2
+            if (pbuf[2] != ((adr >> 8) & 0xFF))
+                return FALSE;
+            // read the offset
+            if (pbuf[3] != ((adr + ln - 1) & 0x1F))
+                return FALSE;
+            // read and compare the contents
+            for (i = 0; i < ln; i++)
+            {
+                if (pbuf[4 + i] != buf[i])
+                    return FALSE;
+            }
+            // success
+            return TRUE;
+        }
+    }
+
+    // end function
+    return FALSE;
 }
 
 /*******************************************************************************
@@ -629,7 +634,7 @@ uint8_t oneWireWriteScratchpad(uint8_t* buf, uint32_t ln, uint32_t adr)
 DESCRIPTION
 read memory page
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -638,60 +643,60 @@ Only valid for DS1921G,H,Z
 Simplification of addressing using SKIP ROM
 
 *******************************************************************************/
-uint8_t oneWireReadPage(uint32_t start_pg, uint8_t* finalbuf) 
+uint8_t oneWireReadPage(uint32_t start_pg, uint8_t *finalbuf)
 {
-  uint32_t lastcrc16;
-  uint32_t len,i;
-  
-  // create a packet to read a page
-  len = 0;
-  setcrc16(0x0);
-  // skip ROM
-  finalbuf[len++] = SKIP_ROM; 
-  // read memory with crc command 
-  finalbuf[len] = RD_MEMORY_CRC; 
-  docrc16(finalbuf[len++]);         
-  
-  // address
-  finalbuf[len] = (uint8_t)((start_pg << 5) & 0xFF);
-  docrc16(finalbuf[len++]);         
-  finalbuf[len] = (uint8_t)(start_pg >> 3); 
-  docrc16(finalbuf[len++]); 
-  
-  // set 32 reads for data and 2 for crc
-  for (i = 0; i < 34; i++)
-  {
-    finalbuf[len++] = 0xFF; 
-  }
-  // send the bytes
-  if (oneWireBlock(TRUE , finalbuf, len)) 
-  {
-    // calculate the CRC over the last 34 bytes
+    uint32_t lastcrc16;
+    uint32_t len, i;
+
+    // create a packet to read a page
+    len = 0;
+    setcrc16(0x0);
+    // skip ROM
+    finalbuf[len++] = SKIP_ROM;
+    // read memory with crc command
+    finalbuf[len] = RD_MEMORY_CRC;
+    docrc16(finalbuf[len++]);
+
+    // address
+    finalbuf[len] = (uint8_t)((start_pg << 5) & 0xFF);
+    docrc16(finalbuf[len++]);
+    finalbuf[len] = (uint8_t)(start_pg >> 3);
+    docrc16(finalbuf[len++]);
+
+    // set 32 reads for data and 2 for crc
     for (i = 0; i < 34; i++)
     {
-      lastcrc16 = docrc16(finalbuf[len - 34 + i]);
+        finalbuf[len++] = 0xFF;
     }
-    // check crc
-    if (lastcrc16 == 0xB001) 
+    // send the bytes
+    if (oneWireBlock(TRUE, finalbuf, len))
     {
-      // copy the data into the buffer without the command and parameters
-      for (i = 0; i < 32; i++)
-      {
-        finalbuf[i] = finalbuf[i + 4];
-      }
+        // calculate the CRC over the last 34 bytes
+        for (i = 0; i < 34; i++)
+        {
+            lastcrc16 = docrc16(finalbuf[len - 34 + i]);
+        }
+        // check crc
+        if (lastcrc16 == 0xB001)
+        {
+            // copy the data into the buffer without the command and parameters
+            for (i = 0; i < 32; i++)
+            {
+                finalbuf[i] = finalbuf[i + 4];
+            }
+        }
+        else
+        {
+            return FALSE;
+        }
     }
     else
     {
-      return FALSE;
+        return FALSE;
     }
-  }
-  else
-  {   
-    return FALSE;
-  }
-  
-  // end function
-  return TRUE;
+
+    // end function
+    return TRUE;
 }
 
 /*******************************************************************************
@@ -720,7 +725,7 @@ DESCRIPTION
                    '1' if the operation is complete.
 
 
-USAGE EXAMPLES: 
+USAGE EXAMPLES:
 
 AUTHOR: jassimoes
 
@@ -729,134 +734,132 @@ COMMENTS:
 *******************************************************************************/
 uint8_t oneWireReadPageCRCEE77(uint32_t page, uint8_t *buff)
 {
-  uint8_t i, send_len=0, lsCRC16;
-  uint8_t raw_buf[15];
-  uint32_t str_add;
-  uint32_t lastcrc16;
-  
-  // select the device
-  if (!oneWireAccess())
-  {
-     return FALSE;
-  }
-  
-  // command, address, offset, password (except last byte)
-  raw_buf[send_len++] = READ_MEMORY_PSW_COMMAND;
-  if(SerialNum[0] == 0x37)
-  {
-      str_add = page * PAGE_LENGTH;
-  }
-  else
-  {
-      str_add = page * PAGE_LENGTH_HYGRO;
-  }
-  raw_buf[send_len++] = str_add & 0xFF;
-  raw_buf[send_len++] = ((str_add & 0xFFFF) >> 8) & 0xFF;
+    uint8_t i, send_len = 0, lsCRC16;
+    uint8_t raw_buf[15];
+    uint32_t str_add;
+    uint32_t lastcrc16;
 
-  // calculate the CRC16
-  setcrc16(0);
-  for(i = 0; i < send_len; i++)
-      lastcrc16 = docrc16(raw_buf[i]);
-
-  for (i = 0; i < 8; i++)
-      raw_buf[send_len++] = 0xFF;
-
-
-  if(SerialNum[0] == 0x37)
-  {
-      // send block (check copy indication complete)
-      if(!oneWireBlock(FALSE,(uint8_t*)raw_buf,(send_len-1)))
-      {
-        return FALSE;
-      }
-
-  }
-  else
-  {
-      if(!oneWireBlock(FALSE,(uint8_t*)raw_buf,send_len))
-      {
-        return FALSE;
-      }
-  }
-
-  // set the read bytes
-  if(SerialNum[0] == 0x37)
-  {
-
-    for (i = 0; i < PAGE_LENGTH; i++)
-        buff[i] = 0xFF;
-  }
-  else
-  {
-    for(i=0; i<PAGE_LENGTH_HYGRO; i++)
-        buff[i] = 0xFF;
-  }
-
-  // read the data
-  if(SerialNum[0] == 0x37)
-  {
-    if(!oneWireBlock(FALSE,(uint8_t*)buff,PAGE_LENGTH))
+    // select the device
+    if (!oneWireAccess())
     {
         return FALSE;
     }
-  }
-  else
-  {
-    if(!oneWireBlock(FALSE,(uint8_t*)buff,PAGE_LENGTH_HYGRO))
+
+    // command, address, offset, password (except last byte)
+    raw_buf[send_len++] = READ_MEMORY_PSW_COMMAND;
+    if (SerialNum[0] == 0x37)
+    {
+        str_add = page * PAGE_LENGTH;
+    }
+    else
+    {
+        str_add = page * PAGE_LENGTH_HYGRO;
+    }
+    raw_buf[send_len++] = str_add & 0xFF;
+    raw_buf[send_len++] = ((str_add & 0xFFFF) >> 8) & 0xFF;
+
+    // calculate the CRC16
+    setcrc16(0);
+    for (i = 0; i < send_len; i++)
+        lastcrc16 = docrc16(raw_buf[i]);
+
+    for (i = 0; i < 8; i++)
+        raw_buf[send_len++] = 0xFF;
+
+    if (SerialNum[0] == 0x37)
+    {
+        // send block (check copy indication complete)
+        if (!oneWireBlock(FALSE, (uint8_t *)raw_buf, (send_len - 1)))
+        {
+            return FALSE;
+        }
+    }
+    else
+    {
+        if (!oneWireBlock(FALSE, (uint8_t *)raw_buf, send_len))
+        {
+            return FALSE;
+        }
+    }
+
+    // set the read bytes
+    if (SerialNum[0] == 0x37)
+    {
+
+        for (i = 0; i < PAGE_LENGTH; i++)
+            buff[i] = 0xFF;
+    }
+    else
+    {
+        for (i = 0; i < PAGE_LENGTH_HYGRO; i++)
+            buff[i] = 0xFF;
+    }
+
+    // read the data
+    if (SerialNum[0] == 0x37)
+    {
+        if (!oneWireBlock(FALSE, (uint8_t *)buff, PAGE_LENGTH))
+        {
+            return FALSE;
+        }
+    }
+    else
+    {
+        if (!oneWireBlock(FALSE, (uint8_t *)buff, PAGE_LENGTH_HYGRO))
+        {
+            return FALSE;
+        }
+    }
+    // read the first CRC16 byte
+    lsCRC16 = oneWireReadByte();
+
+    // calculate CRC on data read
+    if (SerialNum[0] == 0x37)
+    {
+        for (i = 0; i < PAGE_LENGTH; i++)
+            lastcrc16 = docrc16(buff[i]);
+    }
+    else
+    {
+        for (i = 0; i < PAGE_LENGTH_HYGRO; i++)
+            lastcrc16 = docrc16(buff[i]);
+    }
+
+    // check lsByte of the CRC
+    if ((lastcrc16 & 0xFF) != (~lsCRC16 & 0xFF))
     {
         return FALSE;
     }
-  }
-  // read the first CRC16 byte
-  lsCRC16 = oneWireReadByte();
 
-  // calculate CRC on data read
-  if(SerialNum[0] == 0x37)
-  {
-    for(i = 0; i < PAGE_LENGTH; i++)
-        lastcrc16 = docrc16(buff[i]);
-  }
-  else
-  {
-    for(i = 0; i < PAGE_LENGTH_HYGRO; i++)
-        lastcrc16 = docrc16(buff[i]);
-  }
-
-  // check lsByte of the CRC
-  if ((lastcrc16 & 0xFF) != (~lsCRC16 & 0xFF))
-  {
-    return FALSE;
-  }
-
-  return TRUE;
+    return TRUE;
 }
 
 /*******************************************************************************
 ** NAME: oneWireFindFirst ******************************************************
 ********************************************************************************/
 // The 'oneWireFindFirst' finds the first device on the 1-Wire Net.
-// This function contains one parameter 'alarmOnly'.  When 
-// 'alarmOnly' is TRUE (1) the find alarm command 0xEC is 
+// This function contains one parameter 'alarmOnly'.  When
+// 'alarmOnly' is TRUE (1) the find alarm command 0xEC is
 // sent instead of the normal search command 0xF0.
 // Using the find alarm command 0xEC will limit the search to only
-// 1-Wire devices that are in an 'alarm' state. 
+// 1-Wire devices that are in an 'alarm' state.
 //
 // 'portnum'    - number 0 to MAX_PORTNUM-1.  This number is provided to
 //                indicate the symbolic port number.
 // 'doReset'   - TRUE (1) perform reset before search, FALSE (0) do not
-//                perform reset before search. 
-// 'alarmOnly' - TRUE (1) the find alarm command 0xEC is 
+//                perform reset before search.
+// 'alarmOnly' - TRUE (1) the find alarm command 0xEC is
 //                sent instead of the normal search command 0xF0
 //
-// Returns:   TRUE (1) : when a 1-Wire device was found and it's 
+// Returns:   TRUE (1) : when a 1-Wire device was found and it's
 //                       Serial Number placed in the global SerialNum
 //            FALSE (0): There are no devices on the 1-Wire Net.
-bool oneWireFindFirst (bool doReset, bool alarmOnly)
+bool oneWireFindFirst(bool doReset, bool alarmOnly)
 {
     // reset the search state
     LastDiscrepancy = 0;
     LastDevice = FALSE;
-    LastFamilyDiscrepancy = 0; 
+    LastFamilyDiscrepancy = 0;
 
     // Call Next and return it's return value;
     return oneWireFindNext(doReset, alarmOnly);
@@ -868,23 +871,23 @@ bool oneWireFindFirst (bool doReset, bool alarmOnly)
 // The 'oneWireFindNext' function does a general search.
 // This function continues from the previos search state. The search state
 // can be reset by using the 'oneWireFindFirst' function.
-// This function contains one parameter 'alarmOnly'.  
-// When 'alarmOnly' is TRUE (1) the find alarm command 
+// This function contains one parameter 'alarmOnly'.
+// When 'alarmOnly' is TRUE (1) the find alarm command
 // 0xEC is sent instead of the normal search command 0xF0.
 // Using the find alarm command 0xEC will limit the search to only
-// 1-Wire devices that are in an 'alarm' state. 
+// 1-Wire devices that are in an 'alarm' state.
 //
 // 'doReset'   - TRUE (1) perform reset before search, FALSE (0) do not
-//                perform reset before search. 
-// 'alarmOnly' - TRUE (1) the find alarm command 0xEC is 
+//                perform reset before search.
+// 'alarmOnly' - TRUE (1) the find alarm command 0xEC is
 //                sent instead of the normal search command 0xF0
 //
-// Returns:   TRUE (1) : when a 1-Wire device was found and it's 
+// Returns:   TRUE (1) : when a 1-Wire device was found and it's
 //                       Serial Number placed in the global SerialNum
 //            FALSE (0): when no new device was found.  Either the
 //                       last search was the last device or there
 //                       are no devices on the 1-Wire Net.
-bool oneWireFindNext (bool doReset, bool alarmOnly)
+bool oneWireFindNext(bool doReset, bool alarmOnly)
 {
     uint8_t romBitIndex = 1;
     uint8_t romByteIndex = 0;
@@ -898,13 +901,13 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
     // clear serial number buffer for new search
     memset(SerialNum, 0, 8);
 
-    // if the last call was the last one 
+    // if the last call was the last one
     if (LastDevice)
     {
         // reset the search
         LastDiscrepancy = 0;
         LastDevice = FALSE;
-        LastFamilyDiscrepancy = 0;  
+        LastFamilyDiscrepancy = 0;
 
         return FALSE;
     }
@@ -922,7 +925,7 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
             return FALSE;
         }
     }
- 
+
     // send search command
     if (alarmOnly)
     {
@@ -997,10 +1000,10 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
             romBitIndex++;
 
             bitMask = bitMask << 1;
-            
+
             // if the mask has reached 0 then go for a new ROM
             if (bitMask == 0)
-            { 
+            {
                 // reset mask and perform CRC8
                 lastcrc8 = doCrc8(lastcrc8, SerialNum[romByteIndex]);
 
@@ -1009,8 +1012,7 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
             }
         }
 
-    }
-    while (romByteIndex < 8);  // loop until we have all ROM bytes
+    } while (romByteIndex < 8); // loop until we have all ROM bytes
 
     if ((romBitIndex < 65) || (lastcrc8 != 0))
     {
@@ -1022,12 +1024,12 @@ bool oneWireFindNext (bool doReset, bool alarmOnly)
         // search was successful: set last discrepancy, device and result
         LastDiscrepancy = discrepMarker;
         LastDevice = (LastDiscrepancy == 0);
-        
+
         // search isn't completed there are more devices present in the bus
         result = TRUE;
     }
 
     return result;
-}   
+}
 
 #endif /* HAL_NF_USE_STM32_ONEWIRE */

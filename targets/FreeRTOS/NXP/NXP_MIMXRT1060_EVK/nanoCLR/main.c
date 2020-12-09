@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -21,11 +20,10 @@
 #include "Target_BlockStorage_iMXRTFlashDriver.h"
 #include "CLR_Startup_Thread.h"
 
-//configure heap memory
-__attribute__((section(".noinit.$SRAM_OC.ucHeap")))
-uint8_t ucHeap[configTOTAL_HEAP_SIZE];
+// configure heap memory
+__attribute__((section(".noinit.$SRAM_OC.ucHeap"))) uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
-#define LED_GPIO GPIO1
+#define LED_GPIO     GPIO1
 #define LED_GPIO_PIN (9U)
 
 int main(void)

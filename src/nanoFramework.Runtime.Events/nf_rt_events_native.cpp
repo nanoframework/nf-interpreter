@@ -4,14 +4,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #include "nf_rt_events_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -71,5 +69,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Event
     "nanoFramework.Runtime.Events",
     0x0EAB00C9,
     method_lookup,
-    { 100, 0, 7, 1 }
+    { 100, 0, 8, 0 }
 };
+
+// clang-format on

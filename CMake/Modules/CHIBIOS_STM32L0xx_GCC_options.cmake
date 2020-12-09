@@ -21,10 +21,10 @@ set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,-
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options coming from any extra args?
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0plus -mfloat-abi=soft -mabi=aapcs -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
+    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0plus -mfloat-abi=soft -mabi=aapcs -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -Wundef -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # this series doesn't have FPU 
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=FALSE)
+    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=FALSE -DUSE_FPU=TRUE)
 
 endfunction()
 

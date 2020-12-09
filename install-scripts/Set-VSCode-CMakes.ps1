@@ -51,8 +51,11 @@ function Set-VSCode-CMakes {
 
                 $cmakeTemplate = Get-Content -Raw -Encoding UTF8 $_.FullName | ConvertFrom-Json
 
-                foreach ($newChoice in $cmakeTemplate.linkage.choices) {
+                $cmakeTemplate.linkage.choices.PSObject.Properties | Foreach-object {
 
+                    $newChoice = New-Object -TypeName psobject 
+                    $newChoice | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
+                    
                     $addChoice = $true
             
                     # loop through each existing linkage choice
@@ -90,7 +93,7 @@ function Set-VSCode-CMakes {
             $object = ($choice | Get-Member -MemberType NoteProperty)
             
             # need to grab the name to be used as key
-            $key = $object.Name
+            $key = $object.Name.ToString()
             
             # now add it, use with force, in case this to update the value
             $cmakeVariants.linkage.choices | Add-Member -MemberType NoteProperty -Name $key -Value $choice."$key" -Force

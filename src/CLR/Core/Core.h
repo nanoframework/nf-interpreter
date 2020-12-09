@@ -9,7 +9,6 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 //#include <nanoCLR_Diagnostics.h>
-//#include <nanoCLR_Graphics.h>
 #include <nanoCLR_Hardware.h>
 //#include <nanoCLR_Stream.h>
 //#include <nanoCLR_Xml.h>
@@ -23,4 +22,3 @@
 #include <nanoCLR_Runtime__HeapBlock.h>
 
 #endif // _NANOCLR_CORE_H_
-

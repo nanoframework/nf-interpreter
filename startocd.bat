@@ -3,7 +3,7 @@ REM If already running it will fail and exit, leaving the existing one to handle
 REM Template allows for multiple target interfaces and boards - add new ones as required
 REM DAV 26FEB19
 setlocal
-set cmd=C:/Esp32_Tools/openocd-esp32/bin/openocd.exe -s C:/Esp32_Tools/openocd-esp32/share/openocd/scripts
+set cmd=C:/nf/ESP32/openocd-esp32/bin/openocd.exe -s C:/nf/ESP32/openocd-esp32/share/openocd/scripts
 
 if %1.==. goto ESP32_JLINK
 call :%1

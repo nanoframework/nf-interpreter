@@ -5,7 +5,7 @@
 
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${PROJECT_SOURCE_DIR}/src/CLR/System.Math")
+set(BASE_PATH_FOR_THIS_MODULE "${CMAKE_SOURCE_DIR}/src/CLR/System.Math")
 
 
 # set include directories

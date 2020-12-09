@@ -13,12 +13,6 @@ typedef void (*set_Event_Callback)(void *);
 
 #define EVENTS_TIMEOUT_INFINITE 0xFFFFFFFF
 
-#if NATIVE_PROFILE_PAL & NATIVE_PROFILE_PAL_EVENTS__flag
-#define NATIVE_PROFILE_PAL_EVENTS() Native_Profiler profiler_obj
-#else
-#define NATIVE_PROFILE_PAL_EVENTS()
-#endif
-
 #ifdef __cplusplus
 extern "C"
 {

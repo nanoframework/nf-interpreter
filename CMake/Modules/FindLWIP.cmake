@@ -5,13 +5,13 @@
 
 
 # List of the required lwIp include files.
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/lwip)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/netif)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/compat)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/LWIP_Source/src/include/compat/posix)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
-list(APPEND LWIP_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/lwip)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/netif)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/compat)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/compat/posix)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
+list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP)
 
 set(LWIP_SRCS
 
@@ -176,28 +176,28 @@ foreach(SRC_FILE ${LWIP_SRCS})
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
-            # ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/various
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/core
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/core/ipv4
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/core/ipv6
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/api
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/netif
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/netif/ppp
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/netif/ppp/polarssl
+            # ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core/ipv4
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core/ipv6
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/api
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif/ppp
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif/ppp/polarssl
 
-			# ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+			# ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
 			# TODO: this needs to be changed so it's not platform dependent
-			${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP
+			${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP
 
             # APPS:
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/snmp
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/http
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/lwiperf
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/sntp
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/mdns
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/netbiosns
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/tftp
-            ${PROJECT_BINARY_DIR}/LWIP_Source/src/apps/mqtt
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/snmp
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/http
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/lwiperf
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/sntp
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/mdns
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/netbiosns
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/tftp
+            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/mqtt
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

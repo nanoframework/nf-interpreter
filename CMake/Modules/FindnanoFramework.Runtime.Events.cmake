@@ -4,14 +4,14 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
+set(BASE_PATH_FOR_THIS_MODULE "${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Events")
 
 
 # set include directories
-list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Core")
-list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/CLR/Include")
-list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/PAL/Include")
+list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Core")
+list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Include")
+list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
+list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/PAL/Include")
 list(APPEND nanoFramework.Runtime.Events_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 
@@ -40,8 +40,8 @@ foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
             ${BASE_PATH_FOR_THIS_MODULE}
 
             # path for AsyncProcCall and related code
-            ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
-            ${PROJECT_SOURCE_DIR}/src/PAL/Events
+            ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
+            ${CMAKE_SOURCE_DIR}/src/PAL/Events
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

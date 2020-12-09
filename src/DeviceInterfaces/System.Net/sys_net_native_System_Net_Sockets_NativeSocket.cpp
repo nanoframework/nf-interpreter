@@ -685,9 +685,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SendRecvHelper(
     if (offset + count > arrData->m_numOfElements)
         NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
 
-    // Infinite Timeout
-    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout infinite
-    hbTimeout.SetInteger((CLR_INT64)-1);
+    // set timeout
+    hbTimeout.SetInteger((CLR_INT64)stack.Arg5().NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
     //

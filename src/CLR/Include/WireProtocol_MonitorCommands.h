@@ -7,46 +7,52 @@
 #ifndef _WIREPROTOCOL_COMMANDS_H_
 #define _WIREPROTOCOL_COMMANDS_H_
 
+#include <nanoHAL_v2.h>
 #include "WireProtocol.h"
 #include "WireProtocol_Message.h"
-#include <nanoPackStruct.h>
+
+// clang-format off
 
 //////////////////////////////////////////
 // enums
 
 // structure for Monitor Reboot options
-// backwards compatible with .NETMF
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.RebootOptions (in managed code) !!! //
+// CONSTANTS VALUES NEED TO BE 'FLAG' TYPE                                                             //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef enum Monitor_Reboot_Options
 {
-    Monitor_Reboot_c_NormalReboot = 0,
-    Monitor_Reboot_c_EnterBootloader = 1,
-    Monitor_Reboot_c_ClrRebootOnly = 2,
-    Monitor_Reboot_c_ClrStopDebugger = 4
+    Monitor_Reboot_c_NormalReboot           = 0,
+    Monitor_Reboot_c_EnterNanoBooter        = 1,
+    Monitor_Reboot_c_ClrRebootOnly          = 2,
+    Monitor_Reboot_c_ClrStopDebugger        = 4,
+    Monitor_Reboot_c_EnterProprietaryBooter = 8
 } Monitor_Reboot_Options;
 
 // structure for Access Memory operations
 typedef enum AccessMemory_Operations
 {
-    // check if memory space is erased
-    AccessMemory_Check = 0x00,
+    // compute CRC32 of the of a block of data starting at a given address
+    AccessMemory_Check                      = 0x00,
 
     // read block of data starting at a given address
-    AccessMemory_Read = 0x01,
+    AccessMemory_Read                       = 0x01,
 
     // write block of data starting at a given address
-    AccessMemory_Write = 0x02,
+    AccessMemory_Write                      = 0x02,
 
     // erase sector/block/page at a given address
-    AccessMemory_Erase = 0x03,
+    AccessMemory_Erase                      = 0x03,
 
-    AccessMemory_Mask = 0x0F
+    AccessMemory_Mask                       = 0x0F
 
 } AccessMemory_Operations;
 
 typedef enum MemoryMap_Options
 {
-    Monitor_MemoryMap_c_RAM = 0x00000001,
-    Monitor_MemoryMap_c_FLASH = 0x00000002,
+    Monitor_MemoryMap_c_RAM     = 0x00000001,
+    Monitor_MemoryMap_c_FLASH   = 0x00000002,
 
 } MemoryMap_Options;
 
@@ -54,20 +60,18 @@ typedef enum MemoryMap_Options
 // typedefs
 
 // structure for Monitor Ping Reply
-// backwards compatible with .NETMF
 typedef struct Monitor_Ping_Reply
 {
-    uint32_t m_source;
-    uint32_t m_dbg_flags;
+    uint32_t Source;
+    uint32_t Flags;
 
 } Monitor_Ping_Reply;
 
 // structure for command Monitor Ping
-// backwards compatible with .NETMF
 typedef struct Monitor_Ping_Command
 {
-    uint32_t m_source;
-    uint32_t m_dbg_flags;
+    uint32_t Source;
+    uint32_t Flags;
 
 } Monitor_Ping_Command;
 
@@ -78,19 +82,26 @@ typedef struct Monitor_OemInfo_Reply
 
 } Monitor_OemInfo_Reply;
 
+// structure with reply for Target information command
+typedef struct Monitor_TargetInfo_Reply
+{
+    TargetInfo m_TargetInfo;
+
+} Monitor_TargetInfo_Reply;
+
 typedef struct CLR_DBG_Commands_Monitor_ReadMemory
 {
-    uint32_t address;
-    uint32_t length;
-    unsigned char data[1];
+    uint32_t        address;
+    uint32_t        length;
+    unsigned char   data[1];
 
 } CLR_DBG_Commands_Monitor_ReadMemory;
 
 typedef struct CLR_DBG_Commands_Monitor_WriteMemory
 {
-    uint32_t address;
-    uint32_t length;
-    unsigned char data[1];
+    uint32_t        address;
+    uint32_t        length;
+    unsigned char   data[1];
 
 } CLR_DBG_Commands_Monitor_WriteMemory;
 
@@ -136,19 +147,19 @@ typedef struct CLR_DBG_Commands_Monitor_MemoryMap
 
 typedef struct Monitor_QueryConfiguration_Command
 {
-    uint32_t Configuration;
-    uint32_t BlockIndex;
+    uint32_t    Configuration;
+    uint32_t    BlockIndex;
 
 } Monitor_QueryConfiguration_Command;
 
 typedef struct __nfpack Monitor_UpdateConfiguration_Command
 {
-    uint32_t Configuration;
-    uint32_t BlockIndex;
-    uint32_t Length;
-    uint32_t Offset;
-    uint32_t Done;
-    uint8_t Data[1];
+    uint32_t    Configuration;
+    uint32_t    BlockIndex;
+    uint32_t    Length;
+    uint32_t    Offset;
+    uint32_t    Done;
+    uint8_t     Data[1];
 
 } Monitor_UpdateConfiguration_Command;
 
@@ -157,6 +168,8 @@ typedef struct Monitor_UpdateConfiguration_Reply
     uint32_t ErrorCode;
 
 } Monitor_UpdateConfiguration_Reply;
+
+// clang-format on
 
 //////////////////////////////////////////
 // function declarations (commands)
@@ -177,6 +190,12 @@ extern "C"
     int Monitor_CheckMemory(WP_Message *message);
     int Monitor_MemoryMap(WP_Message *message);
     int Monitor_FlashSectorMap(WP_Message *message);
+    int Monitor_TargetInfo(WP_Message *message);
+
+    // helper functions
+    int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode);
+    int nanoBooter_GetTargetInfo(TargetInfo *targetInfo);
+    int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo);
 
 #ifdef __cplusplus
 }

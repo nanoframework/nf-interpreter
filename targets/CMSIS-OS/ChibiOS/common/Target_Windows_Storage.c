@@ -11,7 +11,7 @@
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_v2.h>
 
-#if HAL_USBH_USE_MSD
+#if defined(HAL_USBH_USE_MSD) && (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
 #endif
 
@@ -37,27 +37,27 @@ static virtual_timer_t sdCardDebounceTimer;
 static bool sdCardPresent;
 
 // Insertion monitor timer callback function.
-static void SdCardInsertionMonitorCallback(void *p) 
+static void SdCardInsertionMonitorCallback(void *p)
 {
     BaseBlockDevice *bbdp = p;
     bool currentStatus;
 
     chSysLockFromISR();
-    
+
     // get current status
     currentStatus = blkIsInserted(bbdp);
 
-    if(sdCardPresent == currentStatus)
+    if (sdCardPresent == currentStatus)
     {
         // value hasn't change for debounce interval so this is a valid change
-        if(currentStatus)
+        if (currentStatus)
         {
             chEvtBroadcastI(&sdInsertedEvent);
         }
         else
         {
             chEvtBroadcastI(&sdRemovedEvent);
-        }        
+        }
     }
 
     chSysUnlockFromISR();
@@ -65,30 +65,32 @@ static void SdCardInsertionMonitorCallback(void *p)
 
 static void SdCardDetectCallback(void *arg)
 {
-    BaseBlockDevice* bbdp = (BaseBlockDevice*)arg;
+    BaseBlockDevice *bbdp = (BaseBlockDevice *)arg;
 
-    if (port_is_isr_context()) {
-    	chSysLockFromISR();
-    	if(!chVTIsArmedI(&sdCardDebounceTimer))
-		{
-        	// save current status
-        	sdCardPresent = blkIsInserted(bbdp);
-        	// setup timer
-        	chVTSetI(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
-		}
-    	chSysUnlockFromISR();
+    if (port_is_isr_context())
+    {
+        chSysLockFromISR();
+        if (!chVTIsArmedI(&sdCardDebounceTimer))
+        {
+            // save current status
+            sdCardPresent = blkIsInserted(bbdp);
+            // setup timer
+            chVTSetI(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
+        }
+        chSysUnlockFromISR();
+    }
+    else
+    {
+        if (!chVTIsArmed(&sdCardDebounceTimer))
+        {
 
-	} else {
-		if(!chVTIsArmed(&sdCardDebounceTimer))
-		{
+            // save current status
+            sdCardPresent = blkIsInserted(bbdp);
 
-			// save current status
-			sdCardPresent = blkIsInserted(bbdp);
-
-			// setup timer
-			chVTSet(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
-		}
-	}
+            // setup timer
+            chVTSet(&sdCardDebounceTimer, TIME_MS2I(SDCARD_POLLING_DELAY), SdCardInsertionMonitorCallback, arg);
+        }
+    }
 }
 
 // Card insertion event handler
@@ -118,7 +120,7 @@ void SdcardInsertHandler(eventid_t id)
         sdCardFileSystemReady = true;
 
         // post event to managed app
-        PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC );
+        PostManagedEvent(EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, SD_CARD_DRIVE_INDEX_NUMERIC);
     }
 }
 
@@ -132,21 +134,16 @@ void SdCardRemoveHandler(eventid_t id)
     sdCardFileSystemReady = false;
 
     // post event to managed app
-    PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC );
+    PostManagedEvent(EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, SD_CARD_DRIVE_INDEX_NUMERIC);
 }
 
-__attribute__((noreturn))
-void SdCardWorkingThread(void const * argument)
+__attribute__((noreturn)) void SdCardWorkingThread(void const *argument)
 {
     (void)argument;
-    
+
     event_listener_t sdEventListener0, sdEventListener1;
 
-    const evhandler_t sdcardEventHandler[] = 
-    { 
-        SdcardInsertHandler,
-        SdCardRemoveHandler 
-    };
+    const evhandler_t sdcardEventHandler[] = {SdcardInsertHandler, SdCardRemoveHandler};
 
     sdCardFileSystemReady = false;
 
@@ -171,7 +168,7 @@ void SdCardWorkingThread(void const * argument)
     // force initial check
     SdCardDetectCallback(&SD_CARD_DRIVER);
 
-    for(;;)
+    for (;;)
     {
         chEvtDispatch(sdcardEventHandler, chEvtWaitOneTimeout(ALL_EVENTS, TIME_MS2I(SDCARD_POLLING_DELAY)));
     }
@@ -190,8 +187,7 @@ bool usbMsdFileSystemReady;
 
 static FATFS usbMsd_FS;
 
-__attribute__((noreturn))
-void UsbMsdWorkingThread(void const * argument)
+__attribute__((noreturn)) void UsbMsdWorkingThread(void const *argument)
 {
     (void)argument;
 
@@ -202,9 +198,9 @@ void UsbMsdWorkingThread(void const * argument)
     // start USB host
     usbhStart(&USB_MSD_DRIVER);
 
-    USBHMassStorageLUNDriver* msBlk = (USBHMassStorageLUNDriver*)&MSBLKD[0];
+    USBHMassStorageLUNDriver *msBlk = (USBHMassStorageLUNDriver *)&MSBLKD[0];
 
-    for(;;)
+    for (;;)
     {
         osDelay(USB_MSD_POLLING_INTERVAL);
 
@@ -220,7 +216,7 @@ void UsbMsdWorkingThread(void const * argument)
         if (blkGetDriverState(msBlk) == BLK_READY)
         {
             // BLK: Ready
-            if(!usbMsdFileSystemReady)
+            if (!usbMsdFileSystemReady)
             {
                 // USB MSD file system not ready
                 // mount drive
@@ -236,19 +232,27 @@ void UsbMsdWorkingThread(void const * argument)
                     usbMsdFileSystemReady = true;
 
                     // post event to managed app
-                    PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceInsertion, USB_MSD_DRIVE_INDEX_NUMERIC );
-                }                
+                    PostManagedEvent(
+                        EVENT_STORAGE,
+                        0,
+                        StorageEventType_RemovableDeviceInsertion,
+                        USB_MSD_DRIVE_INDEX_NUMERIC);
+                }
             }
         }
 
         if (blkGetDriverState(msBlk) == BLK_STOP)
         {
-            if(usbMsdFileSystemReady)
+            if (usbMsdFileSystemReady)
             {
                 usbMsdFileSystemReady = false;
 
                 // post event to managed app
-                PostManagedEvent( EVENT_STORAGE, 0, StorageEventType_RemovableDeviceRemoval, USB_MSD_DRIVE_INDEX_NUMERIC );
+                PostManagedEvent(
+                    EVENT_STORAGE,
+                    0,
+                    StorageEventType_RemovableDeviceRemoval,
+                    USB_MSD_DRIVE_INDEX_NUMERIC);
             }
         }
 

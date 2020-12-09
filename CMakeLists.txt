@@ -33,6 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
+include(nf_utils)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -52,7 +53,7 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # handle RTOSes choice
 
-if("${RTOS}" STREQUAL "")
+if(${RTOS} STREQUAL "")
     # no RTOS selected, defaulting to ChibiOS
     set(RTOS "CHIBIOS")
 endif()
@@ -69,10 +70,10 @@ else()
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
-string(COMPARE EQUAL "CHIBIOS" "${RTOS}"  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS" "${RTOS}" RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "FREERTOS_ESP32" "${RTOS}" RTOS_FREERTOS_ESP32_CHECK)
-string(COMPARE EQUAL "TI_SIMPLELINK" "${RTOS}" RTOS_TI_SIMPLELINK_CHECK)
+string(COMPARE EQUAL "CHIBIOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FREERTOS" ${RTOS} RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "FREERTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
+string(COMPARE EQUAL "TI_SIMPLELINK" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
 
 ##########################################################################
 
@@ -130,11 +131,14 @@ if(NOT BUILD_VERSION)
 endif()
 project(nanoFramework VERSION ${BUILD_VERSION})
 
+set(NANOBOOTER_PROJECT_NAME "nanoBooter")
+set(NANOCLR_PROJECT_NAME "nanoCLR")
+
 #######################
 message(STATUS "")
 message(STATUS "Building nanoFramework version ${PROJECT_VERSION} using build type '${CMAKE_BUILD_TYPE}'.")
-message(STATUS "Source directory is '${PROJECT_SOURCE_DIR}'.")
-message(STATUS "Build  directory is '${PROJECT_BINARY_DIR}'.")
+message(STATUS "Source directory is '${CMAKE_SOURCE_DIR}'.")
+message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")
 #######################
 
@@ -358,6 +362,19 @@ else()
 endif()
 
 #################################################################
+# target has nanoBooter 
+# (default is ON so target device HAS nanoBooter)
+option(NF_TARGET_HAS_NANOBOOTER "option to signal if target implements nanoBooter" ON)
+
+if(NF_TARGET_HAS_NANOBOOTER)
+    set(TARGET_HAS_NANOBOOTER TRUE CACHE INTERNAL "Option for nanoBooter implementation")
+    message(STATUS "Target implements nanoBooter")
+else()
+    set(TARGET_HAS_NANOBOOTER FALSE CACHE INTERNAL "Option for nanoBooter implementation")
+    message(STATUS "Target DOES NOT implement nanoBooter")
+endif()
+
+#################################################################
 
 if(RTOS_CHIBIOS_CHECK)
 
@@ -407,6 +424,9 @@ option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provi
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
+
+# (default is OFF so driver is NOT used)
+option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
 
 #################################################################
 
@@ -483,7 +503,13 @@ if( API_System.Net OR
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(API_Windows.Devices.Wifi)
+    if(NF_NETWORKING_ENC28J60)
+        set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28J60 network driver")
+    else()
+        set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
+    endif()
+
+   if(API_Windows.Devices.Wifi)
         set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
     else()
         set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
@@ -508,10 +534,24 @@ else()
 endif()
 
 
+if(API_System.Device.Gpio)
+    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for System.Device.Gpio")
+else()
+    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for System.Device.Gpio")
+endif()
+
+
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 else()
     set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
+endif()
+
+
+if(API_System.Device.I2c)
+    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
+else()
+    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 endif()
 
 
@@ -549,6 +589,15 @@ else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
 endif()
 
+#################################################################################
+#  Option to include the graphics bitmap primitives
+#################################################################################
+if(API_nanoFramework.Graphics)
+    set(NANOCLR_GRAPHICS TRUE CACHE INTERNAL "Graphics Support")
+else()
+    set(NANOCLR_GRAPHICS FALSE CACHE INTERNAL "No Graphics Support")
+endif()
+
 if(NF_FEATURE_HAS_SDCARD)
     set(HAL_USE_SDC_OPTION TRUE CACHE INTERNAL "HAL SDC for NF_FEATURE_HAS_SDCARD")
 else()
@@ -556,9 +605,9 @@ else()
 endif()
 
 if(NF_FEATURE_HAS_USB_MSD)
-    set(HAL_USBH_USE_MSDC_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+    set(HAL_USBH_USE_MSD_OPTION TRUE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
 else()
-    set(HAL_USBH_USE_MSDC_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
+    set(HAL_USBH_USE_MSD_OPTION FALSE CACHE INTERNAL "HAL USBH_USE_MSD for NF_FEATURE_HAS_USB_MSD")
 endif()
 
 #################################################################
@@ -568,6 +617,7 @@ endif()
 # include nanoFramework.Runtime.Events API
 if( API_nanoFramework.Devices.OneWire OR 
     API_System.Net OR
+    API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
     API_Windows.Networking.Sockets OR
@@ -601,6 +651,10 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for networking enabled with security")
     else()
         message(STATUS "Support for networking enabled WITHOUT security")
+    endif()
+
+    if(NF_NETWORKING_ENC28J60)
+        message(STATUS "Support for ENC28j60 network driver enabled")
     endif()
 
     # sanity check for missing configuration block option
@@ -654,44 +708,63 @@ endif()
 
 #################################################################
 
+#################################################################
+# Baudrate for serial communication 
+
+if(TARGET_SERIAL_BAUDRATE)
+    message(STATUS "Baudrate for serial communication was set to ${TARGET_SERIAL_BAUDRATE}.")
+endif()
+
+#################################################################
+
+#################################################################
+# Override target name on device properties
+
+if(TARGET_NAME)
+    message(STATUS "Target name set to ${TARGET_NAME}.")
+else()
+    # use target board as the name
+    set(TARGET_NAME ${TARGET_BOARD})
+endif()
+
+#################################################################
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR")
-
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    
     add_subdirectory(targets/CMSIS-OS/ChibiOS)
     add_subdirectory(targets/CMSIS-OS/common)
     add_subdirectory(targets/CMSIS-OS/common/Include)
-    add_subdirectory(targets/CMSIS-OS/nanoBooter)
-    add_subdirectory(targets/CMSIS-OS/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${CHIBIOS_BOARD}' found")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory("${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
             # board found
-            message(STATUS "Support for target board '${CHIBIOS_BOARD}' found in Community targets")
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory("targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+            add_subdirectory(targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()
@@ -706,14 +779,8 @@ elseif(RTOS_FREERTOS_CHECK)
 # FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
-    if("${TARGET_SERIES}" STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${ESP32_BOARD}")
-
-        if(API_nanoFramework.Hardware.Esp32.Rmt)
-            set(HAL_USE_ESP32_RMT_OPTION TRUE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        else()
-            set(HAL_USE_ESP32_RMT_OPTION FALSE CACHE INTERNAL "HAL RMT for nanoFramework.Hardware.Esp32.Rmt")
-        endif()
+    if(${TARGET_SERIES} STREQUAL "ESP32")
+        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD}")
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
@@ -723,13 +790,13 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Define base path for the class libraries
-        set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}/nanoCLR")
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
 
         add_subdirectory(targets/FreeRTOS_ESP32)
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${ESP32_BOARD}")
- 		add_subdirectory(targets/FreeRTOS_ESP32/${ESP32_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
+ 		add_subdirectory(targets/FreeRTOS_ESP32/${TARGET_BOARD})
 
     endif()
 
@@ -738,35 +805,35 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES "${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR")
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TI_BOARD}")
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${TI_BOARD}' found")
-        message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
+        message(STATUS "${TARGET_BASE_LOCATION}")
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TI_BOARD}")
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
         
             # board found
-            message(STATUS "Support for target board '${TI_BOARD}' found in Community targets")
-            message(STATUS "${TI_BOARD_DEFINITIONS_LOCATION}")
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
+            message(STATUS "${TARGET_BASE_LOCATION}")
 
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TI_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
 
     endif()

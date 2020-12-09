@@ -3,13 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ff.h>
-#include "win_storage_native.h"
-#include <nanoHAL_Windows_Storage.h>
-
-#if HAL_USBH_USE_MSD
-#include "usbh/dev/msd.h"
-#endif
+#include "win_storage_native_target.h"
 
 // defining these types here to make it shorter and improve code readability
 typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;

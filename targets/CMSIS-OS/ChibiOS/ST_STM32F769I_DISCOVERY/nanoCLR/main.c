@@ -18,90 +18,90 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 extern uint8_t hal_spiffs_config();
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
-// declare CLRStartup thread here 
+// declare CLRStartup thread here
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 
 #if HAL_USE_SDC
-// declare SD Card working thread here 
-osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT"); 
+// declare SD Card working thread here
+osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT");
 #endif
 #if HAL_USBH_USE_MSD
-// declare USB MSD thread here 
-osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT"); 
+// declare USB MSD thread here
+osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT");
 #endif
 
 //  Application entry point.
-int main(void) {
+int main(void)
+{
+    // HAL initialization, this also initializes the configured device drivers
+    // and performs the board-specific initializations.
+    halInit();
 
-  // HAL initialization, this also initializes the configured device drivers
-  // and performs the board-specific initializations.
-  halInit();
+    // init boot clipboard
+    InitBootClipboard();
 
-  // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUTPUT == TRUE)
-  SwoInit();
-  #endif
+// init SWO as soon as possible to make it available to output ASAP
+#if (SWO_OUTPUT == TRUE)
+    SwoInit();
+#endif
 
-  // The kernel is initialized but not started yet, this means that
-  // main() is executing with absolute priority but interrupts are already enabled.
-  osKernelInitialize();
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
 
-  // start watchdog
-  Watchdog_Init();
+    // start watchdog
+    Watchdog_Init();
 
-  #if (HAL_NF_USE_STM32_CRC == TRUE)
-  // startup crc
-  crcStart(NULL);
-  #endif
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
 
-  // config and init external memory
-  // this has to be called after osKernelInitialize, otherwise an hard fault will occur
-  Target_ExternalMemoryInit();
+    // config and init external memory
+    // this has to be called after osKernelInitialize, otherwise an hard fault will occur
+    Target_ExternalMemoryInit();
 
-  #if NF_FEATURE_USE_SPIFFS
-  // config and init SPIFFS
-  hal_spiffs_config();
-  #endif
-  
-  // starts the serial driver
-  sdStart(&SERIAL_DRIVER, NULL);
+#if NF_FEATURE_USE_SPIFFS
+    // config and init SPIFFS
+    hal_spiffs_config();
+#endif
 
-  // create the receiver thread
-  osThreadCreate(osThread(ReceiverThread), NULL);
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, NULL);
 
-  // CLR settings to launch CLR thread
-  CLR_SETTINGS clrSettings;
-  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+    // create the receiver thread
+    osThreadCreate(osThread(ReceiverThread), NULL);
 
-  clrSettings.MaxContextSwitches         = 50;
-  clrSettings.WaitForDebugger            = false;
-  clrSettings.EnterDebuggerLoopAfterExit = true;
+    // CLR settings to launch CLR thread
+    CLR_SETTINGS clrSettings;
+    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-  // create the CLR Startup thread 
-  osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  #if HAL_USE_SDC
-  // creates the SD card working thread 
-  osThreadCreate(osThread(SdCardWorkingThread), NULL);
-  #endif
+    // create the CLR Startup thread
+    osThreadCreate(osThread(CLRStartupThread), &clrSettings);
 
-  #if HAL_USBH_USE_MSD
-  // create the USB MSD working thread
-  osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
-  #endif
+#if HAL_USE_SDC
+    // creates the SD card working thread
+    osThreadCreate(osThread(SdCardWorkingThread), NULL);
+#endif
 
-  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
-  osKernelStart();
+#if HAL_USBH_USE_MSD
+    // create the USB MSD working thread
+    osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
+#endif
 
-  while (true) { 
-    osDelay(100);
-  }
+    // start kernel, after this main() will behave like a thread with priority osPriorityNormal
+    osKernelStart();
+
+    while (true)
+    {
+        osDelay(100);
+    }
 }

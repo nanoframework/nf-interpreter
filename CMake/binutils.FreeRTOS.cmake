@@ -22,7 +22,7 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.map")
 
 endfunction()
 
@@ -78,3 +78,142 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
     target_compile_definitions(${TARGET} PUBLIC ${ARGN})
 
 endfunction()
+
+# Add packages that are common to FreeRTOS platform builds
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_PACKAGES)
+
+    find_package(FreeRTOS REQUIRED)
+    find_package(CMSIS REQUIRED)
+
+    # nF feature: networking
+    if(USE_NETWORKING_OPTION)
+        find_package(LWIP REQUIRED)
+    endif()
+
+    if(USE_FILESYSTEM_OPTION)
+        find_package(FATFS REQUIRED)
+    endif()
+
+endmacro()
+
+# Add FreeRTOS platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # sources specific to nanoBooter
+    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
+
+    endif()
+
+    # sources specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+    
+        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
+        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
+
+    endif()
+
+endmacro()
+
+# Add FreeRTOS platform include directories to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
+
+    target_include_directories(${TARGET}.elf PUBLIC
+
+        ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+        ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+        ${FreeRTOS_INCLUDE_DIRS}
+        ${CMSIS_INCLUDE_DIRS}
+    )
+    
+    # includes specific to nanoBooter
+    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        target_include_directories(${TARGET}.elf PUBLIC
+            
+            ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
+            ${TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS}
+        )
+
+    endif()
+
+    # includes specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        target_include_directories(${TARGET}.elf PUBLIC
+
+            ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
+            ${NANOCLR_PROJECT_INCLUDE_DIRS}
+            ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
+            ${LWIP_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/fatfs
+            ${FATFS_INCLUDE_DIRS}
+
+        )
+
+    endif()
+
+
+endmacro()
+
+# Add FreeRTOS platform target sources to a specific CMake target
+# To be called from target CMakeList.txt
+macro(NF_ADD_PLATFORM_SOURCES TARGET)
+
+    # add header files with common OS definitions and board definitions 
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
+                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+
+    # sources common to both builds
+    target_sources(${TARGET}.elf PUBLIC
+    
+        ${TARGET_CMSIS_COMMON_SOURCES}
+        
+        ${FreeRTOS_SOURCES}
+    )
+
+    # sources specific to nanoBooter
+    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        # add header files with common OS definitions and board definitions 
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
+
+        target_sources(${TARGET}.elf PUBLIC
+            
+            ${TARGET_NXP_NANOBOOTER_SOURCES}
+            ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
+           
+            # need to add configuration manager to allow get/store configuration blocks
+            ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c
+        )
+
+    endif()
+
+    # sources specific to nanoCRL
+    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        # add header files with common OS definitions and board definitions 
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
+                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
+
+        target_sources(${TARGET}.elf PUBLIC
+
+            ${TARGET_FREERTOS_COMMON_SOURCES}
+            ${TARGET_FREERTOS_NANOCLR_SOURCES}
+            ${TARGET_NXP_COMMON_SOURCES}
+            ${TARGET_NXP_NANOCLR_SOURCES}
+
+            ${FATFS_SOURCES}
+            ${LWIP_SOURCES}
+
+        )
+
+    endif()
+
+endmacro()

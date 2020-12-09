@@ -11,7 +11,7 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 # set include directories
 list(APPEND nanoFramework.Devices.OneWire_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND nanoFramework.Devices.OneWire_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
-list(APPEND nanoFramework.Devices.OneWire_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Devices.OneWire)
+list(APPEND nanoFramework.Devices.OneWire_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Devices.OneWire)
 
 # source files
 set(nanoFramework.Devices.OneWire_SRCS
@@ -28,7 +28,7 @@ foreach(SRC_FILE ${nanoFramework.Devices.OneWire_SRCS})
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Devices.OneWire
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.Devices.OneWire
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

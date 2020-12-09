@@ -39,6 +39,9 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Doulble LInkedlist for GPIO input status
 static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit per pin
 
+// memory for pin state
+static uint16_t pinStateStore[TOTAL_GPIO_PORTS];
+
 // Get pointer to gpio_input_state for Gpio pin
 // return NULL if not found
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
@@ -95,7 +98,7 @@ void Esp_Gpio_fire_event(gpio_input_state *pState)
     bool actual = CPU_GPIO_GetPinState(pState->pinNumber); // get current pin state
     if (actual == pState->expected)
     {
-        pState->isrPtr(pState->pinNumber, actual);
+        pState->isrPtr(pState->pinNumber, actual, pState->param);
 
         if (pState->mode == GPIO_INT_EDGE_BOTH)
         {
@@ -208,9 +211,46 @@ GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pin)
 }
 
 // Set Pin state
-void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue PinState)
+void CPU_GPIO_SetPinState(GPIO_PIN pinNumber, GpioPinValue pinState)
 {
-    gpio_set_level((gpio_num_t)pin, (uint32_t)PinState);
+    // need to store pin state
+    int port = pinNumber >> 4, bit = 1 << (pinNumber & 0x0F);
+
+    if (pinState == GpioPinValue_High)
+    {
+        pinStateStore[port] |= bit;
+    }
+    else
+    {
+        pinStateStore[port] &= ~bit;
+    }
+
+    gpio_set_level((gpio_num_t)pinNumber, (uint32_t)pinState);
+}
+
+// Toggle pin state
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
+{
+    // platform DOES NOT support toggle
+    // need to do it "the hard way"
+
+    uint32_t newValue;
+
+    // need to store pin state
+    int port = pinNumber >> 4, bit = 1 << (pinNumber & 0x0F);
+
+    if (pinStateStore[port] & bit)
+    {
+        pinStateStore[port] &= ~bit;
+        newValue = 0;
+    }
+    else
+    {
+        pinStateStore[port] |= bit;
+        newValue = 1;
+    }
+
+    gpio_set_level((gpio_num_t)pinNumber, newValue);
 }
 
 // ISR called by IDF

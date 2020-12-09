@@ -26,4 +26,15 @@
 #define HAL_NF_USE_STM32_QSPI          FALSE
 #endif
 
+// enable STM32 graphics
+#if !defined(HAL_DSI_MODULE_ENABLED)
+#define HAL_DSI_MODULE_ENABLED          TRUE
+#endif
+
+#if !defined(HAL_LTDC_MODULE_ENABLED)
+#define HAL_LTDC_MODULE_ENABLED          TRUE
+#endif
+
+
+
 #endif // _HALCONF_NF_H_

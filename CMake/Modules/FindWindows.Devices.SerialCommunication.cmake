@@ -10,7 +10,7 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 # set include directories
 list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
-list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/Windows.Devices.SerialCommunication)
+list(APPEND Windows.Devices.SerialCommunication_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Windows.Devices.SerialCommunication)
 
 
 # source files
@@ -28,7 +28,7 @@ foreach(SRC_FILE ${Windows.Devices.SerialCommunication_SRCS})
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/Windows.Devices.SerialCommunication
+            ${CMAKE_SOURCE_DIR}/src/Windows.Devices.SerialCommunication
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

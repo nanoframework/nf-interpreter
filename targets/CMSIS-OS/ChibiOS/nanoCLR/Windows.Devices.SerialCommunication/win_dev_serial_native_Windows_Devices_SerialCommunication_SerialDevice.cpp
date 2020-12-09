@@ -10,28 +10,28 @@
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
 NF_PAL_UART Uart1_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
 NF_PAL_UART Uart2_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
 NF_PAL_UART Uart3_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
 NF_PAL_UART Uart4_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
 NF_PAL_UART Uart5_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
 NF_PAL_UART Uart6_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
 NF_PAL_UART Uart7_PAL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
 NF_PAL_UART Uart8_PAL;
 #endif
 
@@ -44,49 +44,49 @@ static void TxEnd1(UARTDriver *uartp)
 
     NF_PAL_UART *palUart;
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     if (uartp == &UARTD1)
     {
         palUart = &Uart1_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     if (uartp == &UARTD2)
     {
         palUart = &Uart2_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     if (uartp == &UARTD3)
     {
         palUart = &Uart3_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     if (uartp == &UARTD4)
     {
         palUart = &Uart4_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     if (uartp == &UARTD5)
     {
         palUart = &Uart5_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     if (uartp == &UARTD6)
     {
         palUart = &Uart6_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     if (uartp == &UARTD7)
     {
         palUart = &Uart7_PAL;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     if (uartp == &UARTD8)
     {
         palUart = &Uart8_PAL;
@@ -113,56 +113,56 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     NF_PAL_UART *palUart;
     uint8_t portIndex = 0;
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     if (uartp == &UARTD1)
     {
         palUart = &Uart1_PAL;
         portIndex = 1;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     if (uartp == &UARTD2)
     {
         palUart = &Uart2_PAL;
         portIndex = 2;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     if (uartp == &UARTD3)
     {
         palUart = &Uart3_PAL;
         portIndex = 3;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     if (uartp == &UARTD4)
     {
         palUart = &Uart4_PAL;
         portIndex = 4;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     if (uartp == &UARTD5)
     {
         palUart = &Uart5_PAL;
         portIndex = 5;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     if (uartp == &UARTD6)
     {
         palUart = &Uart6_PAL;
         portIndex = 6;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     if (uartp == &UARTD7)
     {
         palUart = &Uart7_PAL;
         portIndex = 7;
     }
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     if (uartp == &UARTD8)
     {
         palUart = &Uart8_PAL;
@@ -223,7 +223,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
     {
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             UnInit_UART1();
             // stop UART
@@ -232,7 +232,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             UnInit_UART2();
             // stop UART
@@ -241,7 +241,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
         case 3:
             UnInit_UART3();
             // stop UART
@@ -250,7 +250,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
         case 4:
             UnInit_UART4();
             // stop UART
@@ -259,7 +259,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
         case 5:
             UnInit_UART5();
             // stop UART
@@ -268,7 +268,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
         case 6:
             UnInit_UART6();
             // stop UART
@@ -277,7 +277,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         case 7:
             UnInit_UART7();
             // stop UART
@@ -286,7 +286,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             break;
 #endif
 
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
         case 8:
             UnInit_UART8();
             // stop UART
@@ -318,56 +318,56 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Choose the driver for this SerialDevice
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 Init_UART1();
                 Uart1_PAL.UartDriver = &UARTD1;
                 palUart = &Uart1_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 Init_UART2();
                 Uart2_PAL.UartDriver = &UARTD2;
                 palUart = &Uart2_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 Init_UART3();
                 Uart3_PAL.UartDriver = &UARTD3;
                 palUart = &Uart3_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 Init_UART4();
                 Uart4_PAL.UartDriver = &UARTD4;
                 palUart = &Uart4_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 Init_UART5();
                 Uart5_PAL.UartDriver = &UARTD5;
                 palUart = &Uart5_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 Init_UART6();
                 Uart6_PAL.UartDriver = &UARTD6;
                 palUart = &Uart6_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 Init_UART7();
                 Uart7_PAL.UartDriver = &UARTD7;
                 palUart = &Uart7_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 Init_UART8();
                 Uart8_PAL.UartDriver = &UARTD8;
@@ -405,42 +405,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Choose the driver for this SerialDevice
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 palUart = &Uart1_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 palUart = &Uart2_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 palUart = &Uart3_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 palUart = &Uart4_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 palUart = &Uart5_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 palUart = &Uart6_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 palUart = &Uart7_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 palUart = &Uart8_PAL;
                 break;
@@ -481,42 +481,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // get pointer to PAL UART
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 ConfigPins_UART1();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 ConfigPins_UART2();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 ConfigPins_UART3();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 ConfigPins_UART4();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 ConfigPins_UART5();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 ConfigPins_UART6();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 ConfigPins_UART7();
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 ConfigPins_UART8();
                 break;
@@ -564,42 +564,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // get pointer to PAL UART
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 palUart = &Uart1_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 palUart = &Uart2_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 palUart = &Uart3_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 palUart = &Uart4_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 palUart = &Uart5_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 palUart = &Uart6_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 palUart = &Uart7_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 palUart = &Uart8_PAL;
                 break;
@@ -665,42 +665,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     // Choose the driver for this SerialDevice
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
     {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             palUart = &Uart1_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             palUart = &Uart2_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
         case 3:
             palUart = &Uart3_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
         case 4:
             palUart = &Uart4_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
         case 5:
             palUart = &Uart5_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
         case 6:
             palUart = &Uart6_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         case 7:
             palUart = &Uart7_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
         case 8:
             palUart = &Uart8_PAL;
             break;
@@ -843,42 +843,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     // Choose the driver for this SerialDevice
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
     {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             palUart = &Uart1_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             palUart = &Uart2_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
         case 3:
             palUart = &Uart3_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
         case 4:
             palUart = &Uart4_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
         case 5:
             palUart = &Uart5_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
         case 6:
             palUart = &Uart6_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         case 7:
             palUart = &Uart7_PAL;
             break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
         case 8:
             palUart = &Uart8_PAL;
             break;
@@ -1020,42 +1020,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Choose the driver for this SerialDevice
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 palUart = &Uart1_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 palUart = &Uart2_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 palUart = &Uart3_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 palUart = &Uart4_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 palUart = &Uart5_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 palUart = &Uart6_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 palUart = &Uart7_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 palUart = &Uart8_PAL;
                 break;
@@ -1086,42 +1086,42 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Choose the driver for this SerialDevice
         switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
         {
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
                 palUart = &Uart1_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
             case 2:
                 palUart = &Uart2_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
             case 3:
                 palUart = &Uart3_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
             case 4:
                 palUart = &Uart4_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
             case 5:
                 palUart = &Uart5_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
             case 6:
                 palUart = &Uart6_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
             case 7:
                 palUart = &Uart7_PAL;
                 break;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
             case 8:
                 palUart = &Uart8_PAL;
                 break;
@@ -1147,28 +1147,28 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // and init with the terminator
         char deviceSelectorString[40 + 1] = {0};
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         strcat(deviceSelectorString, "COM1,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         strcat(deviceSelectorString, "COM2,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
         strcat(deviceSelectorString, "COM3,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
         strcat(deviceSelectorString, "COM4,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
         strcat(deviceSelectorString, "COM5,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
         strcat(deviceSelectorString, "COM6,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         strcat(deviceSelectorString, "COM7,");
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
         strcat(deviceSelectorString, "COM8,");
 #endif
 

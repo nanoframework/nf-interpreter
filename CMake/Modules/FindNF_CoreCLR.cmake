@@ -6,23 +6,24 @@
 # set include directories for nanoFramework Core, CoreLib and CLR startup
 
 # include directories for Core
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 
 # include directories for CoreLib
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/CorLib)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/CorLib)
 
 # CLR startup
-list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${PROJECT_SOURCE_DIR}/src/CLR/Startup)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 
 # others
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Debugger)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -202,46 +203,46 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
         PATHS 
             
             # Core
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core
 
             # CoreLib
-            ${PROJECT_SOURCE_DIR}/src/CLR/CorLib
+            ${CMAKE_SOURCE_DIR}/src/CLR/CorLib
 
             # CLR startup
-            ${PROJECT_SOURCE_DIR}/src/CLR/Startup
+            ${CMAKE_SOURCE_DIR}/src/CLR/Startup
 
             # Runtime.Native
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Runtime.Native
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native
 
             # Core stubs
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/Hardware
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/InterruptHandler
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/RPC
-            ${PROJECT_SOURCE_DIR}/src/CLR/Core/Serialization
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/Hardware
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/InterruptHandler
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/RPC
+            ${CMAKE_SOURCE_DIR}/src/CLR/Core/Serialization
 
             # CLR stubs
-            ${PROJECT_SOURCE_DIR}/src/CLR/Debugger
-            ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
-            ${PROJECT_SOURCE_DIR}/src/CLR/Messaging
+            ${CMAKE_SOURCE_DIR}/src/CLR/Debugger
+            ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
+            ${CMAKE_SOURCE_DIR}/src/CLR/Messaging
             
             # Helpers
-            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
-            ${PROJECT_SOURCE_DIR}/src/CLR/Helpers/Base64
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
-            ${PROJECT_SOURCE_DIR}/src/HAL
+            ${CMAKE_SOURCE_DIR}/src/HAL
 
             # PAL
-            ${PROJECT_SOURCE_DIR}/src/PAL
-            ${PROJECT_SOURCE_DIR}/src/PAL/BlockStorage
-            ${PROJECT_SOURCE_DIR}/src/PAL/Double
-            ${PROJECT_SOURCE_DIR}/src/PAL/Events
+            ${CMAKE_SOURCE_DIR}/src/PAL
+            ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage
+            ${CMAKE_SOURCE_DIR}/src/PAL/Double
+            ${CMAKE_SOURCE_DIR}/src/PAL/Events
 
             # PAL stubs
-            ${PROJECT_SOURCE_DIR}/src/PAL/AsyncProcCall
-            ${PROJECT_SOURCE_DIR}/src/PAL/COM
-            ${PROJECT_SOURCE_DIR}/src/PAL/Profiler
+            ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM
+            ${CMAKE_SOURCE_DIR}/src/PAL/Profiler
 
             # target
             "${TARGET_BASE_LOCATION}"

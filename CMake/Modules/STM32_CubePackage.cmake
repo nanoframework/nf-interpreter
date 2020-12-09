@@ -19,6 +19,9 @@ macro(ProcessSTM32CubePackage)
         endif()
     endif()
 
+    # store the package name for later use
+    set(TARGET_STM32_CUBE_PACKAGE STM32${TARGET_SERIES_SHORT} CACHE INTERNAL "name for STM32 Cube package")
+
     if(NO_STM32_CUBE_PACKAGE_SOURCE)
         # no STM Cube package source specified, download it from nanoFramework fork
 
@@ -30,22 +33,22 @@ macro(ProcessSTM32CubePackage)
             message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
         endif()
 
-        message(STATUS "STM32 ${TARGET_SERIES_SHORT} Cube package from GitHub repo")
+        message(STATUS "STM32${TARGET_SERIES_SHORT} Cube package from GitHub repo")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/STM32.CubePackage.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download/CMakeLists.txt")
+        configure_file(${CMAKE_SOURCE_DIR}/CMake/STM32.CubePackage.CMakeLists.cmake.in
+                       ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download/CMakeLists.txt)
 
         # setup CMake project for STM32_CubePackage download
         execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download)
 
         # run build on STM32_CubePackage download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/STM32${TARGET_SERIES_SHORT}-CubePackage_Download)
 
         # add STM32_CubePackage as external project
         # need to specify nanoframework as the active branch

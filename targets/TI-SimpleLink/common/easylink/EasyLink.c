@@ -36,9 +36,7 @@
 /***** Includes *****/
 #include "EasyLink.h"
 #include "ti_easylink_config.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stddef.h>
+#include <nanoCLR_Headers.h>
 #include <limits.h>
 
 #ifndef USE_DMM

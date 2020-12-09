@@ -34,6 +34,20 @@ typedef enum __nfpack GpioPinDriveMode
 } GpioPinDriveMode;
 
 // from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
+// TODO replace GpioPinDriveMode with this one when Windows.Devices.Gpio is removed
+// typedef enum __nfpack PinMode
+// {
+//     PinMode_Input = 0,
+//     PinMode_InputPullDown = 1,
+//     PinMode_InputPullUp = 2,
+//     PinMode_Output = 3,
+//     PinMode_OutputOpenDrain = 4,
+//     PinMode_OutputOpenDrainPullUp = 5,
+//     PinMode_OutputOpenSource = 6,
+//     PinMode_OutputOpenSourcePullDown = 7,
+// } PinMode;
+
+// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
 typedef enum __nfpack GpioPinValue
 {
     GpioPinValue_Low = 0,
@@ -57,7 +71,7 @@ enum GPIO_INT_EDGE
 //     GPIO_RESISTOR Resistor;
 // };
 
-typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState);
+typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState, void *pArg);
 
 bool CPU_GPIO_Initialize();
 bool CPU_GPIO_Uninitialize();
@@ -114,6 +128,17 @@ GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN Pin);
 
 //  Set state of output gpio pin
 void CPU_GPIO_SetPinState(GPIO_PIN Pin, GpioPinValue PinState);
+
+//
+// CPU_GPIO_TogglePinState
+//
+// Parameters :-
+//
+// pinNumber
+//   The number of the output pin for which the state is to be toggled.
+// Return Value
+//
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber);
 
 //  Check if pin is already reserved
 //  Returns true if pin is already reserved

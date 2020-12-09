@@ -77,7 +77,7 @@
 static SemaphoreHandle_t s_debugConsoleReadSemaphore;
 static SemaphoreHandle_t s_debugConsoleReadWaitSemaphore;
 
-#elif(DEBUG_CONSOLE_SYNCHRONIZATION_MODE == DDEBUG_CONSOLE_SYNCHRONIZATION_BM)
+#elif(DEBUG_CONSOLE_SYNCHRONIZATION_MODE == DEBUG_CONSOLE_SYNCHRONIZATION_BM)
 
 static volatile uint8_t s_debugConsoleReadWaitSemaphore;
 

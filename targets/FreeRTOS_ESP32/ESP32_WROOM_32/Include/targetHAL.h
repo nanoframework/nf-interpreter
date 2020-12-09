@@ -26,11 +26,6 @@ extern portMUX_TYPE globalLockMutex;
 
 #define LPCSTR const char *
 
-// TODO: Doesn't seem to be defined anywhere, used  clr corlib math
-#define INT32 int32_t
-#define TRUE  true
-#define FALSE false
-
 #if !defined(BUILD_RTM)
 
 #define HARD_BREAKPOINT() HARD_Breakpoint()

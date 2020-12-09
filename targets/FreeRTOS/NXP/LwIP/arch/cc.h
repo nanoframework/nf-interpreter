@@ -45,7 +45,7 @@
 #endif
 
 // Typedefs for the types used by lwip
-#if LWIP_NO_STDINT_H
+#ifdef LWIP_NO_STDINT_H
 typedef unsigned char  u8_t;
 typedef signed   char  s8_t;
 typedef unsigned short u16_t;

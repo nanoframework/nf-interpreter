@@ -6,8 +6,8 @@
 //
 */
 
-__nanoImage_start__     = ORIGIN(flash);
-__nanoImage_size__      = LENGTH(flash);
+__nanoImage_start__     = ORIGIN(flash0);
+__nanoImage_size__      = LENGTH(flash0);
 __nanoImage_end__       = __nanoImage_start__ + __nanoImage_size__;
 __nanoConfig_start__    = ORIGIN(config);
 __nanoConfig_size__     = LENGTH(config);
@@ -27,28 +27,29 @@ SECTIONS
 
     .xtors : ALIGN(4)
     {
-        __init_array_start = .;
+        __init_array_base__ = .;
         KEEP(*(SORT(.init_array.*)))
         KEEP(*(.init_array))
-        __init_array_end = .;
-        __fini_array_start = .;
+        __init_array_end__ = .;
+        __fini_array_base__ = .;
         KEEP(*(.fini_array))
         KEEP(*(SORT(.fini_array.*)))
-        __fini_array_end = .;
+        __fini_array_end__ = .;
     } > XTORS_FLASH AT > XTORS_FLASH_LMA
 
-    .text : ALIGN(16)
+    .text : ALIGN_WITH_INPUT
     {
+        __text_base__ = .;
         *(.text)
         *(.text.*)
         *(.glue_7t)
         *(.glue_7)
         *(.gcc*)
+        __text_end__ = .;
     } > TEXT_FLASH AT > TEXT_FLASH_LMA
 
     .rodata : ALIGN(4)
     {
-        . = ALIGN(4);
         __rodata_base__ = .;
         *(.rodata)
         *(.rodata.*)
@@ -62,8 +63,10 @@ SECTIONS
     } > VARIOUS_FLASH AT > VARIOUS_FLASH_LMA
 
     .ARM.exidx : {
+        __exidx_base__ = .;
         __exidx_start = .;
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+        __exidx_end__ = .;
         __exidx_end = .;
      } > VARIOUS_FLASH AT > VARIOUS_FLASH_LMA
 
