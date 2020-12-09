@@ -277,11 +277,8 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
     Emit(buffer, (int)iBuffer);
 
 #if defined(_WIN32)
-    OutputDebugStringA(buffer);
-
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
-
 #endif
 
 #if !defined(_WIN32)
