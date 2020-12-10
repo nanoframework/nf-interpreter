@@ -1892,7 +1892,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     void Clear();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData = NULL);
 
     //--//
 

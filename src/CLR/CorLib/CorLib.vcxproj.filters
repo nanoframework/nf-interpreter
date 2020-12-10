@@ -65,12 +65,6 @@
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="corlib_native_System_Collections_Queue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corlib_native_System_Collections_Stack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="corlib_native_System_Diagnostics_Debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

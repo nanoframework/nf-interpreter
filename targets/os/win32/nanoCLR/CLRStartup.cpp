@@ -141,28 +141,28 @@ struct Settings
 		// just need to update the path on the package folder as the version changes //
 		// ************************************************************************* //
 		vec.push_back(L"-load");
-		vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.0.0-preview038\\lib\\mscorlib.pe");
+		vec.push_back(L"..\\packages\\nanoFramework.CoreLibrary.1.9.1-preview.6\\lib\\mscorlib.pe");
 		
 		// grab Windows.Devices.Gpio.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
 		// ************************************************************************* //
 		// just need to update the path on the package folder as the version changes //
 		// ************************************************************************* //
-		vec.push_back(L"-load");
-		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Gpio.1.0.0-preview164\\lib\\Windows.Devices.Gpio.pe");
+		//vec.push_back(L"-load");
+		//vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Gpio.1.5.2-preview.12\\lib\\Windows.Devices.Gpio.pe");
 
 		// grab nanoFramework.Runtime.Events.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
 		// ************************************************************************* //
 		// just need to update the path on the package folder as the version changes //
 		// ************************************************************************* //
-		vec.push_back(L"-load");
-		vec.push_back(L"..\\packages\\nanoFramework.Runtime.Events.1.0.0-preview165\\lib\\nanoFramework.Runtime.Events.pe");
+		//vec.push_back(L"-load");
+		//vec.push_back(L"..\\packages\\nanoFramework.Runtime.Events.1.8.2-preview.10\\lib\\nanoFramework.Runtime.Events.pe");
 
 		// grab Windows.Devices.Spi.pe from the packages folder (it has to be there because the NF.TestApplication has just build)
 		// ************************************************************************* //
 		// just need to update the path on the package folder as the version changes //
 		// ************************************************************************* //
-		vec.push_back(L"-load");
-		vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Spi.1.0.0-preview164\\lib\\Windows.Devices.Spi.pe");
+		//vec.push_back(L"-load");
+		//vec.push_back(L"..\\packages\\nanoFramework.Windows.Devices.Spi.1.4.1-preview.17\\lib\\Windows.Devices.Spi.pe");
 
 
         //vec.push_back(L"-load");
