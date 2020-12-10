@@ -800,7 +800,7 @@ struct CLR_RT_HeapBlock
 
     CLR_DataType DataType() const
     {
-       return (CLR_DataType)m_id.type.dataType;
+        return (CLR_DataType)m_id.type.dataType;
     }
 
     CLR_UINT8 DataFlags() const
