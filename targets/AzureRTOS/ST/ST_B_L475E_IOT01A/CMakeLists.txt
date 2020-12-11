@@ -63,8 +63,8 @@ nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 # nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-# nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DSTM32L475xx -DUSE_HAL_DRIVER)
+# nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DSTM32L475xx -DUSE_HAL_DRIVER)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
