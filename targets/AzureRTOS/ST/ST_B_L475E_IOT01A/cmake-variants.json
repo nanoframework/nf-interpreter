@@ -30,7 +30,7 @@
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "RTOS": "AZURERTOS",
           "TARGET_SERIES": "STM32L4xx",
-          "AZURERTOS_BOARD": "ST_B_L475E_IOT01A",
+          "TARGET_BOARD": "ST_B_L475E_IOT01A",
           "RTOS_SOURCE_FOLDER": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "OFF",
           "STM32_CUBE_PACKAGE_SOURCE": "",
