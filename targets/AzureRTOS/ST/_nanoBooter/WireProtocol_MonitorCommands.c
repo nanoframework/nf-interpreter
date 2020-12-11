@@ -4,13 +4,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <cmsis_os.h>
 #include <nanoHAL_v2.h>
-#include <hal.h>
-#include <hal_nf_community.h>
 #include <WireProtocol.h>
 #include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>
+#include <Target_BlockStorage_STM32FlashDriver.h>
+#include <stm32l4xx_hal.h>
 #include <target_board.h>
 
 int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
@@ -23,12 +22,12 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
         case AccessMemory_Write:
             // use FLASH driver to perform write operation
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashWrite(location, lengthInBytes, buffer);
+            return STM32FlashDriver_Write(NULL, location, lengthInBytes, buffer, true);
 
         case AccessMemory_Erase:
             // erase using FLASH driver
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            return stm32FlashErase(location);
+            return STM32FlashDriver_EraseBlock(NULL, location);
 
         case AccessMemory_Check:
             // compute CRC32 of the memory segment
@@ -39,7 +38,7 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
         case AccessMemory_Read:
             // use FLASH driver to perform read operation
             // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            stm32FlashReadBytes(location, lengthInBytes, buffer);
+            STM32FlashDriver_Read(NULL, location, lengthInBytes, buffer);
             return true;
 
         default:
@@ -67,8 +66,7 @@ int Monitor_Reboot(WP_Message *message)
         else
         {
             // RESET CPU to load nanoCLR
-            // because ChibiOS relies on CMSIS it's recommended to make use of the CMSIS API
-            NVIC_SystemReset();
+            HAL_NVIC_SystemReset();
         }
     }
 
