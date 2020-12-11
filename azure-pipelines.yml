@@ -338,7 +338,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'VS2017-Win2016'
+    vmImage: 'windows-2019'
 
   strategy:
     matrix:
@@ -353,6 +353,7 @@ jobs:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
 
   steps:
+  - template: azure-pipelines-templates/build-preparations.yml
   - template: azure-pipelines-templates/nb-gitversioning.yml
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
