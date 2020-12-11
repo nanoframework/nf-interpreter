@@ -199,7 +199,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
 
-        ${AZzureRTOS_SOURCES}
+        # ${AZzureRTOS_SOURCES}
     )
 
     # sources specific to nanoBooter
@@ -211,7 +211,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         target_sources(${TARGET}.elf PUBLIC
             
-            ${TARGET_AZUREROTS_NANOBOOTER_SOURCES}
+            ${TARGET_AZURERTOS_NANOBOOTER_SOURCES}
             ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
            
             # need to add configuration manager to allow get/store configuration blocks
@@ -227,14 +227,14 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
                     ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
 
         # TODO
-        # target_sources(${TARGET}.elf PUBLIC
+        target_sources(${TARGET}.elf PUBLIC
 
-        #     ${TARGET_CHIBIOS_NANOCLR_SOURCES}
-        #     ${CHIBIOS_CONTRIB_SOURCES}
-        #     ${CHIBIOS_FATFS_SOURCES}
-        #     ${CHIBIOS_LWIP_SOURCES}
-        #     ${SPIFFS_SOURCES}
-        # )
+            ${TARGET_AZURERTOS_NANOCLR_SOURCES}
+            #     ${CHIBIOS_FATFS_SOURCES}
+            #     ${CHIBIOS_LWIP_SOURCES}
+            #     ${SPIFFS_SOURCES}
+            # 
+        )
 
     endif()
 
