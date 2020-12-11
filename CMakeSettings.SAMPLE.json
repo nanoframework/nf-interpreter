@@ -179,6 +179,11 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.IO.FileSystem",
+          "value": "ON",
+          "type": "BOOL"
+        },
+        {
           "name": "API_System.Math",
           "value": "True",
           "type": "BOOL"
@@ -441,6 +446,11 @@
         {
           "name": "API_nanoFramework.Devices.OneWire",
           "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.IO.FileSystem",
+          "value": "ON",
           "type": "BOOL"
         },
         {

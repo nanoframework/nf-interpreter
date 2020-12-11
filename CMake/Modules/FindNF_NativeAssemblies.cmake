@@ -16,6 +16,7 @@ option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtim
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
 option(API_nanoFramework.System.Collections     "option for nanoFramework.System.Collections")
 option(API_nanoFramework.System.Text            "option for nanoFramework.System.Text")
+option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
@@ -248,6 +249,12 @@ endmacro()
         # append to list of entries for Interop Assemblies table
         list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
 
+    endif()
+
+    # System.IO.FileSystem
+    if(API_System.IO.FileSystem)
+        ##### API name here (doted name)
+        PerformSettingsForApiEntry("System.IO.FileSystem")
     endif()
 
     # System.Math

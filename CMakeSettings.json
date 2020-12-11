@@ -360,6 +360,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.IO.FileSystem:BOOL",  //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
           "name": "API_System.Math:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
