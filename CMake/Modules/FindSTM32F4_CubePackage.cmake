@@ -4,6 +4,7 @@
 #
 
 # set include directories
+list(APPEND STM32F7_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32F4_CubePackage_Source/Drivers/CMSIS/Device/ST/STM32F4xx/Include)
 list(APPEND STM32F4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32F4_CubePackage_Source/Drivers/STM32F4xx_HAL_Driver/Inc)
 
 # source files

@@ -4,10 +4,11 @@
 #
 
 # set include directories
-list(APPEND STM32L0_CubePackage_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/STM32L0_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Inc")
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L0_CubePackage_Source/Drivers/CMSIS/Device/ST/STM32L0xx/Include)
+list(APPEND STM32L0_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L0_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Inc)
 
 # source files
-set(STM32_CubePackage_SRCS
+set(STM32L0_CubePackage_SRCS
 
     # add HAL files here as required
 )
@@ -17,7 +18,7 @@ foreach(SRC_FILE ${STM32L0_CubePackage_SRCS})
     find_file(STM32L0_CubePackage_SRC_FILE ${SRC_FILE}
         PATHS 
 
-        "${CMAKE_BINARY_DIR}/STM32L0_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Src"
+        ${CMAKE_BINARY_DIR}/STM32L0_CubePackage_Source/Drivers/STM32L0xx_HAL_Driver/Src
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
