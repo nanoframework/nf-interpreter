@@ -1,3 +1,8 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #include "nf_sys_io_filesystem.h"
 
 // clang-format off
