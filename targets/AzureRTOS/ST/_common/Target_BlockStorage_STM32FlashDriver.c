@@ -6,6 +6,8 @@
 #include <stm32l4xx_hal.h>
 #include <Target_BlockStorage_STM32FlashDriver.h>
 
+#define FLASH_ERASED_WORD 0xFFU
+
 // helper functions
 // Gets the page of a given address
 static uint32_t GetPage(uint32_t address)
@@ -111,21 +113,83 @@ bool STM32FlashDriver_Write(
     (void)context;
     (void)readModifyWrite;
 
-    (void)startAddress;
-    (void)numBytes;
-    (void)buffer;
+    bool success = false;
 
-    // return stm32FlashWrite(startAddress, numBytes, buffer);
+    // Unlock the Flash to enable the flash control register access
+    HAL_FLASH_Unlock();
+
+    uint32_t address = startAddress;
+    uint32_t endAddress = startAddress + numBytes;
+    uint32_t programType = FLASH_TYPEPROGRAM_FAST;
+    uint32_t remainingBytes = numBytes;
+    uint32_t data32;
+
+    while (address < endAddress)
+    {
+        if(remainingBytes > 4)
+        {
+            data32 = *(uint32_t*)buffer;
+        }
+        else
+        {
+            data32 = *(uint32_t*)buffer;
+
+            // need to clear the "remaining" bytes
+            for(uint32_t i = 0; i < remainingBytes; i++)
+            {
+                data32 |= 0xFF << 8 * i;
+            }
+
+            // this is the last one
+            programType = FLASH_TYPEPROGRAM_FAST_AND_LAST;
+        }
+        
+
+        success = HAL_FLASH_Program(programType, address, data32) == HAL_OK;
+        if (success)
+        {
+            // increse address
+            address = address + 4;
+            
+            // move buffer pointer
+            (uint32_t*)buffer++;
+
+            // update counter
+            remainingBytes -=4;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    // Lock the Flash to disable the flash control register access
+    HAL_FLASH_Lock();
+
+    return success;
 }
 
 bool STM32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
     (void)context;
 
-    (void)blockAddress;
-    (void)length;
+    volatile uint8_t *cursor = (volatile uint8_t *)blockAddress;
+    volatile uint8_t *endAddress = (volatile uint8_t *)(blockAddress + length);
 
-    // return stm32FlashIsErased(blockAddress, length);
+    // an erased flash address has to read FLASH_ERASED_WORD
+    // OK to check by word (32 bits) because the erase is performed by 'page' whose size is word multiple
+    while (cursor < endAddress)
+    {
+        if (*cursor++ != FLASH_ERASED_WORD)
+        {
+            // found an address with something other than FLASH_ERASED_WORD!!
+            return false;
+        }
+    }
+
+    // reached here so the segment must be erased
+    return true;
+
 }
 
 bool STM32FlashDriver_EraseBlock(void *context, ByteAddress address)
@@ -134,6 +198,7 @@ bool STM32FlashDriver_EraseBlock(void *context, ByteAddress address)
 
     // Unlock the Flash to enable the flash control register access
     HAL_FLASH_Unlock();
+
     uint32_t page = GetPage(address);
     uint32_t bank = GetBank(address);
 
