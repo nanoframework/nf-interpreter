@@ -151,6 +151,7 @@ endif()
  target_include_directories(NanoApiLib PUBLIC
     # directories for nanoFramework libraries
     ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
+    ${CMAKE_CURRENT_SOURCE_DIR}/Include
     ${CMAKE_CURRENT_BINARY_DIR}
     ${NF_CoreCLR_INCLUDE_DIRS}
 
