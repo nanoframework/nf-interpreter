@@ -309,6 +309,14 @@ if(NF_FEATURE_HAS_SDCARD)
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
+    if(RTOS_FREERTOS_ESP32_CHECK)
+        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
+        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
+        
+        # force **REMOVAL** of System.IO.FileSystem API
+        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
+    endif()
+
     message(STATUS "Support for SD Card is included")
 else()
     message(STATUS "Support for SD Card IS NOT included")
@@ -336,6 +344,14 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+
+    if(RTOS_FREERTOS_ESP32_CHECK)
+        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
+        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
+        
+        # force **REMOVAL** of System.IO.FileSystem API
+        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
+    endif()
 
     message(STATUS "Support for USB Mass Storage is included")
 else()
