@@ -5,12 +5,14 @@
 
 # set include directories
 list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/CMSIS/Device/ST/STM32L4xx/Include)
+list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/CMSIS/Core/Include)
 list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/STM32L4xx_HAL_Driver/Inc)
 
 # source files
 set(STM32L4_CubePackage_SRCS
 
     # add HAL files here as required
+    stm32l4xx_hal.c
     
     # SPIFFS
     stm32l4xx_hal_qspi.c
