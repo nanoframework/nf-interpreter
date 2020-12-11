@@ -14,6 +14,7 @@ list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/D
 set(STM32L4_CubePackage_SRCS
 
     # add HAL files here as required
+    stm32l4xx_hal.c
     
     # SPIFFS
     stm32l4xx_hal_qspi.c
