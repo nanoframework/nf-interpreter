@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stdio.h>
+#include <nanoCLR_Headers.h>
 #include <stm32l4xx_hal.h>
 #include <stm32l475e_iot01.h>
 
@@ -12,19 +12,13 @@
 // #include "board_init.h"
 // #include "cmsis_utils.h"
 
-void SystemClock_Config(void);
+void BoardInit(bool initSensors);
 
 //  Application entry point.
 int main(void)
 {
-    HAL_Init();
-
-    SystemClock_Config();
-
-    BSP_LED_Init(LED2);
-
-    // Initialize the board
-    // board_init();
+    // init board WITHOUT sensors
+    BoardInit(false);
 
     // Enter the ThreadX kernel
     //tx_kernel_enter();
