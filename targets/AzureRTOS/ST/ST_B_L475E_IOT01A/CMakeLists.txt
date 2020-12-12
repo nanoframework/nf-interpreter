@@ -5,6 +5,7 @@
 
 include(binutils.common)
 include(binutils.AzureRTOS)
+include(AZURERTOS_${TARGET_SERIES}_GCC_options)
 
 ENABLE_LANGUAGE(ASM)
 
