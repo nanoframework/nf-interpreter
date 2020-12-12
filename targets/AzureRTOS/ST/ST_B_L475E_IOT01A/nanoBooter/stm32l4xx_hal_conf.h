@@ -40,7 +40,7 @@ extern "C"
 #define HAL_PWR_MODULE_ENABLED
 #define HAL_QSPI_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
-// #define HAL_RNG_MODULE_ENABLED
+#define HAL_RNG_MODULE_ENABLED
 #define HAL_RTC_MODULE_ENABLED
 // #define HAL_SAI_MODULE_ENABLED
 // #define HAL_SD_MODULE_ENABLED
@@ -54,47 +54,27 @@ extern "C"
     // #define HAL_USART_MODULE_ENABLED
     // #define HAL_WWDG_MODULE_ENABLED
 
-#if !defined(HSE_VALUE)
 #define HSE_VALUE 8000000U
-#endif
 
-#if !defined(HSE_STARTUP_TIMEOUT)
 #define HSE_STARTUP_TIMEOUT 100U
-#endif
 
-#if !defined(MSI_VALUE)
 #define MSI_VALUE 4000000U
-#endif
 
-#if !defined(HSI_VALUE)
 #define HSI_VALUE 16000000U
-#endif
 
-#if !defined(HSI48_VALUE)
-#define HSI48_VALUE
-#endif
+#define HSI48_VALUE 48000000U
 
-#if !defined(LSI_VALUE)
-#define LSI_VALUE 32000U /*!< LSI Typical Value in Hz*/
-#endif
+#define LSI_VALUE 32000U
 
-#if !defined(LSE_VALUE)
-#define LSE_VALUE 32768U /*!< Value of the External oscillator in Hz*/
-#endif
+#define LSE_VALUE 32768U
 
-#if !defined(LSE_STARTUP_TIMEOUT)
 #define LSE_STARTUP_TIMEOUT 5000U
-#endif
 
-#if !defined(EXTERNAL_SAI1_CLOCK_VALUE)
 #define EXTERNAL_SAI1_CLOCK_VALUE 48000U
-#endif
 
-#if !defined(EXTERNAL_SAI2_CLOCK_VALUE)
 #define EXTERNAL_SAI2_CLOCK_VALUE 48000U
-#endif
 
-    //########################### System Configuration #########################
+//########################### System Configuration #########################
 
 #define VDD_VALUE                3300U
 #define TICK_INT_PRIORITY        0x0FU
