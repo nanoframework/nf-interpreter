@@ -87,8 +87,6 @@ endfunction()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_PACKAGES)
 
-    find_package(AzureRTOS REQUIRED)
-
     # # nF feature: networking
     # if(USE_NETWORKING_OPTION)
     #     find_package(CHIBIOS_LWIP REQUIRED)
@@ -113,9 +111,6 @@ endmacro()
 # Add Azure RTOS platform dependencies to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
-
-    # add dependency from Azure RTOS (this is required to make sure the Azure RTOS repo is downloaded before the build starts)
-    add_dependencies(${TARGET}.elf AzureRTOS)
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
         add_dependencies(${TARGET}.elf ${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
