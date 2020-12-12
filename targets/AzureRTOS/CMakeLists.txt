@@ -62,22 +62,6 @@ if(NO_RTOS_SOURCE_FOLDER)
                     RESULT_VARIABLE result
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/AzureRTOS_Download)
 
-    # add AzureRTOS as external project
-    ExternalProject_Add( 
-        AzureRTOS
-        PREFIX AzureRTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/AzureRTOS_Source
-        GIT_REPOSITORY https://github.com/azure-rtos/threadx.git
-        GIT_TAG ${RTOS_VERSION}  # target specified branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        # Disable all other steps
-        INSTALL_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )
-
 else()
     # AzureRTOS source was specified
 
@@ -98,20 +82,6 @@ else()
     else()
         message(FATAL_ERROR "Couldn't find AzureRTOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
-
-    # add AzureRTOS as external project
-    ExternalProject_Add(
-        AzureRTOS
-        PREFIX AzureRTOS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/AzureRTOS_Source
-        # Disable all other steps
-        INSTALL_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )
-
-    # get source dir for AzureRTOS CMake project
-    ExternalProject_Get_Property(AzureRTOS SOURCE_DIR)
 
 endif()
 
@@ -198,3 +168,8 @@ else()
     endif()
 
 endif()
+
+# Azure RTOS settings and inclusion of build system
+set(THREADX_ARCH "cortex_m4")
+set(THREADX_TOOLCHAIN "gnu")
+add_subdirectory(${CMAKE_BINARY_DIR}/AzureRTOS_Source AzureSource)
