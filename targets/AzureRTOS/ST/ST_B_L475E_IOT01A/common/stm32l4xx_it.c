@@ -5,23 +5,23 @@
 //
 
 #include <stm32l4xx_hal.h>
-#include "stm32l4xx_it.h"
+#include <stm32l475e_iot01.h>
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
-void NMI_Handler(void)
-{
-}
+// void NMI_Handler(void)
+// {
+// }
 
-void HardFault_Handler(void)
-{
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
-}
+// void HardFault_Handler(void)
+// {
+//   /* Go to infinite loop when Hard Fault exception occurs */
+//   while (1)
+//   {
+//   }
+// }
 
 void MemManage_Handler(void)
 {
@@ -47,20 +47,36 @@ void UsageFault_Handler(void)
   }
 }
 
-void DebugMon_Handler(void)
+// void DebugMon_Handler(void)
+// {
+// }
+
+//////////////////////////////////
+// defined in ThreadX low level //
+//void PendSV_Handler(void)     //
+//////////////////////////////////
+
+//////////////////////////////////
+// defined in ThreadX low level //
+// void SysTick_Handler(void)   //
+//////////////////////////////////
+
+void EXTI4_IRQHandler(void)
 {
+  HAL_GPIO_EXTI_IRQHandler(NFC_GPIO_GPO_PIN);
 }
 
-void PendSV_Handler(void)
+void EXTI15_10_IRQHandler(void)
 {
-}
-
-void SysTick_Handler(void)
-{
-  HAL_IncTick();
+  HAL_GPIO_EXTI_IRQHandler(USER_BUTTON_PIN);
 }
 
 void EXTI1_IRQHandler(void)
 {
- //HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
 }
+
+// void TIM1_CC_IRQHandler(void)
+// {
+//   HAL_TIM_IRQHandler(&TimCCHandle);
+// }
