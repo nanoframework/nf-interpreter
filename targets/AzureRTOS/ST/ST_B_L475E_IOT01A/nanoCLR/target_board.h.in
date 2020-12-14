@@ -11,8 +11,8 @@
 #ifndef _TARGET_BOARD_NANOCLR_H_
 #define _TARGET_BOARD_NANOCLR_H_
 
-//#include <target_common.h>
+#include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @AZURERTOS_BOARD@"
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TARGET_NAME@"
 
 #endif /* _TARGET_BOARD_NANOCLR_H_ */
