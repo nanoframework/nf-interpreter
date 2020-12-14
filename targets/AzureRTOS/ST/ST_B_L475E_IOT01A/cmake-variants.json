@@ -38,6 +38,7 @@
           "NF_FEATURE_DEBUGGER": "ON",
           "NF_FEATURE_RTC": "OFF",
           "NF_FEATURE_HAS_SDCARD": "OFF",
+          "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
           "NF_BUILD_RTM": "OFF",
           "API_System.Math": "OFF",
           "API_Windows.Devices.Gpio": "OFF",
