@@ -119,7 +119,9 @@
    enabled. If the application does not use notify callbacks, they may be disabled to reduce
    code size and improve performance.  */
 
+/*
 #define TX_DISABLE_NOTIFY_CALLBACKS
+*/
 
 
 /* Determine if the tx_thread_resume and tx_thread_suspend services should have their internal 
