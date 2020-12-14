@@ -11,7 +11,7 @@
 #ifndef _TARGET_COMMON_H_
 #define _TARGET_COMMON_H_
 
-//#include <target_os.h>
+#include <target_os.h>
 //#include <target_lwipopts.h>
 //#include <nf_lwipopts_sntp.h>
 
