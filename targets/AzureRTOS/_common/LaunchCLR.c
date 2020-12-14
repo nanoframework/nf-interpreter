@@ -87,7 +87,7 @@ bool CheckValidCLRImage(uint32_t address)
     opCodeAddress -= 1;
 
     uint32_t opCode = *((uint32_t*)opCodeAddress);
-    if((uint16_t)opCode == 0xE002)
+    if((uint16_t)opCode == 0xF8DF)
     {
         // check, there seems to be a valid CLR image
         return true;
