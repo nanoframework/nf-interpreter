@@ -138,7 +138,7 @@ void BoardInit(bool initSensors)
     // board specifics inits
     BSP_LED_Init(LED2);
 
-    BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
+    BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
 
     WProtocolUart.Instance = USART1;
     WProtocolUart.Init.BaudRate = 921600;
