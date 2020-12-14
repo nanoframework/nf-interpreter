@@ -7,26 +7,25 @@
 /* Highest address of the user mode stack */
 _estack = 0x20018000;    /* end of RAM */
 
-/* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x400;      /* required amount of heap  */
-_Min_Stack_Size = 0x800; /* required amount of stack */
-
 /* Set the RAM segment used end for threadx */
 __RAM_segment_used_end__ = 0; 
 
 /* Specify the memory areas */
 MEMORY
 {
-  flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 34K      /* space reserved for nanoBooter */
-  deployment (rx)  : ORIGIN = 0x00000000, LENGTH = 0        /* space reserved for application deployment */
-  config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k       /* space reserved for configuration block */
+  flash0     (rx)  : ORIGIN = 0x08008800, LENGTH = 186K         /* space reserved for nanoCLR */
+  deployment (rx)  : ORIGIN = 0x08036800, LENGTH = 1M-186K-34K  /* space reserved for application deployment */
+  config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k           /* space reserved for configuration block */
   ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
-  ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K
-  bootclpbrd (wx)  : ORIGIN = 0x20000000, LENGTH = 48       /* boot clipboard area */
+  ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K          /* managed heap */
+  bootclpbrd (wx)  : ORIGIN = 0x20000000, LENGTH = 48           /* boot clipboard area */
 }
 
 /* RAM region to be used for the boot clipboard.*/
 REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
+
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram2);
 
 /* Define output sections */
 SECTIONS
@@ -145,10 +144,28 @@ SECTIONS
     . = ALIGN(8);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
+    __heap_base__ = .;
+    . += __crt_heap_size__;
+    . = ALIGN(8);
+    __heap_end__ = .;
+    __main_stack_base__ = .;
+    . += __main_stack_size__;
+    . = ALIGN(8);
+    __main_stack_end__ = .;
     . = ALIGN(8);
   } >ram0
+
+  /* nanoFramework CLR managed heap section at the specified RAM section.*/
+  .clr_managed_heap (NOLOAD) :
+  {
+      . = ALIGN(8);
+      __clr_managed_heap_base__ = .;
+      PROVIDE(HeapBegin = .);
+      . = ORIGIN(CLR_MANAGED_HEAP_RAM) + LENGTH(CLR_MANAGED_HEAP_RAM);
+      . = ALIGN(8);
+      __clr_managed_heap_end__ = .;
+      PROVIDE(HeapEnd = .);
+  } > CLR_MANAGED_HEAP_RAM
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
