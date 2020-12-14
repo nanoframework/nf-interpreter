@@ -6,11 +6,13 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
+#include <tx_api.h>
+
 #include <target_board.h>
 #include <nanoHAL_v2.h>
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs) osDelay(milliSecs);
+#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs/10);
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
