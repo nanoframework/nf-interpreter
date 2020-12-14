@@ -19,9 +19,14 @@
 // LSE as RTC clock
 #define RTC_SYNCH_PREDIV 0x00FF
 
+#ifdef HAL_RTC_MODULE_ENABLED
 RTC_HandleTypeDef RtcHandle;
+#endif
+
+CRC_HandleTypeDef CrcHandle;
 UART_HandleTypeDef WProtocolUart;
 
+#ifdef HAL_RTC_MODULE_ENABLED
 void System_IniRtc(void)
 {
     RtcHandle.Instance = RTC;
@@ -40,6 +45,7 @@ void System_IniRtc(void)
         }
     }
 }
+#endif // HAL_RTC_MODULE_ENABLED
 
 void SystemClock_Config(void)
 {
@@ -163,4 +169,13 @@ void BoardInit(bool initSensors)
         BSP_TSENSOR_Init();
         BSP_PSENSOR_Init();
     }
+
+    // config CRC32 unit
+    CrcHandle.Instance = CRC;
+    CrcHandle.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+    CrcHandle.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+    CrcHandle.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+    CrcHandle.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+
+    HAL_CRC_Init(&CrcHandle);
 }
