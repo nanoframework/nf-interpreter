@@ -20,11 +20,13 @@ void BoardInit(bool initSensors);
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 // byte pool configuration and definitions
-#define DEMO_BYTE_POOL_SIZE     4096
-TX_BYTE_POOL            byte_pool_0;
-uint8_t memory_area[DEMO_BYTE_POOL_SIZE];
+#define DEFAULT_BYTE_POOL_SIZE 4096
+TX_BYTE_POOL byte_pool_0;
+uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
 
 // threads definitions and configurations
+
+// receiver thread
 #define RECEIVER_THREAD_STACK_SIZE 2048
 #define RECEIVER_THREAD_PRIORITY   4
 
@@ -58,7 +60,7 @@ void tx_application_define(void *first_unused_memory)
     systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
 
     // Create a byte memory pool from which to allocate the thread stacks.
-    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEMO_BYTE_POOL_SIZE);
+    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
@@ -119,7 +121,6 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
-
 }
 
 //  Application entry point.
@@ -130,7 +131,7 @@ int main(void)
 
     // init boot clipboard
     InitBootClipboard();
-    
+
     // report successfull nanoBooter execution
     ReportSuccessfullNanoBooter();
 
