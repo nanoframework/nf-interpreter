@@ -16,49 +16,39 @@ extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 /*            Cortex-M4 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
-// void NMI_Handler(void)
-// {
-// }
+///////////////////////////////////
+// defined in hard fault handler //
+// void NMI_Handler(void)        //
+///////////////////////////////////
 
-// void HardFault_Handler(void)
-// {
-//   /* Go to infinite loop when Hard Fault exception occurs */
-//   while (1)
-//   {
-//   }
-// }
+///////////////////////////////////
+// defined in hard fault handler //
+// void HardFault_Handler(void)  //
+///////////////////////////////////
 
-void MemManage_Handler(void)
-{
-    /* Go to infinite loop when Memory Manage exception occurs */
-    while (1)
-    {
-    }
-}
+///////////////////////////////////
+// defined in hard fault handler //
+// void MemManage_Handler(void)  //
+///////////////////////////////////
 
-void BusFault_Handler(void)
-{
-    /* Go to infinite loop when Bus Fault exception occurs */
-    while (1)
-    {
-    }
-}
+///////////////////////////////////
+// defined in hard fault handler //
+// void BusFault_Handler(void)   //
+///////////////////////////////////
 
-void UsageFault_Handler(void)
-{
-    /* Go to infinite loop when Usage Fault exception occurs */
-    while (1)
-    {
-    }
-}
+///////////////////////////////////
+// defined in hard fault handler //
+// void UsageFault_Handler(void) //
+///////////////////////////////////
 
-// void DebugMon_Handler(void)
-// {
-// }
+///////////////////////////////////
+// defined in hard fault handler //
+// void DebugMon_Handler(void)   //
+///////////////////////////////////
 
 //////////////////////////////////
 // defined in ThreadX low level //
-// void PendSV_Handler(void)     //
+// void PendSV_Handler(void)    //
 //////////////////////////////////
 
 //////////////////////////////////
