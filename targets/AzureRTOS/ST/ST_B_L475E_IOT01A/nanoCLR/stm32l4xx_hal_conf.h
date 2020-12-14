@@ -8,7 +8,8 @@
 #define __STM32L4xx_HAL_CONF_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C"
+{
 #endif
 
 #define HAL_MODULE_ENABLED
@@ -17,7 +18,7 @@
 // #define HAL_CAN_LEGACY_MODULE_ENABLED
 // #define HAL_COMP_MODULE_ENABLED
 #define HAL_CORTEX_MODULE_ENABLED
-// #define HAL_CRC_MODULE_ENABLED
+#define HAL_CRC_MODULE_ENABLED
 // #define HAL_CRYP_MODULE_ENABLED
 // #define HAL_DAC_MODULE_ENABLED
 // #define HAL_DFSDM_MODULE_ENABLED
@@ -29,7 +30,7 @@
 // #define HAL_NOR_MODULE_ENABLED
 // #define HAL_SRAM_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
-// #define HAL_I2C_MODULE_ENABLED
+#define HAL_I2C_MODULE_ENABLED
 // #define HAL_IRDA_MODULE_ENABLED
 // #define HAL_IWDG_MODULE_ENABLED
 // #define HAL_LCD_MODULE_ENABLED
@@ -37,10 +38,10 @@
 // #define HAL_OPAMP_MODULE_ENABLED
 // #define HAL_PCD_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
-// #define HAL_QSPI_MODULE_ENABLED
+#define HAL_QSPI_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
 // #define HAL_RNG_MODULE_ENABLED
-// #define HAL_RTC_MODULE_ENABLED
+#define HAL_RTC_MODULE_ENABLED
 // #define HAL_SAI_MODULE_ENABLED
 // #define HAL_SD_MODULE_ENABLED
 // #define HAL_SMARTCARD_MODULE_ENABLED
@@ -50,58 +51,37 @@
 // #define HAL_TIM_MODULE_ENABLED
 // #define HAL_TSC_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
-// #define HAL_USART_MODULE_ENABLED
-// #define HAL_WWDG_MODULE_ENABLED
+    // #define HAL_USART_MODULE_ENABLED
+    // #define HAL_WWDG_MODULE_ENABLED
 
-#if !defined  (HSE_VALUE)
-  #define HSE_VALUE    8000000U /*!< Value of the External oscillator in Hz
-#endif
+#define HSE_VALUE 8000000U
 
-#if !defined  (HSE_STARTUP_TIMEOUT)
-  #define HSE_STARTUP_TIMEOUT    100U   /*!< Time out for HSE start up, in ms
-#endif
+#define HSE_STARTUP_TIMEOUT 100U
 
-#if !defined  (MSI_VALUE)
-  #define MSI_VALUE    4000000U /*!< Value of the Internal oscillator in Hz*/
-#endif 
+#define MSI_VALUE 4000000U
 
-#if !defined  (HSI_VALUE)
-  #define HSI_VALUE    16000000U /*!< Value of the Internal oscillator in Hz*/
-#endif 
+#define HSI_VALUE 16000000U
 
-#if !defined  (HSI48_VALUE) 
-  #define HSI48_VALUE   48000000U             /*!< Value of the Internal High Speed oscillator for USB FS/SDMMC/RNG in Hz.
-                                               The real value my vary depending on manufacturing process variations.*/
-#endif
+#define HSI48_VALUE 48000000U
 
-#if !defined  (LSI_VALUE) 
-  #define LSI_VALUE  32000U                 /*!< LSI Typical Value in Hz*/
-#endif 
+#define LSI_VALUE 32000U
 
-#if !defined  (LSE_VALUE)
-  #define LSE_VALUE    32768U /*!< Value of the External oscillator in Hz*/
-#endif 
+#define LSE_VALUE 32768U
 
-#if !defined  (LSE_STARTUP_TIMEOUT)
-  #define LSE_STARTUP_TIMEOUT    5000U  /*!< Time out for LSE start up, in ms
-#endif 
+#define LSE_STARTUP_TIMEOUT 5000U
 
-#if !defined  (EXTERNAL_SAI1_CLOCK_VALUE)
-  #define EXTERNAL_SAI1_CLOCK_VALUE    48000U /*!< Value of the SAI1 External clock source in Hz*/
-#endif 
+#define EXTERNAL_SAI1_CLOCK_VALUE 48000U
 
-#if !defined  (EXTERNAL_SAI2_CLOCK_VALUE)
-  #define EXTERNAL_SAI2_CLOCK_VALUE    48000U /*!< Value of the SAI2 External clock source in Hz*/
-#endif
+#define EXTERNAL_SAI2_CLOCK_VALUE 48000U
 
 //########################### System Configuration #########################
- 
-#define  VDD_VALUE                    3300U /*!< Value of VDD in mv
-#define  TICK_INT_PRIORITY            0x0FU /*!< tick interrupt priority
-#define  USE_RTOS                     0U
-#define  PREFETCH_ENABLE              0U
-#define  INSTRUCTION_CACHE_ENABLE     1U
-#define  DATA_CACHE_ENABLE            1U
+
+#define VDD_VALUE                3300U
+#define TICK_INT_PRIORITY        0x0FU
+#define USE_RTOS                 0U
+#define PREFETCH_ENABLE          0U
+#define INSTRUCTION_CACHE_ENABLE 1U
+#define DATA_CACHE_ENABLE        1U
 
 // ########################## Assert Selection ##############################
 // #define USE_FULL_ASSERT               1U
@@ -269,7 +249,7 @@
   #include "stm32l4xx_hal_hcd.h"
 #endif // HAL_HCD_MODULE_ENABLED
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
   #define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
   void assert_failed(uint8_t *file, uint32_t line);
 #else
