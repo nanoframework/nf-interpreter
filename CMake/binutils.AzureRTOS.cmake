@@ -233,6 +233,10 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     endif()
 
+    target_link_libraries(${TARGET}.elf
+        azrtos::threadx
+    )
+
     # TODO
     # # mbed TLS requires a config file
     # if(USE_SECURITY_MBEDTLS_OPTION)
