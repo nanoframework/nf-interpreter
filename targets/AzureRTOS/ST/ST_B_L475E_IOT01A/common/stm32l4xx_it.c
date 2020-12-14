@@ -94,8 +94,3 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
         tx_event_flags_set(&wpUartEvent, UartHandle->RxXferSize - UartHandle->RxXferCount, TX_OR);
     }
 }
-
-// void TIM1_CC_IRQHandler(void)
-// {
-//   HAL_TIM_IRQHandler(&TimCCHandle);
-// }
