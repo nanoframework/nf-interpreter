@@ -193,8 +193,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         ${TARGET_AZURERTOS_COMMON_SOURCES}
 
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
-
-        # ${AZzureRTOS_SOURCES}
     )
 
     # sources specific to nanoBooter
