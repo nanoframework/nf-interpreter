@@ -7,6 +7,7 @@
 #include <stm32l4xx_hal.h>
 #include <tx_api.h>
 
+#ifdef HAL_RTC_MODULE_ENABLED
 void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
 {
     (void)hrtc;
@@ -47,6 +48,26 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef *hrtc)
     __HAL_RCC_RTC_DISABLE();
 }
 
+#endif // HAL_RTC_MODULE_ENABLED
+
+void HAL_CRC_MspInit(CRC_HandleTypeDef *hcrc)
+{
+    (void)hcrc;
+    /* CRC Peripheral clock enable */
+    __HAL_RCC_CRC_CLK_ENABLE();
+}
+
+void HAL_CRC_MspDeInit(CRC_HandleTypeDef *hcrc)
+{
+    (void)hcrc;
+    /* Enable CRC reset state */
+    __HAL_RCC_CRC_FORCE_RESET();
+
+    /* Release CRC from reset state */
+    __HAL_RCC_CRC_RELEASE_RESET();
+}
+
+#ifdef HAL_RNG_MODULE_ENABLED
 void HAL_RNG_MspInit(RNG_HandleTypeDef *hrng)
 {
     if (hrng->Instance == RNG)
@@ -64,6 +85,8 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef *hrng)
         __HAL_RCC_RNG_CLK_DISABLE();
     }
 }
+
+#endif // HAL_RNG_MODULE_ENABLED
 
 uint32_t HAL_GetTick(void)
 {
