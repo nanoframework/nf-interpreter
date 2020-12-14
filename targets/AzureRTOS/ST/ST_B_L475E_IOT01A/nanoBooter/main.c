@@ -10,6 +10,8 @@
 #include <cmsis_utils.h>
 #include <tx_api.h>
 
+#include <LaunchCLR.h>
+#include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
@@ -56,6 +58,17 @@ void tx_application_define(void *first_unused_memory)
 
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEMO_BYTE_POOL_SIZE);
+
+    // initialize block storage list and devices
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
+
+    // initialize configuration manager
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it here to have access to network configuration blocks
+    ConfigurationManager_Initialize();
 
     // Create blink thread
     uint16_t status = tx_thread_create(
@@ -105,9 +118,7 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
-    
-    // report successfull nanoBooter execution
-    ReportSuccessfullNanoBooter();
+
 }
 
 //  Application entry point.
@@ -118,17 +129,29 @@ int main(void)
 
     // init boot clipboard
     InitBootClipboard();
+    
+    // report successfull nanoBooter execution
+    ReportSuccessfullNanoBooter();
 
-    // initialize block storage list and devices
-    // in CLR this is called in nanoHAL_Initialize()
-    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    BlockStorageList_Initialize();
-    BlockStorage_AddDevices();
+    // the following IF is not mandatory, it's just providing a way for a user to 'force'
+    // the board to remain in nanoBooter and not launching nanoCLR
 
-    // initialize configuration manager
-    // in CLR this is called in nanoHAL_Initialize()
-    // for nanoBooter we have to init it here to have access to network configuration blocks
-    ConfigurationManager_Initialize();
+    // check if there is a request to remain on nanoBooter
+    if (!IsToRemainInBooter())
+    {
+        // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
+        if (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
+        {
+            // check for valid CLR image
+            // we are checking for a valid image right after the configuration block
+            if (CheckValidCLRImage((uint32_t)&__nanoConfig_end__))
+            {
+                // there seems to be a valid CLR image
+                // launch nanoCLR
+                LaunchCLR((uint32_t)&__nanoConfig_end__);
+            }
+        }
+    }
 
     // Enter the ThreadX kernel
     tx_kernel_enter();
