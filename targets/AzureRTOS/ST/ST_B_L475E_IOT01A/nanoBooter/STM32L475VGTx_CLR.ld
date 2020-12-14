@@ -1,35 +1,9 @@
 /*
-*****************************************************************************
-**
-
-**  File        : LinkerScript.ld
-**
-**  Abstract    : Linker script for STM32L475VGTx Device with
-**                1024KByte FLASH, 96KByte RAM
-**
-**                Set heap size, stack size and stack location according
-**                to application requirements.
-**
-**                Set memory bank area and size if external memory is used.
-**
-**  Target      : STMicroelectronics STM32
-**
-**
-**  Distribution: The file is distributed as is, without any warranty
-**                of any kind.
-**
-**  (c)Copyright Ac6.
-**  You may use this file as-is or modify it according to the needs of your
-**  project. Distribution of this file (unmodified or modified) is not
-**  permitted. Ac6 permit registered System Workbench for MCU users the
-**  rights to distribute the assembled, compiled & linked contents of this
-**  file as part of an application binary file, provided that it is built
-**  using the System Workbench for MCU toolchain.
-**
-*****************************************************************************
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) STMicroelectronics. All rights reserved.
+// See LICENSE file in the project root for full license information.
 */
 
-/* Entry Point */
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
@@ -45,23 +19,29 @@ __RAM_segment_used_end__ = 0;
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 96K
-RAM2 (xrw)      : ORIGIN = 0x10000000, LENGTH = 32K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 1024K
+flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 18K      /* space reserved for nanoBooter */
+deployment (rx)  : ORIGIN = 0x00000000, LENGTH = 0        /* space reserved for application deployment */
+config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k       /* space reserved for configuration block */
+ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
+ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K
+bootclpbrd (wx)  : ORIGIN = 0x20000000, LENGTH = 48       /* boot clipboard area */
 }
+
+/* RAM region to be used for the boot clipboard.*/
+REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
 /* Define output sections */
 SECTIONS
 {
-  /* The startup code goes first into FLASH */
+  /* The startup code goes first into flash0 */
   .isr_vector :
   {
     . = ALIGN(8);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(8);
-  } >FLASH
+  } >flash0
 
-  /* The program code and other data goes into FLASH */
+  /* The program code and other data goes into flash0 */
   .text :
   {
     . = ALIGN(8);
@@ -76,30 +56,30 @@ SECTIONS
 
     . = ALIGN(8);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
+  } >flash0
 
-  /* Constant data goes into FLASH */
+  /* Constant data goes into flash0 */
   .rodata :
   {
     . = ALIGN(8);
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(8);
-  } >FLASH
+  } >flash0
 
   .ARM.extab   : 
   { 
   . = ALIGN(8);
   *(.ARM.extab* .gnu.linkonce.armextab.*)
   . = ALIGN(8);
-  } >FLASH
+  } >flash0
   .ARM : {
 	. = ALIGN(8);
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
 	. = ALIGN(8);
-  } >FLASH
+  } >flash0
 
   .preinit_array     :
   {
@@ -108,7 +88,7 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
 	. = ALIGN(8);
-  } >FLASH
+  } >flash0
   
   .init_array :
   {
@@ -118,7 +98,7 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
 	. = ALIGN(8);
-  } >FLASH
+  } >flash0
   .fini_array :
   {
 	. = ALIGN(8);
@@ -127,7 +107,7 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
 	. = ALIGN(8);
-  } >FLASH
+  } >flash0
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
@@ -142,7 +122,7 @@ SECTIONS
 
     . = ALIGN(8);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
+  } >ram0 AT> flash0
 
   
   /* Uninitialized data section */
@@ -159,9 +139,9 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAM
+  } >ram0
 
-  /* User_heap_stack section, used to check that there is enough RAM left */
+  /* User_heap_stack section, used to check that there is enough ram0 left */
   ._user_heap_stack :
   {
     . = ALIGN(8);
@@ -170,7 +150,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAM
+  } >ram0
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
@@ -182,3 +162,9 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld
