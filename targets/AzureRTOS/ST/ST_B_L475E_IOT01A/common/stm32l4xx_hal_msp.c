@@ -5,6 +5,7 @@
 //
 
 #include <stm32l4xx_hal.h>
+#include <tx_api.h>
 
 // void HAL_TIM_OC_MspInit(TIM_HandleTypeDef *htim)
 // { 
@@ -72,4 +73,9 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef* hrng)
     /* Peripheral clock disable */
     __HAL_RCC_RNG_CLK_DISABLE();
   }
+}
+
+uint32_t HAL_GetTick(void)
+{
+  return tx_time_get() * 10;
 }
