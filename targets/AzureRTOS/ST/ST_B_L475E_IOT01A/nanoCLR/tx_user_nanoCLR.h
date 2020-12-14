@@ -94,9 +94,7 @@
    enabled. If the application does not use preemption-threshold, it may be disabled to reduce
    code size and improve performance.  */
 
-/*
 #define TX_DISABLE_PREEMPTION_THRESHOLD
-*/
 
 /* Determine if global ThreadX variables should be cleared. If the compiler startup code clears 
    the .bss section prior to ThreadX running, the define can be used to eliminate unnecessary
@@ -105,7 +103,6 @@
 /*
 #define TX_DISABLE_REDUNDANT_CLEARING
 */
-
 /* Determine if no timer processing is required. This option will help eliminate the timer 
    processing when not needed. The user will also have to comment out the call to 
    tx_timer_interrupt, which is typically made from assembly language in 
