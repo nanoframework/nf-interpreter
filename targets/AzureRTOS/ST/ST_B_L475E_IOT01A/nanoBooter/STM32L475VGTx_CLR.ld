@@ -19,12 +19,12 @@ __RAM_segment_used_end__ = 0;
 /* Specify the memory areas */
 MEMORY
 {
-flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 18K      /* space reserved for nanoBooter */
-deployment (rx)  : ORIGIN = 0x00000000, LENGTH = 0        /* space reserved for application deployment */
-config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k       /* space reserved for configuration block */
-ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
-ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K
-bootclpbrd (wx)  : ORIGIN = 0x20000000, LENGTH = 48       /* boot clipboard area */
+  flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 18K      /* space reserved for nanoBooter */
+  deployment (rx)  : ORIGIN = 0x00000000, LENGTH = 0        /* space reserved for application deployment */
+  config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k       /* space reserved for configuration block */
+  ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
+  ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K
+  bootclpbrd (wx)  : ORIGIN = 0x20000000, LENGTH = 48       /* boot clipboard area */
 }
 
 /* RAM region to be used for the boot clipboard.*/
