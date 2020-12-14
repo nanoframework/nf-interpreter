@@ -34,7 +34,7 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 // blink thread
 #define BLINK_THREAD_STACK_SIZE 1024
-#define BLINK_THREAD_PRIORITY   4
+#define BLINK_THREAD_PRIORITY   5
 
 TX_THREAD blinkThread;
 uint32_t blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
@@ -53,6 +53,7 @@ void BlinkThread_entry(uint32_t parameter)
 void tx_application_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
+    uint16_t status;
 
     systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
 
@@ -71,7 +72,7 @@ void tx_application_define(void *first_unused_memory)
     ConfigurationManager_Initialize();
 
     // Create blink thread
-    uint16_t status = tx_thread_create(
+    status = tx_thread_create(
         &blinkThread,
         "Blink Thread",
         BlinkThread_entry,
