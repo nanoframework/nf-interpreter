@@ -172,13 +172,6 @@ endif()
 # Azure RTOS settings and inclusion of build system
 set(THREADX_ARCH "cortex_m4")
 set(THREADX_TOOLCHAIN "gnu")
-
-if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
-    set(TX_USER_FILE "${TARGET_BASE_LOCATION}/nanoBooter/tx_user.h" CACHE STRING "Enable TX user configuration")
-elseif(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
-    set(TX_USER_FILE "${TARGET_BASE_LOCATION}/nanoCLR/tx_user.h" CACHE STRING "Enable TX user configuration")
-elseif()
-    message(FATAL_ERROR "\n\n'${TARGET}' is not a valid target value. Check the build system.\n\n")
-endif()
+set(TX_USER_FILE "${TARGET_BASE_LOCATION}/tx_user.h" CACHE STRING "Enable TX user configuration")
 
 add_subdirectory(${CMAKE_BINARY_DIR}/AzureRTOS_Source AzureSource)
