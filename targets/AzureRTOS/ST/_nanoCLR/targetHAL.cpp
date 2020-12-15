@@ -3,6 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <stm32l4xx_hal.h>
+
 #include <nanoPAL.h>
 #include <nanoHAL_Time.h>
 #include <nanoHAL_Types.h>
@@ -74,8 +76,7 @@ void nanoHAL_Initialize()
 
     Events_Initialize();
 
-    // TODO
-    //CPU_GPIO_Initialize();
+    CPU_GPIO_Initialize();
 
 #if (HAL_USE_CAN == TRUE)
 
@@ -270,8 +271,7 @@ void nanoHAL_Uninitialize()
 
 #endif
 
-    // TODO
-    //CPU_GPIO_Uninitialize();
+    CPU_GPIO_Uninitialize();
 
     Events_Uninitialize();
 
