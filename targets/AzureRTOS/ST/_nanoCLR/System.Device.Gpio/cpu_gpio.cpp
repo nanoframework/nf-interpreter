@@ -14,6 +14,16 @@
 #define GPIO_MAX_PIN     256
 #define TOTAL_GPIO_PORTS ((GPIO_MAX_PIN + 15) / 16)
 
+// TODO
+//  move this to sys_dev_gpio_native_System_Device_Gpio_GpioPin when Windows.Devices.Gpio is removed
+void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void *pArg)
+{
+    (void)pArg;
+
+    // if handle registered then post a managed event with the current pin reading
+    PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
+}
+
 // Double linkedlist to hold the state of each Input pin
 struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 {
