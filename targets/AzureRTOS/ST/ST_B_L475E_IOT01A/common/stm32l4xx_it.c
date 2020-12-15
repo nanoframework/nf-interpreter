@@ -56,6 +56,26 @@ extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 // void SysTick_Handler(void)   //
 //////////////////////////////////
 
+void EXTI0_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(NFC_GPIO_GPO_PIN);
+}
+
+void EXTI1_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+}
+
+void EXTI2_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+}
+
+void EXTI3_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+}
+
 void EXTI4_IRQHandler(void)
 {
     HAL_GPIO_EXTI_IRQHandler(NFC_GPIO_GPO_PIN);
@@ -64,11 +84,6 @@ void EXTI4_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
     HAL_GPIO_EXTI_IRQHandler(USER_BUTTON_PIN);
-}
-
-void EXTI1_IRQHandler(void)
-{
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
 }
 
 void USART1_IRQHandler(void)
