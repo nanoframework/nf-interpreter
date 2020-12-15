@@ -1,0 +1,77 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: Cache@2
+    inputs:
+      key: '3-3-1 | esp331ToolsKey'
+      restoreKeys: esp331ToolchainKey
+      path: $(Agent.TempDirectory)\ESP32_Tools
+      cacheHitVar: ESP_TOOLS_CACHE_RESTORED
+    displayName: Cache ESP32 tools
+
+  - task: PowerShell@2
+    displayName: Download & install xtensa ESP32 toolchain
+    inputs:
+      targetType: 'filePath'
+      filePath: 'install-scripts\install-esp32-toolchain.ps1'
+      failOnStderr: true
+
+  - task: ExtractFiles@1
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Extracting xtensa ESP32 toolchain
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+
+  - task: PowerShell@2
+    displayName: Downloading & install ESP32 pre-compiled libs
+    inputs:
+      targetType: 'filePath'
+      filePath: 'install-scripts\install-esp32-libs.ps1'
+      failOnStderr: true
+
+  - task: ExtractFiles@1
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Installing ESP32 pre-compiled libs
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs'
+      cleanDestinationFolder: false
+  
+  - task: PowerShell@2
+    displayName: Downloading & install ESP32 IDF
+    inputs:
+      targetType: 'filePath'
+      filePath: 'install-scripts\install-esp32-idf.ps1'
+      failOnStderr: true
+
+  - task: ExtractFiles@1
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Installing Espressif IDF
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
+      cleanDestinationFolder: false
+
+  # Use Python Version 3.7 and add it to path
+  - task: UsePythonVersion@0
+    displayName: Set Python to v3.7
+    inputs:
+      versionSpec: '3.7' 
+      addToPath: true 
+
+  # in this one have to call Python with full path otherwise it can fail
+  - task: PowerShell@2
+    displayName: Installing python pyserial
+    inputs:
+        targetType: 'inline'
+        script: python -m pip install pyserial
+        # the below settings are required as the script is installing an outdated version of pyserial
+        errorActionPreference: 'silentlyContinue' 
+        failOnStderr: false
+        ignoreLASTEXITCODE: false
+
+  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+    displayName: Tweak PATH to reach cmd
