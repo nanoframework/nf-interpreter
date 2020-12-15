@@ -17,7 +17,7 @@
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
 
-void BoardInit(bool initSensors);
+void BoardInit(bool initSensors, bool initGpios);
 
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 extern CLR_SETTINGS clrSettings;
@@ -45,24 +45,6 @@ TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ClrStartupThread_entry(uint32_t parameter);
 
-// blink thread
-#define BLINK_THREAD_STACK_SIZE 1024
-#define BLINK_THREAD_PRIORITY   10
-
-TX_THREAD blinkThread;
-uint32_t blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
-
-void BlinkThread_entry(uint32_t parameter)
-{
-    (void)parameter;
-
-    while (1)
-    {
-        BSP_LED_Toggle(LED2);
-        tx_thread_sleep(100);
-    }
-}
-
 void tx_application_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
@@ -83,26 +65,6 @@ void tx_application_define(void *first_unused_memory)
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
-
-    // Create blink thread
-    status = tx_thread_create(
-        &blinkThread,
-        "Blink Thread",
-        BlinkThread_entry,
-        0,
-        blinkThreadStack,
-        BLINK_THREAD_STACK_SIZE,
-        BLINK_THREAD_PRIORITY,
-        BLINK_THREAD_PRIORITY,
-        TX_NO_TIME_SLICE,
-        TX_AUTO_START);
-
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
 
     // Create receiver thread
     status = tx_thread_create(
@@ -164,8 +126,8 @@ void tx_application_define(void *first_unused_memory)
 //  Application entry point.
 int main(void)
 {
-    // init board WITH sensors
-    BoardInit(true);
+    // init board WITH sensors and WITHOUT GPIOs
+    BoardInit(false, false);
 
     // init boot clipboard
     InitBootClipboard();
