@@ -58,19 +58,7 @@ static const CommandHandlerLookup c_Lookup_Reply[] = {
     /*******************************************************************************************************************************************************************/
 };
 
-int WP_App_ProcessHeader(WP_Message *message)
-{
-    // check for reception buffer overflow
-    if (message->m_header.m_size > sizeof(receptionBuffer))
-    {
-        return false;
-    }
-
-    message->m_payload = receptionBuffer;
-    return true;
-}
-
-int WP_App_ProcessPayload(WP_Message *message)
+int Messaging_ProcessPayload(WP_Message* message)
 {
     // Prevent processing duplicate packets
     if (message->m_header.m_seq == lastPacketSequence)
