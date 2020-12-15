@@ -1,0 +1,20 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  buildDirectory: '$(Build.SourcesDirectory)\build'
+
+steps:
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: ${{ parameters.buildDirectory }}
+      Contents: |
+        *.bin
+        *.hex
+        *.s19
+        *.dfu
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    displayName: Collecting deployable artifacts
+    
