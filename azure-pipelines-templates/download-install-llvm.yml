@@ -1,0 +1,26 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PowerShell@2
+    displayName: Downloading LLVM 10.0
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    inputs:
+        targetType: 'inline'
+        script: |
+          $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/LLVM-10.0.0-win64.exe"
+          $output = "$(Agent.TempDirectory)\LLVM-10.0.0-win64.exe"
+          (New-Object Net.WebClient).DownloadFile($url, $output)
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+
+  - task: ExtractFiles@1
+    displayName: Install LLVM 10
+    condition: eq(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-10.0.0-win64.exe' 
+      destinationFolder: '$(Agent.TempDirectory)\llvm'
+  
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin"
+    displayName: Add LLVM to PATH
+    condition: eq(variables['Build.Reason'], 'PullRequest')
