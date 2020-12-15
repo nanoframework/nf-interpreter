@@ -12,7 +12,7 @@
 #include <nanoHAL_v2.h>
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs/10);
+#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs / 10);
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
@@ -65,23 +65,9 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
-extern int my_lock_counter;
-
 #define GLOBAL_LOCK()                                                                                                  \
-    {                                                                                                                  \
-        if (port_is_isr_context())                                                                                     \
-            chSysLockFromISR();                                                                                        \
-        else                                                                                                           \
-            chSysLock();
-
-#define GLOBAL_UNLOCK()                                                                                                \
-    if (port_is_isr_context())                                                                                         \
-        chSysUnlockFromISR();                                                                                          \
-    else                                                                                                               \
-        chSysUnlock();                                                                                                 \
-    }
+    TX_INTERRUPT_SAVE_AREA                                                                                             \
+    TX_DISABLE
+#define GLOBAL_UNLOCK() TX_RESTORE
 
 #endif //_TARGET_HAL_H_
-
-//#define GLOBAL_LOCK()              chSysLock();
-//#define GLOBAL_UNLOCK();           chSysUnlock();
