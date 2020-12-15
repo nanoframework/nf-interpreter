@@ -116,6 +116,8 @@ macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
         add_dependencies(${TARGET}.elf ${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
     endif()
 
+    add_dependencies(${TARGET}.elf azrtos::threadx)
+
     # specific to nanoCRL
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
@@ -145,7 +147,6 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
     target_include_directories(${TARGET}.elf PUBLIC
 
-        ${AzureRTOS_INCLUDE_DIRS}
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
         ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
         # ${CHIBIOS_LWIP_INCLUDE_DIRS}
@@ -187,8 +188,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
-    
-        ${TARGET_CMSIS_COMMON_SOURCES}
         
         ${TARGET_AZURERTOS_COMMON_SOURCES}
 
