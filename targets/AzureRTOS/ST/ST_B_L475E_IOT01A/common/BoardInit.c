@@ -132,7 +132,7 @@ void WProtocol_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart)
     HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 
-void BoardInit(bool initSensors)
+void BoardInit(bool initSensors, bool initGpios)
 {
     // regular ST HAL inits
     HAL_Init();
@@ -141,10 +141,13 @@ void BoardInit(bool initSensors)
 
     // System_IniRtc();
 
-    // board specifics inits
-    BSP_LED_Init(LED2);
+    // only init GPIOs if required
+    if(initGpios)
+    {
+        BSP_LED_Init(LED2);
 
-    BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
+        BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
+    }
 
     WProtocolUart.Instance = USART1;
     WProtocolUart.Init.BaudRate = 921600;
