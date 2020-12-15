@@ -29,9 +29,9 @@ bool Events_Initialize_Platform()
                &boolEventsTimer,
                (char *)"BoolEvents Timer",
                local_Events_SetBoolTimer_Callback,
-               0,
-               0,
+               NULL,
                1,
+               0,
                TX_NO_ACTIVATE) == TX_SUCCESS;
 }
 
