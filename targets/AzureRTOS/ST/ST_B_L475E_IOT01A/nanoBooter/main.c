@@ -15,7 +15,7 @@
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
 
-void BoardInit(bool initSensors);
+void BoardInit(bool initSensors, bool initGpios);
 
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 
@@ -126,8 +126,8 @@ void tx_application_define(void *first_unused_memory)
 //  Application entry point.
 int main(void)
 {
-    // init board WITHOUT sensors
-    BoardInit(false);
+    // init board WITHOUT sensors but WITH GPIOs
+    BoardInit(false, true);
 
     // init boot clipboard
     InitBootClipboard();
