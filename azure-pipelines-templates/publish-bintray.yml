@@ -1,0 +1,118 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# To publish builds of targets in branches other than develop
+# set 'ForceUpload' variable to true on target matrix
+
+steps:
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_AssemblyVersion).zip'
+      replaceExistingArchive: true
+    # skip task on PR build and when on branch other than master or nf community targets
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    displayName: Zip binary files (release)
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      Contents: |
+        *.zip
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    displayName: Collecting deployable artifacts (release)
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight).zip'
+      replaceExistingArchive: true
+    # skip task on PR build and when on branch other than develop, master or release
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Zip binary files (preview)
+
+  - task: CopyFiles@1
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      Contents: |
+        *.zip
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Collecting deployable artifacts (preview)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      ArtifactName: $(TargetPublishName)
+      ArtifactType: Container
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    displayName: Publish deployables artifacts
+
+  - task: PowerShell@2
+    inputs:
+        targetType: 'inline'
+        script: |
+
+            $repoName = $env:Build_Repository_Name
+            $branchName = $env:Build_SourceBranchName
+
+            Write-Host "repo name is: $repoName"
+            Write-Host "branch name is: $branchName"
+
+            if( $env:Build_Repository_Name -like "*nf-Community-Targets" )
+            {
+              # this is a build for a community target
+              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-community-targets"
+              # set publishing package name
+              Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_AssemblyVersion)"
+              # set version
+              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
+            }
+            else
+            {
+              if( $env:Build_SourceBranchName -match "^develop*" -or 
+                  $env:Build_SourceBranchName -match "^release*" )
+              {
+                # this a dev or release branch, publish to Bintray dev repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
+                # set package name
+                Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight)"
+                # set version
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight)"
+              }
+              else 
+              {
+                # this master branch, publish to Bintray stable repo
+                Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
+                # set package name
+                Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_AssemblyVersion)"
+                # set version
+                Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
+              }
+            }
+        errorActionPreference: 'stop'
+        failOnStderr: 'true'
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Set Bintray repo path
+
+  - task: cURLUploader@2
+    inputs:
+      files: '$(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip'
+      authType: 'userAndPass'
+      username: 'nfbot'
+      password: '$(BinTrayKey)'
+      url: 'https://api.bintray.com/'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(TargetPublishName)/$(PACKAGE_VERSION)/$(PUBLISHING_PACKAGE_NAME).zip;publish=1'
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Upload artifact to Bintray
