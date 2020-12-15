@@ -386,7 +386,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 }
 
 // wrapper function for CLR_Messaging::ProcessPayload(
-extern "C" int CLR_Messaging_ProcessPayload(WP_Message *msg)
+extern "C" int Messaging_ProcessPayload(WP_Message *msg)
 {
     if (g_CLR_DBG_Debugger == NULL)
     {
