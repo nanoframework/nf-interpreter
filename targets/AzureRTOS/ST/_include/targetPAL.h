@@ -9,9 +9,12 @@
 #include <stm32l4xx_hal.h>
 
 // Contains available GPIO ports for the current board
-extern GPIO_TypeDef* gpioPort[];
+extern GPIO_TypeDef* GpioPorts[];
 
-//Gets the GPIO according to a pin number
-#define GPIO_PORT(pin) (gpioPort[pin/16])
+//Gets the GPIO port according to a pin number
+#define GPIO_PORT(pin) (GpioPorts[pin/16])
+
+//Gets the GPIO port according to a pin number
+#define GPIO_PIN(pin) (pin - (pin%16)*16)
 
 #endif // _TARGETPAL_H_
