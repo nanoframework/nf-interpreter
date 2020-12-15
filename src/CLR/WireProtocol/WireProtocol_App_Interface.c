@@ -6,9 +6,9 @@
 #include <nanoWeak.h>
 #include "WireProtocol_App_Interface.h"
 
-extern int Messaging_ProcessPayload(WP_Message* message);
+extern int Messaging_ProcessPayload(WP_Message *message);
 
-int WP_App_ProcessHeader(WP_Message* message)
+int WP_App_ProcessHeader(WP_Message *message)
 {
     // check for reception buffer overflow
     if (message->m_header.m_size > sizeof(receptionBuffer))
@@ -20,7 +20,7 @@ int WP_App_ProcessHeader(WP_Message* message)
     return true;
 }
 
-int WP_App_ProcessPayload(WP_Message* message)
+int WP_App_ProcessPayload(WP_Message *message)
 {
     return Messaging_ProcessPayload(message);
 }
