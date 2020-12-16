@@ -483,7 +483,7 @@ jobs:
     matrix:
       ST_B_L475E_IOT01A:
         TargetBoard: ST_B_L475E_IOT01A
-        BuildOptions: -DTARGET_SERIES=STM32L4xx -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DRTOS=AZURERTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=OFF -DNF_FEATURE_HAS_SDCARD=OFF -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Device.Gpio=OFF -DAPI_System.Net=OFF -DAPI_Windows.Storage=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.Devicess.I2c=OFF -DAPI_nanoFramework.ResourceManager=OFF -DAPI_nanoFramework.System.Collections=OFF -DAPI_nanoFramework.System.Text=OFF
+        BuildOptions: -DTARGET_SERIES=STM32L4xx -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DRTOS=AZURERTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=OFF -DNF_FEATURE_HAS_SDCARD=OFF -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Device.Gpio=ON -DAPI_System.Net=OFF -DAPI_Windows.Storage=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.Devicess.I2c=OFF -DAPI_nanoFramework.ResourceManager=OFF -DAPI_nanoFramework.System.Collections=OFF -DAPI_nanoFramework.System.Text=OFF
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
