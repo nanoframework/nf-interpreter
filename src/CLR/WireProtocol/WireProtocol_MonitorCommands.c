@@ -288,14 +288,7 @@ int Monitor_FlashSectorMap(WP_Message *message)
 {
     if ((message->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
-        struct Flash_BlockRegionInfo
-        {
-            unsigned int StartAddress;
-            unsigned int NumBlocks;
-            unsigned int BytesPerBlock;
-            unsigned int Usage;
-
-        } *pData = NULL;
+        Flash_BlockRegionInfo *pData = NULL;
 
         unsigned int rangeCount = 0;
         unsigned int rangeIndex = 0;
@@ -312,14 +305,18 @@ int Monitor_FlashSectorMap(WP_Message *message)
 
             if (cnt == 1)
             {
-                pData =
-                    (struct Flash_BlockRegionInfo *)platform_malloc(rangeCount * sizeof(struct Flash_BlockRegionInfo));
+                uint32_t allocationSize = rangeCount * sizeof(struct Flash_BlockRegionInfo);
+
+                pData = (Flash_BlockRegionInfo *)platform_malloc(allocationSize);
 
                 if (pData == NULL)
                 {
                     WP_ReplyToCommand(message, true, false, NULL, 0);
                     return false;
                 }
+
+                // clear memory
+                memset(pData, 0, allocationSize);
             }
 
             DeviceBlockInfo *deviceInfo = BlockStorageDevice_GetDeviceInfo(device);
@@ -341,7 +338,10 @@ int Monitor_FlashSectorMap(WP_Message *message)
                             BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[j].StartBlock);
                         pData[rangeIndex].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[j]);
                         pData[rangeIndex].BytesPerBlock = pRegion->BytesPerBlock;
-                        pData[rangeIndex].Usage = pRegion->BlockRanges[j].RangeType & BlockRange_USAGE_MASK;
+                        pData[rangeIndex].Flags = pRegion->BlockRanges[j].RangeType & BlockRange_USAGE_MASK;
+                        // add the media attributes to the flags
+                        pData[rangeIndex].Flags |= pRegion->Attributes & BlockRegionAttributes_MASK;
+
                         rangeIndex++;
                     }
                 }
