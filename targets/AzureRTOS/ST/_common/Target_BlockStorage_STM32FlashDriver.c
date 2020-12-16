@@ -8,6 +8,14 @@
 
 #define FLASH_ERASED_WORD 0xFFU
 
+// copied from stm32l4xx_hal_flash.c
+#if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||                    \
+    defined(STM32L4R9xx) || defined(STM32L4S5xx) || defined(STM32L4S7xx) || defined(STM32L4S9xx)
+#define FLASH_NB_DOUBLE_WORDS_IN_ROW 64
+#else
+#define FLASH_NB_DOUBLE_WORDS_IN_ROW 32
+#endif
+
 // helper functions
 // Gets the page of a given address
 static uint32_t GetPage(uint32_t address)
@@ -113,52 +121,92 @@ bool STM32FlashDriver_Write(
     (void)context;
     (void)readModifyWrite;
 
+    uint32_t address = startAddress;
+    uint32_t endAddress = startAddress + numBytes;
+    uint32_t remainingBytes = numBytes;
     bool success = false;
+    bool useFastProgram;
+    uint32_t programType;
+    uint64_t data, temp;
 
     // Unlock the Flash to enable the flash control register access
     HAL_FLASH_Unlock();
 
-    uint32_t address = startAddress;
-    uint32_t endAddress = startAddress + numBytes;
-    uint32_t programType = FLASH_TYPEPROGRAM_FAST;
-    uint32_t remainingBytes = numBytes;
-    uint32_t data32;
+    // TODO
+    // fast program isn't working, using _just_ double word programming for now
+    // check if data is multiple of 32*64bits (32*4bytes) = 128 bytes
+    // if ((endAddress - address) % (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW) == 0)
+    // {
+    //     useFastProgram = true;
+    //     programType = FLASH_TYPEPROGRAM_FAST;
+    // }
+    // else
+    {
+        programType = FLASH_TYPEPROGRAM_DOUBLEWORD;
+        useFastProgram = false;
+    }
 
     while (address < endAddress)
     {
-        if(remainingBytes > 4)
+        if (useFastProgram)
         {
-            data32 = *(uint32_t*)buffer;
+            data = (uint64_t)((uint32_t)buffer);
+
+            if (remainingBytes == (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW))
+            {
+
+                // this is the last one
+                programType = FLASH_TYPEPROGRAM_FAST_AND_LAST;
+            }
+        }
+        else if (remainingBytes > sizeof(uint64_t))
+        {
+            data = *(uint64_t *)buffer;
         }
         else
         {
-            data32 = *(uint32_t*)buffer;
+            temp = *(uint64_t *)buffer;
+
+            // "move" data to start of position
+            data = temp << sizeof(uint8_t) * (sizeof(uint64_t) - remainingBytes);
 
             // need to clear the "remaining" bytes
-            for(uint32_t i = 0; i < remainingBytes; i++)
-            {
-                data32 |= 0xFF << 8 * i;
-            }
-
-            // this is the last one
-            programType = FLASH_TYPEPROGRAM_FAST_AND_LAST;
+            data |= 0xFFFFFFFFFFFFFFFF;
         }
-        
 
-        success = HAL_FLASH_Program(programType, address, data32) == HAL_OK;
+        success = (HAL_FLASH_Program(programType, address, data) == HAL_OK);
         if (success)
         {
-            // increse address
-            address = address + 4;
-            
-            // move buffer pointer
-            (uint32_t*)buffer++;
+            if (programType == FLASH_TYPEPROGRAM_FAST_AND_LAST || programType == FLASH_TYPEPROGRAM_FAST)
+            {
+                // increase address
+                address += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
 
-            // update counter
-            remainingBytes -=4;
+                // move buffer pointer
+                buffer += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
+
+                // update counter
+                remainingBytes -= (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
+            }
+            else
+            {
+                // increase address
+                address += sizeof(uint64_t);
+
+                // move buffer pointer
+                buffer += sizeof(uint64_t);
+
+                // update counter
+                remainingBytes -= sizeof(uint64_t);
+            }
         }
         else
         {
+#ifdef DEBUG
+            // get error
+            volatile uint32_t errorCode = HAL_FLASH_GetError();
+            (void)errorCode;
+#endif
             break;
         }
     }
@@ -189,7 +237,6 @@ bool STM32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, uns
 
     // reached here so the segment must be erased
     return true;
-
 }
 
 bool STM32FlashDriver_EraseBlock(void *context, ByteAddress address)
@@ -209,7 +256,17 @@ bool STM32FlashDriver_EraseBlock(void *context, ByteAddress address)
     EraseInitStruct.NbPages = 1;
 
     uint32_t error = 0;
-    bool success = (HAL_FLASHEx_Erase(&EraseInitStruct, &error) != HAL_OK);
+    bool success = (HAL_FLASHEx_Erase(&EraseInitStruct, &error) == HAL_OK);
+
+#ifdef DEBUG
+    if (!success)
+    {
+        // DEBUG ONLY
+        // get error
+        volatile uint32_t errorCode = HAL_FLASH_GetError();
+        (void)errorCode;
+    }
+#endif
 
     // Lock the Flash to disable the flash control register access
     HAL_FLASH_Lock();
