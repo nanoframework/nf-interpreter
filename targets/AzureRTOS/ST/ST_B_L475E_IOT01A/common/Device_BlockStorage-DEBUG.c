@@ -30,8 +30,8 @@ const BlockRange BlockRange1[] = {
 
 const BlockRegionInfo BlockRegions[] = {
     {
-        // no attributes for this region
-        (0),
+        // STM32L4 flash requires 64bits width programming
+        (BlockRegionAttribute_ProgramWidthIs64bits),
 
         // start address for block region
         0x08000000,
