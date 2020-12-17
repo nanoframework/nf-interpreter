@@ -82,6 +82,29 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
 endfunction()
 
+# check valid frequency and if configuration file exists 
+function(nf_check_radio_frequency)
+
+    if(NOT DEFINED RADIO_FREQUENCY)
+        message(FATAL_ERROR "Radio frequncy NOT defined. Please set build option 'RADIO_FREQUENCY'. Valid values are 868 and 915.")
+    endif()
+
+    find_file(
+        SYS-CONFIG-FILE 
+        *_${RADIO_FREQUENCY}.syscfg
+        
+        PATHS 
+            ${TARGET_BASE_LOCATION}
+        )
+
+    # check if file was found
+    if(SYS-CONFIG-FILE-NOTFOUND)
+        message(FATAL_ERROR "Couldn't find a sysconfig file for radio frequency ${RADIO_FREQUENCY}. Valid values are 868 and 915.")
+    endif()
+
+endfunction()
+
+
 # Add packages that are common to TI SimpleLink platform builds
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_PACKAGES)
@@ -171,13 +194,29 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
 
+    set(TI_DEVICE_FAMILIES_WITH_RADIO_FREQUENCY "CC13x2_26x2")
+
+    list(FIND TI_DEVICE_FAMILIES_WITH_RADIO_FREQUENCY ${TARGET_SERIES} TI_DEVICE_FAMILY_NAME_INDEX)
+
+    if(TI_DEVICE_FAMILY_NAME_INDEX EQUAL -1)
+        # this target series doesn't have/support/care radio frequency option
+        # compose sys config file name 
+        set(SYS_CONFIG_FILENAME ${TARGET_BOARD}.syscfg)
+    else()
+        # check for valid frequency setting
+        nf_check_radio_frequency()
+
+        # compose sys config file name 
+        set(SYS_CONFIG_FILENAME ${TARGET_BOARD}_${RADIO_FREQUENCY}.syscfg)
+    endif()
+
     # copy Sys Config file to build directory
     add_custom_command(
         OUTPUT
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+        ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_BOARD}.syscfg
-                ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+                ${CMAKE_CURRENT_SOURCE_DIR}/${SYS_CONFIG_FILENAME}
+                ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
         COMMENT "Copy TI-RTOS configuration file to build directory" 
     )
 
@@ -190,9 +229,9 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
         ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
         DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_BOARD}.syscfg
+        ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
 
-        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${TARGET_BOARD}.syscfg
+        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generate configuration files" 
     )
