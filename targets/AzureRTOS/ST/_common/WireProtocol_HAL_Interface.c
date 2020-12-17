@@ -16,6 +16,7 @@ TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 WP_Message inboundMessage;
 uint32_t receivedBytes;
+uint32_t transmittedBytes;
 
 int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
@@ -28,17 +29,17 @@ int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     if (*size)
     {
         // read from serial stream with 250ms timeout
-        if (HAL_UART_Receive_IT(&WProtocolUart, ptr, *size) == HAL_OK)
+        if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, *size) == HAL_OK)
         {
             // wait for event
-            tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &receivedBytes, 25);
-
-            // abort any ongoing UART operation
-            HAL_UART_Abort(&WProtocolUart);
+            tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &receivedBytes, 100);
 
             ptr += receivedBytes;
             *size -= receivedBytes;
         }
+
+        // abort any ongoing UART operation
+        HAL_UART_DMAStop(&WProtocolUart);
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
 
@@ -59,18 +60,28 @@ int WP_TransmitMessage(WP_Message *message)
         message->m_header.m_size);
 
     // write header with 250ms timeout
-    if (HAL_UART_Transmit(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header), 250) != HAL_OK)
+    if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
     {
         return false;
     }
+    
+    // wait for event
+    tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &transmittedBytes, 25);
+
+    HAL_UART_DMAStop(&WProtocolUart);
 
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
-        if (HAL_UART_Transmit(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size, 500) != HAL_OK)
+        if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
         {
             return false;
         }
+
+        // wait for event
+        tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &transmittedBytes, 25);
+
+        HAL_UART_DMAStop(&WProtocolUart);
     }
 
     return true;
