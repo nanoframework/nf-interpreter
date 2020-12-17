@@ -31,7 +31,7 @@ uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
 
 // receiver thread
 #define RECEIVER_THREAD_STACK_SIZE 2048
-#define RECEIVER_THREAD_PRIORITY   4
+#define RECEIVER_THREAD_PRIORITY   6
 
 TX_THREAD receiverThread;
 uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
