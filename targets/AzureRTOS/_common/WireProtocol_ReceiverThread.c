@@ -25,7 +25,7 @@ void ReceiverThread_entry(uint32_t parameter)
         WP_Message_Process(&inboundMessage);
 
         // pass control to the OS
-        tx_thread_sleep(100);
+        tx_thread_sleep(10);
     }
 
     // this function never returns
