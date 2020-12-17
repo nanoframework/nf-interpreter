@@ -31,6 +31,7 @@
           "RTOS": "TI_SIMPLELINK",
           "TARGET_SERIES": "CC13x2_26x2",
           "TARGET_BOARD": "TI_CC1352R1_LAUNCHXL",
+          "RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915",
           "TI_SL_CC13x2_26x2_SDK_SOURCE": "",
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
