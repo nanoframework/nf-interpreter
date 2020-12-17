@@ -25,6 +25,7 @@ RTC_HandleTypeDef RtcHandle;
 
 CRC_HandleTypeDef CrcHandle;
 UART_HandleTypeDef WProtocolUart;
+DMA_HandleTypeDef s_DMAHandle;
 
 #ifdef HAL_RTC_MODULE_ENABLED
 void System_IniRtc(void)
@@ -100,6 +101,9 @@ void SystemClock_Config(void)
 
 void WProtocol_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart)
 {
+    static DMA_HandleTypeDef hdma_tx;
+    static DMA_HandleTypeDef hdma_rx;
+
     GPIO_InitTypeDef gpio_init_structure;
 
     /* Enable GPIO clock */
@@ -108,6 +112,9 @@ void WProtocol_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart)
 
     /* Enable USART clock */
     DISCOVERY_COMx_CLK_ENABLE(COM);
+
+    /* Enable DMA clock */
+    __HAL_RCC_DMA1_CLK_ENABLE();
 
     /* Configure USART Tx as alternate function */
     gpio_init_structure.Pin = DISCOVERY_COM1_TX_PIN;
@@ -127,6 +134,47 @@ void WProtocol_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart)
     huart->Instance = DISCOVERY_COM1;
     HAL_UART_Init(huart);
 
+    // Configure the DMA handler for Transmission process
+    hdma_tx.Instance = DMA1_Channel4;
+    hdma_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_tx.Init.Mode = DMA_NORMAL;
+    hdma_tx.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_tx.Init.Request = DMA_REQUEST_2;
+
+    HAL_DMA_Init(&hdma_tx);
+
+    /* Associate the initialized DMA handle to the UART handle */
+    __HAL_LINKDMA(huart, hdmatx, hdma_tx);
+
+    /* Configure the DMA handler for reception process */
+    hdma_rx.Instance = DMA1_Channel5;
+    hdma_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_rx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_rx.Init.Mode = DMA_NORMAL;
+    hdma_rx.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_rx.Init.Request = DMA_REQUEST_2;
+
+    HAL_DMA_Init(&hdma_rx);
+
+    /* Associate the initialized DMA handle to the the UART handle */
+    __HAL_LINKDMA(huart, hdmarx, hdma_rx);
+
+    /*##-4- Configure the NVIC for DMA #########################################*/
+    /* NVIC configuration for DMA transfer complete interrupt (USART1_TX) */
+    HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 1);
+    HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+
+    /* NVIC configuration for DMA transfer complete interrupt (USART1_RX) */
+    HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
     /* NVIC for USART */
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
@@ -142,7 +190,7 @@ void BoardInit(bool initSensors, bool initGpios)
     // System_IniRtc();
 
     // only init GPIOs if required
-    if(initGpios)
+    if (initGpios)
     {
         BSP_LED_Init(LED2);
 
