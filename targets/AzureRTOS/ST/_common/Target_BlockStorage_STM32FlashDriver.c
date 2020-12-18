@@ -6,7 +6,7 @@
 #include <stm32l4xx_hal.h>
 #include <Target_BlockStorage_STM32FlashDriver.h>
 
-#define FLASH_ERASED_WORD 0xFFU
+#define FLASH_ERASED_WORD ((uint32_t)0xFFFFFFFF)
 
 // copied from stm32l4xx_hal_flash.c
 #if defined(STM32L4P5xx) || defined(STM32L4Q5xx) || defined(STM32L4R5xx) || defined(STM32L4R7xx) ||                    \
@@ -221,8 +221,8 @@ bool STM32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, uns
 {
     (void)context;
 
-    volatile uint8_t *cursor = (volatile uint8_t *)blockAddress;
-    volatile uint8_t *endAddress = (volatile uint8_t *)(blockAddress + length);
+    uint32_t *cursor = (uint32_t *)blockAddress;
+    uint32_t *endAddress = (uint32_t *)(blockAddress + length);
 
     // an erased flash address has to read FLASH_ERASED_WORD
     // OK to check by word (32 bits) because the erase is performed by 'page' whose size is word multiple
