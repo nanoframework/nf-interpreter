@@ -159,7 +159,7 @@ bool STM32FlashDriver_Write(
                 programType = FLASH_TYPEPROGRAM_FAST_AND_LAST;
             }
         }
-        else if (remainingBytes > sizeof(uint64_t))
+        else if (remainingBytes >= sizeof(uint64_t))
         {
             data = *(uint64_t *)buffer;
         }
