@@ -493,7 +493,9 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 
     GPIO_TypeDef *port = GPIO_PORT(pinNumber);
     uint32_t pin = GPIO_PIN(pinNumber);
+    
     GPIO_InitTypeDef gpio_init_structure;
+    gpio_init_structure.Pin = pin;
 
     // deinit pin
     HAL_GPIO_DeInit(port, pin);
@@ -564,7 +566,7 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
             return false;
     }
 
-    HAL_GPIO_GetConfig(port, &gpio_init_structure);
+    HAL_GPIO_SetConfig(port, &gpio_init_structure);
 
     return true;
 }
