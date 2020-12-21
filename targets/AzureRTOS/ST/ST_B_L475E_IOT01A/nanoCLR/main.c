@@ -39,7 +39,7 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 // CLR thread
 #define CLR_THREAD_STACK_SIZE 4096
-#define CLR_THREAD_PRIORITY   6
+#define CLR_THREAD_PRIORITY   8
 
 TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
