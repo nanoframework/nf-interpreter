@@ -1240,7 +1240,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
 
     // updating the debugging execution conditions requires sometime to propagate
     // make sure we allow enough time for that to happen
-    OS_DELAY(100);
+    OS_DELAY(200);
 
     if ((msg->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
     {
