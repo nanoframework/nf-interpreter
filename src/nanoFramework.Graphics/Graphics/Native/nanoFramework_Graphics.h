@@ -5,7 +5,7 @@
 
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -34,7 +34,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEvent
     static const int FIELD___globalIndex = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEventArgs
@@ -45,7 +44,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEventArgs
     static const int FIELD___flags = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonEventArgs
@@ -55,7 +53,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonEventArgs
     static const int FIELD___isRepeat = 9;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_FocusChangedEventArgs
@@ -64,7 +61,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_FocusChangedEventAr
     static const int FIELD__NewFocus = 8;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEventArgs
@@ -72,7 +68,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEventArgs
     static const int FIELD__InternalEvent = 7;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchGestureEventArgs
@@ -84,7 +79,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchGestureEventArgs
     static const int FIELD__Arguments = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEventArgs
@@ -92,7 +86,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEventArgs
     static const int FIELD__Touches = 7;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_Dispatcher
@@ -116,7 +109,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_Dispatcher
     static const int FIELD___mediaContext = 14;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherFrame
@@ -126,7 +118,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherFrame
     static const int FIELD___dispatcher = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOperation
@@ -140,7 +131,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOpera
     static const int FIELD___status = 7;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Font
@@ -159,11 +149,10 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Font
     NANOCLR_NATIVE_DECLARE(ComputeTextInRect___VOID__STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4);
 
     //--//
-      //-- The Following was not generated //
-    static HRESULT GetFont(CLR_RT_HeapBlock* pThis, CLR_GFX_Font*& font);
-    static HRESULT GetFont(CLR_RT_StackFrame& stack, CLR_GFX_Font*& font);
+    //-- The Following was not generated //
+    static HRESULT GetFont(CLR_RT_HeapBlock *pThis, CLR_GFX_Font *&font);
+    static HRESULT GetFont(CLR_RT_StackFrame &stack, CLR_GFX_Font *&font);
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
@@ -180,17 +169,20 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(Flush___VOID);
     NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
+    NANOCLR_NATIVE_DECLARE(
+        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
     NANOCLR_NATIVE_DECLARE(SetClippingRectangle___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_Width___I4);
     NANOCLR_NATIVE_DECLARE(get_Height___I4);
-    NANOCLR_NATIVE_DECLARE(DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(
+        DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(MakeTransparent___VOID__nanoFrameworkPresentationMediaColor);
     NANOCLR_NATIVE_DECLARE(StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(
+        DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4);
     NANOCLR_NATIVE_DECLARE(SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor);
     NANOCLR_NATIVE_DECLARE(GetPixel___nanoFrameworkPresentationMediaColor__I4__I4);
@@ -201,7 +193,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(Dispose___VOID__BOOLEAN);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_Pen
@@ -210,7 +201,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_Pen
     static const int FIELD__Thickness = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_DrawingContext
@@ -222,7 +212,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_DrawingCo
     static const int FIELD___clippingRectangles = 6;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_MediaContext
@@ -241,7 +230,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_MediaCont
     static const int FIELD___screen = 13;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_LayoutManager__LayoutQueue
@@ -250,7 +238,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_LayoutManager__
     static const int FIELD___elements = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_LayoutManager
@@ -266,7 +253,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_LayoutManager
     static const int FIELD___updateCallback = 10;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_PropertyChangedEventArgs
@@ -276,7 +262,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_PropertyChangedEventArgs
     static const int FIELD__NewValue = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEventHandlerInfo
@@ -285,7 +270,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEventHandlerInfo
     static const int FIELD___handledEventsToo = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_RouteItem
@@ -294,7 +278,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RouteItem
     static const int FIELD___routedEventHandlerInfo = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_EventRoute
@@ -303,7 +286,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_EventRoute
     static const int FIELD___routeItemList = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElement
@@ -347,7 +329,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElement
     static const int FIELD___isVisibleChanged = 36;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_Brush
@@ -355,7 +336,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_Brush
     static const int FIELD___opacity = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Border
@@ -367,7 +347,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Border
     static const int FIELD___borderBottom = 44;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElementCollection
@@ -378,7 +357,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElementCollec
     static const int FIELD___owner = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Control
@@ -388,7 +366,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Contro
     static const int FIELD___font = 39;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_DockPanel
@@ -399,7 +376,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_DockPa
     static const int FIELD___lastChildFill = 37;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_DrawingAttributes
@@ -407,7 +383,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Drawin
     static const int FIELD__Color = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Image
@@ -415,7 +390,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Image
     static const int FIELD___bitmap = 37;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_InkCanvas
@@ -429,7 +403,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_InkCan
     static const int FIELD___left = 43;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBoxItem
@@ -438,7 +411,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBo
     static const int FIELD___listBox = 41;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_SelectionChangedEventArgs
@@ -447,7 +419,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Select
     static const int FIELD__SelectedIndex = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBoxItemCollection
@@ -456,7 +427,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBo
     static const int FIELD___listBox = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBox
@@ -468,7 +438,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ListBo
     static const int FIELD___items = 44;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ScrollChangedEventArgs
@@ -479,7 +448,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Scroll
     static const int FIELD__VerticalOffset = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_ScrollViewer
@@ -498,7 +466,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Scroll
     static const int FIELD___scrollChanged = 51;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_StackPanel
@@ -506,7 +473,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_StackP
     static const int FIELD___orientation = 37;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Text
@@ -519,7 +485,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Text
     static const int FIELD___alignment = 42;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextRun
@@ -532,7 +497,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextRu
     static const int FIELD___height = 6;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextFlow
@@ -544,7 +508,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextFl
     static const int FIELD___scrollingStyle = 41;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextFlow__TextLine
@@ -555,7 +518,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextFl
     static const int FIELD___width = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextRunCollection
@@ -564,7 +526,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_TextRu
     static const int FIELD___textRuns = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_WrapPanel
@@ -574,7 +535,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_WrapPa
     static const int FIELD___orientation = 39;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_WrapPanel__UVSize
@@ -584,7 +544,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_WrapPa
     static const int FIELD___orientation = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_DrawingContext__ClipRectangle
@@ -595,7 +554,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_DrawingCo
     static const int FIELD__Height = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_ImageBrush
@@ -604,7 +562,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_ImageBrus
     static const int FIELD__Stretch = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_LinearGradientBrush
@@ -618,7 +575,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_LinearGra
     static const int FIELD__EndY = 8;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_MediaContext__InvokeOnRenderCallback
@@ -627,7 +583,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_MediaCont
     static const int FIELD___arg = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_SolidColorBrush
@@ -635,7 +590,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_SolidColo
     static const int FIELD__Color = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_SolidColorBrush__LineSegment
@@ -653,7 +607,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_SolidColo
     static const int FIELD__processedPts = 11;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_PresentationSource
@@ -661,7 +614,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_PresentationSou
     static const int FIELD___rootUIElement = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Line
@@ -669,7 +621,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Line
     static const int FIELD___direction = 39;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Polygon
@@ -677,7 +628,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Polygon
     static const int FIELD___pts = 39;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Shape
@@ -686,7 +636,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Shapes_Shape
     static const int FIELD___stroke = 38;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElement__Pair
@@ -696,7 +645,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElement__Pair
     static const int FIELD___status = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElementCollection__Enumerator
@@ -707,7 +655,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElementCollec
     static const int FIELD___currentElement = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_WindowManager
@@ -717,7 +664,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_WindowManager
     static const int FIELD___postRenderHandler = 37;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_WindowCollection
@@ -725,7 +671,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_WindowCollection
     static const int FIELD___list = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputEventArgs
@@ -734,7 +679,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputEventArgs
     static const int FIELD___inputDevice = 6;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_StagingAreaInputItem
@@ -743,7 +687,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_StagingAreaInputIte
     static const int FIELD___table = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_PreProcessInputEventArgs
@@ -751,7 +694,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_PreProcessInputEven
     static const int FIELD___canceled = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_NotifyInputEventArgs
@@ -759,7 +701,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_NotifyInputEventArg
     static const int FIELD__StagingItem = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReport
@@ -768,7 +709,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReport
     static const int FIELD__Timestamp = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputManager
@@ -789,7 +729,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputManager
     static const int FIELD___genericDevice = 12;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputProviderSite
@@ -799,7 +738,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputProviderSite
     static const int FIELD___inputProvider = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput
@@ -812,14 +750,13 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput
     static const int FIELD__ContactHeight = 6;
 
     //--//
-       //_The following was not generated___________
- //___________________________________________
+    //_The following was not generated___________
+    //___________________________________________
     static const CLR_UINT32 FLAG__None = 0x00;
     static const CLR_UINT32 FLAG__Primary = 0x10;
     static const CLR_UINT32 FLAG__Pen = 0x40;
     static const CLR_UINT32 FLAG__Palm = 0x80;
     //___________________________________________
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchDevice
@@ -828,7 +765,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchDevice
     static const int FIELD___focus = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Runtime_Events_GenericEventEx
@@ -837,7 +773,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Runtime_Events_GenericEventE
     static const int FIELD__Y = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericDevice
@@ -846,7 +781,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericDevice
     static const int FIELD___inputManager = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Application
@@ -870,7 +804,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Application
     static const int FIELD___inputProviderSite = 10;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Window
@@ -879,7 +812,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Window
     static const int FIELD___windowManager = 41;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_CancelEventArgs
@@ -887,7 +819,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_CancelEventArgs
     static const int FIELD__Cancel = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
@@ -903,7 +834,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Ink
@@ -912,7 +842,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Ink
     NANOCLR_NATIVE_DECLARE(ResetInkRegion___STATIC__VOID);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawButtonInputReport
@@ -921,7 +850,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawButtonInputRepor
     static const int FIELD__Actions = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonDevice
@@ -937,7 +865,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonDevice
     static const int FIELD___tagButton = 10;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_Buttons
@@ -950,7 +877,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_Buttons
     static const int FIELD_STATIC__LostFocusEvent = 26;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEvents
@@ -958,7 +884,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEvents
     static const int FIELD_STATIC__GenericStandardEvent = 27;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputManager__DeviceEvents
@@ -969,7 +894,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputManager__Devic
     static const int FIELD___postProcessInput = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReportArgs
@@ -978,7 +902,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReportArgs
     static const int FIELD__Report = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReportEventArgs
@@ -986,7 +909,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReportEventArg
     static const int FIELD__Report = 7;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawGenericInputReport
@@ -995,7 +917,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawGenericInputRepo
     static const int FIELD__InternalEvent = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport
@@ -1005,7 +926,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport
     static const int FIELD__Touches = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchCapture
@@ -1013,7 +933,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchCapture
     static const int FIELD_STATIC___captureElement = 28;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEvents
@@ -1023,7 +942,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEvents
     static const int FIELD_STATIC__TouchUpEvent = 31;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherObject
@@ -1031,7 +949,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherObjec
     static const int FIELD__Dispatcher = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOperation__DispatcherOperationEvent
@@ -1042,7 +959,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOpera
     static const int FIELD___waitTimer = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOperation__DispatcherOperationFrame
@@ -1051,7 +967,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOpera
     static const int FIELD___waitTimer = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherTimer
@@ -1065,7 +980,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherTimer
     static const int FIELD___timer = 7;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Touch
@@ -1074,7 +988,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Touch
     static const int FIELD_STATIC___activeTouchPanel = 33;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollector
@@ -1083,7 +996,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollector
     static const int FIELD___nativeBufferSize = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration
@@ -1094,11 +1006,12 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfigurati
     static const int FIELD_STATIC___collectionBufferSize = 37;
 
     NANOCLR_NATIVE_DECLARE(GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2);
-    NANOCLR_NATIVE_DECLARE(GetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__BYREF_I4__BYREF_I4__BYREF_I4);
-    NANOCLR_NATIVE_DECLARE(SetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(
+        GetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__BYREF_I4__BYREF_I4__BYREF_I4);
+    NANOCLR_NATIVE_DECLARE(
+        SetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__I4__I4__I4);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent
@@ -1107,7 +1020,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent
     static const int FIELD__Touches = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor
@@ -1115,7 +1027,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor
     NANOCLR_NATIVE_DECLARE(ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel
@@ -1126,7 +1037,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel
     NANOCLR_NATIVE_DECLARE(GetCalibrationPoint___VOID__I4__BYREF_I4__BYREF_I4);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreen__ActiveRectangle
@@ -1138,7 +1048,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreen__ActiveRectan
     static const int FIELD__Target = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreenEventArgs
@@ -1148,7 +1057,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreenEventArgs
     static const int FIELD__Target = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreen
@@ -1164,9 +1072,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreen
     static const int FIELD__OnGestureEnded = 9;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics;
 
-#endif  //_NANOFRAMEWORK_GRAPHICS_H_
+#endif //_NANOFRAMEWORK_GRAPHICS_H_
