@@ -5,7 +5,8 @@
 
 #include "nanoFramework_Graphics.h"
 
-static const CLR_RT_MethodHandler method_lookup[] = {
+static const CLR_RT_MethodHandler method_lookup[] = 
+{
     NULL,
     NULL,
     NULL,
@@ -956,4 +957,9 @@ static const CLR_RT_MethodHandler method_lookup[] = {
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
-    {"nanoFramework.Graphics", 0xFD1E2C37, method_lookup, {100, 0, 0, 2}};
+{
+    "nanoFramework.Graphics", 
+    0xFD1E2C37, 
+    method_lookup, 
+    {100, 0, 0, 2}
+};
