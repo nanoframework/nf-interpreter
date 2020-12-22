@@ -5,8 +5,7 @@
 
 #include "nanoFramework_Graphics.h"
 
-static const CLR_RT_MethodHandler method_lookup[] = 
-{
+static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
@@ -105,35 +104,48 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_Graphics_nanoFramework_UI_Font::ComputeExtent___VOID__STRING__BYREF_I4__BYREF_I4__I4,
     NULL,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Font::ComputeTextInRect___VOID__STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Font::
+        ComputeTextInRect___VOID__STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4,
     NULL,
     NULL,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__I4__I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::_ctor___VOID__SZARRAY_U1__nanoFrameworkUIBitmapBitmapImageType,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        _ctor___VOID__SZARRAY_U1__nanoFrameworkUIBitmapBitmapImageType,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4__I4__I4__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont,
     NULL,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRectangle___VOID__I4__I4__I4__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Width___I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
     NULL,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__nanoFrameworkPresentationMediaColor,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixel___nanoFrameworkPresentationMediaColor__I4__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZARRAY_U1,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::TileImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Scale9Image___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+        Scale9Image___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Dispose___VOID__BOOLEAN,
     NULL,
     NULL,
@@ -743,11 +755,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenWidth___STATIC__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenHeight___STATIC__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_BitsPerPixel___STATIC__I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+        get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+        NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_Ink::SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Ink::
+        SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap,
     Library_nanoFramework_Graphics_nanoFramework_UI_Ink::ResetInkRegion___STATIC__VOID,
     NULL,
     NULL,
@@ -891,18 +906,23 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2,
-    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::GetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__BYREF_I4__BYREF_I4__BYREF_I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::SetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__I4__I4__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::
+        GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::
+        GetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__BYREF_I4__BYREF_I4__BYREF_I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration::
+        SetTouchInput___STATIC__VOID__nanoFrameworkUITouchCollectorConfigurationTouchInput__I4__I4__I4,
     NULL,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime,
+    Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
+        ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime,
     NULL,
     NULL,
     NULL,
     NULL,
     NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel::SetCalibration___VOID__I4__SZARRAY_I2__SZARRAY_I2__SZARRAY_I2__SZARRAY_I2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel::
+        SetCalibration___VOID__I4__SZARRAY_I2__SZARRAY_I2__SZARRAY_I2__SZARRAY_I2,
     Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel::GetCalibrationPointCount___VOID__BYREF_I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel::StartCalibration___VOID,
     Library_nanoFramework_Graphics_nanoFramework_UI_TouchPanel::GetCalibrationPoint___VOID__I4__BYREF_I4__BYREF_I4,
@@ -935,9 +955,4 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
-{
-    "nanoFramework.Graphics", 
-    0xFC87C8D9, 
-    method_lookup, 
-    {100, 0, 0, 2}
-};
+    {"nanoFramework.Graphics", 0xFC87C8D9, method_lookup, {100, 0, 0, 2}};
