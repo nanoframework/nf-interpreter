@@ -892,16 +892,15 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_CancelEventArgs
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
-    static const int FIELD_STATIC__dc = 20;
+    static const int FIELD_STATIC___fullScreen = 20;
 
-    NANOCLR_NATIVE_DECLARE(get_LongerSide___I4);
-    NANOCLR_NATIVE_DECLARE(get_ShorterSide___I4);
-    NANOCLR_NATIVE_DECLARE(get_Width___I4);
-    NANOCLR_NATIVE_DECLARE(get_Height___I4);
-    NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___I4);
-    NANOCLR_NATIVE_DECLARE(get_Orientation___I4);
-    NANOCLR_NATIVE_DECLARE(ChangeOrientation___BOOLEAN__BYREF_I4);
-    NANOCLR_NATIVE_DECLARE(Dispose___VOID__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_LongerSide___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_ShorterSide___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_ScreenWidth___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_ScreenHeight___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
+    NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
 
     //--//
 
