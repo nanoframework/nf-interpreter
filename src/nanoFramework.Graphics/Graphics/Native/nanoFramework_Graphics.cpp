@@ -5,6 +5,8 @@
 
 #include "nanoFramework_Graphics.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -738,25 +740,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_LongerSide___STATIC__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ShorterSide___STATIC__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenWidth___STATIC__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenHeight___STATIC__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_BitsPerPixel___STATIC__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation,
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_LongerSide___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ShorterSide___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Width___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Height___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_BitsPerPixel___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Orientation___I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::ChangeOrientation___BOOLEAN__BYREF_I4,
-    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Dispose___VOID__BOOLEAN,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation,
     NULL,
     Library_nanoFramework_Graphics_nanoFramework_UI_Ink::SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap,
     Library_nanoFramework_Graphics_nanoFramework_UI_Ink::ResetInkRegion___STATIC__VOID,
@@ -948,7 +939,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
 {
     "nanoFramework.Graphics",
-    0x17168108,
+    0xFC87C8D9,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 0, 0, 2 }
 };
+
+// clang-format on
