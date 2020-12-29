@@ -484,6 +484,7 @@ jobs:
   steps:
 
   - checkout: self
+    fetchDepth: 1
 
   # step from template @ nf-tools repo
   - template: azure-pipelines-templates/discord-webhook.yml@templates  
