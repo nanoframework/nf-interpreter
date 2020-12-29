@@ -1198,6 +1198,9 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_DelegateBeginInvoke = 0x00040000;
     static const CLR_UINT32 MD_DelegateEndInvoke = 0x00080000;
 
+    static const CLR_UINT32 MD_ContainsGenericParameter = 0x00100000;
+    static const CLR_UINT32 MD_HasGenericParameter = 0x00200000;
+
     static const CLR_UINT32 MD_Synchronized = 0x01000000;
     static const CLR_UINT32 MD_GloballySynchronized = 0x02000000;
     static const CLR_UINT32 MD_Patched = 0x04000000;
