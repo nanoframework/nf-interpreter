@@ -355,7 +355,7 @@ void TouchPanelDriver::PollTouchPoint()
 
         g_palEventDriver.PostEvent(PAL_EVENT_TOUCH, TouchPanelStylusUp);
 
-        // Make a copy of the point for the Microsoft.SPOT.Touch handler.
+        // Make a copy of the point for the nanoFramework.UI.Touch handler.
         if (point == NULL)
         {
             m_tmpUpTouch.contact = 0;

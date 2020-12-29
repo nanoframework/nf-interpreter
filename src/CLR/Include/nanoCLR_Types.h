@@ -332,7 +332,7 @@ enum CLR_CorCallingConvention
               /////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
+enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
     DATATYPE_VOID, // 0 bytes
 
