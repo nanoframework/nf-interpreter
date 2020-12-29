@@ -387,7 +387,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 // Get the read offset, only the elements defined by the span must be read, not the whole array
                 readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-                // use the span length as write size, only the elements defined by the span must be read
+                // use the span length as read size, only the elements defined by the span must be read
                 palI2c->ReadSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
             }
         }
@@ -433,7 +433,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             if (writeBuffer != NULL)
             {
                 // grab the pointer to the array by starting and the offset specified in the span
-                palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetElement(writeOffset)();
+                palI2c->WriteBuffer = (uint8_t *)writeBuffer->GetElement(writeOffset);
 
                 // flush DMA buffer to ensure cache coherency
                 // (only required for Cortex-M7)

@@ -136,7 +136,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
                 // grab the pointer to the array by starting and the offset specified in the span
-                writeData = writeBuffer->GetElement(writeOffset)();
+                writeData = writeBuffer->GetElement(writeOffset);
 
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
@@ -153,9 +153,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
                 // grab the pointer to the array by starting and the offset specified in the span
-                readData = readBuffer->GetElement(readOffset)();
+                readData = readBuffer->GetElement(readOffset);
 
-                // use the span length as write size, only the elements defined by the span must be read
+                // use the span length as read size, only the elements defined by the span must be read
                 readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
             }
         }
