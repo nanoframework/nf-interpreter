@@ -6,7 +6,6 @@
 
 #include <nanoCLR_Application.h>
 
-
 //
 // UNDONE: Feature configuration
 //
@@ -27,7 +26,9 @@
 
 #else
 
-#pragma comment(lib, "WireProtocol.lib")    // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
+#pragma comment(                                                                                                       \
+    lib,                                                                                                               \
+    "WireProtocol.lib") // UNDONE: FIXME: SUPPORT_ComputeCRC required by TypeSystem.cpp, CLR_RT_HeapBlock
 
 #pragma comment(lib, "Debugger_stub.lib")
 #pragma comment(lib, "Diagnostics_stub.lib")
@@ -38,20 +39,12 @@
 #pragma comment(lib, "RPC_stub.lib")
 #pragma comment(lib, "Serialization_stub.lib")
 
-
 #endif
-
-
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 
-
 // All solutions are expected to provide an implementation of this
-bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
+bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 {
     NFReleaseInfo::Init(
         releaseInfo,
@@ -64,8 +57,7 @@ bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
         TARGETNAMESTRING,
         hal_strlen_s(TARGETNAMESTRING),
         PLATFORMNAMESTRING,
-        hal_strlen_s(PLATFORMNAMESTRING)
-    );
+        hal_strlen_s(PLATFORMNAMESTRING));
 
     return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
@@ -73,28 +65,29 @@ bool Target_GetReleaseInfo(NFReleaseInfo& releaseInfo)
 /////////////////////////////////////////////////////////////////////////////
 //
 
-int main()
+int _tmain(int argc, _TCHAR *argv[])
 {
-    //void ApplicationEntryPoint()
-
-	// initialize nanoHAL
-	nanoHAL_Initialize();
+    // initialize nanoHAL
+    nanoHAL_Initialize();
 
     CLR_SETTINGS clrSettings;
     ZeroMemory(&clrSettings, sizeof(clrSettings));
 
-    clrSettings.MaxContextSwitches         = 50;
-    clrSettings.WaitForDebugger            = false;
-    clrSettings.EnterDebuggerLoopAfterExit = true;
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
+    clrSettings.EnterDebuggerLoopAfterExit = false;
+
+    // fill arguments from command line
+    for (int i = 0; i < argc - 1; i++)
+    {
+        clrSettings.StartArgs.push_back((argv + 1)[i]);
+    }
 
     ClrStartup(clrSettings);
 
-//#if !defined(BUILD_RTM)
-//    debug_printf( "Exiting.\r\n" );
-//#else
-    //::CPU_Reset();
-//#endif
+#if !defined(BUILD_RTM)
+    CLR_Debug::Printf("Exiting.\r\n");
+#endif
 
     return 0;
 }
-

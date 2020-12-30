@@ -99,7 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include;nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include;..\..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include;nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\..\src\CLR\Include;..\..\..\..\src\HAL\Include;..\..\..\..\src\PAL\Include;..\..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,16 +160,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp" />
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native.cpp" />
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp" />
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp" />
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp" />
     <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
     <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
     <ClCompile Include="Memory.cpp" />
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native.cpp" />
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp" />
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp" />
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp" />
     <ClCompile Include="PAL\blockstorageList_stubs.cpp" />
     <ClCompile Include="PAL\COMDirector_stubs.cpp" />
     <ClCompile Include="PAL\ConfigHelper_stubs.cpp" />
@@ -190,12 +190,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="WatchDog.cpp" />
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native.cpp" />
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native_Windows_Devices_Gpio_GpioController.cpp" />
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native_Windows_Devices_Gpio_GpioPin.cpp" />
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native.cpp" />
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp" />
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\CLR\Core\Core.vcxproj">
@@ -273,6 +267,9 @@
     <ProjectReference Include="..\..\..\..\src\CLR\WireProtocol\WireProtocol.vcxproj">
       <Project>{2337c4a4-3ab4-4014-9c29-9ebe32f4510e}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

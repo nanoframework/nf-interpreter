@@ -19,14 +19,8 @@
     <Filter Include="Source Files\Generated">
       <UniqueIdentifier>{917f0887-d239-439f-b246-e18c1f726304}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Windows.Devices.Gpio">
-      <UniqueIdentifier>{7d83b23d-05f7-4660-9f84-a6fcdb0a0cf3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\nanoFramework.Runtime.Events">
       <UniqueIdentifier>{27c2cf5b-4789-40b1-b760-fc55c60546f0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Windows.Devices.Spi">
-      <UniqueIdentifier>{a6b77d6f-6169-46dc-9bd2-dac8fdef5518}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,38 +98,23 @@
     <ClCompile Include="targetHAL_Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native.cpp">
-      <Filter>Source Files\Windows.Devices.Gpio</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native_Windows_Devices_Gpio_GpioController.cpp">
-      <Filter>Source Files\Windows.Devices.Gpio</Filter>
-    </ClCompile>
-    <ClCompile Include="Windows.Devices.Gpio\win_dev_gpio_native_Windows_Devices_Gpio_GpioPin.cpp">
-      <Filter>Source Files\Windows.Devices.Gpio</Filter>
-    </ClCompile>
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native.cpp">
-      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
-    </ClCompile>
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp">
-      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
-    </ClCompile>
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp">
-      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
-    </ClCompile>
-    <ClCompile Include="nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp">
-      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native.cpp">
-      <Filter>Source Files\Windows.Devices.Spi</Filter>
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
     </ClCompile>
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp">
-      <Filter>Source Files\Windows.Devices.Spi</Filter>
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
     </ClCompile>
-    <ClCompile Include="Windows.Devices.Spi\win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp">
-      <Filter>Source Files\Windows.Devices.Spi</Filter>
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp">
+      <Filter>Source Files\nanoFramework.Runtime.Events</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
   </ItemGroup>
 </Project>
