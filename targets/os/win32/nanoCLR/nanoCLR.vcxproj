@@ -77,6 +77,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -87,6 +88,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(BinDir)</OutDir>
     <IntDir>$(IntDir)</IntDir>
+    <TargetName>nanoFramework.nanoCLR</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
