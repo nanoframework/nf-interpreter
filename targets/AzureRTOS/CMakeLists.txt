@@ -73,7 +73,7 @@ else()
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/AzureRTOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/AzureRTOS_Source/common/src") #TODO: is this correct?
+            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/AzureRTOS_Source/")
         else()
             message(STATUS "Using local cache of AzureRTOS source from ${RTOS_SOURCE_FOLDER}")
         endif()
