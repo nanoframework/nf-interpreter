@@ -67,6 +67,15 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 int _tmain(int argc, _TCHAR *argv[])
 {
+    wprintf(L"\n.NET nanoFramework nanoCLR WIN32 ");
+    wprintf(
+        L"v%d.%d.%d.%d\r\n",
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_BUILD,
+        VERSION_REVISION);
+    wprintf(L"Copyright (c) 2020 .NET nanoFramework project contributors\r\n\r\n");
+
     // initialize nanoHAL
     nanoHAL_Initialize();
 
