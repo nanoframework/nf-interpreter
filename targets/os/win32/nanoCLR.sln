@@ -49,6 +49,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hardware_stub", "..\..\..\s
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeEventDispatcher", "..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.vcxproj", "{6DD5CA4F-2AE9-44D3-B9D7-A2A4A35FC5B2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3CE63A67-6F35-40AE-BBB5-587464198EC3}"
+	ProjectSection(SolutionItems) = preProject
+		nanoFramework.nanoCLR.Win32.nuspec = nanoFramework.nanoCLR.Win32.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
