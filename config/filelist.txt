@@ -1,0 +1,2 @@
+**/nanoFramework.CoreLibrary.*
+**/nanoFramework.CoreLibrary.NoReflection.*
