@@ -9,6 +9,8 @@
 
 #if defined(_WIN32)
 
+#include <iostream>
+
 static std::string *s_redirectedString = NULL;
 
 void CLR_Debug::RedirectToString(std::string *str)
@@ -281,6 +283,7 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #if defined(_WIN32)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
+    std::cout << outputString;
 #endif
 
 #if !defined(_WIN32)

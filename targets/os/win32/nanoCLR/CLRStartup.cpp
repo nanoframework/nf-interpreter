@@ -158,7 +158,6 @@ struct Settings : CLR_RT_ParseOptions
         if (FAILED(hr))
         {
             CLR_Debug::Printf("Error: %08x\r\n", hr);
-            wprintf(L"Error: %08x\r\n", hr);
 
             if (hr == CLR_E_TYPE_UNAVAILABLE)
             {
