@@ -10,14 +10,15 @@
   },
   "publicReleaseRefSpec": [
     "^refs/heads/master$",
-    "^refs/heads/v\\d+(?:\\.\\d+)?$"
+    "^refs/heads/v\\d+(?:\\.\\d+)?$",
+    "^refs/heads/develop"
   ],
   "cloudBuild": {
     "setAllVariables": true,
     "buildNumber": {
       "enabled": true,
       "includeCommitId": {
-        "when": "always"
+        "when": "nonPublicReleaseOnly"
       }
     }
   },
