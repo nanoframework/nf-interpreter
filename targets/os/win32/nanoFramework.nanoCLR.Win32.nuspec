@@ -5,7 +5,7 @@
     <version>$version$</version>
     <title>nanoFramework.nanoCLR.Win32</title>
     <authors>nanoFramework project contributors</authors>
-    <owners>nanoFramework project contributors</owners>
+    <owners>nanoFramework project contributors,dotnetfoundation</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="file">LICENSE.md</license>
     <releaseNotes></releaseNotes>
