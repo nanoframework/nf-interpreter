@@ -57,6 +57,6 @@ steps:
       command: push
       nuGetFeedType: external
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-$(System.TeamProject)'
+      publishFeedCredentials: 'NuGet-nf-interpreter'
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), ne(variables['Build.Reason'], 'PullRequest') )
     displayName: Push managed helpers NuGet packages to NuGet

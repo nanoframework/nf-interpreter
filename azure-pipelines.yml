@@ -389,7 +389,7 @@ jobs:
       command: push
       nuGetFeedType: external
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'AzureArtifacts-$(System.TeamProject)'
+      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
   # push NuGet class lib package to NuGet (always happens except on PR builds)
@@ -402,7 +402,7 @@ jobs:
       nuGetFeedType: external
       allowPackageConflicts: true
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-      publishFeedCredentials: 'NuGet-$(System.TeamProject)'
+      publishFeedCredentials: 'NuGet-nf-interpreter'
   
 #######################
 # generate change log
