@@ -118,6 +118,18 @@ uint64_t GetFileTimeFromPath(char * path)
     return HAL_Time_ConvertFromSystemTime(&fileInfoTime);
 }
 
+// Save a DateTime (ticks) to DateTime field in object
+void SaveDateTimeToField(CLR_RT_HeapBlock* hbObj, int fieldIndex, CLR_UINT64 ticks)
+{
+    CLR_RT_HeapBlock& dateFieldRef = hbObj[fieldIndex];
+    CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
+    if (pRes)
+    {
+        // ...and set it 
+        *pRes = ticks;
+    }
+}
+
 HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder( CLR_RT_StackFrame& stack )
 {
     NANOCLR_HEADER();
@@ -387,14 +399,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFold
                     
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], workingBuffer ));
 
-                    // get a reference to the dateCreated managed field...
-                    CLR_RT_HeapBlock& dateFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
-                    CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
-                    if (pRes)
-                    {
-                        // ...and set it 
-                        *pRes = GetFileTimeFromPath(workingBuffer);
-                    }
+                    // Save created DateTime to StorageFolder date created field...
+                    SaveDateTimeToField(hbObj, 
+                                        Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                                        GetFileTimeFromPath(workingBuffer));
 
                     // move the storage folder pointer to the next item in the array
                     storageFolder++;
@@ -582,14 +590,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetStorageFile
 
 						NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], workingBuffer));
 
-						// get a reference to the dateCreated managed field...
-						CLR_RT_HeapBlock& dateFieldRef = hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-                        CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
-                        if (pRes)
-                        {
-						    // ...and set it 
-						    *pRes = GetFileTimeFromPath(workingBuffer);
-                        }
+                        // Save created DateTime to StorageFile date created field...
+                        SaveDateTimeToField(hbObj, 
+                                            Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
+                                            GetFileTimeFromPath(workingBuffer));
 
 						// move the storage folder pointer to the next item in the array
 						storageFile++;
@@ -771,14 +775,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFileNati
         // file path
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path ], filePath ));
 
-        // get a reference to the dateCreated managed field...
-        CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated ];
-        CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
-        if ( pRes)
-        {
-            // ...and set it 
-            *pRes = GetFileTimeFromPath(workingPath);
-        }
+        // Save created DateTime to StorageFile date created field...
+        SaveDateTimeToField(storageFile, 
+                            Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
+                            GetFileTimeFromPath(workingPath));
     }
     else
     {
@@ -905,17 +905,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::CreateFolderNa
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance( storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path ], folderPath ));
 
-        // get the date time details and fill in the managed field
-        // get a reference to the dateCreated managed field...
-        CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated ];
-        CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
-        if (pRes)
-        {
-            // get the date time details and fill in the managed field
-            // compute directory date
-            // ...and set it 
-            *pRes = GetFileTimeFromPath(workingPath);
-        }
+        // Save created DateTime to StorageFile date created field...
+        // compute directory date
+        SaveDateTimeToField(storageFolder, 
+                            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                            GetFileTimeFromPath(workingPath));
     }
     else
     {
@@ -1134,17 +1128,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
 		NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path], folderPath));
 
-		// get the date time details and fill in the managed field
-		// get a reference to the dateCreated managed field...
-		CLR_RT_HeapBlock& dateFieldRef = storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-        CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
-        if (pRes)
-        {
-            // get the date time details and fill in the managed field
-            // compute directory date
-            // ...and set it 
-            *pRes = GetFileTimeFromPath(workingPath);
-        }
+        // Save created DateTime to StorageFile date created field...
+        // compute directory date
+        SaveDateTimeToField(storageFolder, 
+                            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                            GetFileTimeFromPath(workingPath));
 	}
 	else
 	{

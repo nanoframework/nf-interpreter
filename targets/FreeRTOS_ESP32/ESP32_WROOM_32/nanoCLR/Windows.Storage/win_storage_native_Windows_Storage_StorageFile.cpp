@@ -7,6 +7,7 @@
 
 extern char * ConvertToESP32Path(const char * filepath);
 extern uint64_t GetFileTimeFromPath(char * path);
+extern void SaveDateTimeToField(CLR_RT_HeapBlock* hbObj, int fieldIndex, CLR_UINT64 ticks);
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative___VOID(CLR_RT_StackFrame& stack)
 {
@@ -164,15 +165,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::GetFileFromPathN
 
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path], managedfilePath));
 
-			// get the date time details and fill in the managed field
-			// get a reference to the dateCreated managed field...
-			CLR_RT_HeapBlock& dateFieldRef = storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-			CLR_INT64* pRes = (CLR_INT64*)&dateFieldRef.NumericByRef().s8;
-
-			// get the date time details and fill in the managed field
-			// compute file date
-			// ...and set it 
-			*pRes = GetFileTimeFromPath(workingPath);
+            // Save created DateTime to StorageFile date created field...
+            SaveDateTimeToField(storageFile, 
+                                Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
+                                GetFileTimeFromPath(workingPath));
 		}
 		else
 		{
