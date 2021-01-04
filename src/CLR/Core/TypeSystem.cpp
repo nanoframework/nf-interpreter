@@ -1729,36 +1729,36 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                 iMetaData);
 
             CLR_Debug::Printf(
-                "   AssemblyRef    = %8d bytes (%8d elements)\r\n",
+                "   AssemblyRef     = %8d bytes (%8d elements)\r\n",
                 offsets.iAssemblyRef,
                 skeleton->m_pTablesSize[TBL_AssemblyRef]);
             CLR_Debug::Printf(
-                "   TypeRef        = %8d bytes (%8d elements)\r\n",
+                "   TypeRef         = %8d bytes (%8d elements)\r\n",
                 offsets.iTypeRef,
                 skeleton->m_pTablesSize[TBL_TypeRef]);
             CLR_Debug::Printf(
-                "   FieldRef       = %8d bytes (%8d elements)\r\n",
+                "   FieldRef        = %8d bytes (%8d elements)\r\n",
                 offsets.iFieldRef,
                 skeleton->m_pTablesSize[TBL_FieldRef]);
             CLR_Debug::Printf(
-                "   MethodRef      = %8d bytes (%8d elements)\r\n",
+                "   MethodRef       = %8d bytes (%8d elements)\r\n",
                 offsets.iMethodRef,
                 skeleton->m_pTablesSize[TBL_MethodRef]);
             CLR_Debug::Printf(
-                "   TypeDef        = %8d bytes (%8d elements)\r\n",
+                "   TypeDef         = %8d bytes (%8d elements)\r\n",
                 offsets.iTypeDef,
                 skeleton->m_pTablesSize[TBL_TypeDef]);
             CLR_Debug::Printf(
-                "   FieldDef       = %8d bytes (%8d elements)\r\n",
+                "   FieldDef        = %8d bytes (%8d elements)\r\n",
                 offsets.iFieldDef,
                 skeleton->m_pTablesSize[TBL_FieldDef]);
             CLR_Debug::Printf(
-                "   MethodDef      = %8d bytes (%8d elements)\r\n",
+                "   MethodDef       = %8d bytes (%8d elements)\r\n",
                 offsets.iMethodDef,
                 skeleton->m_pTablesSize[TBL_MethodDef]);
 #if !defined(NANOCLR_APPDOMAINS)
             CLR_Debug::Printf(
-                "   StaticFields   = %8d bytes (%8d elements)\r\n",
+                "   StaticFields    = %8d bytes (%8d elements)\r\n",
                 offsets.iStaticFields,
                 skeleton->m_iStaticFields);
 #endif
@@ -3993,42 +3993,42 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 iMetaData);
 
             CLR_Debug::Printf(
-                "   AssemblyRef    = %8d bytes (%8d elements)\r\n",
+                "   AssemblyRef     = %8d bytes (%8d elements)\r\n",
                 offsets.iAssemblyRef,
                 pTablesSize[TBL_AssemblyRef]);
             CLR_Debug::Printf(
-                "   TypeRef        = %8d bytes (%8d elements)\r\n",
+                "   TypeRef         = %8d bytes (%8d elements)\r\n",
                 offsets.iTypeRef,
                 pTablesSize[TBL_TypeRef]);
             CLR_Debug::Printf(
-                "   FieldRef       = %8d bytes (%8d elements)\r\n",
+                "   FieldRef        = %8d bytes (%8d elements)\r\n",
                 offsets.iFieldRef,
                 pTablesSize[TBL_FieldRef]);
             CLR_Debug::Printf(
-                "   MethodRef      = %8d bytes (%8d elements)\r\n",
+                "   MethodRef       = %8d bytes (%8d elements)\r\n",
                 offsets.iMethodRef,
                 pTablesSize[TBL_MethodRef]);
             CLR_Debug::Printf(
-                "   TypeDef        = %8d bytes (%8d elements)\r\n",
+                "   TypeDef         = %8d bytes (%8d elements)\r\n",
                 offsets.iTypeDef,
                 pTablesSize[TBL_TypeDef]);
             CLR_Debug::Printf(
-                "   FieldDef       = %8d bytes (%8d elements)\r\n",
+                "   FieldDef        = %8d bytes (%8d elements)\r\n",
                 offsets.iFieldDef,
                 pTablesSize[TBL_FieldDef]);
             CLR_Debug::Printf(
-                "   MethodDef      = %8d bytes (%8d elements)\r\n",
+                "   MethodDef       = %8d bytes (%8d elements)\r\n",
                 offsets.iMethodDef,
                 pTablesSize[TBL_MethodDef]);
 
 #if !defined(NANOCLR_APPDOMAINS)
-            CLR_Debug::Printf("   StaticFields   = %8d bytes (%8d elements)\r\n", offsets.iStaticFields, iStaticFields);
+            CLR_Debug::Printf("   StaticFields    = %8d bytes (%8d elements)\r\n", offsets.iStaticFields, iStaticFields);
 #endif
 
             CLR_Debug::Printf("\r\n");
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            CLR_Debug::Printf("   DebuggingInfo  = %8d bytes\r\n", offsets.iDebuggingInfoMethods);
+            CLR_Debug::Printf("   DebuggingInfo   = %8d bytes\r\n", offsets.iDebuggingInfoMethods);
             CLR_Debug::Printf("\r\n");
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
