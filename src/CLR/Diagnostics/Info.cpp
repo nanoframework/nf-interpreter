@@ -283,7 +283,7 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #if defined(_WIN32)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
-    std::cout << outputString;
+    std::cout << s_messageString + "\n";
 #endif
 
 #if !defined(_WIN32)
