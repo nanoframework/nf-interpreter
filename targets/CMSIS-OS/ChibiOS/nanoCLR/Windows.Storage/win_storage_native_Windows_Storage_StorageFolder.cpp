@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <corlib_native.h>
 #include "win_storage_native_target.h"
 
 #if (HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE)
@@ -61,6 +62,18 @@ SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
     fileTime.wSecond = time & 0x001F;
 
     return fileTime;
+}
+
+// Save a DateTime (ticks) to DateTime field in object
+void SaveDateTimeToField(CLR_RT_HeapBlock *hbObj, int fieldIndex, CLR_UINT64 ticks)
+{
+    CLR_RT_HeapBlock &dateFieldRef = hbObj[fieldIndex];
+    CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(dateFieldRef);
+    if (pRes)
+    {
+        // ...and set it
+        *pRes = ticks;
+    }
 }
 
 HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
@@ -445,12 +458,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                     // compute directory date
                     fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-                    // get a reference to the dateCreated managed field...
-                    CLR_RT_HeapBlock &dateFieldRef =
-                        hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-                    CLR_INT64 *pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
-                    // ...and set it with the fileInfoTime
-                    *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+                    // Save fileInfoTime to StorageFolder date created field...
+                    SaveDateTimeToField(
+                        hbObj,
+                        Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+                        HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
                     // move the storage folder pointer to the next item in the array
                     storageFolder++;
@@ -1143,12 +1155,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // compute directory date
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock &dateFieldRef =
-                storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-            CLR_INT64 *pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
-            // ...and set it with the fileInfoTime
-            *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+            // Save fileInfoTime to StorageFile date created field...
+            SaveDateTimeToField(
+                storageFile,
+                Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated,
+                HAL_Time_ConvertFromSystemTime(&fileInfoTime));
         }
         else
         {
@@ -1398,12 +1409,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // compute directory date
         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-        // get a reference to the dateCreated managed field...
-        CLR_RT_HeapBlock &dateFieldRef =
-            storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-        CLR_INT64 *pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
-        // ...and set it with the fileInfoTime
-        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+        // Save fileInfoTime to StorageFolder date created field...
+        SaveDateTimeToField(
+            storageFolder,
+            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
     }
     else
     {
@@ -1614,8 +1624,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
     FRESULT operationResult;
 
-    CLR_INT64 *pRes;
-
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -1695,12 +1703,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
             // compute directory date
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock &dateFieldRef =
-                storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-            pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
-            // ...and set it with the fileInfoTime
-            *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+            // Save fileInfoTime to StorageFolder date created field...
+            SaveDateTimeToField(
+                storageFolder,
+                Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+                HAL_Time_ConvertFromSystemTime(&fileInfoTime));
         }
     }
 
