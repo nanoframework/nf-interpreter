@@ -43,6 +43,18 @@ SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
     return fileTime;
 }
 
+// Save a DateTime (ticks) to DateTime field in object
+void SaveDateTimeToField(CLR_RT_HeapBlock* hbObj, int fieldIndex, CLR_UINT64 ticks)
+{
+    CLR_RT_HeapBlock& dateFieldRef = hbObj[fieldIndex];
+    CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
+    if (pRes)
+    {
+        // ...and set it 
+        *pRes = ticks;
+    }
+}
+
 HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     GetRemovableStorageFoldersNative___SZARRAY_WindowsStorageStorageFolder(CLR_RT_StackFrame &stack)
 {
@@ -318,21 +330,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                     // compute directory date
                     fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-                    // get a reference to the dateCreated managed field...
-                    CLR_RT_HeapBlock &timestampFieldRef =
-                        hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-                    // create an instance of <DateTime>
-                    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-                        timestampFieldRef,
-                        g_CLR_RT_WellKnownTypes.m_DateTime));
-                    // get reference to this object
-                    CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();
-                    // get reference to ticks field
-                    CLR_RT_HeapBlock &dateTimeTickField =
-                        hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
-                    CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
-                    // ...and set it with the fileInfoTime
-                    *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+                    // Save created DateTime to StorageFolder date created field...
+                    SaveDateTimeToField(hbObj, 
+                                        Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                                        HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
                     // move the storage folder pointer to the next item in the array
                     storageFolder++;
@@ -528,21 +529,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         // compute directory date
                         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-                        // get a reference to the dateCreated managed field...
-                        CLR_RT_HeapBlock &timestampFieldRef =
-                            hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-                        // create an instance of <DateTime>
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(
-                            timestampFieldRef,
-                            g_CLR_RT_WellKnownTypes.m_DateTime));
-                        // get reference to this object
-                        CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();
-                        // get reference to ticks field
-                        CLR_RT_HeapBlock &dateTimeTickField =
-                            hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
-                        CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
-                        // ...and set it with the fileInfoTime
-                        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+                        // Save created DateTime to StorageFile date created field...
+                        SaveDateTimeToField(hbObj, 
+                                            Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
+                                            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
                         // move the storage folder pointer to the next item in the array
                         storageFile++;
@@ -811,19 +801,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path],
                 filePath));
 
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock &timestampFieldRef =
-                storageFile[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-            // create an instance of <DateTime>
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
-            // get reference to this object
-            CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();
-            // get reference to ticks field
-            CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
-            CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
-            // ...and set it with the current DateTime
-            *pRes = HAL_Time_CurrentDateTime(false);
+            // Save created DateTime to StorageFile date created field...
+            SaveDateTimeToField(storageFile, 
+                                Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
+                                HAL_Time_CurrentDateTime(false));
 
             free(filePath);
 
@@ -971,17 +952,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // compute directory date
         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-        // get a reference to the dateCreated managed field and set it with the fileInfoTime
-        CLR_RT_HeapBlock &timestampFieldRef =
-            storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-        // create an instance of <DateTime>
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
-        // get reference to this object
-        CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();
-        // get reference to ticks field
-        CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
-        CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
+        // Save created DateTime to StorageFolder date created field...
+        SaveDateTimeToField(storageFolder, 
+                            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
         // ...and set it with the fileInfoTime
         *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
@@ -1188,19 +1162,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
             // compute directory date
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
-            // get a reference to the dateCreated managed field...
-            CLR_RT_HeapBlock &timestampFieldRef =
-                storageFolder[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated];
-            // create an instance of <DateTime>
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(timestampFieldRef, g_CLR_RT_WellKnownTypes.m_DateTime));
-            // get reference to this object
-            CLR_RT_HeapBlock *hbDateTime = timestampFieldRef.Dereference();
-            // get reference to ticks field
-            CLR_RT_HeapBlock &dateTimeTickField = hbDateTime[Library_corlib_native_System_DateTime::FIELD___ticks];
-            CLR_INT64 *pRes = (CLR_INT64 *)&dateTimeTickField.NumericByRef().s8;
-            // ...and set it with the fileInfoTime
-            *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+            // Save created DateTime to StorageFolder date created field...
+            SaveDateTimeToField(storageFolder, 
+                                Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
+                                HAL_Time_ConvertFromSystemTime(&fileInfoTime));
         }
     }
 
