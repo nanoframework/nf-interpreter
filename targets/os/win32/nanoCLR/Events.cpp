@@ -90,25 +90,25 @@ void Events_Clear(UINT32 Events)
     EventsConditionVar.notify_all();
 }
 
-uint32_t Events_MaskedRead(UINT32 Events)
+uint32_t Events_MaskedRead(uint32_t Events)
 {
     return SystemEvents & Events;
 }
 
 // block this thread and wake up when at least one of the requested events is set or a timeout occurs...
-uint32_t Events_WaitForEvents(UINT32 powerLevel, UINT32 WakeupSystemEvents, UINT32 Timeout_Milliseconds)
+uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, uint32_t timeoutMilliseconds)
 {
     std::unique_lock<std::mutex> scopeLock(EventsMutex);
 
     bool timeout = false;
     // check current condition before waiting as Condition var doesn't do that
-    if ((WakeupSystemEvents & SystemEvents) == 0)
+    if ((wakeupSystemEvents & SystemEvents) == 0)
     {
-        timeout = !EventsConditionVar.wait_for(scopeLock, std::chrono::milliseconds(Timeout_Milliseconds), [=]() {
-            return (WakeupSystemEvents & SystemEvents) != 0;
+        timeout = !EventsConditionVar.wait_for(scopeLock, std::chrono::milliseconds(timeoutMilliseconds), [=]() {
+            return (wakeupSystemEvents & SystemEvents) != 0;
         });
     }
-    return timeout ? 0 : SystemEvents & WakeupSystemEvents;
+    return timeout ? 0 : SystemEvents & wakeupSystemEvents;
 }
 
 void Events_SetCallback(set_Event_Callback pfn, void *arg)
@@ -116,6 +116,6 @@ void Events_SetCallback(set_Event_Callback pfn, void *arg)
     _ASSERTE(FALSE);
 }
 
-void FreeManagedEvent(UINT8 category, UINT8 subCategory, UINT16 data1, UINT32 data2)
+void FreeManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2)
 {
 }

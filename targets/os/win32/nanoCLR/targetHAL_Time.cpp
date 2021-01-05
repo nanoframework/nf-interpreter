@@ -27,9 +27,9 @@ void HAL_Time_Sleep_MicroSeconds_InterruptEnabled(unsigned int uSec)
 unsigned int HAL_Time_CurrentSysTicks()
 {
     FILETIME ft = {0};
-    GetSystemTimePreciseAsFileTime(&ft);
-
-    auto sysTicks = FileTimeToUint64(ft) / CPU_TicksPerSecond() / 1000;
+    GetSystemTimeAsFileTime(&ft);
+    auto fileTime = FileTimeToUint64(ft);
+    auto sysTicks = fileTime / CPU_TicksPerSecond();
 
     return (uint32_t)sysTicks;
 }

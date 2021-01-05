@@ -83,12 +83,17 @@ inline bool RequestToLaunchNanoBooter()
 
 inline uint32_t CPU_TicksPerSecond()
 {
-    return 1000000000;
+    return 100000000;
 }
 
 inline uint64_t CPU_MicrosecondsToTicks(UINT64 uSec)
 {
-    return uSec * 1000;
+    return uSec * 10;
+}
+
+inline uint64_t CPU_MillisecondsToTicks(UINT64 uSec)
+{
+    return uSec * 10 * 1000;
 }
 
 #endif //_TARGET_HAL_H_
