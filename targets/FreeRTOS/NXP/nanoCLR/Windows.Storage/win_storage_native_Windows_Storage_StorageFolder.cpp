@@ -44,13 +44,13 @@ SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
 }
 
 // Save a DateTime (ticks) to DateTime field in object
-void SaveDateTimeToField(CLR_RT_HeapBlock* hbObj, int fieldIndex, CLR_UINT64 ticks)
+void SaveDateTimeToField(CLR_RT_HeapBlock *hbObj, int fieldIndex, CLR_UINT64 ticks)
 {
-    CLR_RT_HeapBlock& dateFieldRef = hbObj[fieldIndex];
-    CLR_INT64* pRes = Library_corlib_native_System_DateTime::GetValuePtr( dateFieldRef );
+    CLR_RT_HeapBlock &dateFieldRef = hbObj[fieldIndex];
+    CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(dateFieldRef);
     if (pRes)
     {
-        // ...and set it 
+        // ...and set it
         *pRes = ticks;
     }
 }
@@ -331,9 +331,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                     fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
                     // Save created DateTime to StorageFolder date created field...
-                    SaveDateTimeToField(hbObj, 
-                                        Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
-                                        HAL_Time_ConvertFromSystemTime(&fileInfoTime));
+                    SaveDateTimeToField(
+                        hbObj,
+                        Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+                        HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
                     // move the storage folder pointer to the next item in the array
                     storageFolder++;
@@ -530,9 +531,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
                         // Save created DateTime to StorageFile date created field...
-                        SaveDateTimeToField(hbObj, 
-                                            Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
-                                            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
+                        SaveDateTimeToField(
+                            hbObj,
+                            Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated,
+                            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
                         // move the storage folder pointer to the next item in the array
                         storageFile++;
@@ -802,9 +804,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 filePath));
 
             // Save created DateTime to StorageFile date created field...
-            SaveDateTimeToField(storageFile, 
-                                Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated, 
-                                HAL_Time_CurrentDateTime(false));
+            SaveDateTimeToField(
+                storageFile,
+                Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated,
+                HAL_Time_CurrentDateTime(false));
 
             free(filePath);
 
@@ -953,9 +956,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
         // Save created DateTime to StorageFolder date created field...
-        SaveDateTimeToField(storageFolder, 
-                            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
-                            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
+        SaveDateTimeToField(
+            storageFolder,
+            Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+            HAL_Time_ConvertFromSystemTime(&fileInfoTime));
 
         // ...and set it with the fileInfoTime
         *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
@@ -1163,9 +1167,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
             fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
             // Save created DateTime to StorageFolder date created field...
-            SaveDateTimeToField(storageFolder, 
-                                Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated, 
-                                HAL_Time_ConvertFromSystemTime(&fileInfoTime));
+            SaveDateTimeToField(
+                storageFolder,
+                Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
+                HAL_Time_ConvertFromSystemTime(&fileInfoTime));
         }
     }
 
