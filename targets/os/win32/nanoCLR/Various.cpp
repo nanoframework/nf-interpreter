@@ -6,6 +6,8 @@
 #include "stdafx.h"
 
 #include "platform_selector.h"
+#include <iostream>
+
 //--//
 
 // using namespace System;
@@ -39,7 +41,7 @@ uint64_t HAL_Windows_GetPerformanceTicks()
 
 void HAL_Windows_Debug_Print(char *szText)
 {
-    // UNDONE: FIXME: System::Diagnostics::Debug::Print( gcnew System::String(szText) );
+    std::cout << (std::string)szText;
 }
 
 // HAL_Configuration_Windows g_HAL_Configuration_Windows;

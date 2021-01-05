@@ -10,6 +10,7 @@
 #if defined(_WIN32)
 
 #include <iostream>
+#include <nanoCLR_Win32.h>
 
 static std::string *s_redirectedString = NULL;
 
@@ -222,8 +223,6 @@ void CLR_Debug::Emit(const char *text, int len)
             Watchdog_Reset();
 #ifdef WIN32
             OutputDebugStringA(s_buffer);
-#endif
-#if defined(PLATFORM_WINDOWS_EMULATOR)
             HAL_Windows_Debug_Print(s_buffer);
 #endif
 
@@ -283,7 +282,6 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #if defined(_WIN32)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
-    std::cout << s_messageString + "\n";
 #endif
 
 #if !defined(_WIN32)
