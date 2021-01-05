@@ -960,9 +960,6 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             storageFolder,
             Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___dateCreated,
             HAL_Time_ConvertFromSystemTime(&fileInfoTime));
-
-        // ...and set it with the fileInfoTime
-        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
     }
     NANOCLR_CLEANUP();
 
