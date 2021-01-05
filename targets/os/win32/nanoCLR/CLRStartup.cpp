@@ -123,6 +123,10 @@ struct Settings : CLR_RT_ParseOptions
 
         NANOCLR_CHECK_HRESULT(ProcessOptions(m_clrOptions.StartArgs));
 
+#if !defined(BUILD_RTM)
+        CLR_Debug::Printf("Loading Assemblies.\r\n");
+#endif
+
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
         {
             CLR_RT_Assembly *assm;
@@ -133,11 +137,12 @@ struct Settings : CLR_RT_ParseOptions
             NANOCLR_CHECK_HRESULT(LoadAssembly(header, assm));
         }
 
+        // don't load assemblies because we don't have any deployment storage
 #if !defined(BUILD_RTM)
-        CLR_Debug::Printf("Loading Deployment Assemblies.\r\n");
+//        CLR_Debug::Printf("Loading Deployment Assemblies.\r\n");
 #endif
 
-        LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
+        //LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
 
         //--//
 
