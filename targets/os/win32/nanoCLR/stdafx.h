@@ -14,7 +14,8 @@
 #include <stdio.h>
 #include <tchar.h>
 
-//#include <windows.h>
+#include <Windows.h>
+#include <mutex>
 
 // TODO: reference additional headers your program requires here
 
@@ -26,3 +27,4 @@
 
 #include "nanoCLR_ParseOptions.h"
 
+#pragma comment(lib, "kernel32.lib")

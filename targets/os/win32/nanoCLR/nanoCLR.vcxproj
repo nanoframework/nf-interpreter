@@ -166,6 +166,8 @@
     <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_EventSink.cpp" />
     <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_NativeEventDispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\nanoFramework.Runtime.Events\nf_rt_events_native_nanoFramework_Runtime_Events_WeakDelegate.cpp" />
+    <ClCompile Include="..\..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
+    <ClCompile Include="..\..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="Events.cpp" />
@@ -186,6 +188,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="targetPAL_Time.cpp" />
     <ClCompile Include="Target_BlockStorage.cpp" />
     <ClCompile Include="targetHAL_Time.cpp" />
     <ClCompile Include="Various.cpp">

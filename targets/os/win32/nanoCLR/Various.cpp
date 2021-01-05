@@ -629,6 +629,13 @@ size_t CPU_GetUncachableAddress(size_t address)
     return address;
 }
 
+// CPU sleep is not currently implemented in this target
+void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents)
+{
+    (void)level;
+    (void)wakeEvents;
+};
+
 ///////////////////////////////////////////////////////////////
 
 int nanoBooter_GetTargetInfo(TargetInfo *targetInfo)
