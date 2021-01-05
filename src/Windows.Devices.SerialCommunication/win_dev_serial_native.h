@@ -26,6 +26,12 @@ typedef enum __nfpack SerialHandshake
     SerialHandshake_XOnXOff = 3,
 } SerialHandshake;
 
+typedef enum __nfpack SerialMode
+{
+    SerialMode_Normal = 0,
+    SerialMode_RS485 = 1,
+} SerialMode;
+
 typedef enum __nfpack SerialParity
 {
     SerialParity_None = 0,
@@ -73,7 +79,8 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___stopBits = 14;
     static const int FIELD___bytesReceived = 15;
     static const int FIELD___watchChar = 16;
-    static const int FIELD___callbacksDataReceivedEvent = 17;
+    static const int FIELD___mode = 17;
+    static const int FIELD___callbacksDataReceivedEvent = 18;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___U4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
