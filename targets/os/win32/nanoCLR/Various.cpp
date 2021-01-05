@@ -41,7 +41,20 @@ uint64_t HAL_Windows_GetPerformanceTicks()
 
 void HAL_Windows_Debug_Print(char *szText)
 {
-    std::cout << (std::string)szText;
+    std::string str = (std::string)szText;
+
+    // clear trailing LR & CR
+    int pos;
+    if ((pos = str.find_last_of('\n')) != std::string::npos)
+    {
+        str.erase(pos);
+    }
+    if ((pos = str.find_last_of('\r')) != std::string::npos)
+    {
+        str.erase(pos);
+    }
+
+    std::cout << (std::string)str + "\n" << std::flush;
 }
 
 // HAL_Configuration_Windows g_HAL_Configuration_Windows;
