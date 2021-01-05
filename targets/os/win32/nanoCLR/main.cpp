@@ -66,7 +66,7 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 /////////////////////////////////////////////////////////////////////////////
 //
 
-int _tmain(int argc, _TCHAR *argv[])
+int _tmain(int argc, _TCHAR* argv[])
 {
     wprintf(L"\n.NET nanoFramework nanoCLR WIN32 v");
     std::cout << VERSION_STRING;
@@ -83,9 +83,12 @@ int _tmain(int argc, _TCHAR *argv[])
     clrSettings.EnterDebuggerLoopAfterExit = false;
 
     // fill arguments from command line
+    clrSettings.StartArgs.resize(argc - 1);
+
     for (int i = 0; i < argc - 1; i++)
     {
-        clrSettings.StartArgs.push_back((argv + 1)[i]);
+        std::wstring argv_ = std::wstring(argv[1 + i]);
+        clrSettings.StartArgs[i] = argv_;
     }
 
     ClrStartup(clrSettings);
