@@ -460,18 +460,18 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         bool rs485Mode = ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 == SerialMode_RS485);
-        if ( rs485Mode )
+        if (rs485Mode)
         {
-                // Disable any flow control & Set RS485 half duplex mode
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-                uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX);
+            // Disable any flow control & Set RS485 half duplex mode
+            uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+            uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX);
         }
         else
         {
-                // Reset to normal mode
-                uart_set_mode(uart_num, UART_MODE_UART);
+            // Reset to normal mode
+            uart_set_mode(uart_num, UART_MODE_UART);
         }
-        
+
         // Already Initialised ?
         if (GetPalUartFromUartNum(uart_num)->SerialDevice)
         {
@@ -517,7 +517,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode
-        if ( rs485Mode ) 
+        if (rs485Mode)
         {
             ctsPin = UART_PIN_NO_CHANGE; // no need for a CTS pin enabled, just RTS
         }
