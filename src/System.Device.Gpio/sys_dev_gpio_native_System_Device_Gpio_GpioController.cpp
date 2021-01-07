@@ -164,7 +164,7 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
     CLR_RT_StackFrame &stack,
     CLR_RT_HeapBlock *&gpioPin)
 {
-    CLR_IDX assemblyIdx;
+    CLR_INDEX assemblyIndex;
     CLR_INT32 index = 0;
     CLR_RT_Assembly *thisAssembly = NULL;
     CLR_RT_HeapBlock *gpioPinBundle = NULL;
@@ -174,8 +174,8 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
     CLR_RT_HeapBlock *pThis = stack.This();
 
     // s_GpioPins it's a static field, need to access it through the assembly
-    assemblyIdx = pThis->ObjectCls().Assembly();
-    thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIdx - 1];
+    assemblyIndex = pThis->ObjectCls().Assembly();
+    thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex - 1];
 
     // finally dereference s_GpioPins (as an ArrayList)
     gpioPins = (CLR_RT_HeapBlock_ArrayList *)thisAssembly->GetStaticField(FIELD_STATIC__s_GpioPins)->Dereference();

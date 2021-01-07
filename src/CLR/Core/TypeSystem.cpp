@@ -479,12 +479,12 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CLR_RT_Assembly_Instance::InitializeFromIndex(const CLR_RT_Assembly_Index &idx)
+bool CLR_RT_Assembly_Instance::InitializeFromIndex(const CLR_RT_Assembly_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(idx))
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        m_data = idx.m_data;
+        m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
 
         return true;
@@ -506,12 +506,12 @@ void CLR_RT_Assembly_Instance::Clear()
 
 //////////////////////////////
 
-bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &idx)
+bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(idx))
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        m_data = idx.m_data;
+        m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetSignature(m_assm->GetTypeSpec(TypeSpec())->sig);
 
@@ -539,12 +539,12 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
     NATIVE_PROFILE_CLR_CORE();
     if (assm && CLR_TypeFromTk(tk) == TBL_TypeSpec)
     {
-        CLR_UINT32 idx = CLR_DataFromTk(tk);
+        CLR_UINT32 index = CLR_DataFromTk(tk);
 
-        Set(assm->m_idx, idx);
+        Set(assm->m_index, index);
 
         m_assm = assm;
-        m_target = assm->GetSignature(assm->GetTypeSpec(idx)->sig);
+        m_target = assm->GetSignature(assm->GetTypeSpec(index)->sig);
 
         return true;
     }
@@ -589,12 +589,12 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
     return ptr ? InitializeFromIndex(*ptr) : false;
 }
 
-bool CLR_RT_TypeDef_Instance::InitializeFromIndex(const CLR_RT_TypeDef_Index &idx)
+bool CLR_RT_TypeDef_Instance::InitializeFromIndex(const CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(idx))
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        m_data = idx.m_data;
+        m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetTypeDef(Type());
 
@@ -613,13 +613,13 @@ bool CLR_RT_TypeDef_Instance::InitializeFromMethod(const CLR_RT_MethodDef_Instan
     NATIVE_PROFILE_CLR_CORE();
     if (NANOCLR_INDEX_IS_VALID(md))
     {
-        CLR_IDX idxAssm = md.Assembly();
-        CLR_IDX idxType = md.CrossReference().GetOwner();
+        CLR_INDEX indexAssm = md.Assembly();
+        CLR_INDEX indexType = md.CrossReference().GetOwner();
 
-        Set(idxAssm, idxType);
+        Set(indexAssm, indexType);
 
-        m_assm = g_CLR_RT_TypeSystem.m_assemblies[idxAssm - 1];
-        m_target = m_assm->GetTypeDef(idxType);
+        m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
+        m_target = m_assm->GetTypeDef(indexType);
 
         return true;
     }
@@ -636,14 +636,14 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
     {
         CLR_RT_Assembly *assm = fd.m_assm;
         const CLR_RECORD_TYPEDEF *td = (const CLR_RECORD_TYPEDEF *)assm->GetTable(TBL_TypeDef);
-        CLR_IDX idxField = fd.Field();
+        CLR_INDEX indexField = fd.Field();
         int i = assm->m_pTablesSize[TBL_TypeDef];
 
         if (fd.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
         {
             for (; i; i--, td++)
             {
-                if (td->sFields_First <= idxField && idxField < td->sFields_First + td->sFields_Num)
+                if (td->sFields_First <= indexField && indexField < td->sFields_First + td->sFields_Num)
                 {
                     break;
                 }
@@ -653,7 +653,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         {
             for (; i; i--, td++)
             {
-                if (td->iFields_First <= idxField && idxField < td->iFields_First + td->iFields_Num)
+                if (td->iFields_First <= indexField && indexField < td->iFields_First + td->iFields_Num)
                 {
                     break;
                 }
@@ -662,13 +662,13 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
 
         if (i)
         {
-            CLR_IDX idxAssm = fd.Assembly();
-            CLR_IDX idxType = assm->m_pTablesSize[TBL_TypeDef] - i;
+            CLR_INDEX indexAssm = fd.Assembly();
+            CLR_INDEX indexType = assm->m_pTablesSize[TBL_TypeDef] - i;
 
-            Set(idxAssm, idxType);
+            Set(indexAssm, indexType);
 
-            m_assm = g_CLR_RT_TypeSystem.m_assemblies[idxAssm - 1];
-            m_target = m_assm->GetTypeDef(idxType);
+            m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
+            m_target = m_assm->GetTypeDef(indexType);
 
             return true;
         }
@@ -701,21 +701,21 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
     {
-        CLR_UINT32 idx = CLR_DataFromTk(tk);
+        CLR_UINT32 index = CLR_DataFromTk(tk);
 
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_TypeRef:
-                m_data = assm->m_pCrossReference_TypeRef[idx].m_target.m_data;
+                m_data = assm->m_pCrossReference_TypeRef[index].m_target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 m_target = m_assm->GetTypeDef(Type());
                 return true;
 
             case TBL_TypeDef:
-                Set(assm->m_idx, idx);
+                Set(assm->m_index, index);
 
                 m_assm = assm;
-                m_target = assm->GetTypeDef(idx);
+                m_target = assm->GetTypeDef(index);
                 return true;
 
             default:
@@ -750,7 +750,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
     NATIVE_PROFILE_CLR_CORE();
     if (NANOCLR_INDEX_IS_VALID(*this))
     {
-        CLR_IDX extends = m_target->extends;
+        CLR_INDEX extends = m_target->extends;
 
         if (extends != CLR_EmptyIndex)
         {
@@ -786,12 +786,12 @@ bool CLR_RT_TypeDef_Instance::HasFinalizer() const
 
 //////////////////////////////
 
-bool CLR_RT_FieldDef_Instance::InitializeFromIndex(const CLR_RT_FieldDef_Index &idx)
+bool CLR_RT_FieldDef_Instance::InitializeFromIndex(const CLR_RT_FieldDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(idx))
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        m_data = idx.m_data;
+        m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetFieldDef(Field());
 
@@ -819,21 +819,21 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
     {
-        CLR_UINT32 idx = CLR_DataFromTk(tk);
+        CLR_UINT32 index = CLR_DataFromTk(tk);
 
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_FieldRef:
-                m_data = assm->m_pCrossReference_FieldRef[idx].m_target.m_data;
+                m_data = assm->m_pCrossReference_FieldRef[index].m_target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 m_target = m_assm->GetFieldDef(Field());
                 return true;
 
             case TBL_FieldDef:
-                Set(assm->m_idx, idx);
+                Set(assm->m_index, index);
 
                 m_assm = assm;
-                m_target = m_assm->GetFieldDef(idx);
+                m_target = m_assm->GetFieldDef(index);
                 return true;
 
             default:
@@ -849,12 +849,12 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
 
 //////////////////////////////
 
-bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index &idx)
+bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(idx))
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        m_data = idx.m_data;
+        m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetMethodDef(Method());
 
@@ -882,21 +882,21 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
     {
-        CLR_UINT32 idx = CLR_DataFromTk(tk);
+        CLR_UINT32 index = CLR_DataFromTk(tk);
 
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_MethodRef:
-                m_data = assm->m_pCrossReference_MethodRef[idx].m_target.m_data;
+                m_data = assm->m_pCrossReference_MethodRef[index].m_target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 m_target = m_assm->GetMethodDef(Method());
                 return true;
 
             case TBL_MethodDef:
-                Set(assm->m_idx, idx);
+                Set(assm->m_index, index);
 
                 m_assm = assm;
-                m_target = m_assm->GetMethodDef(idx);
+                m_target = m_assm->GetMethodDef(index);
                 return true;
 
             default:
@@ -1881,9 +1881,9 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
 void CLR_RT_Assembly::DestroyInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (m_idx)
+    if (m_index)
     {
-        g_CLR_RT_TypeSystem.m_assemblies[m_idx - 1] = NULL;
+        g_CLR_RT_TypeSystem.m_assemblies[m_index - 1] = NULL;
     }
 
 #if defined(WIN32)
@@ -2079,9 +2079,9 @@ void CLR_RT_Assembly::Resolve_Link()
 {
     NATIVE_PROFILE_CLR_CORE();
     int iStaticFields = 0;
-    int idxType;
+    int indexType;
 
-    ITERATE_THROUGH_RECORDS(this, idxType, TypeDef, TYPEDEF)
+    ITERATE_THROUGH_RECORDS(this, indexType, TypeDef, TYPEDEF)
     {
         int num;
         int i;
@@ -2104,11 +2104,11 @@ void CLR_RT_Assembly::Resolve_Link()
         // Link instance fields.
         //
         {
-            CLR_RT_TypeDef_Index idx;
-            idx.Set(m_idx, idxType);
+            CLR_RT_TypeDef_Index index;
+            index.Set(m_index, indexType);
             CLR_RT_TypeDef_Instance inst;
-            inst.InitializeFromIndex(idx);
-            CLR_IDX tot = 0;
+            inst.InitializeFromIndex(index);
+            CLR_INDEX tot = 0;
 
             do
             {
@@ -2153,7 +2153,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             for (; num; num--, md++)
             {
-                md->m_data = idxType;
+                md->m_data = indexType;
             }
         }
     }
@@ -2398,14 +2398,14 @@ void CLR_RT_AppDomain::Relocate()
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_outOfMemoryException);
 }
 
-HRESULT CLR_RT_AppDomain::VerifyTypeIsLoaded(const CLR_RT_TypeDef_Index &idx)
+HRESULT CLR_RT_AppDomain::VerifyTypeIsLoaded(const CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_TypeDef_Instance inst;
 
-    if (!inst.InitializeFromIndex(idx))
+    if (!inst.InitializeFromIndex(index))
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     if (!FindAppDomainAssembly(inst.m_assm))
         NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
@@ -2425,7 +2425,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
     CLR_RT_HeapBlock *proxySrc = NULL;
     CLR_RT_HeapBlock *mbroSrc = NULL;
     bool fSimpleAssign = false;
-    CLR_RT_TypeDef_Index idxVerify = g_CLR_RT_WellKnownTypes.m_Object;
+    CLR_RT_TypeDef_Index indexVerify = g_CLR_RT_WellKnownTypes.m_Object;
     CLR_DataType dtSrc = src.DataType();
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 
@@ -2466,7 +2466,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
 
                     NANOCLR_CHECK_HRESULT(proxySrc->TransparentProxyValidate());
 
-                    idxVerify = proxySrc->TransparentProxyDereference()->ObjectCls();
+                    indexVerify = proxySrc->TransparentProxyDereference()->ObjectCls();
 
                     if (proxySrc->TransparentProxyAppDomain() != appDomainDst)
                     {
@@ -2485,7 +2485,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
                         if ((inst.CrossReference().m_flags &
                              CLR_RT_TypeDef_CrossReference::TD_CR_IsMarshalByRefObject) != 0)
                         {
-                            idxVerify = inst;
+                            indexVerify = inst;
 
                             mbroSrc = ptr;
                         }
@@ -2496,7 +2496,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
         }
     }
 
-    NANOCLR_CHECK_HRESULT(appDomainDst->VerifyTypeIsLoaded(idxVerify));
+    NANOCLR_CHECK_HRESULT(appDomainDst->VerifyTypeIsLoaded(indexVerify));
 
     if (fSimpleAssign)
     {
@@ -2652,14 +2652,14 @@ HRESULT CLR_RT_AppDomain::GetAssemblies(CLR_RT_HeapBlock &ref)
             else
             {
                 CLR_RT_HeapBlock *hbObj;
-                CLR_RT_Assembly_Index idx;
-                idx.Set(pASSM->m_idx);
+                CLR_RT_Assembly_Index index;
+                index.Set(pASSM->m_index);
 
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
                 hbObj = pArray->Dereference();
 
-                hbObj->SetReflection(idx);
+                hbObj->SetReflection(index);
 
                 pArray++;
             }
@@ -2934,26 +2934,26 @@ void CLR_RT_Assembly::Resolve_MethodDef()
     {
         const MethodIndexLookup *mil = c_MethodIndexLookup;
 
-        CLR_RT_MethodDef_Index idx;
-        idx.Set(m_idx, i);
+        CLR_RT_MethodDef_Index index;
+        index.Set(m_index, i);
 
         // Check for wellKnownMethods
         for (size_t i = 0; i < ARRAYSIZE(c_MethodIndexLookup); i++, mil++)
         {
-            CLR_RT_TypeDef_Index &idxType = *mil->type;
-            CLR_RT_MethodDef_Index &idxMethod = *mil->method;
+            CLR_RT_TypeDef_Index &indexType = *mil->type;
+            CLR_RT_MethodDef_Index &indexMethod = *mil->method;
 
-            if (NANOCLR_INDEX_IS_VALID(idxType) && NANOCLR_INDEX_IS_INVALID(idxMethod))
+            if (NANOCLR_INDEX_IS_VALID(indexType) && NANOCLR_INDEX_IS_INVALID(indexMethod))
             {
                 CLR_RT_TypeDef_Instance instType;
 
-                _SIDE_ASSERTE(instType.InitializeFromIndex(idxType));
+                _SIDE_ASSERTE(instType.InitializeFromIndex(indexType));
 
                 if (instType.m_assm == this)
                 {
                     if (!strcmp(GetString(md->name), mil->name))
                     {
-                        idxMethod.m_data = idx.m_data;
+                        indexMethod.m_data = index.m_data;
                     }
                 }
             }
@@ -2961,7 +2961,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
 
         if (md->flags & CLR_RECORD_METHODDEF::MD_EntryPoint)
         {
-            g_CLR_RT_TypeSystem.m_entryPoint = idx;
+            g_CLR_RT_TypeSystem.m_entryPoint = index;
         }
     }
 }
@@ -3049,7 +3049,7 @@ CLR_UINT32 CLR_RT_Assembly::ComputeAssemblyHash(const CLR_RECORD_ASSEMBLYREF *ar
 
 //--//
 
-bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &idx)
+bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
@@ -3064,19 +3064,19 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_R
 
             if (!strcmp(szName, name) && !strcmp(szNameSpace, nameSpace))
             {
-                idx.Set(m_idx, i);
+                index.Set(m_index, i);
 
                 return true;
             }
         }
     }
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
 
-bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_IDX scope, CLR_RT_TypeDef_Index &idx)
+bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
@@ -3090,19 +3090,19 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_IDX scope, CLR_RT_TypeDe
 
             if (!strcmp(szName, name))
             {
-                idx.Set(m_idx, i);
+                index.Set(m_index, i);
 
                 return true;
             }
         }
     }
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
 
-bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &idx)
+bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_CrossReference *p = m_pCrossReference_TypeDef;
@@ -3117,13 +3117,13 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &idx)
 
     if (i != tblSize)
     {
-        idx.Set(m_idx, i);
+        index.Set(m_index, i);
 
         return true;
     }
     else
     {
-        idx.Clear();
+        index.Clear();
 
         return false;
     }
@@ -3137,7 +3137,7 @@ static bool local_FindFieldDef(
     CLR_UINT32 num,
     const char *szText,
     CLR_RT_Assembly *base,
-    CLR_IDX sig,
+    CLR_INDEX sig,
     CLR_RT_FieldDef_Index &res)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -3160,7 +3160,7 @@ static bool local_FindFieldDef(
                     continue;
             }
 
-            res.Set(assm->m_idx, first + i);
+            res.Set(assm->m_index, first + i);
 
             return true;
         }
@@ -3175,16 +3175,16 @@ bool CLR_RT_Assembly::FindFieldDef(
     const CLR_RECORD_TYPEDEF *td,
     const char *name,
     CLR_RT_Assembly *base,
-    CLR_IDX sig,
-    CLR_RT_FieldDef_Index &idx)
+    CLR_INDEX sig,
+    CLR_RT_FieldDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (local_FindFieldDef(this, td->iFields_First, td->iFields_Num, name, base, sig, idx))
+    if (local_FindFieldDef(this, td->iFields_First, td->iFields_Num, name, base, sig, index))
         return true;
-    if (local_FindFieldDef(this, td->sFields_First, td->sFields_Num, name, base, sig, idx))
+    if (local_FindFieldDef(this, td->sFields_First, td->sFields_Num, name, base, sig, index))
         return true;
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
@@ -3194,7 +3194,7 @@ bool CLR_RT_Assembly::FindMethodDef(
     const char *name,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
-    CLR_RT_MethodDef_Index &idx)
+    CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     int i;
@@ -3221,21 +3221,21 @@ bool CLR_RT_Assembly::FindMethodDef(
 
             if (fMatch)
             {
-                idx.Set(m_idx, i + td->methods_First);
+                index.Set(m_index, i + td->methods_First);
 
                 return true;
             }
         }
     }
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CLR_RT_Assembly::FindMethodBoundaries(CLR_IDX i, CLR_OFFSET &start, CLR_OFFSET &end)
+bool CLR_RT_Assembly::FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_OFFSET &end)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODDEF *p = GetMethodDef(i);
@@ -3266,16 +3266,16 @@ bool CLR_RT_Assembly::FindMethodBoundaries(CLR_IDX i, CLR_OFFSET &start, CLR_OFF
     return true;
 }
 
-bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &idx)
+bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    _ASSERTE(m_idx == idx.Assembly());
+    _ASSERTE(m_index == index.Assembly());
 
-    for (int i = idx.Method(); i < m_pTablesSize[TBL_MethodDef]; i++)
+    for (int i = index.Method(); i < m_pTablesSize[TBL_MethodDef]; i++)
     {
         const CLR_RECORD_METHODDEF *md = GetMethodDef(i);
 
-        idx.Set(m_idx, i);
+        index.Set(m_index, i);
 
         if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
         {
@@ -3283,7 +3283,7 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &idx)
         }
     }
 
-    idx.Clear();
+    index.Clear();
     return false;
 }
 
@@ -3299,11 +3299,11 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
     for (int i = 0; i < m_pTablesSize[TBL_TypeDef]; i++, src++, dst++)
     {
-        CLR_RT_TypeDef_Index idx;
-        idx.Set(m_idx, i);
+        CLR_RT_TypeDef_Index index;
+        index.Set(m_index, i);
         CLR_RT_TypeDef_Instance inst;
-        inst.InitializeFromIndex(idx);
-        CLR_UINT32 hash = ComputeHashForName(idx, 0);
+        inst.InitializeFromIndex(index);
+        CLR_UINT32 hash = ComputeHashForName(index, 0);
 
         while (NANOCLR_INDEX_IS_VALID(inst))
         {
@@ -3440,12 +3440,12 @@ void CLR_RT_TypeSystem::Link(CLR_RT_Assembly *assm)
     {
         *ppASSM = assm;
 
-        assm->m_idx = idx;
+        assm->m_index = index;
 
         PostLinkageProcessing(assm);
 
-        if (m_assembliesMax < idx)
-            m_assembliesMax = idx;
+        if (m_assembliesMax < index)
+            m_assembliesMax = index;
 
         return;
     }
@@ -3778,16 +3778,16 @@ int
 HRESULT CLR_RT_TypeSystem::LocateResourceFile(
     CLR_RT_Assembly_Instance assm,
     const char *name,
-    CLR_INT32 &idxResourceFile)
+    CLR_INT32 &indexResourceFile)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     CLR_RT_Assembly *pAssm = assm.m_assm;
 
-    for (idxResourceFile = 0; idxResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles]; idxResourceFile++)
+    for (indexResourceFile = 0; indexResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles]; indexResourceFile++)
     {
-        const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(idxResourceFile);
+        const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(indexResourceFile);
 
         if (!strcmp(pAssm->GetString(resourceFile->name), name))
         {
@@ -3795,14 +3795,14 @@ HRESULT CLR_RT_TypeSystem::LocateResourceFile(
         }
     }
 
-    idxResourceFile = -1;
+    indexResourceFile = -1;
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT CLR_RT_TypeSystem::LocateResource(
     CLR_RT_Assembly_Instance assm,
-    CLR_INT32 idxResourceFile,
+    CLR_INT32 indexResourceFile,
     CLR_INT16 id,
     const CLR_RECORD_RESOURCE *&res,
     CLR_UINT32 &size)
@@ -3819,10 +3819,10 @@ HRESULT CLR_RT_TypeSystem::LocateResource(
     res = NULL;
     size = 0;
 
-    if (idxResourceFile < 0 || idxResourceFile >= pAssm->m_pTablesSize[TBL_ResourcesFiles])
+    if (indexResourceFile < 0 || indexResourceFile >= pAssm->m_pTablesSize[TBL_ResourcesFiles])
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
-    resourceFile = pAssm->GetResourceFile(idxResourceFile);
+    resourceFile = pAssm->GetResourceFile(indexResourceFile);
 
     _ASSERTE(resourceFile->numberOfResources > 0);
 
@@ -4180,22 +4180,22 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
     NATIVE_PROFILE_CLR_CORE();
     if (fIsInstanceOfOK)
     {
-        CLR_RT_ReflectionDef_Index idxLeft;
+        CLR_RT_ReflectionDef_Index indexLeft;
         CLR_RT_TypeDescriptor descLeft;
-        CLR_RT_ReflectionDef_Index idxRight;
+        CLR_RT_ReflectionDef_Index indexRight;
         CLR_RT_TypeDescriptor descRight;
 
-        idxLeft.m_kind = REFLECTION_TYPE;
-        idxLeft.m_levels = resLeft.m_levels;
-        idxLeft.m_data.m_type = resLeft.m_cls;
+        indexLeft.m_kind = REFLECTION_TYPE;
+        indexLeft.m_levels = resLeft.m_levels;
+        indexLeft.m_data.m_type = resLeft.m_cls;
 
-        idxRight.m_kind = REFLECTION_TYPE;
-        idxRight.m_levels = resRight.m_levels;
-        idxRight.m_data.m_type = resRight.m_cls;
+        indexRight.m_kind = REFLECTION_TYPE;
+        indexRight.m_levels = resRight.m_levels;
+        indexRight.m_data.m_type = resRight.m_cls;
 
-        if (FAILED(descLeft.InitializeFromReflection(idxLeft)))
+        if (FAILED(descLeft.InitializeFromReflection(indexLeft)))
             return false;
-        if (FAILED(descRight.InitializeFromReflection(idxRight)))
+        if (FAILED(descRight.InitializeFromReflection(indexRight)))
             return false;
 
         if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft, false))
@@ -4345,7 +4345,7 @@ HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char 
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &calleeMD,
-    CLR_RT_MethodDef_Index &idx)
+    CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_MethodDef_Instance calleeInst;
@@ -4377,15 +4377,15 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
             QueueStringToBuffer(szBuffer, iBuffer, ".");
             QueueStringToBuffer(szBuffer, iBuffer, calleeName);
 
-            if (FindVirtualMethodDef(cls, calleeMD, rgBuffer, idx))
+            if (FindVirtualMethodDef(cls, calleeMD, rgBuffer, index))
                 return true;
         }
 
-        if (FindVirtualMethodDef(cls, calleeMD, calleeName, idx))
+        if (FindVirtualMethodDef(cls, calleeMD, calleeName, index))
             return true;
     }
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
@@ -4394,7 +4394,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     const CLR_RT_TypeDef_Index &cls,
     const CLR_RT_MethodDef_Index &calleeMD,
     const char *calleeName,
-    CLR_RT_MethodDef_Index &idx)
+    CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_TypeDef_Instance clsInst;
@@ -4418,7 +4418,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
             if (targetMDR == calleeMDR)
             {
                 // Shortcut for identity.
-                idx = calleeInst;
+                index = calleeInst;
                 return true;
             }
 
@@ -4435,7 +4435,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
                     if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
                     {
-                        idx.Set(targetAssm->m_idx, i + targetTDR->methods_First);
+                        index.Set(targetAssm->m_index, i + targetTDR->methods_First);
 
                         return true;
                     }
@@ -4446,7 +4446,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
         clsInst.SwitchToParent();
     }
 
-    idx.Clear();
+    index.Clear();
 
     return false;
 }
@@ -4492,7 +4492,7 @@ void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_TypeDef_Instance &inst)
 {
     NATIVE_PROFILE_CLR_CORE();
     m_data.ownerType = TBL_TypeDef;
-    m_data.ownerIdx = inst.Type();
+    m_data.ownerIndex = inst.Type();
 
     Initialize(inst.m_assm);
 }
@@ -4501,7 +4501,7 @@ void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_FieldDef_Instance &inst
 {
     NATIVE_PROFILE_CLR_CORE();
     m_data.ownerType = TBL_FieldDef;
-    m_data.ownerIdx = inst.Field();
+    m_data.ownerIndex = inst.Field();
 
     Initialize(inst.m_assm);
 }
@@ -4510,7 +4510,7 @@ void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_MethodDef_Instance &ins
 {
     NATIVE_PROFILE_CLR_CORE();
     m_data.ownerType = TBL_MethodDef;
-    m_data.ownerIdx = inst.Method();
+    m_data.ownerIndex = inst.Method();
 
     Initialize(inst.m_assm);
 }
@@ -4536,14 +4536,14 @@ bool CLR_RT_AttributeEnumerator::Advance()
 
         if (ptr->Key() == key)
         {
-            CLR_IDX tk = ptr->constructor;
+            CLR_INDEX tk = ptr->constructor;
             if (tk & 0x8000)
             {
                 m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].m_target;
             }
             else
             {
-                m_match.Set(m_assm->m_idx, tk);
+                m_match.Set(m_assm->m_index, tk);
             }
 
             m_blob = m_assm->GetSignature(ptr->data);
@@ -4620,7 +4620,7 @@ HRESULT CLR_RT_AttributeParser::Initialize(const CLR_RT_AttributeEnumerator &en)
     m_fixed_Count = m_md.m_target->numArgs - 1;
     m_named_Count = -1;
     m_constructorParsed = false;
-    m_mdIdx = en.m_match;
+    m_mdIndex = en.m_match;
 
     NANOCLR_NOCLEANUP();
 }

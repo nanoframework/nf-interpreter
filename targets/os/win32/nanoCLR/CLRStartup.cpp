@@ -401,7 +401,7 @@ struct Settings : CLR_RT_ParseOptions
 #define OPTION_CALL(fpn, optName, optDesc)                                                                             \
     cmd = new Command_Call(*this, &Settings::fpn, optName, optDesc);                                                   \
     m_commands.push_back(cmd)
-#define PARAM_EXTRACT_STRING(lst, idx) ((CLR_RT_ParseOptions::Parameter_Generic *)(*lst)[idx])->m_data.c_str()
+#define PARAM_EXTRACT_STRING(lst, index) ((CLR_RT_ParseOptions::Parameter_Generic *)(*lst)[index])->m_data.c_str()
 
     void BuildOptions()
     {

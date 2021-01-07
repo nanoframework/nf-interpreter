@@ -256,13 +256,13 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
             if (pass == 0)
             {
                 // allocate array of byte arrays
-                CLR_RT_ReflectionDef_Index idx;
+                CLR_RT_ReflectionDef_Index index;
 
-                idx.m_kind = REFLECTION_TYPE;
-                idx.m_levels = 2;
-                idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
+                index.m_kind = REFLECTION_TYPE;
+                index.m_levels = 2;
+                index.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
 
-                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, idx));
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, index));
 
                 NANOCLR_CHECK_HRESULT(hbAddresses.StoreToReference(stack.Arg2(), 0));
             }

@@ -6,6 +6,8 @@
 #ifndef _NANOCLR_RUNTIME__SERIALIZATION_H_
 #define _NANOCLR_RUNTIME__SERIALIZATION_H_
 
+// clang-format off
+
 struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
 {
     //////////////////////////////////////////////////////////////////
@@ -220,13 +222,13 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
     struct DuplicateTracker : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
     {
         CLR_RT_HeapBlock* m_ptr;
-        CLR_UINT32        m_idx;
+        CLR_UINT32        m_index;
     };
 
     //--//
 
     CLR_RT_HeapBlock_MemoryStream* m_stream;
-    CLR_UINT32                     m_idx;
+    CLR_UINT32                     m_index;
     CLR_UINT32                     m_lastTypeRead;
     CLR_RT_DblLinkedList           m_duplicates;            // EVENT HEAP - NO RELOCATION - list of CLR_RT_BinaryFormatter::DuplicateTracker
     CLR_RT_DblLinkedList           m_states;                // EVENT HEAP - NO RELOCATION - list of CLR_RT_BinaryFormatter::State
@@ -252,7 +254,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
      HRESULT           TrackDuplicate ( CLR_RT_HeapBlock* object );
      CLR_UINT32        SearchDuplicate( CLR_RT_HeapBlock* object );
-     CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        idx    );
+     CLR_RT_HeapBlock* GetDuplicate   ( CLR_UINT32        index    );
 
     //--//
 
@@ -283,3 +285,4 @@ private:
 
 #endif // _NANOCLR_RUNTIME__SERIALIZATION_H_
 
+// clang-format on

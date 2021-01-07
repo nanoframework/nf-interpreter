@@ -763,27 +763,27 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
 bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
     CLR_RT_AppDomain *appDomain,
     CLR_RT_AppDomainAssembly *appDomainAssembly,
-    const CLR_RT_MethodDef_Index &idx)
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
     _ASSERTE(m_cctorThread != NULL);
     //_ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.m_data = index.m_data;
 
     _ASSERTE(appDomainAssembly != NULL);
 
     // find next method with static constructor
-    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(idxNext))
+    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
     {
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
-        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, idxNext, NULL)))
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, NULL)))
         {
             dlg = refDlg.DereferenceDelegate();
             dlg->m_appDomain = appDomain;
@@ -814,24 +814,24 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     if (dlg != NULL)
     {
         CLR_RT_AppDomainAssembly *appDomainAssembly;
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst;
 
-        // Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex(idx));
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
         appDomainAssembly = dlg->m_appDomain->FindAppDomainAssembly(inst.m_assm);
 
         _ASSERTE(appDomainAssembly != NULL);
         _ASSERTE(appDomainAssembly->m_assembly == inst.m_assm);
 
-        // This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
+        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
         // which will fail
-        idx.m_data++;
+        index.m_data++;
 
         // This is not the first static constructor run in this appDomain
-        if (SpawnStaticConstructorHelper(dlg->m_appDomain, appDomainAssembly, idx))
+        if (SpawnStaticConstructorHelper(dlg->m_appDomain, appDomainAssembly, index))
             return;
     }
 
@@ -845,8 +845,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
             // Find an AppDomainAssembly that does not have it's static constructor bit set...
             if ((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted) == 0)
             {
-                CLR_RT_MethodDef_Index idx;
-                idx.Set(assembly->m_idx, 0);
+                CLR_RT_MethodDef_Index index;
+                index.Set(assembly->m_index, 0);
 
 #ifdef DEBUG
 
@@ -861,7 +861,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
                 }
 #endif
 
-                if (SpawnStaticConstructorHelper(appDomain, appDomainAssembly, idx))
+                if (SpawnStaticConstructorHelper(appDomain, appDomainAssembly, index))
                     return;
             }
         }
@@ -876,27 +876,29 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 }
 #else  // NANOCLR_APPDOMAINS
 
-bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assembly, const CLR_RT_MethodDef_Index &idx)
+bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
+    CLR_RT_Assembly *assembly,
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
     _ASSERTE(m_cctorThread != NULL);
     _ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.m_data = index.m_data;
 
     _ASSERTE(assembly != NULL);
 
     // find next method with static constructor
-    if (assembly->FindNextStaticConstructor(idxNext))
+    if (assembly->FindNextStaticConstructor(indexNext))
     {
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
-        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, idxNext, NULL)))
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, NULL)))
         {
             dlg = refDlg.DereferenceDelegate();
 
@@ -925,18 +927,18 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 
     if (dlg != NULL)
     {
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst;
 
-        // Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex(idx));
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
-        // This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
+        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
         // which will fail
-        idx.m_data++;
+        index.m_data++;
 
-        if (SpawnStaticConstructorHelper(inst.m_assm, idx))
+        if (SpawnStaticConstructorHelper(inst.m_assm, index))
             return;
     }
 
@@ -946,8 +948,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         // Find an AppDomainAssembly that does not have it's static constructor bit set...
         if ((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {
-            CLR_RT_MethodDef_Index idx;
-            idx.Set(pASSM->m_idx, 0);
+            CLR_RT_MethodDef_Index index;
+            index.Set(pASSM->m_index, 0);
             bool fDepedenciesRun = true;
 
             // Check that all dependent assemblies have had static constructors run.
@@ -961,7 +963,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
                 }
             }
 
-            if (fDepedenciesRun && SpawnStaticConstructorHelper(pASSM, idx))
+            if (fDepedenciesRun && SpawnStaticConstructorHelper(pASSM, index))
                 return;
         }
     }
@@ -1032,10 +1034,10 @@ void CLR_RT_ExecutionEngine::UpdateToLowestExecutionCounter(CLR_RT_Thread *pThre
     pThread->m_executionCounter = m_GlobalExecutionCounter - 1;
 }
 
-void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT32 &methodIdx)
+void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    assmIdx = 0;
-    methodIdx = 0;
+    assmIndex = 0;
+    methodIndex = 0;
 
     if (m_currentThread != NULL)
     {
@@ -1043,15 +1045,15 @@ void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT
 
         if (stack)
         {
-            assmIdx = stack->m_call.Assembly();
-            methodIdx = stack->m_call.Method();
+            assmIndex = stack->m_call.Assembly();
+            methodIndex = stack->m_call.Method();
         }
     }
 }
 
-void CLR_RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT32 &methodIdx)
+void CLR_RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod(assmIdx, methodIdx);
+    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod(assmIndex, methodIndex);
 }
 
 void CLR_SoftReboot()
@@ -1819,14 +1821,14 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 case DATATYPE_VALUETYPE:
                 {
                     CLR_UINT32 tk = CLR_TkFromStream(sig);
-                    CLR_UINT32 idx = CLR_DataFromTk(tk);
+                    CLR_UINT32 index = CLR_DataFromTk(tk);
 
                     switch (CLR_TypeFromTk(tk))
                     {
                         case TBL_TypeSpec:
                         {
                             CLR_RT_SignatureParser sub;
-                            sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(idx));
+                            sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(index));
                             CLR_RT_SignatureParser::Element res;
 
                             NANOCLR_CHECK_HRESULT(sub.Advance(res));
@@ -1837,11 +1839,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         break;
 
                         case TBL_TypeRef:
-                            cls = assm->m_pCrossReference_TypeRef[idx].m_target;
+                            cls = assm->m_pCrossReference_TypeRef[index].m_target;
                             break;
 
                         case TBL_TypeDef:
-                            cls.Set(assm->m_idx, idx);
+                            cls.Set(assm->m_index, index);
                             break;
 
                         default:
@@ -2246,18 +2248,18 @@ HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const cha
     NANOCLR_HEADER();
 
     CLR_RT_FieldDef_Instance inst;
-    CLR_RT_FieldDef_Index idx;
+    CLR_RT_FieldDef_Index index;
     CLR_RT_HeapBlock *res;
 
     field = NULL;
 
-    NANOCLR_CHECK_HRESULT(FindFieldDef(reference, szText, idx));
+    NANOCLR_CHECK_HRESULT(FindFieldDef(reference, szText, index));
 
-    inst.InitializeFromIndex(idx);
+    inst.InitializeFromIndex(index);
 
     if (inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-        res = CLR_RT_ExecutionEngine::AccessStaticField(idx);
+        res = CLR_RT_ExecutionEngine::AccessStaticField(index);
         if (res == NULL)
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }

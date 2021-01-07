@@ -106,7 +106,7 @@ typedef signed __int64 CLR_INT64;
 
 typedef CLR_UINT16 CLR_OFFSET;
 typedef CLR_UINT32 CLR_OFFSET_LONG;
-typedef CLR_UINT16 CLR_IDX;
+typedef CLR_UINT16 CLR_INDEX;
 typedef CLR_UINT16 CLR_STRING;
 typedef CLR_UINT16 CLR_SIG;
 typedef const CLR_UINT8 *CLR_PMETADATA;
@@ -220,7 +220,7 @@ enum CLR_LOGICAL_OPCODE
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const CLR_IDX CLR_EmptyIndex = 0xFFFF;
+static const CLR_INDEX CLR_EmptyIndex = 0xFFFF;
 static const CLR_UINT32 CLR_EmptyToken = 0xFFFFFFFF;
 static const size_t CLR_MaxStreamSize_AssemblyRef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_TypeRef = 0x0000FFFF;
@@ -363,58 +363,58 @@ enum CLR_CorCallingConvention
 enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
     /// @brief 0 bytes
-    DATATYPE_VOID, 
+    DATATYPE_VOID,
 
     /// @brief  1 byte
-    DATATYPE_BOOLEAN, 
-    
+    DATATYPE_BOOLEAN,
+
     /// @brief 1 byte
-    DATATYPE_I1,      
-    
+    DATATYPE_I1,
+
     /// @brief 1 byte
-    DATATYPE_U1,      
+    DATATYPE_U1,
 
     /// @brief 2 bytes
-    DATATYPE_CHAR, 
-    
+    DATATYPE_CHAR,
+
     /// @brief 2 bytes
-    DATATYPE_I2,   
-    
+    DATATYPE_I2,
+
     /// @brief 2 bytes
-    DATATYPE_U2,   
+    DATATYPE_U2,
 
     /// @brief 4 bytes
-    DATATYPE_I4, 
-    
-    /// @brief 4 bytes
-    DATATYPE_U4, 
+    DATATYPE_I4,
 
     /// @brief 4 bytes
-    DATATYPE_R4, 
-    
-    /// @brief 8 bytes
-    DATATYPE_I8,       
+    DATATYPE_U4,
+
+    /// @brief 4 bytes
+    DATATYPE_R4,
 
     /// @brief 8 bytes
-    DATATYPE_U8,       
+    DATATYPE_I8,
 
     /// @brief 8 bytes
-    DATATYPE_R8,       
+    DATATYPE_U8,
+
+    /// @brief 8 bytes
+    DATATYPE_R8,
 
     /// @brief 8 bytes (Shortcut for System.DateTime)
-    DATATYPE_DATETIME, 
+    DATATYPE_DATETIME,
 
     /// @brief  8 bytes (Shortcut for System.TimeSpan)
-    DATATYPE_TIMESPAN, 
+    DATATYPE_TIMESPAN,
     DATATYPE_STRING,
 
     /// @brief  This is the last type that doesn't need to be relocated.
-    DATATYPE_LAST_NONPOINTER = DATATYPE_TIMESPAN,      
-    
-    //  All the above types don't need fix-up on assignment.
-    DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8, 
+    DATATYPE_LAST_NONPOINTER = DATATYPE_TIMESPAN,
 
-    // All the above types can be marshaled by assignment.
+    //  All the above types don't need fix-up on assignment.
+    DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8,
+
+// All the above types can be marshaled by assignment.
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
     DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_STRING, //
 #else
@@ -422,25 +422,25 @@ enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.To
 #endif
 
     // All the above types don't need fix-up on assignment.
-    DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, 
+    DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING,
 
     /// @brief Shortcut for System.Object
-    DATATYPE_OBJECT,                    
-    
+    DATATYPE_OBJECT,
+
     /// @brief Shortcut for generic type
-    DATATYPE_GENERIC = DATATYPE_OBJECT, 
-    
+    DATATYPE_GENERIC = DATATYPE_OBJECT,
+
     /// @brief CLASS <class Token>
-    DATATYPE_CLASS,                     
-    
+    DATATYPE_CLASS,
+
     /// @brief VALUETYPE <class Token>
-    DATATYPE_VALUETYPE,                 
-    
+    DATATYPE_VALUETYPE,
+
     /// @brief Shortcut for single dimension zero lower bound array SZARRAY <type>
-    DATATYPE_SZARRAY,                   
-    
+    DATATYPE_SZARRAY,
+
     /// @brief BYREF <type>
-    DATATYPE_BYREF,                     
+    DATATYPE_BYREF,
 
     /// @brief Generic parameter in a generic type definition, represented as number
     DATATYPE_VAR,
@@ -1095,7 +1095,7 @@ struct CLR_RECORD_TYPEREF
     CLR_STRING nameSpace;
 
     /// @brief TypeRefOrAssemblyRef -> Index into TBL_AssemblyRef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x8000)
-    CLR_IDX scope;
+    CLR_INDEX scope;
 
     CLR_UINT16 pad;
 };
@@ -1107,7 +1107,7 @@ struct CLR_RECORD_FIELDREF
     CLR_STRING name;
 
     /// @brief TypeRefTableIndex -> TBL_TypeRef | TBL_TypeRef // 0x8000
-    CLR_IDX container;
+    CLR_INDEX container;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1125,7 +1125,7 @@ struct CLR_RECORD_METHODREF
     /// @brief MemberRefParent -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x2000) |
     /// TBL_TypeSpec (ORed with 0x8000)
     ///
-    CLR_IDX container;
+    CLR_INDEX container;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1195,11 +1195,11 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief TBL_TypeDef | TBL_TypeRef // 0x8000
     ///
-    CLR_IDX extends;
+    CLR_INDEX extends;
 
     /// @brief TBL_TypeDef
     ///
-    CLR_IDX enclosingType;
+    CLR_INDEX enclosingType;
 
     /// @brief TBL_Signatures
     ///
@@ -1207,7 +1207,7 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief TBL_MethodDef
     ///
-    CLR_IDX methods_First;
+    CLR_INDEX methods_First;
 
     CLR_UINT8 vMethods_Num;
     CLR_UINT8 iMethods_Num;
@@ -1216,11 +1216,11 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief TBL_FieldDef
     ///
-    CLR_IDX sFields_First;
+    CLR_INDEX sFields_First;
 
     /// @brief TBL_FieldDef
     ///
-    CLR_IDX iFields_First;
+    CLR_INDEX iFields_First;
 
     CLR_UINT8 sFields_Num;
     CLR_UINT8 iFields_Num;
@@ -1407,7 +1407,7 @@ struct CLR_RECORD_ATTRIBUTE
 
     /// @brief TBL_TypeDef | TBL_MethodDef | TBL_FielfDef
     ///
-    CLR_UINT16 ownerIdx;
+    CLR_UINT16 ownerIndex;
     CLR_UINT16 constructor;
 
     /// @brief Index into TBL_Signatures
@@ -1445,7 +1445,7 @@ struct CLR_RECORD_GENERICPARAM
 
     /// @brief TypeOrMethodDef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_MethodDef (ORed with 0x8000)
     ///
-    CLR_IDX Owner;
+    CLR_INDEX Owner;
 
     /// @brief Index into TBL_Strings
     ///
@@ -1456,19 +1456,19 @@ struct CLR_RECORD_GENERICPARAMCONSTRAINT
 {
     /// @brief Index into TBL_GenericParam
     ///
-    CLR_IDX Owner;
+    CLR_INDEX Owner;
 
     /// @brief TypeDefOrRef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x4000) | TBL_TypeSpec
     /// (ORed with 0x8000)
     ///
-    CLR_IDX Constraint;
+    CLR_INDEX Constraint;
 };
 
 struct CLR_RECORD_METHODSPEC
 {
     /// @brief MethodDefOrRef -> Index into TBL_MethodDef (ORed with 0x0000) | TBL_MemberRef (ORed with 0x8000)
     ///
-    CLR_IDX Method;
+    CLR_INDEX Method;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1486,7 +1486,7 @@ struct CLR_RECORD_EH
 
     CLR_UINT16 mode;
     union {
-        CLR_IDX classToken; // TBL_TypeDef | TBL_TypeRef
+        CLR_INDEX classToken; // TBL_TypeDef | TBL_TypeRef
         CLR_OFFSET filterStart;
     };
     CLR_OFFSET tryStart;

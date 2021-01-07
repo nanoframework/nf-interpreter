@@ -1846,12 +1846,12 @@ bool CLR_DBG_Debugger::Debugging_Execution_BreakpointStatus(WP_Message *msg)
 
 //--//
 
-CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_IDX idxAssm)
+CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_INDEX indexAssm)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        if (pASSM->m_idx == idxAssm)
+        if (pASSM->m_index == indexAssm)
             return pASSM;
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
@@ -2424,7 +2424,7 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, CLR_DataType dt, CLR_UINT8 *bu
     return fCanAssign;
 }
 
-static CLR_RT_HeapBlock *GetScratchPad_Helper(int idx)
+static CLR_RT_HeapBlock *GetScratchPad_Helper(int index)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_HeapBlock_Array *array = g_CLR_RT_ExecutionEngine.m_scratchPadArray;
@@ -2433,9 +2433,9 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int idx)
 
     tmp.SetObjectReference(array);
 
-    if (SUCCEEDED(ref.InitializeArrayReference(tmp, idx)))
+    if (SUCCEEDED(ref.InitializeArrayReference(tmp, index)))
     {
-        return (CLR_RT_HeapBlock *)array->GetElement(idx);
+        return (CLR_RT_HeapBlock *)array->GetElement(index);
     }
 
     return NULL;
@@ -2772,7 +2772,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetScratchPad(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_GetScratchPad *cmd =
         (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_idx);
+    CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_index);
 
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
 }
@@ -3124,7 +3124,7 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies(WP_Message *msg)
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        assemblies[num++].Set(pASSM->m_idx);
+        assemblies[num++].Set(pASSM->m_index);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 
@@ -3193,7 +3193,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_AppDomain(WP_Message *msg)
 
         NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(appDomain)
         {
-            pAssemblyIndex->Set(pASSM->m_idx);
+            pAssemblyIndex->Set(pASSM->m_index);
             pAssemblyIndex++;
             numAssemblies++;
         }
@@ -3224,7 +3224,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Resolve_Assembly *cmd = (CLR_DBG_Commands::Debugging_Resolve_Assembly *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply cmdReply;
-    CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_idx.Assembly());
+    CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_index.Assembly());
 
     if (assm)
     {
@@ -3437,12 +3437,12 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Method(const CLR_RT_MethodDef_Index &idx, bool fJMC)
+bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Method(const CLR_RT_MethodDef_Index &index, bool fJMC)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_MethodDef_Instance inst;
 
-    if (!CheckMethodDef(idx, inst))
+    if (!CheckMethodDef(index, inst))
         return false;
     if (inst.m_target->RVA == CLR_EmptyIndex)
         return false;
@@ -3452,7 +3452,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Method(const CLR_RT_MethodDef_Index
     return true;
 }
 
-bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &idx, bool fJMC)
+bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &index, bool fJMC)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     const CLR_RECORD_TYPEDEF *td;
@@ -3460,7 +3460,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
     int totMethods;
     CLR_RT_MethodDef_Index md;
 
-    if (!CheckTypeDef(idx, inst))
+    if (!CheckTypeDef(index, inst))
         return false;
 
     td = inst.m_target;
@@ -3468,7 +3468,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
 
     for (int i = 0; i < totMethods; i++)
     {
-        md.Set(idx.Assembly(), td->methods_First + i);
+        md.Set(index.Assembly(), td->methods_First + i);
 
         Debugging_Info_SetJMC_Method(md, fJMC);
     }
@@ -3494,11 +3494,11 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
 
             for (int i = 0; i < assm->m_pTablesSize[TBL_TypeDef]; i++)
             {
-                CLR_RT_TypeDef_Index idx;
+                CLR_RT_TypeDef_Index index;
 
-                idx.Set(cmd->m_data.m_assm.Assembly(), i);
+                index.Set(cmd->m_data.m_assm.Assembly(), i);
 
-                g_CLR_DBG_Debugger->Debugging_Info_SetJMC_Type(idx, fJMC);
+                g_CLR_DBG_Debugger->Debugging_Info_SetJMC_Type(index, fJMC);
             }
 
             return true;

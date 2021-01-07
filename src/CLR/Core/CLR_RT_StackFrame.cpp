@@ -785,11 +785,11 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
     }
     else if (m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_Static)
     {
-        CLR_RT_TypeDef_Index idx;
+        CLR_RT_TypeDef_Index index;
 
-        idx.Set(m_call.Assembly(), m_call.CrossReference().GetOwner());
+        index.Set(m_call.Assembly(), m_call.CrossReference().GetOwner());
 
-        refType.SetReflection(idx);
+        refType.SetReflection(index);
 
         obj = &refType;
     }
@@ -949,15 +949,15 @@ void CLR_RT_StackFrame::Pop()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     else
     {
-        int idx = m_owningThread->m_scratchPad;
+        int index = m_owningThread->m_scratchPad;
 
-        if (idx >= 0)
+        if (index >= 0)
         {
             CLR_RT_HeapBlock_Array *array = g_CLR_RT_ExecutionEngine.m_scratchPadArray;
 
-            if (array && array->m_numOfElements > (CLR_UINT32)idx)
+            if (array && array->m_numOfElements > (CLR_UINT32)index)
             {
-                CLR_RT_HeapBlock *dst = (CLR_RT_HeapBlock *)array->GetElement((CLR_UINT32)idx);
+                CLR_RT_HeapBlock *dst = (CLR_RT_HeapBlock *)array->GetElement((CLR_UINT32)index);
                 CLR_RT_HeapBlock *exception = m_owningThread->m_currentException.Dereference();
 
                 dst->SetObjectReference(NULL);

@@ -439,31 +439,31 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LOOKUP_ELEMENT(idx, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(idx)
+#define LOOKUP_ELEMENT(index, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(index)
 
-#define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                          \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
-    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[idx].m_target;                                   \
+#define LOOKUP_ELEMENT_REF(index, tblName, tblNameUC, tblName2)                                                        \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
+    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[index].m_target;                                 \
     if (s->m_data == 0)                                                                                                \
     s = NULL
 
-#define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                    \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
+#define LOOKUP_ELEMENT_IDX(index, tblName, tblNameUC)                                                                  \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
     CLR_RT_##tblName##_Index s;                                                                                        \
-    s.Set(m_idx, idx)
+    s.Set(m_index, index)
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
 void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 idx = CLR_DataFromTk(tk);
+    CLR_UINT32 index = CLR_DataFromTk(tk);
 
     switch (CLR_TypeFromTk(tk))
     {
         case TBL_AssemblyRef:
         {
-            LOOKUP_ELEMENT(idx, AssemblyRef, ASSEMBLYREF);
+            LOOKUP_ELEMENT(index, AssemblyRef, ASSEMBLYREF);
             {
                 CLR_Debug::Printf("[%s]", GetString(p->name));
             }
@@ -471,7 +471,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_TypeRef:
         {
-            LOOKUP_ELEMENT_REF(idx, TypeRef, TYPEREF, TypeDef);
+            LOOKUP_ELEMENT_REF(index, TypeRef, TYPEREF, TypeDef);
             if (s)
             {
                 CLR_RT_DUMP::TYPE(*s);
@@ -484,7 +484,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_FieldRef:
         {
-            LOOKUP_ELEMENT_REF(idx, FieldRef, FIELDREF, FieldDef);
+            LOOKUP_ELEMENT_REF(index, FieldRef, FIELDREF, FieldDef);
             if (s)
             {
                 CLR_RT_DUMP::FIELD(*s);
@@ -497,7 +497,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_MethodRef:
         {
-            LOOKUP_ELEMENT_REF(idx, MethodRef, METHODREF, MethodDef);
+            LOOKUP_ELEMENT_REF(index, MethodRef, METHODREF, MethodDef);
             if (s)
             {
                 CLR_RT_DUMP::METHOD(*s);
@@ -510,25 +510,25 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_TypeDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, TypeDef, TYPEDEF);
+            LOOKUP_ELEMENT_IDX(index, TypeDef, TYPEDEF);
             CLR_RT_DUMP::TYPE(s);
             break;
         }
         case TBL_FieldDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, FieldDef, FIELDDEF);
+            LOOKUP_ELEMENT_IDX(index, FieldDef, FIELDDEF);
             CLR_RT_DUMP::FIELD(s);
             break;
         }
         case TBL_MethodDef:
         {
-            LOOKUP_ELEMENT_IDX(idx, MethodDef, METHODDEF);
+            LOOKUP_ELEMENT_IDX(index, MethodDef, METHODDEF);
             CLR_RT_DUMP::METHOD(s);
             break;
         }
         case TBL_Strings:
         {
-            const char *p = GetString(idx);
+            const char *p = GetString(index);
             CLR_Debug::Printf("'%s'", p);
             break;
         }
