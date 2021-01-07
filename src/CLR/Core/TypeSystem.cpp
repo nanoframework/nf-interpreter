@@ -1375,11 +1375,13 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//
-// Keep this string less than 8-character long (including terminator) because it's stuffed into an 8-byte structure.
-//
-static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
+// Keep these strings less than 8-character long (including terminator) because it's stuffed into an 8-byte structure.
+// static const char c_MARKER_ASSEMBLY_V1[] = "NFMRK1";
+static const char c_MARKER_ASSEMBLY_V2[] = "NFMRK2";
 
+/// @brief Check for valid assembly header (CRC32 of header, string table version and marker)
+///
+/// @return Check result
 bool CLR_RECORD_ASSEMBLY::GoodHeader() const
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1387,35 +1389,31 @@ bool CLR_RECORD_ASSEMBLY::GoodHeader() const
     header.headerCRC = 0;
 
     if (SUPPORT_ComputeCRC(&header, sizeof(header), 0) != this->headerCRC)
+    {
         return false;
+    }
 
     if (this->stringTableVersion != c_CLR_StringTable_Version)
+    {
         return false;
+    }
 
-    return memcmp(marker, c_MARKER_ASSEMBLY_V1, sizeof(c_MARKER_ASSEMBLY_V1)) == 0;
+    return memcmp(marker, c_MARKER_ASSEMBLY_V2, sizeof(c_MARKER_ASSEMBLY_V2)) == 0;
 }
 
+/// @brief Check for valid assembly (header and CRC32 of assembly content)
+///
+/// @return bool Check result
 bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
 {
     NATIVE_PROFILE_CLR_CORE();
     if (!GoodHeader())
+    {
         return false;
+    }
+
     return SUPPORT_ComputeCRC(&this[1], this->TotalSize() - sizeof(*this), 0) == this->assemblyCRC;
 }
-
-#if defined(WIN32)
-
-void CLR_RECORD_ASSEMBLY::ComputeCRC()
-{
-    NATIVE_PROFILE_CLR_CORE();
-    memcpy(marker, c_MARKER_ASSEMBLY_V1, sizeof(marker));
-
-    headerCRC = 0;
-    assemblyCRC = SUPPORT_ComputeCRC(&this[1], this->TotalSize() - sizeof(*this), 0);
-    headerCRC = SUPPORT_ComputeCRC(this, sizeof(*this), 0);
-}
-
-#endif
 
 CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver)
 {
@@ -1592,13 +1590,13 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     NANOCLR_CLEAR(*skeleton);
 
     if (header->GoodAssembly() == false)
+    {
         NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Failed in type system: assembly is not good.\n");
+    }
 
     skeleton->m_header = header;
 
-    //
     // Compute overall size for assembly data structure.
-    //
     {
         for (uint32_t i = 0; i < ARRAYSIZE(skeleton->m_pTablesSize) - 1; i++)
         {
@@ -1612,6 +1610,9 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         skeleton->m_pTablesSize[TBL_TypeDef] /= sizeof(CLR_RECORD_TYPEDEF);
         skeleton->m_pTablesSize[TBL_FieldDef] /= sizeof(CLR_RECORD_FIELDDEF);
         skeleton->m_pTablesSize[TBL_MethodDef] /= sizeof(CLR_RECORD_METHODDEF);
+        skeleton->m_pTablesSize[TBL_GenericParam] /= sizeof(CLR_RECORD_GENERICPARAM);
+        skeleton->m_pTablesSize[TBL_GenericParamConstraint] /= sizeof(CLR_RECORD_GENERICPARAMCONSTRAINT);
+        skeleton->m_pTablesSize[TBL_MethodSpec] /= sizeof(CLR_RECORD_METHODSPEC);
         skeleton->m_pTablesSize[TBL_Attributes] /= sizeof(CLR_RECORD_ATTRIBUTE);
         skeleton->m_pTablesSize[TBL_TypeSpec] /= sizeof(CLR_RECORD_TYPESPEC);
         skeleton->m_pTablesSize[TBL_Resources] /= sizeof(CLR_RECORD_RESOURCE);
@@ -1620,9 +1621,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
     //--//
 
-    //
     // Count static fields.
-    //
     {
         const CLR_RECORD_TYPEDEF *src = (const CLR_RECORD_TYPEDEF *)skeleton->GetTable(TBL_TypeDef);
 
@@ -1638,28 +1637,42 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         CLR_RT_Assembly::Offsets offsets;
 
         offsets.iBase = ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly), CLR_UINT32);
+
         offsets.iAssemblyRef = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
             CLR_UINT32);
+
         offsets.iTypeRef =
             ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference), CLR_UINT32);
+
         offsets.iFieldRef =
             ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference), CLR_UINT32);
+
         offsets.iMethodRef = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
             CLR_UINT32);
+
         offsets.iTypeDef =
             ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference), CLR_UINT32);
+
         offsets.iFieldDef =
             ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference), CLR_UINT32);
+
         offsets.iMethodDef = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
             CLR_UINT32);
 
-        if (skeleton->m_header->numOfPatchedMethods > 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_PATCHING_NOT_SUPPORTED);
-        }
+        offsets.iGenericParam = ROUNDTOMULTIPLE(
+            skeleton->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
+            CLR_UINT32);
+
+        offsets.iGenericParamConstraint = ROUNDTOMULTIPLE(
+            skeleton->m_pTablesSize[TBL_GenericParamConstraint] * sizeof(CLR_RT_GenericParamConstraint_CrossReference),
+            CLR_UINT32);
+
+        offsets.iMethodSpec = ROUNDTOMULTIPLE(
+            skeleton->m_pTablesSize[TBL_MethodSpec] * sizeof(CLR_RT_MethodSpec_CrossReference),
+            CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
         offsets.iStaticFields = ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
@@ -3002,17 +3015,6 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
             }
         }
 
-        if (m_header->patchEntryOffset != 0xFFFFFFFF)
-        {
-            CLR_PMETADATA ptr = GetResourceData(m_header->patchEntryOffset);
-
-#if defined(WIN32)
-            CLR_Debug::Printf("Simulating jump into patch code...\r\n");
-#else
-            ((void (*)())ptr)();
-#endif
-        }
-
 #if defined(NANOCLR_APPDOMAINS)
         // Temporary solution.  All Assemblies get added to the current AppDomain
         // Which assemblies get loaded at boot, and when assemblies get added to AppDomain at runtime is
@@ -4022,7 +4024,10 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 pTablesSize[TBL_MethodDef]);
 
 #if !defined(NANOCLR_APPDOMAINS)
-            CLR_Debug::Printf("   StaticFields    = %8d bytes (%8d elements)\r\n", offsets.iStaticFields, iStaticFields);
+            CLR_Debug::Printf(
+                "   StaticFields    = %8d bytes (%8d elements)\r\n",
+                offsets.iStaticFields,
+                iStaticFields);
 #endif
 
             CLR_Debug::Printf("\r\n");

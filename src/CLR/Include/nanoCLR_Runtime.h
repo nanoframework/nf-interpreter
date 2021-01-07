@@ -822,6 +822,21 @@ struct CLR_RT_MethodDef_CrossReference
     }
 };
 
+struct CLR_RT_GenericParam_CrossReference
+{
+    // TODO
+};
+
+struct CLR_RT_GenericParamConstraint_CrossReference
+{
+    // TODO
+};
+
+struct CLR_RT_MethodSpec_CrossReference
+{
+    // TODO
+};
+
 struct CLR_RT_MethodDef_Patch
 {
     CLR_IDX m_orig;
@@ -1126,6 +1141,9 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t iTypeDef;
         size_t iFieldDef;
         size_t iMethodDef;
+        size_t iGenericParam;
+        size_t iGenericParamConstraint;
+        size_t iMethodSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
         size_t iStaticFields;
@@ -1133,7 +1151,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t iDebuggingInfoMethods;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif
     };
 
     //--//
@@ -1182,6 +1200,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         *m_pCrossReference_FieldDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference
         *m_pCrossReference_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_GenericParam_CrossReference
+        *m_pCrossReference_GenericParam; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_GenericParamConstraint_CrossReference
+        *m_pCrossReference_GenericParamConstraint; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_MethodSpec_CrossReference
+        *m_pCrossReference_MethodSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
@@ -1295,6 +1319,18 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const CLR_RECORD_METHODDEF *GetMethodDef(CLR_IDX i)
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
+    }
+    const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_IDX i)
+    {
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_MethodDef, i);
+    }
+    const CLR_RECORD_GENERICPARAMCONSTRAINT *GetGenericParamConstraint(CLR_IDX i)
+    {
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAMCONSTRAINT, TBL_MethodDef, i);
+    }
+    const CLR_RECORD_METHODSPEC *GetMethodSpec(CLR_IDX i)
+    {
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODSPEC, TBL_MethodDef, i);
     }
     const CLR_RECORD_ATTRIBUTE *GetAttribute(CLR_IDX i)
     {

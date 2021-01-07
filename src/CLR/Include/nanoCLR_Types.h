@@ -229,6 +229,9 @@ static const size_t CLR_MaxStreamSize_MethodRef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_TypeDef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_FieldDef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_MethodDef = 0x0000FFFF;
+static const size_t CLR_MaxStreamSize_GenericParam = 0x0000FFFF;
+static const size_t CLR_MaxStreamSize_GenericParamConstraint = 0x0000FFFF;
+static const size_t CLR_MaxStreamSize_MethodSpec = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_Attributes = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_TypeSpec = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_Resources = 0x0000FFFF;
@@ -291,16 +294,19 @@ enum CLR_TABLESENUM
     TBL_TypeDef = 0x00000004,
     TBL_FieldDef = 0x00000005,
     TBL_MethodDef = 0x00000006,
-    TBL_Attributes = 0x00000007,
-    TBL_TypeSpec = 0x00000008,
-    TBL_Resources = 0x00000009,
-    TBL_ResourcesData = 0x0000000A,
-    TBL_Strings = 0x0000000B,
-    TBL_Signatures = 0x0000000C,
-    TBL_ByteCode = 0x0000000D,
-    TBL_ResourcesFiles = 0x0000000E,
-    TBL_EndOfAssembly = 0x0000000F,
-    TBL_Max = 0x00000010,
+    TBL_GenericParam = 0x00000007,
+    TBL_GenericParamConstraint = 0x00000008,
+    TBL_MethodSpec = 0x00000009,
+    TBL_Attributes = 0x0000000A,
+    TBL_TypeSpec = 0x0000000B,
+    TBL_Resources = 0x0000000C,
+    TBL_ResourcesData = 0x0000000D,
+    TBL_Strings = 0x0000000E,
+    TBL_Signatures = 0x0000000F,
+    TBL_ByteCode = 0x00000010,
+    TBL_ResourcesFiles = 0x00000011,
+    TBL_EndOfAssembly = 0x000000012,
+    TBL_Max = 0x00000013,
 };
 
 enum CLR_CorCallingConvention
@@ -309,6 +315,7 @@ enum CLR_CorCallingConvention
     //
     // This is based on CorCallingConvention.
     //
+
     PIMAGE_CEE_CS_CALLCONV_DEFAULT = 0x0,
 
     PIMAGE_CEE_CS_CALLCONV_VARARG = 0x5,
@@ -316,66 +323,130 @@ enum CLR_CorCallingConvention
     PIMAGE_CEE_CS_CALLCONV_LOCAL_SIG = 0x7,
     PIMAGE_CEE_CS_CALLCONV_PROPERTY = 0x8,
     PIMAGE_CEE_CS_CALLCONV_UNMGD = 0x9,
-    PIMAGE_CEE_CS_CALLCONV_GENERICINST = 0xa,  // generic method instantiation
-    PIMAGE_CEE_CS_CALLCONV_NATIVEVARARG = 0xb, // used ONLY for 64bit vararg PInvoke calls
-    PIMAGE_CEE_CS_CALLCONV_MAX = 0xc,          // first invalid calling convention
+
+    /// @brief generic method instantiation
+    ///
+    PIMAGE_CEE_CS_CALLCONV_GENERICINST = 0xA,
+
+    /// @brief used ONLY for 64bit vararg PInvoke calls
+    ///
+    PIMAGE_CEE_CS_CALLCONV_NATIVEVARARG = 0xB,
+
+    /// @brief first invalid calling convention
+    ///
+    PIMAGE_CEE_CS_CALLCONV_MAX = 0xC,
 
     // The high bits of the calling convention convey additional info
-    PIMAGE_CEE_CS_CALLCONV_MASK = 0x0f,         // Calling convention is bottom 4 bits
-    PIMAGE_CEE_CS_CALLCONV_HASTHIS = 0x20,      // Top bit indicates a 'this' parameter
-    PIMAGE_CEE_CS_CALLCONV_EXPLICITTHIS = 0x40, // This parameter is explicitly in the signature
-    PIMAGE_CEE_CS_CALLCONV_GENERIC =
-        0x10, // Generic method sig with explicit number of type arguments (precedes ordinary parameter count)
-              //
-              // End of overlap with CorCallingConvention.
-              //
-              /////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// @brief Calling convention is bottom 4 bits
+    ///
+    PIMAGE_CEE_CS_CALLCONV_MASK = 0x0F,
+
+    /// @brief Top bit indicates a 'this' parameter
+    ///
+    PIMAGE_CEE_CS_CALLCONV_HASTHIS = 0x20,
+
+    /// @brief This parameter is explicitly in the signature
+    ///
+    PIMAGE_CEE_CS_CALLCONV_EXPLICITTHIS = 0x40,
+
+    /// @brief Generic method sig with explicit number of type arguments (precedes ordinary parameter count)
+    ///
+    PIMAGE_CEE_CS_CALLCONV_GENERIC = 0x10,
+
+    //
+    // End of overlap with CorCallingConvention.
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////
 };
 
 enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
-    DATATYPE_VOID, // 0 bytes
+    /// @brief 0 bytes
+    DATATYPE_VOID, 
 
-    DATATYPE_BOOLEAN, // 1 byte
-    DATATYPE_I1,      // 1 byte
-    DATATYPE_U1,      // 1 byte
+    /// @brief  1 byte
+    DATATYPE_BOOLEAN, 
+    
+    /// @brief 1 byte
+    DATATYPE_I1,      
+    
+    /// @brief 1 byte
+    DATATYPE_U1,      
 
-    DATATYPE_CHAR, // 2 bytes
-    DATATYPE_I2,   // 2 bytes
-    DATATYPE_U2,   // 2 bytes
+    /// @brief 2 bytes
+    DATATYPE_CHAR, 
+    
+    /// @brief 2 bytes
+    DATATYPE_I2,   
+    
+    /// @brief 2 bytes
+    DATATYPE_U2,   
 
-    DATATYPE_I4, // 4 bytes
-    DATATYPE_U4, // 4 bytes
-    DATATYPE_R4, // 4 bytes
+    /// @brief 4 bytes
+    DATATYPE_I4, 
+    
+    /// @brief 4 bytes
+    DATATYPE_U4, 
 
-    DATATYPE_I8,       // 8 bytes
-    DATATYPE_U8,       // 8 bytes
-    DATATYPE_R8,       // 8 bytes
-    DATATYPE_DATETIME, // 8 bytes     // Shortcut for System.DateTime
-    DATATYPE_TIMESPAN, // 8 bytes     // Shortcut for System.TimeSpan
+    /// @brief 4 bytes
+    DATATYPE_R4, 
+    
+    /// @brief 8 bytes
+    DATATYPE_I8,       
+
+    /// @brief 8 bytes
+    DATATYPE_U8,       
+
+    /// @brief 8 bytes
+    DATATYPE_R8,       
+
+    /// @brief 8 bytes (Shortcut for System.DateTime)
+    DATATYPE_DATETIME, 
+
+    /// @brief  8 bytes (Shortcut for System.TimeSpan)
+    DATATYPE_TIMESPAN, 
     DATATYPE_STRING,
 
-    DATATYPE_LAST_NONPOINTER = DATATYPE_TIMESPAN,      // This is the last type that doesn't need to be relocated.
-    DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8, // All the above types don't need fix-up on assignment.
+    /// @brief  This is the last type that doesn't need to be relocated.
+    DATATYPE_LAST_NONPOINTER = DATATYPE_TIMESPAN,      
+    
+    //  All the above types don't need fix-up on assignment.
+    DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8, 
+
+    // All the above types can be marshaled by assignment.
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_STRING, // All the above types can be marshaled by assignment.
+    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_STRING, //
 #else
-    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_TIMESPAN, // All the above types can be marshaled by assignment.
+    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_TIMESPAN,
 #endif
-    DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, // All the above types don't need fix-up on assignment.
 
-    DATATYPE_OBJECT,                    // Shortcut for System.Object
-    DATATYPE_GENERIC = DATATYPE_OBJECT, // shortcut for generic type
-    DATATYPE_CLASS,                     // CLASS <class Token>
-    DATATYPE_VALUETYPE,                 // VALUETYPE <class Token>
-    DATATYPE_SZARRAY,                   // Shortcut for single dimension zero lower bound array SZARRAY <type>
-    DATATYPE_BYREF,                     // BYREF <type>
+    // All the above types don't need fix-up on assignment.
+    DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, 
 
-    // Generic parameter in a generic type definition, represented as number
+    /// @brief Shortcut for System.Object
+    DATATYPE_OBJECT,                    
+    
+    /// @brief Shortcut for generic type
+    DATATYPE_GENERIC = DATATYPE_OBJECT, 
+    
+    /// @brief CLASS <class Token>
+    DATATYPE_CLASS,                     
+    
+    /// @brief VALUETYPE <class Token>
+    DATATYPE_VALUETYPE,                 
+    
+    /// @brief Shortcut for single dimension zero lower bound array SZARRAY <type>
+    DATATYPE_SZARRAY,                   
+    
+    /// @brief BYREF <type>
+    DATATYPE_BYREF,                     
+
+    /// @brief Generic parameter in a generic type definition, represented as number
     DATATYPE_VAR,
-    // Generic type instantiation
+    /// @brief Generic type instantiation
     DATATYPE_GENERICINST,
-    // Generic parameter in a generic method definition, represented as number
+    /// @brief Generic parameter in a generic method definition, represented as number
     DATATYPE_MVAR,
 
     ////////////////////////////////////////
@@ -464,12 +535,7 @@ inline CLR_UINT32 CLR_TkFromType(CLR_TABLESENUM tbl, CLR_UINT32 data)
 {
     return ((((CLR_UINT32)tbl) << 24) & 0xFF000000) | (data & 0x00FFFFFF);
 }
-#if 0
-// Used on LE host to target BE
-inline CLR_UINT32     CLR_TkFromType( CLR_TABLESENUM tbl, CLR_UINT32 data ) { return ( ((CLR_UINT32)(tbl) & 0xFF) | (data & 0xFFFFFF00)); }
-inline CLR_UINT32     CLR_DataFromTk( CLR_UINT32 tk ) { return                  tk & 0xFFFFFF00; }
-inline CLR_TABLESENUM CLR_TypeFromTk( CLR_UINT32 tk ) { return (CLR_TABLESENUM)(tk&0xFF);        }
-#endif
+
 //--//
 
 inline CLR_UINT32 CLR_UncompressStringToken(CLR_UINT32 tk)
@@ -587,25 +653,6 @@ inline CLR_UINT32 CLR_UncompressData(const CLR_UINT8 *&p)
         val |= (CLR_UINT32)*ptr++ << 8;
         val |= (CLR_UINT32)*ptr++ << 0;
     }
-#if 0
-    // Handle smallest data inline.
-    if((val & 0x80) == 0x00)        // 0??? ????
-    {
-    }
-    else if((val & 0xC0) == 0x80)  // 10?? ????
-    {
-        val  =             (val & 0x3F);
-        val |= ((CLR_UINT32)*ptr++ <<8);
-    }
-    else // 110? ????
-    {
-        val  =             (val & 0x1F)       ;
-        val |= (CLR_UINT32)*ptr++       <<   8;
-        val |= (CLR_UINT32)*ptr++       <<  16;
-        val |= (CLR_UINT32)*ptr++       <<  24;
-    }
-
-#endif
 
     p = ptr;
 
@@ -980,8 +1027,6 @@ struct CLR_RECORD_VERSION
 
 struct CLR_RECORD_ASSEMBLY
 {
-    static const CLR_UINT32 c_Flags_NeedReboot = 0x00000001;
-
     CLR_UINT8 marker[8];
     //
     CLR_UINT32 headerCRC;
@@ -989,7 +1034,6 @@ struct CLR_RECORD_ASSEMBLY
     CLR_UINT32 flags;
     //
     CLR_UINT32 nativeMethodsChecksum;
-    CLR_UINT32 patchEntryOffset;
     //
     CLR_RECORD_VERSION version;
     //
@@ -997,7 +1041,7 @@ struct CLR_RECORD_ASSEMBLY
     CLR_UINT16 stringTableVersion;
     //
     CLR_OFFSET_LONG startOfTables[TBL_Max];
-    CLR_UINT32 numOfPatchedMethods;
+
     //
     // For every table, a number of bytes that were padded to the end of the table
     // to align to unsigned long.  Each table starts at a unsigned long boundary, and ends
@@ -1031,52 +1075,93 @@ struct CLR_RECORD_ASSEMBLY
     static CLR_UINT32 ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver);
 };
 
+/// @brief Assembly header
 struct CLR_RECORD_ASSEMBLYREF
 {
-    CLR_STRING name; // TBL_Strings
+    /// @brief Index into TBL_Strings
+    CLR_STRING name;
     CLR_UINT16 pad;
-    //
+
+    /// @brief Assembly version
     CLR_RECORD_VERSION version;
 };
 
 struct CLR_RECORD_TYPEREF
 {
-    CLR_STRING name;      // TBL_Strings
-    CLR_STRING nameSpace; // TBL_Strings
-    //
-    CLR_IDX scope; // TBL_AssemblyRef | TBL_TypeRef // 0x8000
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name;
+    /// @brief Index into TBL_Strings
+    CLR_STRING nameSpace;
+
+    /// @brief TypeRefOrAssemblyRef -> Index into TBL_AssemblyRef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x8000)
+    CLR_IDX scope;
+
     CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_FIELDREF
 {
-    CLR_STRING name;   // TBL_Strings
-    CLR_IDX container; // TBL_TypeRef
-    //
-    CLR_SIG sig; // TBL_Signatures
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name;
+
+    /// @brief TypeRefTableIndex -> TBL_TypeRef | TBL_TypeRef // 0x8000
+    CLR_IDX container;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG sig;
+
     CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_METHODREF
 {
-    CLR_STRING name;   // TBL_Strings
-    CLR_IDX container; // TBL_TypeRef
-    //
-    CLR_SIG sig; // TBL_Signatures
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name;
+
+    /// @brief MemberRefParent -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x2000) |
+    /// TBL_TypeSpec (ORed with 0x8000)
+    ///
+    CLR_IDX container;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG sig;
     CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_TYPEDEF
 {
     static const CLR_UINT16 TD_Scope_Mask = 0x0007;
-    static const CLR_UINT16 TD_Scope_NotPublic = 0x0000;         // Class is not public scope.
-    static const CLR_UINT16 TD_Scope_Public = 0x0001;            // Class is public scope.
-    static const CLR_UINT16 TD_Scope_NestedPublic = 0x0002;      // Class is nested with public visibility.
-    static const CLR_UINT16 TD_Scope_NestedPrivate = 0x0003;     // Class is nested with private visibility.
-    static const CLR_UINT16 TD_Scope_NestedFamily = 0x0004;      // Class is nested with family visibility.
-    static const CLR_UINT16 TD_Scope_NestedAssembly = 0x0005;    // Class is nested with assembly visibility.
-    static const CLR_UINT16 TD_Scope_NestedFamANDAssem = 0x0006; // Class is nested with family and assembly visibility.
-    static const CLR_UINT16 TD_Scope_NestedFamORAssem = 0x0007;  // Class is nested with family or assembly visibility.
+    /// @brief Class is not public scope.
+    ///
+    static const CLR_UINT16 TD_Scope_NotPublic = 0x0000;
+    /// @brief Class is public scope.
+    ///
+    static const CLR_UINT16 TD_Scope_Public = 0x0001;
+    /// @brief Class is nested with public visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedPublic = 0x0002;
+    /// @brief Class is nested with private visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedPrivate = 0x0003;
+
+    /// @brief Class is nested with family visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedFamily = 0x0004;
+
+    /// @brief Class is nested with assembly visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedAssembly = 0x0005;
+    /// @brief Class is nested with family and assembly visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedFamANDAssem = 0x0006; //
+    /// @brief Class is nested with family or assembly visibility.
+    ///
+    static const CLR_UINT16 TD_Scope_NestedFamORAssem = 0x0007;
 
     static const CLR_UINT16 TD_Serializable = 0x0008;
 
@@ -1100,23 +1185,43 @@ struct CLR_RECORD_TYPEDEF
     static const CLR_UINT16 TD_HasFinalizer = 0x4000;
     static const CLR_UINT16 TD_HasAttributes = 0x8000;
 
-    CLR_STRING name;      // TBL_Strings
-    CLR_STRING nameSpace; // TBL_Strings
-    //
-    CLR_IDX extends;       // TBL_TypeDef | TBL_TypeRef // 0x8000
-    CLR_IDX enclosingType; // TBL_TypeDef
-    //
-    CLR_SIG interfaces;    // TBL_Signatures
-    CLR_IDX methods_First; // TBL_MethodDef
-    //
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name; // TBL_Strings
+
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING nameSpace;
+
+    /// @brief TBL_TypeDef | TBL_TypeRef // 0x8000
+    ///
+    CLR_IDX extends;
+
+    /// @brief TBL_TypeDef
+    ///
+    CLR_IDX enclosingType;
+
+    /// @brief TBL_Signatures
+    ///
+    CLR_SIG interfaces;
+
+    /// @brief TBL_MethodDef
+    ///
+    CLR_IDX methods_First;
+
     CLR_UINT8 vMethods_Num;
     CLR_UINT8 iMethods_Num;
     CLR_UINT8 sMethods_Num;
     CLR_UINT8 dataType;
-    //
-    CLR_IDX sFields_First; // TBL_FieldDef
-    CLR_IDX iFields_First; // TBL_FieldDef
-    //
+
+    /// @brief TBL_FieldDef
+    ///
+    CLR_IDX sFields_First;
+
+    /// @brief TBL_FieldDef
+    ///
+    CLR_IDX iFields_First;
+
     CLR_UINT8 sFields_Num;
     CLR_UINT8 iFields_Num;
     CLR_UINT16 flags;
@@ -1158,35 +1263,86 @@ struct CLR_RECORD_FIELDDEF
 
     static const CLR_UINT16 FD_HasAttributes = 0x8000;
 
-    CLR_STRING name; // TBL_Strings
-    CLR_SIG sig;     // TBL_Signatures
-    //
-    CLR_SIG defaultValue; // TBL_Signatures
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG sig;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG defaultValue;
     CLR_UINT16 flags;
 };
 
 struct CLR_RECORD_METHODDEF
 {
     static const CLR_UINT32 MD_Scope_Mask = 0x00000007;
-    static const CLR_UINT32 MD_Scope_PrivateScope = 0x00000000; // Member not referenceable.
-    static const CLR_UINT32 MD_Scope_Private = 0x00000001;      // Accessible only by the parent type.
-    static const CLR_UINT32 MD_Scope_FamANDAssem = 0x00000002;  // Accessible by sub-types only in this Assembly.
-    static const CLR_UINT32 MD_Scope_Assem = 0x00000003;        // Accessibly by anyone in the Assembly.
-    static const CLR_UINT32 MD_Scope_Family = 0x00000004;       // Accessible only by type and sub-types.
-    static const CLR_UINT32 MD_Scope_FamORAssem =
-        0x00000005;                                       // Accessibly by sub-types anywhere, plus anyone in assembly.
-    static const CLR_UINT32 MD_Scope_Public = 0x00000006; // Accessibly by anyone who has visibility to this scope.
 
-    static const CLR_UINT32 MD_Static = 0x00000010;    // Defined on type, else per instance.
-    static const CLR_UINT32 MD_Final = 0x00000020;     // Method may not be overridden.
-    static const CLR_UINT32 MD_Virtual = 0x00000040;   // Method virtual.
-    static const CLR_UINT32 MD_HideBySig = 0x00000080; // Method hides by name+sig, else just by name.
+    /// @brief ember not referenceable.
+    ///
+    static const CLR_UINT32 MD_Scope_PrivateScope = 0x00000000;
+
+    /// @brief Accessible only by the parent type.
+    ///
+    static const CLR_UINT32 MD_Scope_Private = 0x00000001;
+
+    /// @brief Accessible by sub-types only in this Assembly.
+    ///
+    static const CLR_UINT32 MD_Scope_FamANDAssem = 0x00000002;
+
+    /// @brief Accessibly by anyone in the Assembly.
+    ///
+    static const CLR_UINT32 MD_Scope_Assem = 0x00000003;
+
+    /// @brief Accessible only by type and sub-types.
+    ///
+    static const CLR_UINT32 MD_Scope_Family = 0x00000004;
+
+    /// @brief Accessibly by sub-types anywhere, plus anyone in assembly.
+    ///
+    static const CLR_UINT32 MD_Scope_FamORAssem = 0x00000005;
+
+    /// @brief Accessibly by anyone who has visibility to this scope.
+    ///
+    static const CLR_UINT32 MD_Scope_Public = 0x00000006;
+
+    /// @brief Defined on type, else per instance.
+    ///
+    static const CLR_UINT32 MD_Static = 0x00000010;
+
+    /// @brief Method may not be overridden.
+    ///
+    static const CLR_UINT32 MD_Final = 0x00000020;
+
+    /// @brief Method virtual.
+    ///
+    static const CLR_UINT32 MD_Virtual = 0x00000040;
+
+    /// @brief Method hides by name+sig, else just by name.
+    ///
+    static const CLR_UINT32 MD_HideBySig = 0x00000080;
 
     static const CLR_UINT32 MD_VtableLayoutMask = 0x00000100;
-    static const CLR_UINT32 MD_ReuseSlot = 0x00000000;   // The default.
-    static const CLR_UINT32 MD_NewSlot = 0x00000100;     // Method always gets a new slot in the vtable.
-    static const CLR_UINT32 MD_Abstract = 0x00000200;    // Method does not provide an implementation.
-    static const CLR_UINT32 MD_SpecialName = 0x00000400; // Method is special.  Name describes how.
+
+    /// @brief The default.
+    ///
+    static const CLR_UINT32 MD_ReuseSlot = 0x00000000;
+
+    /// @brief Method always gets a new slot in the vtable.
+    ///
+    static const CLR_UINT32 MD_NewSlot = 0x00000100;
+
+    /// @brief  Method does not provide an implementation.
+    ///
+    static const CLR_UINT32 MD_Abstract = 0x00000200;
+
+    /// @brief  Method is special.  Name describes how.
+    ///
+    static const CLR_UINT32 MD_SpecialName = 0x00000400;
+
     static const CLR_UINT32 MD_NativeProfiled = 0x00000800;
 
     static const CLR_UINT32 MD_Constructor = 0x00001000;
@@ -1205,23 +1361,36 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_GloballySynchronized = 0x02000000;
     static const CLR_UINT32 MD_Patched = 0x04000000;
     static const CLR_UINT32 MD_EntryPoint = 0x08000000;
-    static const CLR_UINT32 MD_RequireSecObject = 0x10000000; // Method calls another method containing security code.
-    static const CLR_UINT32 MD_HasSecurity = 0x20000000;      // Method has security associate with it.
+
+    /// @brief Method calls another method containing security code.
+    ///
+    static const CLR_UINT32 MD_RequireSecObject = 0x10000000;
+
+    /// @brief Method has security associate with it.
+    ///
+    static const CLR_UINT32 MD_HasSecurity = 0x20000000;
     static const CLR_UINT32 MD_HasExceptionHandlers = 0x40000000;
     static const CLR_UINT32 MD_HasAttributes = 0x80000000;
 
-    CLR_STRING name; // TBL_Strings
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING name;
     CLR_OFFSET RVA;
-    //
+
     CLR_UINT32 flags;
-    //
+
     CLR_UINT8 retVal;
     CLR_UINT8 numArgs;
     CLR_UINT8 numLocals;
     CLR_UINT8 lengthEvalStack;
-    //
-    CLR_SIG locals; // TBL_Signatures
-    CLR_SIG sig;    // TBL_Signatures
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG locals;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG sig;
 };
 
 #ifdef __GNUC__
@@ -1232,10 +1401,18 @@ struct CLR_RECORD_METHODDEF
 
 struct CLR_RECORD_ATTRIBUTE
 {
-    CLR_UINT16 ownerType; // one of TBL_TypeDef, TBL_MethodDef, or TBL_FieldDef.
-    CLR_UINT16 ownerIdx;  // TBL_TypeDef | TBL_MethodDef | TBL_FielfDef
+    /// @brief one of TBL_TypeDef, TBL_MethodDef, or TBL_FieldDef.
+    ///
+    CLR_UINT16 ownerType;
+
+    /// @brief TBL_TypeDef | TBL_MethodDef | TBL_FielfDef
+    ///
+    CLR_UINT16 ownerIdx;
     CLR_UINT16 constructor;
-    CLR_SIG data; // TBL_Signatures
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG data;
 
     CLR_UINT32 Key() const
     {
@@ -1249,8 +1426,53 @@ struct CLR_RECORD_ATTRIBUTE
 
 struct CLR_RECORD_TYPESPEC
 {
-    CLR_SIG sig; // TBL_Signatures
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG sig;
+
     CLR_UINT16 pad;
+};
+
+struct CLR_RECORD_GENERICPARAM
+{
+    /// @brief 2-byte index of the generic parameter, numbered left -to-right, from zero.
+    ///
+    CLR_UINT16 Number;
+
+    /// @brief 2-byte bitmask of type GenericParamAttributes
+    ///
+    CLR_UINT16 Flags;
+
+    /// @brief TypeOrMethodDef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_MethodDef (ORed with 0x8000)
+    ///
+    CLR_IDX Owner;
+
+    /// @brief Index into TBL_Strings
+    ///
+    CLR_STRING Name;
+};
+
+struct CLR_RECORD_GENERICPARAMCONSTRAINT
+{
+    /// @brief Index into TBL_GenericParam
+    ///
+    CLR_IDX Owner;
+
+    /// @brief TypeDefOrRef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x4000) | TBL_TypeSpec
+    /// (ORed with 0x8000)
+    ///
+    CLR_IDX Constraint;
+};
+
+struct CLR_RECORD_METHODSPEC
+{
+    /// @brief MethodDefOrRef -> Index into TBL_MethodDef (ORed with 0x0000) | TBL_MemberRef (ORed with 0x8000)
+    ///
+    CLR_IDX Method;
+
+    /// @brief Index into TBL_Signatures
+    ///
+    CLR_SIG Instantiation;
 };
 
 struct CLR_RECORD_EH

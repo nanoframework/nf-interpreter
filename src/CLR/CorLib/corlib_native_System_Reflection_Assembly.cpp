@@ -274,14 +274,6 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     if(header->GoodAssembly())
     {
-        //
-        // Sorry, you'll have to reboot to load this assembly.
-        //
-        if(header->flags & CLR_RECORD_ASSEMBLY::c_Flags_NeedReboot)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
-        }
-
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance( header, assm ));
 
         assm->m_pFile = array;
