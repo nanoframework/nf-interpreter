@@ -824,17 +824,35 @@ struct CLR_RT_MethodDef_CrossReference
 
 struct CLR_RT_GenericParam_CrossReference
 {
-    // TODO
+    CLR_UINT16 m_flags;
+    CLR_UINT16 m_data;
+
+    CLR_INDEX GetOwner() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
 };
 
 struct CLR_RT_GenericParamConstraint_CrossReference
 {
-    // TODO
+    CLR_UINT16 Constraint;
+
+    CLR_UINT16 m_data;
+
+    CLR_INDEX GetOwner() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
 };
 
 struct CLR_RT_MethodSpec_CrossReference
 {
-    // TODO
+    CLR_UINT16 m_data;
+
+    CLR_INDEX GetMethod() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
 };
 
 struct CLR_RT_MethodDef_Patch
