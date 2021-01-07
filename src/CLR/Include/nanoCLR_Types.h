@@ -1080,10 +1080,11 @@ struct CLR_RECORD_ASSEMBLYREF
 {
     /// @brief Index into TBL_Strings
     CLR_STRING name;
-    CLR_UINT16 pad;
 
     /// @brief Assembly version
     CLR_RECORD_VERSION version;
+
+    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_TYPEREF
