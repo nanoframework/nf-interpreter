@@ -458,7 +458,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // Check RS485 mode is not selected as currently not supported
         if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
         {
-             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
         }
 
         // stop bits @ CR2:STOP1&STOP0
