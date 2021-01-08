@@ -3175,7 +3175,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (target->enclosingType == scope)
+        if (target->GetEnclosingTypeIndex() == scope)
         {
             const char *szName = GetString(target->name);
 
@@ -4393,7 +4393,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     if (fFullName && td->enclosingType != CLR_EmptyIndex)
     {
         CLR_RT_TypeDef_Index clsSub;
-        clsSub.Set(inst.Assembly(), td->enclosingType);
+        clsSub.Set(inst.Assembly(), td->GetEnclosingTypeIndex());
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(clsSub, szBuffer, iBuffer, flags, 0));
 
