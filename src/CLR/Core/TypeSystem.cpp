@@ -2083,18 +2083,48 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
     int i;
 
-    ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
+    // TODO: replace code with macro
+    //ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
+    const CLR_RECORD_METHODREF * src = (const CLR_RECORD_METHODREF*)this->GetTable(TBL_MethodRef); 
+    CLR_RT_MethodRef_CrossReference *dst = this->m_pCrossReference_MethodRef;
+    for (i = 0; i < this->m_pTablesSize[TBL_MethodRef]; i++, src++, dst++)
     {
+        CLR_RT_TypeDef_Index target;
         CLR_RT_TypeDef_Instance inst;
 
-        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->container].m_target) == false)
+        switch (src->GetTarget())
+        {
+            case MemberRefParent::MRP_TypeRef:
+                target = m_pCrossReference_TypeRef[src->GetContainer()].m_target;
+                break;
+
+            case MemberRefParent::MRP_TypeDef:
+                CLR_RT_TypeDef_Index target;
+                target.Set(this->m_index, src->GetContainer());
+                break;
+
+            case MemberRefParent::MRP_TypeSpec:
+                // TODO
+                break;
+
+            default:
+#if defined(_WIN32)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Method: unknown or unsupported MemberRefParent: %08x\r\n", src->container);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Method: unknown or unsupported MemberRefParent: %08x\r\n", src->container);
+#endif
+                break;
+
+        }
+
+        if (inst.InitializeFromIndex(target) == false)
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->container);
+            CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->container);
 #endif
 
 #if defined(_WIN32)
-            NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Field: unknown scope: %08x\r\n", src->container);
+            NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Method: unknown scope: %08x\r\n", src->container);
 #else
             NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Field: unknown scope: %08x\r\n", src->container);
 #endif

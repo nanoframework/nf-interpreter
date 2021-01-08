@@ -1087,6 +1087,19 @@ struct CLR_RECORD_ASSEMBLYREF
     CLR_UINT16 pad;
 };
 
+/// @brief Target of index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec 
+enum TypeDefOrRef
+{
+    //  @brief This is an index into TBL_TypeDef
+    TDR_TypeDef = 0,
+
+    ///  @brief This is an index into TBL_TypeRef
+    TDR_TypeRef = 1,
+
+    ///  @brief This is an index into TBL_TypeSpec
+    TDR_TypeSpec = 2
+};
+
 struct CLR_RECORD_TYPEREF
 {
     /// @brief Index into TBL_Strings
@@ -1117,14 +1130,37 @@ struct CLR_RECORD_FIELDREF
     CLR_UINT16 pad;
 };
 
+/// @brief Target of index into TBL_TypeDef | TBL_TypeRef | TBL_ModuleRef | TBL_MethodDef | TBL_TypeSpec 
+enum MemberRefParent
+{
+    //  @brief This is an index into TBL_TypeDef
+    MRP_TypeDef = 0,
+
+    ///  @brief This is an index into TBL_TypeRef
+    MRP_TypeRef = 1,
+
+    // NOT IMPLEMENTED
+    ///  @brief This is an index into TBL_ModuleRef
+    //MRP_ModuleRef = 2,
+
+    // NOT IMPLEMENTED
+    ///  @brief This is an index into TBL_MethodDef
+    //MRP_MethodDef = 3,
+
+    ///  @brief This is an index into TBL_TypeSpec
+    MRP_TypeSpec = 4
+};
+
 struct CLR_RECORD_METHODREF
 {
+    // MemberRefParent is 3 bits
+    static const CLR_UINT16 MemberRefParent_Mask = 0x0007;
+
     /// @brief Index into TBL_Strings
     ///
     CLR_STRING name;
 
-    /// @brief MemberRefParent -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x2000) |
-    /// TBL_TypeSpec (ORed with 0x8000)
+    /// @brief MemberRefParent -> Index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
     ///
     CLR_INDEX container;
 
@@ -1132,6 +1168,19 @@ struct CLR_RECORD_METHODREF
     ///
     CLR_SIG sig;
     CLR_UINT16 pad;
+
+    /// @brief Get Index value for container
+    CLR_INDEX GetContainer() const
+    {
+        // MemberRefParent is 3 bits
+        return container >> 3;
+    }
+
+    /// @brief Get target table for this
+    MemberRefParent GetTarget() const
+    {
+        return (MemberRefParent)(container & (MemberRefParent_Mask));
+    }
 };
 
 struct CLR_RECORD_TYPEDEF
