@@ -2087,6 +2087,9 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
     int i;
 
+    // const CLR_RECORD_METHODREF *src = (const CLR_RECORD_METHODREF *)this->GetTable(TBL_MethodRef);
+    // CLR_RT_MethodRef_CrossReference *dst = this->m_pCrossReference_MethodRef;
+    // for (i = 0; i < this->m_pTablesSize[TBL_MethodRef]; i++, src++, dst++)
     ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
     {
         CLR_RT_TypeDef_Index target;
@@ -2152,6 +2155,9 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         if (fGot == false)
         {
 #if !defined(BUILD_RTM)
+            const CLR_RECORD_TYPEDEF *qTD = inst.m_target;
+            CLR_RT_Assembly *qASSM = inst.m_assm;
+
             CLR_Debug::Printf(
                 "Resolve: unknown method: %s.%s.%s\r\n",
                 qASSM->GetString(qTD->nameSpace),
