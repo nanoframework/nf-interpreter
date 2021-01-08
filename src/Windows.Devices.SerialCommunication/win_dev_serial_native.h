@@ -26,6 +26,12 @@ typedef enum __nfpack SerialHandshake
     SerialHandshake_XOnXOff = 3,
 } SerialHandshake;
 
+typedef enum __nfpack SerialMode
+{
+    SerialMode_Normal = 0,
+    SerialMode_RS485 = 1,
+} SerialMode;
+
 typedef enum __nfpack SerialParity
 {
     SerialParity_None = 0,
@@ -73,7 +79,8 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___stopBits = 14;
     static const int FIELD___bytesReceived = 15;
     static const int FIELD___watchChar = 16;
-    static const int FIELD___callbacksDataReceivedEvent = 17;
+    static const int FIELD___mode = 17;
+    static const int FIELD___callbacksDataReceivedEvent = 18;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___U4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
@@ -86,7 +93,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
-
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceController
@@ -96,7 +102,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD_STATIC__s_deviceCollection = 3;
 
     //--//
-
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceEventListener
@@ -104,7 +109,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___serialDevicesMap = 1;
 
     //--//
-
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceInputStream
@@ -112,7 +116,6 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___serialDevice = 1;
 
     //--//
-
 };
 
 struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream
@@ -121,9 +124,8 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
     static const int FIELD___unstoredBufferLength = 2;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication;
 
-#endif  //_WIN_DEV_SERIAL_NATIVE_H_
+#endif //_WIN_DEV_SERIAL_NATIVE_H_
