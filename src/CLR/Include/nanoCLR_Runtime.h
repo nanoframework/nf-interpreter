@@ -1060,6 +1060,15 @@ struct CLR_RT_SignatureParser
         int m_levels;
         CLR_DataType m_dt;
         CLR_RT_TypeDef_Index m_cls;
+
+        /// @brief Element is GenericInstance
+        bool m_IsGenericInst;
+
+        /// @brief Element is MVAR
+        bool m_IsMvar;
+
+        /// @brief Generic Parameter position
+        int m_GenericParamPosition;
     };
 
     CLR_RT_HeapBlock *m_lst;

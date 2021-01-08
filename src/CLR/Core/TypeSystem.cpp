@@ -325,6 +325,8 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
     res.m_fByRef = false;
     res.m_levels = 0;
+    res.m_IsGenericInst = false;
+    res.m_IsMvar = false;
 
     switch (m_type)
     {
@@ -454,6 +456,24 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         res.m_cls = g_CLR_RT_WellKnownTypes.m_Void;
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
+
+                    case DATATYPE_MVAR:
+                    {
+                        res.m_IsMvar = true;
+                        res.m_GenericParamPosition = (int)*m_sig++;
+
+                        // TODO leaving this as object for now
+                        res.m_cls = g_CLR_RT_WellKnownTypes.m_Object;
+
+                        NANOCLR_SET_AND_LEAVE(S_OK);
+                    }
+
+                    case DATATYPE_GENERICINST:
+                    {
+                        res.m_IsGenericInst = true;
+
+                        NANOCLR_SET_AND_LEAVE(S_OK);
+                    }
 
                     default:
                     {
@@ -2107,7 +2127,6 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 break;
 
             case MemberRefParent::MRP_TypeDef:
-                CLR_RT_TypeDef_Index target;
                 target.Set(this->m_index, src->GetContainer());
                 break;
 
@@ -4319,13 +4338,34 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
     else
     {
         if (resLeft.m_fByRef != resRight.m_fByRef)
+        {
             return false;
+        }
         if (resLeft.m_levels != resRight.m_levels)
+        {
             return false;
+        }
         if (resLeft.m_dt != resRight.m_dt)
+        {
             return false;
+        }
         if (resLeft.m_cls.m_data != resRight.m_cls.m_data)
+        {
             return false;
+        }
+        if (resLeft.m_IsMvar != resRight.m_IsMvar)
+        {
+            return false;
+        }
+        if ((resLeft.m_IsMvar && resRight.m_IsMvar) &&
+            (resLeft.m_GenericParamPosition && resRight.m_GenericParamPosition))
+        {
+            return false;
+        }
+        if (resLeft.m_IsGenericInst != resRight.m_IsGenericInst)
+        {
+            return false;
+        }
     }
 
     return true;
