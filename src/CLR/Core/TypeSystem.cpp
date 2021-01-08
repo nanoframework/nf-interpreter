@@ -757,15 +757,23 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
             CLR_RT_TypeDef_Index tmp;
             const CLR_RT_TypeDef_Index *cls;
 
-            if (extends & 0x8000) // TypeRef
-            {
-                cls = &m_assm->m_pCrossReference_TypeRef[extends & 0x7FFF].m_target;
-            }
-            else
-            {
-                tmp.Set(Assembly(), extends);
+            // extends its TypeDefOrRef (2 bits to encode tag)
+            CLR_INDEX index = extends >> 2;
 
-                cls = &tmp;
+            switch (TypeDefOrRef(extends & 0x0003))
+            {
+                case TypeDefOrRef::TDR_TypeDef:
+                    tmp.Set(Assembly(), index);
+                    cls = &tmp;
+                    break;
+
+                case TypeDefOrRef::TDR_TypeRef:
+                    cls = &m_assm->m_pCrossReference_TypeRef[index].m_target;
+                    break;
+
+                // all others are not supported
+                default:
+                    return false;
             }
 
             return InitializeFromIndex(*cls);
