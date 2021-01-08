@@ -1087,7 +1087,7 @@ struct CLR_RECORD_ASSEMBLYREF
     CLR_UINT16 pad;
 };
 
-/// @brief Target of index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec 
+/// @brief Tag for encoded index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
 enum TypeDefOrRef
 {
     //  @brief This is an index into TBL_TypeDef
@@ -1098,6 +1098,37 @@ enum TypeDefOrRef
 
     ///  @brief This is an index into TBL_TypeSpec
     TDR_TypeSpec = 2
+};
+
+/// @brief Tag for encoded index into TBL_TypeDef | TBL_TypeRef | TBL_ModuleRef | TBL_MethodDef | TBL_TypeSpec
+enum MemberRefParent
+{
+    //  @brief This is an index into TBL_TypeDef
+    MRP_TypeDef = 0,
+
+    ///  @brief This is an index into TBL_TypeRef
+    MRP_TypeRef = 1,
+
+    // NOT IMPLEMENTED
+    ///  @brief This is an index into TBL_ModuleRef
+    // MRP_ModuleRef = 2,
+
+    // NOT IMPLEMENTED
+    ///  @brief This is an index into TBL_MethodDef
+    // MRP_MethodDef = 3,
+
+    ///  @brief This is an index into TBL_TypeSpec
+    MRP_TypeSpec = 4
+};
+
+/// @brief Tag for encoded index into TBL_TypeDef | TBL_MethodDef
+enum TypeOrMethodDef
+{
+    //  @brief This is an index into TBL_TypeDef
+    TMR_TypeDef = 0,
+
+    ///  @brief This is an index into TBL_MethodDef
+    TMR_MethodDef = 1,
 };
 
 struct CLR_RECORD_TYPEREF
@@ -1130,37 +1161,16 @@ struct CLR_RECORD_FIELDREF
     CLR_UINT16 pad;
 };
 
-/// @brief Target of index into TBL_TypeDef | TBL_TypeRef | TBL_ModuleRef | TBL_MethodDef | TBL_TypeSpec 
-enum MemberRefParent
-{
-    //  @brief This is an index into TBL_TypeDef
-    MRP_TypeDef = 0,
-
-    ///  @brief This is an index into TBL_TypeRef
-    MRP_TypeRef = 1,
-
-    // NOT IMPLEMENTED
-    ///  @brief This is an index into TBL_ModuleRef
-    //MRP_ModuleRef = 2,
-
-    // NOT IMPLEMENTED
-    ///  @brief This is an index into TBL_MethodDef
-    //MRP_MethodDef = 3,
-
-    ///  @brief This is an index into TBL_TypeSpec
-    MRP_TypeSpec = 4
-};
-
 struct CLR_RECORD_METHODREF
 {
-    // MemberRefParent is 3 bits
+    // MemberRefParent tag is 3 bits
     static const CLR_UINT16 MemberRefParent_Mask = 0x0007;
 
     /// @brief Index into TBL_Strings
     ///
     CLR_STRING name;
 
-    /// @brief MemberRefParent -> Index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
+    /// @brief Encoded index for MemberRefParent
     ///
     CLR_INDEX container;
 
@@ -1169,22 +1179,26 @@ struct CLR_RECORD_METHODREF
     CLR_SIG sig;
     CLR_UINT16 pad;
 
-    /// @brief Get Index value for container
-    CLR_INDEX GetContainer() const
-    {
-        // MemberRefParent is 3 bits
-        return container >> 3;
-    }
-
-    /// @brief Get target table for this
+    /// @brief MemberRefParent -> Index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
+    ///
     MemberRefParent GetTarget() const
     {
         return (MemberRefParent)(container & (MemberRefParent_Mask));
+    }
+
+    /// @brief Index value
+    CLR_INDEX GetIndex() const
+    {
+        // MemberRefParent_Tag is 3 bits
+        return (CLR_INDEX)(container >> 3);
     }
 };
 
 struct CLR_RECORD_TYPEDEF
 {
+    // TypeDefOrRef tag is 2 bits
+    static const CLR_UINT16 TypeDefOrRef_Mask = 0x0003;
+
     static const CLR_UINT16 TD_Scope_Mask = 0x0007;
     /// @brief Class is not public scope.
     ///
@@ -1243,13 +1257,41 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_STRING nameSpace;
 
-    /// @brief TBL_TypeDef | TBL_TypeRef // 0x8000
+    /// @brief Encoded index for TypeDefOrRef
     ///
     CLR_INDEX extends;
 
-    /// @brief TBL_TypeDef
+    /// @brief Tag for @param extends TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
+    ///
+    TypeDefOrRef GetExtendsTarget() const
+    {
+        return (TypeDefOrRef)(extends & (TypeDefOrRef_Mask));
+    }
+
+    /// @brief Index value for extends type
+    CLR_INDEX GetExtendsIndex() const
+    {
+        // TypeDefOrRef tag is 2 bits
+        return (CLR_INDEX)(extends >> 2);
+    }
+
+    /// @brief Encoded index for TypeDefOrRef
     ///
     CLR_INDEX enclosingType;
+
+    /// @brief Tag for @param enclosingType TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
+    ///
+    TypeDefOrRef GetEnclosingTypeTarget() const
+    {
+        return (TypeDefOrRef)(enclosingType & (TypeDefOrRef_Mask));
+    }
+
+    /// @brief Index value for enclosingType
+    CLR_INDEX GetEnclosingTypeIndex() const
+    {
+        // TypeDefOrRef tag is 2 bits
+        return (CLR_INDEX)(enclosingType >> 2);
+    }
 
     /// @brief TBL_Signatures
     ///
@@ -1508,8 +1550,8 @@ struct CLR_RECORD_GENERICPARAMCONSTRAINT
     ///
     CLR_INDEX Owner;
 
-    /// @brief TypeDefOrRef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x4000) | TBL_TypeSpec
-    /// (ORed with 0x8000)
+    /// @brief TypeDefOrRef_Tag -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x4000) |
+    /// TBL_TypeSpec (ORed with 0x8000)
     ///
     CLR_INDEX Constraint;
 };

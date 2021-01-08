@@ -777,18 +777,15 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
             CLR_RT_TypeDef_Index tmp;
             const CLR_RT_TypeDef_Index *cls;
 
-            // extends its TypeDefOrRef (2 bits to encode tag)
-            CLR_INDEX index = extends >> 2;
-
-            switch (TypeDefOrRef(extends & 0x0003))
+            switch (m_target->GetExtendsTarget())
             {
                 case TypeDefOrRef::TDR_TypeDef:
-                    tmp.Set(Assembly(), index);
+                    tmp.Set(Assembly(), m_target->GetExtendsIndex());
                     cls = &tmp;
                     break;
 
                 case TypeDefOrRef::TDR_TypeRef:
-                    cls = &m_assm->m_pCrossReference_TypeRef[index].m_target;
+                    cls = &m_assm->m_pCrossReference_TypeRef[m_target->GetExtendsIndex()].m_target;
                     break;
 
                 // all others are not supported
@@ -2098,11 +2095,11 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         switch (src->GetTarget())
         {
             case MemberRefParent::MRP_TypeRef:
-                target = m_pCrossReference_TypeRef[src->GetContainer()].m_target;
+                target = m_pCrossReference_TypeRef[src->GetIndex()].m_target;
                 break;
 
             case MemberRefParent::MRP_TypeDef:
-                target.Set(this->m_index, src->GetContainer());
+                target.Set(this->m_index, src->GetIndex());
                 break;
 
             case MemberRefParent::MRP_TypeSpec:
@@ -2111,7 +2108,9 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
             default:
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve Method: unknown or unsupported MemberRefParent %08x\r\n", src->container);
+                CLR_Debug::Printf(
+                    "Resolve Method: unknown or unsupported MemberRefParent_Tag %08x\r\n",
+                    src->container);
 #endif
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
@@ -2152,11 +2151,6 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
         if (fGot == false)
         {
-            inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->container].m_target);
-
-            const CLR_RECORD_TYPEDEF *qTD = inst.m_target;
-            CLR_RT_Assembly *qASSM = inst.m_assm;
-
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf(
                 "Resolve: unknown method: %s.%s.%s\r\n",
