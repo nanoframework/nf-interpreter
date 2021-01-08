@@ -455,6 +455,12 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // parity @ CR1:PS
         // TODO
 
+        // Check RS485 mode is not selected as currently not supported
+        if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+        {
+             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+        }
+
         // stop bits @ CR2:STOP1&STOP0
         // clear bits for stop bits setting
         palUart->Uart_cfg.cr2 &= ~USART_CR2_STOP;
