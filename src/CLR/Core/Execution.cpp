@@ -1795,15 +1795,18 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         CLR_RT_TypeDef_Index cls;
         CLR_UINT32 levels = 0;
         CLR_DataType dtModifier = DATATYPE_VOID;
+        // flag for GENERICINST
+        bool isGenericInstance = false;
+        // count of GENERICINST arguments
+        CLR_UINT8 genArgCount = 0;
+        // counter for GENERICINST arguments parsed
+        CLR_UINT8 genArgCountParsed = 0;
+        // flag to skip allocation of local when the signature is being consumed to parse GENERICINST signature
+        bool skipAllocation = false;
 
         while (true)
         {
             dt = CLR_UncompressElementType(sig);
-            if (dt ==
-                DATATYPE_VOID) // there should never have been a local variable of type void, unless it's generic type
-            {
-                dt = DATATYPE_OBJECT;
-            }
             switch (dt)
             {
                 case DATATYPE_TYPE_PINNED:
@@ -1820,50 +1823,109 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 case DATATYPE_CLASS:
                 case DATATYPE_VALUETYPE:
                 {
-                    CLR_UINT32 tk = CLR_TkFromStream(sig);
-                    CLR_UINT32 index = CLR_DataFromTk(tk);
-
-                    switch (CLR_TypeFromTk(tk))
+                    if (skipAllocation)
                     {
-                        case TBL_TypeSpec:
+                        genArgCountParsed++;
+                    }
+                    else
+                    {
+                        CLR_UINT32 tk = CLR_TkFromStream(sig);
+                        CLR_UINT32 index = CLR_DataFromTk(tk);
+
+                        switch (CLR_TypeFromTk(tk))
                         {
-                            CLR_RT_SignatureParser sub;
-                            sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(index));
-                            CLR_RT_SignatureParser::Element res;
+                            case TBL_TypeSpec:
+                            {
+                                CLR_RT_SignatureParser sub;
+                                sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(index));
+                                CLR_RT_SignatureParser::Element res;
 
-                            NANOCLR_CHECK_HRESULT(sub.Advance(res));
+                                NANOCLR_CHECK_HRESULT(sub.Advance(res));
 
-                            cls = res.m_cls;
-                            levels += res.m_levels;
+                                cls = res.m_cls;
+                                levels += res.m_levels;
+                            }
+                            break;
+
+                            case TBL_TypeRef:
+                                cls = assm->m_pCrossReference_TypeRef[index].m_target;
+                                break;
+
+                            case TBL_TypeDef:
+                                cls.Set(assm->m_index, index);
+                                break;
+
+                            default:
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
-                        break;
 
-                        case TBL_TypeRef:
-                            cls = assm->m_pCrossReference_TypeRef[index].m_target;
+                        if (isGenericInstance)
+                        {
+                            if (genArgCount == 0)
+                            {
+                                // need to read generic arguments count to consume signature
+                                genArgCount = *sig++;
+
+                                // flag to skip allocation of locals
+                                skipAllocation = true;
+                            }
+
+                            // done here
                             break;
-
-                        case TBL_TypeDef:
-                            cls.Set(assm->m_index, index);
-                            break;
-
-                        default:
-                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+                        else
+                        {
+                            // parsing of non GENERICINST signature
+                            goto done;
+                        }
                     }
                 }
-                    goto done;
+
+                case DATATYPE_GENERICINST:
+                {
+                    if (skipAllocation)
+                    {
+                        genArgCountParsed++;
+                    }
+                    else
+                    {
+                        // set flag that we are processing a GENERICINST signature
+                        isGenericInstance = true;
+                    }
+                    break;
+                }
+
+                case DATATYPE_MVAR:
+                    // TODO
+                    break;
 
                 default:
                 {
-                    const CLR_RT_TypeDef_Index *cls2 = c_CLR_RT_DataTypeLookup[dt].m_cls;
-
-                    if (cls2 == NULL)
+                    if (skipAllocation)
                     {
-                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        genArgCountParsed++;
                     }
+                    else
+                    {
+                        const CLR_RT_TypeDef_Index *cls2 = c_CLR_RT_DataTypeLookup[dt].m_cls;
 
-                    cls = *cls2;
+                        if (cls2 == NULL)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                        }
+
+                        cls = *cls2;
+
+                        goto done;
+                    }
                 }
-                    goto done;
+            }
+
+            // check if we are done with generic instance parsing
+            if (skipAllocation && (genArgCountParsed == genArgCount))
+            {
+                // yes, move to local creation
+                goto done;
             }
         }
 
@@ -1918,6 +1980,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
                 {
                     dt = DATATYPE_OBJECT;
+                }
+
+                if (isGenericInstance)
+                {
+                    dt = DATATYPE_GENERICINST;
                 }
 
                 locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
