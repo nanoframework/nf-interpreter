@@ -777,15 +777,15 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
             CLR_RT_TypeDef_Index tmp;
             const CLR_RT_TypeDef_Index *cls;
 
-            switch (m_target->GetExtendsTarget())
+            switch (CLR_GetTypeDefOrRef(extends))
             {
-                case TypeDefOrRef::TDR_TypeDef:
-                    tmp.Set(Assembly(), m_target->GetExtendsIndex());
+                case CLR_TypeDefOrRef::TDR_TypeDef:
+                    tmp.Set(Assembly(), CLR_GetIndexFromTypeDefOrRef(m_target->extends));
                     cls = &tmp;
                     break;
 
-                case TypeDefOrRef::TDR_TypeRef:
-                    cls = &m_assm->m_pCrossReference_TypeRef[m_target->GetExtendsIndex()].m_target;
+                case CLR_TypeDefOrRef::TDR_TypeRef:
+                    cls = &m_assm->m_pCrossReference_TypeRef[CLR_GetIndexFromTypeDefOrRef(m_target->extends)].m_target;
                     break;
 
                 // all others are not supported
@@ -2095,17 +2095,17 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         CLR_RT_TypeDef_Index target;
         CLR_RT_TypeDef_Instance inst;
 
-        switch (src->GetTarget())
+        switch (CLR_GetMemberRefParent(src->container))
         {
-            case MemberRefParent::MRP_TypeRef:
-                target = m_pCrossReference_TypeRef[src->GetIndex()].m_target;
+            case CLR_MemberRefParent::MRP_TypeRef:
+                target = m_pCrossReference_TypeRef[CLR_GetIndexFromMemberRefParent(src->container)].m_target;
                 break;
 
-            case MemberRefParent::MRP_TypeDef:
-                target.Set(this->m_index, src->GetIndex());
+            case CLR_MemberRefParent::MRP_TypeDef:
+                target.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
                 break;
 
-            case MemberRefParent::MRP_TypeSpec:
+            case CLR_MemberRefParent::MRP_TypeSpec:
                 // TODO
                 break;
 
@@ -3181,7 +3181,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (target->GetEnclosingTypeIndex() == scope)
+        if (CLR_GetIndexFromTypeDefOrRef(target->enclosingType) == scope)
         {
             const char *szName = GetString(target->name);
 
@@ -4399,7 +4399,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     if (fFullName && td->enclosingType != CLR_EmptyIndex)
     {
         CLR_RT_TypeDef_Index clsSub;
-        clsSub.Set(inst.Assembly(), td->GetEnclosingTypeIndex());
+        clsSub.Set(inst.Assembly(), CLR_GetIndexFromTypeDefOrRef(td->enclosingType));
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(clsSub, szBuffer, iBuffer, flags, 0));
 
