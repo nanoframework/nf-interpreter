@@ -2367,7 +2367,7 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     if (FAILED(desc.InitializeFromObject(*blk)))
         return false;
 
-    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.m_target->dataType];
+    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.m_target->DataType];
 
     return (dtl.m_flags & c_MaskForPrimitive) == c_MaskForPrimitive;
 }
@@ -2635,7 +2635,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 
         while (true)
         {
-            CLR_UINT32 iFields = td.m_target->iFields_Num;
+            CLR_UINT32 iFields = td.m_target->InstanceFieldsCount;
             CLR_UINT32 totalFields = td.CrossReference().m_totalFields;
             CLR_UINT32 dFields = totalFields - iFields;
 
@@ -2649,7 +2649,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
                 return false;
         }
 
-        cmd->m_fd.Set(td.Assembly(), td.m_target->iFields_First + offset);
+        cmd->m_fd.Set(td.Assembly(), td.m_target->FirstInstanceField + offset);
     }
 
     if (!g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
@@ -3464,11 +3464,11 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &in
         return false;
 
     td = inst.m_target;
-    totMethods = td->vMethods_Num + td->iMethods_Num + td->sMethods_Num;
+    totMethods = td->VirtualMethodCount + td->InstanceMethodCount + td->StaticFieldsCount;
 
     for (int i = 0; i < totMethods; i++)
     {
-        md.Set(index.Assembly(), td->methods_First + i);
+        md.Set(index.Assembly(), td->FirstMethod + i);
 
         Debugging_Info_SetJMC_Method(md, fJMC);
     }

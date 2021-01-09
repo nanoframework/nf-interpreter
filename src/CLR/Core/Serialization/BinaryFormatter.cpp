@@ -94,7 +94,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
 
 #endif
 
-        if ((m_type->m_handlerCls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Serializable) == 0)
+        if ((m_type->m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Serializable) == 0)
         {
 #if defined(NANOCLR_APPDOMAINS)
 
@@ -162,7 +162,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
                     td = m_typeExpected;
                 }
 
-                if (td->m_handlerCls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Sealed)
+                if (td->m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Sealed)
                 {
                     res &= ~c_Signature_Type;
                     break;
@@ -198,7 +198,7 @@ bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(CLR_RT_TypeDescriptor *le
 CLR_DataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (CLR_DataType)type->m_handlerCls.m_target->dataType;
+    return (CLR_DataType)type->m_handlerCls.m_target->DataType;
 }
 
 CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)
@@ -1206,7 +1206,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
 
     NANOCLR_CLEAR(hints);
 
-    if (cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
+    if (cls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
@@ -1661,9 +1661,9 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 
     while (NANOCLR_INDEX_IS_VALID(m_fields_CurrentClass))
     {
-        if (m_fields_CurrentField < m_fields_CurrentClass.m_target->iFields_Num)
+        if (m_fields_CurrentField < m_fields_CurrentClass.m_target->InstanceFieldsCount)
         {
-            int offset = m_fields_CurrentClass.m_target->iFields_First + m_fields_CurrentField++;
+            int offset = m_fields_CurrentClass.m_target->FirstInstanceField + m_fields_CurrentField++;
             CLR_RT_FieldDef_Index index;
             index.Set(m_fields_CurrentClass.Assembly(), offset);
             CLR_RT_FieldDef_Instance inst;

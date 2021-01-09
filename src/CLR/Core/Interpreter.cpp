@@ -2414,7 +2414,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //
                         // See CLR_RT_StackFrame::Pop()
                         //
-                        if ((cls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        if ((cls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                             CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
                         {
                             if (top[0].DataType() == DATATYPE_OBJECT)
@@ -2733,9 +2733,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     UPDATESTACK(stack, evalPos);
 
-                    if (((typeInst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                    if (((typeInst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
-                        ((typeInst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        ((typeInst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_Enum))
                     {
                         //"unbox"
@@ -3341,7 +3341,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_INT32 len;
 
-                    if (clsInst.m_target->dataType)
+                    if (clsInst.m_target->DataType)
                     {
                         len = sizeof(CLR_RT_HeapBlock);
                     }

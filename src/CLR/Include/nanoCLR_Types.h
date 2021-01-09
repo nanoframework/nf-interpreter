@@ -1268,56 +1268,75 @@ struct CLR_RECORD_TYPEDEF
     static const CLR_UINT16 TD_HasFinalizer = 0x4000;
     static const CLR_UINT16 TD_HasAttributes = 0x8000;
 
-    /// @brief Index into TBL_Strings
+    /// @brief Index into TBL_Strings with the name of the type
     ///
-    CLR_STRING name; // TBL_Strings
+    CLR_STRING Name;
 
-    /// @brief Index into TBL_Strings
+    /// @brief Index into TBL_Strings  with the name of the namespace containing the type
     ///
-    CLR_STRING nameSpace;
+    CLR_STRING NameSpace;
 
     /// @brief Encoded index for TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
     ///
-    CLR_TYPEDEFORREF extends;
+    CLR_TYPEDEFORREF Extends;
 
     /// @brief Encoded index for TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
     ///
-    CLR_TYPEDEFORREF enclosingType;
+    CLR_TYPEDEFORREF EnclosingType;
 
-    /// @brief TBL_Signatures
+    /// @brief Index into TBL_Signatures blob table for the set of interfaces implemented by this type
     ///
-    CLR_SIG interfaces;
+    CLR_SIG Interfaces;
 
-    /// @brief TBL_MethodDef
+    /// @brief Index into TBL_MethodDef for the first method of the type
     ///
-    CLR_INDEX methods_First;
+    CLR_INDEX FirstMethod;
 
-    CLR_UINT8 vMethods_Num;
-    CLR_UINT8 iMethods_Num;
-    CLR_UINT8 sMethods_Num;
-    CLR_UINT8 dataType;
-
-    /// @brief TBL_FieldDef
+    /// @brief Count of virtual methods in the type
     ///
-    CLR_INDEX sFields_First;
+    CLR_UINT8 VirtualMethodCount;
 
-    /// @brief TBL_FieldDef
+    /// @brief Count of instance methods in the type
     ///
-    CLR_INDEX iFields_First;
+    CLR_UINT8 InstanceMethodCount;
 
-    CLR_UINT8 sFields_Num;
-    CLR_UINT8 iFields_Num;
-    CLR_UINT16 flags;
+    /// @brief Count of static methods in the type
+    ///
+    CLR_UINT8 StaticMethodCount;
+
+    /// @brief Data type identity for the type
+    ///
+    CLR_UINT8 DataType;
+
+    /// @brief Index into  TBL_FieldDef for the first static field of the type
+    ///
+    CLR_INDEX FirstStaticField;
+
+    /// @brief Index into  TBL_FieldDef for the first instance field of the type
+    ///
+    CLR_INDEX FirstInstanceField;
+
+    /// @brief
+    ///
+    CLR_UINT8 StaticFieldsCount;
+
+    /// @brief
+    ///
+    CLR_UINT8 InstanceFieldsCount;
+
+    /// @brief Flags defining intrinsic attributes and access modifiers for the type
+    ///
+    CLR_UINT16 Flags;
 
     //--//
 
     bool IsEnum() const
     {
-        return (flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
+        return (Flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
     }
     bool IsDelegate() const
     {
-        return (flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
+        return (Flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
     }
 };
 

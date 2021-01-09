@@ -2106,7 +2106,7 @@ struct CLR_RT_TypeDescriptor
 
     CLR_DataType GetDataType() const
     {
-        return (CLR_DataType)m_handlerCls.m_target->dataType;
+        return (CLR_DataType)m_handlerCls.m_target->DataType;
     }
 
     //--//

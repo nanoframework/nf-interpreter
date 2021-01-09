@@ -218,9 +218,9 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
 void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (td->interfaces != CLR_EmptyIndex)
+    if (td->Interfaces != CLR_EmptyIndex)
     {
-        CLR_PMETADATA sig = assm->GetSignature(td->interfaces);
+        CLR_PMETADATA sig = assm->GetSignature(td->Interfaces);
 
         m_count = (*sig++);
         m_sig = sig;
@@ -384,7 +384,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
             desc.m_handlerCls.InitializeFromIndex(desc.m_reflex.m_data.m_type);
 
             res.m_levels = desc.m_reflex.m_levels;
-            res.m_dt = (CLR_DataType)desc.m_handlerCls.m_target->dataType;
+            res.m_dt = (CLR_DataType)desc.m_handlerCls.m_target->DataType;
             res.m_cls = desc.m_reflex.m_data.m_type;
 
             //
@@ -663,7 +663,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         {
             for (; i; i--, td++)
             {
-                if (td->sFields_First <= indexField && indexField < td->sFields_First + td->sFields_Num)
+                if (td->FirstStaticField <= indexField && indexField < td->FirstStaticField + td->StaticFieldsCount)
                 {
                     break;
                 }
@@ -673,7 +673,8 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         {
             for (; i; i--, td++)
             {
-                if (td->iFields_First <= indexField && indexField < td->iFields_First + td->iFields_Num)
+                if (td->FirstInstanceField <= indexField &&
+                    indexField < td->FirstInstanceField + td->InstanceFieldsCount)
                 {
                     break;
                 }
@@ -770,7 +771,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
     NATIVE_PROFILE_CLR_CORE();
     if (NANOCLR_INDEX_IS_VALID(*this))
     {
-        CLR_INDEX extends = m_target->extends;
+        CLR_INDEX extends = m_target->Extends;
 
         if (extends != CLR_EmptyIndex)
         {
@@ -780,12 +781,12 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
             switch (CLR_GetTypeDefOrRef(extends))
             {
                 case CLR_TypeDefOrRef::TDR_TypeDef:
-                    tmp.Set(Assembly(), CLR_GetIndexFromTypeDefOrRef(m_target->extends));
+                    tmp.Set(Assembly(), CLR_GetIndexFromTypeDefOrRef(m_target->Extends));
                     cls = &tmp;
                     break;
 
                 case CLR_TypeDefOrRef::TDR_TypeRef:
-                    cls = &m_assm->m_pCrossReference_TypeRef[CLR_GetIndexFromTypeDefOrRef(m_target->extends)].m_target;
+                    cls = &m_assm->m_pCrossReference_TypeRef[CLR_GetIndexFromTypeDefOrRef(m_target->Extends)].m_target;
                     break;
 
                 // all others are not supported
@@ -1037,7 +1038,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
     }
     else
     {
-        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_handlerCls.m_target->dataType];
+        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_handlerCls.m_target->DataType];
 
         m_flags = dtl.m_flags & CLR_RT_DataTypeLookup::c_SemanticMask;
 
@@ -1047,7 +1048,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
 
         if (m_flags == CLR_RT_DataTypeLookup::c_Primitive)
         {
-            if ((m_handlerCls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+            if ((m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                 CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
                 m_flags = CLR_RT_DataTypeLookup::c_Enum;
@@ -1055,7 +1056,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
         }
         else
         {
-            switch (m_handlerCls.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask)
+            switch (m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask)
             {
                 case CLR_RECORD_TYPEDEF::TD_Semantics_ValueType:
                     m_flags = CLR_RT_DataTypeLookup::c_ValueType;
@@ -1701,7 +1702,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
         for (int i = 0; i < skeleton->m_pTablesSize[TBL_TypeDef]; i++, src++)
         {
-            skeleton->m_iStaticFields += src->sFields_Num;
+            skeleton->m_iStaticFields += src->StaticFieldsCount;
         }
     }
 
@@ -2136,8 +2137,8 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
         CLR_Debug::Printf(
             "Trying to resolve Method: %s.%s.%s\r\n",
-            qASSM->GetString(qTD->nameSpace),
-            qASSM->GetString(qTD->name),
+            qASSM->GetString(qTD->NameSpace),
+            qASSM->GetString(qTD->Name),
             name);
 #endif
 
@@ -2160,8 +2161,8 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
             CLR_Debug::Printf(
                 "Resolve: unknown method: %s.%s.%s\r\n",
-                qASSM->GetString(qTD->nameSpace),
-                qASSM->GetString(qTD->name),
+                qASSM->GetString(qTD->NameSpace),
+                qASSM->GetString(qTD->Name),
                 name);
 #endif
 
@@ -2187,9 +2188,9 @@ void CLR_RT_Assembly::Resolve_Link()
         // Link static fields.
         //
         {
-            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->sFields_First];
+            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->FirstStaticField];
 
-            num = src->sFields_Num;
+            num = src->StaticFieldsCount;
 
             for (; num; num--, fd++)
             {
@@ -2209,7 +2210,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             do
             {
-                if (inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_HasFinalizer)
+                if (inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_HasFinalizer)
                 {
                     dst->m_flags |= CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer;
                 }
@@ -2221,16 +2222,16 @@ void CLR_RT_Assembly::Resolve_Link()
                 }
 #endif
 
-                tot += inst.m_target->iFields_Num;
+                tot += inst.m_target->InstanceFieldsCount;
             } while (inst.SwitchToParent());
 
             dst->m_totalFields = tot;
 
             //--//
 
-            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->iFields_First];
+            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->FirstInstanceField];
 
-            num = src->iFields_Num;
+            num = src->InstanceFieldsCount;
             i = tot - num + CLR_RT_HeapBlock::HB_Object_Fields_Offset; // Take into account the offset from the
                                                                        // beginning of the object.
 
@@ -2244,9 +2245,9 @@ void CLR_RT_Assembly::Resolve_Link()
         // Link methods.
         //
         {
-            CLR_RT_MethodDef_CrossReference *md = &m_pCrossReference_MethodDef[src->methods_First];
+            CLR_RT_MethodDef_CrossReference *md = &m_pCrossReference_MethodDef[src->FirstMethod];
 
-            int num = src->vMethods_Num + src->iMethods_Num + src->sMethods_Num;
+            int num = src->VirtualMethodCount + src->InstanceMethodCount + src->StaticMethodCount;
 
             for (; num; num--, md++)
             {
@@ -3154,10 +3155,10 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_R
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (target->enclosingType == CLR_EmptyIndex)
+        if (target->EnclosingType == CLR_EmptyIndex)
         {
-            const char *szNameSpace = GetString(target->nameSpace);
-            const char *szName = GetString(target->name);
+            const char *szNameSpace = GetString(target->NameSpace);
+            const char *szName = GetString(target->Name);
 
             if (!strcmp(szName, name) && !strcmp(szNameSpace, nameSpace))
             {
@@ -3181,9 +3182,9 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (CLR_GetIndexFromTypeDefOrRef(target->enclosingType) == scope)
+        if (CLR_GetIndexFromTypeDefOrRef(target->EnclosingType) == scope)
         {
-            const char *szName = GetString(target->name);
+            const char *szName = GetString(target->Name);
 
             if (!strcmp(szName, name))
             {
@@ -3276,9 +3277,9 @@ bool CLR_RT_Assembly::FindFieldDef(
     CLR_RT_FieldDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (local_FindFieldDef(this, td->iFields_First, td->iFields_Num, name, base, sig, index))
+    if (local_FindFieldDef(this, td->FirstInstanceField, td->InstanceFieldsCount, name, base, sig, index))
         return true;
-    if (local_FindFieldDef(this, td->sFields_First, td->sFields_Num, name, base, sig, index))
+    if (local_FindFieldDef(this, td->FirstStaticField, td->StaticFieldsCount, name, base, sig, index))
         return true;
 
     index.Clear();
@@ -3295,8 +3296,8 @@ bool CLR_RT_Assembly::FindMethodDef(
 {
     NATIVE_PROFILE_CLR_CORE();
     int i;
-    int num = td->vMethods_Num + td->iMethods_Num + td->sMethods_Num;
-    const CLR_RECORD_METHODDEF *md = GetMethodDef(td->methods_First);
+    int num = td->VirtualMethodCount + td->InstanceMethodCount + td->StaticMethodCount;
+    const CLR_RECORD_METHODDEF *md = GetMethodDef(td->FirstMethod);
 
     for (i = 0; i < num; i++, md++)
     {
@@ -3318,7 +3319,7 @@ bool CLR_RT_Assembly::FindMethodDef(
 
             if (fMatch)
             {
-                index.Set(m_index, i + td->methods_First);
+                index.Set(m_index, i + td->FirstMethod);
 
                 return true;
             }
@@ -3405,9 +3406,9 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
         while (NANOCLR_INDEX_IS_VALID(inst))
         {
             const CLR_RECORD_TYPEDEF *target = inst.m_target;
-            const CLR_RECORD_FIELDDEF *fd = inst.m_assm->GetFieldDef(target->iFields_First);
+            const CLR_RECORD_FIELDDEF *fd = inst.m_assm->GetFieldDef(target->FirstInstanceField);
 
-            for (int j = 0; j < target->iFields_Num; j++, fd++)
+            for (int j = 0; j < target->InstanceFieldsCount; j++, fd++)
             {
                 if ((fd->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
                 {
@@ -4396,10 +4397,10 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     td = inst.m_target;
     fFullName = flags & CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL;
 
-    if (fFullName && td->enclosingType != CLR_EmptyIndex)
+    if (fFullName && td->EnclosingType != CLR_EmptyIndex)
     {
         CLR_RT_TypeDef_Index clsSub;
-        clsSub.Set(inst.Assembly(), CLR_GetIndexFromTypeDefOrRef(td->enclosingType));
+        clsSub.Set(inst.Assembly(), CLR_GetIndexFromTypeDefOrRef(td->EnclosingType));
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(clsSub, szBuffer, iBuffer, flags, 0));
 
@@ -4409,9 +4410,9 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
             (flags & CLR_RT_TypeSystem::TYPENAME_NESTED_SEPARATOR_DOT) ? "." : "+"));
     }
 
-    if (fFullName && td->nameSpace != CLR_EmptyIndex)
+    if (fFullName && td->NameSpace != CLR_EmptyIndex)
     {
-        const char *szNameSpace = assm->GetString(td->nameSpace);
+        const char *szNameSpace = assm->GetString(td->NameSpace);
 
         if (szNameSpace[0])
         {
@@ -4420,7 +4421,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
         }
     }
 
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, assm->GetString(td->name)));
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, assm->GetString(td->Name)));
 
     while (levels-- > 0)
     {
@@ -4487,7 +4488,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromMethod(calleeInst);
 
-        if ((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+        if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
             CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
         {
             //
@@ -4540,8 +4541,8 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     {
         CLR_RT_Assembly *targetAssm = clsInst.m_assm;
         const CLR_RECORD_TYPEDEF *targetTDR = clsInst.m_target;
-        const CLR_RECORD_METHODDEF *targetMDR = targetAssm->GetMethodDef(targetTDR->methods_First);
-        int num = targetTDR->vMethods_Num + targetTDR->iMethods_Num;
+        const CLR_RECORD_METHODDEF *targetMDR = targetAssm->GetMethodDef(targetTDR->FirstMethod);
+        int num = targetTDR->VirtualMethodCount + targetTDR->InstanceMethodCount;
 
         for (int i = 0; i < num; i++, targetMDR++)
         {
@@ -4565,7 +4566,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
                     if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
                     {
-                        index.Set(targetAssm->m_index, i + targetTDR->methods_First);
+                        index.Set(targetAssm->m_index, i + targetTDR->FirstMethod);
 
                         return true;
                     }
@@ -4886,9 +4887,9 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         CLR_RT_TypeDef_Instance td;
         td.InitializeFromIndex(m_res.m_cls);
 
-        if ((td.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+        if ((td.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
         {
-            m_res.m_dt = (CLR_DataType)td.m_target->dataType;
+            m_res.m_dt = (CLR_DataType)td.m_target->DataType;
         }
     }
 

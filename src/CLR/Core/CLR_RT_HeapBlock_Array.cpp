@@ -44,7 +44,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     }
     else
     {
-        CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+        CLR_DataType dt = (CLR_DataType)inst.m_target->DataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
         if (dtl.m_sizeInBytes == CLR_RT_DataTypeLookup::c_NA)

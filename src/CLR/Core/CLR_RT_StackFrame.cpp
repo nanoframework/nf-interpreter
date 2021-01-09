@@ -708,7 +708,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
             {
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(res.m_cls);
-                CLR_DataType dtT = (CLR_DataType)inst.m_target->dataType;
+                CLR_DataType dtT = (CLR_DataType)inst.m_target->DataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
 
                 if (dtl.m_flags & (CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType))

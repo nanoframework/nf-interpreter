@@ -1436,7 +1436,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+    CLR_DataType dt = (CLR_DataType)inst.m_target->DataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
@@ -1729,9 +1729,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
             CLR_RT_TypeDef_Instance inst;
             inst.InitializeFromIndex(res.m_cls);
 
-            if ((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
-                dt = (CLR_DataType)inst.m_target->dataType;
+                dt = (CLR_DataType)inst.m_target->DataType;
             }
             else
             {
@@ -1858,26 +1858,26 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                             default:
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
+                    }
 
-                        if (isGenericInstance)
+                    if (isGenericInstance)
+                    {
+                        if (genArgCount == 0)
                         {
-                            if (genArgCount == 0)
-                            {
-                                // need to read generic arguments count to consume signature
-                                genArgCount = *sig++;
+                            // need to read generic arguments count to consume signature
+                            genArgCount = *sig++;
 
-                                // flag to skip allocation of locals
-                                skipAllocation = true;
-                            }
+                            // flag to skip allocation of locals
+                            skipAllocation = true;
+                        }
 
-                            // done here
-                            break;
-                        }
-                        else
-                        {
-                            // parsing of non GENERICINST signature
-                            goto done;
-                        }
+                        // done here
+                        break;
+                    }
+                    else
+                    {
+                        // parsing of non GENERICINST signature
+                        goto done;
                     }
                 }
 
@@ -1947,9 +1947,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(cls);
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                if (inst.m_target->DataType != DATATYPE_VALUETYPE)
                 {
-                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.m_target->dataType, CLR_RT_HeapBlock::HB_Alive, 1));
+                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.m_target->DataType, CLR_RT_HeapBlock::HB_Alive, 1));
                     locals->ClearData();
                 }
                 else
@@ -2023,7 +2023,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
     reference.SetObjectReference(NULL);
 
-    CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+    CLR_DataType dt = (CLR_DataType)inst.m_target->DataType;
 
     //
     // You cannot create an array this way.
@@ -2065,7 +2065,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
             case DATATYPE_CLASS:
             case DATATYPE_VALUETYPE:
             {
-                int clsFields = inst.m_target->iFields_Num;
+                int clsFields = inst.m_target->InstanceFieldsCount;
                 int totFields = inst.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
                 CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, 0, inst, totFields);
                 CHECK_ALLOCATION(obj);
@@ -2093,14 +2093,14 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                             if (instSub.SwitchToParent() == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
-                            clsFields = instSub.m_target->iFields_Num;
+                            clsFields = instSub.m_target->InstanceFieldsCount;
                             target = NULL;
                         }
 
                         if (target == NULL)
                         {
                             assm = instSub.m_assm;
-                            target = assm->GetFieldDef(instSub.m_target->iFields_First + clsFields);
+                            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
                         }
 
                         obj--;
@@ -2899,14 +2899,14 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             }
         }
 
-        if (inst.m_target->dataType != instTarget.m_target->dataType)
+        if (inst.m_target->DataType != instTarget.m_target->DataType)
         {
             return false;
         }
     }
 
-    CLR_UINT32 semantic = (inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
-    CLR_UINT32 semanticTarget = (instTarget.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semantic = (inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semanticTarget = (instTarget.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
@@ -2926,7 +2926,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         // Scan the list of interfaces.
         //
-        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
+        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->Interfaces != CLR_EmptyIndex)
         {
             CLR_RT_SignatureParser parser;
             parser.Initialize_Interfaces(inst.m_assm, inst.m_target);

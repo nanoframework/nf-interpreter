@@ -463,7 +463,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
                     NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
                 }
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+                if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
                 {
                     obj = &objT[1];
                 }
@@ -821,7 +821,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     }
 
     {
-        CLR_DataType dataType = (CLR_DataType)cls.m_target->dataType;
+        CLR_DataType dataType = (CLR_DataType)cls.m_target->DataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -913,14 +913,14 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         // The typedef indexes are different, but src and cls may have identical basic data type.
         // Need to check it. If identical - the unboxing is allowed.
         // This "if" compares underlying type in object and cls. Should be equal in order to continue.
-        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->dataType)))
+        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->DataType)))
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }
 
-    if (cls.m_target->dataType == DATATYPE_VALUETYPE)
+    if (cls.m_target->DataType == DATATYPE_VALUETYPE)
     {
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *this));
 
@@ -930,7 +930,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     {
         this->Assign(src[1]);
 
-        this->ChangeDataType(cls.m_target->dataType);
+        this->ChangeDataType(cls.m_target->DataType);
     }
 
     NANOCLR_NOCLEANUP();
@@ -955,7 +955,7 @@ CLR_RT_HeapBlock *CLR_RT_HeapBlock::FixBoxingReference()
             if (!inst.InitializeFromIndex(src->ObjectCls()))
                 return NULL;
 
-            if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+            if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
             {
                 return &src[1];
             }

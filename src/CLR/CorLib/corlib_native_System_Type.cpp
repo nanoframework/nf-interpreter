@@ -16,10 +16,10 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if (td.m_target->enclosingType != CLR_EmptyIndex)
+    if (td.m_target->EnclosingType != CLR_EmptyIndex)
     {
         CLR_RT_HeapBlock *hbObj;
-        td.Set(td.Assembly(), td.m_target->enclosingType);
+        td.Set(td.Assembly(), td.m_target->EnclosingType);
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = top.Dereference();
@@ -355,7 +355,7 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if ((td.m_target->flags & mask) == flag)
+    if ((td.m_target->Flags & mask) == flag)
     {
         fRes = true;
     }
@@ -408,8 +408,8 @@ HRESULT Library_corlib_native_System_Type::GetFields(
             {
                 CLR_RT_Assembly *assm = td.m_assm;
                 const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-                const CLR_RECORD_FIELDDEF *fd = td.m_assm->GetFieldDef(tdR->sFields_First);
-                int iTot = tdR->iFields_Num + tdR->sFields_Num;
+                const CLR_RECORD_FIELDDEF *fd = td.m_assm->GetFieldDef(tdR->FirstStaticField);
+                int iTot = tdR->InstanceFieldsCount + tdR->StaticFieldsCount;
                 int i;
                 CLR_RT_FieldDef_Index index;
 
@@ -459,7 +459,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    index.Set(td.Assembly(), i + tdR->sFields_First);
+                    index.Set(td.Assembly(), i + tdR->FirstStaticField);
 
                     if (!fAllMatches)
                     {
@@ -540,8 +540,8 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
         {
             CLR_RT_Assembly *assm = td.m_assm;
             const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->methods_First);
-            int iTot = tdR->sMethods_Num + tdR->iMethods_Num + tdR->vMethods_Num;
+            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->FirstMethod);
+            int iTot = tdR->StaticMethodCount + tdR->InstanceMethodCount + tdR->VirtualMethodCount;
             int i;
 
             if (staticInstanceOnly)
@@ -618,7 +618,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 }
 
                 CLR_RT_MethodDef_Index index;
-                index.Set(td.Assembly(), i + tdR->methods_First);
+                index.Set(td.Assembly(), i + tdR->FirstMethod);
                 CLR_RT_MethodDef_Instance inst2;
                 inst2.InitializeFromIndex(index);
 
