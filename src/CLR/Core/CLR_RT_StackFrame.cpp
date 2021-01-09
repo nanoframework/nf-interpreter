@@ -186,14 +186,18 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     }
 
     {
-        CLR_UINT32 flags = md->flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
+        CLR_UINT32 syncFlags = md->flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
 
-        if (flags)
+        if (syncFlags)
         {
-            if (flags & md->MD_Synchronized)
+            if (syncFlags & md->MD_Synchronized)
+            {
                 stack->m_flags |= c_NeedToSynchronize;
-            if (flags & md->MD_GloballySynchronized)
+            }
+            if (syncFlags & md->MD_GloballySynchronized)
+            {
                 stack->m_flags |= c_NeedToSynchronizeGlobally;
+            }
         }
     }
 
