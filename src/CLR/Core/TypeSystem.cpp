@@ -261,7 +261,7 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMET
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md)
 {
     NATIVE_PROFILE_CLR_CORE();
-    Initialize_MethodSignature(assm, assm->GetSignature(md->sig));
+    Initialize_MethodSignature(assm, assm->GetSignature(md->Signature));
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md)
@@ -287,11 +287,11 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
     //
 
     m_assm = assm;
-    m_sig = assm->GetSignature(md->locals);
+    m_sig = assm->GetSignature(md->Locals);
 
     m_type = CLR_RT_SignatureParser::c_Locals;
     m_flags = 0;
-    m_count = md->numLocals;
+    m_count = md->LocalsCount;
 }
 
 //--//
@@ -3049,7 +3049,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
 
                 if (instType.m_assm == this)
                 {
-                    if (!strcmp(GetString(md->name), mil->name))
+                    if (!strcmp(GetString(md->Name), mil->name))
                     {
                         indexMethod.m_data = index.m_data;
                     }
@@ -3057,7 +3057,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
             }
         }
 
-        if (md->flags & CLR_RECORD_METHODDEF::MD_EntryPoint)
+        if (md->Flags & CLR_RECORD_METHODDEF::MD_EntryPoint)
         {
             g_CLR_RT_TypeSystem.m_entryPoint = index;
         }
@@ -3301,7 +3301,7 @@ bool CLR_RT_Assembly::FindMethodDef(
 
     for (i = 0; i < num; i++, md++)
     {
-        const char *methodName = GetString(md->name);
+        const char *methodName = GetString(md->Name);
 
         if (!strcmp(methodName, name))
         {
@@ -3375,7 +3375,7 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 
         index.Set(m_index, i);
 
-        if (md->flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
+        if (md->Flags & CLR_RECORD_METHODDEF::MD_StaticConstructor)
         {
             return true;
         }
@@ -4446,7 +4446,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodDef_Index &md, cha
 
     NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
 
-    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->name));
+    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->Name));
 
     NANOCLR_NOCLEANUP();
 }
@@ -4483,7 +4483,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
     if (calleeInst.InitializeFromIndex(calleeMD))
     {
-        const char *calleeName = calleeInst.m_assm->GetString(calleeInst.m_target->name);
+        const char *calleeName = calleeInst.m_assm->GetString(calleeInst.m_target->Name);
 
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromMethod(calleeInst);
@@ -4535,7 +4535,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
 
     CLR_RT_Assembly *calleeAssm = calleeInst.m_assm;
     const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.m_target;
-    CLR_UINT8 calleeNumArgs = calleeMDR->numArgs;
+    CLR_UINT8 calleeArgumentsCount = calleeMDR->ArgumentsCount;
 
     while (NANOCLR_INDEX_IS_VALID(clsInst))
     {
@@ -4553,9 +4553,10 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
                 return true;
             }
 
-            if (targetMDR->numArgs == calleeNumArgs && (targetMDR->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
+            if (targetMDR->ArgumentsCount == calleeArgumentsCount &&
+                (targetMDR->Flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
             {
-                const char *targetName = targetAssm->GetString(targetMDR->name);
+                const char *targetName = targetAssm->GetString(targetMDR->Name);
 
                 if (!strcmp(targetName, calleeName))
                 {
@@ -4748,7 +4749,7 @@ HRESULT CLR_RT_AttributeParser::Initialize(const CLR_RT_AttributeEnumerator &en)
     m_blob = en.m_blob;
 
     m_currentPos = 0;
-    m_fixed_Count = m_md.m_target->numArgs - 1;
+    m_fixed_Count = m_md.m_target->ArgumentsCount - 1;
     m_named_Count = -1;
     m_constructorParsed = false;
     m_mdIndex = en.m_match;

@@ -287,7 +287,7 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
     m_data.reflection.m_kind =
-        (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
+        (inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
     m_data.reflection.m_levels = 0;
     m_data.reflection.m_data.m_method = md;
 

@@ -1474,25 +1474,41 @@ struct CLR_RECORD_METHODDEF
     static const CLR_UINT32 MD_HasExceptionHandlers = 0x40000000;
     static const CLR_UINT32 MD_HasAttributes = 0x80000000;
 
-    /// @brief Index into TBL_Strings
+    /// @brief Index into TBL_Strings for the name of the method
     ///
-    CLR_STRING name;
+    CLR_STRING Name;
+
+    /// @brief Offset into the IL byte code blob table for the opcodes of the method
+    ///
     CLR_OFFSET RVA;
 
-    CLR_UINT32 flags;
-
-    CLR_UINT8 retVal;
-    CLR_UINT8 numArgs;
-    CLR_UINT8 numLocals;
-    CLR_UINT8 lengthEvalStack;
-
-    /// @brief Index into TBL_Signatures
+    /// @brief Flags to indicate intrinsic attributes and semantics of the method
     ///
-    CLR_SIG locals;
+    CLR_UINT32 Flags;
 
-    /// @brief Index into TBL_Signatures
+    /// @brief DataType of the return value for the method
     ///
-    CLR_SIG sig;
+    CLR_UINT8 RetVal;
+
+    /// @brief Count of arguments to the method
+    ///
+    CLR_UINT8 ArgumentsCount;
+
+    /// @brief Count of local variables for the method
+    ///
+    CLR_UINT8 LocalsCount;
+
+    /// @brief Length of the evaluation stack for the method
+    ///
+    CLR_UINT8 LengthEvalStack;
+
+    /// @brief Index into TBL_Signatures to describe the locals for the method
+    ///
+    CLR_SIG Locals;
+
+    /// @brief Index into TBL_Signatures that describes the method itself
+    ///
+    CLR_SIG Signature;
 };
 
 #ifdef __GNUC__

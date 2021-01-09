@@ -562,7 +562,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
             for (i = 0; i < iTot; i++, md++)
             {
-                if (md->flags & CLR_RECORD_METHODDEF::MD_Static)
+                if (md->Flags & CLR_RECORD_METHODDEF::MD_Static)
                 {
                     if ((bindingFlags & c_BindingFlags_Static) == 0)
                         continue;
@@ -573,7 +573,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         continue;
                 }
 
-                if ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
+                if ((md->Flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
                 {
                     if ((bindingFlags & c_BindingFlags_Public) == 0)
                         continue;
@@ -586,7 +586,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 //--//
 
-                if (md->flags & CLR_RECORD_METHODDEF::MD_Constructor)
+                if (md->Flags & CLR_RECORD_METHODDEF::MD_Constructor)
                 {
                     if ((bindingFlags & c_BindingFlags_CreateInstance) == 0)
                         continue;
@@ -596,7 +596,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     if ((bindingFlags & c_BindingFlags_CreateInstance) != 0)
                         continue;
 
-                    if (szText != NULL && !strcmp(assm->GetString(md->name), szText) == false)
+                    if (szText != NULL && !strcmp(assm->GetString(md->Name), szText) == false)
                         continue;
                 }
 

@@ -171,9 +171,9 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     this->m_dlg = pDelegate;
     this->m_status = TH_S_Ready;
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.m_target->numArgs));
+    NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(this, inst, inst.m_target->ArgumentsCount));
 
-    if ((inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+    if ((inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
         CLR_RT_StackFrame *stackTop = this->CurrentFrame();
 
@@ -592,16 +592,16 @@ void CLR_RT_Thread::DumpStack()
 void CLR_RT_Thread::ProcessException_FilterPseudoFrameCopyVars(CLR_RT_StackFrame *to, CLR_RT_StackFrame *from)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT8 numArgs = from->m_call.m_target->numArgs;
+    CLR_UINT8 ArgumentsCount = from->m_call.m_target->ArgumentsCount;
 
-    if (numArgs)
+    if (ArgumentsCount)
     {
-        memcpy(to->m_arguments, from->m_arguments, sizeof(CLR_RT_HeapBlock) * numArgs);
+        memcpy(to->m_arguments, from->m_arguments, sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
     }
 
-    if (from->m_call.m_target->numLocals)
+    if (from->m_call.m_target->LocalsCount)
     {
-        memcpy(to->m_locals, from->m_locals, sizeof(CLR_RT_HeapBlock) * from->m_call.m_target->numLocals);
+        memcpy(to->m_locals, from->m_locals, sizeof(CLR_RT_HeapBlock) * from->m_call.m_target->LocalsCount);
     }
 }
 
@@ -823,7 +823,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         }
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        if (stack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+        if (stack->m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
         {
             CLR_PMETADATA ip;
             if (us.m_ip)
@@ -866,7 +866,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         us.m_currentBlockEnd = eh.m_handlerStart;
 
                         // Create a pseudo-frame at the top of the stack so the filter can call other functions.
-                        CLR_UINT8 numArgs = stack->m_call.m_target->numArgs;
+                        CLR_UINT8 ArgumentsCount = stack->m_call.m_target->ArgumentsCount;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         // We don't want to send any breakpoints until after we set the IP appropriately
@@ -874,7 +874,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-                        hr = CLR_RT_StackFrame::Push(stack->m_owningThread, stack->m_call, numArgs);
+                        hr = CLR_RT_StackFrame::Push(stack->m_owningThread, stack->m_call, ArgumentsCount);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         if (!fBreakpointsDisabledSav)
@@ -896,17 +896,20 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         us.m_stack = newStack;
 
                         // Copy local variables and arguments so the filter has access to them.
-                        if (numArgs)
+                        if (ArgumentsCount)
                         {
-                            memcpy(newStack->m_arguments, stack->m_arguments, sizeof(CLR_RT_HeapBlock) * numArgs);
+                            memcpy(
+                                newStack->m_arguments,
+                                stack->m_arguments,
+                                sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
                         }
 
-                        if (stack->m_call.m_target->numLocals)
+                        if (stack->m_call.m_target->LocalsCount)
                         {
                             memcpy(
                                 newStack->m_locals,
                                 stack->m_locals,
-                                sizeof(CLR_RT_HeapBlock) * stack->m_call.m_target->numLocals);
+                                sizeof(CLR_RT_HeapBlock) * stack->m_call.m_target->LocalsCount);
                         }
 
                         newStack->PushValueAndAssign(m_currentException);
@@ -1090,7 +1093,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         }
         else
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            if (iterStack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+            if (iterStack->m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
         {
             if (iterStack->m_IP) // No IP? Either out of memory during allocation of iterStack frame or native method.
             {

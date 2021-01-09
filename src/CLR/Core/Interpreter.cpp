@@ -449,7 +449,7 @@ bool CLR_RT_Thread::FindEhBlock(
     }
 #endif
 
-    if (stack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+    if (stack->m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
     {
         switch (stack->m_flags & CLR_RT_StackFrame::c_MethodKind_Mask)
         {
@@ -970,10 +970,13 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
         CLR_RT_ProtectFromGC gc(*dlg);
         CLR_RT_MethodDef_Instance inst;
         inst.InitializeFromIndex(dlg->DelegateFtn());
-        bool fStaticMethod = (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
+        bool fStaticMethod = (inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
-        NANOCLR_CHECK_HRESULT(
-            stack->MakeCall(inst, fStaticMethod ? NULL : &dlg->m_object, &stack->m_arguments[1], md->numArgs - 1));
+        NANOCLR_CHECK_HRESULT(stack->MakeCall(
+            inst,
+            fStaticMethod ? NULL : &dlg->m_object,
+            &stack->m_arguments[1],
+            md->ArgumentsCount - 1));
     }
 
     NANOCLR_NOCLEANUP();
@@ -2094,10 +2097,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     bool fAppDomainTransition = false;
 #endif
 
-                    pThis = &evalPos[1 - calleeInst.m_target->numArgs]; // Point to the first arg, 'this' if an instance
-                                                                        // method
+                    pThis = &evalPos[1 - calleeInst.m_target->ArgumentsCount]; // Point to the first arg, 'this' if an
+                                                                               // instance method
 
-                    if (calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
+                    if (calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
                     {
                         CLR_RT_HeapBlock_Delegate *dlg = pThis->DereferenceDelegate();
                         FAULT_ON_NULL(dlg);
@@ -2106,7 +2109,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             calleeInst.InitializeFromIndex(dlg->DelegateFtn());
 
-                            if ((calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            if ((calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                             {
                                 pThis->Assign(dlg->m_object);
 
@@ -2116,7 +2119,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             }
                             else
                             {
-                                memmove(&pThis[0], &pThis[1], calleeInst.m_target->numArgs * sizeof(CLR_RT_HeapBlock));
+                                memmove(
+                                    &pThis[0],
+                                    &pThis[1],
+                                    calleeInst.m_target->ArgumentsCount * sizeof(CLR_RT_HeapBlock));
 
                                 evalPos--;
                             }
@@ -2132,7 +2138,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         CLR_RT_MethodDef_Index calleeReal;
 
-                        if ((calleeInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             // Instance method, pThis[ 0 ] is valid
 
@@ -2151,7 +2157,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 // instance method isn't virtual we don't need to do the more expensive virtual method
                                 // lookup.
                                 if (op == CEE_CALLVIRT &&
-                                    (calleeInst.m_target->flags &
+                                    (calleeInst.m_target->Flags &
                                      (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
                                 {
                                     if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
@@ -2335,7 +2341,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // Special case for delegates. LDFTN or LDVIRTFTN have already created the delegate object, just
                         // check that...
                         //
-                        changes = -calleeInst.m_target->numArgs;
+                        changes = -calleeInst.m_target->ArgumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2365,7 +2371,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        if ((dlgInst.m_target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((dlgInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             dlg->m_object.Assign(top[0]);
                         }
@@ -2374,7 +2380,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
                     else
                     {
-                        changes = calleeInst.m_target->numArgs;
+                        changes = calleeInst.m_target->ArgumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2431,7 +2437,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 //
                                 top = stack->m_evalStackPos++;
 
-                                changes = calleeInst.m_target->numArgs;
+                                changes = calleeInst.m_target->ArgumentsCount;
                                 while (--changes > 0)
                                 {
                                     top[0].Assign(top[-1]);

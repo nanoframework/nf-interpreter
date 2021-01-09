@@ -247,7 +247,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         //
         if (clsData == instCLS.m_data)
         {
-            if ((instMD.m_target->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
+            if ((instMD.m_target->Flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
             {
                 md = mdVirtual;
 

@@ -1956,9 +1956,9 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     {
         CLR_RT_StackFrame *stack = th->CurrentFrame();
         const CLR_RECORD_METHODDEF *target = stack->m_call.m_target;
-        CLR_UINT8 numArgs = target->numArgs;
+        CLR_UINT8 ArgumentsCount = target->ArgumentsCount;
 
-        if (numArgs)
+        if (ArgumentsCount)
         {
             CLR_RT_SignatureParser parser;
             parser.Initialize_MethodSignature(stack->m_call.m_assm, target);
@@ -1969,7 +1969,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
             {
                 args->SetObjectReference(NULL);
 
-                numArgs--;
+                ArgumentsCount--;
                 args++;
             }
 
@@ -1995,7 +1995,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
                 }
             }
 
-            for (CLR_UINT8 i = 0; i < numArgs; i++, args++)
+            for (CLR_UINT8 i = 0; i < ArgumentsCount; i++, args++)
             {
                 NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(*args, parser));
             }
@@ -2295,8 +2295,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_inlineFrame->m_frame.m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_inlineFrame->m_frame.m_IP - call->m_inlineFrame->m_frame.m_IPStart);
-            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.m_target->numArgs;
-            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.m_target->numLocals;
+            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount;
+            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.m_target->LocalsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack);
         }
         else
@@ -2304,8 +2304,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_IP - call->m_IPstart);
-            cmdReply.m_numOfArguments = call->m_call.m_target->numArgs;
-            cmdReply.m_numOfLocals = call->m_call.m_target->numLocals;
+            cmdReply.m_numOfArguments = call->m_call.m_target->ArgumentsCount;
+            cmdReply.m_numOfLocals = call->m_call.m_target->LocalsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)call->TopValuePosition();
         }
 
@@ -2507,20 +2507,20 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
 #ifndef CLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
-                num = isInline ? md.m_target->numArgs : md.m_target->numArgs;
+                num = isInline ? md.m_target->ArgumentsCount : md.m_target->ArgumentsCount;
 #else
                 array = call->m_arguments;
-                num = call->m_call.m_target->numArgs;
+                num = call->m_call.m_target->ArgumentsCount;
 #endif
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
 #ifndef CLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
-                num = isInline ? md.m_target->numLocals : md.m_target->numLocals;
+                num = isInline ? md.m_target->LocalsCount : md.m_target->LocalsCount;
 #else
                 array = call->m_locals;
-                num = call->m_call.m_target->numLocals;
+                num = call->m_call.m_target->LocalsCount;
 #endif
                 break;
 
@@ -3336,7 +3336,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
         cmdReply.m_td = instOwner;
 
-        CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
+        CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->Name));
 
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 

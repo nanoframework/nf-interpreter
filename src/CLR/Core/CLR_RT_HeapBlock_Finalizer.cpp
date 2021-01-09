@@ -24,7 +24,7 @@ HRESULT CLR_RT_HeapBlock_Finalizer::CreateInstance(CLR_RT_HeapBlock *object, con
 
             for (; pos < end; pos++, md++)
             {
-                if (md->flags & CLR_RECORD_METHODDEF::MD_Finalizer)
+                if (md->Flags & CLR_RECORD_METHODDEF::MD_Finalizer)
                     break;
             }
 

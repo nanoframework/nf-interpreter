@@ -600,7 +600,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     {
         CLR_RT_StackFrame *stack = thMain->CurrentFrame();
 
-        if (stack->m_call.m_target->numArgs > 0)
+        if (stack->m_call.m_target->ArgumentsCount > 0)
         {
             // Main entrypoint takes an optional String[] parameter.
             // Set the arg to NULL, if that's the case.
@@ -1785,8 +1785,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
     NANOCLR_HEADER();
 
-    CLR_PMETADATA sig = assm->GetSignature(md->locals);
-    CLR_UINT32 count = md->numLocals;
+    CLR_PMETADATA sig = assm->GetSignature(md->Locals);
+    CLR_UINT32 count = md->LocalsCount;
     bool fZeroed = false;
 
     while (count)

@@ -356,8 +356,8 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
             case DATATYPE_STACK_FRAME:
             {
                 CLR_RT_StackFrame *stack = (CLR_RT_StackFrame *)ptr;
-                DumpListOfReferences(stack->m_arguments, stack->m_call.m_target->numArgs);
-                DumpListOfReferences(stack->m_locals, stack->m_call.m_target->numLocals);
+                DumpListOfReferences(stack->m_arguments, stack->m_call.m_target->ArgumentsCount);
+                DumpListOfReferences(stack->m_locals, stack->m_call.m_target->LocalsCount);
                 DumpListOfReferences(stack->m_evalStack, stack->TopValuePosition());
                 break;
             }
