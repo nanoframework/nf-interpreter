@@ -1316,11 +1316,11 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_INDEX FirstInstanceField;
 
-    /// @brief
+    /// @brief Count of static fields in the type
     ///
     CLR_UINT8 StaticFieldsCount;
 
-    /// @brief
+    /// @brief Count of instance fields in the type
     ///
     CLR_UINT8 InstanceFieldsCount;
 
