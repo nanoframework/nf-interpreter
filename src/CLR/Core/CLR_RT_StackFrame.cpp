@@ -719,7 +719,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                     }
                     else if (args->Dereference()->ObjectCls().m_data == res.m_cls.m_data)
                     {
-                        if ( args->Dereference()->IsBoxed())
+                        if (args->Dereference()->IsBoxed())
                         {
                             NANOCLR_CHECK_HRESULT(args->PerformUnboxing(inst));
                         }
