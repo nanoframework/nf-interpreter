@@ -1901,6 +1901,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     if (skipAllocation)
                     {
                         genArgCountParsed++;
+                        break;
                     }
                     else
                     {
