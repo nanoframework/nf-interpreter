@@ -2117,9 +2117,6 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
     int i;
 
-    // const CLR_RECORD_METHODREF *src = (const CLR_RECORD_METHODREF *)this->GetTable(TBL_MethodRef);
-    // CLR_RT_MethodRef_CrossReference *dst = this->m_pCrossReference_MethodRef;
-    // for (i = 0; i < this->m_pTablesSize[TBL_MethodRef]; i++, src++, dst++)
     ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
     {
         CLR_RT_TypeDef_Index target;
