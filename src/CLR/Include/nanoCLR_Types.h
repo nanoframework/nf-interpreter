@@ -79,9 +79,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_TYPES_H, 4)
-#endif
+#pragma pack(push, 4)
 
 enum CLR_OPCODE
 {
@@ -1654,8 +1652,6 @@ struct CLR_RECORD_RESOURCE
     CLR_UINT32 offset;
 };
 
-#if defined(_MSC_VER)
-#pragma pack(pop, NANOCLR_TYPES_H)
-#endif
+#pragma pack(pop) // pack 4
 
 #endif // _NANOCLR_TYPES_H_
