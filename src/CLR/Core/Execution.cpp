@@ -1773,8 +1773,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
 HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_RT_HeapBlock *locals,
-    CLR_RT_Assembly *assm,
-    const CLR_RECORD_METHODDEF *md)
+    const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -1785,8 +1784,10 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
     NANOCLR_HEADER();
 
-    CLR_PMETADATA sig = assm->GetSignature(md->Locals);
-    CLR_UINT32 count = md->LocalsCount;
+    CLR_RT_Assembly *assembly = methodDefInstance.m_assm;
+    const CLR_RECORD_METHODDEF *methodDef = methodDefInstance.m_target;
+    CLR_PMETADATA sig = assembly->GetSignature(methodDef->Locals);
+    CLR_UINT32 count = methodDef->LocalsCount;
     bool fZeroed = false;
 
     while (count)
@@ -1837,7 +1838,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                             case TBL_TypeSpec:
                             {
                                 CLR_RT_SignatureParser sub;
-                                sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(index));
+                                sub.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(index));
                                 CLR_RT_SignatureParser::Element res;
 
                                 NANOCLR_CHECK_HRESULT(sub.Advance(res));
@@ -1848,11 +1849,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                             break;
 
                             case TBL_TypeRef:
-                                cls = assm->m_pCrossReference_TypeRef[index].m_target;
+                                cls = assembly->m_pCrossReference_TypeRef[index].m_target;
                                 break;
 
                             case TBL_TypeDef:
-                                cls.Set(assm->m_index, index);
+                                cls.Set(assembly->m_index, index);
                                 break;
 
                             default:
@@ -1896,8 +1897,23 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 }
 
                 case DATATYPE_MVAR:
-                    // TODO
-                    break;
+                {
+                    if (skipAllocation)
+                    {
+                        genArgCountParsed++;
+                    }
+                    else
+                    {
+                        CLR_UINT8 genericParameterPosition = *sig++;
+
+                        CLR_RT_GenericParam_Instance gp;
+                        gp.Initialize(methodDefInstance, genericParameterPosition);
+
+                        cls.Set(gp.Assembly(), assembly->m_pCrossReference_GenericParam[gp.GenericParam()].m_data);
+
+                        goto done;
+                    }
+                }
 
                 default:
                 {

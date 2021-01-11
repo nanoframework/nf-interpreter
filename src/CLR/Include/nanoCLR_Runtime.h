@@ -3735,7 +3735,7 @@ struct CLR_RT_ExecutionEngine
     HRESULT InitializeReference(CLR_RT_HeapBlock &ref, CLR_RT_SignatureParser &parser);
     HRESULT InitializeReference(CLR_RT_HeapBlock &ref, const CLR_RECORD_FIELDDEF *target, CLR_RT_Assembly *assm);
 
-    HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
+    HRESULT InitializeLocals(CLR_RT_HeapBlock *locals, const CLR_RT_MethodDef_Instance &methodDefInstance);
 
     HRESULT NewObjectFromIndex(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Index &cls);
     HRESULT NewObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance &inst);

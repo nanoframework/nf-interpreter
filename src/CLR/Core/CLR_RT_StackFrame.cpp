@@ -182,7 +182,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 
     if (md->LocalsCount)
     {
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals(stack->m_locals, assm, md));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals(stack->m_locals, callInst));
     }
 
     {
@@ -337,7 +337,7 @@ bool CLR_RT_StackFrame::PushInline(
 
     if (md->LocalsCount)
     {
-        g_CLR_RT_ExecutionEngine.InitializeLocals(m_locals, calleeInst.m_assm, md);
+        g_CLR_RT_ExecutionEngine.InitializeLocals(m_locals, calleeInst);
     }
 
     m_flags |= CLR_RT_StackFrame::c_MethodKind_Inlined;
