@@ -1156,6 +1156,9 @@ struct CLR_RECORD_ASSEMBLY
     static CLR_UINT32 ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver);
 };
 
+// record structures are aligned to 1 byte boundary to minimize PE size
+#pragma pack(push, 1)
+
 /// @brief Assembly header
 struct CLR_RECORD_ASSEMBLYREF
 {
@@ -1164,8 +1167,6 @@ struct CLR_RECORD_ASSEMBLYREF
 
     /// @brief Assembly version
     CLR_RECORD_VERSION version;
-
-    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_TYPEREF
@@ -1178,8 +1179,6 @@ struct CLR_RECORD_TYPEREF
 
     /// @brief TypeRefOrAssemblyRef -> Index into TBL_AssemblyRef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x8000)
     CLR_INDEX scope;
-
-    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_FIELDREF
@@ -1194,8 +1193,6 @@ struct CLR_RECORD_FIELDREF
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG sig;
-
-    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_METHODREF
@@ -1211,7 +1208,6 @@ struct CLR_RECORD_METHODREF
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG sig;
-    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_TYPEDEF
@@ -1545,8 +1541,6 @@ struct CLR_RECORD_TYPESPEC
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG sig;
-
-    CLR_UINT16 pad;
 };
 
 struct CLR_RECORD_GENERICPARAM
@@ -1652,6 +1646,7 @@ struct CLR_RECORD_RESOURCE
     CLR_UINT32 offset;
 };
 
+#pragma pack(pop) // pack 1
 #pragma pack(pop) // pack 4
 
 #endif // _NANOCLR_TYPES_H_
