@@ -936,6 +936,58 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
     return false;
 }
 
+//////////////////////////////
+
+bool CLR_RT_GenericParam_Instance::Initialize(
+    const CLR_RT_MethodDef_Instance &methodDefInstance,
+    const CLR_UINT8 position)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    if (NANOCLR_INDEX_IS_VALID(methodDefInstance))
+    {
+        CLR_RT_TypeDef_Instance ownerType;
+        ownerType.InitializeFromMethod(methodDefInstance);
+
+        // get assembly from TypeDef
+        m_assm = ownerType.m_assm;
+
+        // get pointer to the 1st generic parameter for this TypeDef
+        const CLR_RECORD_GENERICPARAM *gp = m_assm->GetGenericParam(ownerType.m_target->FirstGenericParam);
+        int i = m_assm->m_pTablesSize[TBL_GenericParam];
+
+        // loop to reach the generic parameter on the position we are looking for
+        while (position > 0)
+        {
+            gp++;
+            i--;
+        }
+
+        // store pointer to generic parameter
+        m_target = gp;
+
+        CLR_INDEX indexGenericParam = m_assm->m_pTablesSize[TBL_GenericParam] - i;
+
+        Set(ownerType.Assembly(), indexGenericParam);
+
+        return true;
+    }
+
+    m_data = 0;
+    m_assm = NULL;
+    m_target = NULL;
+
+    return false;
+}
+
+void CLR_RT_GenericParam_Instance::Clear()
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_GenericParam_Index::Clear();
+
+    m_assm = NULL;
+    m_target = NULL;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CLR_RT_TypeDescriptor::TypeDescriptor_Initialize()
@@ -2229,6 +2281,20 @@ void CLR_RT_Assembly::Resolve_Link()
             for (; num; num--, md++)
             {
                 md->m_data = indexType;
+            }
+        }
+
+        //
+        // Link generic parameters.
+        //
+        {
+            CLR_RT_GenericParam_CrossReference *gp = &m_pCrossReference_GenericParam[src->FirstGenericParam];
+
+            int num = src->GenericParamCount;
+
+            for (; num; num--, gp++)
+            {
+                gp->m_data = indexType;
             }
         }
     }

@@ -358,6 +358,7 @@ struct CLR_RT_TypeSpec_Instance;
 struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
+struct CLR_RT_GenericParam_Instance;
 
 struct CLR_RT_StackFrame;
 struct CLR_RT_SubThread;
@@ -738,6 +739,35 @@ struct CLR_RT_MethodDef_Index
     }
 };
 
+struct CLR_RT_GenericParam_Index
+{
+    CLR_UINT32 m_data;
+
+    //--//
+
+    void Clear()
+    {
+        m_data = 0;
+    }
+
+    void Set(CLR_UINT32 indexAssm, CLR_UINT8 indexGenericParam)
+    {
+        m_data = indexAssm << 16 | indexGenericParam;
+    }
+
+    //--//
+
+    CLR_INDEX Assembly() const
+    {
+        return (CLR_INDEX)(m_data >> 16);
+    }
+
+    CLR_UINT8 GenericParam() const
+    {
+        return (CLR_UINT8)(m_data);
+    }
+};
+
 struct CLR_RT_ReflectionDef_Index
 {
     CLR_UINT16 m_kind; // CLR_ReflectionType
@@ -825,13 +855,6 @@ struct CLR_RT_MethodDef_CrossReference
 struct CLR_RT_GenericParam_CrossReference
 {
     CLR_UINT16 m_flags;
-    CLR_UINT16 m_data;
-
-    CLR_INDEX GetOwner() const
-    {
-        return (CLR_INDEX)(m_data);
-    }
-};
 
     /// @brief Generic Parameter Owner TypeDef
     ///
@@ -2016,6 +2039,27 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
         return m_assm->m_pDebuggingInfo_MethodDef[Method()];
     }
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+};
+
+struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
+{
+    CLR_RT_Assembly *m_assm;
+    const CLR_RECORD_GENERICPARAM *m_target;
+
+    //--//
+
+    bool Initialize(const CLR_RT_MethodDef_Instance &methodDefInstance, const CLR_UINT8 position);
+
+    void Clear();
+
+    CLR_INDEX OwnerType();
+
+    //--//
+
+    CLR_RT_GenericParam_CrossReference &CrossReference() const
+    {
+        return m_assm->m_pCrossReference_GenericParam[GenericParam()];
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

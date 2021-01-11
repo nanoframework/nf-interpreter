@@ -1316,6 +1316,14 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_UINT8 InstanceFieldsCount;
 
+    /// @brief Index into TBL_GenericParam for the first generic parameter of the type
+    ///
+    CLR_INDEX FirstGenericParam;
+
+    /// @brief Count of generic parameters in the type
+    ///
+    CLR_UINT8 GenericParamCount;
+
     /// @brief Flags defining intrinsic attributes and access modifiers for the type
     ///
     CLR_UINT16 Flags;
@@ -1490,6 +1498,10 @@ struct CLR_RECORD_METHODDEF
     ///
     CLR_UINT8 LocalsCount;
 
+    /// @brief Count of generic parameters for the method
+    ///
+    CLR_UINT8 GenericParamCount;
+
     /// @brief Length of the evaluation stack for the method
     ///
     CLR_UINT8 LengthEvalStack;
@@ -1497,6 +1509,10 @@ struct CLR_RECORD_METHODDEF
     /// @brief Index into TBL_Signatures to describe the locals for the method
     ///
     CLR_SIG Locals;
+
+    /// @brief Index into TBL_Signatures to describe the locals for the method
+    ///
+    CLR_SIG GenericParam;
 
     /// @brief Index into TBL_Signatures that describes the method itself
     ///
