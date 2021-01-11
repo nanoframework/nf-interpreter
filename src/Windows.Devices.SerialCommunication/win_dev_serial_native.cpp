@@ -3,9 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #include "win_dev_serial_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -28,6 +28,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -81,7 +83,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication =
 {
     "Windows.Devices.SerialCommunication",
-    0x82260711,
+    0x84A8FB94,
     method_lookup,
-    { 100, 1, 1, 1 }
+    { 100, 1, 1, 2 }
 };
+
+// clang-format on
