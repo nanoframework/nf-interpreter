@@ -230,7 +230,6 @@ static const size_t CLR_MaxStreamSize_TypeDef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_FieldDef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_MethodDef = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_GenericParam = 0x0000FFFF;
-static const size_t CLR_MaxStreamSize_GenericParamConstraint = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_MethodSpec = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_Attributes = 0x0000FFFF;
 static const size_t CLR_MaxStreamSize_TypeSpec = 0x0000FFFF;
@@ -295,18 +294,17 @@ enum CLR_TABLESENUM
     TBL_FieldDef = 0x00000005,
     TBL_MethodDef = 0x00000006,
     TBL_GenericParam = 0x00000007,
-    TBL_GenericParamConstraint = 0x00000008,
-    TBL_MethodSpec = 0x00000009,
-    TBL_Attributes = 0x0000000A,
-    TBL_TypeSpec = 0x0000000B,
-    TBL_Resources = 0x0000000C,
-    TBL_ResourcesData = 0x0000000D,
-    TBL_Strings = 0x0000000E,
-    TBL_Signatures = 0x0000000F,
-    TBL_ByteCode = 0x00000010,
-    TBL_ResourcesFiles = 0x00000011,
-    TBL_EndOfAssembly = 0x000000012,
-    TBL_Max = 0x00000013,
+    TBL_MethodSpec = 0x00000008,
+    TBL_Attributes = 0x00000009,
+    TBL_TypeSpec = 0x0000000A,
+    TBL_Resources = 0x0000000B,
+    TBL_ResourcesData = 0x0000000C,
+    TBL_Strings = 0x0000000D,
+    TBL_Signatures = 0x0000000E,
+    TBL_ByteCode = 0x0000000F,
+    TBL_ResourcesFiles = 0x00000010,
+    TBL_EndOfAssembly = 0x000000011,
+    TBL_Max = 0x00000012,
 };
 
 enum CLR_CorCallingConvention
@@ -1560,18 +1558,6 @@ struct CLR_RECORD_GENERICPARAM
     /// @brief Index into TBL_Strings
     ///
     CLR_STRING Name;
-};
-
-struct CLR_RECORD_GENERICPARAMCONSTRAINT
-{
-    /// @brief Index into TBL_GenericParam
-    ///
-    CLR_INDEX Owner;
-
-    /// @brief TypeDefOrRef_Tag -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x4000) |
-    /// TBL_TypeSpec (ORed with 0x8000)
-    ///
-    CLR_INDEX Constraint;
 };
 
 struct CLR_RECORD_METHODSPEC

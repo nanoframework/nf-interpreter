@@ -833,13 +833,13 @@ struct CLR_RT_GenericParam_CrossReference
     }
 };
 
-struct CLR_RT_GenericParamConstraint_CrossReference
-{
-    CLR_UINT16 Constraint;
-
+    /// @brief Generic Parameter Owner TypeDef
+    ///
     CLR_UINT16 m_data;
 
-    CLR_INDEX GetOwner() const
+    CLR_RT_GenericParam_Index m_target;
+
+    CLR_INDEX GetOwnerType() const
     {
         return (CLR_INDEX)(m_data);
     }
@@ -1169,7 +1169,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t iFieldDef;
         size_t iMethodDef;
         size_t iGenericParam;
-        size_t iGenericParamConstraint;
         size_t iMethodSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
@@ -1229,9 +1228,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         *m_pCrossReference_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_GenericParam_CrossReference *
         m_pCrossReference_GenericParam; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_GenericParamConstraint_CrossReference
-        *m_pCrossReference_GenericParamConstraint; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be
-                                                   // relocated)
     CLR_RT_MethodSpec_CrossReference
         *m_pCrossReference_MethodSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 
@@ -1351,10 +1347,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i)
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_MethodDef, i);
-    }
-    const CLR_RECORD_GENERICPARAMCONSTRAINT *GetGenericParamConstraint(CLR_INDEX i)
-    {
-        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAMCONSTRAINT, TBL_MethodDef, i);
     }
     const CLR_RECORD_METHODSPEC *GetMethodSpec(CLR_INDEX i)
     {
