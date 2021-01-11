@@ -4093,6 +4093,9 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.iMethodDef += ROUNDTOMULTIPLE(
                     pASSM->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
                     CLR_UINT32);
+                offsets.iGenericParam += ROUNDTOMULTIPLE(
+                    pASSM->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
+                    CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
                 offsets.iStaticFields += ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
@@ -4108,6 +4111,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                              pASSM->m_header->SizeOfTable(TBL_FieldRef) + pASSM->m_header->SizeOfTable(TBL_MethodRef) +
                              pASSM->m_header->SizeOfTable(TBL_TypeDef) + pASSM->m_header->SizeOfTable(TBL_FieldDef) +
                              pASSM->m_header->SizeOfTable(TBL_MethodDef) +
+                             pASSM->m_header->SizeOfTable(TBL_GenericParam) +
                              pASSM->m_header->SizeOfTable(TBL_Attributes) + pASSM->m_header->SizeOfTable(TBL_TypeSpec) +
                              pASSM->m_header->SizeOfTable(TBL_Signatures);
 
@@ -4123,7 +4127,8 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
             NANOCLR_FOREACH_ASSEMBLY_END();
 
             iTotalRamSize = offsets.iBase + offsets.iAssemblyRef + offsets.iTypeRef + offsets.iFieldRef +
-                            offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef;
+                            offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef +
+                            offsets.iGenericParam;
 
 #if !defined(NANOCLR_APPDOMAINS)
             iTotalRamSize += offsets.iStaticFields;
@@ -4182,7 +4187,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
             CLR_Debug::Printf("\r\n");
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            CLR_Debug::Printf("   DebuggingInfo           = %6d bytes\r\n", offsets.iDebuggingInfoMethods);
+            CLR_Debug::Printf("   DebuggingInfo   = %6d bytes\r\n", offsets.iDebuggingInfoMethods);
             CLR_Debug::Printf("\r\n");
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
