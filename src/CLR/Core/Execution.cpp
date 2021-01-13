@@ -2941,12 +2941,12 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         }
 
         //
-        // Scan the list of interfaces.
+        // Scan the signature.
         //
-        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->Interfaces != CLR_EmptyIndex)
+        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->Signature != CLR_EmptyIndex)
         {
             CLR_RT_SignatureParser parser;
-            parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
+            parser.Initialize_FromTypeDef(inst.m_assm, inst.m_target);
             CLR_RT_SignatureParser::Element res;
 
             while (parser.Available() > 0)

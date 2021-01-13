@@ -218,9 +218,9 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
 void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (td->Interfaces != CLR_EmptyIndex)
+    if (td->Signature != CLR_EmptyIndex)
     {
-        CLR_PMETADATA sig = assm->GetSignature(td->Interfaces);
+        CLR_PMETADATA sig = assm->GetSignature(td->Signature);
 
         m_count = (*sig++);
         m_sig = sig;

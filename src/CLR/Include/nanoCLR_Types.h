@@ -1276,9 +1276,9 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_TYPEDEFORREF EnclosingType;
 
-    /// @brief Index into TBL_Signatures blob table for the set of interfaces implemented by this type
+    /// @brief Index into TBL_Signatures blob table for this type
     ///
-    CLR_SIG Interfaces;
+    CLR_SIG Signature;
 
     /// @brief Index into TBL_MethodDef for the first method of the type
     ///
