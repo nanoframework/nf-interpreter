@@ -750,7 +750,7 @@ struct CLR_RT_GenericParam_Index
         m_data = 0;
     }
 
-    void Set(CLR_UINT32 indexAssm, CLR_UINT8 indexGenericParam)
+    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexGenericParam)
     {
         m_data = indexAssm << 16 | indexGenericParam;
     }
@@ -854,11 +854,13 @@ struct CLR_RT_MethodDef_CrossReference
 
 struct CLR_RT_GenericParam_CrossReference
 {
-    CLR_UINT16 m_flags;
-
-    /// @brief Generic Parameter Owner TypeDef
+    /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
     ///
     CLR_UINT16 m_data;
+    
+    /// @brief Tag for owner (TypeDef or MethodDef)
+    ///
+    CLR_TypeOrMethodDef m_TypeOrMethodDef;
 
     CLR_RT_GenericParam_Index m_target;
 
@@ -1306,6 +1308,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &index);
     bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index);
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
+    bool FindGenericParam(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
 
     bool FindFieldDef(
         const CLR_RECORD_TYPEDEF *src,

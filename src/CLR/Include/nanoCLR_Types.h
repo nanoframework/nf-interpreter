@@ -110,7 +110,7 @@ typedef CLR_UINT16 CLR_SIG;
 typedef const CLR_UINT8 *CLR_PMETADATA;
 typedef CLR_UINT16 CLR_TYPEDEFORREF;
 typedef CLR_UINT16 CLR_MEMBERREFPARENT;
-
+typedef CLR_UINT16 CLR_TYPEORMETHODDEF;
 //--//
 // may need to change later
 typedef CLR_INT64 CLR_INT64_TEMP_CAST;
@@ -425,9 +425,6 @@ enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.To
     /// @brief Shortcut for System.Object
     DATATYPE_OBJECT,
 
-    /// @brief Shortcut for generic type
-    DATATYPE_GENERIC = DATATYPE_OBJECT,
-
     /// @brief CLASS <class Token>
     DATATYPE_CLASS,
 
@@ -600,6 +597,24 @@ inline CLR_INDEX CLR_GetIndexFromMemberRefParent(CLR_MEMBERREFPARENT encodedInde
 {
     // MemberRefParent_Tag is 3 bits
     return (CLR_INDEX)(encodedIndex >> 3);
+}
+
+/// @brief Get target table from encoded TypeOrMethodDef
+///
+inline CLR_TypeOrMethodDef CLR_GetTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
+{
+    // TypeOrMethodDef tag is 1 bit
+    static const CLR_UINT16 TypeOrMethodDef_Mask = 0x0001;
+
+    return (CLR_TypeOrMethodDef)(encodedIndex & TypeOrMethodDef_Mask);
+}
+
+/// @brief Get index from encoded TypeOrMethodDef
+///
+inline CLR_INDEX CLR_GetIndexFromTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
+{
+    // TypeOrMethodDef tag is 1 bit
+    return (CLR_INDEX)(encodedIndex >> 1);
 }
 
 inline CLR_UINT32 CLR_DataFromTk(CLR_UINT32 tk)
@@ -1569,7 +1584,7 @@ struct CLR_RECORD_GENERICPARAM
 
     /// @brief TypeOrMethodDef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_MethodDef (ORed with 0x8000)
     ///
-    CLR_INDEX Owner;
+    CLR_TYPEORMETHODDEF Owner;
 
     /// @brief Index into TBL_Strings
     ///

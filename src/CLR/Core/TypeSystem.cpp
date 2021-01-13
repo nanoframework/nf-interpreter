@@ -215,7 +215,7 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
 
 //--//
 
-void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
+void CLR_RT_SignatureParser::Initialize_FromTypeDef(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
 {
     NATIVE_PROFILE_CLR_CORE();
     if (td->Signature != CLR_EmptyIndex)
@@ -457,13 +457,37 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
+                    case DATATYPE_VAR:
+                        break;
+
                     case DATATYPE_MVAR:
                     {
                         res.m_IsMvar = true;
                         res.m_GenericParamPosition = (int)*m_sig++;
 
-                        // TODO leaving this as object for now
-                        res.m_cls = g_CLR_RT_WellKnownTypes.m_Object;
+                        CLR_INDEX parameter = m_assm->GetTypeDef(this->m_type)->FirstGenericParam;
+
+                        // check for valid parameter
+                        if (parameter != CLR_EmptyIndex)
+                        {
+                            parameter += res.m_GenericParamPosition;
+
+                            const CLR_RECORD_GENERICPARAM* genericParam = m_assm->GetGenericParam(parameter);
+
+                            // need to check if the method exists
+                            if (genericParam->Owner)
+                            {
+                            }
+                            CLR_RT_SignatureParser sub;
+                            sub.Initialize_MethodLocals(m_assm, m_assm->GetMethodDef(genericParam->Owner));
+
+                            NANOCLR_CHECK_HRESULT(sub.Advance(res));
+
+                            // this->m_assm->GetTypeDef(this->m_type)
+
+                            // TODO leaving this as object for now
+                            res.m_cls = g_CLR_RT_WellKnownTypes.m_Object;
+                        }
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
@@ -1665,7 +1689,6 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_GenericParam_CrossReference *dst = this->m_pCrossReference_GenericParam;
         for (i = 0; i < this->m_pTablesSize[TBL_GenericParam]; i++, src++, dst++)
         {
-            dst->m_flags = 0;
             dst->m_data = CLR_EmptyIndex;
         }
     }
@@ -2292,6 +2315,7 @@ void CLR_RT_Assembly::Resolve_Link()
             for (; num; num--, gp++)
             {
                 gp->m_data = indexType;
+                gp->m_TypeOrMethodDef = TMR_TypeDef;
             }
         }
     }
@@ -3092,6 +3116,32 @@ void CLR_RT_Assembly::Resolve_MethodDef()
                     if (!strcmp(GetString(md->Name), mil->name))
                     {
                         indexMethod.m_data = index.m_data;
+
+                        // link generic parameters
+                        const CLR_RECORD_GENERICPARAM* param = GetGenericParam(0);
+
+                        CLR_RT_GenericParam_CrossReference* gp = m_pCrossReference_GenericParam;
+                        CLR_UINT32 paramsTableSize = m_pTablesSize[TBL_GenericParam];
+
+                        for (int gpIndex = 0; gpIndex < paramsTableSize; gpIndex++, gp++, param++)
+                        {
+                            if (CLR_GetTypeOrMethodDef(param->Owner) == TMR_MethodDef)
+                            {
+                                if (CLR_GetIndexFromTypeOrMethodDef(param->Owner) == i)
+                                {
+                                    gp->m_data = index.m_data;
+                                    gp->m_TypeOrMethodDef = TMR_MethodDef;
+
+                                    // move to next
+                                    gp++;
+
+                                    for (int paramIndex = 0; paramIndex < md->GenericParamCount; paramIndex++)
+                                    {
+                                        gp->m_data = index.m_data;
+                                    }
+                                }
+                            }
+                        }                        
                     }
                 }
             }
@@ -3254,6 +3304,41 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
     }
 
     if (i != tblSize)
+    {
+        index.Set(m_index, i);
+
+        return true;
+    }
+    else
+    {
+        index.Clear();
+
+        return false;
+    }
+}
+
+bool CLR_RT_Assembly::FindGenericParam(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_INDEX indexType = md.CrossReference().GetOwner();
+
+    const CLR_RECORD_TYPEDEF *typeOwner = GetTypeDef(indexType);
+
+    CLR_RT_GenericParam_CrossReference* params = m_pCrossReference_GenericParam;
+    CLR_UINT32 paramsTableSize = m_pTablesSize[TBL_GenericParam];
+    CLR_UINT32 i;
+
+    for (i = 0; i < paramsTableSize; i++, params++)
+    {
+        if (params->m_TypeOrMethodDef == TMR_TypeDef &&
+            params->m_data == indexType)
+        {
+            break;
+        }
+    }
+
+    if (i != paramsTableSize)
     {
         index.Set(m_index, i);
 
