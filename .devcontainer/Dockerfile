@@ -21,8 +21,8 @@ ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.1.zip
 RUN curl -o /tmp/dc-downloads/esp-idf.zip $IDF_URI \
     && unzip -d /tmp/dc-extracted/esp-idf /tmp/dc-downloads/esp-idf.zip
 
-ARG IDF_LIBS_URI='https://bintray.com/nfbot/internal-build-tools/download_file?file_path=IDF_libs-v3.3.1.zip'
-RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI \
+ARG IDF_LIBS_URI=https://dl.bintray.com/nfbot/internal-build-tools/IDF_libs-v3.3.1.zip
+RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
     && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
 
 FROM debian:10.4-slim AS devcontainer
@@ -45,13 +45,22 @@ RUN apt-get update \
 
 RUN mkdir -p /usr/local/bin/gcc \
     && git clone https://github.com/STMicroelectronics/STM32CubeL4.git ./sources/STM32CubeL4 \
-    && git clone --recursive https://github.com/azure-rtos/threadx.git ./sources/AzureRTOS
+    && git clone --recursive https://github.com/azure-rtos/threadx.git ./sources/AzureRTOS \
+    && git clone --branch stable_20.3.x https://github.com/nanoframework/chibios.git ./sources/ChibiOs \
+    && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git ./sources/ChibiOs-Contrib \
+    && git clone --branch mbedtls-2.23.0 https://github.com/nanoframework/mbedtls.git ./sources/mbedtls \
+    && git clone --branch R0.14 https://github.com/abbrev/fatfs.git ./sources/fatfs
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
-COPY --from=downloader /tmp/dc-extracted/cmake/bin /usr/local/bin/cmake
+COPY --from=downloader /tmp/dc-extracted/cmake /usr
 COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
 COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf_libs
+
+# Putting hex2dfu in the container even if it will not be used, prep will fail otherwise
+ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu.exe
+RUN mkdir -p /usr/local/bin/hex2dfu \
+    && curl -o /usr/local/bin/hex2dfu/hex2dfu.exe $HEX2DFU
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
