@@ -4,7 +4,8 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     bzip2 \
-    unzip
+    unzip \
+    srecord
 
 ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
@@ -49,7 +50,10 @@ RUN mkdir -p /usr/local/bin/gcc \
     && git clone --branch stable_20.3.x https://github.com/nanoframework/chibios.git ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git ./sources/ChibiOs-Contrib \
     && git clone --branch mbedtls-2.23.0 https://github.com/nanoframework/mbedtls.git ./sources/mbedtls \
-    && git clone --branch R0.14 https://github.com/abbrev/fatfs.git ./sources/fatfs
+    && git clone --branch R0.14 https://github.com/abbrev/fatfs.git ./sources/fatfs \
+    && git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git ./sources/FreeRTOS \
+    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git ./sources/CMSIS_5 \
+    && git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git ./sources/lwip
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
