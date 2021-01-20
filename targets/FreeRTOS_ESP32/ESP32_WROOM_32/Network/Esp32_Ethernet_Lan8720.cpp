@@ -14,7 +14,7 @@
 
 extern "C"
 {
-#include "lwip\netif.h"
+#include "lwip/netif.h"
 }
 
 extern struct netif * Esp32_find_netif(esp_interface_t esp_if);

@@ -4,8 +4,7 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     bzip2 \
-    unzip \
-    srecord
+    unzip
 
 ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
@@ -26,6 +25,11 @@ ARG IDF_LIBS_URI=https://dl.bintray.com/nfbot/internal-build-tools/IDF_libs-v3.3
 RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
     && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
 
+ARG XTENSA_URI=https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+RUN  mkdir -p /tmp/dc-extracted/xtensa \
+    && curl -o /tmp/dc-downloads/xtensa.tar.gz $XTENSA_URI \
+    && tar -xzf /tmp/dc-downloads/xtensa.tar.gz -C /tmp/dc-extracted/xtensa --strip-components 1
+
 FROM debian:10.4-slim AS devcontainer
 
 # Avoid warnings by switching to noninteractive
@@ -42,10 +46,17 @@ RUN apt-get update \
     && apt-get install -y \
     git \
     curl \
-    ninja-build
+    ninja-build \
+    srecord \
+    python3 \
+    python3-pip
 
 RUN mkdir -p /usr/local/bin/gcc \
-    && git clone https://github.com/STMicroelectronics/STM32CubeL4.git ./sources/STM32CubeL4 \
+    && mkdir -p /usr/local/bin/xtensa \
+    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git ./sources/STM32CubeL4 \
+    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git ./sources/STM32CubeF7 \
+    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git ./sources/STM32CubeF4 \
+    && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git ./sources/STM32CubeH7 \
     && git clone --recursive https://github.com/azure-rtos/threadx.git ./sources/AzureRTOS \
     && git clone --branch stable_20.3.x https://github.com/nanoframework/chibios.git ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git ./sources/ChibiOs-Contrib \
@@ -53,18 +64,24 @@ RUN mkdir -p /usr/local/bin/gcc \
     && git clone --branch R0.14 https://github.com/abbrev/fatfs.git ./sources/fatfs \
     && git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git ./sources/FreeRTOS \
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git ./sources/CMSIS_5 \
-    && git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git ./sources/lwip
+    && git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git ./sources/lwip \
+    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git ./sources/spiffs
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
-COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf_libs
+COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
+COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 
 # Putting hex2dfu in the container even if it will not be used, prep will fail otherwise
 ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu.exe
 RUN mkdir -p /usr/local/bin/hex2dfu \
     && curl -o /usr/local/bin/hex2dfu/hex2dfu.exe $HEX2DFU
+
+# Creating static link python for pyhton3
+RUN ln -fs /usr/bin/python3 /usr/bin/python \
+    && pip3 install pyserial
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

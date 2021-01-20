@@ -24,21 +24,25 @@ macro(SET_COMPILER_VAR var name)
    find_program(CMAKE_${var} xtensa-esp32-elf-${name} HINTS ${TOOLCHAIN_BIN_DIR} DOC "${name} tool")
 endmacro()
 
+set(CMAKE_C_COMPILER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gcc)
 # setup C compiler
 if(NOT CMAKE_C_COMPILER)
-    SET_COMPILER_VAR(C_COMPILER gcc)
+    SET_COMPILER_VAR(C_COMPILER gcc)    
 endif()
 SET_COMPILER_VAR(C_COMPILER gcc)
 
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-g++)
 # setup C++ compiler
 if(NOT CMAKE_CXX_COMPILER)
-    SET_COMPILER_VAR(CXX_COMPILER g++)
+    SET_COMPILER_VAR(CXX_COMPILER g++)    
 endif()
 
+set(CMAKE_ASM_COMPILER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gcc)
+set(CMAKE_ASM_ATT_COMPILER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-as)
 # setup Assembler compiler
 if(NOT CMAKE_ASM_COMPILER)
     SET_COMPILER_VAR(ASM_COMPILER gcc)
-    SET_COMPILER_VAR(ASM-ATT_COMPILER as)
+    SET_COMPILER_VAR(ASM-ATT_COMPILER as)    
 endif()
  
 # other toolchain configurations  

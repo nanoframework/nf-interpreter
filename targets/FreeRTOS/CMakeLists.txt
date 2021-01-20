@@ -19,7 +19,7 @@ if(RTOS_SOURCE_FOLDER)
 endif()
 
 if(NOT "${TOOL_SRECORD_PREFIX}" STREQUAL "")
-    if((NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat))
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
         message(STATUS "")
         message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
         message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")

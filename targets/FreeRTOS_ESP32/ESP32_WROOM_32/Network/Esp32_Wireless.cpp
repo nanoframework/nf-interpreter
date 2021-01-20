@@ -10,7 +10,7 @@
 
 extern "C"
 {
-#include "lwip\netif.h"
+#include "lwip/netif.h"
 }
 
 static const char *TAG = "wifi";
