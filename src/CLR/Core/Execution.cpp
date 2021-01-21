@@ -1716,9 +1716,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-    dt = res.m_dt;
+    dt = res.DataType;
 
-    if (res.m_levels > 0) // Array
+    if (res.Levels > 0) // Array
     {
         dt = DATATYPE_OBJECT;
     }
@@ -1727,7 +1727,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
         if (dt == DATATYPE_VALUETYPE)
         {
             CLR_RT_TypeDef_Instance inst;
-            inst.InitializeFromIndex(res.m_cls);
+            inst.InitializeFromIndex(res.Class);
 
             if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
@@ -1843,8 +1843,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                                 NANOCLR_CHECK_HRESULT(sub.Advance(res));
 
-                                cls = res.m_cls;
-                                levels += res.m_levels;
+                                cls = res.Class;
+                                levels += res.Levels;
                             }
                             break;
 
@@ -2954,7 +2954,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
                 if (FAILED(parser.Advance(res)))
                     break;
 
-                if (res.m_cls.m_data == instTarget.m_data)
+                if (res.Class.m_data == instTarget.m_data)
                 {
                     return true;
                 }

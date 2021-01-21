@@ -1081,28 +1081,39 @@ struct CLR_RT_SignatureParser
 
     struct Element
     {
-        bool m_fByRef;
-        int m_levels;
-        CLR_DataType m_dt;
-        CLR_RT_TypeDef_Index m_cls;
+        bool IsByRef;
+        int Levels;
+        CLR_DataType DataType;
+        CLR_RT_TypeDef_Index Class;
 
         /// @brief Element is GenericInstance
-        bool m_IsGenericInst;
+        bool IsGenericInst;
 
         /// @brief Element is MVAR
-        bool m_IsMvar;
+        bool IsMvar;
 
         /// @brief Generic Parameter position
-        int m_GenericParamPosition;
+        int GenericParamPosition;
+
+        /// @brief Generic Parameter count
+        int GenericParamCount;
     };
 
-    CLR_RT_HeapBlock *m_lst;
-    CLR_RT_Assembly *m_assm;
-    CLR_PMETADATA m_sig;
+    CLR_RT_HeapBlock *ObjectList;
+    CLR_RT_Assembly *Assembly;
+    CLR_PMETADATA Signature;
 
-    int m_type;
-    CLR_UINT32 m_flags;
-    int m_count;
+    /// @brief Signature type being processed, from the constants.
+    int Type;
+
+    /// @brief Flags for signature parsing. For methods this is the ECMA-335 calling convention.
+    CLR_UINT32 Flags;
+
+    /// @brief Parameters count
+    int ParamCount;
+
+    /// @brief Generic parameters count
+    int GenParamCount;
 
     //--//
 
@@ -1120,7 +1131,7 @@ struct CLR_RT_SignatureParser
 
     int Available() const
     {
-        return m_count;
+        return ParamCount;
     }
 
     HRESULT Advance(Element &res);

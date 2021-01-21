@@ -687,7 +687,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
         CLR_RT_SignatureParser::Element res;
         CLR_RT_HeapBlock *args = m_arguments;
 
-        if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+        if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
         {
             args++;
         }
@@ -701,13 +701,13 @@ HRESULT CLR_RT_StackFrame::FixCall()
         {
             NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-            if (res.m_levels > 0)
+            if (res.Levels > 0)
                 continue; // Array, no need to fix.
 
             if (args->DataType() == DATATYPE_OBJECT)
             {
                 CLR_RT_TypeDef_Instance inst;
-                inst.InitializeFromIndex(res.m_cls);
+                inst.InitializeFromIndex(res.Class);
                 CLR_DataType dtT = (CLR_DataType)inst.m_target->DataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
 
@@ -721,7 +721,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                         // It's a boxed primitive/enum type.
                         args->Assign(*value);
                     }
-                    else if (args->Dereference()->ObjectCls().m_data == res.m_cls.m_data)
+                    else if (args->Dereference()->ObjectCls().m_data == res.Class.m_data)
                     {
                         if (args->Dereference()->IsBoxed())
                         {
@@ -735,7 +735,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                 }
             }
 
-            if (res.m_dt == DATATYPE_VALUETYPE && res.m_fByRef == false)
+            if (res.DataType == DATATYPE_VALUETYPE && res.IsByRef == false)
             {
                 if (args->IsAReferenceOfThisType(DATATYPE_VALUETYPE))
                 {
@@ -983,7 +983,7 @@ void CLR_RT_StackFrame::Pop()
 
                     // Box to the return value type
                     _SIDE_ASSERTE(SUCCEEDED(sig.Advance(res)));
-                    _SIDE_ASSERTE(SUCCEEDED(desc.InitializeFromType(res.m_cls)));
+                    _SIDE_ASSERTE(SUCCEEDED(desc.InitializeFromType(res.Class)));
 
                     if (c_CLR_RT_DataTypeLookup[this->DataType()].m_flags &
                             CLR_RT_DataTypeLookup::c_OptimizedValueType ||

@@ -205,12 +205,12 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, const CL
 void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_assm = assm;
-    m_sig = ts;
+    Assembly = assm;
+    Signature = ts;
 
-    m_type = CLR_RT_SignatureParser::c_TypeSpec;
-    m_flags = 0;
-    m_count = 1;
+    Type = CLR_RT_SignatureParser::c_TypeSpec;
+    Flags = 0;
+    ParamCount = 1;
 }
 
 //--//
@@ -222,19 +222,19 @@ void CLR_RT_SignatureParser::Initialize_FromTypeDef(CLR_RT_Assembly *assm, const
     {
         CLR_PMETADATA sig = assm->GetSignature(td->Signature);
 
-        m_count = (*sig++);
-        m_sig = sig;
+        ParamCount = (*sig++);
+        Signature = sig;
     }
     else
     {
-        m_count = 0;
-        m_sig = NULL;
+        ParamCount = 0;
+        Signature = NULL;
     }
 
-    m_type = CLR_RT_SignatureParser::c_Interfaces;
-    m_flags = 0;
+    Type = CLR_RT_SignatureParser::c_Interfaces;
+    Flags = 0;
 
-    m_assm = assm;
+    Assembly = assm;
 }
 
 //--//
@@ -248,12 +248,12 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, const CL
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_type = CLR_RT_SignatureParser::c_Field;
-    m_flags = (*fd++);
-    m_count = 1;
+    Type = CLR_RT_SignatureParser::c_Field;
+    Flags = (*fd++);
+    ParamCount = 1;
 
-    m_assm = assm;
-    m_sig = fd;
+    Assembly = assm;
+    Signature = fd;
 }
 
 //--//
@@ -267,12 +267,13 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, c
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_type = CLR_RT_SignatureParser::c_Method;
-    m_flags = (*md++);
-    m_count = (*md++) + 1;
+    Type = CLR_RT_SignatureParser::c_Method;
+    Flags = (*md++);
+    ParamCount = (*md++) + 1;
 
-    m_assm = assm;
-    m_sig = md;
+    Assembly = assm;
+    Signature = md;
+}
 }
 
 //--//
@@ -286,12 +287,12 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
     // If you change this method, change "CLR_RT_ExecutionEngine::InitializeLocals" too.
     //
 
-    m_assm = assm;
-    m_sig = assm->GetSignature(md->Locals);
+    Assembly = assm;
+    Signature = assm->GetSignature(md->Locals);
 
-    m_type = CLR_RT_SignatureParser::c_Locals;
-    m_flags = 0;
-    m_count = md->LocalsCount;
+    Type = CLR_RT_SignatureParser::c_Locals;
+    Flags = 0;
+    ParamCount = md->LocalsCount;
 }
 
 //--//
@@ -299,11 +300,11 @@ void CLR_RT_SignatureParser::Initialize_MethodLocals(CLR_RT_Assembly *assm, cons
 void CLR_RT_SignatureParser::Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_lst = lst;
+    ObjectList = lst;
 
-    m_type = CLR_RT_SignatureParser::c_Object;
-    m_flags = fTypes ? 1 : 0;
-    m_count = count;
+    Type = CLR_RT_SignatureParser::c_Object;
+    Flags = fTypes ? 1 : 0;
+    ParamCount = count;
 }
 
 //--//
@@ -319,38 +320,39 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
     NANOCLR_HEADER();
 
-    _ASSERTE(m_count > 0);
+    _ASSERTE(ParamCount > 0);
 
-    m_count--;
+    ParamCount--;
 
-    res.m_fByRef = false;
-    res.m_levels = 0;
-    res.m_IsGenericInst = false;
-    res.m_IsMvar = false;
 
-    switch (m_type)
+    res.IsByRef = false;
+    res.Levels = 0;
+    res.IsGenericInst = false;
+    res.IsMvar = false;
+
+    switch (Type)
     {
         case c_Interfaces:
         {
             CLR_RT_TypeDef_Instance cls;
 
-            res.m_dt = DATATYPE_CLASS;
+            res.DataType = DATATYPE_CLASS;
 
-            if (cls.ResolveToken(CLR_TkFromStream(m_sig), m_assm) == false)
+            if (cls.ResolveToken(CLR_TkFromStream(Signature), Assembly) == false)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
-            res.m_cls = cls;
+            res.Class = cls;
         }
         break;
 
         case c_Object:
         {
             CLR_RT_TypeDescriptor desc;
-            CLR_RT_HeapBlock *ptr = m_lst++;
+            CLR_RT_HeapBlock *ptr = ObjectList++;
 
-            if (m_flags)
+            if (Flags)
             {
                 // Reflection types are now boxed, so unbox first
                 if (ptr->DataType() == DATATYPE_OBJECT)
@@ -370,7 +372,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                 {
                     case DATATYPE_BYREF:
                     case DATATYPE_ARRAY_BYREF:
-                        res.m_fByRef = true;
+                        res.IsByRef = true;
                         break;
 
                     default:
@@ -383,16 +385,16 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
             desc.m_handlerCls.InitializeFromIndex(desc.m_reflex.m_data.m_type);
 
-            res.m_levels = desc.m_reflex.m_levels;
-            res.m_dt = (CLR_DataType)desc.m_handlerCls.m_target->DataType;
-            res.m_cls = desc.m_reflex.m_data.m_type;
+            res.Levels = desc.m_reflex.m_levels;
+            res.DataType = (CLR_DataType)desc.m_handlerCls.m_target->DataType;
+            res.Class = desc.m_reflex.m_data.m_type;
 
             //
             // Special case for Object types.
             //
-            if (res.m_cls.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data)
+            if (res.Class.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data)
             {
-                res.m_dt = DATATYPE_OBJECT;
+                res.DataType = DATATYPE_OBJECT;
             }
         }
         break;
@@ -400,21 +402,21 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
         default:
             while (true)
             {
-                res.m_dt = CLR_UncompressElementType(m_sig);
+                res.DataType = CLR_UncompressElementType(Signature);
 
-                switch (res.m_dt)
+                switch (res.DataType)
                 {
                     case DATATYPE_BYREF:
-                        if (res.m_fByRef)
+                        if (res.IsByRef)
                         {
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        res.m_fByRef = true;
+                        res.IsByRef = true;
                         break;
 
                     case DATATYPE_SZARRAY:
-                        res.m_levels++;
+                        res.Levels++;
                         break;
 
                     case DATATYPE_CLASS:
@@ -1190,11 +1192,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignaturePar
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-    NANOCLR_CHECK_HRESULT(InitializeFromType(res.m_cls));
+    NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
 
-    if (res.m_levels)
+    if (res.Levels)
     {
-        m_reflex.m_levels = res.m_levels;
+        m_reflex.m_levels = res.Levels;
 
         ConvertToArray();
     }
@@ -3543,16 +3545,16 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
                     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-                    while (res.m_levels-- > 0)
+                    while (res.Levels -- > 0)
                     {
                         hash = ComputeHashForType(DATATYPE_SZARRAY, hash);
                     }
 
-                    hash = ComputeHashForType(res.m_dt, hash);
+                    hash = ComputeHashForType(res.DataType, hash);
 
-                    if ((res.m_dt == DATATYPE_VALUETYPE) || (res.m_dt == DATATYPE_CLASS))
+                    if ((res.DataType == DATATYPE_VALUETYPE) || (res.DataType == DATATYPE_CLASS))
                     {
-                        hash = ComputeHashForName(res.m_cls, hash);
+                        hash = ComputeHashForName(res.Class, hash);
                     }
 
                     const char *fieldName = inst.m_assm->GetString(fd->name);
@@ -4369,9 +4371,9 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 bool CLR_RT_TypeSystem::MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (parserLeft.m_type != parserRight.m_type)
+    if (parserLeft.Type != parserRight.Type)
         return false;
-    if (parserLeft.m_flags != parserRight.m_flags)
+    if (parserLeft.Flags != parserRight.Flags)
         return false;
 
     return MatchSignatureDirect(parserLeft, parserRight, false);
@@ -4422,12 +4424,12 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         CLR_RT_TypeDescriptor descRight;
 
         indexLeft.m_kind = REFLECTION_TYPE;
-        indexLeft.m_levels = resLeft.m_levels;
-        indexLeft.m_data.m_type = resLeft.m_cls;
+        indexLeft.m_levels = resLeft.Levels;
+        indexLeft.m_data.m_type = resLeft.Class;
 
         indexRight.m_kind = REFLECTION_TYPE;
-        indexRight.m_levels = resRight.m_levels;
-        indexRight.m_data.m_type = resRight.m_cls;
+        indexRight.m_levels = resRight.Levels;
+        indexRight.m_data.m_type = resRight.Class;
 
         if (FAILED(descLeft.InitializeFromReflection(indexLeft)))
             return false;
@@ -4439,32 +4441,32 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
     }
     else
     {
-        if (resLeft.m_fByRef != resRight.m_fByRef)
+        if (resLeft.IsByRef != resRight.IsByRef)
         {
             return false;
         }
-        if (resLeft.m_levels != resRight.m_levels)
+        if (resLeft.Levels != resRight.Levels)
         {
             return false;
         }
-        if (resLeft.m_dt != resRight.m_dt)
+        if (resLeft.DataType != resRight.DataType)
         {
             return false;
         }
-        if (resLeft.m_cls.m_data != resRight.m_cls.m_data)
+        if (resLeft.Class.m_data != resRight.Class.m_data)
         {
             return false;
         }
-        if (resLeft.m_IsMvar != resRight.m_IsMvar)
+        if (resLeft.IsMvar != resRight.IsMvar)
         {
             return false;
         }
-        if ((resLeft.m_IsMvar && resRight.m_IsMvar) &&
-            (resLeft.m_GenericParamPosition && resRight.m_GenericParamPosition))
+        if ((resLeft.IsMvar && resRight.IsMvar) &&
+            (resLeft.GenericParamPosition && resRight.GenericParamPosition))
         {
             return false;
         }
-        if (resLeft.m_IsGenericInst != resRight.m_IsGenericInst)
+        if (resLeft.IsGenericInst != resRight.IsGenericInst)
         {
             return false;
         }
@@ -4924,7 +4926,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         //
         m_blob += sizeof(CLR_UINT8);
 
-        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_res.m_dt];
+        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_res.DataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
         {
@@ -4937,14 +4939,14 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             // need to setup reflection and data type Id to properly setup the object
             m_lastValue.m_value.SetReflection(*dtl.m_cls);
 
-            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1));
+            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.DataType, 0, 1));
 
             // because this is a numeric object, performa a raw copy of the numeric value data from the blob to the
             // return value
             memcpy((CLR_UINT8 *)&m_lastValue.m_value.NumericByRef(), m_blob, size);
             m_blob += size;
         }
-        else if (m_res.m_dt == DATATYPE_STRING)
+        else if (m_res.DataType == DATATYPE_STRING)
         {
             CLR_UINT32 tk;
             NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
@@ -5009,14 +5011,14 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
     //
     // Check for Enums.
     //
-    if (m_res.m_dt == DATATYPE_VALUETYPE)
+    if (m_res.DataType == DATATYPE_VALUETYPE)
     {
         CLR_RT_TypeDef_Instance td;
-        td.InitializeFromIndex(m_res.m_cls);
+        td.InitializeFromIndex(m_res.Class);
 
         if ((td.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
         {
-            m_res.m_dt = (CLR_DataType)td.m_target->DataType;
+            m_res.DataType = (CLR_DataType)td.m_target->DataType;
         }
     }
 
@@ -5026,21 +5028,21 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
     m_blob += sizeof(CLR_UINT8);
 
     {
-        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_res.m_dt];
+        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_res.DataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
         {
             // need to setup reflection and data type Id to properly setup the object
-            m_lastValue.m_value.SetReflection(m_res.m_cls);
+            m_lastValue.m_value.SetReflection(m_res.Class);
 
-            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1));
+            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.DataType, 0, 1));
 
             CLR_UINT32 size = dtl.m_sizeInBytes;
 
             memcpy(&m_lastValue.m_value.NumericByRef(), m_blob, size);
             m_blob += size;
         }
-        else if (m_res.m_dt == DATATYPE_STRING)
+        else if (m_res.DataType == DATATYPE_STRING)
         {
             CLR_UINT32 tk;
             NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);

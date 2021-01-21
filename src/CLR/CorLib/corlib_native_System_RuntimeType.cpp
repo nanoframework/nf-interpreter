@@ -148,7 +148,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
                     NANOCLR_CHECK_HRESULT(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, g_CLR_RT_WellKnownTypes.m_TypeStatic));
                     hbObj = ptr->Dereference();
-                    hbObj->SetReflection(res.m_cls);
+                    hbObj->SetReflection(res.Class);
 
                     ptr++;
                     count--;

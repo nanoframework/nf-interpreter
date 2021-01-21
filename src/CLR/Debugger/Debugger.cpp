@@ -1965,7 +1965,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
 
-            if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+            if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
             {
                 args->SetObjectReference(NULL);
 
@@ -1988,7 +1988,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
                 {
                     NANOCLR_CHECK_HRESULT(parser2.Advance(res));
 
-                    if (res.m_fByRef)
+                    if (res.IsByRef)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2561,7 +2561,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
 
                 iElement++; // Skip the return value, always at the head of the signature.
 
-                if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+                if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
                 {
                     if (iElement == 0)
                         return false; // The requested argument is the "this" argument, it can never be a primitive.
@@ -2584,10 +2584,10 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             // So some arguments have the wrong datatype, since an eval stack push always promotes to 32 bits.
             //
             if (c_CLR_RT_DataTypeLookup[blk->DataType()].m_sizeInBytes == sizeof(CLR_INT32) &&
-                c_CLR_RT_DataTypeLookup[res.m_dt].m_sizeInBytes < sizeof(CLR_INT32))
+                c_CLR_RT_DataTypeLookup[res.DataType].m_sizeInBytes < sizeof(CLR_INT32))
             {
                 tmp.Assign(*blk);
-                tmp.ChangeDataType(res.m_dt);
+                tmp.ChangeDataType(res.DataType);
 
                 reference = blk;
                 blk = &tmp;
@@ -2596,7 +2596,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             //
             // Check for enum.
             //
-            desc.InitializeFromType(res.m_cls);
+            desc.InitializeFromType(res.Class);
 
             if (desc.m_handlerCls.m_target->IsEnum())
             {
