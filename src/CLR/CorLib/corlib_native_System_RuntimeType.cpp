@@ -126,9 +126,9 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
 
         do
         {
-            // Scan the signature
+            // Scan the list of interfaces.
             CLR_RT_SignatureParser parser;
-            parser.Initialize_FromTypeDef(td.m_assm, td.m_target);
+            parser.Initialize_Interfaces(td.m_assm, td.m_target);
             CLR_RT_SignatureParser::Element res;
 
             // 1. pass count

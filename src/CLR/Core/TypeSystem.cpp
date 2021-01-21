@@ -215,12 +215,12 @@ void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMET
 
 //--//
 
-void CLR_RT_SignatureParser::Initialize_FromTypeDef(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
+void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (td->Signature != CLR_EmptyIndex)
+    if (td->Interfaces != CLR_EmptyIndex)
     {
-        CLR_PMETADATA sig = assm->GetSignature(td->Signature);
+        CLR_PMETADATA sig = assm->GetSignature(td->Interfaces);
 
         ParamCount = (*sig++);
         Signature = sig;
@@ -559,7 +559,7 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
     {
         m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-        m_target = m_assm->GetSignature(m_assm->GetTypeSpec(TypeSpec())->sig);
+        m_target = m_assm->GetTypeSpec(TypeSpec());
 
         return true;
     }
@@ -590,7 +590,7 @@ bool CLR_RT_TypeSpec_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
         Set(assm->m_index, index);
 
         m_assm = assm;
-        m_target = assm->GetSignature(assm->GetTypeSpec(index)->sig);
+        m_target = assm->GetTypeSpec(index);
 
         return true;
     }
