@@ -546,7 +546,7 @@ enum CLR_MemberRefParent
 
     // NOT IMPLEMENTED
     ///  @brief This is an index into TBL_MethodDef
-    // MRP_MethodDef = 3,
+    MRP_MethodDef = 3,
 
     ///  @brief This is an index into TBL_TypeSpec
     MRP_TypeSpec = 4
@@ -654,8 +654,9 @@ inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
-    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
-    return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
+//    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
+
+    return CLR_TkFromType((CLR_TABLESENUM)((tk >> 12) & 0x0F), 0x0FFF & tk);
 }
 
 #if defined(_WIN32)
@@ -1215,9 +1216,9 @@ struct CLR_RECORD_METHODREF
     ///
     CLR_STRING name;
 
-    /// @brief Encoded index for MemberRefParent -> Index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
+    /// @brief TypeRefTableIndex -> Index into TBL_TypeDef
     ///
-    CLR_MEMBERREFPARENT container;
+    CLR_INDEX container;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1292,9 +1293,9 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_TYPEDEFORREF EnclosingType;
 
-    /// @brief Index into TBL_Signatures blob table for this type
+    /// @brief Index into TBL_Signatures blob table for the set of interfaces implemented by this type
     ///
-    CLR_SIG Signature;
+    CLR_SIG Interfaces;
 
     /// @brief Index into TBL_MethodDef for the first method of the type
     ///
@@ -1332,11 +1333,11 @@ struct CLR_RECORD_TYPEDEF
     ///
     CLR_UINT8 InstanceFieldsCount;
 
-    /// @brief Index into TBL_GenericParam for the first generic parameter of the type
+    /// @brief Index into TBL_GenericParam for the first generic parameter for the type
     ///
     CLR_INDEX FirstGenericParam;
 
-    /// @brief Count of generic parameters in the type
+    /// @brief Count of generic parameters for the type
     ///
     CLR_UINT8 GenericParamCount;
 
@@ -1514,10 +1515,6 @@ struct CLR_RECORD_METHODDEF
     ///
     CLR_UINT8 LocalsCount;
 
-    /// @brief Count of generic parameters for the method
-    ///
-    CLR_UINT8 GenericParamCount;
-
     /// @brief Length of the evaluation stack for the method
     ///
     CLR_UINT8 LengthEvalStack;
@@ -1526,9 +1523,18 @@ struct CLR_RECORD_METHODDEF
     ///
     CLR_SIG Locals;
 
-    /// @brief Index into TBL_Signatures to describe the locals for the method
+    /// @brief Index into TBL_GenericParam for the first generic parameter for the method
     ///
-    CLR_SIG GenericParam;
+    CLR_INDEX FirstGenericParam;
+
+    /// @brief Count of generic parameters for the method
+    ///
+    CLR_UINT8 GenericParamCount;
+
+    /// @brief Index into TBL_Signatures that describes the method itself
+    ///
+    CLR_SIG Signature;
+};
 
 struct CLR_RECORD_MEMBERREF
 {
