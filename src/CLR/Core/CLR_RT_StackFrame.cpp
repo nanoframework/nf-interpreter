@@ -683,7 +683,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
     if (ArgumentsCount)
     {
         CLR_RT_SignatureParser parser;
-        parser.Initialize_MethodSignature(m_call.m_assm, target);
+        parser.Initialize_MethodSignature(&m_call);
         CLR_RT_SignatureParser::Element res;
         CLR_RT_HeapBlock *args = m_arguments;
 
@@ -973,7 +973,7 @@ void CLR_RT_StackFrame::Pop()
                 else if (m_call.m_target->RetVal != DATATYPE_VOID)
                 {
                     CLR_RT_SignatureParser sig;
-                    sig.Initialize_MethodSignature(this->m_call.m_assm, this->m_call.m_target);
+                    sig.Initialize_MethodSignature(&this->m_call);
                     CLR_RT_SignatureParser::Element res;
                     CLR_RT_TypeDescriptor desc;
 

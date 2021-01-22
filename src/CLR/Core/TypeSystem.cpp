@@ -257,23 +257,67 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMET
 }
 
 //--//
-
-void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md)
+void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodDef_Instance *md)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    Method = md->Method();
+
+    Initialize_MethodSignature(md->m_assm, md->m_assm->GetSignature(md->m_target->Signature));
+}
+
+void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Method = 0xFFFF;
+    
     Initialize_MethodSignature(assm, assm->GetSignature(md->Signature));
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     Type = CLR_RT_SignatureParser::c_Method;
+
     Flags = (*md++);
+
+    if ((Flags & PIMAGE_CEE_CS_CALLCONV_GENERIC) == PIMAGE_CEE_CS_CALLCONV_GENERIC)
+    {
+        // is generic instance, has generic parameters count
+        GenParamCount = (*md++);
+    }
+    else
+    {
+        GenParamCount = 0;
+    }
+
     ParamCount = (*md++) + 1;
 
     Assembly = assm;
     Signature = md;
 }
+
+
+//--//
+
+void CLR_RT_SignatureParser::Initialize_MemberRefSignature(CLR_RT_Assembly* assm, const CLR_RECORD_MEMBERREF* mr)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    Initialize_MemberRefSignature(assm, assm->GetSignature(mr->Signature));
+}
+
+void CLR_RT_SignatureParser::Initialize_MemberRefSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Assembly = assm;
+    Signature = md;
+
+    Type = CLR_RT_SignatureParser::c_MemberRef;
+    ParamCount = 1;
+    Flags = 0;
 }
 
 //--//
@@ -4819,7 +4863,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
                 if (!strcmp(targetName, calleeName))
                 {
                     CLR_RT_SignatureParser parserLeft;
-                    parserLeft.Initialize_MethodSignature(calleeAssm, calleeMDR);
+                    parserLeft.Initialize_MethodSignature(&calleeInst);
                     CLR_RT_SignatureParser parserRight;
                     parserRight.Initialize_MethodSignature(targetAssm, targetMDR);
 
@@ -5000,7 +5044,7 @@ HRESULT CLR_RT_AttributeParser::Initialize(const CLR_RT_AttributeEnumerator &en)
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    m_parser.Initialize_MethodSignature(m_md.m_assm, m_md.m_target);
+    m_parser.Initialize_MethodSignature(&m_md);
     m_parser.Advance(m_res); // Skip return value.
 
     m_assm = en.m_assm;

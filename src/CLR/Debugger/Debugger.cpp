@@ -1961,7 +1961,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
         if (ArgumentsCount)
         {
             CLR_RT_SignatureParser parser;
-            parser.Initialize_MethodSignature(stack->m_call.m_assm, target);
+            parser.Initialize_MethodSignature(&stack->m_call);
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
 
@@ -2557,7 +2557,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
 
             if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
             {
-                parser.Initialize_MethodSignature(md.m_assm, md.m_target);
+                parser.Initialize_MethodSignature(&md);
 
                 iElement++; // Skip the return value, always at the head of the signature.
 

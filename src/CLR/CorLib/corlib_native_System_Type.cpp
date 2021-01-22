@@ -643,9 +643,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     if (NANOCLR_INDEX_IS_VALID(inst))
                     {
                         CLR_RT_SignatureParser parserLeft;
-                        parserLeft.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+                        parserLeft.Initialize_MethodSignature(&inst);
                         CLR_RT_SignatureParser parserRight;
-                        parserRight.Initialize_MethodSignature(inst2.m_assm, inst2.m_target);
+                        parserRight.Initialize_MethodSignature(&inst2);
 
                         CLR_RT_SignatureParser::Element resLeft;
                         CLR_RT_SignatureParser::Element resRight;

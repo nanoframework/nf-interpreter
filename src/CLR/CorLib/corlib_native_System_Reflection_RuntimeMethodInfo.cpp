@@ -18,7 +18,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_MethodBase::GetMethodDescriptor( stack, *hbMeth, md ));
 
-    parser.Initialize_MethodSignature( md.m_assm, md.m_target );
+    parser.Initialize_MethodSignature(&md);
 
     NANOCLR_CHECK_HRESULT(desc.InitializeFromSignatureParser( parser ));
 
