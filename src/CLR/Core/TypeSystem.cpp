@@ -3606,26 +3606,30 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
     }
 }
 
-bool CLR_RT_Assembly::FindGenericParam(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
+bool CLR_RT_Assembly::FindGenericParamAtTypeDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_INDEX indexType = md.CrossReference().GetOwner();
 
-    const CLR_RECORD_TYPEDEF *typeOwner = GetTypeDef(indexType);
+    CLR_INDEX paramIndex = GetTypeDef(indexType)->FirstGenericParam;
 
-    CLR_RT_GenericParam_CrossReference* params = m_pCrossReference_GenericParam;
-    CLR_UINT32 paramsTableSize = m_pTablesSize[TBL_GenericParam];
-    CLR_UINT32 i;
-
-    for (i = 0; i < paramsTableSize; i++, params++)
+    // sanity check for valid parameter index
+    if (paramIndex != CLR_EmptyIndex)
     {
-        if (params->m_TypeOrMethodDef == TMR_TypeDef &&
-            params->m_data == indexType)
-        {
-            break;
-        }
+        paramIndex += genericParameterPosition;
+
+        index.Set(m_index, paramIndex);
+
+        return true;
     }
+    else
+    {
+        index.Clear();
+
+        return false;
+    }
+}
 
 bool CLR_RT_Assembly::FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
 {
@@ -3748,6 +3752,130 @@ bool CLR_RT_Assembly::FindMethodDef(
 
                 return true;
             }
+        }
+    }
+
+    index.Clear();
+
+    return false;
+}
+
+bool CLR_RT_Assembly::FindMethodDef(
+    const CLR_RECORD_TYPESPEC* ts,
+    const char* name,
+    CLR_RT_Assembly* base,
+    CLR_SIG sig,
+    CLR_RT_MethodDef_Index& index)
+{
+    (void)ts;
+
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_RECORD_METHODDEF* md = GetMethodDef(0);
+
+    for (int i = 0; i < m_pTablesSize[TBL_MethodDef]; i++, md++)
+    {
+        const char* methodName = GetString(md->Name);
+
+        if (!strcmp(methodName, name))
+        {
+            bool fMatch = true;
+
+            if (CLR_SIG_INVALID != sig)
+            {
+                CLR_RT_SignatureParser parserLeft;
+                parserLeft.Initialize_MethodSignature(this, md);
+                CLR_RT_SignatureParser parserRight;
+                parserRight.Initialize_MethodSignature(base, base->GetSignature(sig));
+
+                fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
+            }
+
+            if (fMatch)
+            {
+                index.Set(m_index, i);
+
+                return true;
+            }
+        }
+    }
+
+
+    //CLR_RT_MemberRef_Index mr;
+
+    //if (FindMemberRef(base, sig, mr))
+    //{
+    //    const char* typeName = GetString(GetMemberRef(mr.Member())->Name);
+
+    //}
+
+    //
+    //int i;
+
+    //const CLR_RECORD_METHODDEF* md = GetMethodDef(td->FirstMethod);
+
+    //for (i = 0; i < num; i++, md++)
+    //{
+    //    const char* methodName = GetString(md->Name);
+
+    //    if (!strcmp(methodName, name))
+    //    {
+    //        bool fMatch = true;
+
+    //        if (CLR_SIG_INVALID != sig)
+    //        {
+    //            CLR_RT_SignatureParser parserLeft;
+    //            parserLeft.Initialize_MethodSignature(this, md);
+    //            CLR_RT_SignatureParser parserRight;
+    //            parserRight.Initialize_MethodSignature(base, base->GetSignature(sig));
+
+    //            fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
+    //        }
+
+    //        if (fMatch)
+    //        {
+    //            index.Set(m_index, i + td->FirstMethod);
+
+    //            return true;
+    //        }
+    //    }
+    //}
+
+    index.Clear();
+
+    return false;
+}
+
+bool CLR_RT_Assembly::FindMemberRef(
+    CLR_RT_Assembly* base,
+    CLR_SIG sig,
+    CLR_RT_MemberRef_Index& index)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    int i;
+    
+    const CLR_RECORD_MEMBERREF* mr = GetMemberRef(0);
+
+    for (i = 0; i < base->m_pTablesSize[TBL_MemberRef]; i++, mr++)
+    {
+        bool fMatch = true;
+
+        if (CLR_SIG_INVALID != sig)
+        {
+            CLR_RT_SignatureParser parserLeft;
+            parserLeft.Initialize_MemberRefSignature(base, mr);
+
+            CLR_RT_SignatureParser parserRight;
+            parserRight.Initialize_MemberRefSignature(base, base->GetSignature(sig));
+
+            fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
+        }
+
+        if (fMatch)
+        {
+            index.Set(m_index, i);
+
+            return true;
         }
     }
 
