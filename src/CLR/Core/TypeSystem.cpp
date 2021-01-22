@@ -2144,23 +2144,39 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
     ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
     {
-        CLR_RT_TypeDef_Index target;
-        CLR_RT_TypeDef_Instance inst;
+        CLR_RT_TypeDef_Index typeDef;
+        typeDef.Clear();
+
+        CLR_RT_TypeDef_Instance typeDefInstance;
+       
+        CLR_RT_TypeSpec_Index typeSpec;
+        typeSpec.Clear();
+
+        CLR_RT_TypeSpec_Instance typeSpecInstance;
+        
+        bool fGot = false;
+        const char* name = NULL;
 
         switch (CLR_GetMemberRefParent(src->container))
         {
             case CLR_MemberRefParent::MRP_TypeRef:
-                target = m_pCrossReference_TypeRef[CLR_GetIndexFromMemberRefParent(src->container)].m_target;
+                typeDef = m_pCrossReference_TypeRef[CLR_GetIndexFromMemberRefParent(src->container)].m_target;
                 break;
 
             case CLR_MemberRefParent::MRP_TypeDef:
-                target.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
+                typeDef.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
+                break;
+            
+            case CLR_MemberRefParent::MRP_MethodDef:
+                dst->m_target.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
+                fGot = true;
                 break;
 
             case CLR_MemberRefParent::MRP_TypeSpec:
-                // TODO
+            {
+                typeSpec.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
                 break;
-
+            }
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
@@ -2170,58 +2186,112 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        if (inst.InitializeFromIndex(target) == false)
+        name = GetString(src->name);
+
+        if (NANOCLR_INDEX_IS_VALID(typeSpec))
         {
-#if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->container);
-#endif
-
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
-
-        const char *name = GetString(src->name);
-        bool fGot = false;
-
-#if defined(_WIN32) && defined(DEBUG_RESOLUTION)
-        const CLR_RECORD_TYPEDEF *qTD = inst.m_target;
-        CLR_RT_Assembly *qASSM = inst.m_assm;
-
-        CLR_Debug::Printf(
-            "Trying to resolve Method: %s.%s.%s\r\n",
-            qASSM->GetString(qTD->NameSpace),
-            qASSM->GetString(qTD->Name),
-            name);
-#endif
-
-        while (NANOCLR_INDEX_IS_VALID(inst))
-        {
-            if (inst.m_assm->FindMethodDef(inst.m_target, name, this, src->sig, dst->m_target))
+            if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
-                fGot = true;
-                break;
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf("Resolve Method: unknown typespec: %08x\r\n", src->container);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            inst.SwitchToParent();
-        }
+            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->sig, dst->m_target))
+            {
+                fGot = true;
+            }
 
-        if (fGot == false)
-        {
+            if (fGot == false)
+            {
 #if !defined(BUILD_RTM)
-            const CLR_RECORD_TYPEDEF *qTD = inst.m_target;
-            CLR_RT_Assembly *qASSM = inst.m_assm;
+                CLR_Debug::Printf(
+                    "Resolve: unknown method: %s.%s.%s\r\n",
+                    "???",
+                    "???",
+                    name);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+        }
+        else if (NANOCLR_INDEX_IS_VALID(typeDef))
+        {
+            if (typeDefInstance.InitializeFromIndex(typeDef) == false)
+            {
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->container);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+#if defined(_WIN32) && defined(DEBUG_RESOLUTION)
+            const CLR_RECORD_TYPEDEF* qTD = typeDefInstance.m_target;
+            CLR_RT_Assembly* qASSM = typeDefInstance.m_assm;
 
             CLR_Debug::Printf(
-                "Resolve: unknown method: %s.%s.%s\r\n",
+                "Trying to resolve Method: %s.%s.%s\r\n",
                 qASSM->GetString(qTD->NameSpace),
                 qASSM->GetString(qTD->Name),
                 name);
 #endif
 
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
+            {
+                if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->sig, dst->m_target))
+                {
+                    fGot = true;
+                    break;
+                }
+
+                typeDefInstance.SwitchToParent();
+            }
+
+            if (fGot == false)
+            {
+#if !defined(BUILD_RTM)
+                const CLR_RECORD_TYPEDEF* qTD = typeDefInstance.m_target;
+                CLR_RT_Assembly* qASSM = typeDefInstance.m_assm;
+
+                CLR_Debug::Printf(
+                    "Resolve: unknown method: %s.%s.%s\r\n",
+                    qASSM->GetString(qTD->NameSpace),
+                    qASSM->GetString(qTD->Name),
+                    name);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
         }
     }
 
     NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_Assembly::Resolve_TypeSpec()
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    int i;
+
+    ITERATE_THROUGH_RECORDS(this, i, TypeSpec, TYPESPEC)
+    {
+        //CLR_RT_TypeSpec_Instance inst;
+
+//        if (inst.InitializeFromIndex(m_pCrossReference_TypeSpec[src->sig].Signature) == false)
+//        {
+//#if !defined(BUILD_RTM)
+//            CLR_Debug::Printf("Resolve TypeSpec: unknown signature: %08x\r\n", src->sig);
+//#endif
+//            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+//        }
+    }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 void CLR_RT_Assembly::Resolve_Link()
