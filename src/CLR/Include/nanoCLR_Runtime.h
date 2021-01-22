@@ -1138,7 +1138,7 @@ struct CLR_RT_SignatureParser
         bool IsMvar;
 
         /// @brief Generic Parameter position
-        int GenericParamPosition;
+        CLR_INDEX GenericParamPosition;
 
         /// @brief Generic Parameter count
         int GenericParamCount;
@@ -1152,13 +1152,16 @@ struct CLR_RT_SignatureParser
     int Type;
 
     /// @brief Flags for signature parsing. For methods this is the ECMA-335 calling convention.
-    CLR_UINT32 Flags;
+    CLR_UINT8 Flags;
 
     /// @brief Parameters count
     int ParamCount;
 
     /// @brief Generic parameters count
     int GenParamCount;
+
+    /// @brief Index into MetodDef table
+    CLR_INDEX Method;
 
     //--//
 
@@ -1173,6 +1176,8 @@ struct CLR_RT_SignatureParser
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
     void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
+
+    void Initialize_MethodSignature(CLR_RT_MethodDef_Instance* mdInstance);
 
     void Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes);
 
