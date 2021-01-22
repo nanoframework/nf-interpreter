@@ -903,6 +903,8 @@ struct CLR_RT_GenericParam_CrossReference
 
     CLR_RT_GenericParam_Index m_target;
 
+    CLR_DataType dt;
+
     CLR_INDEX GetOwnerType() const
     {
         return (CLR_INDEX)(m_data);
