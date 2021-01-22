@@ -1441,11 +1441,11 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     }
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i)
     {
-        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_MethodDef, i);
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_GenericParam, i);
     }
     const CLR_RECORD_METHODSPEC *GetMethodSpec(CLR_INDEX i)
     {
-        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODSPEC, TBL_MethodDef, i);
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODSPEC, TBL_MethodSpec, i);
     }
     const CLR_RECORD_ATTRIBUTE *GetAttribute(CLR_INDEX i)
     {
