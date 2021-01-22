@@ -2307,17 +2307,22 @@ void CLR_RT_Assembly::Resolve_Link()
         }
 
         //
-        // Link generic parameters.
+        // Link generic parameters, if any
         //
         {
-            CLR_RT_GenericParam_CrossReference *gp = &m_pCrossReference_GenericParam[src->FirstGenericParam];
-
-            int num = src->GenericParamCount;
-
-            for (; num; num--, gp++)
+            if (src->GenericParamCount)
             {
-                gp->m_data = indexType;
-                gp->m_TypeOrMethodDef = TMR_TypeDef;
+                CLR_RT_GenericParam_CrossReference* gp = &m_pCrossReference_GenericParam[src->FirstGenericParam];
+
+                // get generic parameter count for stop condition
+                int num = src->GenericParamCount;
+
+                for (; num; num--, gp++)
+                {
+                    gp->m_data = indexType;
+                    gp->m_TypeOrMethodDef = TMR_TypeDef;
+                    gp->dt = DATATYPE_VOID;
+                }
             }
         }
     }
@@ -3118,32 +3123,6 @@ void CLR_RT_Assembly::Resolve_MethodDef()
                     if (!strcmp(GetString(md->Name), mil->name))
                     {
                         indexMethod.m_data = index.m_data;
-
-                        // link generic parameters
-                        const CLR_RECORD_GENERICPARAM* param = GetGenericParam(0);
-
-                        CLR_RT_GenericParam_CrossReference* gp = m_pCrossReference_GenericParam;
-                        CLR_UINT32 paramsTableSize = m_pTablesSize[TBL_GenericParam];
-
-                        for (int gpIndex = 0; gpIndex < paramsTableSize; gpIndex++, gp++, param++)
-                        {
-                            if (CLR_GetTypeOrMethodDef(param->Owner) == TMR_MethodDef)
-                            {
-                                if (CLR_GetIndexFromTypeOrMethodDef(param->Owner) == i)
-                                {
-                                    gp->m_data = index.m_data;
-                                    gp->m_TypeOrMethodDef = TMR_MethodDef;
-
-                                    // move to next
-                                    gp++;
-
-                                    for (int paramIndex = 0; paramIndex < md->GenericParamCount; paramIndex++)
-                                    {
-                                        gp->m_data = index.m_data;
-                                    }
-                                }
-                            }
-                        }                        
                     }
                 }
             }
@@ -3152,6 +3131,22 @@ void CLR_RT_Assembly::Resolve_MethodDef()
         if (md->Flags & CLR_RECORD_METHODDEF::MD_EntryPoint)
         {
             g_CLR_RT_TypeSystem.m_entryPoint = index;
+        }
+
+        // link generic parameters
+        if (md->GenericParamCount)
+        {
+            CLR_RT_GenericParam_CrossReference* gp = &m_pCrossReference_GenericParam[md->FirstGenericParam];
+
+            // get generic parameter count for stop condition
+            int num = md->GenericParamCount;
+
+            for (; num; num--, gp++)
+            {
+                gp->m_data = i;
+                gp->m_TypeOrMethodDef = TMR_MethodDef;
+                gp->dt = DATATYPE_VOID;
+            }
         }
     }
 }
