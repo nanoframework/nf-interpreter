@@ -951,6 +951,17 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 m_target = m_assm->GetMethodDef(index);
                 return true;
 
+            case TBL_MethodSpec:
+            {
+                Set(assm->m_index, index);
+
+                m_assm = assm;
+                //const CLR_RECORD_METHODSPEC* temp_target = m_assm->GetMethodSpec(index);
+
+                m_target = 0;
+
+                return true;
+            }
             default:
                 // the remaining data types aren't to be handled
                 break;
@@ -1098,7 +1109,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromTypeSpec(const CLR_RT_TypeSpec_Inde
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    parser.Initialize_TypeSpec(inst.m_assm, inst.m_target);
+    //parser.Initialize_TypeSpec(inst.m_assm, inst.m_target);
 
     NANOCLR_SET_AND_LEAVE(InitializeFromSignatureParser(parser));
 
@@ -1643,10 +1654,14 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
     buffer += offsets.iFieldDef;
     m_pCrossReference_MethodDef = (CLR_RT_MethodDef_CrossReference *)buffer;
     buffer += offsets.iMethodDef;
+    m_pCrossReference_MemberRef = (CLR_RT_MemberRef_CrossReference *)buffer;
+    buffer += offsets.iMemberRef;    
     m_pCrossReference_GenericParam = (CLR_RT_GenericParam_CrossReference *)buffer;
     buffer += offsets.iGenericParam;
     m_pCrossReference_MethodSpec = (CLR_RT_MethodSpec_CrossReference *)buffer;
     buffer += offsets.iMethodSpec;
+    m_pCrossReference_TypeSpec = (CLR_RT_TypeSpec_CrossReference *)buffer;
+    buffer += offsets.iTypeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
     m_pStaticFields = (CLR_RT_HeapBlock *)buffer;
@@ -1687,6 +1702,15 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
+        const CLR_RECORD_MEMBERREF *src = (const CLR_RECORD_MEMBERREF *)this->GetTable(TBL_MemberRef);
+        CLR_RT_MemberRef_CrossReference *dst = this->m_pCrossReference_MemberRef;
+        for (i = 0; i < this->m_pTablesSize[TBL_MemberRef]; i++, src++, dst++)
+        {
+            dst->m_data = CLR_EmptyIndex;
+        }
+    }
+
+    {
         const CLR_RECORD_GENERICPARAM *src = (const CLR_RECORD_GENERICPARAM *)this->GetTable(TBL_GenericParam);
         CLR_RT_GenericParam_CrossReference *dst = this->m_pCrossReference_GenericParam;
         for (i = 0; i < this->m_pTablesSize[TBL_GenericParam]; i++, src++, dst++)
@@ -1701,7 +1725,15 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         for (i = 0; i < this->m_pTablesSize[TBL_MethodSpec]; i++, src++, dst++)
         {
             dst->m_data = CLR_EmptyIndex;
-            dst->m_data = CLR_EmptyIndex;
+        }
+    }
+
+    {
+        const CLR_RECORD_TYPESPEC* src = (const CLR_RECORD_TYPESPEC*)this->GetTable(TBL_TypeSpec);
+        CLR_RT_TypeSpec_CrossReference* dst = this->m_pCrossReference_TypeSpec;
+        for (i = 0; i < this->m_pTablesSize[TBL_TypeSpec]; i++, src++, dst++)
+        {
+            dst->Signature = CLR_EmptyIndex;
         }
     }
 
@@ -1749,10 +1781,11 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         skeleton->m_pTablesSize[TBL_TypeDef] /= sizeof(CLR_RECORD_TYPEDEF);
         skeleton->m_pTablesSize[TBL_FieldDef] /= sizeof(CLR_RECORD_FIELDDEF);
         skeleton->m_pTablesSize[TBL_MethodDef] /= sizeof(CLR_RECORD_METHODDEF);
+        skeleton->m_pTablesSize[TBL_MemberRef] /= sizeof(CLR_RECORD_MEMBERREF);
         skeleton->m_pTablesSize[TBL_GenericParam] /= sizeof(CLR_RECORD_GENERICPARAM);
         skeleton->m_pTablesSize[TBL_MethodSpec] /= sizeof(CLR_RECORD_METHODSPEC);
-        skeleton->m_pTablesSize[TBL_Attributes] /= sizeof(CLR_RECORD_ATTRIBUTE);
         skeleton->m_pTablesSize[TBL_TypeSpec] /= sizeof(CLR_RECORD_TYPESPEC);
+        skeleton->m_pTablesSize[TBL_Attributes] /= sizeof(CLR_RECORD_ATTRIBUTE);
         skeleton->m_pTablesSize[TBL_Resources] /= sizeof(CLR_RECORD_RESOURCE);
         skeleton->m_pTablesSize[TBL_ResourcesFiles] /= sizeof(CLR_RECORD_RESOURCE_FILE);
     }
@@ -1800,12 +1833,20 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             skeleton->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
             CLR_UINT32);
 
+        offsets.iMemberRef = ROUNDTOMULTIPLE(
+            skeleton->m_pTablesSize[TBL_MemberRef] * sizeof(CLR_RT_MemberRef_CrossReference),
+            CLR_UINT32);
+
         offsets.iGenericParam = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
             CLR_UINT32);
 
         offsets.iMethodSpec = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_MethodSpec] * sizeof(CLR_RT_MethodSpec_CrossReference),
+            CLR_UINT32);
+
+        offsets.iTypeSpec = ROUNDTOMULTIPLE(
+            skeleton->m_pTablesSize[TBL_TypeSpec] * sizeof(CLR_RT_TypeSpec_CrossReference),
             CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
@@ -1819,8 +1860,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         size_t iTotalRamSize = offsets.iBase + offsets.iAssemblyRef + offsets.iTypeRef + offsets.iFieldRef +
-                               offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef +
-                               offsets.iGenericParam + offsets.iMethodSpec;
+                               offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef + 
+                               offsets.iMemberRef + offsets.iGenericParam + offsets.iMethodSpec + offsets.iTypeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
         iTotalRamSize += offsets.iStaticFields;
@@ -1867,9 +1908,10 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             size_t iMetaData = header->SizeOfTable(TBL_AssemblyRef) + header->SizeOfTable(TBL_TypeRef) +
                                header->SizeOfTable(TBL_FieldRef) + header->SizeOfTable(TBL_MethodRef) +
                                header->SizeOfTable(TBL_TypeDef) + header->SizeOfTable(TBL_FieldDef) +
-                               header->SizeOfTable(TBL_MethodDef) + header->SizeOfTable(TBL_GenericParam) +
-                               header->SizeOfTable(TBL_MethodSpec) + header->SizeOfTable(TBL_Attributes) +
-                               header->SizeOfTable(TBL_TypeSpec) + header->SizeOfTable(TBL_Signatures);
+                               header->SizeOfTable(TBL_MethodDef) + header->SizeOfTable(TBL_MemberRef) + header->SizeOfTable(TBL_GenericParam) +
+                               header->SizeOfTable(TBL_MethodSpec) + header->SizeOfTable(TBL_TypeSpec) +
+                header->SizeOfTable(TBL_Attributes) +
+                                header->SizeOfTable(TBL_Signatures);
 
             CLR_Debug::Printf(
                 " (%d RAM - %d ROM - %d METADATA)\r\n\r\n",
@@ -1905,6 +1947,10 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
                 offsets.iMethodDef,
                 skeleton->m_pTablesSize[TBL_MethodDef]);
+            CLR_Debug::Printf(
+                "   MemberRef       = %6d bytes (%5d elements)\r\n",
+                offsets.iMemberRef,
+                skeleton->m_pTablesSize[TBL_MemberRef]);
             CLR_Debug::Printf(
                 "   GenericParam    = %6d bytes (%5d elements)\r\n",
                 offsets.iGenericParam,
@@ -4179,6 +4225,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                     NANOCLR_CHECK_HRESULT(pASSM->Resolve_MethodRef());
                     /********************/ pASSM->Resolve_TypeDef();
                     /********************/ pASSM->Resolve_MethodDef();
+                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_TypeSpec());
                     /********************/ pASSM->Resolve_Link();
                     NANOCLR_CHECK_HRESULT(pASSM->Resolve_ComputeHashes());
 
@@ -4253,6 +4300,9 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.iMethodDef += ROUNDTOMULTIPLE(
                     pASSM->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
                     CLR_UINT32);
+                offsets.iMemberRef += ROUNDTOMULTIPLE(
+                    pASSM->m_pTablesSize[TBL_MemberRef] * sizeof(CLR_RT_MemberRef_CrossReference),
+                    CLR_UINT32);
                 offsets.iGenericParam += ROUNDTOMULTIPLE(
                     pASSM->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
                     CLR_UINT32);
@@ -4270,9 +4320,9 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 iMetaData += pASSM->m_header->SizeOfTable(TBL_AssemblyRef) + pASSM->m_header->SizeOfTable(TBL_TypeRef) +
                              pASSM->m_header->SizeOfTable(TBL_FieldRef) + pASSM->m_header->SizeOfTable(TBL_MethodRef) +
                              pASSM->m_header->SizeOfTable(TBL_TypeDef) + pASSM->m_header->SizeOfTable(TBL_FieldDef) +
-                             pASSM->m_header->SizeOfTable(TBL_MethodDef) +
-                             pASSM->m_header->SizeOfTable(TBL_GenericParam) +
-                             pASSM->m_header->SizeOfTable(TBL_Attributes) + pASSM->m_header->SizeOfTable(TBL_TypeSpec) +
+                             pASSM->m_header->SizeOfTable(TBL_MethodDef) + pASSM->m_header->SizeOfTable(TBL_MemberRef) +
+                             pASSM->m_header->SizeOfTable(TBL_GenericParam) +pASSM->m_header->SizeOfTable(TBL_TypeSpec) +
+                             pASSM->m_header->SizeOfTable(TBL_Attributes) + 
                              pASSM->m_header->SizeOfTable(TBL_Signatures);
 
                 for (int tbl = 0; tbl < TBL_Max; tbl++)
@@ -4328,6 +4378,10 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
                 offsets.iMethodDef,
                 pTablesSize[TBL_MethodDef]);
+            CLR_Debug::Printf(
+                "   MemberRef       = %6d bytes (%5d elements)\r\n",
+                offsets.iMemberRef,
+                pTablesSize[TBL_MemberRef]);
             CLR_Debug::Printf(
                 "   GenericParam    = %6d bytes (%5d elements)\r\n",
                 offsets.iGenericParam,

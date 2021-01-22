@@ -768,6 +768,35 @@ struct CLR_RT_GenericParam_Index
     }
 };
 
+struct CLR_RT_MemberRef_Index
+{
+    CLR_UINT32 m_data;
+
+    //--//
+
+    void Clear()
+    {
+        m_data = 0;
+    }
+
+    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMemberRef)
+    {
+        m_data = indexAssm << 16 | indexMemberRef;
+    }
+
+    //--//
+
+    CLR_INDEX Assembly() const
+    {
+        return (CLR_INDEX)(m_data >> 16);
+    }
+
+    CLR_INDEX Member() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
+};
+
 struct CLR_RT_ReflectionDef_Index
 {
     CLR_UINT16 m_kind; // CLR_ReflectionType
@@ -852,6 +881,16 @@ struct CLR_RT_MethodDef_CrossReference
     }
 };
 
+struct CLR_RT_MemberRef_CrossReference
+{
+    CLR_UINT16 m_data;
+
+    CLR_INDEX GetOwner() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
+};
+
 struct CLR_RT_GenericParam_CrossReference
 {
     /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
@@ -878,6 +917,11 @@ struct CLR_RT_MethodSpec_CrossReference
     {
         return (CLR_INDEX)(m_data);
     }
+};
+
+struct CLR_RT_TypeSpec_CrossReference
+{
+    CLR_INDEX Signature;
 };
 
 struct CLR_RT_MethodDef_Patch
@@ -1078,6 +1122,7 @@ struct CLR_RT_SignatureParser
     static const int c_Method = 3;
     static const int c_Locals = 4;
     static const int c_Object = 5;
+    static const int c_MemberRef = 6;
 
     struct Element
     {
@@ -1122,10 +1167,12 @@ struct CLR_RT_SignatureParser
     void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
+    void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, const CLR_RECORD_MEMBERREF* mr);
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
+    void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
 
     void Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes);
 
@@ -1204,8 +1251,10 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t iTypeDef;
         size_t iFieldDef;
         size_t iMethodDef;
+        size_t iMemberRef;
         size_t iGenericParam;
         size_t iMethodSpec;
+        size_t iTypeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
         size_t iStaticFields;
@@ -1262,10 +1311,14 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         *m_pCrossReference_FieldDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference
         *m_pCrossReference_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_MemberRef_CrossReference
+        * m_pCrossReference_MemberRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_GenericParam_CrossReference *
         m_pCrossReference_GenericParam; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodSpec_CrossReference
         *m_pCrossReference_MethodSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_TypeSpec_CrossReference
+        * m_pCrossReference_TypeSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
@@ -1305,6 +1358,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     HRESULT Resolve_TypeRef();
     HRESULT Resolve_FieldRef();
     HRESULT Resolve_MethodRef();
+    HRESULT Resolve_TypeSpec();
     void Resolve_TypeDef();
     void Resolve_MethodDef();
     void Resolve_Link();
@@ -1380,6 +1434,10 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const CLR_RECORD_METHODDEF *GetMethodDef(CLR_INDEX i)
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
+    }
+    const CLR_RECORD_MEMBERREF* GetMemberRef(CLR_INDEX i)
+    {
+        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_MEMBERREF, TBL_MemberRef, i);
     }
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i)
     {
