@@ -3405,9 +3405,20 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_RT_MethodDef_Instance md, CLR_UINT32 
         }
     }
 
-    if (i != paramsTableSize)
+bool CLR_RT_Assembly::FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_INDEX paramIndex = GetMethodDef(md.Method())->FirstGenericParam;
+
+    // sanity check for valid parameter index
+    if (paramIndex != CLR_EmptyIndex)
     {
-        index.Set(m_index, i);
+        paramIndex += genericParameterPosition;
+
+        //const CLR_RECORD_GENERICPARAM* genericParam = GetGenericParam(paramIndex);
+
+        index.Set(m_index, paramIndex);
 
         return true;
     }
