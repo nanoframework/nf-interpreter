@@ -689,7 +689,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
     int pid)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_Debug::Printf("    [%04x:%04x:%08x", pid, (int)(ip - ipStart), (size_t)ip);
+    CLR_Debug::Printf("    [%04x:%04x", pid, (int)(ip - ipStart));
 
     if (NANOCLR_INDEX_IS_VALID(call))
     {
