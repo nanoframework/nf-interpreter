@@ -26,19 +26,19 @@ endmacro()
 
 # setup C compiler
 if(NOT CMAKE_C_COMPILER)
-    SET_COMPILER_VAR(C_COMPILER gcc)
+    SET_COMPILER_VAR(C_COMPILER gcc)    
 endif()
 SET_COMPILER_VAR(C_COMPILER gcc)
 
 # setup C++ compiler
 if(NOT CMAKE_CXX_COMPILER)
-    SET_COMPILER_VAR(CXX_COMPILER g++)
+    SET_COMPILER_VAR(CXX_COMPILER g++)    
 endif()
 
 # setup Assembler compiler
 if(NOT CMAKE_ASM_COMPILER)
     SET_COMPILER_VAR(ASM_COMPILER gcc)
-    SET_COMPILER_VAR(ASM-ATT_COMPILER as)
+    SET_COMPILER_VAR(ASM-ATT_COMPILER as)    
 endif()
  
 # other toolchain configurations  
