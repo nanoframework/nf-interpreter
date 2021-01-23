@@ -1,5 +1,5 @@
 {
-	"name": "NanoFramework",
+	"name": "nanoFramework",
 	"dockerFile": "Dockerfile",
 	"context": ".",
 	"mounts": [

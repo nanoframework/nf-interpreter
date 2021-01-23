@@ -221,6 +221,22 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
     )
 
     # execute Sys Config with configuration file
+    if(WIN32)
+        add_custom_command(
+            OUTPUT 
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+
+            DEPENDS
+            ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+
+            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generate configuration files" 
+        )
+    else()
     add_custom_command(
         OUTPUT 
         ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
@@ -231,11 +247,11 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
         DEPENDS
         ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
 
-        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
+        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.sh -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generate configuration files" 
     )
-
+    endif()
     ######################################
 
     # need to copy the configuration file to the build directory
@@ -250,20 +266,24 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
 
     add_custom_target(
         COPY_TIRTOS_CONFIG
-
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_SOURCE_DIR}/${TI_RTOS_CONFIG_FILE}
                 ${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}
         COMMENT "Copy TI-RTOS configuration file to build directory" 
     )
 
-    add_custom_target(
-        TIRTOS_CONFIG
-    
-        COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    
-        COMMENT "Generate TI-RTOS configuration" 
-    )
-
+    if (WIN32)
+        add_custom_target(
+            TIRTOS_CONFIG        
+            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"    
+            COMMENT "Generate TI-RTOS configuration" 
+        )
+    else()
+        add_custom_target(
+            TIRTOS_CONFIG
+            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"        
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}    
+            COMMENT "Generate TI-RTOS configuration" 
+        )
+    endif()
 endmacro()

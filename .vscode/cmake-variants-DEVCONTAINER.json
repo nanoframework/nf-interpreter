@@ -73,7 +73,7 @@
           "NF_FEATURE_RTC": "ON",
           "SWO_OUTPUT": "OFF",
           "NF_BUILD_RTM": "OFF",
-          "API_System.IO.FileSystem": "OFF",
+          "API_System.IO.FileSystem": "ON",
           "API_System.Math": "ON",
           "API_Hardware.Stm32": "ON",
           "API_Windows.Devices.Gpio": "ON",
@@ -348,6 +348,41 @@
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
           "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+        }
+      },
+      "TI_CC1352R1_LAUNCHXL": {
+        "short": "TI_CC1352R1_LAUNCHXL",
+        "settings": {
+          "BUILD_VERSION": "0.9.99.999",
+          "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
+          "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
+          "RTOS": "TI_SIMPLELINK",
+          "TARGET_SERIES": "CC13x2_26x2",
+          "TARGET_BOARD": "TI_CC1352R1_LAUNCHXL",
+          "RADIO_FREQUENCY": "868",
+          "TI_SL_CC13x2_26x2_SDK_SOURCE": "/sources/SimpleLinkCC13",
+          "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
+          "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
+          "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+          "NF_TARGET_HAS_NANOBOOTER": "OFF",
+          "NF_FEATURE_DEBUGGER": "ON",
+          "NF_FEATURE_RTC": "ON",
+          "NF_FEATURE_HAS_SDCARD": "OFF",
+          "NF_BUILD_RTM": "OFF",
+          "API_System.Math": "ON",
+          "API_Windows.Devices.Gpio": "ON",
+          "API_System.Device.Gpio": "ON",
+          "API_Windows.Devices.Spi": "OFF",
+          "API_Windows.Devices.I2c": "OFF",
+          "API_System.Device.I2c": "OFF",
+          "API_Windows.Devices.Pwm": "OFF",
+          "API_Windows.Devices.Adc": "ON",
+          "API_Windows.Devices.SerialCommunication": "OFF",
+          "API_nanoFramework.ResourceManager": "OFF",
+          "API_nanoFramework.System.Collections": "OFF",
+          "API_nanoFramework.System.Text": "OFF",
+          "API_nanoFramework.TI.EasyLink": "ON",
+          "API_nanoFramework.Hardware.TI": "ON"
         }
       }
     }

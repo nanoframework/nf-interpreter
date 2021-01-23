@@ -116,7 +116,12 @@ add_custom_command(
 
 add_custom_command(
     TARGET ${NANOCLR_PROJECT_NAME}.elf PRE_BUILD
-    COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source\;${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages\;" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4 -p ti.platforms.simplelink:CC3220SF -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC3220" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+    if (WIN32)
+        COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source\;${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages\;" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4 -p ti.platforms.simplelink:CC3220SF -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC3220" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+    endif (WIN32)
+    if (UNIX)
+        COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs --xdcpath="${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source\;${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages\;" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4 -p ti.platforms.simplelink:CC3220SF -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions "-DDeviceFamily_CC3220" "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"
+    endif (UNIX)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generate TI-RTOS configuration" 
 )
