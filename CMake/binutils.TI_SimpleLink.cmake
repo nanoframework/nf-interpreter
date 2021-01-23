@@ -221,7 +221,7 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
     )
 
     # execute Sys Config with configuration file
-    if(WIN32)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_command(
             OUTPUT 
             ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
@@ -237,20 +237,20 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
             COMMENT "Generate configuration files" 
         )
     else()
-    add_custom_command(
-        OUTPUT 
-        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
-        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
-        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
-        ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+        add_custom_command(
+            OUTPUT 
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
-        DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+            DEPENDS
+            ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
 
-        COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.sh -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generate configuration files" 
-    )
+            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.sh -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generate configuration files" 
+        )
     endif()
     ######################################
 

@@ -222,7 +222,7 @@ endif()
 set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )
 set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
 set(ESPTOOL_PY_FILE ${ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py )
-set(ESPTOOL_PY_FLAGS --chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB )
+set(ESPTOOL_PY_FLAGS "--chip" "esp32" "elf2image" "--flash_mode" "dio" "--flash_freq" "40m" "--flash_size" "4MB" )
 set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
