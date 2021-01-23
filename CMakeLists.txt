@@ -228,7 +228,7 @@ option(USE_RNG "option to enable use of true random generator hardware block" ON
 if(USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
 else()
-    message(STATUS "Random Number Generation by target MCU is NOT activated")
+    message(STATUS "Random Number Generation by target MCU **IS NOT** activated")
 endif()
 
 #################################################################
@@ -242,7 +242,7 @@ option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 if(NF_FEATURE_DEBUGGER)
     message(STATUS "Support for debugging managed applications is included.")
 else()
-    message(STATUS "Support for debugging managed applications IS NOT included.")
+    message(STATUS "Support for debugging managed applications **IS NOT** included.")
 endif()
 
 #################################################################
@@ -253,7 +253,7 @@ option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
 else()
-    message(STATUS "Application Domains support IS NOT included")
+    message(STATUS "Application Domains support **IS NOT** included")
 endif()
 
 #################################################################
@@ -288,7 +288,7 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     message(STATUS "Configuration block storage is included")
 else()
     set(TARGET_HAS_CONFIG_BLOCK FALSE CACHE INTERNAL "Option for config block")
-    message(STATUS "Configuration block storage IS NOT included")
+    message(STATUS "Configuration block storage **IS NOT** included")
 endif()
 
 #################################################################
@@ -319,7 +319,7 @@ if(NF_FEATURE_HAS_SDCARD)
 
     message(STATUS "Support for SD Card is included")
 else()
-    message(STATUS "Support for SD Card IS NOT included")
+    message(STATUS "Support for SD Card **IS NOT** included")
 endif()
 
 #################################################################
@@ -355,7 +355,7 @@ if(NF_FEATURE_HAS_USB_MSD)
 
     message(STATUS "Support for USB Mass Storage is included")
 else()
-    message(STATUS "Support for USB Mass Storage IS NOT included")
+    message(STATUS "Support for USB Mass Storage **IS NOT** included")
 endif()
 
 #################################################################
@@ -380,7 +380,7 @@ if(NF_FEATURE_USE_SPIFFS)
     message(STATUS "Support for SPIFFS is included")
 else()
     set(NF_FEATURE_USE_SPIFFS_OPTION FALSE CACHE INTERNAL "Set nF SPIFFS feature FALSE")
-    message(STATUS "Support for SPIFFS IS NOT included")
+    message(STATUS "Support for SPIFFS **IS NOT** included")
 endif()
 
 #################################################################
@@ -689,7 +689,7 @@ if(USE_NETWORKING_OPTION)
 
 else()
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
-    message(STATUS "Support for networking IS NOT enabled")
+    message(STATUS "Support for networking **IS NOT** enabled")
 endif()
 
 #################################################################
