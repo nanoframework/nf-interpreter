@@ -10,35 +10,30 @@
 #include "eth_phy/phy_lan8720.h"
 #include "soc/emac_reg_v2.h"
 
-
-
 extern "C"
 {
 #include "lwip/netif.h"
 }
 
-extern struct netif * Esp32_find_netif(esp_interface_t esp_if);
-
+extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 
 //
 // Olimex ESP32-EVB Rev B, OLimex ESP32-Gateway, Generic Lan8270
 //
-#define CONFIG_PHY_LAN8720          1
-#define CONFIG_PHY_ADDRESS          0
-#define CONFIG_PHY_SMI_MDC_PIN      23
-#define CONFIG_PHY_SMI_MDIO_PIN     18
-
+#define CONFIG_PHY_LAN8720      1
+#define CONFIG_PHY_ADDRESS      0
+#define CONFIG_PHY_SMI_MDC_PIN  23
+#define CONFIG_PHY_SMI_MDIO_PIN 18
 
 // Uncomment one of these following lines to support switching of a power gpio used on some boards
 //#define CONFIG_PIN_PHY_POWER		12     // Olimex_POE
 //#define CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
 
 // Uncomment one of these lines to select alternate clock modes
-#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_IN		// Default
+#define CONFIG_PHY_CLOCK_MODE ETH_CLOCK_GPIO0_IN // Default
 //#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     // 
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    // 
-
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     //
+//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
 
 #ifdef CONFIG_PHY_LAN8720
 #include "eth_phy/phy_lan8720.h"
@@ -50,8 +45,8 @@ extern struct netif * Esp32_find_netif(esp_interface_t esp_if);
 #define DEFAULT_ETHERNET_PHY_CONFIG phy_tlk110_default_ethernet_config
 #endif
 
-#define PIN_SMI_MDC   CONFIG_PHY_SMI_MDC_PIN
-#define PIN_SMI_MDIO  CONFIG_PHY_SMI_MDIO_PIN
+#define PIN_SMI_MDC  CONFIG_PHY_SMI_MDC_PIN
+#define PIN_SMI_MDIO CONFIG_PHY_SMI_MDIO_PIN
 
 static void eth_gpio_config_rmii(void)
 {
@@ -85,11 +80,10 @@ static void phy_device_power_enable_via_gpio(bool enable)
 }
 #endif
 
-
-esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
+esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
 {
     (void)pMacAdr;
-    
+
     // Config Ethernet interface which will depend on current hardware
     eth_config_t config = DEFAULT_ETHERNET_PHY_CONFIG;
     /* Set the PHY address in the example configuration */
@@ -102,43 +96,46 @@ esp_err_t Esp32_InitialiseEthernet( uint8_t * pMacAdr)
     config.phy_power_enable = phy_device_power_enable_via_gpio;
 #endif
     esp_err_t ret = esp_eth_init(&config);
-    if(ret != ESP_OK) return ret;
+    if (ret != ESP_OK)
+        return ret;
 
     // esp_eth_set_mac( pMacAdr );  // need later IDF
     esp_eth_enable();
- 
+
     return ESP_OK;
 }
 
 //
 //  Open Ethernet Network driver
 //
-int  Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface * config) 
-{ 
+int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
+{
     (void)index;
 
-    if ( Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK )
+    if (Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK)
     {
-       // Return NetIf number for Esp32 wireless station
+        // Return NetIf number for Esp32 wireless station
 
-       // FIXME find a better way to get the netif ptr
+        // FIXME find a better way to get the netif ptr
         struct netif *pNetIf;
-        while(true)
+        while (true)
         {
             vTaskDelay(100 / portTICK_PERIOD_MS);
 
             // Return NetIf number for Esp32 wireless station
             pNetIf = Esp32_find_netif(ESP_IF_ETH);
-            if (pNetIf != NULL) break; 
+            if (pNetIf != NULL)
+                break;
         }
-        if (pNetIf != NULL)  return pNetIf->num;
-   }
+        if (pNetIf != NULL)
+            return pNetIf->num;
+    }
 
-    return SOCK_SOCKET_ERROR; 
+    return SOCK_SOCKET_ERROR;
 }
 
 bool Esp32_Ethernet_Close(int index)
-{ 
+{
     (void)index;
-    return  esp_eth_disable() == ESP_OK;
+    return esp_eth_disable() == ESP_OK;
 }
