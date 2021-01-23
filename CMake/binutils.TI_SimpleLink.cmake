@@ -221,6 +221,7 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
     )
 
     # execute Sys Config with configuration file
+    message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}" )
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_command(
             OUTPUT 
@@ -272,7 +273,7 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
         COMMENT "Copy TI-RTOS configuration file to build directory" 
     )
 
-    if (WIN32)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_target(
             TIRTOS_CONFIG        
             COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"    
