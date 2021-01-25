@@ -1382,6 +1382,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
     bool FindGenericParamAtTypeDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
     bool FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
+    bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index& index);
 
     bool FindFieldDef(
         const CLR_RECORD_TYPEDEF *src,

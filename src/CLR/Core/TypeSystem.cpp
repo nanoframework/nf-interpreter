@@ -3592,6 +3592,34 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
     }
 }
 
+bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index& index)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    const CLR_RECORD_GENERICPARAM* gp = this->GetGenericParam(0);
+    int tblSize = this->m_pTablesSize[TBL_GenericParam];
+
+    for (int i = 0; i < tblSize; i++, gp++)
+    {
+        CLR_RT_SignatureParser parserLeft;
+        parserLeft.Initialize_GenericParamTypeSignature(this, gp);
+
+        CLR_RT_SignatureParser parserRight;
+        parserRight.Initialize_TypeSpec(this, this->GetTypeSpec(typeSpecIndex));
+
+        if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
+        {
+            
+
+
+            return true;
+        }
+    }
+
+    index.Clear();
+
+    return false;
+}
+
 bool CLR_RT_Assembly::FindGenericParamAtTypeDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index& index)
 {
     NATIVE_PROFILE_CLR_CORE();
