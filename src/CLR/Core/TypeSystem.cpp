@@ -1106,33 +1106,15 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
 bool CLR_RT_GenericParam_Instance::Initialize(
     const CLR_RT_MethodDef_Instance &methodDefInstance,
     const CLR_UINT8 position)
+bool CLR_RT_GenericParam_Instance::InitializeFromIndex(const CLR_RT_GenericParam_Index& index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (NANOCLR_INDEX_IS_VALID(methodDefInstance))
+
+    if (NANOCLR_INDEX_IS_VALID(index))
     {
-        CLR_RT_TypeDef_Instance ownerType;
-        ownerType.InitializeFromMethod(methodDefInstance);
-
-        // get assembly from TypeDef
-        m_assm = ownerType.m_assm;
-
-        // get pointer to the 1st generic parameter for this TypeDef
-        const CLR_RECORD_GENERICPARAM *gp = m_assm->GetGenericParam(ownerType.m_target->FirstGenericParam);
-        int i = m_assm->m_pTablesSize[TBL_GenericParam];
-
-        // loop to reach the generic parameter on the position we are looking for
-        while (position > 0)
-        {
-            gp++;
-            i--;
-        }
-
-        // store pointer to generic parameter
-        m_target = gp;
-
-        CLR_INDEX indexGenericParam = m_assm->m_pTablesSize[TBL_GenericParam] - i;
-
-        Set(ownerType.Assembly(), indexGenericParam);
+        m_data = index.m_data;
+        m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+        m_target = m_assm->GetGenericParam(GenericParam());
 
         return true;
     }
