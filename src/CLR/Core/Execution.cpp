@@ -1790,6 +1790,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_UINT32 count = methodDef->LocalsCount;
     bool fZeroed = false;
     CLR_DataType genericInstanceDataType = DATATYPE_VOID;
+    CLR_RT_TypeDef_Index genericInstanceClass;
 
     while (count)
     {
@@ -1862,18 +1863,21 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                         }
                     }
 
-                    if (isGenericInstance)
+                    if (isGenericInstance &&
+                        !skipAllocation)
                     {
+                        // store these to properly set local after parsing signature
                         genericInstanceDataType = dt;
+                        genericInstanceClass = cls;
 
-                        if (genArgCount == 0)
-                        {
+                        //if (genArgCount == 0)
+                        //{
                             // need to read generic arguments count to consume signature
                             genArgCount = *sig++;
 
                             // flag to skip allocation of locals
                             skipAllocation = true;
-                        }
+                        //}
 
                         // done here
                         break;
@@ -1907,43 +1911,14 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         CLR_UINT8 genericParameterPosition = *sig++;
 
-                        //CLR_RT_GenericParam_Instance gp;
-                        CLR_RT_GenericParam_Index gp;
+                        CLR_RT_GenericParam_Index gpIndex;
 
-                        assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gp);
+                        assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gpIndex);
 
-                        CLR_INDEX index = assembly->m_pCrossReference_GenericParam[gp.GenericParam()].GetOwnerType();
+                        CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                        //cls.Set(assembly->m_index, index);
-
-
-                        //cls = *c_CLR_RT_DataTypeLookup[DATATYPE_I4].m_cls;
-                        //dt = DATATYPE_I4;
-
-                        //cls.Set(assembly->m_index, index);
-                        CLR_RT_SignatureParser sub;
-                        sub.Initialize_MethodSignature(assembly, methodDefInstance.m_target);
-                        CLR_RT_SignatureParser::Element res;
-
-
-                        CLR_INDEX ownerIndex = methodDefInstance.CrossReference().GetOwner();
-
-                        const CLR_RECORD_TYPEDEF* ownerTypeDef = assembly->GetTypeDef(ownerIndex);
-                        
-                        // get DATATYPE for generic param
-                        //assembly->m_pCrossReference_GenericParam[gp.GenericParam()].dt
-
-
-                        // return type
-                        NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                        //// 1st parameter
-                        //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-
-                        //gp.Initialize(methodDefInstance, genericParameterPosition);
-
-                        //cls.Set(gp.Assembly(), assembly->m_pCrossReference_GenericParam[gp.GenericParam()].m_data);
+                        cls = gp.Class;
+                        dt = gp.DataType;
 
                         goto done;
                     }
@@ -1960,88 +1935,14 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     {
                         CLR_UINT8 genericParameterPosition = *sig++;
 
-                        CLR_RT_GenericParam_Index gp;
+                        CLR_RT_GenericParam_Index gpIndex;
                         
-                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParameterPosition, gp);
+                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParameterPosition, gpIndex);
 
-// #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                        CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                        CLR_TYPEORMETHODDEF owner = assembly->GetGenericParam(gp.GenericParam())->Owner;
-
-                        // sanity check for MethodDef
-                        if (CLR_GetTypeOrMethodDef(owner) != CLR_TypeOrMethodDef::TMR_MethodDef)
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                        }
-
-                        CLR_INDEX methodIndex = CLR_GetIndexFromTypeOrMethodDef(owner);
-
-                        // sanity check for MethodDef ID
-                        if (methodDefInstance.Method() != methodIndex)
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                        }
-
-                        // parse signature to find out MVAR type
-                        CLR_RT_SignatureParser sub;
-                        sub.Initialize_MethodSignature(assembly, methodDefInstance.m_target);
-                        CLR_RT_SignatureParser::Element res;
-
-                        // advance signature parse to consume return type
-                        NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                        // advance signature parser to get 1st parameter
-                        NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                        // advance signature parser to MVAR parameter position
-                        for (int i = 0; i < genericParameterPosition; i++)
-                        {
-                            NANOCLR_CHECK_HRESULT(sub.Advance(res));
-                        }
-
-                        // is pointing to the generic parameter type
-                        //const CLR_RECORD_GENERICPARAM *parameter = assembly->GetGenericParam(res.GenericParamPosition);
-
-                        // check for valid parameter
-                        //if (parameter != CLR_EmptyIndex)
-                        {
-                            //parameter += res.GenericParamPosition;
-
-                            //const CLR_RECORD_GENERICPARAM* genericParam = Assembly->GetGenericParam(parameter);
-
-                            //// need to check if the method exists
-                            //if (genericParam->Owner)
-                            //{
-                            //}
-                            //CLR_RT_SignatureParser sub;
-                            //sub.Initialize_MethodLocals(Assembly, Assembly->GetMethodDef(genericParam->Owner));
-
-                            //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                            // this->Assembly->GetTypeDef(this->m_type)
-
-                            // TODO leaving this as object for now
-                            //res.Class = g_CLR_RT_WellKnownTypes.m_Object;
-                        }
-
-
-                        cls.Set(assembly->m_index, methodIndex);
-
-                        cls = *c_CLR_RT_DataTypeLookup[DATATYPE_I4].m_cls;
-                        dt = DATATYPE_I4;
-
-                        //cls.Set(assembly->m_index, index);
-
-                        //// return type
-                        //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                        //// 1st parameter
-                        //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-
-                        //gp.Initialize(methodDefInstance, genericParameterPosition);
-
-                        //cls.Set(gp.Assembly(), assembly->m_pCrossReference_GenericParam[gp.GenericParam()].m_data);
+                        cls = gp.Class;
+                        dt = gp.DataType;
 
                         goto done;
                     }
@@ -2134,6 +2035,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 {
                     // TODO, check this on debug
                     dt = genericInstanceDataType;
+                    cls = genericInstanceClass;
                 }
 
                 locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
