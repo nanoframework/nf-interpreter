@@ -1124,7 +1124,8 @@ struct CLR_RT_SignatureParser
     static const int c_Method = 3;
     static const int c_Locals = 4;
     static const int c_Object = 5;
-    static const int c_MemberRef = 6;
+    static const int c_GenericParamType = 6;
+    static const int c_MemberRef = 7;
 
     struct Element
     {
@@ -1173,6 +1174,7 @@ struct CLR_RT_SignatureParser
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, const CLR_RECORD_MEMBERREF* mr);
+    bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp);
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
@@ -2139,7 +2141,7 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     //--//
 
-    bool Initialize(const CLR_RT_MethodDef_Instance &methodDefInstance, const CLR_UINT8 position);
+    bool InitializeFromIndex(const CLR_RT_GenericParam_Index& index);
 
     void Clear();
 
