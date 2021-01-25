@@ -299,6 +299,31 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, C
     Signature = md;
 }
 
+bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Type = CLR_RT_SignatureParser::c_GenericParamType;
+
+    Assembly = assm;
+    
+    // need to check for valid signature
+    if (gp->Signature != 0xFFFF)
+    {
+        Signature = assm->GetSignature(gp->Signature);
+        ParamCount = 1;
+    }
+    else
+    {
+        // can't process...
+        return false;
+    }
+
+    Flags = 0;
+
+    // done here
+    return true;
+}
 
 //--//
 
