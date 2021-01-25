@@ -3646,8 +3646,6 @@ bool CLR_RT_Assembly::FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, 
     {
         paramIndex += genericParameterPosition;
 
-        //const CLR_RECORD_GENERICPARAM* genericParam = GetGenericParam(paramIndex);
-
         index.Set(m_index, paramIndex);
 
         return true;
@@ -5106,7 +5104,6 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     CLR_RT_MethodDef_Instance calleeInst;
     calleeInst.InitializeFromIndex(calleeMD);
 
-    CLR_RT_Assembly *calleeAssm = calleeInst.m_assm;
     const CLR_RECORD_METHODDEF *calleeMDR = calleeInst.m_target;
     CLR_UINT8 calleeArgumentsCount = calleeMDR->ArgumentsCount;
 
