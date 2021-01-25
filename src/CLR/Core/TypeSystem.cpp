@@ -1103,9 +1103,6 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
 
 //////////////////////////////
 
-bool CLR_RT_GenericParam_Instance::Initialize(
-    const CLR_RT_MethodDef_Instance &methodDefInstance,
-    const CLR_UINT8 position)
 bool CLR_RT_GenericParam_Instance::InitializeFromIndex(const CLR_RT_GenericParam_Index& index)
 {
     NATIVE_PROFILE_CLR_CORE();
