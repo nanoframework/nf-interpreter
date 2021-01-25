@@ -903,12 +903,13 @@ struct CLR_RT_GenericParam_CrossReference
 
     CLR_RT_GenericParam_Index m_target;
 
-    CLR_DataType dt;
+    /// @brief DataType for the generic parameter
+    ///
+    CLR_DataType DataType;
 
-    CLR_INDEX GetOwnerType() const
-    {
-        return (CLR_INDEX)(m_data);
-    }
+    /// @brief Class of the generic parameter
+    ///
+    CLR_RT_TypeDef_Index Class;
 };
 
 struct CLR_RT_MethodSpec_CrossReference

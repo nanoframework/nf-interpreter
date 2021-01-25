@@ -1604,6 +1604,10 @@ struct CLR_RECORD_GENERICPARAM
     ///
     CLR_TYPEORMETHODDEF Owner;
 
+    /// @brief Index into TBL_Signatures for parameter type signature
+    ///
+    CLR_SIG Signature;
+
     /// @brief Index into TBL_Strings
     ///
     CLR_STRING Name;
