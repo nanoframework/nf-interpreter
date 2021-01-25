@@ -2560,12 +2560,38 @@ void CLR_RT_Assembly::Resolve_Link()
 
                 // get generic parameter count for stop condition
                 int num = src->GenericParamCount;
+                CLR_UINT16 indexGenericParam = src->FirstGenericParam;
 
-                for (; num; num--, gp++)
+                for (; num; num--, gp++, indexGenericParam++)
                 {
+                    CLR_RT_GenericParam_Index gpIndex;
+                    gpIndex.Set(m_index, indexGenericParam);
+
+                    gp->m_target = gpIndex;
+
                     gp->m_data = indexType;
                     gp->m_TypeOrMethodDef = TMR_TypeDef;
-                    gp->dt = DATATYPE_VOID;
+
+                    CLR_RT_SignatureParser sub;
+                    if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
+                    {
+                        CLR_RT_SignatureParser::Element res;
+
+                        // get generic param type
+                        sub.Advance(res);
+
+                        gp->DataType = res.DataType;
+                        gp->Class = res.Class;
+                    }
+                    else
+                    {
+                        gp->DataType = DATATYPE_VOID;
+
+                        CLR_RT_TypeDef_Index td;
+                        td.Clear();
+
+                        gp->Class = td;
+                    }
                 }
             }
         }
