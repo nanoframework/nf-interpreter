@@ -3369,20 +3369,20 @@ void CLR_RT_Assembly::Resolve_MethodDef()
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODDEF *md = GetMethodDef(0);
 
-    for (int i = 0; i < m_pTablesSize[TBL_MethodDef]; i++, md++)
+    for (int indexMethod = 0; indexMethod < m_pTablesSize[TBL_MethodDef]; indexMethod++, md++)
     {
         const MethodIndexLookup *mil = c_MethodIndexLookup;
 
         CLR_RT_MethodDef_Index index;
-        index.Set(m_index, i);
+        index.Set(m_index, indexMethod);
 
         // Check for wellKnownMethods
-        for (size_t i = 0; i < ARRAYSIZE(c_MethodIndexLookup); i++, mil++)
+        for (size_t ii = 0; ii < ARRAYSIZE(c_MethodIndexLookup); ii++, mil++)
         {
             CLR_RT_TypeDef_Index &indexType = *mil->type;
-            CLR_RT_MethodDef_Index &indexMethod = *mil->method;
+            CLR_RT_MethodDef_Index &mIndex = *mil->method;
 
-            if (NANOCLR_INDEX_IS_VALID(indexType) && NANOCLR_INDEX_IS_INVALID(indexMethod))
+            if (NANOCLR_INDEX_IS_VALID(indexType) && NANOCLR_INDEX_IS_INVALID(mIndex))
             {
                 CLR_RT_TypeDef_Instance instType;
 
@@ -3392,7 +3392,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
                 {
                     if (!strcmp(GetString(md->Name), mil->name))
                     {
-                        indexMethod.m_data = index.m_data;
+                        mIndex.m_data = index.m_data;
                     }
                 }
             }
@@ -3410,12 +3410,38 @@ void CLR_RT_Assembly::Resolve_MethodDef()
 
             // get generic parameter count for stop condition
             int num = md->GenericParamCount;
+            CLR_UINT16 indexGenericParam = md->FirstGenericParam;
 
-            for (; num; num--, gp++)
+            for (; num; num--, gp++, indexGenericParam++)
             {
-                gp->m_data = i;
+                CLR_RT_GenericParam_Index gpIndex;
+                gpIndex.Set(m_index, indexGenericParam);
+
+                gp->m_target = gpIndex;
+
+                gp->m_data = indexMethod;
                 gp->m_TypeOrMethodDef = TMR_MethodDef;
-                gp->dt = DATATYPE_VOID;
+
+                CLR_RT_SignatureParser sub;
+                if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
+                {
+                    CLR_RT_SignatureParser::Element res;
+
+                    // get generic param type
+                    sub.Advance(res);
+
+                    gp->DataType = res.DataType;
+                    gp->Class = res.Class;
+                }
+                else
+                {
+                    gp->DataType = DATATYPE_VOID;
+
+                    CLR_RT_TypeDef_Index td;
+                    td.Clear();
+
+                    gp->Class = td;
+                }
             }
         }
     }
