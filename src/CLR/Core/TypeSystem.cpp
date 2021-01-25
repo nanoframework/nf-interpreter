@@ -372,7 +372,8 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     CLR_UINT8 genArgCountParsed = 0;
     // flag to skip allocation of local when the signature is being consumed to parse GENERICINST signature
     bool skipAllocation = false;
-    //CLR_DataType genericInstanceDataType = DATATYPE_VOID;
+    CLR_DataType genericInstanceDataType = DATATYPE_VOID;
+    CLR_RT_TypeDef_Index genericInstanceClass;
 
     res.IsByRef = false;
     res.Levels = 0;
@@ -480,40 +481,55 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         else
                         {
                             CLR_UINT32 tk = CLR_TkFromStream(Signature);
+                            CLR_UINT32 index = CLR_DataFromTk(tk);
 
-                            if (CLR_TypeFromTk(tk) == TBL_TypeSpec)
+                            switch (CLR_TypeFromTk(tk))
                             {
-                                CLR_RT_SignatureParser sub;
-                                sub.Initialize_TypeSpec(Assembly, Assembly->GetTypeSpec(CLR_DataFromTk(tk)));
-                                int extraLevels = res.Levels;
-
-                                NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                                res.Levels += extraLevels;
-                            }
-                            else
-                            {
-                                CLR_RT_TypeDef_Instance cls;
-
-                                if (cls.ResolveToken(tk, Assembly) == false)
+                                case TBL_TypeSpec:
                                 {
-                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                                }
+                                    CLR_RT_SignatureParser sub;
+                                    sub.Initialize_TypeSpec(Assembly, Assembly->GetTypeSpec(index));
+                                    CLR_RT_SignatureParser::Element res;
+                                    int extraLevels = res.Levels;
 
-                                res.Class = cls;
+                                    NANOCLR_CHECK_HRESULT(sub.Advance(res));
+
+                                    res.Levels += extraLevels;
+                                }
+                                break;
+
+                                case TBL_TypeRef:
+                                    res.Class = Assembly->m_pCrossReference_TypeRef[index].m_target;
+                                    break;
+
+                                case TBL_TypeDef:
+                                    CLR_RT_TypeDef_Instance cls;
+
+                                    if (cls.ResolveToken(tk, Assembly) == false)
+                                    {
+                                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                                    }
+
+                                    res.Class = cls;
+                                    break;
+
+                                default:
+                                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             }
                         }
 
-                        if (res.IsGenericInst)
+                        if (res.IsGenericInst &&
+                            !skipAllocation)
                         {
-                            if (res.GenericParamCount == 0)
-                            {
-                                // need to read generic arguments count to consume signature
-                                res.GenericParamCount = *Signature++;
+                            // store these to properly set local after parsing signature
+                            genericInstanceDataType = res.DataType;
+                            genericInstanceClass = res.Class;
 
-                                // flag to skip allocation of locals
-                                skipAllocation = true;
-                            }
+                            // need to read generic arguments count to consume signature
+                            res.GenericParamCount = *Signature++;
+
+                            // flag to skip allocation of locals
+                            skipAllocation = true;
 
                             // done here
                             break;
@@ -573,46 +589,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         {
                             res.GenericParamPosition = *Signature++;
 
-                            //CLR_RT_GenericParam_Index gp;
-
-                            //assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gp);
-
-                            //CLR_INDEX index = assembly->m_pCrossReference_GenericParam[gp.GenericParam()].GetOwnerType();
-
-                            //cls.Set(assembly->m_index, index);
-
-
-                            res.Class = g_CLR_RT_WellKnownTypes.m_Int32;
-                            res.DataType = DATATYPE_I4;
-
                             NANOCLR_SET_AND_LEAVE(S_OK);
-
-                            ////CLR_RT_GenericParam_Instance gp;
-                            //CLR_RT_GenericParam_Index gp;
-
-                            //assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gp);
-
-                            //CLR_INDEX index = assembly->m_pCrossReference_GenericParam[gp.GenericParam()].GetOwnerType();
-
-                            //cls.Set(assembly->m_index, index);
-
-                            //cls.Set(assembly->m_index, index);
-                            //CLR_RT_SignatureParser sub;
-                            //sub.Initialize_MethodSignature(assembly, methodDefInstance.m_target);
-                            //CLR_RT_SignatureParser::Element res;
-
-                            //// return type
-                            //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                            //// 1st parameter
-                            //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-
-                            //gp.Initialize(methodDefInstance, genericParameterPosition);
-
-                            //cls.Set(gp.Assembly(), assembly->m_pCrossReference_GenericParam[gp.GenericParam()].m_data);
-
-                            //goto done;
                         }
                         break;
 
@@ -627,34 +604,6 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         {
                             res.IsMvar = true;
                             res.GenericParamPosition = (int)*Signature++;
-
-                            res.Class = g_CLR_RT_WellKnownTypes.m_Int32;
-                            res.DataType = DATATYPE_I4;
-
-                            // TODO fix typeIndex below
-                            CLR_INDEX parameter = Assembly->GetTypeDef(0)->FirstGenericParam;
-
-                            // check for valid parameter
-                            if (parameter != CLR_EmptyIndex)
-                            {
-                                parameter += res.GenericParamPosition;
-
-                                //const CLR_RECORD_GENERICPARAM* genericParam = Assembly->GetGenericParam(parameter);
-
-                                //// need to check if the method exists
-                                //if (genericParam->Owner)
-                                //{
-                                //}
-                                //CLR_RT_SignatureParser sub;
-                                //sub.Initialize_MethodLocals(Assembly, Assembly->GetMethodDef(genericParam->Owner));
-
-                                //NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                                // this->Assembly->GetTypeDef(this->m_type)
-
-                                // TODO leaving this as object for now
-                                //res.Class = g_CLR_RT_WellKnownTypes.m_Object;
-                            }
 
                             NANOCLR_SET_AND_LEAVE(S_OK);
                         }
@@ -686,8 +635,11 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                 // check if we are done with generic instance parsing
                 if (skipAllocation && (genArgCountParsed == res.GenericParamCount))
                 {
-                    // set this 
-                    res.DataType = DATATYPE_GENERICINST;
+                    if (res.IsGenericInst)
+                    {
+                        res.DataType = genericInstanceDataType;
+                        res.Class = genericInstanceClass;
+                    }
 
                     // yes, done here
                     NANOCLR_SET_AND_LEAVE(S_OK);
