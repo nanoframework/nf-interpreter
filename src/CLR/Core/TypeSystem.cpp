@@ -918,6 +918,17 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                 m_target = assm->GetTypeDef(index);
                 return true;
 
+            case TBL_GenericParam:
+            {
+                CLR_RT_GenericParam_CrossReference gp = assm->m_pCrossReference_GenericParam[index];
+               
+                Set(gp.Class.Assembly(), gp.Class.Type());
+
+                m_target = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly()-1]->GetTypeDef(gp.Class.Type());
+                m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly()-1];
+
+                return true;
+            }
             default:
                 // handle generic type from provided data
                 if (sampleData != NULL)
