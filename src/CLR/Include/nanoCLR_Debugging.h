@@ -897,7 +897,7 @@ private:
     bool               CheckFieldDef ( const CLR_RT_FieldDef_Index&  fd     , CLR_RT_FieldDef_Instance&  inst );
     bool               CheckMethodDef( const CLR_RT_MethodDef_Index& md     , CLR_RT_MethodDef_Instance& inst );
 
-    bool               GetValue( WP_Message *msg, CLR_RT_HeapBlock *ptr, CLR_RT_HeapBlock *reference, CLR_RT_TypeDef_Instance *pTD );
+    bool               GetValue( WP_Message *msg, CLR_RT_HeapBlock *ptr, CLR_RT_HeapBlock *reference, CLR_RT_TypeDef_Instance *pTD, bool isGenericInstance);
 
     bool AllocateAndQueueMessage( CLR_UINT32 cmd, unsigned int length, unsigned char *data, CLR_RT_HeapBlock_EndPoint::Port port, CLR_RT_HeapBlock_EndPoint::Address addr, CLR_UINT32 found );
 
