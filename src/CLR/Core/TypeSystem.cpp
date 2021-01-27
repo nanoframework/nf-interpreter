@@ -2300,10 +2300,10 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
     {
         CLR_RT_TypeDef_Instance inst;
 
-        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->container].m_target) == false)
+        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->owner].m_target) == false)
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->container);
+            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->owner);
 #endif
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

@@ -1200,8 +1200,8 @@ struct CLR_RECORD_FIELDREF
     ///
     CLR_STRING name;
 
-    /// @brief TypeRefTableIndex -> TBL_TypeRef | TBL_TypeRef // 0x8000
-    CLR_INDEX container;
+    /// @brief TypeRefTableIndex -> TBL_TypeRef 
+    CLR_INDEX owner;
 
     /// @brief Index into TBL_Signatures
     ///
