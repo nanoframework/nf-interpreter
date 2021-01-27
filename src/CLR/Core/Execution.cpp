@@ -1798,6 +1798,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         CLR_RT_TypeDef_Index cls;
         CLR_UINT32 levels = 0;
         CLR_DataType dtModifier = DATATYPE_VOID;
+        // pointer to the signature of the current local being processed
+        //CLR_PMETADATA localSignature = sig;
         // flag for GENERICINST
         bool isGenericInstance = false;
         // count of GENERICINST arguments
@@ -2026,16 +2028,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
             }
             else
             {
-                if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
-                {
-                    dt = DATATYPE_OBJECT;
-                }
-
                 if (isGenericInstance)
                 {
                     // TODO, check this on debug
                     dt = genericInstanceDataType;
                     cls = genericInstanceClass;
+                }
+                
+                if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
+                {
+                    dt = DATATYPE_OBJECT;
                 }
 
                 locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
