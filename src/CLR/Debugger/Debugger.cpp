@@ -2547,6 +2547,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         CLR_RT_HeapBlock tmp;
         CLR_RT_TypeDef_Instance *pTD = NULL;
         CLR_RT_TypeDef_Instance td;
+        bool isGenericInstance = false;
 
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
         {
@@ -2554,6 +2555,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             CLR_RT_SignatureParser parser;
             CLR_RT_SignatureParser::Element res;
             CLR_RT_TypeDescriptor desc;
+            CLR_RT_TypeDef_Index targetClass;
+            CLR_DataType targetDataType;
 
             if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
             {
@@ -2579,25 +2582,61 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 parser.Advance(res);
             } while (iElement--);
 
+            // handle generic parameters
+            if (res.DataType == DATATYPE_VAR)
+            {
+                // Generic parameter in a generic TypeDef
+                CLR_RT_Assembly* assembly = md.m_assm;
+
+                CLR_RT_GenericParam_Index gpIndex;
+                assembly->FindGenericParamAtTypeDef(md, res.GenericParamPosition, gpIndex);
+
+                CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                targetClass = gp.Class;
+                targetDataType = gp.DataType;
+
+                isGenericInstance = true;
+            }
+            else if (res.DataType == DATATYPE_MVAR)
+            {
+                // Generic parameter in a generic method definition
+                CLR_RT_Assembly* assembly = md.m_assm;
+
+                CLR_RT_GenericParam_Index gpIndex;
+                assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
+
+                CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                targetClass = gp.Class;
+                targetDataType = gp.DataType;
+
+                isGenericInstance = true;
+            }
+            else
+            {
+                // all the rest get it from parser element
+                targetClass = res.Class;
+                targetDataType = res.DataType;
+            }
+
             //
             // Arguments to a methods come from the eval stack and we don't fix up the eval stack for each call.
             // So some arguments have the wrong datatype, since an eval stack push always promotes to 32 bits.
             //
             if (c_CLR_RT_DataTypeLookup[blk->DataType()].m_sizeInBytes == sizeof(CLR_INT32) &&
-                c_CLR_RT_DataTypeLookup[res.DataType].m_sizeInBytes < sizeof(CLR_INT32))
+                c_CLR_RT_DataTypeLookup[targetDataType].m_sizeInBytes < sizeof(CLR_INT32))
             {
                 tmp.Assign(*blk);
-                tmp.ChangeDataType(res.DataType);
+                tmp.ChangeDataType(targetDataType);
 
                 reference = blk;
                 blk = &tmp;
             }
 
-            //
-            // Check for enum.
-            //
-            desc.InitializeFromType(res.Class);
+            desc.InitializeFromType(targetClass);
 
+            // Check for enum
             if (desc.m_handlerCls.m_target->IsEnum())
             {
                 td = desc.m_handlerCls;
@@ -2605,7 +2644,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
         }
 
-        return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
+        return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD, isGenericInstance);
     }
 
     return false;
