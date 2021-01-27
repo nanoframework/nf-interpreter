@@ -143,6 +143,7 @@ struct CLR_RT_HeapBlock
         CLR_UINT32 raw;
     } m_id;
 
+
     union CLR_RT_HeapBlock_AtomicData {
         struct NodeLink
         {
@@ -788,6 +789,8 @@ struct CLR_RT_HeapBlock
             CLR_RT_MarkingHandler m_mark;
             CLR_RT_RelocationHandler m_relocate;
         } binaryBlob;
+
+        //--//
 
     } m_data;
 

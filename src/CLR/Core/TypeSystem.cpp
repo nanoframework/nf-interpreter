@@ -2362,10 +2362,9 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 break;
 
             case CLR_MemberRefParent::MRP_TypeSpec:
-            {
                 typeSpec.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
                 break;
-            }
+
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
