@@ -908,7 +908,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
             case TBL_TypeRef:
                 m_data = assm->m_pCrossReference_TypeRef[index].m_target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                m_target = m_assm->GetTypeDef(Type());
+                m_target = assm->GetTypeDef(Type());
                 return true;
 
             case TBL_TypeDef:
@@ -930,19 +930,19 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                 return true;
             }
             default:
-                // handle generic type from provided data
-                if (sampleData != NULL)
-                {
-                    CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*sampleData, *this);
-                    m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                    m_target = m_assm->GetTypeDef(Type());
-                }
-                else
-                {
-                    m_data = g_CLR_RT_WellKnownTypes.m_Object.m_data;
-                    m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.m_Object.Assembly() - 1];
-                    m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.m_Object.Type());
-                }
+                //// handle generic type from provided data
+                //if (sampleData != NULL)
+                //{
+                //    CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(*sampleData, *this);
+                //    m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                //    m_target = m_assm->GetTypeDef(Type());
+                //}
+                //else
+                //{
+                //    m_data = g_CLR_RT_WellKnownTypes.m_Object.m_data;
+                //    m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.m_Object.Assembly() - 1];
+                //    m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.m_Object.Type());
+                //}
                 return true;
                 // the remaining data types aren't to be handled
                 break;
