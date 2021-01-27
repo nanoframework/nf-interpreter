@@ -652,9 +652,9 @@ inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
-//    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
+    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
 
-    return CLR_TkFromType((CLR_TABLESENUM)((tk >> 12) & 0x0F), 0x0FFF & tk);
+    return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
 }
 
 #if defined(_WIN32)
