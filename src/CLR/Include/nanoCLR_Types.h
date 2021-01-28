@@ -284,7 +284,11 @@ enum CLR_FlowControl
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum CLR_TABLESENUM
+//////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH enum ClrTable (in nanoCLR_TypeSystem VS extension) !!! //
+// !!! KEEP IN SYNC WITH enum ClrTable (in MDP)                             !!! //
+//////////////////////////////////////////////////////////////////////////////////
+enum ClrTable
 {
     TBL_AssemblyRef = 0x00000000,
     TBL_TypeRef = 0x00000001,
@@ -602,12 +606,11 @@ inline CLR_INDEX CLR_GetIndexFromMemberRefParent(CLR_MEMBERREFPARENT encodedInde
 
 /// @brief Get target table from encoded TypeOrMethodDef
 ///
-inline CLR_TypeOrMethodDef CLR_GetTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
+inline ClrTable CLR_GetTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
 {
-    // TypeOrMethodDef tag is 1 bit
-    static const CLR_UINT16 TypeOrMethodDef_Mask = 0x0001;
+    static const ClrTable c_lookup[2] = { TBL_TypeDef, TBL_MethodDef };
 
-    return (CLR_TypeOrMethodDef)(encodedIndex & TypeOrMethodDef_Mask);
+    return c_lookup[(encodedIndex >> 15) & 1];
 }
 
 /// @brief Get index from encoded TypeOrMethodDef
@@ -622,11 +625,11 @@ inline CLR_UINT32 CLR_DataFromTk(CLR_UINT32 tk)
 {
     return tk & 0x00FFFFFF;
 }
-inline CLR_TABLESENUM CLR_TypeFromTk(CLR_UINT32 tk)
+inline ClrTable CLR_TypeFromTk(CLR_UINT32 tk)
 {
-    return (CLR_TABLESENUM)(tk >> 24);
+    return (ClrTable)(tk >> 24);
 }
-inline CLR_UINT32 CLR_TkFromType(CLR_TABLESENUM tbl, CLR_UINT32 data)
+inline CLR_UINT32 CLR_TkFromType(ClrTable tbl, CLR_UINT32 data)
 {
     return ((((CLR_UINT32)tbl) << 24) & 0xFF000000) | (data & 0x00FFFFFF);
 }
@@ -640,19 +643,19 @@ inline CLR_UINT32 CLR_UncompressStringToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 {
-    static const CLR_TABLESENUM c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
+    static const ClrTable c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
     return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 {
-    static const CLR_TABLESENUM c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
+    static const ClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
     return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
-    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
+    static const ClrTable c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
 
     return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
 }
@@ -665,32 +668,32 @@ CLR_UINT32 CLR_ReadTokenCompressed(CLR_PMETADATA &ip, CLR_OPCODE opcode);
 
 //--//
 
-HRESULT CLR_CompressTokenHelper(const CLR_TABLESENUM *tables, CLR_UINT16 cTables, CLR_UINT32 &tk);
+HRESULT CLR_CompressTokenHelper(const ClrTable *tables, CLR_UINT16 cTables, CLR_UINT32 &tk);
 
 inline HRESULT CLR_CompressStringToken(CLR_UINT32 &tk)
 {
-    static const CLR_TABLESENUM c_lookup[1] = {TBL_Strings};
+    static const ClrTable c_lookup[1] = {TBL_Strings};
 
     return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
 }
 
 inline HRESULT CLR_CompressTypeToken(CLR_UINT32 &tk)
 {
-    static const CLR_TABLESENUM c_lookup[3] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec};
+    static const ClrTable c_lookup[3] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec};
 
     return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
 }
 
 inline HRESULT CLR_CompressFieldToken(CLR_UINT32 &tk)
 {
-    static const CLR_TABLESENUM c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
+    static const ClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
 
     return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
 }
 
 inline HRESULT CLR_CompressMethodToken(CLR_UINT32 &tk)
 {
-    static const CLR_TABLESENUM c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
+    static const ClrTable c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
 
     return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
 }
@@ -760,7 +763,7 @@ inline CLR_DataType CLR_UncompressElementType(const CLR_UINT8 *&p)
 
 inline CLR_UINT32 CLR_TkFromStream(const CLR_UINT8 *&p)
 {
-    static const CLR_TABLESENUM c_lookup[4] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_Max};
+    static const ClrTable c_lookup[4] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_Max};
 
     CLR_UINT32 data = CLR_UncompressData(p);
 
@@ -1154,7 +1157,7 @@ struct CLR_RECORD_ASSEMBLY
     void ComputeCRC();
 #endif
 
-    CLR_OFFSET_LONG SizeOfTable(CLR_TABLESENUM tbl) const
+    CLR_OFFSET_LONG SizeOfTable(ClrTable tbl) const
     {
         return startOfTables[tbl + 1] - startOfTables[tbl] - paddingOfTables[tbl];
     }

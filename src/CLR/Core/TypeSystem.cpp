@@ -1914,7 +1914,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     {
         for (uint32_t i = 0; i < ARRAYSIZE(skeleton->m_pTablesSize) - 1; i++)
         {
-            skeleton->m_pTablesSize[i] = header->SizeOfTable((CLR_TABLESENUM)i);
+            skeleton->m_pTablesSize[i] = header->SizeOfTable((ClrTable)i);
         }
 
         skeleton->m_pTablesSize[TBL_AssemblyRef] /= sizeof(CLR_RECORD_ASSEMBLYREF);
@@ -2584,7 +2584,7 @@ void CLR_RT_Assembly::Resolve_Link()
                     gp->m_target = gpIndex;
 
                     gp->m_data = indexType;
-                    gp->m_TypeOrMethodDef = TMR_TypeDef;
+                    gp->m_TypeOrMethodDef = TBL_TypeDef;
 
                     CLR_RT_SignatureParser sub;
                     if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
@@ -3434,7 +3434,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
                 gp->m_target = gpIndex;
 
                 gp->m_data = indexMethod;
-                gp->m_TypeOrMethodDef = TMR_MethodDef;
+                gp->m_TypeOrMethodDef = TBL_MethodDef;
 
                 CLR_RT_SignatureParser sub;
                 if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
