@@ -210,7 +210,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
     //    0 - No more references. End of Packet
     //    1 - 32-bit pointer to reference follows. Repeat.
 
-    CLR_DataType dt = ptr->DataType();
+    nanoClrDataType dt = ptr->DataType();
     _ASSERTE(dt < DATATYPE_FIRST_INVALID);
     _ASSERTE(
         sizeof(CLR_RT_HeapBlock) ==
@@ -451,7 +451,7 @@ CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock *ref)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     while (ref)
     {
-        CLR_DataType dt = ref->DataType();
+        nanoClrDataType dt = ref->DataType();
         switch (dt)
         {
             case DATATYPE_BYREF:

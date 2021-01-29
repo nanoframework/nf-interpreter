@@ -363,7 +363,12 @@ enum CLR_CorCallingConvention
     /////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
+/////////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH enum nanoClrDataType (in nanoCLR_TypeSystem VS extension) !!! //
+// !!! KEEP IN SYNC WITH enum nanoClrDataType (in nanoCLR_TypeSystem Debugger)     !!! //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+enum nanoClrDataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
     /// @brief 0 bytes
     DATATYPE_VOID,
@@ -756,9 +761,9 @@ inline CLR_UINT32 CLR_UncompressData(const CLR_UINT8 *&p)
     return val;
 }
 
-inline CLR_DataType CLR_UncompressElementType(const CLR_UINT8 *&p)
+inline nanoClrDataType CLR_UncompressElementType(const CLR_UINT8 *&p)
 {
-    return (CLR_DataType)*p++;
+    return (nanoClrDataType)*p++;
 }
 
 inline CLR_UINT32 CLR_TkFromStream(const CLR_UINT8 *&p)

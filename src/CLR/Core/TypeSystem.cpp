@@ -397,7 +397,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     CLR_UINT8 genArgCountParsed = 0;
     // flag to skip allocation of local when the signature is being consumed to parse GENERICINST signature
     bool skipAllocation = false;
-    CLR_DataType genericInstanceDataType = DATATYPE_VOID;
+    nanoClrDataType genericInstanceDataType = DATATYPE_VOID;
     CLR_RT_TypeDef_Index genericInstanceClass;
 
     res.IsByRef = false;
@@ -463,7 +463,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
             desc.m_handlerCls.InitializeFromIndex(desc.m_reflex.m_data.m_type);
 
             res.Levels = desc.m_reflex.m_levels;
-            res.DataType = (CLR_DataType)desc.m_handlerCls.m_target->DataType;
+            res.DataType = (nanoClrDataType)desc.m_handlerCls.m_target->DataType;
             res.Class = desc.m_reflex.m_data.m_type;
 
             //
@@ -1179,7 +1179,7 @@ void CLR_RT_TypeDescriptor::TypeDescriptor_Initialize()
     m_reflex.Clear();     // CLR_RT_ReflectionDef_Index m_reflex;
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType(CLR_DataType dt)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType(nanoClrDataType dt)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1364,11 +1364,11 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
     NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock *obj = &ref;
-    CLR_DataType dt;
+    nanoClrDataType dt;
 
     while (true)
     {
-        dt = (CLR_DataType)obj->DataType();
+        dt = (nanoClrDataType)obj->DataType();
 
         if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
         {
@@ -1558,7 +1558,7 @@ bool CLR_RT_TypeDescriptor::GetElementType(CLR_RT_TypeDescriptor &sub)
 
 ////////////////////////////////////////
 
-HRESULT CLR_RT_TypeDescriptor::ExtractObjectAndDataType(CLR_RT_HeapBlock *&ref, CLR_DataType &dt)
+HRESULT CLR_RT_TypeDescriptor::ExtractObjectAndDataType(CLR_RT_HeapBlock *&ref, nanoClrDataType &dt)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -1566,7 +1566,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractObjectAndDataType(CLR_RT_HeapBlock *&ref, 
 
     while (true)
     {
-        dt = (CLR_DataType)ref->DataType();
+        dt = (nanoClrDataType)ref->DataType();
 
         if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
         {
@@ -1589,7 +1589,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj = (CLR_RT_HeapBlock *)&ref;
-    CLR_DataType dt;
+    nanoClrDataType dt;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2879,7 +2879,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
     CLR_RT_HeapBlock *mbroSrc = NULL;
     bool fSimpleAssign = false;
     CLR_RT_TypeDef_Index indexVerify = g_CLR_RT_WellKnownTypes.m_Object;
-    CLR_DataType dtSrc = src.DataType();
+    nanoClrDataType dtSrc = src.DataType();
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 
     if (!appDomainSrc)
@@ -3020,8 +3020,8 @@ HRESULT CLR_RT_AppDomain::MarshalParameters(
 
     while (count-- > 0)
     {
-        CLR_DataType dtSrc = src->DataType();
-        CLR_DataType dtDst = dst->DataType();
+        nanoClrDataType dtSrc = src->DataType();
+        nanoClrDataType dtDst = dst->DataType();
 
         if (dtSrc == DATATYPE_BYREF || dtSrc == DATATYPE_ARRAY_BYREF)
         {
@@ -4056,7 +4056,7 @@ CLR_UINT32 CLR_RT_Assembly::ComputeHashForName(const CLR_RT_TypeDef_Index &td, C
     return hashPost;
 }
 
-CLR_UINT32 CLR_RT_Assembly::ComputeHashForType(CLR_DataType et, CLR_UINT32 hash)
+CLR_UINT32 CLR_RT_Assembly::ComputeHashForType(nanoClrDataType et, CLR_UINT32 hash)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8 val = (CLR_UINT8)CLR_RT_TypeSystem::MapDataTypeToElementType(et);
@@ -5195,7 +5195,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
     return false;
 }
 
-CLR_DataType CLR_RT_TypeSystem::MapElementTypeToDataType(CLR_UINT32 et)
+nanoClrDataType CLR_RT_TypeSystem::MapElementTypeToDataType(CLR_UINT32 et)
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RT_DataTypeLookup *ptr = c_CLR_RT_DataTypeLookup;
@@ -5203,7 +5203,7 @@ CLR_DataType CLR_RT_TypeSystem::MapElementTypeToDataType(CLR_UINT32 et)
     for (CLR_UINT32 num = 0; num < DATATYPE_FIRST_INVALID; num++, ptr++)
     {
         if (ptr->m_convertToElementType == et)
-            return (CLR_DataType)num;
+            return (nanoClrDataType)num;
     }
 
     if (et == ELEMENT_TYPE_I)
@@ -5214,7 +5214,7 @@ CLR_DataType CLR_RT_TypeSystem::MapElementTypeToDataType(CLR_UINT32 et)
     return DATATYPE_FIRST_INVALID;
 }
 
-CLR_UINT32 CLR_RT_TypeSystem::MapDataTypeToElementType(CLR_DataType dt)
+CLR_UINT32 CLR_RT_TypeSystem::MapDataTypeToElementType(nanoClrDataType dt)
 {
     NATIVE_PROFILE_CLR_CORE();
     return c_CLR_RT_DataTypeLookup[dt].m_convertToElementType;
@@ -5502,7 +5502,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         if ((td.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
         {
-            m_res.DataType = (CLR_DataType)td.m_target->DataType;
+            m_res.DataType = (nanoClrDataType)td.m_target->DataType;
         }
     }
 

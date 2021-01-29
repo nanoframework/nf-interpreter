@@ -103,7 +103,7 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
 
     CLR_RT_HeapBlock*     pArgs = &(stack.Arg0());
     CLR_RT_HeapBlock*     value = pArgs;
-    CLR_DataType          dt;
+    nanoClrDataType          dt;
     CLR_RT_TypeDescriptor desc;
     char result[ 24 ];
     // This is temporary buffer to create proper format string.  

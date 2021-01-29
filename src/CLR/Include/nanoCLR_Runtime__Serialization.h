@@ -157,7 +157,7 @@ struct CLR_RT_BinaryFormatter : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO 
 
          bool CompareTypes( CLR_RT_TypeDescriptor* left, CLR_RT_TypeDescriptor* right );
 
-         static CLR_DataType GetDataType  ( CLR_RT_TypeDescriptor* type );
+         static nanoClrDataType GetDataType  ( CLR_RT_TypeDescriptor* type );
          static CLR_UINT32   GetSizeOfType( CLR_RT_TypeDescriptor* type );
          static bool         GetSignOfType( CLR_RT_TypeDescriptor* type );
 

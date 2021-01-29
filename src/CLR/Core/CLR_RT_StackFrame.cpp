@@ -708,7 +708,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
             {
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(res.Class);
-                CLR_DataType dtT = (CLR_DataType)inst.m_target->DataType;
+                nanoClrDataType dtT = (nanoClrDataType)inst.m_target->DataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
 
                 if (dtl.m_flags & (CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType))
@@ -1023,7 +1023,7 @@ void CLR_RT_StackFrame::Pop()
 
 //--//
 
-void CLR_RT_StackFrame::SetResult(CLR_INT32 val, CLR_DataType dataType)
+void CLR_RT_StackFrame::SetResult(CLR_INT32 val, nanoClrDataType dataType)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock &top = PushValue();

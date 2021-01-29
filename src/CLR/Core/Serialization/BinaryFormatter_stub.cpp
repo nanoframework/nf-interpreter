@@ -69,12 +69,12 @@ __nfweak bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(
     return true;
 }
 
-__nfweak CLR_DataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
+__nfweak nanoClrDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     (void)type;
 
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (CLR_DataType)0;
+    return (nanoClrDataType)0;
 }
 
 __nfweak CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)

@@ -2381,14 +2381,14 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     return (dtl.m_flags & c_MaskForPrimitive) == c_MaskForPrimitive;
 }
 
-static bool SetBlockHelper(CLR_RT_HeapBlock *blk, CLR_DataType dt, CLR_UINT8 *builtinValue)
+static bool SetBlockHelper(CLR_RT_HeapBlock *blk, nanoClrDataType dt, CLR_UINT8 *builtinValue)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fCanAssign = false;
 
     if (blk)
     {
-        CLR_DataType dtDst;
+        nanoClrDataType dtDst;
         CLR_RT_HeapBlock src;
 
         dtDst = blk->DataType();
@@ -2565,7 +2565,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             CLR_RT_SignatureParser::Element res;
             CLR_RT_TypeDescriptor desc;
             CLR_RT_TypeDef_Index targetClass;
-            CLR_DataType targetDataType;
+            nanoClrDataType targetDataType;
 
             if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
             {
@@ -2832,7 +2832,7 @@ bool CLR_DBG_Debugger::Debugging_Value_SetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_SetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    WP_ReplyToCommand(msg, SetBlockHelper(blk, (CLR_DataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
+    WP_ReplyToCommand(msg, SetBlockHelper(blk, (nanoClrDataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
 
     return true;
 }

@@ -1436,7 +1436,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType dt = (CLR_DataType)inst.m_target->DataType;
+    nanoClrDataType dt = (nanoClrDataType)inst.m_target->DataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
@@ -1712,7 +1712,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     NANOCLR_HEADER();
 
     CLR_RT_SignatureParser::Element res;
-    CLR_DataType dt;
+    nanoClrDataType dt;
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
@@ -1731,7 +1731,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
 
             if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
-                dt = (CLR_DataType)inst.m_target->DataType;
+                dt = (nanoClrDataType)inst.m_target->DataType;
             }
             else
             {
@@ -1789,15 +1789,15 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_PMETADATA sig = assembly->GetSignature(methodDef->Locals);
     CLR_UINT32 count = methodDef->LocalsCount;
     bool fZeroed = false;
-    CLR_DataType genericInstanceDataType = DATATYPE_VOID;
+    nanoClrDataType genericInstanceDataType = DATATYPE_VOID;
     CLR_RT_TypeDef_Index genericInstanceClass;
 
     while (count)
     {
-        CLR_DataType dt = DATATYPE_VOID;
+        nanoClrDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
         CLR_UINT32 levels = 0;
-        CLR_DataType dtModifier = DATATYPE_VOID;
+        nanoClrDataType dtModifier = DATATYPE_VOID;
         // pointer to the signature of the current local being processed
         //CLR_PMETADATA localSignature = sig;
         // flag for GENERICINST
@@ -2076,7 +2076,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
     reference.SetObjectReference(NULL);
 
-    CLR_DataType dt = (CLR_DataType)inst.m_target->DataType;
+    nanoClrDataType dt = (nanoClrDataType)inst.m_target->DataType;
 
     //
     // You cannot create an array this way.
@@ -2205,11 +2205,11 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
     NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock *obj = &source;
-    CLR_DataType dt;
+    nanoClrDataType dt;
 
     while (true)
     {
-        dt = (CLR_DataType)obj->DataType();
+        dt = (nanoClrDataType)obj->DataType();
 
         if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
         {

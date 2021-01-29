@@ -625,7 +625,7 @@ void CLR_RT_Assembly::DumpSignature(CLR_SIG sig)
 void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_DataType opt = CLR_UncompressElementType(p);
+    nanoClrDataType opt = CLR_UncompressElementType(p);
 
     switch (opt)
     {

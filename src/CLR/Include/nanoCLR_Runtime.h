@@ -905,7 +905,7 @@ struct CLR_RT_GenericParam_CrossReference
 
     /// @brief DataType for the generic parameter
     ///
-    CLR_DataType DataType;
+    nanoClrDataType DataType;
 
     /// @brief Class of the generic parameter
     ///
@@ -1132,7 +1132,7 @@ struct CLR_RT_SignatureParser
     {
         bool IsByRef;
         int Levels;
-        CLR_DataType DataType;
+        nanoClrDataType DataType;
         CLR_RT_TypeDef_Index Class;
 
         /// @brief Element is GenericInstance
@@ -1584,7 +1584,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
   private:
     CLR_UINT32 ComputeHashForName(const CLR_RT_TypeDef_Index &td, CLR_UINT32 hash);
 
-    static CLR_UINT32 ComputeHashForType(CLR_DataType dt, CLR_UINT32 hash);
+    static CLR_UINT32 ComputeHashForType(nanoClrDataType dt, CLR_UINT32 hash);
 };
 
 #ifdef __GNUC__
@@ -1857,7 +1857,7 @@ struct CLR_RT_OpcodeLookup
 
 #if defined(NANOCLR_OPCODE_PARSER)
     CLR_LOGICAL_OPCODE m_logicalOpcode;
-    CLR_DataType m_dt;
+    nanoClrDataType m_dt;
     CLR_INT8 m_index;
     CLR_UINT16 m_flags;
 #endif
@@ -2010,8 +2010,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_RT_SignatureParser::Element &resRight,
         bool fIsInstanceOfOK);
 
-    static CLR_DataType MapElementTypeToDataType(CLR_UINT32 et);
-    static CLR_UINT32 MapDataTypeToElementType(CLR_DataType dt);
+    static nanoClrDataType MapElementTypeToDataType(CLR_UINT32 et);
+    static CLR_UINT32 MapDataTypeToElementType(nanoClrDataType dt);
 
 #if defined(_WIN32)
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
@@ -2234,16 +2234,16 @@ struct CLR_RT_TypeDescriptor
 
     CLR_RT_ReflectionDef_Index m_reflex;
 
-    CLR_DataType GetDataType() const
+    nanoClrDataType GetDataType() const
     {
-        return (CLR_DataType)m_handlerCls.m_target->DataType;
+        return (nanoClrDataType)m_handlerCls.m_target->DataType;
     }
 
     //--//
 
     void TypeDescriptor_Initialize();
 
-    HRESULT InitializeFromDataType(CLR_DataType dt);
+    HRESULT InitializeFromDataType(nanoClrDataType dt);
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
@@ -2257,7 +2257,7 @@ struct CLR_RT_TypeDescriptor
     bool GetElementType(CLR_RT_TypeDescriptor &sub);
 
     static HRESULT ExtractTypeIndexFromObject(const CLR_RT_HeapBlock &ref, CLR_RT_TypeDef_Index &res);
-    static HRESULT ExtractObjectAndDataType(CLR_RT_HeapBlock *&ref, CLR_DataType &dt);
+    static HRESULT ExtractObjectAndDataType(CLR_RT_HeapBlock *&ref, nanoClrDataType &dt);
 };
 
 #include <nanoCLR_Runtime__Serialization.h>
@@ -2473,7 +2473,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     HRESULT HandleSynchronized(bool fAcquire, bool fGlobal);
 
-    void SetResult(CLR_INT32 val, CLR_DataType dataType);
+    void SetResult(CLR_INT32 val, nanoClrDataType dataType);
     void SetResult_I1(CLR_UINT8 val);
     void SetResult_I2(CLR_INT16 val);
     void SetResult_I4(CLR_INT32 val);

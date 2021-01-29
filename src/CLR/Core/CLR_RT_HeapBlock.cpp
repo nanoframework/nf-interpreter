@@ -385,7 +385,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    nanoClrDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -491,7 +491,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    nanoClrDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -527,7 +527,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
 #if defined(_DEBUG)
                 {
-                    CLR_DataType dtElem = (CLR_DataType)array->m_typeOfElement;
+                    nanoClrDataType dtElem = (nanoClrDataType)array->m_typeOfElement;
                     CLR_RT_HeapBlock blk;
                     blk.Assign(*this);
 
@@ -797,7 +797,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj = this;
-    CLR_DataType dt = obj->DataType();
+    nanoClrDataType dt = obj->DataType();
 
     //
     // System.DateTime and System.TimeSpan are real value types, so sometimes they are passed by reference.
@@ -821,7 +821,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     }
 
     {
-        CLR_DataType dataType = (CLR_DataType)cls.m_target->DataType;
+        nanoClrDataType dataType = (nanoClrDataType)cls.m_target->DataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -1367,8 +1367,8 @@ static inline int CompareValues_Pointers(const CLR_RT_HeapBlock *left, const CLR
 CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType leftDataType = left.DataType();
-    CLR_DataType rightDataType = right.DataType();
+    nanoClrDataType leftDataType = left.DataType();
+    nanoClrDataType rightDataType = right.DataType();
 
     if (leftDataType == rightDataType)
     {

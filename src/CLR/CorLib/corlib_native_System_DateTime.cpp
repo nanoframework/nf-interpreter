@@ -219,7 +219,7 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock* obj = &ref;
-    CLR_DataType      dt  = obj->DataType();
+    nanoClrDataType      dt  = obj->DataType();
 
     if(dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
