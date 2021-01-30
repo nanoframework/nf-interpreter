@@ -898,6 +898,8 @@ void CLR_RT_TypeDef_Instance::Clear()
 // generic parameter
 bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData)
 {
+    (void)sampleData;
+
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
     {
