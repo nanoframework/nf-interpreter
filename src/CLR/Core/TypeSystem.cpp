@@ -1916,7 +1916,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     {
         for (uint32_t i = 0; i < ARRAYSIZE(skeleton->m_pTablesSize) - 1; i++)
         {
-            skeleton->m_pTablesSize[i] = header->SizeOfTable((ClrTable)i);
+            skeleton->m_pTablesSize[i] = header->SizeOfTable((nanoClrTable)i);
         }
 
         skeleton->m_pTablesSize[TBL_AssemblyRef] /= sizeof(CLR_RECORD_ASSEMBLYREF);

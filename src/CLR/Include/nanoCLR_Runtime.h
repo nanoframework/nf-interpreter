@@ -899,7 +899,7 @@ struct CLR_RT_GenericParam_CrossReference
     
     /// @brief Tag for owner (TypeDef or MethodDef)
     ///
-    ClrTable m_TypeOrMethodDef;
+    nanoClrTable m_TypeOrMethodDef;
 
     CLR_RT_GenericParam_Index m_target;
 
@@ -1422,7 +1422,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
-    CLR_PMETADATA GetTable(ClrTable tbl)
+    CLR_PMETADATA GetTable(nanoClrTable tbl)
     {
         return (CLR_PMETADATA)m_header + m_header->startOfTables[tbl];
     }
