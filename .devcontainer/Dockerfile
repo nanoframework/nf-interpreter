@@ -93,7 +93,7 @@ COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_61_00_16_core /usr/local/bin/titools
 
 # Putting hex2dfu in the container even if it will not be used, prep will fail otherwise
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
+ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu
 RUN mkdir -p /usr/local/bin/hex2dfu \
     && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
     && chmod +x /usr/local/bin/hex2dfu/hex2dfu
