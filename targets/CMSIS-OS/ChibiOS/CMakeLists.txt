@@ -14,9 +14,9 @@ set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 ########################################################
 # check availability of hex2dfu tool if specified
 if(DEFINED TOOL_HEX2DFU_PREFIX)
-    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe)
+    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
-        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe")
+        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
         message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
         message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
         message(STATUS "")
