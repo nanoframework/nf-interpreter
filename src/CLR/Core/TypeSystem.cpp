@@ -1122,6 +1122,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 Set(assm->m_index, index);
 
                 m_assm = assm;
+
+
                 //const CLR_RECORD_METHODSPEC* temp_target = m_assm->GetMethodSpec(index);
 
                 m_target = 0;

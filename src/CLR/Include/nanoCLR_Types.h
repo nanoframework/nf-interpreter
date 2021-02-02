@@ -561,16 +561,6 @@ enum CLR_MemberRefParent
     MRP_TypeSpec = 4
 };
 
-/// @brief Tag for encoded index into TBL_TypeDef | TBL_MethodDef
-enum CLR_TypeOrMethodDef
-{
-    //  @brief This is an index into TBL_TypeDef
-    TMR_TypeDef = 0,
-
-    ///  @brief This is an index into TBL_MethodDef
-    TMR_MethodDef = 1,
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Get target table from encoded TypeDefOrRef
