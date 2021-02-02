@@ -1769,31 +1769,44 @@ extern CLR_RT_WellKnownMethods g_CLR_RT_WellKnownMethods;
 
 typedef void (CLR_RT_HeapBlock::*CLR_RT_HeapBlockRelocate)();
 
+// clang-format off
+
 struct CLR_RT_DataTypeLookup
 {
-    static const CLR_UINT8 c_NA = 0x00;
-    static const CLR_UINT8 c_VariableSize = 0xFF;
+    static const CLR_UINT8 c_NA =                   0x00;
+    static const CLR_UINT8 c_VariableSize =         0xFF;
 
-    static const CLR_UINT32 c_Primitive = 0x00000001;
-    static const CLR_UINT32 c_Interface = 0x00000002;
-    static const CLR_UINT32 c_Class = 0x00000004;
-    static const CLR_UINT32 c_ValueType = 0x00000008;
-    static const CLR_UINT32 c_Enum = 0x00000010;
-    static const CLR_UINT32 c_SemanticMask = 0x0000001F;
+    static const CLR_UINT32 c_Primitive =           0x00000001;
+    static const CLR_UINT32 c_Interface =           0x00000002;
+    static const CLR_UINT32 c_Class =               0x00000004;
+    static const CLR_UINT32 c_ValueType =           0x00000008;
+    static const CLR_UINT32 c_Enum =                0x00000010;
+    static const CLR_UINT32 c_SemanticMask =        0x0000001F;
 
-    static const CLR_UINT32 c_Array = 0x00000020;
-    static const CLR_UINT32 c_ArrayList = 0x00000040;
-    static const CLR_UINT32 c_SemanticMask2 = 0x0000007F;
+    static const CLR_UINT32 c_Array =               0x00000020;
+    static const CLR_UINT32 c_ArrayList =           0x00000040;
+    static const CLR_UINT32 c_SemanticMask2 =       0x0000007F;
 
-    static const CLR_UINT32 c_Reference = 0x00010000;
-    static const CLR_UINT32 c_Numeric = 0x00020000;
-    static const CLR_UINT32 c_Integer = 0x00040000;
-    static const CLR_UINT32 c_Signed = 0x00080000;
-    static const CLR_UINT32 c_Direct = 0x00100000;             // This isn't an indirect reference.
-    static const CLR_UINT32 c_OptimizedValueType = 0x00200000; // A value type that is kept in a single HeapBlock.
-    static const CLR_UINT32 c_ManagedType = 0x00400000; // this dt represents a managed type, or a pointer to a managed
-                                                        // type More specificly, TypeDescriptor::InitializeFromObject
-                                                        // will succeed when starting from an object of with this dt
+    static const CLR_UINT32 c_Var =                 0x00000100;
+    static const CLR_UINT32 c_GenericInstance =     0x00000200;
+    static const CLR_UINT32 c_MVar =                0x00000400;
+
+    static const CLR_UINT32 c_Reference =           0x00010000;
+    static const CLR_UINT32 c_Numeric =             0x00020000;
+    static const CLR_UINT32 c_Integer =             0x00040000;
+    static const CLR_UINT32 c_Signed =              0x00080000;
+    
+    // This isn't an indirect reference.
+    static const CLR_UINT32 c_Direct =              0x00100000;
+
+    // A value type that is kept in a single HeapBlock.
+    static const CLR_UINT32 c_OptimizedValueType =  0x00200000; 
+
+
+    // This DataType represents a managed type, or a pointer to a managed
+    // type More specifically, TypeDescriptor::InitializeFromObject
+    // will succeed when starting from an object of with this DataType
+    static const CLR_UINT32 c_ManagedType =         0x00400000; 
 
     CLR_UINT32 m_flags;
     CLR_UINT8 m_sizeInBits;
@@ -1808,6 +1821,8 @@ struct CLR_RT_DataTypeLookup
     const char *m_name;
 #endif
 };
+
+// clang-format on
 
 extern const CLR_RT_DataTypeLookup c_CLR_RT_DataTypeLookup[];
 
