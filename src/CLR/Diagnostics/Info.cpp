@@ -498,34 +498,35 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         case TBL_MethodRef:
         {
             const CLR_RECORD_METHODREF* p = GetMethodRef(index);
-            switch (CLR_GetMemberRefParent(p->container))
+            
+            switch (CLR_GetEncodedNanoType(p->container))
             {
-                case CLR_MemberRefParent::MRP_TypeRef:
+                case TBL_TypeRef:
                 {
-                    CLR_RT_TypeDef_Index* typeDef = &m_pCrossReference_TypeRef[CLR_GetIndexFromMemberRefParent(p->container)].m_target;
+                    CLR_RT_TypeDef_Index* typeDef = &m_pCrossReference_TypeRef[CLR_GetEncodedNanoTypeIndex(p->container)].m_target;
                     CLR_RT_DUMP::TYPE(*typeDef);
                     break;
                 }
 
-                case CLR_MemberRefParent::MRP_TypeDef:
-                {
-                    CLR_RT_TypeDef_Index* typeDef;
-                    typeDef->Set(m_index, CLR_GetIndexFromMemberRefParent(p->container));
-                    CLR_RT_DUMP::TYPE(*typeDef);
-                    break;
-                }
+                //case CLR_MemberRefParent::MRP_TypeDef:
+                //{
+                //    CLR_RT_TypeDef_Index* typeDef;
+                //    typeDef->Set(m_index, CLR_GetIndexFromMemberRefParent(p->container));
+                //    CLR_RT_DUMP::TYPE(*typeDef);
+                //    break;
+                //}
 
-                case CLR_MemberRefParent::MRP_MethodDef:
-                {
-                    const CLR_RT_MethodDef_Index* methodDef = &m_pCrossReference_MethodRef[CLR_GetIndexFromMemberRefParent(p->container)].m_target;
-                    CLR_RT_DUMP::METHOD(*methodDef);
-                    break;
-                }
+                //case CLR_MemberRefParent::MRP_MethodDef:
+                //{
+                //    const CLR_RT_MethodDef_Index* methodDef = &m_pCrossReference_MethodRef[CLR_GetIndexFromMemberRefParent(p->container)].m_target;
+                //    CLR_RT_DUMP::METHOD(*methodDef);
+                //    break;
+                //}
 
-                case CLR_MemberRefParent::MRP_TypeSpec:
+                case TBL_TypeSpec:
                 {
                     CLR_RT_TypeSpec_Index typeSpec;
-                    typeSpec.Set(m_index, CLR_GetIndexFromMemberRefParent(p->container));
+                    typeSpec.Set(m_index, CLR_GetEncodedNanoTypeIndex(p->container));
                     
                     CLR_RT_TypeSpec_Instance typeSpecInstance;
                     typeSpecInstance.InitializeFromIndex(typeSpec);
@@ -536,6 +537,11 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
 
                     break;
                 }
+
+                default:
+                    CLR_Debug::Printf("%s", GetString(p->name));
+                    //CLR_Debug::Printf("UNKNOWN TYPE");
+                    break;
             }
 
             //if (s->m_data == 0)
@@ -548,9 +554,9 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
                 CLR_RT_DUMP::METHOD(*s);
             }
             else*/
-            {
-                CLR_Debug::Printf("%s", GetString(p->name));
-            }
+        /*    {
+                
+            }*/
             break;
         }
         case TBL_TypeDef:

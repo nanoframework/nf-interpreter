@@ -109,8 +109,11 @@ typedef CLR_UINT16 CLR_STRING;
 typedef CLR_UINT16 CLR_SIG;
 typedef const CLR_UINT8 *CLR_PMETADATA;
 typedef CLR_UINT16 CLR_TYPEDEFORREF;
-typedef CLR_UINT16 CLR_MEMBERREFPARENT;
 typedef CLR_UINT16 CLR_TYPEORMETHODDEF;
+typedef CLR_UINT16 CLR_ENCODEDNANOTYPE;
+typedef CLR_UINT16 CLR_ENCODEDNANOMETHOD;
+typedef CLR_UINT16 CLR_ENCODEDTYPEDEFREF;
+
 //--//
 // may need to change later
 typedef CLR_INT64 CLR_INT64_TEMP_CAST;
@@ -297,19 +300,18 @@ enum nanoClrTable
     TBL_TypeDef = 0x00000004,
     TBL_FieldDef = 0x00000005,
     TBL_MethodDef = 0x00000006,
-    TBL_MemberRef = 0x00000007,
-    TBL_GenericParam = 0x00000008,
-    TBL_MethodSpec = 0x00000009,
-    TBL_TypeSpec = 0x0000000A,
-    TBL_Attributes = 0x0000000B,
-    TBL_Resources = 0x0000000C,
-    TBL_ResourcesData = 0x0000000D,
-    TBL_Strings = 0x0000000E,
-    TBL_Signatures = 0x0000000F,
-    TBL_ByteCode = 0x00000010,
-    TBL_ResourcesFiles = 0x00000011,
-    TBL_EndOfAssembly = 0x000000012,
-    TBL_Max = 0x00000013,
+    TBL_GenericParam = 0x00000007,
+    TBL_MethodSpec = 0x00000008,
+    TBL_TypeSpec = 0x00000009,
+    TBL_Attributes = 0x0000000A,
+    TBL_Resources = 0x0000000B,
+    TBL_ResourcesData = 0x0000000C,
+    TBL_Strings = 0x0000000D,
+    TBL_Signatures = 0x0000000E,
+    TBL_ByteCode = 0x0000000F,
+    TBL_ResourcesFiles = 0x00000010,
+    TBL_EndOfAssembly = 0x000000011,
+    TBL_Max = 0x00000012,
 };
 
 enum CLR_CorCallingConvention
@@ -527,76 +529,22 @@ enum CLR_ReflectionType
     REFLECTION_FIELD = 0x06,
 };
 
-/// @brief Tag for encoded index into TBL_TypeDef | TBL_TypeRef | TBL_TypeSpec
-enum CLR_TypeDefOrRef
-{
-    //  @brief This is an index into TBL_TypeDef
-    TDR_TypeDef = 0,
-
-    ///  @brief This is an index into TBL_TypeRef
-    TDR_TypeRef = 1,
-
-    ///  @brief This is an index into TBL_TypeSpec
-    TDR_TypeSpec = 2
-};
-
-/// @brief Tag for encoded index into TBL_TypeDef | TBL_TypeRef | TBL_ModuleRef | TBL_MethodDef | TBL_TypeSpec
-enum CLR_MemberRefParent
-{
-    //  @brief This is an index into TBL_TypeDef
-    MRP_TypeDef = 0,
-
-    ///  @brief This is an index into TBL_TypeRef
-    MRP_TypeRef = 1,
-
-    // NOT IMPLEMENTED
-    ///  @brief This is an index into TBL_ModuleRef
-    // MRP_ModuleRef = 2,
-
-    // NOT IMPLEMENTED
-    ///  @brief This is an index into TBL_MethodDef
-    MRP_MethodDef = 3,
-
-    ///  @brief This is an index into TBL_TypeSpec
-    MRP_TypeSpec = 4
-};
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// @brief Get target table from encoded TypeDefOrRef
 ///
-inline CLR_TypeDefOrRef CLR_GetTypeDefOrRef(CLR_TYPEDEFORREF encodedIndex)
+inline nanoClrTable CLR_GetEncodedTypeDefOrRef(CLR_ENCODEDTYPEDEFREF encodedIndex)
 {
-    // TypeDefOrRef tag is 2 bits
-    static const CLR_UINT16 TypeDefOrRef_Mask = 0x0003;
+    static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef};
 
-    return (CLR_TypeDefOrRef)(encodedIndex & TypeDefOrRef_Mask);
+    return c_lookup[(encodedIndex >> 15) & 1];
 }
 
 /// @brief Get index from encoded TypeDefOrRef
 ///
-inline CLR_INDEX CLR_GetIndexFromTypeDefOrRef(CLR_TYPEDEFORREF encodedIndex)
+inline CLR_INDEX CLR_GetEncodedTypeDefOrRefIndex(CLR_ENCODEDTYPEDEFREF encodedIndex)
 {
-    // TypeDefOrRef tag is 2 bits
-    return (CLR_INDEX)(encodedIndex >> 2);
-}
-
-/// @brief Get target table from encoded MemberRefParent
-///
-inline CLR_MemberRefParent CLR_GetMemberRefParent(CLR_MEMBERREFPARENT encodedIndex)
-{
-    // MemberRefParent tag is 3 bits
-    static const CLR_UINT16 MemberRefParent_Mask = 0x0007;
-
-    return (CLR_MemberRefParent)(encodedIndex & MemberRefParent_Mask);
-}
-
-/// @brief Get index from encoded MemberRefParent
-///
-inline CLR_INDEX CLR_GetIndexFromMemberRefParent(CLR_MEMBERREFPARENT encodedIndex)
-{
-    // MemberRefParent_Tag is 3 bits
-    return (CLR_INDEX)(encodedIndex >> 3);
+    return (encodedIndex & 0x7FFF);
 }
 
 /// @brief Get target table from encoded TypeOrMethodDef
@@ -606,6 +554,38 @@ inline nanoClrTable CLR_GetTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
     static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_MethodDef };
 
     return c_lookup[(encodedIndex >> 15) & 1];
+}
+
+/// @brief Get target table from encoded NanoTypeToken
+///
+inline nanoClrTable CLR_GetEncodedNanoType(CLR_ENCODEDNANOTYPE encodedIndex)
+{
+    static const nanoClrTable c_lookup[4] = { TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
+
+    return c_lookup[(encodedIndex >> 14) & 3];
+}
+
+/// @brief Get index from encoded NanoTypeToken
+///
+inline CLR_INDEX CLR_GetEncodedNanoTypeIndex(CLR_ENCODEDNANOTYPE encodedIndex)
+{
+    return (encodedIndex & 0x3FFF);
+}
+
+/// @brief Get target table from encoded EncodedNanoMethod
+///
+inline nanoClrTable CLR_GetEncodedNanoMethod(CLR_ENCODEDNANOMETHOD encodedIndex)
+{
+    static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
+
+    return c_lookup[(encodedIndex >> 15) & 1];
+}
+
+/// @brief Get index from encoded NanoTypeToken
+///
+inline CLR_INDEX CLR_GetEncodedNanoMethodIndex(CLR_ENCODEDNANOMETHOD encodedIndex)
+{
+    return (encodedIndex & 0x7FFF);
 }
 
 /// @brief Get index from encoded TypeOrMethodDef
@@ -650,9 +630,9 @@ inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
+    static const nanoClrTable c_lookup[4] = {TBL_MethodDef, TBL_MethodRef, TBL_TypeSpec, TBL_MethodSpec};
 
-    return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
+    return CLR_TkFromType(c_lookup[(tk >> 14) & 3], 0x3fff & tk);
 }
 
 #if defined(_WIN32)
@@ -1212,9 +1192,9 @@ struct CLR_RECORD_METHODREF
     ///
     CLR_STRING name;
 
-    /// @brief TypeRefTableIndex -> Index into TBL_TypeDef
+    /// @brief Encoded index into TBL_TypeDef or TBL_TypeSpec
     ///
-    CLR_INDEX container;
+    CLR_ENCODEDNANOTYPE container;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1533,22 +1513,6 @@ struct CLR_RECORD_METHODDEF
     CLR_SIG Signature;
 };
 
-struct CLR_RECORD_MEMBERREF
-{
-    /// @brief Index into TBL_Strings for the name of the method
-    ///
-    CLR_STRING Name;
-
-    /// @brief Index into
-    ///
-    CLR_MEMBERREFPARENT Class;
-
-    /// @brief Index into TBL_Signatures that describes the method itself
-    ///
-    CLR_SIG Signature;
-};
-
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
@@ -1597,7 +1561,7 @@ struct CLR_RECORD_GENERICPARAM
     ///
     CLR_UINT16 Flags;
 
-    /// @brief TypeOrMethodDef -> Index into TBL_TypeDef (ORed with 0x0000) | TBL_MethodDef (ORed with 0x8000)
+    /// @brief TypeOrMethodDef -> Index into TBL_TypeDef TBL_MethodDef
     ///
     CLR_TYPEORMETHODDEF Owner;
 
@@ -1612,13 +1576,17 @@ struct CLR_RECORD_GENERICPARAM
 
 struct CLR_RECORD_METHODSPEC
 {
-    /// @brief MethodDefOrRef -> Index into TBL_MethodDef (ORed with 0x0000) | TBL_MemberRef (ORed with 0x8000)
+    /// @brief Encoded index into TBL_MethodDef | TBL_MethodRef
     ///
-    CLR_INDEX Method;
+    CLR_ENCODEDNANOMETHOD Method;
 
-    /// @brief Index into TBL_Signatures
+    /// @brief Index into TBL_Signatures holding the signature of this instantiation
     ///
     CLR_SIG Instantiation;
+
+    /// @brief Index into TBL_Signatures for the type specification containing the method
+    ///
+    CLR_INDEX Container;
 };
 
 struct CLR_RECORD_EH

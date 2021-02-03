@@ -359,6 +359,7 @@ struct CLR_RT_TypeDef_Instance;
 struct CLR_RT_MethodDef_Instance;
 struct CLR_RT_FieldDef_Instance;
 struct CLR_RT_GenericParam_Instance;
+struct CLR_RT_MethodSpec_Instance;
 
 struct CLR_RT_StackFrame;
 struct CLR_RT_SubThread;
@@ -683,6 +684,40 @@ struct CLR_RT_TypeDef_Index
     }
 };
 
+struct CLR_RT_MethodSpec_Index
+{
+    CLR_UINT32 m_data;
+
+    //--//
+
+    void Clear()
+    {
+        m_data = 0;
+    }
+
+    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
+    {
+        m_data = indexAssm << 16 | indexMethod;
+    }
+
+    //--//
+
+    CLR_INDEX Assembly() const
+    {
+        return (CLR_INDEX)(m_data >> 16);
+    }
+
+    nanoClrTable Type() const
+    {
+        return CLR_GetEncodedNanoMethod((CLR_UINT16)m_data);
+    }
+
+    CLR_INDEX Method() const
+    {
+        return CLR_GetEncodedNanoMethodIndex((CLR_UINT16)m_data);
+    }
+};
+
 struct CLR_RT_FieldDef_Index
 {
     CLR_UINT32 m_data;
@@ -768,35 +803,6 @@ struct CLR_RT_GenericParam_Index
     }
 };
 
-struct CLR_RT_MemberRef_Index
-{
-    CLR_UINT32 m_data;
-
-    //--//
-
-    void Clear()
-    {
-        m_data = 0;
-    }
-
-    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMemberRef)
-    {
-        m_data = indexAssm << 16 | indexMemberRef;
-    }
-
-    //--//
-
-    CLR_INDEX Assembly() const
-    {
-        return (CLR_INDEX)(m_data >> 16);
-    }
-
-    CLR_INDEX Member() const
-    {
-        return (CLR_INDEX)(m_data);
-    }
-};
-
 struct CLR_RT_ReflectionDef_Index
 {
     CLR_UINT16 m_kind; // CLR_ReflectionType
@@ -873,16 +879,6 @@ struct CLR_RT_MethodDef_CrossReference
     static const CLR_UINT16 MD_CR_Patched = 0x8000;
     static const CLR_UINT16 MD_CR_OwnerMask = 0x7FFF;
 
-    CLR_UINT16 m_data;
-
-    CLR_INDEX GetOwner() const
-    {
-        return (CLR_INDEX)(m_data);
-    }
-};
-
-struct CLR_RT_MemberRef_CrossReference
-{
     CLR_UINT16 m_data;
 
     CLR_INDEX GetOwner() const
@@ -1126,7 +1122,6 @@ struct CLR_RT_SignatureParser
     static const int c_Locals = 4;
     static const int c_Object = 5;
     static const int c_GenericParamType = 6;
-    static const int c_MemberRef = 7;
 
     struct Element
     {
@@ -1174,13 +1169,11 @@ struct CLR_RT_SignatureParser
     void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
-    void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, const CLR_RECORD_MEMBERREF* mr);
     bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp);
 
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
     void Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
-    void Initialize_MemberRefSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
 
     void Initialize_MethodSignature(CLR_RT_MethodDef_Instance* mdInstance);
 
@@ -1261,7 +1254,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         size_t iTypeDef;
         size_t iFieldDef;
         size_t iMethodDef;
-        size_t iMemberRef;
         size_t iGenericParam;
         size_t iMethodSpec;
         size_t iTypeSpec;
@@ -1321,8 +1313,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         *m_pCrossReference_FieldDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference
         *m_pCrossReference_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_MemberRef_CrossReference
-        * m_pCrossReference_MemberRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_GenericParam_CrossReference *
         m_pCrossReference_GenericParam; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodSpec_CrossReference
@@ -1386,6 +1376,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindGenericParamAtTypeDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
     bool FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
     bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index& index);
+    bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index& index);
 
     bool FindFieldDef(
         const CLR_RECORD_TYPEDEF *src,
@@ -1405,10 +1396,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_RT_Assembly* base,
         CLR_SIG sig,
         CLR_RT_MethodDef_Index& index);
-    bool FindMemberRef(
-        CLR_RT_Assembly* base,
-        CLR_SIG sig,
-        CLR_RT_MemberRef_Index& index);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
 
@@ -1456,10 +1443,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     const CLR_RECORD_METHODDEF *GetMethodDef(CLR_INDEX i)
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
-    }
-    const CLR_RECORD_MEMBERREF* GetMemberRef(CLR_INDEX i)
-    {
-        return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_MEMBERREF, TBL_MemberRef, i);
     }
     const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i)
     {
@@ -2170,6 +2153,24 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
         return m_assm->m_pCrossReference_GenericParam[GenericParam()];
     }
 };
+
+struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
+{
+    CLR_RT_Assembly* m_assm;
+    const CLR_RECORD_METHODSPEC* m_target;
+
+    //--//
+
+    bool InitializeFromIndex(const CLR_RT_MethodSpec_Index& index);
+    void Clear();
+
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly* assm);
+
+    CLR_INDEX Container();
+
+    CLR_ENCODEDNANOMETHOD InstanceOfMethod;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

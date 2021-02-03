@@ -1633,6 +1633,11 @@ static bool FillValues(
     CLR_RT_TypeDescriptor desc;
 
     memset(dst, 0, sizeof(*dst));
+    // if(isGenericInstance)
+    // {
+    //     reference->PerformUnboxing(*pTD);
+    //     ptr->PerformUnboxing(*pTD);
+    // }
 
     dst->m_referenceID = (reference != NULL) ? reference : ptr;
     dst->m_dt = ptr->DataType();
@@ -1701,7 +1706,6 @@ static bool FillValues(
         case DATATYPE_OBJECT:
         case DATATYPE_BYREF:
             return FillValues(ptr->Dereference(), array, num, NULL, pTD, isGenericInstance);
-
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
             dst->m_td = ptr->ObjectCls();
@@ -2591,43 +2595,43 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 parser.Advance(res);
             } while (iElement--);
 
-            // handle generic parameters
-            if (res.DataType == DATATYPE_VAR)
-            {
-                // Generic parameter in a generic TypeDef
-                CLR_RT_Assembly* assembly = md.m_assm;
+            // // handle generic parameters
+            // if (res.DataType == DATATYPE_VAR)
+            // {
+            //     // Generic parameter in a generic TypeDef
+            //     CLR_RT_Assembly* assembly = md.m_assm;
 
-                CLR_RT_GenericParam_Index gpIndex;
-                assembly->FindGenericParamAtTypeDef(md, res.GenericParamPosition, gpIndex);
+            //     CLR_RT_GenericParam_Index gpIndex;
+            //     assembly->FindGenericParamAtTypeDef(md, res.GenericParamPosition, gpIndex);
 
-                CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+            //     CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                targetClass = gp.Class;
-                targetDataType = gp.DataType;
+            //     targetClass = gp.Class;
+            //     targetDataType = gp.DataType;
 
-                isGenericInstance = true;
-            }
-            else if (res.DataType == DATATYPE_MVAR)
-            {
-                // Generic parameter in a generic method definition
-                CLR_RT_Assembly* assembly = md.m_assm;
+            //     isGenericInstance = true;
+            // }
+            // else if (res.DataType == DATATYPE_MVAR)
+            // {
+            //     // Generic parameter in a generic method definition
+            //     CLR_RT_Assembly* assembly = md.m_assm;
 
-                CLR_RT_GenericParam_Index gpIndex;
-                assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
+            //     CLR_RT_GenericParam_Index gpIndex;
+            //     assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
 
-                CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+            //     CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                targetClass = gp.Class;
-                targetDataType = gp.DataType;
+            //     targetClass = gp.Class;
+            //     targetDataType = gp.DataType;
 
-                isGenericInstance = true;
-            }
-            else
-            {
+            //     isGenericInstance = true;
+            // }
+            // else
+            //{
                 // all the rest get it from parser element
                 targetClass = res.Class;
                 targetDataType = res.DataType;
-            }
+            //}
 
             //
             // Arguments to a methods come from the eval stack and we don't fix up the eval stack for each call.
@@ -2643,13 +2647,25 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 blk = &tmp;
             }
 
-            desc.InitializeFromType(targetClass);
-
-            // Check for enum
-            if (desc.m_handlerCls.m_target->IsEnum())
+            if (res.DataType == DATATYPE_VAR ||
+                res.DataType == DATATYPE_MVAR)
             {
-                td = desc.m_handlerCls;
-                pTD = &td;
+                tmp.Assign(*blk);
+                tmp.ChangeDataType(targetDataType);
+
+                reference = blk;
+                blk = &tmp;
+            }
+            else
+            {
+                desc.InitializeFromType(targetClass);
+
+                // Check for enum
+                if (desc.m_handlerCls.m_target->IsEnum())
+                {
+                    td = desc.m_handlerCls;
+                    pTD = &td;
+                }
             }
         }
 
