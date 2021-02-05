@@ -478,7 +478,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
             }
             else
             {
-                CLR_Debug::Printf("%s.%s", GetString(p->nameSpace), GetString(p->name));
+                CLR_Debug::Printf("%s.%s", GetString(p->NameSpace), GetString(p->Name));
             }
             break;
         }
@@ -491,7 +491,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
             }
             else
             {
-                CLR_Debug::Printf("%s", GetString(p->name));
+                CLR_Debug::Printf("%s", GetString(p->Name));
             }
             break;
         }
@@ -499,11 +499,11 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         {
             const CLR_RECORD_METHODREF* p = GetMethodRef(index);
             
-            switch (CLR_GetEncodedNanoType(p->container))
+            switch (p->Owner())
             {
                 case TBL_TypeRef:
                 {
-                    CLR_RT_TypeDef_Index* typeDef = &m_pCrossReference_TypeRef[CLR_GetEncodedNanoTypeIndex(p->container)].m_target;
+                    CLR_RT_TypeDef_Index* typeDef = &m_pCrossReference_TypeRef[p->OwnerIndex()].m_target;
                     CLR_RT_DUMP::TYPE(*typeDef);
                     break;
                 }
@@ -526,20 +526,20 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
                 case TBL_TypeSpec:
                 {
                     CLR_RT_TypeSpec_Index typeSpec;
-                    typeSpec.Set(m_index, CLR_GetEncodedNanoTypeIndex(p->container));
+                    typeSpec.Set(m_index, p->OwnerIndex());
                     
                     CLR_RT_TypeSpec_Instance typeSpecInstance;
                     typeSpecInstance.InitializeFromIndex(typeSpec);
                     
                     CLR_RT_MethodDef_Index methodDef;
-                    FindMethodDef(typeSpecInstance.m_target, GetString(p->name), this, p->sig, methodDef);
+                    FindMethodDef(typeSpecInstance.m_target, GetString(p->Name), this, p->Sig, methodDef);
                     CLR_RT_DUMP::METHOD(methodDef);
 
                     break;
                 }
 
                 default:
-                    CLR_Debug::Printf("%s", GetString(p->name));
+                    CLR_Debug::Printf("%s", GetString(p->Name));
                     //CLR_Debug::Printf("UNKNOWN TYPE");
                     break;
             }

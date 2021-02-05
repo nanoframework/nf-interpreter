@@ -199,7 +199,7 @@ bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_UINT32 &hash
 void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, const CLR_RECORD_TYPESPEC *ts)
 {
     NATIVE_PROFILE_CLR_CORE();
-    Initialize_TypeSpec(assm, assm->GetSignature(ts->sig));
+    Initialize_TypeSpec(assm, assm->GetSignature(ts->Sig));
 }
 
 void CLR_RT_SignatureParser::Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts)
@@ -263,7 +263,7 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodDef_Instanc
 
     Method = md->Method();
 
-    Initialize_MethodSignature(md->m_assm, md->m_assm->GetSignature(md->m_target->Signature));
+    Initialize_MethodSignature(md->m_assm, md->m_assm->GetSignature(md->m_target->Sig));
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md)
@@ -272,7 +272,7 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly* assm, c
 
     Method = 0xFFFF;
     
-    Initialize_MethodSignature(assm, assm->GetSignature(md->Signature));
+    Initialize_MethodSignature(assm, assm->GetSignature(md->Sig));
 }
 
 void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md)
@@ -308,9 +308,9 @@ bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(CLR_RT_Assembl
     Assembly = assm;
     
     // need to check for valid signature
-    if (gp->Signature != 0xFFFF)
+    if (gp->Sig != 0xFFFF)
     {
-        Signature = assm->GetSignature(gp->Signature);
+        Signature = assm->GetSignature(gp->Sig);
         ParamCount = 1;
     }
     else
@@ -2344,20 +2344,20 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
     ITERATE_THROUGH_RECORDS(this, i, TypeRef, TYPEREF)
     {
         // TODO check typedef
-        if (src->scope & 0x8000) // Flag for TypeRef
+        if (src->Scope & 0x8000) // Flag for TypeRef
         {
             CLR_RT_TypeDef_Instance inst;
 
-            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->scope & 0x7FFF].m_target) == false)
+            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->Scope & 0x7FFF].m_target) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->scope);
+                CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->Scope);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            const char *szName = GetString(src->name);
+            const char *szName = GetString(src->Name);
             if (inst.m_assm->FindTypeDef(szName, inst.Type(), dst->m_target) == false)
             {
 #if !defined(BUILD_RTM)
@@ -2368,14 +2368,14 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         }
         else
         {
-            CLR_RT_Assembly *assm = m_pCrossReference_AssemblyRef[src->scope].m_target;
+            CLR_RT_Assembly *assm = m_pCrossReference_AssemblyRef[src->Scope].m_target;
             if (assm == NULL)
             {
                 NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: assm is null\n");
             }
 
-            const char *szNameSpace = GetString(src->nameSpace);
-            const char *szName = GetString(src->name);
+            const char *szNameSpace = GetString(src->NameSpace);
+            const char *szName = GetString(src->Name);
             if (assm->FindTypeDef(szName, szNameSpace, dst->m_target) == false)
             {
 #if !defined(BUILD_RTM)
@@ -2401,18 +2401,18 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
     {
         CLR_RT_TypeDef_Instance inst;
 
-        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->owner].m_target) == false)
+        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].m_target) == false)
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->owner);
+            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->encodedOwner);
 #endif
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        const char *szName = GetString(src->name);
+        const char *szName = GetString(src->Name);
 
-        if (inst.m_assm->FindFieldDef(inst.m_target, szName, this, src->sig, dst->m_target) == false)
+        if (inst.m_assm->FindFieldDef(inst.m_target, szName, this, src->Sig, dst->m_target) == false)
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf("Resolve: unknown field: %s\r\n", szName);
@@ -2440,17 +2440,17 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         CLR_RT_TypeDef_Instance typeDefInstance;
        
         CLR_RT_TypeSpec_Index typeSpec;
-        typeSpec.Clear();
+        typeSpec.Clear(); 
 
         CLR_RT_TypeSpec_Instance typeSpecInstance;
         
         bool fGot = false;
         const char* name = NULL;
 
-        switch (CLR_GetEncodedNanoType(src->container))
+        switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[CLR_GetEncodedNanoTypeIndex(src->container)].m_target;
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].m_target;
                 break;
 
             //case CLR_MemberRefParent::MRP_TypeDef:
@@ -2463,32 +2463,32 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             //    break;
 
             case TBL_TypeSpec:
-                typeSpec.Set(this->m_index, CLR_GetEncodedNanoTypeIndex(src->container));
+                typeSpec.Set(this->m_index, src->OwnerIndex());
                 break;
 
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Resolve Method: unknown or unsupported MemberRefParent_Tag %08x\r\n",
-                    src->container);
+                    "Resolve Method: unknown or unsupported TypeRefOrSpec %08x\r\n",
+                    src->encodedOwner);
 #endif
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        name = GetString(src->name);
+        name = GetString(src->Name);
 
         if (NANOCLR_INDEX_IS_VALID(typeSpec))
         {
             if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve Method: unknown typespec: %08x\r\n", src->container);
+                CLR_Debug::Printf("Resolve Method: unknown typespec: %08x\r\n", src->encodedOwner);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->sig, dst->m_target))
+            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->m_target))
             {
                 fGot = true;
             }
@@ -2511,7 +2511,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             if (typeDefInstance.InitializeFromIndex(typeDef) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->container);
+                CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->encodedOwner);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2530,7 +2530,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
             while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
             {
-                if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->sig, dst->m_target))
+                if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->Sig, dst->m_target))
                 {
                     fGot = true;
                     break;
@@ -5271,7 +5271,7 @@ void CLR_RT_AttributeEnumerator::Initialize(CLR_RT_Assembly *assm)
 void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_TypeDef_Instance &inst)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_data.ownerType = TBL_TypeDef;
+    m_data.OwnerType = TBL_TypeDef;
     m_data.ownerIndex = inst.Type();
 
     Initialize(inst.m_assm);
@@ -5280,7 +5280,7 @@ void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_TypeDef_Instance &inst)
 void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_FieldDef_Instance &inst)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_data.ownerType = TBL_FieldDef;
+    m_data.OwnerType = TBL_FieldDef;
     m_data.ownerIndex = inst.Field();
 
     Initialize(inst.m_assm);
@@ -5289,7 +5289,7 @@ void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_FieldDef_Instance &inst
 void CLR_RT_AttributeEnumerator::Initialize(const CLR_RT_MethodDef_Instance &inst)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_data.ownerType = TBL_MethodDef;
+    m_data.OwnerType = TBL_MethodDef;
     m_data.ownerIndex = inst.Method();
 
     Initialize(inst.m_assm);

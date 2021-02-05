@@ -113,6 +113,7 @@ typedef CLR_UINT16 CLR_TYPEORMETHODDEF;
 typedef CLR_UINT16 CLR_ENCODEDNANOTYPE;
 typedef CLR_UINT16 CLR_ENCODEDNANOMETHOD;
 typedef CLR_UINT16 CLR_ENCODEDTYPEDEFREF;
+typedef CLR_UINT16 CLR_TypeRefOrSpec;
 
 //--//
 // may need to change later
@@ -543,6 +544,22 @@ inline nanoClrTable CLR_GetEncodedTypeDefOrRef(CLR_ENCODEDTYPEDEFREF encodedInde
 /// @brief Get index from encoded TypeDefOrRef
 ///
 inline CLR_INDEX CLR_GetEncodedTypeDefOrRefIndex(CLR_ENCODEDTYPEDEFREF encodedIndex)
+{
+    return (encodedIndex & 0x7FFF);
+}
+
+/// @brief Get target table from encoded TypeRefOrSpec
+///
+inline nanoClrTable CLR_GetEncodedTypeRefOrSpec(CLR_TypeRefOrSpec encodedIndex)
+{
+    static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+
+    return c_lookup[(encodedIndex >> 15) & 1];
+}
+
+/// @brief Get index from encoded TypeRefOrSpec
+///
+inline CLR_INDEX CLR_GetEncodedTypeRefOrSpecIndex(CLR_TypeRefOrSpec encodedIndex)
 {
     return (encodedIndex & 0x7FFF);
 }
@@ -1164,41 +1181,76 @@ struct CLR_RECORD_TYPEREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING name;
+    CLR_STRING Name;
+
     /// @brief Index into TBL_Strings
-    CLR_STRING nameSpace;
+    ///
+    CLR_STRING NameSpace;
 
     /// @brief TypeRefOrAssemblyRef -> Index into TBL_AssemblyRef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x8000)
-    CLR_INDEX scope;
+    ///
+    CLR_INDEX Scope;
 };
 
 struct CLR_RECORD_FIELDREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING name;
+    CLR_STRING Name;
 
-    /// @brief TypeRefTableIndex -> TBL_TypeRef 
-    CLR_INDEX owner;
+    /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing this field 
+    CLR_TypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG sig;
+    CLR_SIG Sig;
+
+    /// @brief Index into owner table
+    ///
+    CLR_INDEX OwnerIndex() const
+    {
+        return (encodedOwner & 0x7FFF);
+    }
+
+    /// @brief Index into owner table
+    ///
+    nanoClrTable Owner() const
+    {
+        static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+
+        return c_lookup[(encodedOwner >> 15) & 0x0001];
+    }
 };
 
 struct CLR_RECORD_METHODREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING name;
+    CLR_STRING Name;
 
-    /// @brief Encoded index into TBL_TypeDef or TBL_TypeSpec
+    /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing the method
     ///
-    CLR_ENCODEDNANOTYPE container;
+    CLR_TypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG sig;
+    CLR_SIG Sig;
+
+    /// @brief Index into owner table
+    ///
+    CLR_INDEX OwnerIndex() const
+    {
+        return (encodedOwner & 0x7FFF);
+    }
+
+    /// @brief Index into owner table
+    ///
+    nanoClrTable Owner() const
+    {
+        static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+
+        return c_lookup[(encodedOwner >> 15) & 0x0001];
+    }
 };
 
 struct CLR_RECORD_TYPEDEF
@@ -1510,7 +1562,7 @@ struct CLR_RECORD_METHODDEF
 
     /// @brief Index into TBL_Signatures that describes the method itself
     ///
-    CLR_SIG Signature;
+    CLR_SIG Sig;
 };
 
 #ifdef __GNUC__
@@ -1523,7 +1575,7 @@ struct CLR_RECORD_ATTRIBUTE
 {
     /// @brief one of TBL_TypeDef, TBL_MethodDef, or TBL_FieldDef.
     ///
-    CLR_UINT16 ownerType;
+    CLR_UINT16 OwnerType;
 
     /// @brief TBL_TypeDef | TBL_MethodDef | TBL_FielfDef
     ///
@@ -1536,7 +1588,7 @@ struct CLR_RECORD_ATTRIBUTE
 
     CLR_UINT32 Key() const
     {
-        return *(CLR_UINT32 *)&ownerType;
+        return *(CLR_UINT32 *)&OwnerType;
     }
 };
 
@@ -1548,7 +1600,7 @@ struct CLR_RECORD_TYPESPEC
 {
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG sig;
+    CLR_SIG Sig;
 };
 
 struct CLR_RECORD_GENERICPARAM
@@ -1567,7 +1619,7 @@ struct CLR_RECORD_GENERICPARAM
 
     /// @brief Index into TBL_Signatures for parameter type signature
     ///
-    CLR_SIG Signature;
+    CLR_SIG Sig;
 
     /// @brief Index into TBL_Strings
     ///
