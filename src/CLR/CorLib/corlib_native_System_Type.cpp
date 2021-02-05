@@ -415,14 +415,14 @@ HRESULT Library_corlib_native_System_Type::GetFields(
 
                 for (i = 0; i < iTot; i++, fd++)
                 {
-                    const char *fieldName = assm->GetString(fd->name);
+                    const char *fieldName = assm->GetString(fd->Name);
 
-                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
+                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
                     {
                         continue;
                     }
 
-                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_Static)
+                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_Static)
                     {
                         if ((bindingFlags & c_BindingFlags_Static) == 0)
                             continue;
@@ -433,7 +433,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
+                    if ((fd->Flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
                     {
                         if ((bindingFlags & c_BindingFlags_Public) == 0)
                             continue;

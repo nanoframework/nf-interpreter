@@ -271,7 +271,7 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly* assm, c
     NATIVE_PROFILE_CLR_CORE();
 
     Method = 0xFFFF;
-    
+
     Initialize_MethodSignature(assm, assm->GetSignature(md->Sig));
 }
 
@@ -816,7 +816,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         CLR_INDEX indexField = fd.Field();
         int i = assm->m_pTablesSize[TBL_TypeDef];
 
-        if (fd.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+        if (fd.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
         {
             for (; i; i--, td++)
             {
@@ -3569,7 +3569,7 @@ HRESULT CLR_RT_Assembly::Resolve_AllocateStaticFields(CLR_RT_HeapBlock *pStaticF
 
     for (int i = 0; i < m_pTablesSize[TBL_FieldDef]; i++, fd++)
     {
-        if (fd->flags & CLR_RECORD_FIELDDEF::FD_Static)
+        if (fd->Flags & CLR_RECORD_FIELDDEF::FD_Static)
         {
             CLR_RT_FieldDef_CrossReference &res = m_pCrossReference_FieldDef[i];
 
@@ -3836,7 +3836,7 @@ static bool local_FindFieldDef(
 
     for (CLR_UINT32 i = 0; i < num; i++, fd++)
     {
-        const char *fieldName = assm->GetString(fd->name);
+        const char *fieldName = assm->GetString(fd->Name);
 
         if (!strcmp(fieldName, szText))
         {
@@ -3848,7 +3848,9 @@ static bool local_FindFieldDef(
                 parserRight.Initialize_FieldDef(base, base->GetSignature(sig));
 
                 if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight) == false)
+                {
                     continue;
+                }
             }
 
             res.Set(assm->m_index, first + i);
@@ -4048,7 +4050,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
 
             for (int j = 0; j < target->InstanceFieldsCount; j++, fd++)
             {
-                if ((fd->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
+                if ((fd->Flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
                 {
                     CLR_RT_SignatureParser parser;
                     parser.Initialize_FieldDef(inst.m_assm, fd);
@@ -4068,7 +4070,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
                         hash = ComputeHashForName(res.Class, hash);
                     }
 
-                    const char *fieldName = inst.m_assm->GetString(fd->name);
+                    const char *fieldName = inst.m_assm->GetString(fd->Name);
 
                     hash = SUPPORT_ComputeCRC(fieldName, (CLR_UINT32)hal_strlen_s(fieldName), hash);
                 }
@@ -5114,7 +5116,7 @@ HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char 
 
     NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
 
-    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->name));
+    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->Name));
 
     NANOCLR_NOCLEANUP();
 }

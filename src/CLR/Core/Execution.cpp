@@ -1680,7 +1680,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_FieldDef_Instance inst;
 
-    if (inst.InitializeFromIndex(fd) && inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.InitializeFromIndex(fd) && inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
 #if defined(NANOCLR_APPDOMAINS)
         {
@@ -2380,7 +2380,7 @@ HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const cha
 
     inst.InitializeFromIndex(index);
 
-    if (inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
         res = CLR_RT_ExecutionEngine::AccessStaticField(index);
         if (res == NULL)

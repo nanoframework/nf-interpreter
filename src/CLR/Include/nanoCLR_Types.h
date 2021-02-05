@@ -1412,17 +1412,17 @@ struct CLR_RECORD_FIELDDEF
 
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING name;
+    CLR_STRING Name;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG sig;
+    CLR_SIG Sig;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG defaultValue;
+    CLR_SIG DefaultValue;
 
-    CLR_UINT16 flags;
+    CLR_UINT16 Flags;
 };
 
 struct CLR_RECORD_METHODDEF

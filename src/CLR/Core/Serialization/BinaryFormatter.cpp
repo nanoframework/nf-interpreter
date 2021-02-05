@@ -1243,7 +1243,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
 
     NANOCLR_CLEAR(hints);
 
-    if (fld.m_target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
+    if (fld.m_target->Flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
@@ -1671,7 +1671,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 
             m_fields_Pointer = m_value.m_value->Dereference() + inst.CrossReference().m_offset;
 
-            if ((inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
+            if ((inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
             {
                 SerializationHintsAttribute hints;
                 CLR_RT_TypeDescriptor desc;
