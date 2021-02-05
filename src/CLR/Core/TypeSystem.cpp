@@ -2404,7 +2404,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].m_target) == false)
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->encodedOwner);
+            CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
 #endif
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2415,7 +2415,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         if (inst.m_assm->FindFieldDef(inst.m_target, szName, this, src->Sig, dst->m_target) == false)
         {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Resolve: unknown field: %s\r\n", szName);
+            CLR_Debug::Printf("Unknown scope when resolving FieldRef: %s\r\n", szName);
 #endif
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2469,7 +2469,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Resolve Method: unknown or unsupported TypeRefOrSpec %08x\r\n",
+                    "Unknown or unsupported TypeRefOrSpec when resolving NethodRef %08x\r\n",
                     src->encodedOwner);
 #endif
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2482,7 +2482,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve Method: unknown typespec: %08x\r\n", src->encodedOwner);
+                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2497,7 +2497,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Resolve: unknown method: %s.%s.%s\r\n",
+                    "Unknown MethodRef: %s.%s.%s\r\n",
                     "???",
                     "???",
                     name);
@@ -2511,7 +2511,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             if (typeDefInstance.InitializeFromIndex(typeDef) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Resolve Method: unknown scope: %08x\r\n", src->encodedOwner);
+                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
 #endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -2522,7 +2522,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_RT_Assembly* qASSM = typeDefInstance.m_assm;
 
             CLR_Debug::Printf(
-                "Trying to resolve Method: %s.%s.%s\r\n",
+                "Unknown scope when resolving MethodRef: %s.%s.%s\r\n",
                 qASSM->GetString(qTD->NameSpace),
                 qASSM->GetString(qTD->Name),
                 name);
@@ -2546,7 +2546,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 CLR_RT_Assembly* qASSM = typeDefInstance.m_assm;
 
                 CLR_Debug::Printf(
-                    "Resolve: unknown method: %s.%s.%s\r\n",
+                    "Unknown MethodRef: %s.%s.%s\r\n",
                     qASSM->GetString(qTD->NameSpace),
                     qASSM->GetString(qTD->Name),
                     name);
