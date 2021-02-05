@@ -239,10 +239,33 @@ void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const 
 
 //--//
 
+void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* fd)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Method = 0xFFFF;
+
+    Initialize_FieldSignature(assm, assm->GetSignature(fd->Sig));
+}
+
+void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly* assm, CLR_PMETADATA fd)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Type = CLR_RT_SignatureParser::c_Field;
+
+    Flags = (*fd++);
+
+    ParamCount = 1;
+
+    Assembly = assm;
+    Signature = fd;
+}
+
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd)
 {
     NATIVE_PROFILE_CLR_CORE();
-    Initialize_FieldDef(assm, assm->GetSignature(fd->sig));
+    Initialize_FieldDef(assm, assm->GetSignature(fd->Sig));
 }
 
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd)
@@ -257,7 +280,7 @@ void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMET
 }
 
 //--//
-void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodDef_Instance *md)
+void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodDef_Instance* md)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -2397,26 +2420,100 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 
     ITERATE_THROUGH_RECORDS(this, i, FieldRef, FIELDREF)
     {
-        CLR_RT_TypeDef_Instance inst;
+        CLR_RT_TypeDef_Index typeDef;
+        typeDef.Clear();
 
-        if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].m_target) == false)
+        CLR_RT_TypeDef_Instance typeDefInstance;
+
+        CLR_RT_TypeSpec_Index typeSpec;
+        typeSpec.Clear();
+
+        CLR_RT_TypeSpec_Instance typeSpecInstance;
+
+        switch (src->Owner())
         {
-#if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
-#endif
+            case TBL_TypeRef:
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].m_target;
+                break;
 
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                //case CLR_MemberRefParent::MRP_TypeDef:
+                //    typeDef.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
+                //    break;
+                //
+                //case CLR_MemberRefParent::MRP_MethodDef:
+                //    dst->m_target.Set(this->m_index, CLR_GetIndexFromMemberRefParent(src->container));
+                //    fGot = true;
+                //    break;
+
+            case TBL_TypeSpec:
+                typeSpec.Set(this->m_index, src->OwnerIndex());
+                break;
+
+            default:
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf(
+                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
+                    src->encodedOwner);
+#endif
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        const char *szName = GetString(src->Name);
+        const char* fieldName = GetString(src->Name);
 
-        if (inst.m_assm->FindFieldDef(inst.m_target, szName, this, src->Sig, dst->m_target) == false)
+        if (NANOCLR_INDEX_IS_VALID(typeSpec))
         {
+            if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
+            {
 #if !defined(BUILD_RTM)
-            CLR_Debug::Printf("Unknown scope when resolving FieldRef: %s\r\n", szName);
+                CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
 #endif
 
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            if (!FindFieldDef(typeSpecInstance.m_target, fieldName, this, src->Sig, dst->m_target))
+            {
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf(
+                    "Unknown FieldRef: %s.%s.%s\r\n",
+                    "???",
+                    "???",
+                    fieldName);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+        }
+        else if (NANOCLR_INDEX_IS_VALID(typeDef))
+        {
+            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].m_target) == false)
+            {
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+#if defined(_WIN32) && defined(DEBUG_RESOLUTION)
+            const CLR_RECORD_TYPEDEF* qTD = typeDefInstance.m_target;
+            CLR_RT_Assembly* qASSM = typeDefInstance.m_assm;
+
+            CLR_Debug::Printf(
+                "Unknown scope when resolving FieldRef: %s.%s.%s\r\n",
+                qASSM->GetString(qTD->NameSpace),
+                qASSM->GetString(qTD->Name),
+                name);
+#endif
+
+            if (typeDefInstance.m_assm->FindFieldDef(typeDefInstance.m_target, fieldName, this, src->Sig, dst->m_target) == false)
+            {
+#if !defined(BUILD_RTM)
+                CLR_Debug::Printf("Unknown FieldRef: %s\r\n", fieldName);
+#endif
+
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
         }
     }
 
@@ -3876,6 +3973,51 @@ bool CLR_RT_Assembly::FindFieldDef(
         return true;
     if (local_FindFieldDef(this, td->FirstStaticField, td->StaticFieldsCount, name, base, sig, index))
         return true;
+
+    index.Clear();
+
+    return false;
+}
+
+bool CLR_RT_Assembly::FindFieldDef(
+    const CLR_RECORD_TYPESPEC* ts,
+    const char* name,
+    CLR_RT_Assembly* base,
+    CLR_SIG sig,
+    CLR_RT_FieldDef_Index& index)
+{
+    (void)ts;
+
+    NATIVE_PROFILE_CLR_CORE();
+
+    const CLR_RECORD_FIELDDEF* fd = GetFieldDef(0);
+
+    for (int i = 0; i < m_pTablesSize[TBL_FieldDef]; i++, fd++)
+    {
+        const char* fieldName = GetString(fd->Name);
+
+        if (!strcmp(fieldName, name))
+        {
+            bool fMatch = true;
+
+            if (CLR_SIG_INVALID != sig)
+            {
+                CLR_RT_SignatureParser parserLeft;
+                parserLeft.Initialize_FieldSignature(this, fd);
+                CLR_RT_SignatureParser parserRight;
+                parserRight.Initialize_FieldSignature(base, base->GetSignature(sig));
+
+                fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
+            }
+
+            if (fMatch)
+            {
+                index.Set(m_index, i);
+
+                return true;
+            }
+        }
+    }
 
     index.Clear();
 

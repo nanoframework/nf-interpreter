@@ -1161,17 +1161,21 @@ struct CLR_RT_SignatureParser
 
     //--//
 
+    void Initialize_TypeSpec(CLR_RT_Assembly* assm, CLR_PMETADATA ts);
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, const CLR_RECORD_TYPESPEC *ts);
+
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
-    void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
-    void Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
     bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp);
 
-    void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
+    void Initialize_FieldDef(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* fd);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
-    void Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
 
+    void Initialize_FieldSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
+    void Initialize_FieldSignature(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* md);
+
+    void Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md);
+    void Initialize_MethodSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
     void Initialize_MethodSignature(CLR_RT_MethodDef_Instance* mdInstance);
 
     void Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes);
@@ -1381,6 +1385,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_RT_Assembly *base,
         CLR_SIG sig,
         CLR_RT_FieldDef_Index &index);
+    bool FindFieldDef(
+        const CLR_RECORD_TYPESPEC* ts,
+        const char* name,
+        CLR_RT_Assembly* base,
+        CLR_SIG sig,
+        CLR_RT_FieldDef_Index& index);
     bool FindMethodDef(
         const CLR_RECORD_TYPEDEF *src,
         const char *name,
