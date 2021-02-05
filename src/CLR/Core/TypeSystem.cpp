@@ -383,7 +383,6 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     res.IsByRef = false;
     res.Levels = 0;
     res.IsGenericInst = false;
-    res.IsMvar = false;
     res.GenericParamCount = 0;
     res.GenericParamPosition = 0xFFFF;
 
@@ -607,7 +606,6 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         }
                         else
                         {
-                            res.IsMvar = true;
                             res.GenericParamPosition = (int)*Signature++;
 
                             NANOCLR_SET_AND_LEAVE(S_OK);
@@ -4971,11 +4969,12 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         {
             return false;
         }
-        if (resLeft.IsMvar != resRight.IsMvar)
+        if ((resLeft.DataType == DATATYPE_MVAR && resLeft.DataType == DATATYPE_MVAR) &&
+            (resLeft.GenericParamPosition && resRight.GenericParamPosition))
         {
             return false;
         }
-        if ((resLeft.IsMvar && resRight.IsMvar) &&
+        if ((resLeft.DataType == DATATYPE_VAR && resLeft.DataType == DATATYPE_VAR) &&
             (resLeft.GenericParamPosition && resRight.GenericParamPosition))
         {
             return false;

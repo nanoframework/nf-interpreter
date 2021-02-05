@@ -1133,9 +1133,6 @@ struct CLR_RT_SignatureParser
         /// @brief Element is GenericInstance
         bool IsGenericInst;
 
-        /// @brief Element is MVAR
-        bool IsMvar;
-
         /// @brief Generic Parameter position
         CLR_INDEX GenericParamPosition;
 
