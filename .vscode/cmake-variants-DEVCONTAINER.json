@@ -232,7 +232,7 @@
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
           "TOOL_SRECORD_PREFIX": "/usr/bin",
-          "TARGET_SERIES": "IMXRT10xx",
+          "TARGET_SERIES": "iMXRT10xx",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "RTOS": "FREERTOS",
           "RTOS_SOURCE_FOLDER": "/sources/FreeRTOS",

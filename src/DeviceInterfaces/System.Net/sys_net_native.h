@@ -11,7 +11,7 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-#include <nanoHAL_time.h>
+#include <nanoHAL_Time.h>
 #include <corlib_native.h>
 
 // MOVED TO src\HAL\Include\nanoHAL_Network.h for convinience

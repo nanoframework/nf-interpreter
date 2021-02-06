@@ -11,7 +11,7 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-#include <nanoHAL_time.h>
+#include <nanoHAL_Time.h>
 
 extern "C"
 {

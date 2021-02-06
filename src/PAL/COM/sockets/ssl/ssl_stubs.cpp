@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nanoHal.h"
+#include "nanoHAL.h"
 
 //--//
 

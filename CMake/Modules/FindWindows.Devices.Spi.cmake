@@ -19,7 +19,7 @@ list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Windows.Dev
 # source files
 set(Windows.Devices.Spi_SRCS
     cpu_spi.cpp
-    nanoHAL_spi.cpp
+    nanoHAL_Spi.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiController.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp

@@ -4,7 +4,7 @@
 //
 
 #include <nanoHAL.h>
-#include "Esp32_os.h"
+#include "esp32_os.h"
 #include "esp_smartconfig.h"
  
 static const int ESPTOUCH_DONE_BIT = BIT1;

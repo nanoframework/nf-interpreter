@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(nf_utils)
+include(NF_Utils)
 
 # check if FATFS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FATFS_SOURCE TRUE)

@@ -5,7 +5,7 @@
 
 include(binutils.arm-none-eabi)
 include(binutils.TI_SimpleLink)
-include(nf_utils)
+include(NF_Utils)
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
@@ -570,7 +570,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     endif()
 
     # need to override the toolchain lib directory
-    set(TOOLCHAIN_INC_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
-    set(TOOLCHAIN_LIB_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_INC_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
+    set(TOOLCHAIN_LIB_DIR ${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib)
 
 endif()

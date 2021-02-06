@@ -4,7 +4,7 @@
 #
 
 # List of the required include paths
-list(APPEND CMSIS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/CMSIS_Source/CMSIS/Core/include/)
+list(APPEND CMSIS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/CMSIS_Source/CMSIS/Core/Include/)
 
 include(FindPackageHandleStandardArgs)
 

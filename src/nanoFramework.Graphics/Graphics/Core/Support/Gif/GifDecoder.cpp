@@ -5,7 +5,7 @@
 //
 #include "Graphics.h"
 #include "giffile.h"
-#include "Gif.h"
+#include "gif.h"
 #include "lzwread.h"
 
 // Initialization routine for GifDecoder struct. When it's finished,

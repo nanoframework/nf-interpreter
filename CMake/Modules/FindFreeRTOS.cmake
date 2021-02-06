@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(FreeRTOS_SUPPORTED_SERIES IMXRT10xx CACHE INTERNAL "supported series names for FreeRTOS")
+set(FreeRTOS_SUPPORTED_SERIES iMXRT10xx CACHE INTERNAL "supported series names for FreeRTOS")
 
 list(FIND FreeRTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 
@@ -27,8 +27,8 @@ include(FreeRTOS_${TARGET_SERIES}_GCC_options)
 # message("FreeRTOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for FreeRTOS
-list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM7/r0p1)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/include)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS/portable/GCC/ARM_CM7/r0p1)
 
 # source files and GCC options according to target vendor and series
 
@@ -49,7 +49,7 @@ foreach(SRC_FILE ${FreeRTOS_SRCS})
     find_file(FreeRTOS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+            ${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

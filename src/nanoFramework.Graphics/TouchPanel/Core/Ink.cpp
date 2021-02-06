@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "ink.h"
+#include "Ink.h"
 #include "TouchPanel.h"
 
 #define INK_COMPLETION_TIME_USEC 10000 // 10ms - same as default touch completion

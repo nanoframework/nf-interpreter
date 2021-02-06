@@ -8,7 +8,7 @@
 #ifndef SSL_FUNCTIONS_H
 #define SSL_FUNCTIONS_H
 
-#include <nanoHal.h>
+#include <nanoHAL.h>
 
 // Keep these in sync with SslProtocols in System.Net
 

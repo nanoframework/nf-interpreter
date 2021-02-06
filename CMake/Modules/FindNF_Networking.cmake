@@ -26,8 +26,8 @@ set(NF_Networking_SRCS
     sockets_lwip.cpp
 
     #Lwip 
-    LwIP_Sockets.cpp
-    LwIP_Sockets_functions.cpp 
+    lwIP_Sockets.cpp
+    lwIP_Sockets_functions.cpp 
 
 )
 
@@ -58,7 +58,7 @@ set(NF_Networking_Security_SRCS
 )
 
 if(NF_FEATURE_DEBUGGER)
-    list(APPEND NF_Networking_SRCS sockets_debugger.cpp)
+    list(APPEND NF_Networking_SRCS Sockets_debugger.cpp)
 endif()
 
 # add Enc28j60source files in two steps
@@ -87,7 +87,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
  
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+    message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
     list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
 endforeach()
 

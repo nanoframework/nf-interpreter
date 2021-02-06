@@ -6,7 +6,7 @@
 include(binutils.arm-none-eabi)
 include(binutils.ChibiOS)
 include(STM32_CubePackage)
-include(nf_utils)
+include(NF_Utils)
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

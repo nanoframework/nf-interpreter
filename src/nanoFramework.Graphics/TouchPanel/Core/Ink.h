@@ -6,7 +6,7 @@
 #ifndef _GESTURES_H_
 #define _GESTURES_H_ 1
 
-#include "graphics.h"
+#include "Graphics.h"
 
 struct InkRegionInfo
 {

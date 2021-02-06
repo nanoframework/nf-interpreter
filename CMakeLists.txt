@@ -33,7 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
-include(nf_utils)
+include(NF_Utils)
 
 ######################################################
 # set build type to release if not specified otherwise
