@@ -964,22 +964,20 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
     NATIVE_PROFILE_CLR_CORE();
     if (NANOCLR_INDEX_IS_VALID(*this))
     {
-        CLR_INDEX extends = m_target->Extends;
-
-        if (extends != CLR_EmptyIndex)
+        if (m_target->HasValidExtendsType())
         {
             CLR_RT_TypeDef_Index tmp;
             const CLR_RT_TypeDef_Index *cls;
 
-            switch (CLR_GetEncodedTypeDefOrRef(extends))
+            switch (m_target->Extends())
             {
                 case TBL_TypeDef:
-                    tmp.Set(Assembly(), CLR_GetEncodedTypeDefOrRefIndex(m_target->Extends));
+                    tmp.Set(Assembly(), m_target->ExtendsIndex());
                     cls = &tmp;
                     break;
 
                 case TBL_TypeRef:
-                    cls = &m_assm->m_pCrossReference_TypeRef[CLR_GetEncodedTypeDefOrRefIndex(m_target->Extends)].m_target;
+                    cls = &m_assm->m_pCrossReference_TypeRef[m_target->ExtendsIndex()].m_target;
                     break;
 
                 // all others are not supported
@@ -3748,7 +3746,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_R
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (target->EnclosingType == CLR_EmptyIndex)
+        if (!target->HasValidEnclosingType())
         {
             const char *szNameSpace = GetString(target->NameSpace);
             const char *szName = GetString(target->Name);
@@ -3775,7 +3773,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 
     for (int i = 0; i < tblSize; i++, target++)
     {
-        if (CLR_GetEncodedTypeDefOrRefIndex(target->EnclosingType) == scope)
+        if (target->EnclosingType() == scope)
         {
             const char *szName = GetString(target->Name);
 
@@ -5189,10 +5187,10 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     td = inst.m_target;
     fFullName = flags & CLR_RT_TypeSystem::TYPENAME_FLAGS_FULL;
 
-    if (fFullName && td->EnclosingType != CLR_EmptyIndex)
+    if (fFullName && td->HasValidEnclosingType())
     {
         CLR_RT_TypeDef_Index clsSub;
-        clsSub.Set(inst.Assembly(), CLR_GetEncodedTypeDefOrRefIndex(td->EnclosingType));
+        clsSub.Set(inst.Assembly(), td->EnclosingTypeIndex());
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(clsSub, szBuffer, iBuffer, flags, 0));
 

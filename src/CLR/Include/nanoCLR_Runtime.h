@@ -650,6 +650,7 @@ struct CLR_RT_TypeSpec_Index
     {
         return (CLR_INDEX)(m_data >> 16);
     }
+
     CLR_INDEX TypeSpec() const
     {
         return (CLR_INDEX)(m_data);
@@ -678,6 +679,7 @@ struct CLR_RT_TypeDef_Index
     {
         return (CLR_INDEX)(m_data >> 16);
     }
+
     CLR_INDEX Type() const
     {
         return (CLR_INDEX)(m_data);
@@ -709,12 +711,14 @@ struct CLR_RT_MethodSpec_Index
 
     nanoClrTable Type() const
     {
-        return CLR_GetEncodedNanoMethod((CLR_UINT16)m_data);
+        static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
+        
+        return c_lookup[(m_data >> 15) & 1];
     }
 
     CLR_INDEX Method() const
     {
-        return CLR_GetEncodedNanoMethodIndex((CLR_UINT16)m_data);
+        return (m_data & 0x7FFF);
     }
 };
 
@@ -740,6 +744,7 @@ struct CLR_RT_FieldDef_Index
     {
         return (CLR_INDEX)(m_data >> 16);
     }
+
     CLR_INDEX Field() const
     {
         return (CLR_INDEX)(m_data);
@@ -768,6 +773,7 @@ struct CLR_RT_MethodDef_Index
     {
         return (CLR_INDEX)(m_data >> 16);
     }
+
     CLR_INDEX Method() const
     {
         return (CLR_INDEX)(m_data);

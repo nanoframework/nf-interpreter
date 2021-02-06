@@ -16,10 +16,10 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if (td.m_target->EnclosingType != CLR_EmptyIndex)
+    if (td.m_target->HasValidEnclosingType())
     {
         CLR_RT_HeapBlock *hbObj;
-        td.Set(td.Assembly(), td.m_target->EnclosingType);
+        td.Set(td.Assembly(), td.m_target->EnclosingType());
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = top.Dereference();

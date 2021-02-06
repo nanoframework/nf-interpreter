@@ -108,12 +108,11 @@ typedef CLR_UINT16 CLR_INDEX;
 typedef CLR_UINT16 CLR_STRING;
 typedef CLR_UINT16 CLR_SIG;
 typedef const CLR_UINT8 *CLR_PMETADATA;
-typedef CLR_UINT16 CLR_TYPEDEFORREF;
 typedef CLR_UINT16 CLR_TYPEORMETHODDEF;
 typedef CLR_UINT16 CLR_ENCODEDNANOTYPE;
 typedef CLR_UINT16 CLR_ENCODEDNANOMETHOD;
-typedef CLR_UINT16 CLR_ENCODEDTYPEDEFREF;
-typedef CLR_UINT16 CLR_TypeRefOrSpec;
+typedef CLR_UINT16 CLR_EncodedTypeDefOrRef;
+typedef CLR_UINT16 CLR_EncodedTypeRefOrSpec;
 
 //--//
 // may need to change later
@@ -532,87 +531,6 @@ enum CLR_ReflectionType
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// @brief Get target table from encoded TypeDefOrRef
-///
-inline nanoClrTable CLR_GetEncodedTypeDefOrRef(CLR_ENCODEDTYPEDEFREF encodedIndex)
-{
-    static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef};
-
-    return c_lookup[(encodedIndex >> 15) & 1];
-}
-
-/// @brief Get index from encoded TypeDefOrRef
-///
-inline CLR_INDEX CLR_GetEncodedTypeDefOrRefIndex(CLR_ENCODEDTYPEDEFREF encodedIndex)
-{
-    return (encodedIndex & 0x7FFF);
-}
-
-/// @brief Get target table from encoded TypeRefOrSpec
-///
-inline nanoClrTable CLR_GetEncodedTypeRefOrSpec(CLR_TypeRefOrSpec encodedIndex)
-{
-    static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
-
-    return c_lookup[(encodedIndex >> 15) & 1];
-}
-
-/// @brief Get index from encoded TypeRefOrSpec
-///
-inline CLR_INDEX CLR_GetEncodedTypeRefOrSpecIndex(CLR_TypeRefOrSpec encodedIndex)
-{
-    return (encodedIndex & 0x7FFF);
-}
-
-/// @brief Get target table from encoded TypeOrMethodDef
-///
-inline nanoClrTable CLR_GetTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
-{
-    static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_MethodDef };
-
-    return c_lookup[(encodedIndex >> 15) & 1];
-}
-
-/// @brief Get target table from encoded NanoTypeToken
-///
-inline nanoClrTable CLR_GetEncodedNanoType(CLR_ENCODEDNANOTYPE encodedIndex)
-{
-    static const nanoClrTable c_lookup[4] = { TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
-
-    return c_lookup[(encodedIndex >> 14) & 3];
-}
-
-/// @brief Get index from encoded NanoTypeToken
-///
-inline CLR_INDEX CLR_GetEncodedNanoTypeIndex(CLR_ENCODEDNANOTYPE encodedIndex)
-{
-    return (encodedIndex & 0x3FFF);
-}
-
-/// @brief Get target table from encoded EncodedNanoMethod
-///
-inline nanoClrTable CLR_GetEncodedNanoMethod(CLR_ENCODEDNANOMETHOD encodedIndex)
-{
-    static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
-
-    return c_lookup[(encodedIndex >> 15) & 1];
-}
-
-/// @brief Get index from encoded NanoTypeToken
-///
-inline CLR_INDEX CLR_GetEncodedNanoMethodIndex(CLR_ENCODEDNANOMETHOD encodedIndex)
-{
-    return (encodedIndex & 0x7FFF);
-}
-
-/// @brief Get index from encoded TypeOrMethodDef
-///
-inline CLR_INDEX CLR_GetIndexFromTypeOrMethodDef(CLR_TYPEORMETHODDEF encodedIndex)
-{
-    // TypeOrMethodDef tag is 1 bit
-    return (CLR_INDEX)(encodedIndex >> 1);
-}
-
 inline CLR_UINT32 CLR_DataFromTk(CLR_UINT32 tk)
 {
     return tk & 0x00FFFFFF;
@@ -641,15 +559,15 @@ inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
-    return CLR_TkFromType(c_lookup[(tk >> 15) & 1], 0x7fff & tk);
+    static const nanoClrTable c_lookup[3] = {TBL_FieldDef, TBL_FieldRef, TBL_TypeSpec };
+    return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
     static const nanoClrTable c_lookup[4] = {TBL_MethodDef, TBL_MethodRef, TBL_TypeSpec, TBL_MethodSpec};
 
-    return CLR_TkFromType(c_lookup[(tk >> 14) & 3], 0x3fff & tk);
+    return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
 
 #if defined(_WIN32)
@@ -657,38 +575,6 @@ inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 CLR_UINT32 CLR_ReadTokenCompressed(CLR_PMETADATA &ip, CLR_OPCODE opcode);
 
 #endif
-
-//--//
-
-HRESULT CLR_CompressTokenHelper(const nanoClrTable*tables, CLR_UINT16 cTables, CLR_UINT32 &tk);
-
-inline HRESULT CLR_CompressStringToken(CLR_UINT32 &tk)
-{
-    static const nanoClrTable c_lookup[1] = {TBL_Strings};
-
-    return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
-}
-
-inline HRESULT CLR_CompressTypeToken(CLR_UINT32 &tk)
-{
-    static const nanoClrTable c_lookup[3] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec};
-
-    return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
-}
-
-inline HRESULT CLR_CompressFieldToken(CLR_UINT32 &tk)
-{
-    static const nanoClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
-
-    return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
-}
-
-inline HRESULT CLR_CompressMethodToken(CLR_UINT32 &tk)
-{
-    static const nanoClrTable c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
-
-    return CLR_CompressTokenHelper(c_lookup, ARRAYSIZE(c_lookup), tk);
-}
 
 //--//
 
@@ -759,7 +645,7 @@ inline CLR_UINT32 CLR_TkFromStream(const CLR_UINT8 *&p)
 
     CLR_UINT32 data = CLR_UncompressData(p);
 
-    return CLR_TkFromType(c_lookup[data & 3], data >> 2);
+    return CLR_TkFromType(c_lookup[data & 0x0003], data >> 2);
 }
 
 //--//--//--//
@@ -1199,7 +1085,7 @@ struct CLR_RECORD_FIELDREF
     CLR_STRING Name;
 
     /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing this field 
-    CLR_TypeRefOrSpec encodedOwner;
+    CLR_EncodedTypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
     ///
@@ -1218,7 +1104,7 @@ struct CLR_RECORD_FIELDREF
     {
         static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
 
-        return c_lookup[(encodedOwner >> 15) & 0x0001];
+        return c_lookup[(encodedOwner >> 15)];
     }
 };
 
@@ -1230,11 +1116,13 @@ struct CLR_RECORD_METHODREF
 
     /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing the method
     ///
-    CLR_TypeRefOrSpec encodedOwner;
+    CLR_EncodedTypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
     ///
     CLR_SIG Sig;
+
+    //--//
 
     /// @brief Index into owner table
     ///
@@ -1243,13 +1131,13 @@ struct CLR_RECORD_METHODREF
         return (encodedOwner & 0x7FFF);
     }
 
-    /// @brief Index into owner table
+    /// @brief Owner table
     ///
     nanoClrTable Owner() const
     {
         static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
 
-        return c_lookup[(encodedOwner >> 15) & 0x0001];
+        return c_lookup[(encodedOwner >> 15)];
     }
 };
 
@@ -1315,11 +1203,11 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief Encoded index for TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
     ///
-    CLR_TYPEDEFORREF Extends;
+    CLR_EncodedTypeDefOrRef encodedExtends;
 
     /// @brief Encoded index for TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
     ///
-    CLR_TYPEDEFORREF EnclosingType;
+    CLR_EncodedTypeDefOrRef encodedEnclosingType;
 
     /// @brief Index into TBL_Signatures blob table for the set of interfaces implemented by this type
     ///
@@ -1379,9 +1267,52 @@ struct CLR_RECORD_TYPEDEF
     {
         return (Flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
     }
+
     bool IsDelegate() const
     {
         return (Flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
+    }
+
+    bool HasValidExtendsType() const
+    {
+        return encodedExtends != CLR_EmptyIndex;
+    }
+
+    bool HasValidEnclosingType() const
+    {
+        return encodedEnclosingType != CLR_EmptyIndex;
+    }
+
+    /// @brief Index into Extends table
+    ///
+    CLR_INDEX ExtendsIndex() const
+    {
+        return (encodedExtends & 0x7FFF);
+    }
+
+    /// @brief Extends table
+    ///
+    nanoClrTable Extends() const
+    {
+        static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+
+        return c_lookup[(encodedExtends >> 15)];
+    }
+
+    /// @brief Index into EnclosingType table
+    ///
+    CLR_INDEX EnclosingTypeIndex() const
+    {
+        return (encodedEnclosingType & 0x7FFF);
+    }
+
+    /// @brief EnclosingType table
+    ///
+    nanoClrTable EnclosingType() const
+    {
+        static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+
+        return c_lookup[(encodedEnclosingType >> 15)];
     }
 };
 
