@@ -9,7 +9,7 @@
 
 # check if the series name is supported 
 
-set(FreeRTOS_SUPPORTED_SERIES iMXRT10xx CACHE INTERNAL "supported series names for FreeRTOS")
+set(FreeRTOS_SUPPORTED_SERIES IMXRT10xx CACHE INTERNAL "supported series names for FreeRTOS")
 
 list(FIND FreeRTOS_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 
