@@ -5,14 +5,13 @@
 
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
-#include <string.h>
 #include <xdc/std.h>
 
 void CLRStartupThread(UArg arg0, UArg arg1)
 {
     (void)arg1;
 
-    CLR_SETTINGS* clrSettings = (CLR_SETTINGS*)arg0;
+    CLR_SETTINGS *clrSettings = (CLR_SETTINGS *)arg0;
 
     nanoHAL_Initialize_C();
 

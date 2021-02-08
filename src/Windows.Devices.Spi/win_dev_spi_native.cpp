@@ -5,7 +5,10 @@
 
 #include "win_dev_spi_native.h"
 
-static const CLR_RT_MethodHandler method_lookup[] = {
+// clang-format off
+
+static const CLR_RT_MethodHandler method_lookup[] =
+{
     NULL,
     NULL,
     NULL,
@@ -18,7 +21,6 @@ static const CLR_RT_MethodHandler method_lookup[] = {
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeChipSelectLineCount___I4,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxClockFrequency___I4,
     Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinClockFrequency___I4,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -68,4 +70,11 @@ static const CLR_RT_MethodHandler method_lookup[] = {
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Spi =
-    {"Windows.Devices.Spi", 0x9C215530, method_lookup, {100, 1, 4, 2}};
+{
+    "Windows.Devices.Spi",
+    0x360239F1,
+    method_lookup,
+    { 100, 1, 4, 2 }
+};
+
+// clang-format on

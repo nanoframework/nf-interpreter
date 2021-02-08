@@ -19,7 +19,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_7_0_
+#define _CHIBIOS_HAL_CONF_VER_7_1_
 
 #include <target_platform.h>
 #include "mcuconf.h"
@@ -31,10 +31,12 @@
 #define HAL_USE_PAL                         TRUE
 #endif
 
+//Not in default template, added manually
 #if !defined(FATFS_HAL_DEVICE) || defined(__DOXYGEN__)
 //this board requires SDCD2 not SDCD1
 #define FATFS_HAL_DEVICE SDCD2
 #endif
+////////
 
 //#define STM32_SDC_SDMMC_50MHZ               TRUE
 
@@ -43,7 +45,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_ADC) || defined(__DOXYGEN__)
-// #define HAL_USE_ADC                          FALSE
+// #define HAL_USE_ADC                         FALSE
 // #endif
 
 /**
@@ -61,12 +63,20 @@
 #define HAL_USE_CRY                         FALSE
 #endif
 
-// /**
-//  * @brief   Enables the DAC subsystem.
-//  */
+/**
+ * @brief   Enables the DAC subsystem.
+ */
+// this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_DAC) || defined(__DOXYGEN__)
 // #define HAL_USE_DAC                         FALSE
 // #endif
+
+/**
+ * @brief   Enables the EFlash subsystem.
+ */
+#if !defined(HAL_USE_EFL) || defined(__DOXYGEN__)
+#define HAL_USE_EFL                         FALSE
+#endif
 
 /**
  * @brief   Enables the GPT subsystem.
@@ -79,9 +89,9 @@
  * @brief   Enables the I2C subsystem.
  */
 // this option is set at target_platform.h (from config file)
-//#if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
-//#define HAL_USE_I2C                       TRUE
-//#endif
+// #if !defined(HAL_USE_I2C) || defined(__DOXYGEN__)
+// #define HAL_USE_I2C                         FALSE
+// #endif
 
 /**
  * @brief   Enables the I2S subsystem.
@@ -102,14 +112,14 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_MAC) || defined(__DOXYGEN__)
-// #define HAL_USE_MAC                          TRUE
+// #define HAL_USE_MAC                         FALSE
 // #endif
 
 /**
  * @brief   Enables the MMC_SPI subsystem.
  */
 #if !defined(HAL_USE_MMC_SPI) || defined(__DOXYGEN__)
-#define HAL_USE_MMC_SPI                         FALSE
+#define HAL_USE_MMC_SPI                     FALSE
 #endif
 
 /**
@@ -117,7 +127,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
-// #define HAL_USE_PWM                          FALSE
+// #define HAL_USE_PWM                         FALSE
 // #endif
 
 /**
@@ -125,7 +135,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_RTC) || defined(__DOXYGEN__)
-// #define HAL_USE_RTC                          TRUE
+// #define HAL_USE_RTC                         FALSE
 // #endif
 
 /**
@@ -133,14 +143,14 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_SDC) || defined(__DOXYGEN__)
-// #define HAL_USE_SDC                          TRUE
+// #define HAL_USE_SDC                         FALSE
 // #endif
 
 /**
  * @brief   Enables the SERIAL subsystem.
  */
 #if !defined(HAL_USE_SERIAL) || defined(__DOXYGEN__)
-#define HAL_USE_SERIAL                          TRUE
+#define HAL_USE_SERIAL                      TRUE
 #endif
 
 /**
@@ -162,7 +172,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_SPI) || defined(__DOXYGEN__)
-// #define HAL_USE_SPI                          FALSE
+// #define HAL_USE_SPI                         FALSE
 // #endif
 
 /**
@@ -177,7 +187,7 @@
  */
 // this option is set at target_platform.h (from config file)
 // #if !defined(HAL_USE_UART) || defined(__DOXYGEN__)
-// #define HAL_USE_UART                         FALSE
+// #define HAL_USE_UART                        FALSE
 // #endif
 
 /**
@@ -321,7 +331,7 @@
  * @brief   Enables the zero-copy API.
  */
 #if !defined(MAC_USE_ZERO_COPY) || defined(__DOXYGEN__)
-#define MAC_USE_ZERO_COPY           FALSE
+#define MAC_USE_ZERO_COPY                   FALSE
 #endif
 
 /**
@@ -459,7 +469,6 @@
 #define SPI_USE_CIRCULAR                    FALSE
 #endif
 
-
 /**
  * @brief   Enables the @p spiAcquireBus() and @p spiReleaseBus() APIs.
  * @note    Disabling this option saves both code and data space.
@@ -527,6 +536,7 @@
 #if !defined(WSPI_USE_MUTUAL_EXCLUSION) || defined(__DOXYGEN__)
 #define WSPI_USE_MUTUAL_EXCLUSION           TRUE
 #endif
+
 
 // header for nanoFramework overlay
 #include "halconf_nf.h"

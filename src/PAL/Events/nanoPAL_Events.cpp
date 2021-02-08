@@ -5,7 +5,6 @@
 //
 
 #include <nanoPAL_events.h>
-// #include <stdbool.h>
 
 static uint32_t systemEvents;
 

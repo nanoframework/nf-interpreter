@@ -22,83 +22,81 @@
 // RAM vector table declaration (valid for GCC only)
 __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 
-#define SYSCFG_MemoryRemap_SRAM     ((uint8_t)0x03)
+#define SYSCFG_MemoryRemap_SRAM ((uint8_t)0x03)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
-// declare CLRStartup thread here 
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread"); 
+// declare CLRStartup thread here
+osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
 
 // configuration for debugger serial port
 // dev notes:
 // conservative baud rate value as 921600 has a high error percentage on baud rate clocking
-// OVER8 bit on CR1 to further decrease baud rate clocking error 
-static const SerialConfig uartConfig =
-{
-  460800,
-  USART_CR1_OVER8,
-  USART_CR2_STOP1_BITS,
-  0
-};
+// OVER8 bit on CR1 to further decrease baud rate clocking error
+static const SerialConfig uartConfig = {460800, USART_CR1_OVER8, USART_CR2_STOP1_BITS, 0};
 
 //  Application entry point.
-int main(void) {
+int main(void)
+{
+    // HAL initialization, this also initializes the configured device drivers
+    // and performs the board-specific initializations.
+    halInit();
 
-  // HAL initialization, this also initializes the configured device drivers
-  // and performs the board-specific initializations.
-  halInit();
+    // init boot clipboard
+    InitBootClipboard();
 
-  // init SWO as soon as possible to make it available to output ASAP
-  #if (SWO_OUTPUT == TRUE)  
-  SwoInit();
-  #endif
-  
-  // relocate the vector table to RAM
-  // Copy the vector table from the Flash (mapped at the base of the application
-  // load address) to the base address of the SRAM at 0x20000000.
-  for(int i = 0; i < 48; i++)
-  {
-    vectorTable[i] = *(__IO uint32_t*)((uint32_t)&__nanoImage_start__ + (i<<2));
-  } 
+// init SWO as soon as possible to make it available to output ASAP
+#if (SWO_OUTPUT == TRUE)
+    SwoInit();
+#endif
 
-  // set CFGR1 register MEM_MODE bits value as "memory remap to SRAM"
-  SYSCFG->CFGR1 |= SYSCFG_MemoryRemap_SRAM;
+    // relocate the vector table to RAM
+    // Copy the vector table from the Flash (mapped at the base of the application
+    // load address) to the base address of the SRAM at 0x20000000.
+    for (int i = 0; i < 48; i++)
+    {
+        vectorTable[i] = *(__IO uint32_t *)((uint32_t)&__nanoImage_start__ + (i << 2));
+    }
 
-  // The kernel is initialized but not started yet, this means that
-  // main() is executing with absolute priority but interrupts are already enabled.
-  osKernelInitialize();
+    // set CFGR1 register MEM_MODE bits value as "memory remap to SRAM"
+    SYSCFG->CFGR1 |= SYSCFG_MemoryRemap_SRAM;
 
-  // start watchdog
-  Watchdog_Init();
+    // The kernel is initialized but not started yet, this means that
+    // main() is executing with absolute priority but interrupts are already enabled.
+    osKernelInitialize();
 
-  #if (HAL_NF_USE_STM32_CRC == TRUE)
-  // startup crc
-  crcStart(NULL);
-  #endif
+    // start watchdog
+    Watchdog_Init();
 
-  // starts the serial driver
-  sdStart(&SERIAL_DRIVER, &uartConfig);
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
 
-  // create the receiver thread
-  osThreadCreate(osThread(ReceiverThread), NULL);
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, &uartConfig);
 
-  // CLR settings to launch CLR thread
-  CLR_SETTINGS clrSettings;
-  (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+    // create the receiver thread
+    osThreadCreate(osThread(ReceiverThread), NULL);
 
-  clrSettings.MaxContextSwitches         = 50;
-  clrSettings.WaitForDebugger            = false;
-  clrSettings.EnterDebuggerLoopAfterExit = true;
+    // CLR settings to launch CLR thread
+    CLR_SETTINGS clrSettings;
+    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-  // create the CLR Startup thread 
-  osThreadCreate(osThread(CLRStartupThread), &clrSettings);
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
 
-  // start kernel, after this main() will behave like a thread with priority osPriorityNormal
-  osKernelStart();
+    // create the CLR Startup thread
+    osThreadCreate(osThread(CLRStartupThread), &clrSettings);
 
-  while (true) { 
-    osDelay(100);
-  }
+    // start kernel, after this main() will behave like a thread with priority osPriorityNormal
+    osKernelStart();
+
+    while (true)
+    {
+        osDelay(100);
+    }
 }

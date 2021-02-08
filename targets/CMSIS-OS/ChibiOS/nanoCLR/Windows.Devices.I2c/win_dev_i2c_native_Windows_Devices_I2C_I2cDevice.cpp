@@ -5,7 +5,6 @@
 
 #include <ch.h>
 #include <hal.h>
-#include <string.h>
 #include <targetPAL.h>
 #include <nanoHAL.h>
 #include "win_dev_i2c_native_target.h"
@@ -15,16 +14,16 @@ typedef Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings I2c
 /////////////////////////////////////////////////////
 // I2C PAL strucs declared in win_dev_i2c_native.h //
 /////////////////////////////////////////////////////
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
 NF_PAL_I2C I2C1_PAL;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
 NF_PAL_I2C I2C2_PAL;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
 NF_PAL_I2C I2C3_PAL;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
 NF_PAL_I2C I2C4_PAL;
 #endif
 
@@ -159,7 +158,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
     // the same bus just using different addresses
     switch (busIndex)
     {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
             if (I2C1_PAL.Driver == NULL)
             {
@@ -170,7 +169,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
         case 2:
             if (I2C2_PAL.Driver == NULL)
             {
@@ -181,7 +180,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
         case 3:
             if (I2C3_PAL.Driver == NULL)
             {
@@ -192,7 +191,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
             }
             break;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
         case 4:
             if (I2C4_PAL.Driver == NULL)
             {
@@ -253,7 +252,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
         // get the driver for the I2C bus
         switch (busIndex)
         {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
             case 1:
                 // deactivates the I2C peripheral
                 i2cStop(&I2CD1);
@@ -262,7 +261,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
                 break;
 #endif
 
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
             case 2:
                 // deactivates the I2C peripheral
                 i2cStop(&I2CD2);
@@ -271,7 +270,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
                 break;
 #endif
 
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
             case 3:
                 // deactivates the I2C peripheral
                 i2cStop(&I2CD3);
@@ -280,7 +279,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose_
                 break;
 #endif
 
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
             case 4:
                 // deactivates the I2C peripheral
                 i2cStop(&I2CD4);
@@ -333,22 +332,22 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
         // get the driver for the I2C bus
         switch (busIndex)
         {
-#if STM32_I2C_USE_I2C1
+#if (STM32_I2C_USE_I2C1 == TRUE)
             case 1:
                 palI2c = &I2C1_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
             case 2:
                 palI2c = &I2C2_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
             case 3:
                 palI2c = &I2C3_PAL;
                 break;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
             case 4:
                 palI2c = &I2C4_PAL;
                 break;
@@ -543,7 +542,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
             // stack
             CLR_RT_HeapBlock &top = stack.PushValueAndClear();
             NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult));
+                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_I2cTransferResult_old));
             result = top.Dereference();
             FAULT_ON_NULL(result);
 

@@ -10,17 +10,20 @@
 
 // Default initialisation for Network interface config blocks
 // strong implementation replacing ChibiOS 'weak' one
-bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface * pconfig, uint32_t configurationIndex)
+bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig, uint32_t configurationIndex)
 {
     (void)configurationIndex;
 
+    // zero memory
+    memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+
     // make sure the config block marker is set
     memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
-    
+
     pconfig->InterfaceType = NetworkInterfaceType_Ethernet;
     pconfig->StartupAddressMode = AddressMode_DHCP;
     pconfig->AutomaticDNS = 1;
-    pconfig->SpecificConfigId = 0;
+    pconfig->SpecificConfigId = UINT32_MAX;
 
     // set MAC address with ST provided MAC for development boards
     // 00:80:E1:01:35:D1

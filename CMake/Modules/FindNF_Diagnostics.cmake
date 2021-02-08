@@ -4,8 +4,8 @@
 #
 
 # set include directories
-list(APPEND NF_Diagnostics_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics)
-list(APPEND NF_Diagnostics_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND NF_Diagnostics_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
+list(APPEND NF_Diagnostics_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 
 # source files 
 set(NF_Diagnostics_SRCS
@@ -19,7 +19,7 @@ foreach(SRC_FILE ${NF_Diagnostics_SRCS})
     set(NF_Diagnostics_SRC_FILE SRC_FILE-NOTFOUND)
     find_file(NF_Diagnostics_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${PROJECT_SOURCE_DIR}/src/CLR/Diagnostics
+            ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

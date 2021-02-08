@@ -3,14 +3,11 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <string.h>
 #include <nanoHAL_v2.h>
 
-__nfweak void ConfigurationManager_Initialize()
-{
-};
+__nfweak void ConfigurationManager_Initialize(){};
 
-__nfweak void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+__nfweak void *ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
     (void)startAddress;
     (void)endAddress;
@@ -18,7 +15,9 @@ __nfweak void* ConfigurationManager_FindNetworkConfigurationBlocks(uint32_t star
     return NULL;
 }
 
-__nfweak void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+__nfweak void *ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
+    uint32_t startAddress,
+    uint32_t endAddress)
 {
     (void)startAddress;
     (void)endAddress;
@@ -26,7 +25,7 @@ __nfweak void* ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
     return NULL;
 }
 
-__nfweak void* ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
+__nfweak void *ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t startAddress, uint32_t endAddress)
 {
     (void)startAddress;
     (void)endAddress;
@@ -34,16 +33,30 @@ __nfweak void* ConfigurationManager_FindX509CertificateConfigurationBlocks(uint3
     return NULL;
 }
 
-__nfweak HAL_Configuration_Wireless80211* ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
+__nfweak HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
 {
     (void)configurationId;
 
     return NULL;
 }
 
-__nfweak HAL_Configuration_WirelessAP* ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId)
+__nfweak HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId)
 {
     (void)configurationId;
 
     return NULL;
+}
+
+__nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
+    void *existingConfigBlock,
+    void *newConfigBlock,
+    uint32_t existingConfigBlockSize,
+    uint32_t newConfigBlockSize)
+{
+    (void)existingConfigBlock;
+    (void)newConfigBlock;
+    (void)existingConfigBlockSize;
+    (void)newConfigBlockSize;
+
+    return false;
 }

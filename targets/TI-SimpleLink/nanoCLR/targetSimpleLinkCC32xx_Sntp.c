@@ -13,11 +13,6 @@
 #include <unistd.h>
 #include <string.h>
 
-// RTOS header files
-// #include "FreeRTOS.h"
-// #include "task.h"
-//#include <ti/sysbios/BIOS.h>
-
 #include <ti/drivers/net/wifi/slnetifwifi.h>
 #include <ti/net/slnetsock.h>
 
@@ -27,7 +22,7 @@
 static struct sntp_server SNTP_ServersList[NTP_SERVERS];
 
 pthread_t sntpWorkingThread = (pthread_t)NULL;
-void * SntpWorkingThread(void *arg0);
+void *SntpWorkingThread(void *arg0);
 
 void sntp_init(void)
 {
@@ -35,7 +30,7 @@ void sntp_init(void)
     pthread_attr_t threadAttributes;
     int retc;
 
-    if(sntpWorkingThread == NULL)
+    if (sntpWorkingThread == NULL)
     {
         pthread_attr_init(&threadAttributes);
         priorityParams.sched_priority = NF_TASK_PRIORITY;
@@ -44,17 +39,19 @@ void sntp_init(void)
         if (retc != 0)
         {
             // failed to set attributes
-            while (1) {}
+            while (1)
+            {
+            }
         }
 
         retc = pthread_create(&sntpWorkingThread, &threadAttributes, SntpWorkingThread, NULL);
-        if(retc != 0)
+        if (retc != 0)
         {
             // pthread_create() failed
             HAL_AssertEx();
             UART_PRINT("Unable to create SNTP thread \n");
 
-            while(1)
+            while (1)
             {
                 ;
             }
@@ -69,13 +66,13 @@ void sntp_stop(void)
 }
 
 bool sntp_enabled(void)
-{ 
-    return (sntpWorkingThread != NULL)? true : false;
+{
+    return (sntpWorkingThread != NULL) ? true : false;
 }
 
-char* sntp_getservername(int index)
-{ 
-    if(index < NTP_SERVERS)
+char *sntp_getservername(int index)
+{
+    if (index < NTP_SERVERS)
     {
         return SNTP_ServersList[index].name;
     }
@@ -83,9 +80,9 @@ char* sntp_getservername(int index)
     return NULL;
 }
 
-void sntp_setservername(int index, char* server)
+void sntp_setservername(int index, char *server)
 {
-    if(index < NTP_SERVERS)
+    if (index < NTP_SERVERS)
     {
         SNTP_ServersList[index].name = server;
     }
@@ -93,17 +90,17 @@ void sntp_setservername(int index, char* server)
 
 static int32_t getAddrByName(const char *name, uint32_t *addr, uint16_t *family)
 {
-    int32_t       ifID;
-    uint16_t      addrLen = 1;
+    int32_t ifID;
+    uint16_t addrLen = 1;
 
     /* Query DNS for IPv4 address. */
     ifID = SlNetUtil_getHostByName(0, (char *)name, strlen(name), addr, &addrLen, SLNETSOCK_AF_INET);
 
-    if(ifID < 0)
+    if (ifID < 0)
     {
         /* If call fails, try again for IPv6. */
         ifID = SlNetUtil_getHostByName(0, (char *)name, strlen(name), addr, &addrLen, SLNETSOCK_AF_INET6);
-        if(ifID < 0)
+        if (ifID < 0)
         {
             /* return an error */
             return -1;
@@ -142,8 +139,7 @@ static int32_t hasKissCode(char *str)
     }
 }
 
-static int32_t getTime(SlNetSock_Addr_t *server, uint16_t ifID,
-        SlNetSock_Timeval_t *timeout, uint64_t *ntpTimeStamp)
+static int32_t getTime(SlNetSock_Addr_t *server, uint16_t ifID, SlNetSock_Timeval_t *timeout, uint64_t *ntpTimeStamp)
 {
     SNTP_Header_t sntpPkt;
     int32_t ret = 0;
@@ -182,7 +178,12 @@ static int32_t getTime(SlNetSock_Addr_t *server, uint16_t ifID,
     if (timeout != NULL)
     {
         /* Set the timeout for the server response to the user's value */
-        ret = SlNetSock_setOpt(sd, SLNETSOCK_LVL_SOCKET, SLNETSOCK_OPSOCK_RCV_TIMEO, timeout, sizeof(SlNetSock_Timeval_t));
+        ret = SlNetSock_setOpt(
+            sd,
+            SLNETSOCK_LVL_SOCKET,
+            SLNETSOCK_OPSOCK_RCV_TIMEO,
+            timeout,
+            sizeof(SlNetSock_Timeval_t));
         if (ret < 0)
         {
             SlNetSock_close(sd);
@@ -277,7 +278,7 @@ int32_t SNTP_getTime(SlNetSock_Timeval_t *timeout, uint64_t *ntpTimeStamp)
     {
         memset(&addr, 0, sizeof(addr));
         ifID = getAddrByName(SNTP_ServersList[i].name, addr, &family);
-        if(ifID >= 0)
+        if (ifID >= 0)
         {
             if (family == SLNETSOCK_AF_INET)
             {
@@ -316,7 +317,7 @@ int32_t SNTP_getTime(SlNetSock_Timeval_t *timeout, uint64_t *ntpTimeStamp)
 ////////////////////////////////////////////////////////////////////////////////
 // SNTP working thread
 ////////////////////////////////////////////////////////////////////////////////
-void* SntpWorkingThread(void* argument)
+void *SntpWorkingThread(void *argument)
 {
     (void)argument;
 
@@ -334,17 +335,17 @@ void* SntpWorkingThread(void* argument)
     UART_PRINT("[SNTP task] started\n\r");
 
     // delay 1st request, if configured
-    if(SNTP_STARTUP_DELAY > 0)
+    if (SNTP_STARTUP_DELAY > 0)
     {
         UART_PRINT("[SNTP task] start delay: %d\n\r", SNTP_STARTUP_DELAY);
 
         ClockP_sleep(SNTP_STARTUP_DELAY);
     }
 
-    while(1)
+    while (1)
     {
         // need to be connected and have an IP
-        if(!IS_IP_ACQUIRED(nF_ControlBlock.Status))
+        if (!IS_IP_ACQUIRED(nF_ControlBlock.Status))
         {
             UART_PRINT("[SNTP task] not connected. Retrying in %d seconds.\n\r", SNTP_RETRY_TIMEOUT);
 

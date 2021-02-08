@@ -1552,7 +1552,7 @@
                                      PIN_MODE_INPUT(GPIOJ_AUDIO_INT) |      \
                                      PIN_MODE_OUTPUT(GPIOJ_LED1_RED) |      \
                                      PIN_MODE_INPUT(GPIOJ_WIFI_RST) |       \
-                                     PIN_MODE_INPUT(GPIOJ_DSI_RESET))
+                                     PIN_MODE_OUTPUT(GPIOJ_DSI_RESET))            // LCD/TFT
 #define VAL_GPIOJ_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOJ_ARD_D4) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOJ_ARD_D2) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOJ_DSI_TE) |     \
@@ -1584,7 +1584,7 @@
                                      PIN_OSPEED_VERYLOW(GPIOJ_AUDIO_INT) |  \
                                      PIN_OSPEED_HIGH(GPIOJ_LED1_RED) |      \
                                      PIN_OSPEED_VERYLOW(GPIOJ_WIFI_RST) |   \
-                                     PIN_OSPEED_VERYLOW(GPIOJ_DSI_RESET))
+                                     PIN_OSPEED_HIGH(GPIOJ_DSI_RESET))
 #define VAL_GPIOJ_PUPDR             (PIN_PUPDR_FLOATING(GPIOJ_ARD_D4) |     \
                                      PIN_PUPDR_FLOATING(GPIOJ_ARD_D2) |     \
                                      PIN_PUPDR_FLOATING(GPIOJ_DSI_TE) |     \
@@ -1600,7 +1600,7 @@
                                      PIN_PUPDR_FLOATING(GPIOJ_AUDIO_INT) |  \
                                      PIN_PUPDR_FLOATING(GPIOJ_LED1_RED) |   \
                                      PIN_PUPDR_FLOATING(GPIOJ_WIFI_RST) |   \
-                                     PIN_PUPDR_FLOATING(GPIOJ_DSI_RESET))
+                                     PIN_PUPDR_PULLUP(GPIOJ_DSI_RESET))
 #define VAL_GPIOJ_ODR               (PIN_ODR_HIGH(GPIOJ_ARD_D4) |           \
                                      PIN_ODR_HIGH(GPIOJ_ARD_D2) |           \
                                      PIN_ODR_HIGH(GPIOJ_DSI_TE) |           \

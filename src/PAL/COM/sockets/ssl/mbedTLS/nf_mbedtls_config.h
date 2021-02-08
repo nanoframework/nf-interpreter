@@ -7,6 +7,7 @@
 #ifndef NF_MBEDTLS_CONFIG_H
 #define NF_MBEDTLS_CONFIG_H
 
+#include <nanoCLR_Headers.h>
 #include <target_common.h>
 #include <mbedtls_config.h>
 #include <time.h>

@@ -51,6 +51,16 @@ inline bool Target_HasNanoBooter()
     return false;
 };
 
+inline bool Target_IFUCapable()
+{
+    return false;
+};
+
+inline bool Target_HasProprietaryBooter()
+{
+    return false;
+};
+
 inline uint32_t GetPlatformCapabilities()
 {
     return 0;
@@ -59,6 +69,16 @@ inline uint32_t GetPlatformCapabilities()
 inline uint32_t GetTargetCapabilities()
 {
     return 0;
+};
+
+inline bool RequestToLaunchProprietaryBootloader()
+{
+    return false;
+};
+
+inline bool RequestToLaunchNanoBooter()
+{
+    return false;
 };
 
 #endif //_TARGET_HAL_H_

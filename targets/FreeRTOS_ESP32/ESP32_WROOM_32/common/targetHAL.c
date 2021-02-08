@@ -10,41 +10,30 @@
 inline void HAL_AssertEx()
 {
     asm("break.n 1");
-    while(true) { /*nop*/ }
+    while (true)
+    { /*nop*/
+    }
 }
 
 #if !defined(BUILD_RTM)
 
-inline void HARD_Breakpoint() 
+inline void HARD_Breakpoint()
 {
     asm("break.n 1");
-    while(true) { /*nop*/ }
+    while (true)
+    { /*nop*/
+    }
 };
 
-#endif  // !defined(BUILD_RTM)
+#endif // !defined(BUILD_RTM)
 
-// Provides information whether the configuration block storage requires erase command before sending the update command
-// ESP32 is storing this using its non-volatile storage therefore no erase is required.
-__nfweak bool Target_ConfigUpdateRequiresErase()
-{ 
-    return false;
-};
+// ESP32 stores configuration blocks using its non-volatile storage therefore no erase is required.
+inline TARGET_CONFIG_UPDATE_REQUIRES_ERASE(false);
 
-inline bool Target_HasNanoBooter()
-{ 
-    return false; 
-};
+// ESP32 targets don't declare any target capability
+inline GET_TARGET_CAPABILITIES(0);
 
-// declarations of platform capabilities
-uint32_t GetPlatformCapabilities()
-{ 
-    return 0; 
-};
+// ESP32 has a proprietatry bootloader
+inline TARGET_HAS_PROPRIETARY_BOOTER(true);
 
-// declarations of target capabilities
-// If a target has something to declare it has to provide a 'strong' implementation of this.
-__nfweak uint32_t GetTargetCapabilities()
-{ 
-    return 0; 
-};
-
+inline TARGET_IFU_CAPABLE(false);

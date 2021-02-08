@@ -9,8 +9,8 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 # set include directories
 list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
-list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink)
-list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common)
+list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink)
+list(APPEND nanoFramework.TI.EasyLink_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/common)
 
 # source files
 set(nanoFramework.TI.EasyLink_SRCS
@@ -32,9 +32,9 @@ foreach(SRC_FILE ${nanoFramework.TI.EasyLink_SRCS})
 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.TI.EasyLink
-            ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink
-            ${PROJECT_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.TI.EasyLink
+            ${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/common/easylink
+            ${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

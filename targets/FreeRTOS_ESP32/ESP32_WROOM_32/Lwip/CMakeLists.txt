@@ -10,6 +10,7 @@ list(APPEND COMPONENT_PATH "${ESP32_IDF_PATH}/components")
 # Add current source path for lwipopts.h and sdkconfig.h
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/lwip/lwip/src/include")
+list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/lwip/lwip/src/include/lwip")
 list(APPEND TARGET_ESP32_IDF_INCLUDES "${COMPONENT_PATH}/lwip/port/esp32/include")
 
 

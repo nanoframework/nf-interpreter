@@ -12,6 +12,7 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
 #include <nf_devices_can_native_target.h>
@@ -23,7 +24,7 @@
 #include <win_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_UART == TRUE)
-#include "win_dev_serial_native_target.h"
+#include <win_dev_serial_native_target.h>
 #endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
@@ -67,24 +68,25 @@ void nanoHAL_Initialize()
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
+#if (NANOCLR_GRAPHICS == TRUE)
+    g_GraphicsMemoryHeap.Initialize();
+#endif
+
     ConfigurationManager_Initialize();
 
     Events_Initialize();
 
     CPU_GPIO_Initialize();
 
-    // no PAL events required until now
-    // PalEvent_Initialize();
-
 #if (HAL_USE_CAN == TRUE)
 
-#if STM32_CAN_USE_CAN1
+#if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
     Can1_PAL.Driver = NULL;
 #endif
-#if STM32_CAN_USE_CAN2
+#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
     Can2_PAL.Driver = NULL;
 #endif
-#if STM32_CAN_USE_CAN3
+#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
     Can3_PAL.Driver = NULL;
 #endif
 
@@ -92,16 +94,16 @@ void nanoHAL_Initialize()
 
 #if (HAL_USE_I2C == TRUE)
 
-#if STM32_I2C_USE_I2C1
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
     I2C1_PAL.Driver = NULL;
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
     I2C2_PAL.Driver = NULL;
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
     I2C3_PAL.Driver = NULL;
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
     I2C4_PAL.Driver = NULL;
 #endif
 
@@ -113,31 +115,44 @@ void nanoHAL_Initialize()
 
 #if (HAL_USE_UART == TRUE)
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     Uart1_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     Uart2_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     Uart3_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     Uart4_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     Uart5_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     Uart6_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     Uart7_PAL.UartDriver = NULL;
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     Uart8_PAL.UartDriver = NULL;
 #endif
 
+#endif
+
+#if (NANOCLR_GRAPHICS == TRUE)
+    DisplayInterfaceConfig config; // not used for DSI display
+    g_DisplayInterface.Initialize(config);
+    g_DisplayDriver.Initialize();
+
+    // g_TouchInterface.Initialize();
+    // g_TouchDevice.Initialize();
+
+    // PalEvent_Initialize();
+    // Gesture_Initialize();
+    // Ink_Initialize();
 #endif
 
     // Initialise Network Stack
@@ -181,13 +196,13 @@ void nanoHAL_Uninitialize()
 
 #if (HAL_USE_CAN == TRUE)
 
-#if STM32_CAN_USE_CAN1
+#if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
     canStop(&CAND1);
 #endif
-#if STM32_CAN_USE_CAN2
+#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
     canStop(&CAND2);
 #endif
-#if STM32_CAN_USE_CAN3
+#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
     canStop(&CAND3);
 #endif
 
@@ -195,19 +210,19 @@ void nanoHAL_Uninitialize()
 
 #if (HAL_USE_I2C == TRUE)
 
-#if STM32_I2C_USE_I2C1
+#if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
     i2cReleaseBus(&I2CD1);
     i2cStop(&I2CD1);
 #endif
-#if STM32_I2C_USE_I2C2
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
     i2cReleaseBus(&I2CD2);
     i2cStop(&I2CD2);
 #endif
-#if STM32_I2C_USE_I2C3
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
     i2cReleaseBus(&I2CD3);
     i2cStop(&I2CD3);
 #endif
-#if STM32_I2C_USE_I2C4
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
     i2cReleaseBus(&I2CD4);
     i2cStop(&I2CD4);
 #endif
@@ -220,35 +235,35 @@ void nanoHAL_Uninitialize()
 
 #if (HAL_USE_UART == TRUE)
 
-#if NF_SERIAL_COMM_STM32_UART_USE_USART1
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     uartReleaseBus(&UARTD1);
     uartStop(&UARTD1);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART2
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     uartReleaseBus(&UARTD2);
     uartStop(&UARTD2);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART3
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     uartReleaseBus(&UARTD3);
     uartStop(&UARTD3);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART4
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     uartReleaseBus(&UARTD4);
     uartStop(&UARTD4);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART5
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     uartReleaseBus(&UARTD5);
     uartStop(&UARTD5);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_USART6
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     uartReleaseBus(&UARTD6);
     uartStop(&UARTD6);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART7
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     uartReleaseBus(&UARTD7);
     uartStop(&UARTD7);
 #endif
-#if NF_SERIAL_COMM_STM32_UART_USE_UART8
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     uartReleaseBus(&UARTD8);
     uartStop(&UARTD8);
 #endif

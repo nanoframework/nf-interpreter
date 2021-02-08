@@ -7,14 +7,14 @@
 #ifndef _NANOHAL_V2_H_
 #define _NANOHAL_V2_H_ 1
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <nanoWeak.h>
+#include <nanoCLR_Headers.h>
 
+#include <nanoHAL_Capabilites.h>
 #include <nanoHAL_Network.h>
 #include <nanoHAL_Power.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include "nanoHAL_Boot.h"
+#include <nanoVersion.h>
 
 typedef uint32_t GPIO_PIN;
 
@@ -87,6 +87,13 @@ typedef enum SLEEP_LEVEL
 #define EVENT_CAN     60
 #define EVENT_STORAGE 70
 #define EVENT_RADIO   80
+
+#define EVENT_TOUCH   120
+#define EVENT_GESTURE 130
+
+#define PAL_EVENT_TOUCH 0x1
+#define PAL_EVENT_KEY   0x2
+#define PAL_EVENT_MOUSE 0x4
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -302,7 +309,7 @@ extern "C"
 #define _SIDE_ASSERTE(expr) (expr)
 #endif
 
-#if STATIC_ASSERT_SUPPORTED
+#ifdef STATIC_ASSERT_SUPPORTED
 #define CT_ASSERT_STRING(x) #x
 #define CT_ASSERT_UNIQUE_NAME(e, name)                                                                                 \
     static_assert((e), CT_ASSERT_STRING(name) "@" __FILE__ CT_ASSERT_STRING(__LINE__));
@@ -360,11 +367,9 @@ extern "C"
 {
 #endif
 
-    bool Target_HasNanoBooter();
+    // Implementation of hardware breakpoint.
+    // Required to make the processor to enter debug state and allowing debug tools to investigate system state.
     void HARD_Breakpoint();
-    bool Target_ConfigUpdateRequiresErase();
-    uint32_t GetPlatformCapabilities();
-    uint32_t GetTargetCapabilities();
 
 #ifdef __cplusplus
 }

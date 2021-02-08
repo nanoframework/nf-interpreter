@@ -9,7 +9,6 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 //#include <nanoCLR_Diagnostics.h>
-//#include <nanoCLR_Graphics.h>
 //#include <nanoCLR_Hardware.h>
 
 #include "corlib_native.h"
@@ -20,4 +19,3 @@
 #endif // !defined(_WIN32)
 
 #endif
-

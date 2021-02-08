@@ -8,12 +8,15 @@ include(binutils.ChibiOS)
 include(STM32_CubePackage)
 include(nf_utils)
 
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 ########################################################
 # check availability of hex2dfu tool if specified
 if(DEFINED TOOL_HEX2DFU_PREFIX)
-    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe)
+    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
-        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe")
+        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
         message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
         message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
         message(STATUS "")
@@ -23,23 +26,23 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
     endif()
 endif()
 
-# check if CHIBIOS_SOURCE was specified or if it's empty (default is empty)
-set(NO_CHIBIOS_SOURCE TRUE)
-if(CHIBIOS_SOURCE)
-    if(NOT "${CHIBIOS_SOURCE}" STREQUAL "")
-        set(NO_CHIBIOS_SOURCE FALSE)
+# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_RTOS_SOURCE_FOLDER TRUE)
+if(RTOS_SOURCE_FOLDER)
+    if(NOT ${RTOS_SOURCE_FOLDER} STREQUAL "")
+        set(NO_RTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
 # check if CHIBIOS-Contrib_SOURCE was specified or if it's empty (default is empty)
 set(NO_CHIBIOS_CONTRIB_SOURCE TRUE)
 if(CHIBIOS_CONTRIB_SOURCE)
-    if(NOT "${CHIBIOS_CONTRIB_SOURCE}" STREQUAL "")
+    if(NOT ${CHIBIOS_CONTRIB_SOURCE} STREQUAL "")
         set(NO_CHIBIOS_CONTRIB_SOURCE FALSE)
     endif()
 endif()
 
-if(NO_CHIBIOS_SOURCE)
+if(NO_RTOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
 
     # check for Git (needed here for advanced warning to user if it's not installed)
@@ -51,23 +54,37 @@ if(NO_CHIBIOS_SOURCE)
     endif()
 
     # ChibiOS version
-    set(CHIBIOS_GIT_TAG "stable_19.1.x")
-    message(STATUS "RTOS is: CHIBIOS (latest available code from ${CHIBIOS_GIT_TAG})")
+    set(RTOS_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc ChibiOS version
+    if(DEFINED RTOS_VERSION)
+        if(NOT "${RTOS_VERSION}" STREQUAL "")
+            set(RTOS_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc ChibiOS version
+    if(RTOS_VERSION_EMPTY)
+        # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
+        set(RTOS_VERSION "stable_20.3.x")
+    endif()
+
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from nanoFramwwork GitHub repo")
 
     # need to setup a separate CMake project to download the code from the GitHub repository
     # otherwise it won't be available before the actual build step
-    configure_file("${PROJECT_SOURCE_DIR}/CMake/ChibiOS.CMakeLists.cmake.in"
-                "${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt")
+    configure_file(${CMAKE_SOURCE_DIR}/CMake/ChibiOS.CMakeLists.cmake.in
+                   ${CMAKE_BINARY_DIR}/ChibiOS_Download/CMakeLists.txt)
 
     # setup CMake project for ChibiOS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
                     RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS_Download)
 
     # run build on ChibiOS download CMake project to perform the download
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
                     RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS_Download")
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS_Download)
 
     # add ChibiOS as external project
     ExternalProject_Add(
@@ -75,7 +92,7 @@ if(NO_CHIBIOS_SOURCE)
         PREFIX ChibiOS
         SOURCE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source
         GIT_REPOSITORY  https://github.com/nanoframework/chibios
-        GIT_TAG ${CHIBIOS_GIT_TAG}  # target specified branch
+        GIT_TAG ${RTOS_VERSION}  # target specified branch
         GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
         TIMEOUT 10
         LOG_DOWNLOAD 1
@@ -93,21 +110,21 @@ else()
     # ChibiOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${CHIBIOS_SOURCE}/")
-        message(STATUS "RTOS is: ChibiOS (source from: ${CHIBIOS_SOURCE})")
+    if(EXISTS ${RTOS_SOURCE_FOLDER}/)
+        message(STATUS "RTOS is: ChibiOS (source from: ${RTOS_SOURCE_FOLDER})")
 
         # check if we already have the sources, no need to copy again
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${CHIBIOS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS_Source")
+            file(COPY ${RTOS_SOURCE_FOLDER}/ DESTINATION ${CMAKE_BINARY_DIR}/ChibiOS_Source)
         else()
-            message(STATUS "Using local cache of ChibiOS source from ${CHIBIOS_SOURCE}")
+            message(STATUS "Using local cache of ChibiOS source from ${RTOS_SOURCE_FOLDER}")
         endif()
 
         set(CHIBIOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/ChibiOS_Source/include)
     else()
-        message(FATAL_ERROR "Couldn't find ChibiOS source at ${CHIBIOS_SOURCE}/")
+        message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
     # add ChibiOS as external project
@@ -143,18 +160,18 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/ChibiOS-Contrib.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download/CMakeLists.txt")
+        configure_file(${CMAKE_SOURCE_DIR}/CMake/ChibiOS-Contrib.CMakeLists.cmake.in
+                       ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download/CMakeLists.txt)
 
         # setup CMake project for ChibiOS-Contrib download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download)
 
         # run build on ChibiOS-Contrib download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Download)
 
         # add ChibiOS-Contrib as external project
         # need to specify nanoframework as the active branch
@@ -180,14 +197,14 @@ if(CHIBIOS_CONTRIB_REQUIRED)
         # ChibiOS-Contrib source was specified
 
         # sanity check is source path exists
-        if(EXISTS "${CHIBIOS_CONTRIB_SOURCE}/")
-            message(STATUS "ChibiOS-Contrib source from: ${CHIBIOS_CONTRIB_SOURCE}")
+        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/)
+            message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
             # check if we already have the sources, no need to copy again
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
-                file(COPY "${CHIBIOS_CONTRIB_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source")
+                file(COPY ${CHIBIOS_CONTRIB_SOURCE}/ DESTINATION ${CMAKE_BINARY_DIR}/ChibiOS-Contrib_Source)
             else()
                 message(STATUS "Using local cache of ChibiOS-Contrib source from ${CHIBIOS_CONTRIB_SOURCE}")
             endif()
@@ -219,7 +236,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     # check if FATFS_SOURCE was specified or if it's empty (default is empty)
     set(NO_FATFS_SOURCE TRUE)
     if(FATFS_SOURCE)
-        if(NOT "${FATFS_SOURCE}" STREQUAL "")   
+        if(NOT ${FATFS_SOURCE} STREQUAL "")   
             set(NO_FATFS_SOURCE FALSE)
         endif()
     endif()
@@ -230,7 +247,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
         # check if build was requested with a specifc FatFS version
         if(DEFINED FATFS_VERSION)
-            if(NOT "${FATFS_VERSION}" STREQUAL "")
+            if(NOT ${FATFS_VERSION} STREQUAL "")
                 set(FATFS_VERSION_EMPTY FALSE)
             endif()
         endif()
@@ -241,25 +258,25 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
             set(FATFS_VERSION_TAG "R0.14")
         else()
             # set version 
-            set(FATFS_VERSION_TAG "${FATFS_VERSION}")
+            set(FATFS_VERSION_TAG ${FATFS_VERSION})
         endif()
 
-        message(STATUS "FatFS version is: ${FATFS_VERSION}")
+        message(STATUS "FatFS version is: ${FATFS_VERSION_TAG}")
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in"
-        "${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt")
+        configure_file(${CMAKE_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in
+                       ${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt)
 
         # setup CMake project for FatFS download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/FatFS_Download)
 
         # run build on FatFS download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/FatFS_Download)
 
         # add FatFS as external project
         ExternalProject_Add( 
@@ -271,7 +288,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
             GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
             TIMEOUT 10
             LOG_DOWNLOAD 1
-            INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h"
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h
 
             # Disable all other steps
             CONFIGURE_COMMAND ""
@@ -282,14 +299,14 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
         # FatFS source was specified
 
         # sanity check is source path exists
-        if(EXISTS "${FATFS_SOURCE}/")
-            message(STATUS "FatFS ${FATFS_VERSION} (source from: ${FATFS_SOURCE})")
+        if(EXISTS ${FATFS_SOURCE}/)
+            message(STATUS "FatFS source from: ${FATFS_SOURCE})")
 
             # check if we already have the sources, no need to copy again
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
-                file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
+                file(COPY ${FATFS_SOURCE}/ DESTINATION ${CMAKE_BINARY_DIR}/FatFS_Source)
             else()
                 message(STATUS "Using local cache of FatFS source from ${FATFS_SOURCE}")
             endif()
@@ -302,7 +319,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
             FatFS
             PREFIX FatFS
             SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
-            INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${PROJECT_BINARY_DIR}/FatFS_Source/source/ffconf.h"
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h
 
             # Disable all other steps
             CONFIGURE_COMMAND ""
@@ -323,7 +340,7 @@ if(NF_SECURITY_MBEDTLS)
     set(NO_MBEDTLS_SOURCE TRUE)
 
     if(MBEDTLS_SOURCE)
-        if(NOT "${MBEDTLS_SOURCE}" STREQUAL "")
+        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
             set(NO_MBEDTLS_SOURCE FALSE)
         endif()
     endif()
@@ -345,20 +362,22 @@ if(NF_SECURITY_MBEDTLS)
         # set tag for currently supported version
         set(MBEDTLS_GIT_TAG "mbedtls-2.23.0")
 
+        message(STATUS "mbedTLS version is: ${MBEDTLS_GIT_TAG}")
+
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/mbedTLS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt")
+        configure_file(${CMAKE_SOURCE_DIR}/CMake/mbedTLS.CMakeLists.cmake.in
+                    ${CMAKE_BINARY_DIR}/mbedTLS_Download/CMakeLists.txt)
 
         # setup CMake project for mbedTLS download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mbedTLS_Download)
 
         # run build on mbedTLS download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/mbedTLS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/mbedTLS_Download)
 
         # add mbedTLS as external project
         ExternalProject_Add(
@@ -379,17 +398,17 @@ if(NF_SECURITY_MBEDTLS)
 
     else()
         # mbedTLS source was specified
-        # message(FATAL_ERROR "${CMAKE_BINARY_DIR}/mbedTLS_Source") 
+        # message(FATAL_ERROR ${CMAKE_BINARY_DIR}/mbedTLS_Source") 
 
         # sanity check is source path exists
-        if(EXISTS "${MBEDTLS_SOURCE}/")
+        if(EXISTS ${MBEDTLS_SOURCE}/)
 
             # check if we already have the sources, no need to copy again
             NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/mbedTLS_Source/ SOURCE_EXISTS)
 
             if(NOT ${SOURCE_EXISTS})
-                message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
-                file(COPY "${MBEDTLS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/mbedTLS_Source")
+                message(STATUS "mbedTLS (source from: ${MBEDTLS_SOURCE})")
+                file(COPY ${MBEDTLS_SOURCE}/ DESTINATION ${CMAKE_BINARY_DIR}/mbedTLS_Source)
             else()
                 message(STATUS "Using local cache of mbedTLS source from ${MBEDTLS_SOURCE}")
             endif()
@@ -413,26 +432,26 @@ if(NF_SECURITY_MBEDTLS)
 
     endif()
 
-    set(mbedTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include")
-    set(mbedTLS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
+    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
     include_directories(${mbedTLS_INCLUDE_DIRS})
 
 endif()
 
 # set target base location
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
     # set target base location
-    set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
 else()
     # try to find board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
         # set target base location
-        set(TARGET_BASE_LOCATION "${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}")
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
     else()
         # board NOT found in targets folder
         # can't continue
-        message(FATAL_ERROR "\n\nSorry but support for ${CHIBIOS_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
     endif()
 endif()
 
@@ -445,7 +464,7 @@ include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 # start search in nanoFramework ChibiOS 'overlay' folder
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${CHIBIOS_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD})
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
@@ -453,18 +472,18 @@ else()
     # board NOT found in ChibiOS 'overlay'
 
     # try to find it in the target boards
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
         # board found
         # check if the board definition files are available at the target folder
-        if( EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.c AND
-            EXISTS ${PROJECT_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD}/board.h)
+        if( EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD}/board.c AND
+            EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD}/board.h)
             # definition files found
             set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
 
         else()
             # board.c and board.h are NOT in the target folder, try to find them in the official distribution
 
-            if(EXISTS ${PROJECT_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${CHIBIOS_BOARD})
+            if(EXISTS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${TARGET_BOARD})
                 # board found
                 # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
                 set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
@@ -472,20 +491,20 @@ else()
             else()
                 # board NOT found in official distribution
                 # quit now as there is no were else to search for these
-                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+                message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${TARGET_BOARD} in the available list of ChibiOS supported boards...\n\n")
 
             endif()
         endif()
 
     else()
         # try to find board in the Community targets folder
-        if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${CHIBIOS_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
             # set flag for this being a community board
             set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
         else()
             # board NOT found in official distribution
             # quit now as there is no were else to search for these
-            message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${CHIBIOS_BOARD} in the available list of ChibiOS supported boards...\n\n")
+            message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${TARGET_BOARD} in the available list of ChibiOS supported boards...\n\n")
         endif()
 
     endif()
@@ -505,7 +524,7 @@ if(NF_FEATURE_USE_SPIFFS)
     set(NO_SPIFFS_SOURCE TRUE)
 
     if(SPIFFS_SOURCE)
-        if(NOT "${SPIFFS_SOURCE}" STREQUAL "")
+        if(NOT ${SPIFFS_SOURCE} STREQUAL "")
             set(NO_SPIFFS_SOURCE FALSE)
         endif()
     endif()
@@ -523,18 +542,18 @@ if(NF_FEATURE_USE_SPIFFS)
 
         # need to setup a separate CMake project to download the code from the GitHub repository
         # otherwise it won't be available before the actual build step
-        configure_file("${PROJECT_SOURCE_DIR}/CMake/SPIFFS.CMakeLists.cmake.in"
-                    "${CMAKE_BINARY_DIR}/SPIFFS_Download/CMakeLists.txt")
+        configure_file(${CMAKE_SOURCE_DIR}/CMake/SPIFFS.CMakeLists.cmake.in
+                    ${CMAKE_BINARY_DIR}/SPIFFS_Download/CMakeLists.txt)
 
         # setup CMake project for SPIFFS download
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        execute_process(COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SPIFFS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/SPIFFS_Download)
 
         # run build on SPIFFS download CMake project to perform the download
         execute_process(COMMAND ${CMAKE_COMMAND} --build .
                         RESULT_VARIABLE result
-                        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/SPIFFS_Download")
+                        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/SPIFFS_Download)
 
         # add SPIFFS as external project
         ExternalProject_Add(
@@ -557,12 +576,12 @@ if(NF_FEATURE_USE_SPIFFS)
         # SPIFFS source was specified
 
         # sanity check is source path exists
-        if(EXISTS "${SPIFFS_SOURCE}/")
+        if(EXISTS ${SPIFFS_SOURCE}/)
 
             # check if we already have the sources, no need to copy again
-            if(NOT EXISTS "${CMAKE_BINARY_DIR}/SPIFFS_Source")
+            if(NOT EXISTS ${CMAKE_BINARY_DIR}/SPIFFS_Source)
                 message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
-                file(COPY "${SPIFFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/SPIFFS_Source")
+                file(COPY ${SPIFFS_SOURCE}/ DESTINATION ${CMAKE_BINARY_DIR}/SPIFFS_Source)
             else()
                 message(STATUS "Using local cache of SPIFFS source from ${SPIFFS_SOURCE}")
             endif()
@@ -589,7 +608,7 @@ if(NF_FEATURE_USE_SPIFFS)
     # get source dir for SPIFFS CMake project
     ExternalProject_Get_Property(SPIFFS SOURCE_DIR)
 
-    set(SPIFFS_LIBRARIES "${CMAKE_SHARED_LIBRARY_PREFIX}SPIFFS${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(SPIFFS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}SPIFFS${CMAKE_SHARED_LIBRARY_SUFFIX})
     include_directories(${SPIFFS_INCLUDE_DIRS})
 
     add_subdirectory(spiffs)

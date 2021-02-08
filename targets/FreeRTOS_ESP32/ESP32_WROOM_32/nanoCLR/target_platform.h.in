@@ -8,16 +8,15 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_ESP32_NANOCLR_H_
-#define _TARGET_ESP32_NANOCLR_H_
+#ifndef _TARGET_PLATFORM_H_
+#define _TARGET_PLATFORM_H_ 1
 
-// enable SPI
-#define HAL_USE_SPI @HAL_USE_SPI_OPTION@
+#define NANOCLR_GRAPHICS        @NANOCLR_GRAPHICS@
+#define HAL_USE_SPI             @HAL_USE_SPI_OPTION@
+#define HAL_USE_SDC             @HAL_USE_SDC_OPTION@
 
-// set when SD card is enabled
-#define HAL_USE_SDC @HAL_USE_SDC_OPTION@
 #if defined(HAL_USE_SDC)
-#define SDC_MAX_OPEN_FILES	5
+#define SDC_MAX_OPEN_FILES	    5
 #endif
 
-#endif /* _TARGET_ESP32_NANOCLR_H_ */
+#endif /* _TARGET_PLATFORM_H_ */

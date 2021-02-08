@@ -6,16 +6,15 @@
 #ifndef _NANOHAL_NETWORK_H_
 #define _NANOHAL_NETWORK_H_ 1
 
-#include <stdio.h>
-#include <nanoPackStruct.h>
-#include <nanoWeak.h>
+#include <nanoCLR_Headers.h>
 
 // this is the maximum hardware address length (MAC address)
 // setting it to 6 and using the same define that lwIP uses for this
 #define NETIF_MAX_HWADDR_LEN 6
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.Wireless80211Configuration.MaxPasswordLength (in managed code) !!! //
+// !!! KEEP IN SYNC WITH System.Net.NetworkInformation.Wireless80211Configuration.MaxPasswordLength (in managed code)
+// !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // this is the maximum wireless 802.11 configuration password length
 #define WIRELESS82011_CONFIG_MAX_PASSWORD_LEN 64
@@ -47,7 +46,7 @@ static const unsigned char c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1[] = "XB1";
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////
-// Description: network interface type 
+// Description: network interface type
 typedef enum __nfpack NetworkInterfaceType
 {
     NetworkInterfaceType_Unknown = 1,
@@ -64,9 +63,11 @@ typedef enum __nfpack Wireless80211Configuration_ConfigurationOptions
     // Enable Station or AP ( Wifi component started & memory allocated )
     Wireless80211Configuration_ConfigurationOptions_Enable = 2,
     // Wireless station automatically connects on CLR start
-    Wireless80211Configuration_ConfigurationOptions_AutoConnect = 4 | Wireless80211Configuration_ConfigurationOptions_Enable,
+    Wireless80211Configuration_ConfigurationOptions_AutoConnect =
+        4 | Wireless80211Configuration_ConfigurationOptions_Enable,
     // Enable Smart config
-    Wireless80211Configuration_ConfigurationOptions_SmartConfig = 8 | Wireless80211Configuration_ConfigurationOptions_Enable,
+    Wireless80211Configuration_ConfigurationOptions_SmartConfig =
+        8 | Wireless80211Configuration_ConfigurationOptions_Enable,
 } Wireless80211Configuration_ConfigurationOptions;
 
 typedef enum __nfpack WirelessAPConfiguration_ConfigurationOptions
@@ -95,7 +96,7 @@ typedef enum __nfpack AddressMode
     AddressMode_Static = 2,
 
     ////////////////////////////////////////
-    // for this option to be valid 
+    // for this option to be valid
     // LWIP_AUTOIP (lwIP option) has to be defined
     AddressMode_AutoIP = 3,
 } AddressMode;
@@ -151,7 +152,8 @@ typedef enum __nfpack RadioType
     RadioType__802_11n = 8,
 } RadioType;
 
-typedef struct __nfpack HAL_Configuration_NetworkInterface {
+typedef struct __nfpack HAL_Configuration_NetworkInterface
+{
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -160,34 +162,34 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
     uint8_t MacAddress[6];
 
     // Network IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4Address;
+    uint32_t IPv4Address;
 
     // Network IPv4 subnet mask as 32-bit unsigned integer
-    uint32_t  IPv4NetMask;
+    uint32_t IPv4NetMask;
 
     // Network gateway IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4GatewayAddress;
+    uint32_t IPv4GatewayAddress;
 
     // DNS server 1 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNSAddress1;
+    uint32_t IPv4DNSAddress1;
 
     // DNS server 2 IPv4 address as 32-bit unsigned integer
-    uint32_t  IPv4DNSAddress2;
+    uint32_t IPv4DNSAddress2;
 
     // Network IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6Address[4];
+    uint32_t IPv6Address[4];
 
     // Network IPv6 subnet mask as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6NetMask[4];
+    uint32_t IPv6NetMask[4];
 
     // Network gateway IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6GatewayAddress[4];
+    uint32_t IPv6GatewayAddress[4];
 
     // DNS server 1 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNSAddress1[4];
+    uint32_t IPv6DNSAddress1[4];
 
     // DNS server 2 IPv6 address as an array of 4 32-bit unsigned integers
-    uint32_t  IPv6DNSAddress2[4];
+    uint32_t IPv6DNSAddress2[4];
 
     // interface type
     NetworkInterfaceType InterfaceType;
@@ -207,7 +209,8 @@ typedef struct __nfpack HAL_Configuration_NetworkInterface {
 
 } HAL_Configuration_NetworkInterface;
 
-typedef struct __nfpack HAL_Configuration_Wireless80211 {
+typedef struct __nfpack HAL_Configuration_Wireless80211
+{
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -233,11 +236,12 @@ typedef struct __nfpack HAL_Configuration_Wireless80211 {
     // Wireless options (flags), depends if wireless Station
     Wireless80211Configuration_ConfigurationOptions Options;
 
-     // Rssi, station only
+    // Rssi, station only
 
 } HAL_Configuration_Wireless80211;
 
-typedef struct __nfpack HAL_Configuration_WirelessAP {
+typedef struct __nfpack HAL_Configuration_WirelessAP
+{
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -264,14 +268,15 @@ typedef struct __nfpack HAL_Configuration_WirelessAP {
     WirelessAPConfiguration_ConfigurationOptions Options;
 
     // channel used for AP
-    uint8_t Channel; 
+    uint8_t Channel;
 
     // Max client connections
     uint8_t MaxConnections;
- 
+
 } HAL_Configuration_WirelessAP;
 
-typedef struct __nfpack HAL_Configuration_X509CaRootBundle {
+typedef struct __nfpack HAL_Configuration_X509CaRootBundle
+{
 
     // this is the marker placeholder for this configuration block
     uint8_t Marker[4];
@@ -284,13 +289,12 @@ typedef struct __nfpack HAL_Configuration_X509CaRootBundle {
 
 } HAL_Configuration_X509CaRootBundle;
 
-
-void 	nanoHAL_Network_Initialize();
-void    sys_signal_sock_event();
-
+void nanoHAL_Network_Initialize();
+void sys_signal_sock_event();
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #ifdef __cplusplus

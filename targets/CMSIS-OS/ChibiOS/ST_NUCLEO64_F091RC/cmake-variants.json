@@ -31,8 +31,8 @@
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "TARGET_SERIES": "STM32F0xx",
           "RTOS": "CHIBIOS",
-          "CHIBIOS_SOURCE": "",
-          "CHIBIOS_BOARD": "ST_NUCLEO64_F091RC",
+          "RTOS_SOURCE_FOLDER": "",
+          "TARGET_BOARD": "ST_NUCLEO64_F091RC",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",
           "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "OFF",
@@ -45,8 +45,10 @@
           "NF_BUILD_RTM": "OFF",
           "API_Hardware.Stm32": "ON",
           "API_Windows.Devices.Gpio": "ON",
+          "API_System.Device.Gpio": "ON",
           "API_Windows.Devices.Spi": "ON",
           "API_Windows.Devices.I2c": "ON",
+          "API_System.Device.I2c": "ON",
           "API_Windows.Devices.Pwm": "ON",
           "API_Windows.Devices.SerialCommunication": "ON"
         }

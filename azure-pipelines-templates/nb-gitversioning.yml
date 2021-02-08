@@ -3,23 +3,24 @@
 
 steps:
   - task: DotNetCoreCLI@2  
+    condition: ne(variables['system.pullrequest.isfork'], true)
+    displayName: Install NBGV tool
     inputs:
       command: custom
       custom: tool
       arguments: install --tool-path . nbgv
-    condition: ne(variables['system.pullrequest.isfork'], true)
-    displayName: Install NBGV tool
 
   - script: nbgv cloud -a -c
     condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Set build number
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
-  # so we need to come up with a versiom number to use for the build
+  # so we need to come up with a version number to use for the build
   - task: PowerShell@2
+    condition: eq(variables['system.pullrequest.isfork'], true)
+    displayName: Set temporary build number
     inputs:
         targetType: 'inline'
         script: |
-            Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0.$env:System_PullRequest_PullRequestNumber"
-    condition: eq(variables['system.pullrequest.isfork'], true)
-    displayName: Set temporary build number
+            Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
+            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionHeight]")$env:System_PullRequest_PullRequestNumber"
