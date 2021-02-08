@@ -47,7 +47,7 @@
 
 #define CLR_RT_HEAPBLOCK_RELOCATE(ptr)                                                                                 \
     {                                                                                                                  \
-        nanoClrDataType dt = ptr->DataType();                                                                             \
+        nanoClrDataType dt = ptr->DataType();                                                                          \
                                                                                                                        \
         if (dt > DATATYPE_LAST_NONPOINTER && dt < DATATYPE_FIRST_INVALID)                                              \
         {                                                                                                              \
@@ -792,6 +792,14 @@ struct CLR_RT_HeapBlock
 
         //--//
 
+        struct GenericInstance
+        {
+            CLR_RT_TypeSpec_Index genericType;
+            CLR_RT_HeapBlock_GenericInstance *ptr;
+        } genericInstance;
+
+        //--//
+
     } m_data;
 
   public:
@@ -1190,6 +1198,16 @@ struct CLR_RT_HeapBlock
     {
         return m_data.reflection;
     }
+
+    //--//
+
+    void SetGenericType(const CLR_RT_TypeSpec_Index& genericType)
+    {
+        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
+        m_data.genericInstance.genericType.m_data = genericType.m_data;
+    }
+
+    HRESULT SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& genericType);
 
     //--//
 
@@ -2382,6 +2400,15 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     HRESULT GetTarget(CLR_RT_HeapBlock &targetReference);
 
     void InsertInPriorityOrder();
+
+    void Relocate();
+};
+
+//--//
+
+struct CLR_RT_HeapBlock_GenericInstance : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
+{
+    static HRESULT CreateInstance(CLR_RT_HeapBlock& reference, const CLR_RT_TypeSpec_Index& tsIndex);
 
     void Relocate();
 };
