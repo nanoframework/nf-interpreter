@@ -7,7 +7,7 @@
 #include <nanoHAL_Types.h>
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
-#include <Esp32_os.h>
+#include <esp32_os.h>
 
 // Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
 uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 

@@ -5,7 +5,7 @@
 
 #include <nanoPAL.h>
 #include <target_platform.h>
-#include <Esp32_os.h>
+#include <esp32_os.h>
 
 static TimerHandle_t nextEventTimer;
 

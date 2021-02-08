@@ -43,7 +43,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 
-#include <Esp32_os.h>
+#include <esp32_os.h>
 #include "Esp32_DeviceMapping.h"
 
 // Max frequency over GPIO mux pins, full duplex

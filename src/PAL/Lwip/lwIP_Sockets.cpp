@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "LWIP_sockets.h"
+#include "lwIP_Sockets.h"
 
 extern "C"
 {

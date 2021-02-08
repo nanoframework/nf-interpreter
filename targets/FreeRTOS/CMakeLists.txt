@@ -5,7 +5,7 @@
 
 include(binutils.arm-none-eabi)
 include(binutils.FreeRTOS)
-include(nf_utils)
+include(NF_Utils)
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
@@ -102,7 +102,7 @@ else()
         NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FreeRTOS_Source/ SOURCE_EXISTS)
 
         if(NOT ${SOURCE_EXISTS})
-            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source/lib/FreeRTOS")
+            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/FreeRTOS_Source")
         else()
             message(STATUS "Using local cache of FreeRTOS source from ${RTOS_SOURCE_FOLDER}")
         endif()

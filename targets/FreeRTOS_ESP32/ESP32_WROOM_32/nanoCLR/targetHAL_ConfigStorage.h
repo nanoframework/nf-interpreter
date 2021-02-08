@@ -6,7 +6,7 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-#include "Esp32_os.h"
+#include "esp32_os.h"
 
 #define CONFIG_ERROR      0xffffffff
 

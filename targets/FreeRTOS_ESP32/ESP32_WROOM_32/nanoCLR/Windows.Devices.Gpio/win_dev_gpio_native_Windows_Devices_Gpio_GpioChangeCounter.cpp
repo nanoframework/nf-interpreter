@@ -5,7 +5,7 @@
 //
 
 #include "win_dev_gpio_native.h"
-#include <core.h>
+#include <Core.h>
 
 typedef Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount GpioChangeCount;
 typedef Library_corlib_native_System_TimeSpan TimeSpan;

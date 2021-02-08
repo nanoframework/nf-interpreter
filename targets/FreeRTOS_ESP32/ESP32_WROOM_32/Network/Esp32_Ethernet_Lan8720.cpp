@@ -6,7 +6,7 @@
 // This file includes the board specific Ethernet Intialisation
 
 #include <nanoHAL.h>
-#include "Esp32_os.h"
+#include "esp32_os.h"
 #include "eth_phy/phy_lan8720.h"
 #include "soc/emac_reg_v2.h"
 
