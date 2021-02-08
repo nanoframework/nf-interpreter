@@ -116,8 +116,9 @@ void Library_corlib_native_System_TimeSpan::ConstructTimeSpan(
     {
         // remaining situation, just take the milliseconds value as it is and convert to ticks
         *val += msec;
-        *val *= TIME_CONVERSION__TICKUNITS;
     }
+
+    *val *= TIME_CONVERSION__TICKUNITS;
 }
 
 HRESULT Library_corlib_native_System_TimeSpan::CompareTo___I4__OBJECT(CLR_RT_StackFrame &stack)

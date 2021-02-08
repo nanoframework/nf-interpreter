@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #ifndef _NF_NETWORKING_SNTP_H_
 #define _NF_NETWORKING_SNTP_H_
 
@@ -34,9 +33,8 @@ struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
     NANOCLR_NATIVE_DECLARE(set_Server2___STATIC__VOID__STRING);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp;
 
-#endif  //_NF_NETWORKING_SNTP_H_
+#endif //_NF_NETWORKING_SNTP_H_

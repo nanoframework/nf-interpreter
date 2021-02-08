@@ -8,7 +8,6 @@
 
 #define INK_COMPLETION_TIME_USEC 10000 // 10ms - same as default touch completion
 
-
 extern TouchPanelDriver g_TouchPanelDriver;
 struct InkDriver g_InkDriver;
 extern DisplayDriver g_DisplayDriver;
@@ -26,7 +25,7 @@ HRESULT InkDriver::Initialize()
         m_InkRegionInfo.Bmp = NULL;
         m_ScreenBmp.width = g_DisplayDriver.Attributes.Width;
         m_ScreenBmp.height = g_DisplayDriver.Attributes.Height;
-        //   m_ScreenBmp.data = Display::GetFrameBuffer();   
+        //   m_ScreenBmp.data = Display::GetFrameBuffer();
         m_ScreenBmp.transparentColor = PAL_GFX_Bitmap::c_InvalidColor;
     }
 
@@ -44,7 +43,7 @@ HRESULT InkDriver::Uninitialize()
     return S_OK;
 }
 
-HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
+HRESULT InkDriver::SetRegion(InkRegionInfo *inkRegionInfo)
 {
     m_InkRegionInfo = *inkRegionInfo;
 
@@ -62,7 +61,6 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
         m_InkRegionInfo.Bmp = &m_ScreenBmp;
     }
 
-
     CLR_UINT32 flags = GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;
     CLR_UINT16 x = 0;
@@ -72,7 +70,8 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
     if (g_TouchPanelDriver.GetTouchPoint(&flags, &source, &x, &y, &time) == S_OK)
     {
 
-        if (x == TouchPointLocationFlags_ContactUp) return S_OK;
+        if (x == TouchPointLocationFlags_ContactUp)
+            return S_OK;
 
         if (x == TouchPointLocationFlags_ContactDown)
         {
@@ -83,16 +82,19 @@ HRESULT InkDriver::SetRegion(InkRegionInfo* inkRegionInfo)
         m_lastx = x;
         m_lasty = y;
 
-        if (!m_InkCompletion.IsLinked()) m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
+        if (!m_InkCompletion.IsLinked())
+            m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
     }
-    else return CLR_E_FAIL;
+    else
+        return CLR_E_FAIL;
 
     return S_OK;
 }
 
 HRESULT InkDriver::ResetRegion()
 {
-    if (m_InkCompletion.IsLinked()) m_InkCompletion.Abort();
+    if (m_InkCompletion.IsLinked())
+        m_InkCompletion.Abort();
 
     m_InkingActive = false;
     m_InkRegionInfo.Bmp = NULL;
@@ -100,16 +102,19 @@ HRESULT InkDriver::ResetRegion()
     return S_OK;
 }
 
-void InkDriver::InkContinuationRoutine(void* arg)
+void InkDriver::InkContinuationRoutine(void *arg)
 {
     g_InkDriver.DrawInk(arg);
 }
 
-void InkDriver::DrawInk(void* arg)
+void InkDriver::DrawInk(void *arg)
 {
-    if (arg == NULL) {}; // Avoid unused parameter, maybe we need it in the future?
+    if (arg == NULL)
+    {
+    }; // Avoid unused parameter, maybe we need it in the future?
     HRESULT hr = S_OK;
-    CLR_UINT32 flags = (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
+    CLR_UINT32 flags =
+        (m_index << 16) | GetTouchPointFlags_NextPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
     CLR_UINT16 source = 0;
     CLR_UINT16 x = 0;
     CLR_UINT16 y = 0;
@@ -119,15 +124,18 @@ void InkDriver::DrawInk(void* arg)
 
     while ((hr = g_TouchPanelDriver.GetTouchPoint(&flags, &source, &x, &y, &time)) == S_OK)
     {
-        if (x == TouchPointLocationFlags_ContactUp) break;
-        if (x == TouchPointLocationFlags_ContactDown) continue;
+        if (x == TouchPointLocationFlags_ContactUp)
+            break;
+        if (x == TouchPointLocationFlags_ContactDown)
+            continue;
 
         if (m_lastx != 0xFFFF)
         {
             g_GraphicsDriver.DrawLineRaw(m_ScreenBmp, m_InkRegionInfo.Pen, m_lastx, m_lasty, x, y);
             if (m_InkRegionInfo.Bmp != NULL)
             {
-                g_GraphicsDriver.DrawLine(*(m_InkRegionInfo.Bmp), m_InkRegionInfo.Pen, m_lastx - dx, m_lasty - dy, x - dx, y - dy);
+                g_GraphicsDriver
+                    .DrawLine(*(m_InkRegionInfo.Bmp), m_InkRegionInfo.Pen, m_lastx - dx, m_lasty - dy, x - dx, y - dy);
             }
         }
 
@@ -139,6 +147,7 @@ void InkDriver::DrawInk(void* arg)
 
     if (x != TouchPointLocationFlags_ContactUp)
     {
-        if (!m_InkCompletion.IsLinked()) m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
+        if (!m_InkCompletion.IsLinked())
+            m_InkCompletion.EnqueueDelta(INK_COMPLETION_TIME_USEC);
     }
 }
