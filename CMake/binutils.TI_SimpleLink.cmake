@@ -145,15 +145,15 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
     target_link_libraries(
         ${NANOCLR_PROJECT_NAME}.elf
     
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source/ti/display/lib/display.am4fg
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source/ti/grlib/lib/gcc/m4f/grlib.a
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source/ti/drivers/lib/drivers_cc13x2.am4fg
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/display/lib/display.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/grlib/lib/gcc/m4f/grlib.a
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/drivers/lib/drivers_cc13x2.am4fg
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x2.am4fg
         
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
-        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
+        ${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
     )
     
 endmacro()
@@ -233,7 +233,7 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
             DEPENDS
             ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
 
-            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
+            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.bat -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generate configuration files" 
         )
@@ -248,7 +248,7 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
             DEPENDS
             ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
 
-            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.sh -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
+            COMMAND ${CMAKE_BINARY_DIR}/TI_SysConfig_Source/sysconfig_cli.sh -s "${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/.metadata/product.json" -o "syscfg" --compiler gcc ${SYS_CONFIG_FILENAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generate configuration files" 
         )
@@ -276,13 +276,13 @@ macro(NF_ADD_PLATFORM_SYSCONFIG_STEPS TI_DEVICE TI_DEVICE_FAMILY)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
         add_custom_target(
             TIRTOS_CONFIG        
-            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"    
+            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs.exe --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"    
             COMMENT "Generate TI-RTOS configuration" 
         )
     else()
         add_custom_target(
             TIRTOS_CONFIG
-            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2Sdk_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"        
+            COMMAND ${CMAKE_BINARY_DIR}/TI_XDCTools_Source/xs --xdcpath="${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source\;${PROJECT_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages" xdc.tools.configuro -o configPkg -t gnu.targets.arm.M4F -p ti.platforms.simplelink:${TI_DEVICE} -r release -c "${TOOLCHAIN_PREFIX}" --compileOptions " -DDeviceFamily_${TI_DEVICE_FAMILY} " "${CMAKE_CURRENT_BINARY_DIR}/${TI_RTOS_CONFIG_FILE}"        
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}    
             COMMENT "Generate TI-RTOS configuration" 
         )
