@@ -87,7 +87,7 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
  
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+    # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
     list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
 endforeach()
 
