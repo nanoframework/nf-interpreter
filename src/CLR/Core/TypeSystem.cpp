@@ -4111,6 +4111,39 @@ bool CLR_RT_Assembly::FindMethodDef(
     return false;
 }
 
+bool CLR_RT_Assembly::FindTypeSpec(CLR_PMETADATA sig, CLR_RT_TypeSpec_Index& index)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    for (int i = 0; i < m_pTablesSize[TBL_TypeSpec]; i++)
+    {
+        const CLR_RECORD_TYPESPEC* ts = GetTypeSpec(i);
+
+        CLR_RT_SignatureParser parserLeft;
+        parserLeft.Initialize_TypeSpec(this, sig);
+        CLR_RT_SignatureParser parserRight;
+        parserRight.Initialize_TypeSpec(this, ts);
+
+        if (CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight))
+        {
+            // found it!
+            // set TypeSpec index
+            index.Set(this->m_index, i);
+
+            // need to advance the signature to consume it
+            while (parserLeft.Signature != sig)
+            {
+                sig++;
+            }
+
+            return true;
+        }
+    }
+
+    index.Clear();
+    return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_Assembly::FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_OFFSET &end)
