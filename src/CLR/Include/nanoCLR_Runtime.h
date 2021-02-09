@@ -891,7 +891,8 @@ struct CLR_RT_FieldRef_CrossReference
 
 struct CLR_RT_MethodRef_CrossReference
 {
-    CLR_RT_MethodDef_Index m_target;
+    CLR_RT_MethodDef_Index Target;
+    CLR_RT_TypeSpec_Index GenericType;
 };
 
 struct CLR_RT_FieldDef_CrossReference

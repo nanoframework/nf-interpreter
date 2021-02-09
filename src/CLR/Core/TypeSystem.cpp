@@ -1095,7 +1095,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         return true;
 
                     case TBL_MethodRef:
-                        m_data = assm->m_pCrossReference_MethodRef[methodSpec.Method()].m_target.m_data;
+                        m_data = assm->m_pCrossReference_MethodRef[methodSpec.Method()].Target.m_data;
                         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         m_target = m_assm->GetMethodDef(Method());
 
@@ -2530,7 +2530,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->m_target))
+            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->Target))
             {
                 fGot = true;
             }
@@ -2572,7 +2572,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
             while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
             {
-                if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->Sig, dst->m_target))
+                if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->Sig, dst->Target))
                 {
                     fGot = true;
                     break;
@@ -5490,9 +5490,10 @@ bool CLR_RT_AttributeEnumerator::Advance()
         if (ptr->Key() == key)
         {
             CLR_INDEX tk = ptr->constructor;
+            // check TYPEDEF
             if (tk & 0x8000)
             {
-                m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].m_target;
+                m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].Target;
             }
             else
             {
