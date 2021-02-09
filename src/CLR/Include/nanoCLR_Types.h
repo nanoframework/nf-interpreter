@@ -1139,6 +1139,11 @@ struct CLR_RECORD_METHODREF
 
         return c_lookup[(encodedOwner >> 15)];
     }
+
+    bool HasOwnerType() const
+    {
+        return encodedOwner != CLR_EmptyIndex;
+    }
 };
 
 struct CLR_RECORD_TYPEDEF
