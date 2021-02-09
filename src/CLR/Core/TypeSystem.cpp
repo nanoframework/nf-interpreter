@@ -5250,45 +5250,58 @@ HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildMemberRefName(const CLR_RT_TypeSpec_Index& ts, const char* name, char*& szBuffer, size_t& iBuffer)
+HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char*& szBuffer, size_t& iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeSpec_Instance typeSpecInstance;
-    typeSpecInstance.InitializeFromIndex(ts);
+    CLR_RT_Assembly* assembly = g_CLR_RT_TypeSystem.m_assemblies[method.Assembly() - 1];
 
-    CLR_RT_Assembly* assembly = typeSpecInstance.m_assm;
+    const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->m_pCrossReference_MethodRef[method.Method()];
+    const CLR_RECORD_METHODREF* methodRef = assembly->GetMethodRef(method.Method());
 
-    CLR_RT_SignatureParser parser;
-    parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(ts.TypeSpec()));
-
-    CLR_RT_SignatureParser::Element element;
-
-    // get type
-    parser.Advance(element);
-
-    CLR_RT_TypeDef_Index typeDef;
-    typeDef.m_data = element.Class.m_data;
-
-    BuildTypeName(typeDef, szBuffer, iBuffer);
-
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
-
-    for (int i = 0; i < parser.GenParamCount; i++)
+    if (memberCrossRef.GenericType.m_data == CLR_EmptyToken)
     {
+        // this is a MethodRef to another type
+        CLR_RT_TypeDef_Index typeOwner;
+        typeOwner.Set(method.Assembly(), methodRef->OwnerIndex());
+
+        NANOCLR_CHECK_HRESULT(BuildTypeName(typeOwner, szBuffer, iBuffer));
+    }
+    else
+    {
+        // this is a MethodRef for a generic type
+
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(memberCrossRef.GenericType.TypeSpec()));
+
+        CLR_RT_SignatureParser::Element element;
+
+        // get type
         parser.Advance(element);
 
-        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+        CLR_RT_TypeDef_Index typeDef;
+        typeDef.m_data = element.Class.m_data;
 
-        if (i + 1 < parser.GenParamCount)
+        BuildTypeName(typeDef, szBuffer, iBuffer);
+
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+
+        for (int i = 0; i < parser.GenParamCount; i++)
         {
-            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
-        }
-    }
+            parser.Advance(element);
 
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">::"));
-    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, name));
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+
+            if (i + 1 < parser.GenParamCount)
+            {
+                NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+            }
+        }
+
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">::"));
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, assembly->GetString(methodRef->Name)));
+    }
 
     NANOCLR_NOCLEANUP();
 }
