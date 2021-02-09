@@ -1063,23 +1063,64 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_MethodRef:
-                m_data = assm->m_pCrossReference_MethodRef[index].m_target.m_data;
-                m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                m_target = m_assm->GetMethodDef(Method());
+            {
+                const CLR_RECORD_METHODREF* mr = assm->GetMethodRef(index);
+
+                if (mr->Owner() == TBL_TypeSpec)
+                {
+                    genericType = &assm->m_pCrossReference_MethodRef[index].GenericType;
+                    
+                    const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
+
+                    CLR_RT_MethodDef_Index method;
+
+                    if (!assm->FindMethodDef(
+                        ts, 
+                        assm->GetString(mr->Name), 
+                        assm, 
+                        mr->Sig, method))
+                    {
+                        return false;
+                    }
+
+                    Set(assm->m_index, method.Method());
+                    
+                    m_assm = assm;
+                    m_target = m_assm->GetMethodDef(method.Method());
+                }
+                else
+                {
+                    m_data = assm->m_pCrossReference_MethodRef[index].Target.m_data;
+                    m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    m_target = m_assm->GetMethodDef(Method());
+
+                    // invalidate GenericType
+                    genericType = NULL;
+                }
+
                 return true;
+            }
 
             case TBL_MethodDef:
                 Set(assm->m_index, index);
 
                 m_assm = assm;
                 m_target = m_assm->GetMethodDef(index);
+
+                // invalidate generic type
+                genericType = NULL;
+
                 return true;
 
             case TBL_MethodSpec:
                 Set(assm->m_index, index);
 
                 m_assm = assm;
+                
                 m_target = 0;
+
+                // invalidate generic type
+                genericType = NULL;
 
                 return true;
 
