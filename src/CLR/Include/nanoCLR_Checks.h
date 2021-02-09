@@ -8,6 +8,8 @@
 
 #include <nanoCLR_Runtime.h>
 
+// clang-format off
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -22,11 +24,12 @@ struct CLR_RT_DUMP
 #define DECL_POSTFIX {}
 #endif
 
-     static void TYPE  ( const CLR_RT_TypeDef_Index&       cls                 ) DECL_POSTFIX;
-     static void TYPE  ( const CLR_RT_ReflectionDef_Index& reflex              ) DECL_POSTFIX;
-     static void METHOD( const CLR_RT_MethodDef_Index&     method              ) DECL_POSTFIX;
-     static void FIELD ( const CLR_RT_FieldDef_Index&      field               ) DECL_POSTFIX;
-     static void OBJECT(       CLR_RT_HeapBlock*           ptr   , const char* text ) DECL_POSTFIX;
+     static void TYPE      (const CLR_RT_TypeDef_Index&       cls                              ) DECL_POSTFIX;
+     static void TYPE      (const CLR_RT_ReflectionDef_Index& reflex                           ) DECL_POSTFIX;
+     static void METHOD    (const CLR_RT_MethodDef_Index&     method                           ) DECL_POSTFIX;
+     static void FIELD     (const CLR_RT_FieldDef_Index&      field                            ) DECL_POSTFIX;
+     static void OBJECT    (      CLR_RT_HeapBlock*           ptr   , const char* text         ) DECL_POSTFIX;
+     static void METHODREF (const CLR_RECORD_METHODREF* method      , CLR_RT_Assembly* assembly) DECL_POSTFIX;
 
     //--//
 
@@ -64,5 +67,7 @@ struct CLR_Checks
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// clang-format on
 
 #endif // _NANOCLR_CHECKS_H_
