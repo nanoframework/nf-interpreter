@@ -2154,6 +2154,8 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     CLR_RT_Assembly *m_assm;
     const CLR_RECORD_METHODDEF *m_target;
 
+    const CLR_RT_TypeSpec_Index *genericType;
+
     //--//
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
