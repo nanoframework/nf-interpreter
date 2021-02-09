@@ -5250,6 +5250,49 @@ HRESULT CLR_RT_TypeSystem::BuildFieldName(const CLR_RT_FieldDef_Index &fd, char 
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_TypeSystem::BuildMemberRefName(const CLR_RT_TypeSpec_Index& ts, const char* name, char*& szBuffer, size_t& iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance typeSpecInstance;
+    typeSpecInstance.InitializeFromIndex(ts);
+
+    CLR_RT_Assembly* assembly = typeSpecInstance.m_assm;
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(ts.TypeSpec()));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get type
+    parser.Advance(element);
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.m_data = element.Class.m_data;
+
+    BuildTypeName(typeDef, szBuffer, iBuffer);
+
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+
+    for (int i = 0; i < parser.GenParamCount; i++)
+    {
+        parser.Advance(element);
+
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+
+        if (i + 1 < parser.GenParamCount)
+        {
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+        }
+    }
+
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">::"));
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, name));
+
+    NANOCLR_NOCLEANUP();
+}
+
 //--//
 
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(
