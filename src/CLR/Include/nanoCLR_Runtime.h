@@ -1136,15 +1136,10 @@ struct CLR_RT_SignatureParser
         int Levels;
         nanoClrDataType DataType;
         CLR_RT_TypeDef_Index Class;
-
-        /// @brief Element is GenericInstance
-        bool IsGenericInst;
+        CLR_RT_TypeSpec_Index TypeSpec;
 
         /// @brief Generic Parameter position
         CLR_INDEX GenericParamPosition;
-
-        /// @brief Generic Parameter count
-        int GenericParamCount;
     };
 
     CLR_RT_HeapBlock *ObjectList;
@@ -1159,6 +1154,9 @@ struct CLR_RT_SignatureParser
 
     /// @brief Parameters count
     int ParamCount;
+
+    /// @brief Signature is from a GenericInstance
+    bool IsGenericInst;
 
     /// @brief Generic parameters count
     int GenParamCount;
@@ -2021,6 +2019,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool MatchSignatureElement(
         CLR_RT_SignatureParser::Element &resLeft,
         CLR_RT_SignatureParser::Element &resRight,
+        CLR_RT_SignatureParser& parserLeft,
+        CLR_RT_SignatureParser& parserRight,
         bool fIsInstanceOfOK);
 
     static nanoClrDataType MapElementTypeToDataType(CLR_UINT32 et);

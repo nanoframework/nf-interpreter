@@ -678,9 +678,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                                 NANOCLR_CHECK_HRESULT(parserRight.Advance(resRight));
 
                                 bool fRightBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, true);
+                                    CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, true);
                                 bool fLeftBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resRight, resLeft, true);
+                                    CLR_RT_TypeSystem::MatchSignatureElement(resRight, resLeft, parserLeft, parserRight, true);
 
                                 // If fLeftBetterMatchT && fRightBetterMatchT, one is assignable from the other, they
                                 // must be the same
