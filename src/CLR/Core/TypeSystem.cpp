@@ -2584,6 +2584,12 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             if (FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->Target))
             {
                 fGot = true;
+
+                // set TypeSpec
+                dst->GenericType.m_data = typeSpec.m_data;
+
+                // invalidate Target
+                dst->Target.m_data = CLR_EmptyToken;
             }
 
             if (fGot == false)
@@ -2626,6 +2632,10 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 if (typeDefInstance.m_assm->FindMethodDef(typeDefInstance.m_target, name, this, src->Sig, dst->Target))
                 {
                     fGot = true;
+
+                    // invalidate GenericType
+                    dst->GenericType.m_data = CLR_EmptyToken;
+
                     break;
                 }
 
@@ -4175,6 +4185,7 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
     index.Clear();
     return false;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
