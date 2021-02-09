@@ -497,7 +497,8 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
         case TBL_MethodRef:
         {
-            CLR_RT_DUMP::METHODREF(GetMethodRef(index), this);
+            LOOKUP_ELEMENT_IDX(index, MethodRef, METHODREF);
+            CLR_RT_DUMP::METHODREF(s);
             break;
         }
         case TBL_TypeDef:
@@ -883,7 +884,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 #undef PELEMENT_TO_STRING
 }
 
-void CLR_RT_DUMP::METHODREF(const CLR_RECORD_METHODREF* method, CLR_RT_Assembly* assembly)
+void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
@@ -891,46 +892,9 @@ void CLR_RT_DUMP::METHODREF(const CLR_RECORD_METHODREF* method, CLR_RT_Assembly*
     char* szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    switch (method->Owner())
-    {
-        case TBL_TypeRef:
-        {
-            CLR_RT_TypeDef_Index* typeDef = &assembly->m_pCrossReference_TypeRef[method->OwnerIndex()].m_target;
-            CLR_RT_DUMP::TYPE(*typeDef);
-            break;
-        }
+    g_CLR_RT_TypeSystem.BuildMethodRefName(method, szBuffer, iBuffer);
 
-        //case CLR_MemberRefParent::MRP_TypeDef:
-        //{
-        //    CLR_RT_TypeDef_Index* typeDef;
-        //    typeDef->Set(m_index, CLR_GetIndexFromMemberRefParent(p->container));
-        //    CLR_RT_DUMP::TYPE(*typeDef);
-        //    break;
-        //}
-
-        //case CLR_MemberRefParent::MRP_MethodDef:
-        //{
-        //    const CLR_RT_MethodDef_Index* methodDef = &m_pCrossReference_MethodRef[CLR_GetIndexFromMemberRefParent(p->container)].m_target;
-        //    CLR_RT_DUMP::METHOD(*methodDef);
-        //    break;
-        //}
-
-        case TBL_TypeSpec:
-        {
-            CLR_RT_TypeSpec_Index typeSpec;
-            typeSpec.Set(assembly->m_index, method->OwnerIndex());
-
-            g_CLR_RT_TypeSystem.BuildMemberRefName(typeSpec, assembly->GetString(method->Name), szBuffer, iBuffer);
-
-            CLR_Debug::Printf("%s", rgBuffer);
-
-            break;
-        }
-
-        default:
-            CLR_Debug::Printf("%s", assembly->GetString(method->Name));
-            break;
-    }
+    CLR_Debug::Printf("%s", rgBuffer);
 }
 
 #endif // defined(NANOCLR_TRACE_ERRORS)

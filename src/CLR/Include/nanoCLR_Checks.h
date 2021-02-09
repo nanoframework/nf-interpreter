@@ -29,7 +29,7 @@ struct CLR_RT_DUMP
      static void METHOD    (const CLR_RT_MethodDef_Index&     method                           ) DECL_POSTFIX;
      static void FIELD     (const CLR_RT_FieldDef_Index&      field                            ) DECL_POSTFIX;
      static void OBJECT    (      CLR_RT_HeapBlock*           ptr   , const char* text         ) DECL_POSTFIX;
-     static void METHODREF (const CLR_RECORD_METHODREF* method      , CLR_RT_Assembly* assembly) DECL_POSTFIX;
+     static void METHODREF (const CLR_RT_MethodRef_Index&     method                           ) DECL_POSTFIX;
 
     //--//
 
