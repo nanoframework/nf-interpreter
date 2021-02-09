@@ -1789,25 +1789,16 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_PMETADATA sig = assembly->GetSignature(methodDef->Locals);
     CLR_UINT32 count = methodDef->LocalsCount;
     bool fZeroed = false;
-    nanoClrDataType genericInstanceDataType = DATATYPE_VOID;
-    CLR_RT_TypeDef_Index genericInstanceClass;
 
     while (count)
     {
         nanoClrDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
+        CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
         nanoClrDataType dtModifier = DATATYPE_VOID;
-        // pointer to the signature of the current local being processed
-        //CLR_PMETADATA localSignature = sig;
         // flag for GENERICINST
         bool isGenericInstance = false;
-        // count of GENERICINST arguments
-        CLR_UINT8 genArgCount = 0;
-        // counter for GENERICINST arguments parsed
-        CLR_UINT8 genArgCountParsed = 0;
-        // flag to skip allocation of local when the signature is being consumed to parse GENERICINST signature
-        bool skipAllocation = false;
 
         while (true)
         {
@@ -1828,155 +1819,82 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 case DATATYPE_CLASS:
                 case DATATYPE_VALUETYPE:
                 {
-                    if (skipAllocation)
+                    CLR_UINT32 tk = CLR_TkFromStream(sig);
+                    CLR_UINT32 index = CLR_DataFromTk(tk);
+
+                    switch (CLR_TypeFromTk(tk))
                     {
-                        genArgCountParsed++;
-                    }
-                    else
-                    {
-                        CLR_UINT32 tk = CLR_TkFromStream(sig);
-                        CLR_UINT32 index = CLR_DataFromTk(tk);
-
-                        switch (CLR_TypeFromTk(tk))
-                        {
-                            case TBL_TypeSpec:
-                            {
-                                CLR_RT_SignatureParser sub;
-                                sub.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(index));
-                                CLR_RT_SignatureParser::Element res;
-
-                                NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                                cls = res.Class;
-                                levels += res.Levels;
-                            }
+                        case TBL_TypeRef:
+                            cls = assembly->m_pCrossReference_TypeRef[index].m_target;
                             break;
 
-                            case TBL_TypeRef:
-                                cls = assembly->m_pCrossReference_TypeRef[index].m_target;
-                                break;
+                        case TBL_TypeDef:
+                            cls.Set(assembly->m_index, index);
+                            break;
 
-                            case TBL_TypeDef:
-                                cls.Set(assembly->m_index, index);
-                                break;
-
-                            default:
-                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                        }
+                        default:
+                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
 
-                    if (isGenericInstance &&
-                        !skipAllocation)
-                    {
-                        // store these to properly set local after parsing signature
-                        genericInstanceDataType = dt;
-                        genericInstanceClass = cls;
-
-                        //if (genArgCount == 0)
-                        //{
-                            // need to read generic arguments count to consume signature
-                            genArgCount = *sig++;
-
-                            // flag to skip allocation of locals
-                            skipAllocation = true;
-                        //}
-
-                        // done here
-                        break;
-                    }
-                    else
-                    {
-                        // parsing of non GENERICINST signature
-                        goto done;
-                    }
+                    goto done;
                 }
 
                 case DATATYPE_GENERICINST:
-                    if (skipAllocation)
+                    // need to rewind the signature so that the ELEMENT_TYPE is present
+                    // otherwise the comparison won't be possible
+                    sig--;
+
+                    if(!assembly->FindTypeSpec(sig, typeSpecIndex))
                     {
-                        genArgCountParsed++;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
-                    else
-                    {
-                        // set flag that we are processing a GENERICINST signature
-                        isGenericInstance = true;
-                    }
-                    break;
-                
+                    goto done;
+
                 case DATATYPE_VAR:
-                    if (skipAllocation)
-                    {
-                        genArgCountParsed++;
-                        break;
-                    }
-                    else
-                    {
-                        CLR_UINT8 genericParameterPosition = *sig++;
+                {
+                    CLR_UINT8 genericParameterPosition = *sig++;
 
-                        CLR_RT_GenericParam_Index gpIndex;
+                    CLR_RT_GenericParam_Index gpIndex;
 
-                        assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gpIndex);
+                    assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gpIndex);
 
-                        CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                        cls = gp.Class;
-                        dt = gp.DataType;
+                    cls = gp.Class;
+                    dt = gp.DataType;
 
-                        goto done;
-                    }
-                    break;
+                    goto done;
+                }
 
                 case DATATYPE_MVAR:
                 {
-                    if (skipAllocation)
-                    {
-                        genArgCountParsed++;
-                        break;
-                    }
-                    else
-                    {
-                        CLR_UINT8 genericParameterPosition = *sig++;
+                    CLR_UINT8 genericParameterPosition = *sig++;
 
-                        CLR_RT_GenericParam_Index gpIndex;
+                    CLR_RT_GenericParam_Index gpIndex;
                         
-                        assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParameterPosition, gpIndex);
+                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParameterPosition, gpIndex);
 
-                        CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                        cls = gp.Class;
-                        dt = gp.DataType;
+                    cls = gp.Class;
+                    dt = gp.DataType;
 
-                        goto done;
-                    }
+                    goto done;
                 }
 
                 default:
                 {
-                    if (skipAllocation)
+                    const CLR_RT_TypeDef_Index *cls2 = c_CLR_RT_DataTypeLookup[dt].m_cls;
+
+                    if (cls2 == NULL)
                     {
-                        genArgCountParsed++;
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
-                    else
-                    {
-                        const CLR_RT_TypeDef_Index *cls2 = c_CLR_RT_DataTypeLookup[dt].m_cls;
 
-                        if (cls2 == NULL)
-                        {
-                            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
-                        }
+                    cls = *cls2;
 
-                        cls = *cls2;
-
-                        goto done;
-                    }
+                    goto done;
                 }
-            }
-
-            // check if we are done with generic instance parsing
-            if (skipAllocation && (genArgCountParsed == genArgCount))
-            {
-                // yes, move to local creation
-                goto done;
             }
         }
 
@@ -1985,7 +1903,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         {
             locals->SetObjectReference(NULL);
 
-            // If local varialb has DATATYPE_TYPE_PINNED, we mark heap block as
+            // If local variable has DATATYPE_TYPE_PINNED, we mark heap block as
             if (dtModifier == DATATYPE_TYPE_PINNED)
             {
                 locals->Pin();
@@ -2026,15 +1944,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     NANOCLR_CHECK_HRESULT(NewObject(*locals, inst));
                 }
             }
+            else if (dt == DATATYPE_GENERICINST)
+            {
+                locals->SetGenericType(typeSpecIndex);
+                locals->ClearData();
+            }
             else
             {
-                if (isGenericInstance)
-                {
-                    // TODO, check this on debug
-                    dt = genericInstanceDataType;
-                    cls = genericInstanceClass;
-                }
-                
                 if (c_CLR_RT_DataTypeLookup[dt].m_flags & CLR_RT_DataTypeLookup::c_Reference)
                 {
                     dt = DATATYPE_OBJECT;
