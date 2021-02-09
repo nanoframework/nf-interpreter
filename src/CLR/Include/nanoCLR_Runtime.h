@@ -781,6 +781,35 @@ struct CLR_RT_MethodDef_Index
     }
 };
 
+struct CLR_RT_MethodRef_Index
+{
+    CLR_UINT32 m_data;
+
+    //--//
+
+    void Clear()
+    {
+        m_data = 0;
+    }
+
+    void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
+    {
+        m_data = indexAssm << 16 | indexMethod;
+    }
+
+    //--//
+
+    CLR_INDEX Assembly() const
+    {
+        return (CLR_INDEX)(m_data >> 16);
+    }
+
+    CLR_INDEX Method() const
+    {
+        return (CLR_INDEX)(m_data);
+    }
+};
+
 struct CLR_RT_GenericParam_Index
 {
     CLR_UINT32 m_data;
