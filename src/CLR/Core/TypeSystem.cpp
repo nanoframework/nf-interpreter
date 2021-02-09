@@ -664,6 +664,16 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetTypeSpec(TypeSpec());
 
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(m_assm, m_assm->GetTypeSpec(index.TypeSpec()));
+
+        CLR_RT_SignatureParser::Element element;
+
+        // get type
+        parser.Advance(element);
+
+        TypeDef = m_assm->GetTypeDef(element.Class.Type());
+
         return true;
     }
 
