@@ -4073,42 +4073,20 @@ bool CLR_RT_Assembly::FindMethodDef(
     CLR_SIG sig,
     CLR_RT_MethodDef_Index& index)
 {
-    (void)ts;
-
     NATIVE_PROFILE_CLR_CORE();
 
-    const CLR_RECORD_METHODDEF* md = base->GetMethodDef(0);
+    CLR_RT_TypeSpec_Index tsIndex;
+    base->FindTypeSpec(base->GetSignature(ts->Sig), tsIndex);
 
-    for (int i = 0; i < base->m_pTablesSize[TBL_MethodDef]; i++, md++)
-    {
-        const char* methodName = base->GetString(md->Name);
+    CLR_RT_TypeSpec_Instance tsInstance;
+    tsInstance.InitializeFromIndex(tsIndex);
 
-        if (!strcmp(methodName, name))
-        {
-            bool fMatch = true;
-
-            if (CLR_SIG_INVALID != sig)
-            {
-                CLR_RT_SignatureParser parserLeft;
-                parserLeft.Initialize_MethodSignature(base, base->GetSignature(md->Sig));
-                CLR_RT_SignatureParser parserRight;
-                parserRight.Initialize_MethodSignature(base, base->GetSignature(sig));
-
-                fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
-            }
-
-            if (fMatch)
-            {
-                index.Set(m_index, i);
-
-                return true;
-            }
-        }
-    }
-
-    index.Clear();
-
-    return false;
+    return CLR_RT_Assembly::FindMethodDef(
+        tsInstance.TypeDef,
+        name,
+        base,
+        sig,
+        index);
 }
 
 bool CLR_RT_Assembly::FindTypeSpec(CLR_PMETADATA sig, CLR_RT_TypeSpec_Index& index)
