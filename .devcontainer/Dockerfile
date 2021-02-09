@@ -82,7 +82,8 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git ./sources/SimpleLinkCC32 \
     # && git clone --branch 3.61.00.16 https://github.com/nanoframework/TI_XDCTools.git ./sources/TI_XDCTools \
     && git clone --branch 4.20.01.04 https://github.com/nanoframework/SimpleLink_CC13x2_26x2_SDK.git ./sources/SimpleLinkCC13 \
-    && git clone --branch 1.5.0 https://github.com/nanoframework/TI_SysConfig.git ./sources/TI_SysConfig
+    && git clone --branch 1.5.0 https://github.com/nanoframework/TI_SysConfig.git ./sources/TI_SysConfig \
+    && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
@@ -91,8 +92,9 @@ COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
 COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
 COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_61_00_16_core /usr/local/bin/titools
+COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
-# Putting hex2dfu in the container even if it will not be used, prep will fail otherwise
+# Putting hex2dfu in the container
 ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
 RUN mkdir -p /usr/local/bin/hex2dfu \
     && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
