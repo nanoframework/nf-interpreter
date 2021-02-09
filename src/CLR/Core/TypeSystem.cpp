@@ -4026,11 +4026,11 @@ bool CLR_RT_Assembly::FindMethodDef(
 
     NATIVE_PROFILE_CLR_CORE();
 
-    const CLR_RECORD_METHODDEF* md = GetMethodDef(0);
+    const CLR_RECORD_METHODDEF* md = base->GetMethodDef(0);
 
-    for (int i = 0; i < m_pTablesSize[TBL_MethodDef]; i++, md++)
+    for (int i = 0; i < base->m_pTablesSize[TBL_MethodDef]; i++, md++)
     {
-        const char* methodName = GetString(md->Name);
+        const char* methodName = base->GetString(md->Name);
 
         if (!strcmp(methodName, name))
         {
@@ -4039,7 +4039,7 @@ bool CLR_RT_Assembly::FindMethodDef(
             if (CLR_SIG_INVALID != sig)
             {
                 CLR_RT_SignatureParser parserLeft;
-                parserLeft.Initialize_MethodSignature(this, md);
+                parserLeft.Initialize_MethodSignature(base, base->GetSignature(md->Sig));
                 CLR_RT_SignatureParser parserRight;
                 parserRight.Initialize_MethodSignature(base, base->GetSignature(sig));
 
