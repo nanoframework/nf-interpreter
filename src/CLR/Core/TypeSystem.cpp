@@ -1033,6 +1033,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
         m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetMethodDef(Method());
+        genericType = NULL;
 
         return true;
     }
@@ -1040,6 +1041,7 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
     m_data = 0;
     m_assm = NULL;
     m_target = NULL;
+    genericType = NULL;
 
     return false;
 }
