@@ -672,7 +672,7 @@ bool CLR_RT_TypeSpec_Instance::InitializeFromIndex(const CLR_RT_TypeSpec_Index &
         // get type
         parser.Advance(element);
 
-        TypeDef = m_assm->GetTypeDef(element.Class.Type());
+        TypeDefIndex = element.Class.Type();
 
         return true;
     }
@@ -4103,8 +4103,11 @@ bool CLR_RT_Assembly::FindMethodDef(
     CLR_RT_TypeSpec_Instance tsInstance;
     tsInstance.InitializeFromIndex(tsIndex);
 
+    const CLR_RECORD_TYPEDEF* td = (const CLR_RECORD_TYPEDEF*)base->GetTable(TBL_TypeDef);
+    td += tsInstance.TypeDefIndex;
+
     return CLR_RT_Assembly::FindMethodDef(
-        tsInstance.TypeDef,
+        td,
         name,
         base,
         sig,
