@@ -323,14 +323,9 @@ HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& 
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
-    //#define CLR_RT_HEAPBLOCK_ASSIGN_GENERICINSTANCE(dataType, typeSpec)                                                    \
-    //    {                                                                                                                  \
-    //        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(dataType, 0, 1);                                                            \
-    //        m_data.genericInstance.typeSpecIndex = typeSpec;                                                               \
-    //    }
 
-    //m_data.genericInstance.objectHeader.cls = cls;
-    //m_data.objectHeader.lock = NULL;
+    m_data.genericInstance.genericType = genericType;
+    m_data.genericInstance.ptr = NULL;
 
     NANOCLR_NOCLEANUP();
 }
