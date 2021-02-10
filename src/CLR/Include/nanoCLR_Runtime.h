@@ -849,6 +849,7 @@ struct CLR_RT_ReflectionDef_Index
         CLR_RT_TypeDef_Index m_type;
         CLR_RT_MethodDef_Index m_method;
         CLR_RT_FieldDef_Index m_field;
+        CLR_RT_TypeSpec_Index m_genericType;
         CLR_UINT32 m_raw;
     } m_data;
 
@@ -869,6 +870,7 @@ struct CLR_RT_ReflectionDef_Index
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_TypeDef_Instance &inst, CLR_UINT32 *levels);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_MethodDef_Instance &inst);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_FieldDef_Instance &inst);
+    static bool Convert(CLR_RT_HeapBlock& ref, CLR_RT_TypeSpec_Instance& inst);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_UINT32 &hash);
 };
 
@@ -2298,12 +2300,20 @@ struct CLR_RT_TypeDescriptor
 {
     CLR_UINT32 m_flags;
     CLR_RT_TypeDef_Instance m_handlerCls;
+    CLR_RT_TypeSpec_Instance m_handlerGenericType;
 
     CLR_RT_ReflectionDef_Index m_reflex;
 
     nanoClrDataType GetDataType() const
     {
-        return (nanoClrDataType)m_handlerCls.m_target->DataType;
+        if (m_handlerCls.m_data != NULL)
+        {
+            return (nanoClrDataType)m_handlerCls.m_target->DataType;
+        }
+        else
+        {
+            return DATATYPE_GENERICINST;
+        }
     }
 
     //--//
@@ -2314,6 +2324,7 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
+    HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index& genericType);
     HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
     HRESULT InitializeFromSignatureParser(CLR_RT_SignatureParser &parser);
     HRESULT InitializeFromObject(const CLR_RT_HeapBlock &ref);

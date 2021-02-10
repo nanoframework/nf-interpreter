@@ -886,8 +886,8 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                
                 Set(gp.Class.Assembly(), gp.Class.Type());
 
-                m_target = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly()-1]->GetTypeDef(gp.Class.Type());
-                m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly()-1];
+                m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
+                m_target = m_assm->GetTypeDef(gp.Class.Type());
 
                 return true;
             }
@@ -1314,10 +1314,10 @@ bool CLR_RT_MethodSpec_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly* as
 void CLR_RT_TypeDescriptor::TypeDescriptor_Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_flags = 0;          // CLR_UINT32                 m_flags;
-    m_handlerCls.Clear(); // CLR_RT_TypeDef_Instance    m_handlerCls;
-                          //
-    m_reflex.Clear();     // CLR_RT_ReflectionDef_Index m_reflex;
+    m_flags = 0;
+    m_handlerCls.Clear();
+    m_handlerGenericType.Clear();
+    m_reflex.Clear();
 }
 
 HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType(nanoClrDataType dt)
@@ -1352,6 +1352,8 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType(nanoClrDataType dt)
         }
     }
 
+    m_handlerGenericType.Clear();
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -1376,6 +1378,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection(const CLR_RT_ReflectionD
 
         ConvertToArray();
     }
+
+    m_handlerCls.Clear();
+    m_handlerGenericType.Clear();
 
     NANOCLR_NOCLEANUP();
 }
@@ -1457,6 +1462,30 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
         }
     }
 
+    m_handlerGenericType.Clear();
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_Index& genericType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    if (m_handlerGenericType.InitializeFromIndex(genericType) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+    else
+    {
+        m_flags = CLR_RT_DataTypeLookup::c_ManagedType | CLR_RT_DataTypeLookup::c_GenericInstance;
+
+        m_reflex.m_kind = REFLECTION_GENERICTYPE;
+        m_reflex.m_data.m_genericType = m_handlerGenericType;
+    }
+    
+    m_handlerCls.Clear();
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -1473,7 +1502,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromFieldDefinition(const CLR_RT_FieldD
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignatureParser &parser)
+HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignatureParser& parser)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -1487,8 +1516,15 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignaturePar
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-    NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
-
+    if (res.DataType == DATATYPE_GENERICINST)
+    {
+        NANOCLR_CHECK_HRESULT(InitializeFromGenericType(res.TypeSpec));
+    }
+    else
+    {
+        NANOCLR_CHECK_HRESULT(InitializeFromType(res.Class));
+    }
+    
     if (res.Levels)
     {
         m_reflex.m_levels = res.Levels;
@@ -1768,8 +1804,17 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
         NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(ref))
 
-        // If desc.InitializeFromObject( ref ) call succeded, then we use m_handlerCls for res
-        res = desc.m_handlerCls;
+        // If desc.InitializeFromObject( ref ) call succeed, then we need to find out what to call
+
+        if (desc.GetDataType() == DATATYPE_GENERICINST)
+        {
+            res.Set(desc.m_handlerGenericType.Assembly(), desc.m_handlerGenericType.TypeDefIndex);
+        }
+        else
+        {
+            // use m_handlerCls for res
+            res = desc.m_handlerCls;
+        }
 
         if (NANOCLR_INDEX_IS_INVALID(res))
         {
