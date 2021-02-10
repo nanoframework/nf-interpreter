@@ -1207,6 +1207,11 @@ struct CLR_RT_HeapBlock
         m_data.genericInstance.genericType.m_data = genericType.m_data;
     }
 
+    const CLR_RT_TypeSpec_Index& ObjectGenericType() const
+    {
+        return m_data.genericInstance.genericType;
+    }
+
     HRESULT SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& genericType);
 
     //--//
