@@ -1827,8 +1827,6 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
         nanoClrDataType dtModifier = DATATYPE_VOID;
-        // flag for GENERICINST
-        bool isGenericInstance = false;
 
         while (true)
         {
@@ -1976,7 +1974,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
             }
             else if (dt == DATATYPE_GENERICINST)
             {
-                locals->SetGenericType(typeSpecIndex);
+                // locals for generic instances are always OBJECT type
+                dt = DATATYPE_OBJECT;
+                locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
                 locals->ClearData();
             }
             else
