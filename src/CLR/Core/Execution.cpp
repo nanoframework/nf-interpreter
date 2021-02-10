@@ -1880,16 +1880,29 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                 case DATATYPE_VAR:
                 {
-                    CLR_UINT8 genericParameterPosition = *sig++;
+                    CLR_INT8 genericParamPosition = *sig++;
 
-                    CLR_RT_GenericParam_Index gpIndex;
+                    const CLR_RECORD_TYPESPEC* ts = assembly->GetTypeSpec(methodDefInstance.genericType->TypeSpec());
+                    
+                    CLR_RT_SignatureParser parser;
+                    parser.Initialize_TypeSpec(assembly, ts);
 
-                    assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParameterPosition, gpIndex);
+                    CLR_RT_SignatureParser::Element element;
 
-                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                    // advance signature: get type
+                    NANOCLR_CHECK_HRESULT(parser.Advance(element));
 
-                    cls = gp.Class;
-                    dt = gp.DataType;
+                    // loop as many times as the parameter position
+                    do
+                    {
+                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                        
+                        genericParamPosition--;
+                    } while (genericParamPosition > 0);
+
+                    // copy these from the parser element
+                    cls = element.Class;
+                    dt = element.DataType;
 
                     goto done;
                 }
