@@ -14,6 +14,8 @@ HRESULT Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC
     const char * szText0 = stack.Arg0().RecoverString();
     bool addLineFeed = (bool)stack.Arg1().NumericByRef().u1;
 
+#if !defined(WIN32) && !defined(NANOCLR_TRACE_INSTRUCTIONS)
+
     if(!szText0) szText0 = "<null>";
 
     CLR_Debug::Emit( szText0, -1 );
@@ -22,7 +24,9 @@ HRESULT Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC
     {
         CLR_Debug::Emit( "\r\n" , -1 );
     }
-    
+
+#endif
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
