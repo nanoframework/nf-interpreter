@@ -5252,7 +5252,7 @@ HRESULT CLR_RT_TypeSystem::BuildTypeName(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodDef_Index &md, char *&szBuffer, size_t &iBuffer)
+HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodDef_Index &md, const CLR_RT_TypeSpec_Index* genericType, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -5261,13 +5261,52 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodDef_Index &md, cha
     CLR_RT_TypeDef_Instance instOwner;
 
     if (inst.InitializeFromIndex(md) == false)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
     if (instOwner.InitializeFromMethod(inst) == false)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
 
-    NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
+    if (genericType == NULL)
+    {
+        NANOCLR_CHECK_HRESULT(BuildTypeName(instOwner, szBuffer, iBuffer));
 
-    CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->Name));
+        CLR_SafeSprintf(szBuffer, iBuffer, "::%s", inst.m_assm->GetString(inst.m_target->Name));
+    }
+    else
+    {
+        CLR_RT_SignatureParser parser;
+        parser.Initialize_TypeSpec(inst.m_assm, inst.m_assm->GetTypeSpec(genericType->TypeSpec()));
+
+        CLR_RT_SignatureParser::Element element;
+
+        // get type
+        parser.Advance(element);
+
+        CLR_RT_TypeDef_Index typeDef;
+        typeDef.m_data = element.Class.m_data;
+
+        BuildTypeName(typeDef, szBuffer, iBuffer);
+
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+
+        for (int i = 0; i < parser.GenParamCount; i++)
+        {
+            parser.Advance(element);
+
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+
+            if (i + 1 < parser.GenParamCount)
+            {
+                NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+            }
+        }
+
+        CLR_SafeSprintf(szBuffer, iBuffer, ">::%s", inst.m_assm->GetString(inst.m_target->Name));
+    }
 
     NANOCLR_NOCLEANUP();
 }
