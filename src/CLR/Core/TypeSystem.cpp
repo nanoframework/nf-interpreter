@@ -5343,11 +5343,19 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
 
     if (memberCrossRef.GenericType.m_data == CLR_EmptyToken)
     {
-        // this is a MethodRef to another type
+        // this is a MethodRef belonging to another assembly
+
+        CLR_RT_MethodDef_Instance mdInstance;
+        mdInstance.m_data = memberCrossRef.Target.m_data;
+        mdInstance.m_assm = g_CLR_RT_TypeSystem.m_assemblies[mdInstance.Assembly() - 1];
+        mdInstance.m_target = mdInstance.m_assm->GetMethodDef(mdInstance.Method());
+
         CLR_RT_TypeDef_Index typeOwner;
-        typeOwner.Set(method.Assembly(), methodRef->OwnerIndex());
+        typeOwner.Set(mdInstance.Assembly(), mdInstance.m_assm->m_pCrossReference_MethodDef[mdInstance.Method()].GetOwner());
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(typeOwner, szBuffer, iBuffer));
+
+        CLR_SafeSprintf(szBuffer, iBuffer, "::%s", mdInstance.m_assm->GetString(mdInstance.m_target->Name));
     }
     else
     {
@@ -5366,23 +5374,23 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
 
         BuildTypeName(typeDef, szBuffer, iBuffer);
 
-        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+        CLR_SafeSprintf(szBuffer, iBuffer, "<");
 
         for (int i = 0; i < parser.GenParamCount; i++)
         {
             parser.Advance(element);
 
-            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+            CLR_SafeSprintf(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name);
 
             if (i + 1 < parser.GenParamCount)
             {
-                NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+                CLR_SafeSprintf(szBuffer, iBuffer, ",");
             }
         }
 
-        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ">::"));
-        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, assembly->GetString(methodRef->Name)));
+        CLR_SafeSprintf(szBuffer, iBuffer, ">::%s", assembly->GetString(methodRef->Name));
     }
+
 
     NANOCLR_NOCLEANUP();
 }
