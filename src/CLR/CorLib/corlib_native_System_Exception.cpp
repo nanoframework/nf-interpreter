@@ -70,7 +70,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING( CLR_RT_
         strName = &buf[ 0 ];
         iName   = MAXSTRLEN(buf) - 2 ;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName( pStackTrace->m_md, strName, iName ));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName( pStackTrace->m_md, NULL, strName, iName ));
         
         memcpy(strName, "\r\n\0", 3);
 

@@ -443,7 +443,7 @@ bool CLR_RT_Thread::FindEhBlock(
         if (!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
             CLR_Debug::Printf("Unwinding at ");
-            CLR_RT_DUMP::METHOD(stack->m_call);
+            CLR_RT_DUMP::METHOD(stack->m_call, NULL);
             CLR_Debug::Printf(" [IP: %04x - %d]\r\n", (size_t)stack->m_IP, (stack->m_IP - stack->m_IPstart));
         }
     }

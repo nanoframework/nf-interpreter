@@ -516,7 +516,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         case TBL_MethodDef:
         {
             LOOKUP_ELEMENT_IDX(index, MethodDef, METHODDEF);
-            CLR_RT_DUMP::METHOD(s);
+            CLR_RT_DUMP::METHOD(s, NULL);
             break;
         }
         case TBL_Strings:
@@ -687,7 +687,7 @@ void CLR_RT_Assembly::DumpOpcodeDirect(
     if (NANOCLR_INDEX_IS_VALID(call))
     {
         CLR_Debug::Printf(":");
-        CLR_RT_DUMP::METHOD(call);
+        CLR_RT_DUMP::METHOD(call, call.genericType);
     }
 
     CLR_OPCODE op = CLR_ReadNextOpcodeCompressed(ip);
@@ -765,14 +765,14 @@ void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
     }
 }
 
-void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method)
+void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_TypeSpec_Index *genericType)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     char rgBuffer[512];
     char *szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildMethodName(method, szBuffer, iBuffer);
+    g_CLR_RT_TypeSystem.BuildMethodName(method, genericType, szBuffer, iBuffer);
 
     CLR_Debug::Printf("%s", rgBuffer);
 }
@@ -835,7 +835,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
         {
             CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
-            CLR_RT_DUMP::METHOD(dlg->DelegateFtn());
+            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), NULL);
         }
         break;
 
@@ -934,7 +934,7 @@ void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
     while (depth-- > 0)
     {
         CLR_Debug::Printf("    ++++ ");
-        CLR_RT_DUMP::METHOD(stackTrace->m_md);
+        CLR_RT_DUMP::METHOD(stackTrace->m_md, NULL);
         CLR_Debug::Printf(" [IP: %04x] ++++\r\n", stackTrace->m_IP);
 
         stackTrace++;

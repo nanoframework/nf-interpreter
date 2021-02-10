@@ -2027,7 +2027,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_UINT32 flags,
         CLR_UINT32 levels);
     HRESULT BuildTypeName(const CLR_RT_TypeDef_Index &cls, char *&szBuffer, size_t &size);
-    HRESULT BuildMethodName(const CLR_RT_MethodDef_Index &md, char *&szBuffer, size_t &size);
+    HRESULT BuildMethodName(const CLR_RT_MethodDef_Index &md, const CLR_RT_TypeSpec_Index* genericType, char *&szBuffer, size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
     HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char*& szBuffer, size_t& iBuffer);
 
