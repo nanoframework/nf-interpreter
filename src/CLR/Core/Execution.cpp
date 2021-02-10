@@ -1471,8 +1471,11 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
         return NULL;
+    }
 
     _ASSERTE(dataType == DATATYPE_CLASS || dataType == DATATYPE_VALUETYPE);
 
@@ -1482,6 +1485,33 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     if (hb)
     {
         hb->SetObjectCls(cls);
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
+#endif
+    }
+
+    return hb;
+}
+
+CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
+    CLR_UINT32 flags,
+    const CLR_RT_TypeSpec_Index& genericType,
+    CLR_UINT32 length)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return NULL;
+    }
+
+    flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
+    CLR_RT_HeapBlock* hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
+
+    if (hb)
+    {
+        hb->SetGenericInstanceObject(genericType);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation(hb);
@@ -2109,6 +2139,87 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
     NANOCLR_CHECK_HRESULT(NewObjectFromIndex(reference, res));
+
+    NANOCLR_NOCLEANUP();
+}
+
+//--//
+
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& typeDef, const CLR_RT_TypeSpec_Index& genericType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance inst;
+
+    if (inst.InitializeFromIndex(genericType) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_SET_AND_LEAVE(NewGenericInstanceObject(reference, typeDef, inst));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance& instance, CLR_RT_TypeSpec_Instance& genericInstance)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    reference.SetObjectReference(NULL);
+
+    int clsFields = instance.m_target->InstanceFieldsCount;
+    int totFields = instance.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
+
+    CLR_RT_HeapBlock_GenericInstance* genericInst;
+
+    genericInst = (CLR_RT_HeapBlock_GenericInstance*)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
+    CHECK_ALLOCATION(genericInst);
+
+    reference.SetObjectReference(genericInst);
+
+    const CLR_RECORD_FIELDDEF* target = NULL;
+    CLR_RT_Assembly* assm = NULL;
+    CLR_RT_TypeDef_Instance instSub = instance;
+
+    //
+    // Initialize field types, from last to first.
+    //
+    // We do the decrement BEFORE the comparison because we want to stop short of the first field, the
+    // object descriptor (already initialized).
+    //
+    genericInst += totFields;
+    while (--totFields > 0)
+    {
+        while (clsFields == 0)
+        {
+            if (instSub.SwitchToParent() == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            clsFields = instSub.m_target->InstanceFieldsCount;
+            target = NULL;
+        }
+
+        if (target == NULL)
+        {
+            assm = instSub.m_assm;
+            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
+        }
+
+        genericInst--;
+        target--;
+        clsFields--;
+
+        NANOCLR_CHECK_HRESULT(InitializeReference(*genericInst, target, assm));
+    }
+
+    if (instance.HasFinalizer())
+    {
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance(reference.Dereference(), instance));
+    }
 
     NANOCLR_NOCLEANUP();
 }

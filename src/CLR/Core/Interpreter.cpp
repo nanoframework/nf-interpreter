@@ -2324,9 +2324,12 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Instance calleeInst;
                     if (calleeInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_TypeDef_Instance cls;
-                    CLR_RT_HeapBlock *top;
+                    CLR_RT_HeapBlock* top;
                     CLR_INT32 changes;
 
                     cls.InitializeFromMethod(calleeInst); // This is the class to create!
@@ -2355,7 +2358,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        CLR_RT_HeapBlock_Delegate *dlg = top[1].DereferenceDelegate();
+                        CLR_RT_HeapBlock_Delegate* dlg = top[1].DereferenceDelegate();
 
                         if (dlg == NULL)
                         {
@@ -2403,7 +2406,14 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //            ^
                         //            Top points here.
 
-                        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
+                        if (calleeInst.genericType == NULL)
+                        {
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
+                        }
+                        else
+                        {
+                            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewGenericInstanceObject(top[0], cls, *calleeInst.genericType));
+                        }
 
                         //
                         // This is to flag the fact that we need to copy back the 'this' pointer into our stack.
