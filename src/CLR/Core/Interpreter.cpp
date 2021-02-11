@@ -2271,7 +2271,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type;
                     CLR_RT_TypeDef_Index cls;
 
-                    if (type.ResolveToken(arg, assm, evalPos) == false)
+                    if (type.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
@@ -2715,7 +2715,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance typeInst;
-                    if (typeInst.ResolveToken(arg, assm, evalPos) == false)
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     UPDATESTACK(stack, evalPos);
@@ -2744,7 +2744,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     // castclass typeTok.
 
                     CLR_RT_TypeDef_Instance typeInst;
-                    if (typeInst.ResolveToken(arg, assm, evalPos) == false)
+                    if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     UPDATESTACK(stack, evalPos);
@@ -2895,7 +2895,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     CLR_RT_TypeDef_Instance type;
                     CLR_RT_TypeDef_Index cls;
 
-                    if (!type.ResolveToken(arg, assm, evalPos))
+                    if (!type.ResolveToken(arg, assm, &stack->m_call))
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
@@ -3096,7 +3096,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case TBL_TypeDef:
                         {
                             CLR_RT_TypeDef_Instance cls;
-                            if (cls.ResolveToken(arg, assm, evalPos) == false)
+                            if (cls.ResolveToken(arg, assm, &stack->m_call) == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                             evalPos[0].SetReflection(cls);
@@ -3353,7 +3353,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_RT_TypeDef_Instance clsInst;
-                    if (clsInst.ResolveToken(arg, assm, evalPos) == false)
+                    if (clsInst.ResolveToken(arg, assm, &stack->m_call) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_INT32 len;
 

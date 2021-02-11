@@ -856,10 +856,8 @@ void CLR_RT_TypeDef_Instance::Clear()
 
 // if type token is not generic, we are going to resolve from the assembly else from the heapblock that may contains
 // generic parameter
-bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_HeapBlock *sampleData)
+bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller)
 {
-    (void)sampleData;
-
     NATIVE_PROFILE_CLR_CORE();
     if (assm)
     {
@@ -891,6 +889,60 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
 
                 return true;
             }
+
+            case TBL_TypeSpec:
+            {
+                const CLR_RECORD_TYPESPEC* ts = assm->GetTypeSpec(index);
+
+                CLR_RT_SignatureParser parser;
+                parser.Initialize_TypeSpec(assm, ts);
+
+                CLR_RT_SignatureParser::Element element;
+                
+                // advance signature: get parameter
+                parser.Advance(element);
+
+                // store parameter position
+                CLR_INT8 genericParamPosition = (CLR_INT8)element.GenericParamPosition;
+
+                // get the caller generic type
+                CLR_RT_TypeSpec_Instance tsInstance;
+                tsInstance.InitializeFromIndex(*caller->genericType);
+
+                switch (element.DataType)
+                {
+                    case DATATYPE_VAR:
+
+                        parser.Initialize_TypeSpec(caller->m_assm, tsInstance.m_target);
+
+                        // advance signature: get type
+                        parser.Advance(element);
+
+                        // loop as many times as the parameter position
+                        do
+                        {
+                            parser.Advance(element);
+
+                            genericParamPosition--;
+                        } while (genericParamPosition > 0);
+
+                        // build TypeDef instance from element
+                        m_data = element.Class.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
+                        m_target = m_assm->GetTypeDef(element.Class.Type());
+
+                        break;
+
+                    case DATATYPE_MVAR:
+                        break;
+
+                    default:
+                        return false;
+                }
+
+                return true;
+            }
+
             default:
                 //// handle generic type from provided data
                 //if (sampleData != NULL)
@@ -1115,17 +1167,41 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 return true;
 
             case TBL_MethodSpec:
-                Set(assm->m_index, index);
-
+            {
                 m_assm = assm;
-                
-                m_target = 0;
 
-                // invalidate generic type
-                genericType = NULL;
+                const CLR_RECORD_METHODSPEC* ms = m_assm->GetMethodSpec(index);
+
+                CLR_RT_MethodSpec_Index msIndex;
+                msIndex.Set(m_assm->m_index, index);
+
+                switch (msIndex.Type())
+                {
+                    case TBL_MethodDef:
+                        Set(m_assm->m_index, msIndex.Method());
+                        m_assm = assm;
+                        m_target = m_assm->GetMethodDef(index);
+                        break;
+
+                    case TBL_MethodRef:
+                        m_data = assm->m_pCrossReference_MethodRef[msIndex.Method()].Target.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                        m_target = m_assm->GetMethodDef(Method());
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+                // get generic type
+                CLR_RT_TypeSpec_Index ts;
+                ts.Set(m_assm->m_index, ms->Container);
+
+                //genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container];
 
                 return true;
-
+            }
             case TBL_TypeSpec:
             {
                 //CLR_RT_TypeSpec_Index typeSpec;
