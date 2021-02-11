@@ -597,7 +597,7 @@ parse_type:
                     }
 
                     case DATATYPE_VAR:
-                        res.GenericParamPosition = *Signature++;
+                        res.GenericParamPosition = (int)*Signature++;
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
                     case DATATYPE_MVAR:
