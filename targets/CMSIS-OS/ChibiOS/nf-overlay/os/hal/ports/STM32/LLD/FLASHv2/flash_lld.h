@@ -100,9 +100,9 @@ typedef struct STM32FlashDriver
 #endif // FLASH_SR_RDERR
 
 //---------------------------------- STM32F7xx ------------------------------//
-#elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) ||                  \
-    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) ||                    \
-    defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+#elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                  \
+    defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
+    defined(STM32F722xx) || defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
 
 #define FLASH_FLAG_EOP    FLASH_SR_EOP    /*!< FLASH End of Operation flag               */
 #define FLASH_FLAG_OPERR  FLASH_SR_OPERR  /*!< FLASH operation Error flag                */
@@ -273,9 +273,9 @@ typedef struct STM32FlashDriver
 /*-----------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------- STM32F7xx ------------------------------*/
-#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) ||                    \
-    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) ||                    \
-    defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                    \
+    defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
+    defined(STM32F722xx) || defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
 
 #define FLASH_SECTOR_0 ((uint32_t)0U) /*!< Sector Number 0   */
 #define FLASH_SECTOR_1 ((uint32_t)1U) /*!< Sector Number 1   */
