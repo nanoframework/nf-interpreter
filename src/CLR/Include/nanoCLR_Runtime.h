@@ -2221,7 +2221,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_INDEX Container();
 
-    CLR_ENCODEDNANOMETHOD InstanceOfMethod;
+    CLR_EncodedMethodDefOrRef InstanceOfMethod;
 };
 
 
