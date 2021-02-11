@@ -110,7 +110,7 @@ typedef CLR_UINT16 CLR_SIG;
 typedef const CLR_UINT8 *CLR_PMETADATA;
 typedef CLR_UINT16 CLR_TYPEORMETHODDEF;
 typedef CLR_UINT16 CLR_ENCODEDNANOTYPE;
-typedef CLR_UINT16 CLR_ENCODEDNANOMETHOD;
+typedef CLR_UINT16 CLR_EncodedMethodDefOrRef;
 typedef CLR_UINT16 CLR_EncodedTypeDefOrRef;
 typedef CLR_UINT16 CLR_EncodedTypeRefOrSpec;
 
@@ -1567,7 +1567,7 @@ struct CLR_RECORD_METHODSPEC
 {
     /// @brief Encoded index into TBL_MethodDef | TBL_MethodRef
     ///
-    CLR_ENCODEDNANOMETHOD Method;
+    CLR_EncodedMethodDefOrRef Method;
 
     /// @brief Index into TBL_Signatures holding the signature of this instantiation
     ///
