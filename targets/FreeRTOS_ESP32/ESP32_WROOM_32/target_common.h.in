@@ -11,31 +11,35 @@
 #ifndef _TARGET_COMMON_H_
 #define _TARGET_COMMON_H_
 
-#include "target_os.h"
+#include <target_os.h>
 
-/////////////////////////////////////////////////////////////////////////////////////////
-// The following addresses and sizes should be filled in according to the SoC data-sheet
-// they also must be coherent with what's in the linker file for nanoBooter and nanoCLR
+///////////////////////////////////////////////////////////////////////
+// RAM start address and size is filled @ HeapLocation() during boot //
+///////////////////////////////////////////////////////////////////////
 
-// RAM base address 
-#define RAM1_MEMORY_StartAddress        (0x200000C0)
-// RAM size 
-#define RAM1_MEMORY_Size                (0x00020000)
+// RAM base address
+#define RAM1_MEMORY_StartAddress (0x0)
+// RAM size
+#define RAM1_MEMORY_Size (0x0)
+
+/////////////////////////////////////////////////////////////////////////////////
+// FLASH start address and size is filled @ FixUpHalSystemConfig() during boot //
+/////////////////////////////////////////////////////////////////////////////////
 
 // FLASH base address
-#define FLASH1_MEMORY_StartAddress      (0x08000000)
+#define FLASH1_MEMORY_StartAddress (0x0)
 // FLASH size
-#define FLASH1_MEMORY_Size              (0x00080000)
+#define FLASH1_MEMORY_Size (0x0)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////
-#define TARGETNAMESTRING "@TARGET_NAME@"
+#define TARGETNAMESTRING   "@TARGET_NAME@"
 #define PLATFORMNAMESTRING "ESP32"
 //////////////////////////////////////////////
 
 /////////////////////////////////////
-#define PLATFORM_HAS_RNG       TRUE
+#define PLATFORM_HAS_RNG TRUE
 /////////////////////////////////////
 
 /////////////////////////////////////
