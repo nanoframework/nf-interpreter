@@ -2167,6 +2167,10 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &refer
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    const CLR_RECORD_FIELDDEF* target = NULL;
+    CLR_RT_Assembly* assm = NULL;
+    CLR_RT_TypeDef_Instance instSub = instance;
+
     reference.SetObjectReference(NULL);
 
     int clsFields = instance.m_target->InstanceFieldsCount;
@@ -2179,9 +2183,6 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &refer
 
     reference.SetObjectReference(genericInst);
 
-    const CLR_RECORD_FIELDDEF* target = NULL;
-    CLR_RT_Assembly* assm = NULL;
-    CLR_RT_TypeDef_Instance instSub = instance;
 
     //
     // Initialize field types, from last to first.

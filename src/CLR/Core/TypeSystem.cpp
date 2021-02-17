@@ -5648,28 +5648,28 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodSpec_Index &ms, co
     NANOCLR_HEADER();
 
     CLR_RT_MethodSpec_Instance inst;
+    const CLR_RECORD_METHODSPEC* msRecord;
+    CLR_RT_SignatureParser parser;
+    CLR_RT_SignatureParser::Element element;
+    CLR_RT_TypeDef_Index typeDef;
+    CLR_RT_TypeDef_Instance instOwner;
+    CLR_RT_Assembly* assembly;
 
     if (inst.InitializeFromIndex(ms) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    CLR_RT_Assembly* assembly = g_CLR_RT_TypeSystem.m_assemblies[ms.Assembly() - 1];
+    assembly = g_CLR_RT_TypeSystem.m_assemblies[ms.Assembly() - 1];
 
-    const CLR_RECORD_METHODSPEC* msRecord = inst.m_assm->GetMethodSpec(ms.Method());
+    msRecord = inst.m_assm->GetMethodSpec(ms.Method());
 
-    CLR_RT_SignatureParser parser;
     parser.Initialize_TypeSpec(inst.m_assm, inst.m_assm->GetTypeSpec(msRecord->Container));
-
-    CLR_RT_SignatureParser::Element element;
 
     // get type
     parser.Advance(element);
 
-    CLR_RT_TypeDef_Index typeDef;
     typeDef.m_data = element.Class.m_data;
-
-    CLR_RT_TypeDef_Instance instOwner;
 
     if (instOwner.InitializeFromIndex(typeDef) == false)
     {
