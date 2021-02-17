@@ -5465,8 +5465,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodDef_Index &md, con
         {
             parser.Advance(element);
 
-            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].Name));
-
+#if defined(_WIN32)
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+#endif
             if (i + 1 < parser.GenParamCount)
             {
                 NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
@@ -5553,7 +5554,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
         {
             parser.Advance(element);
 
-            CLR_SafeSprintf(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].Name);
+#if defined(_WIN32)
+            CLR_SafeSprintf(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name);
+#endif
 
             if (i + 1 < parser.GenParamCount)
             {
@@ -5612,7 +5615,9 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
     {
         parser.Advance(element);
 
-        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].Name));
+#if defined(_WIN32)
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+#endif
 
         if (i + 1 < parser.GenParamCount)
         {
