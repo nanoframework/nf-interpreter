@@ -2090,7 +2090,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_MethodDef_Instance calleeInst;
                     if (calleeInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_TypeDef_Index cls;
                     CLR_RT_HeapBlock *pThis;
 #if defined(NANOCLR_APPDOMAINS)
@@ -2599,7 +2602,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_FieldDef_Instance fieldInst;
                     if (fieldInst.ResolveToken(arg, assm) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+
                     CLR_RT_HeapBlock *obj = &evalPos[1];
                     nanoClrDataType dt = obj->DataType();
 
@@ -2716,7 +2722,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     CLR_RT_TypeDef_Instance typeInst;
                     if (typeInst.ResolveToken(arg, assm, &stack->m_call) == false)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     UPDATESTACK(stack, evalPos);
 
