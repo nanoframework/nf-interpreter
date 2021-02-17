@@ -519,6 +519,12 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
             CLR_RT_DUMP::METHOD(s, NULL);
             break;
         }
+        case TBL_MethodSpec:
+        {
+            LOOKUP_ELEMENT_IDX(index, MethodSpec, METHODSPEC);
+            CLR_RT_DUMP::METHODSPEC(s, NULL);
+            break;
+        }
         case TBL_Strings:
         {
             const char *p = GetString(index);
@@ -893,6 +899,19 @@ void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildMethodRefName(method, szBuffer, iBuffer);
+
+    CLR_Debug::Printf("%s", rgBuffer);
+}
+
+void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index& method, const CLR_RT_TypeSpec_Index* genericType)
+{
+    NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+    char rgBuffer[512];
+    char* szBuffer = rgBuffer;
+    size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+    g_CLR_RT_TypeSystem.BuildMethodName(method, genericType, szBuffer, iBuffer);
 
     CLR_Debug::Printf("%s", rgBuffer);
 }

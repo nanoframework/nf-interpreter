@@ -5579,6 +5579,88 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodSpec_Index &ms, const CLR_RT_TypeSpec_Index* genericType, char *&szBuffer, size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_MethodSpec_Instance inst;
+
+    if (inst.InitializeFromIndex(ms) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    CLR_RT_Assembly* assembly = g_CLR_RT_TypeSystem.m_assemblies[ms.Assembly() - 1];
+
+    const CLR_RECORD_METHODSPEC* msRecord = inst.m_assm->GetMethodSpec(ms.Method());
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(inst.m_assm, inst.m_assm->GetTypeSpec(msRecord->Container));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get type
+    parser.Advance(element);
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.m_data = element.Class.m_data;
+
+    CLR_RT_TypeDef_Instance instOwner;
+
+    if (instOwner.InitializeFromIndex(typeDef) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    BuildTypeName(typeDef, szBuffer, iBuffer);
+
+    CLR_SafeSprintf(szBuffer, iBuffer, "<");
+
+    parser.Initialize_MethodSignature(&inst);
+
+    for (int i = 0; i < parser.GenParamCount; i++)
+    {
+        parser.Advance(element);
+
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+
+        if (i + 1 < parser.GenParamCount)
+        {
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+        }
+    }
+
+    CLR_SafeSprintf(szBuffer, iBuffer, ">::");
+
+    switch (msRecord->MethodKind())
+    {
+        case TBL_MethodDef:
+        {
+            const CLR_RECORD_METHODDEF* md = assembly->GetMethodDef(msRecord->MethodIndex());
+            CLR_SafeSprintf(szBuffer, iBuffer, "%s", assembly->GetString(md->Name));
+            break;
+        }
+        case TBL_MethodRef:
+        {
+            const CLR_RECORD_METHODREF* methodRef = assembly->GetMethodRef(msRecord->MethodIndex());
+            const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->m_pCrossReference_MethodRef[msRecord->MethodIndex()];
+
+            CLR_RT_MethodDef_Instance mdInstance;
+            mdInstance.m_data = memberCrossRef.Target.m_data;
+            mdInstance.m_assm = g_CLR_RT_TypeSystem.m_assemblies[mdInstance.Assembly() - 1];
+            mdInstance.m_target = mdInstance.m_assm->GetMethodDef(mdInstance.Method());
+
+            CLR_SafeSprintf(szBuffer, iBuffer, "%s", mdInstance.m_assm->GetString(mdInstance.CrossReference().GetOwner()));
+            break;
+        }
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 //--//
 
 bool CLR_RT_TypeSystem::FindVirtualMethodDef(

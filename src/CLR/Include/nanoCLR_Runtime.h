@@ -2041,6 +2041,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     HRESULT BuildMethodName(const CLR_RT_MethodDef_Index &md, const CLR_RT_TypeSpec_Index* genericType, char *&szBuffer, size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
     HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char*& szBuffer, size_t& iBuffer);
+    HRESULT BuildMethodName(const CLR_RT_MethodSpec_Index& ms, const CLR_RT_TypeSpec_Index* genericType, char*& szBuffer, size_t& iBuffer);
 
     HRESULT QueueStringToBuffer(char *&szBuffer, size_t &size, const char *szText);
 
