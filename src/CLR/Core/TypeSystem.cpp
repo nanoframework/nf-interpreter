@@ -2187,7 +2187,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_TypeSpec_CrossReference* dst = this->m_pCrossReference_TypeSpec;
         for (i = 0; i < this->m_pTablesSize[TBL_TypeSpec]; i++, src++, dst++)
         {
-            dst->Signature = CLR_EmptyIndex;
+            dst->GenericType.m_data = 0;
         }
     }
 

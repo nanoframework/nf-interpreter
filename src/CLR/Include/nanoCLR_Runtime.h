@@ -959,7 +959,7 @@ struct CLR_RT_MethodSpec_CrossReference
 
 struct CLR_RT_TypeSpec_CrossReference
 {
-    CLR_INDEX Signature;
+    CLR_RT_TypeSpec_Index GenericType;
 };
 
 struct CLR_RT_MethodDef_Patch
