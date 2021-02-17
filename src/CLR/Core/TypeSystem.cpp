@@ -962,27 +962,20 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                 switch (element.DataType)
                 {
                     case DATATYPE_VAR:
+                    {
+                        CLR_RT_GenericParam_Index gpIndex;
 
-                        parser.Initialize_TypeSpec(caller->m_assm, tsInstance.m_target);
+                        caller->m_assm->FindGenericParamAtTypeDef(*caller, genericParamPosition, gpIndex);
 
-                        // advance signature: get type
-                        parser.Advance(element);
+                        CLR_RT_GenericParam_CrossReference gp = caller->m_assm->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                        // loop as many times as the parameter position
-                        do
-                        {
-                            parser.Advance(element);
-
-                            genericParamPosition--;
-                        } while (genericParamPosition > 0);
-
-                        // build TypeDef instance from element
-                        m_data = element.Class.m_data;
-                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[element.Class.Assembly() - 1];
-                        m_target = m_assm->GetTypeDef(element.Class.Type());
+                        // get TypeDef instance from generic parameter index
+                        m_data = gp.Class.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
+                        m_target = m_assm->GetTypeDef(gp.Class.Type());
 
                         break;
-
+                    }
                     case DATATYPE_MVAR:
                     {
                         CLR_RT_GenericParam_Index gpIndex;
