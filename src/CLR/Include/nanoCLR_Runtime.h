@@ -710,13 +710,6 @@ struct CLR_RT_MethodSpec_Index
         return (CLR_INDEX)(m_data >> 16);
     }
 
-    nanoClrTable Type() const
-    {
-        static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
-        
-        return c_lookup[(m_data >> 15) & 1];
-    }
-
     CLR_INDEX Method() const
     {
         return (m_data & 0x7FFF);
