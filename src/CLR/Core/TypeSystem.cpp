@@ -1110,11 +1110,52 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_FieldRef:
-                m_data = assm->m_pCrossReference_FieldRef[index].m_target.m_data;
-                m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                m_target = m_assm->GetFieldDef(Field());
-                return true;
+            {
+                const CLR_RECORD_FIELDREF* fr = assm->GetFieldRef(index);
 
+                switch (fr->Owner())
+                {
+                    case TBL_TypeRef:
+                        m_data = assm->m_pCrossReference_FieldRef[fr->OwnerIndex()].Target.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                        m_target = m_assm->GetFieldDef(Field());
+
+                        // invalidate generic type
+                        genericType = NULL;
+
+                        break;
+
+                    case TBL_TypeSpec:
+                    {
+                        genericType = &assm->m_pCrossReference_FieldRef[index].GenericType;
+
+                        const CLR_RECORD_TYPESPEC* ts = assm->GetTypeSpec(genericType->TypeSpec());
+
+                        CLR_RT_FieldDef_Index field;
+
+                        if (!assm->FindFieldDef(
+                            ts,
+                            assm->GetString(fr->Name),
+                            assm,
+                            fr->Sig, field))
+                        {
+                            return false;
+                        }
+
+                        Set(assm->m_index, field.Field());
+
+                        m_assm = assm;
+                        m_target = m_assm->GetFieldDef(Field());
+
+                        break;
+                    }
+                    default:
+                        // shouldn't be here
+                        return false;
+                }
+
+                return true;
+            }
             case TBL_FieldDef:
                 Set(assm->m_index, index);
 
@@ -2675,6 +2716,9 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
+
+            // set TypeSpec
+            dst->GenericType.m_data = typeSpec.m_data;
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
         {
@@ -2706,6 +2750,9 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
+
+            // invalidate GenericType
+            dst->GenericType.m_data = CLR_EmptyToken;
         }
     }
 
