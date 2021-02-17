@@ -5632,7 +5632,6 @@ HRESULT CLR_RT_TypeSystem::BuildMethodName(const CLR_RT_MethodSpec_Index &ms, ch
         }
         case TBL_MethodRef:
         {
-            const CLR_RECORD_METHODREF* methodRef = assembly->GetMethodRef(msRecord->MethodIndex());
             const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->m_pCrossReference_MethodRef[msRecord->MethodIndex()];
 
             CLR_RT_MethodDef_Instance mdInstance;
