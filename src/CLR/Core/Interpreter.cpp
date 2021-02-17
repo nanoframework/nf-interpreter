@@ -2615,6 +2615,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
+                        case DATATYPE_GENERICINST:
                             obj[fieldInst.CrossReference().m_offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
