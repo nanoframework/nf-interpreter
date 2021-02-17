@@ -564,7 +564,7 @@ parse_type:
                             break;
 
                             case TBL_TypeRef:
-                                res.Class = Assembly->m_pCrossReference_TypeRef[index].m_target;
+                                res.Class = Assembly->m_pCrossReference_TypeRef[index].Target;
                                 break;
 
                             case TBL_TypeDef:
@@ -916,7 +916,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_TypeRef:
-                m_data = assm->m_pCrossReference_TypeRef[index].m_target.m_data;
+                m_data = assm->m_pCrossReference_TypeRef[index].Target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 m_target = assm->GetTypeDef(Type());
                 return true;
@@ -1043,7 +1043,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
                     break;
 
                 case TBL_TypeRef:
-                    cls = &m_assm->m_pCrossReference_TypeRef[m_target->ExtendsIndex()].m_target;
+                    cls = &m_assm->m_pCrossReference_TypeRef[m_target->ExtendsIndex()].Target;
                     break;
 
                 // all others are not supported
@@ -2561,7 +2561,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         {
             CLR_RT_TypeDef_Instance inst;
 
-            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->Scope & 0x7FFF].m_target) == false)
+            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->Scope & 0x7FFF].Target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->Scope);
@@ -2571,7 +2571,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
             }
 
             const char *szName = GetString(src->Name);
-            if (inst.m_assm->FindTypeDef(szName, inst.Type(), dst->m_target) == false)
+            if (inst.m_assm->FindTypeDef(szName, inst.Type(), dst->Target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s\r\n", szName);
@@ -2589,7 +2589,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 
             const char *szNameSpace = GetString(src->NameSpace);
             const char *szName = GetString(src->Name);
-            if (assm->FindTypeDef(szName, szNameSpace, dst->m_target) == false)
+            if (assm->FindTypeDef(szName, szNameSpace, dst->Target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
@@ -2625,7 +2625,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].m_target;
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].Target;
                 break;
 
                 //case CLR_MemberRefParent::MRP_TypeDef:
@@ -2663,7 +2663,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            if (!FindFieldDef(typeSpecInstance.m_target, fieldName, this, src->Sig, dst->m_target))
+            if (!FindFieldDef(typeSpecInstance.m_target, fieldName, this, src->Sig, dst->Target))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
@@ -2678,7 +2678,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
         {
-            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].m_target) == false)
+            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].Target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
@@ -2698,7 +2698,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 name);
 #endif
 
-            if (typeDefInstance.m_assm->FindFieldDef(typeDefInstance.m_target, fieldName, this, src->Sig, dst->m_target) == false)
+            if (typeDefInstance.m_assm->FindFieldDef(typeDefInstance.m_target, fieldName, this, src->Sig, dst->Target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s\r\n", fieldName);
@@ -2737,7 +2737,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].m_target;
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].Target;
                 break;
 
             //case CLR_MemberRefParent::MRP_TypeDef:

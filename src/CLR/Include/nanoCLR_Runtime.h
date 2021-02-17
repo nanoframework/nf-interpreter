@@ -876,12 +876,12 @@ struct CLR_RT_AssemblyRef_CrossReference
 
 struct CLR_RT_TypeRef_CrossReference
 {
-    CLR_RT_TypeDef_Index m_target;
+    CLR_RT_TypeDef_Index Target;
 };
 
 struct CLR_RT_FieldRef_CrossReference
 {
-    CLR_RT_FieldDef_Index m_target;
+    CLR_RT_FieldDef_Index Target;
 };
 
 struct CLR_RT_MethodRef_CrossReference

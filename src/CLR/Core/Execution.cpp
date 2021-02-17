@@ -1853,7 +1853,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     switch (CLR_TypeFromTk(tk))
                     {
                         case TBL_TypeRef:
-                            cls = assembly->m_pCrossReference_TypeRef[index].m_target;
+                            cls = assembly->m_pCrossReference_TypeRef[index].Target;
                             break;
 
                         case TBL_TypeDef:
