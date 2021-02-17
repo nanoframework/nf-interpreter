@@ -1882,38 +1882,25 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 {
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    const CLR_RECORD_TYPESPEC* ts = assembly->GetTypeSpec(methodDefInstance.genericType->TypeSpec());
-                    
-                    CLR_RT_SignatureParser parser;
-                    parser.Initialize_TypeSpec(assembly, ts);
+                    CLR_RT_GenericParam_Index gpIndex;
 
-                    CLR_RT_SignatureParser::Element element;
+                    assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParamPosition, gpIndex);
 
-                    // advance signature: get type
-                    NANOCLR_CHECK_HRESULT(parser.Advance(element));
+                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                    // loop as many times as the parameter position
-                    do
-                    {
-                        NANOCLR_CHECK_HRESULT(parser.Advance(element));
-                        
-                        genericParamPosition--;
-                    } while (genericParamPosition > 0);
-
-                    // copy these from the parser element
-                    cls = element.Class;
-                    dt = element.DataType;
+                    cls = gp.Class;
+                    dt = gp.DataType;
 
                     goto done;
                 }
 
                 case DATATYPE_MVAR:
                 {
-                    CLR_UINT8 genericParameterPosition = *sig++;
+                    CLR_UINT8 genericParamPosition = *sig++;
 
                     CLR_RT_GenericParam_Index gpIndex;
                         
-                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParameterPosition, gpIndex);
+                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
 
                     CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
