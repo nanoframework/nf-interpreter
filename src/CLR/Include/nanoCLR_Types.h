@@ -560,8 +560,8 @@ inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[3] = {TBL_FieldDef, TBL_FieldRef, TBL_TypeSpec };
-    return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
+    static const nanoClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef };
+    return CLR_TkFromType(c_lookup[(tk >> 15)], 0x7fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
