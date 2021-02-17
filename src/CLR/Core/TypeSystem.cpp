@@ -984,8 +984,20 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm,
                         break;
 
                     case DATATYPE_MVAR:
-                        break;
+                    {
+                        CLR_RT_GenericParam_Index gpIndex;
 
+                        caller->m_assm->FindGenericParamAtMethodDef(*caller, genericParamPosition, gpIndex);
+
+                        CLR_RT_GenericParam_CrossReference gp = caller->m_assm->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                        // get TypeDef instance from generic parameter index
+                        m_data = gp.Class.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
+                        m_target = m_assm->GetTypeDef(gp.Class.Type());
+
+                        break;
+                    }
                     default:
                         return false;
                 }
