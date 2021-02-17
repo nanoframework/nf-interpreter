@@ -1174,6 +1174,7 @@ void CLR_RT_MethodDef_Instance::Clear()
 
     m_assm = NULL;
     m_target = NULL;
+    genericType = NULL;
 }
 
 bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
