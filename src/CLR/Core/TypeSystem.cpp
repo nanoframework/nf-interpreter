@@ -1084,6 +1084,7 @@ bool CLR_RT_FieldDef_Instance::InitializeFromIndex(const CLR_RT_FieldDef_Index &
         m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetFieldDef(Field());
+        genericType = NULL;
 
         return true;
     }
@@ -1091,6 +1092,7 @@ bool CLR_RT_FieldDef_Instance::InitializeFromIndex(const CLR_RT_FieldDef_Index &
     m_data = 0;
     m_assm = NULL;
     m_target = NULL;
+    genericType = NULL;
 
     return false;
 }
@@ -1102,6 +1104,7 @@ void CLR_RT_FieldDef_Instance::Clear()
 
     m_assm = NULL;
     m_target = NULL;
+    genericType = NULL;
 }
 
 bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
@@ -1124,6 +1127,10 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
 
                 m_assm = assm;
                 m_target = m_assm->GetFieldDef(index);
+
+                // invalidate generic type
+                genericType = NULL;
+
                 return true;
 
             default:

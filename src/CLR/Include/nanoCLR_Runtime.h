@@ -2140,6 +2140,8 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
     CLR_RT_Assembly *m_assm;
     const CLR_RECORD_FIELDDEF *m_target;
 
+    const CLR_RT_TypeSpec_Index* genericType;
+
     //--//
 
     bool InitializeFromIndex(const CLR_RT_FieldDef_Index &index);
