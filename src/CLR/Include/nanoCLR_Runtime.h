@@ -2225,8 +2225,6 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     void Clear();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly* assm);
-
     CLR_RT_MethodSpec_CrossReference& CrossReference() const
     {
         return m_assm->m_pCrossReference_MethodSpec[Method()];
