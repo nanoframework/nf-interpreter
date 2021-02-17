@@ -182,6 +182,7 @@ __nfweak void CLR_RT_DUMP::TYPE( const CLR_RT_ReflectionDef_Index& reflex )
 __nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index& method, const CLR_RT_TypeSpec_Index *genericType)
 {
     (void)method;
+    (void)genericType;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }

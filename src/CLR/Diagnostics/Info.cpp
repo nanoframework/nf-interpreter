@@ -522,7 +522,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         case TBL_MethodSpec:
         {
             LOOKUP_ELEMENT_IDX(index, MethodSpec, METHODSPEC);
-            CLR_RT_DUMP::METHODSPEC(s, NULL);
+            CLR_RT_DUMP::METHODSPEC(s);
             break;
         }
         case TBL_Strings:
@@ -903,7 +903,7 @@ void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
     CLR_Debug::Printf("%s", rgBuffer);
 }
 
-void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index& method, const CLR_RT_TypeSpec_Index* genericType)
+void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index& method)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
