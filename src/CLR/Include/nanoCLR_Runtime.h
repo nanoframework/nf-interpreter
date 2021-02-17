@@ -2319,7 +2319,7 @@ struct CLR_RT_TypeDescriptor
 
     nanoClrDataType GetDataType() const
     {
-        if (m_handlerCls.m_data != CLR_EmptyToken)
+        if (m_handlerCls.m_data != 0)
         {
             return (nanoClrDataType)m_handlerCls.m_target->DataType;
         }
