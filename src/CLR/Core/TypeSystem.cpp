@@ -1213,7 +1213,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 }
                 else
                 {
-                    m_data = assm->m_pCrossReference_MethodRef[index].Target.m_data;
+                    m_data = assm->m_pCrossReference_MethodRef[mr->OwnerIndex()].Target.m_data;
                     m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                     m_target = m_assm->GetMethodDef(Method());
 
@@ -1260,7 +1260,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         break;
 
                     default:
-                        break;
+                        // shouldn't be here
+                        return false;
                 }
 
                 // get generic type
@@ -1295,9 +1296,12 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
 
                     default:
                         // shouldn't be here
-                        break;
+                        return false;
                 }
                 break;
+               
+                // get generic type
+                genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container].GenericType;
 
                 return true;
             }
