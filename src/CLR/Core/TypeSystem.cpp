@@ -1225,16 +1225,16 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 CLR_RT_MethodSpec_Index msIndex;
                 msIndex.Set(m_assm->m_index, index);
 
-                switch (msIndex.Type())
+                switch (ms->MethodKind())
                 {
                     case TBL_MethodDef:
-                        Set(m_assm->m_index, msIndex.Method());
+                        Set(m_assm->m_index, ms->MethodIndex());
                         m_assm = assm;
-                        m_target = m_assm->GetMethodDef(index);
+                        m_target = m_assm->GetMethodDef(ms->MethodIndex());
                         break;
 
                     case TBL_MethodRef:
-                        m_data = assm->m_pCrossReference_MethodRef[msIndex.Method()].Target.m_data;
+                        m_data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].Target.m_data;
                         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         m_target = m_assm->GetMethodDef(Method());
 
@@ -1245,36 +1245,30 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 }
 
                 // get generic type
-                CLR_RT_TypeSpec_Index ts;
-                ts.Set(m_assm->m_index, ms->Container);
-
-                //genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container];
+                genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container].GenericType;
 
                 return true;
             }
             case TBL_TypeSpec:
             {
-                //CLR_RT_TypeSpec_Index typeSpec;
-                //typeSpec.Set(assm->m_index, index);
-
-                ////CLR_RT_TypeSpec_Instance typeSpecInstance;
-                ////typeSpecInstance.InitializeFromIndex(typeSpec);
-
                 CLR_RT_MethodSpec_Index methodSpec;
                 assm->FindMethodSpecFromTypeSpec(index, methodSpec);
 
-                switch (methodSpec.Type())
+                const CLR_RECORD_METHODSPEC* ms = assm->GetMethodSpec(index);
+
+                switch (ms->MethodKind())
                 {
                     case TBL_MethodDef:
-                        Set(assm->m_index, methodSpec.Method());
+                        Set(assm->m_index, ms->MethodIndex());
 
-                        m_assm = assm;
-                        m_target = m_assm->GetMethodDef(methodSpec.Method());
+                        m_assm = assm; 
+                        m_target = m_assm->GetMethodDef(ms->MethodIndex());
+
 
                         return true;
 
                     case TBL_MethodRef:
-                        m_data = assm->m_pCrossReference_MethodRef[methodSpec.Method()].Target.m_data;
+                        m_data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].Target.m_data;
                         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         m_target = m_assm->GetMethodDef(Method());
 
