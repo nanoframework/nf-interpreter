@@ -1567,7 +1567,7 @@ struct CLR_RECORD_METHODSPEC
 {
     /// @brief Encoded index into TBL_MethodDef | TBL_MethodRef
     ///
-    CLR_EncodedMethodDefOrRef Method;
+    CLR_EncodedMethodDefOrRef encodedMethod;
 
     /// @brief Index into TBL_Signatures holding the signature of this instantiation
     ///
@@ -1576,6 +1576,22 @@ struct CLR_RECORD_METHODSPEC
     /// @brief Index into TBL_Signatures for the type specification containing the method
     ///
     CLR_INDEX Container;
+
+    /// @brief Index into table pointed by  TBL_MethodDef | TBL_MethodRef
+    ///
+    CLR_INDEX MethodIndex() const
+    {
+        return (encodedMethod & 0x7FFF);
+    }
+
+    /// @brief EnclosingType table
+    ///
+    nanoClrTable MethodKind() const
+    {
+        static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
+
+        return c_lookup[(encodedMethod >> 15)];
+    }
 };
 
 struct CLR_RECORD_EH

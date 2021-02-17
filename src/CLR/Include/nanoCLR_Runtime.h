@@ -949,12 +949,19 @@ struct CLR_RT_GenericParam_CrossReference
 
 struct CLR_RT_MethodSpec_CrossReference
 {
+    CLR_RT_TypeSpec_Index GenericType;
+    
+    CLR_RT_MethodDef_Index MethodDef;
+    CLR_RT_MethodRef_Index MethodRef;
+
+    CLR_INDEX Signature;
+
     CLR_UINT16 m_data;
 
-    CLR_INDEX GetMethod() const
-    {
-        return (CLR_INDEX)(m_data);
-    }
+    //CLR_INDEX GetMethod() const
+    //{
+    //    return (CLR_INDEX)(m_data);
+    //}
 };
 
 struct CLR_RT_TypeSpec_CrossReference
@@ -1161,6 +1168,7 @@ struct CLR_RT_SignatureParser
     static const int c_Locals = 4;
     static const int c_Object = 5;
     static const int c_GenericParamType = 6;
+    static const int c_MethodSpec = 7;
 
     struct Element
     {
@@ -1214,6 +1222,7 @@ struct CLR_RT_SignatureParser
     void Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md);
     void Initialize_MethodSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
     void Initialize_MethodSignature(CLR_RT_MethodDef_Instance* mdInstance);
+    void Initialize_MethodSignature(CLR_RT_MethodSpec_Instance* msInstance);
 
     void Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes);
 
@@ -2111,6 +2120,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     bool InitializeFromIndex(const CLR_RT_TypeDef_Index &index);
     bool InitializeFromMethod(const CLR_RT_MethodDef_Instance &md);
     bool InitializeFromField(const CLR_RT_FieldDef_Instance &fd);
+    bool InitializeFromMethod(const CLR_RT_MethodSpec_Instance& ms);
 
     void Clear();
 
@@ -2215,11 +2225,19 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_MethodSpec_Index& index);
+
     void Clear();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly* assm);
 
+    CLR_RT_MethodSpec_CrossReference& CrossReference() const
+    {
+        return m_assm->m_pCrossReference_MethodSpec[Method()];
+    }
+
     CLR_INDEX Container();
+
+    CLR_INDEX Instantiation();
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 };

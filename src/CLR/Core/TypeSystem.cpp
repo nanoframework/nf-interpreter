@@ -336,6 +336,35 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, C
     IsGenericInst = false;
 }
 
+void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_MethodSpec_Instance* ms)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    Method = ms->Method();
+
+    Signature = ms->m_assm->GetSignature(ms->m_target->Instantiation);
+
+    Type = CLR_RT_SignatureParser::c_MethodSpec;
+
+    Flags = (*Signature++);
+
+    if (Flags != PIMAGE_CEE_CS_CALLCONV_GENERICINST)
+    {
+        // call is wrong
+        return;
+    }
+
+    ParamCount = (*Signature++);
+
+    Assembly = ms->m_assm;
+
+    GenParamCount = ParamCount;
+
+    IsGenericInst = false;
+}
+
+//--//
+
 bool CLR_RT_SignatureParser::Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -779,6 +808,27 @@ bool CLR_RT_TypeDef_Instance::InitializeFromMethod(const CLR_RT_MethodDef_Instan
 
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
         m_target = m_assm->GetTypeDef(indexType);
+
+        return true;
+    }
+
+    Clear();
+
+    return false;
+}
+
+bool CLR_RT_TypeDef_Instance::InitializeFromMethod(const CLR_RT_MethodSpec_Instance &ms)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    if (NANOCLR_INDEX_IS_VALID(ms))
+    {
+        CLR_INDEX indexAssm = ms.Assembly();
+       // CLR_INDEX indexType = ms.CrossReference().GetOwner();
+
+        //Set(indexAssm, indexType);
+
+        m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
+        //m_target = m_assm->GetTypeDef(indexType);
 
         return true;
     }
