@@ -911,7 +911,7 @@ void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index& method, const CLR_RT
     char* szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
-    g_CLR_RT_TypeSystem.BuildMethodName(method, genericType, szBuffer, iBuffer);
+    g_CLR_RT_TypeSystem.BuildMethodSpecName(method, szBuffer, iBuffer);
 
     CLR_Debug::Printf("%s", rgBuffer);
 }
