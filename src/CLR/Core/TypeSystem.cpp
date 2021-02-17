@@ -2828,9 +2828,6 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
                 // set TypeSpec
                 dst->GenericType.m_data = typeSpec.m_data;
-
-                // invalidate Target
-                dst->Target.m_data = CLR_EmptyToken;
             }
 
             if (fGot == false)
