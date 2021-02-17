@@ -2855,18 +2855,21 @@ HRESULT CLR_RT_Assembly::Resolve_TypeSpec()
 
     ITERATE_THROUGH_RECORDS(this, i, TypeSpec, TYPESPEC)
     {
-        //CLR_RT_TypeSpec_Instance inst;
+        dst->GenericType.Set(m_index, i);
 
-//        if (inst.InitializeFromIndex(m_pCrossReference_TypeSpec[src->sig].Signature) == false)
-//        {
-//#if !defined(BUILD_RTM)
-//            CLR_Debug::Printf("Resolve TypeSpec: unknown signature: %08x\r\n", src->sig);
-//#endif
-//            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-//        }
+        CLR_RT_TypeSpec_Instance inst;
+
+        if (inst.InitializeFromIndex(dst->GenericType) == false)
+        {
+#if !defined(BUILD_RTM)
+            CLR_Debug::Printf("Resolve TypeSpec: can't create TypeSpec instance: %08x\r\n", src->Sig);
+#endif
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+        
     }
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 void CLR_RT_Assembly::Resolve_Link()
