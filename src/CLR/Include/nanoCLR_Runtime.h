@@ -1211,7 +1211,6 @@ struct CLR_RT_SignatureParser
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
 
     void Initialize_FieldSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
-    void Initialize_FieldSignature(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* md);
 
     void Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md);
     void Initialize_MethodSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);

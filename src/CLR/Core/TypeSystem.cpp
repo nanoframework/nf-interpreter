@@ -244,20 +244,13 @@ void CLR_RT_SignatureParser::Initialize_Interfaces(CLR_RT_Assembly *assm, const 
 
 //--//
 
-void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* fd)
-{
-    NATIVE_PROFILE_CLR_CORE();
-
-    Method = 0xFFFF;
-
-    Initialize_FieldSignature(assm, assm->GetSignature(fd->Sig));
-}
-
 void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly* assm, CLR_PMETADATA fd)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     Type = CLR_RT_SignatureParser::c_Field;
+
+    Method = 0xFFFF;
 
     Flags = (*fd++);
 
@@ -273,6 +266,7 @@ void CLR_RT_SignatureParser::Initialize_FieldSignature(CLR_RT_Assembly* assm, CL
 void CLR_RT_SignatureParser::Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     Initialize_FieldDef(assm, assm->GetSignature(fd->Sig));
 }
 
@@ -451,6 +445,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
     res.IsByRef = false;
     res.Levels = 0;
     res.GenericParamPosition = 0xFFFF;
+    res.Class.Clear();
 
     switch (Type)
     {
