@@ -326,7 +326,6 @@ void CLR_RT_SignatureParser::Initialize_MethodSignature(CLR_RT_Assembly *assm, C
     Assembly = assm;
     Signature = md;
 
-    GenParamCount = 0;
     IsGenericInst = false;
 }
 
