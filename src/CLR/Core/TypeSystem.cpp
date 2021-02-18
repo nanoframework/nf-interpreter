@@ -5231,17 +5231,26 @@ bool CLR_RT_TypeSystem::MatchSignatureDirect(
         int iAvailRight = parserRight.Available();
 
         if (iAvailLeft != iAvailRight)
+        {
             return false;
+        }
 
         if (!iAvailLeft)
+        {
             return true;
-
+        }
+    
         CLR_RT_SignatureParser::Element resLeft;
         if (FAILED(parserLeft.Advance(resLeft)))
+        {
             return false;
+        }
+
         CLR_RT_SignatureParser::Element resRight;
         if (FAILED(parserRight.Advance(resRight)))
+        {
             return false;
+        }
 
         if (!MatchSignatureElement(
             resLeft, 
@@ -5249,7 +5258,9 @@ bool CLR_RT_TypeSystem::MatchSignatureDirect(
             parserLeft,
             parserRight,
             fIsInstanceOfOK))
-            return false;
+            {
+                return false;
+            }
     }
 
     return true;
@@ -5279,12 +5290,19 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         indexRight.m_data.m_type = resRight.Class;
 
         if (FAILED(descLeft.InitializeFromReflection(indexLeft)))
+        {
             return false;
+        }
+
         if (FAILED(descRight.InitializeFromReflection(indexRight)))
+        {
             return false;
+        }
 
         if (!CLR_RT_ExecutionEngine::IsInstanceOf(descRight, descLeft, false))
+        {
             return false;
+        }
     }
     else
     {
@@ -5292,32 +5310,39 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         {
             return false;
         }
+
         if (resLeft.Levels != resRight.Levels)
         {
             return false;
         }
+
         if (resLeft.DataType != resRight.DataType)
         {
             return false;
         }
+
         if (resLeft.Class.m_data != resRight.Class.m_data)
         {
             return false;
         }
+
         if ((resLeft.DataType == DATATYPE_MVAR && resLeft.DataType == DATATYPE_MVAR) &&
             (resLeft.GenericParamPosition && resRight.GenericParamPosition))
         {
             return false;
         }
+
         if ((resLeft.DataType == DATATYPE_VAR && resLeft.DataType == DATATYPE_VAR) &&
             (resLeft.GenericParamPosition && resRight.GenericParamPosition))
         {
             return false;
         }
+
         if (parserLeft.IsGenericInst != parserRight.IsGenericInst)
         {
             return false;
         }
+        
         if (parserLeft.IsGenericInst || parserRight.IsGenericInst)
         {
             if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
