@@ -4168,24 +4168,23 @@ bool CLR_RT_Assembly::FindFieldDef(
 
         if (!strcmp(fieldName, name))
         {
-            bool fMatch = true;
-
-            if (CLR_SIG_INVALID != sig)
+            if(base)
             {
                 CLR_RT_SignatureParser parserLeft;
-                parserLeft.Initialize_FieldSignature(this, fd);
+                parserLeft.Initialize_FieldDef(this, fd);
+
                 CLR_RT_SignatureParser parserRight;
                 parserRight.Initialize_FieldSignature(base, base->GetSignature(sig));
 
-                fMatch = CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight);
+                if(CLR_RT_TypeSystem::MatchSignature(parserLeft, parserRight) == false)
+                {
+                    continue;
+                }
             }
 
-            if (fMatch)
-            {
-                index.Set(m_index, i);
+            index.Set(m_index, i);
 
-                return true;
-            }
+            return true;
         }
     }
 
