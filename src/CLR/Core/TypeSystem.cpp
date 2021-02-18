@@ -2625,7 +2625,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            if (!FindFieldDef(typeSpecInstance.m_target, fieldName, this, src->Sig, dst->Target))
+            if (!typeSpecInstance.m_assm->FindFieldDef(typeSpecInstance.m_target, fieldName, this, src->Sig, dst->Target))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
@@ -2743,7 +2743,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            if (FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->Target))
+            if (typeSpecInstance.m_assm->FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->Target))
             {
                 fGot = true;
 
