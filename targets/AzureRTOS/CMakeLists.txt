@@ -88,7 +88,7 @@ endif()
 # AzureRTOS common directories
 add_subdirectory(_common)
 
-# try to find board in the targets folder
+# try to find STM board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
 if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
@@ -107,9 +107,26 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
     # add TARGET board directory
     add_subdirectory(ST/${TARGET_BOARD})
 
+# try to find Nordic  board in the targets folder
+elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
+
+    # board found
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
+
+    # Define base path for the class libraries
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+
+    # set target base location
+    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
+
+    add_subdirectory(Nordic)
+
+    # add TARGET board directory
+    add_subdirectory(Nordic/${TARGET_BOARD})
+
 else()
 
-    # try to find board in the Community targets folder
+    # try to find STM board in the Community targets folder
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
 
         # board found
@@ -125,6 +142,23 @@ else()
 
         # add TARGET board directory from Community
         add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
+
+    # try to find Nordic board in the Community targets folder
+    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
+
+        # board found
+        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
+
+        # Define base path for the class libraries
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+
+        # set target base location
+        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
+
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Nordic)
+
+        # add TARGET board directory from Community
+        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
 
     else()
 
