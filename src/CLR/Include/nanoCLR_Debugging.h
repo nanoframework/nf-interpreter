@@ -545,6 +545,11 @@ struct CLR_DBG_Commands
 
     //--//
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.WireProtocol.Commands.Debugging_Value (in managed code) !!! //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     struct Debugging_Value
     {
         CLR_RT_HeapBlock *      m_referenceID;
@@ -567,6 +572,11 @@ struct CLR_DBG_Commands
         // For DATATYPE_VALUETYPE or DATATYPE_CLASSTYPE
         //
         CLR_RT_TypeDef_Index    m_td;
+
+        //
+        // For DATATYPE_GENERICINST
+        //
+        CLR_RT_TypeSpec_Index    m_ts;
 
         //
         // For DATATYPE_SZARRAY
