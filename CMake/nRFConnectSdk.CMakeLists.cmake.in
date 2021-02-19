@@ -1,0 +1,26 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+cmake_minimum_required(VERSION 3.15)
+
+project(nRFConnectSdk-download NONE)
+
+include(ExternalProject)
+
+# download nRF Connect SDK source from official GitHub repo
+ExternalProject_Add( 
+    nRFConnectSdk
+    PREFIX nRFConnectSdk
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/nRFConnectSdk_Source
+    GIT_REPOSITORY https://github.com/nrfconnect/sdk-nrf
+    GIT_TAG ${NRF_CONNECT_SDK_VERSION}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)
