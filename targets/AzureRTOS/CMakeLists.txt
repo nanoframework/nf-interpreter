@@ -107,44 +107,10 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
     # add TARGET board directory
     add_subdirectory(ST/${TARGET_BOARD})
 
-# try to find board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
-
-    # board found
-    message(STATUS "Support for target board '${TARGET_BOARD}' found")
-
-    # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
-
-    # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
-
-    add_subdirectory(ST)
-
-    # add TARGET board directory
-    add_subdirectory(ST/${TARGET_BOARD})
-
 else()
 
     # try to find board in the Community targets folder
     if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
-
-        # board found
-        message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-
-        # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
-
-        # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
-
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
-
-        # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
-
-    # try to find STM board in the Community targets folder
-    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
