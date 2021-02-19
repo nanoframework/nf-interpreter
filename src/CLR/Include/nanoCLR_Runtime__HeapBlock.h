@@ -47,7 +47,7 @@
 
 #define CLR_RT_HEAPBLOCK_RELOCATE(ptr)                                                                                 \
     {                                                                                                                  \
-        nanoClrDataType dt = ptr->DataType();                                                                          \
+        NanoCLRDataType dt = ptr->DataType();                                                                          \
                                                                                                                        \
         if (dt > DATATYPE_LAST_NONPOINTER && dt < DATATYPE_FIRST_INVALID)                                              \
         {                                                                                                              \
@@ -135,7 +135,7 @@ struct CLR_RT_HeapBlock
     union CLR_RT_HeapBlock_Id {
         struct Type
         {
-            CLR_UINT8 dataType; // nanoClrDataType
+            CLR_UINT8 dataType; // NanoCLRDataType
             CLR_UINT8 flags;    // HB_*
             CLR_UINT16 size;
         } type;
@@ -809,9 +809,9 @@ struct CLR_RT_HeapBlock
 
     //--//
 
-    nanoClrDataType DataType() const
+    NanoCLRDataType DataType() const
     {
-        return (nanoClrDataType)m_id.type.dataType;
+        return (NanoCLRDataType)m_id.type.dataType;
     }
 
     CLR_UINT8 DataFlags() const
@@ -1076,7 +1076,7 @@ struct CLR_RT_HeapBlock
         m_data.objectReference.ptr = obj;
     }
 
-    bool IsAReferenceOfThisType(nanoClrDataType dataType) const
+    bool IsAReferenceOfThisType(NanoCLRDataType dataType) const
     {
         if (DataType() == DATATYPE_OBJECT)
         {
@@ -1339,7 +1339,7 @@ struct CLR_RT_HeapBlock
     // Since it is rare case, the code is not inlined to save code size.
     void AssignAndPinReferencedObject(const CLR_RT_HeapBlock &value);
 
-    HRESULT Convert(nanoClrDataType et, bool fOverflow, bool fUnsigned)
+    HRESULT Convert(NanoCLRDataType et, bool fOverflow, bool fUnsigned)
     {
         //
         // For V1, we don't throw on overflow.
@@ -1392,7 +1392,7 @@ struct CLR_RT_HeapBlock
 
     static CLR_INT32 Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned);
 
-    HRESULT Convert_Internal(nanoClrDataType et);
+    HRESULT Convert_Internal(NanoCLRDataType et);
     HRESULT NumericAdd(const CLR_RT_HeapBlock &right);
     HRESULT NumericSub(const CLR_RT_HeapBlock &right);
     HRESULT NumericMul(const CLR_RT_HeapBlock &right);

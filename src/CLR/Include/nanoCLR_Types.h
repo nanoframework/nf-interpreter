@@ -288,10 +288,10 @@ enum CLR_FlowControl
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH enum nanoClrTable (in nanoCLR_TypeSystem VS extension) !!! //
-// !!! KEEP IN SYNC WITH enum nanoClrTable (in MDP)                             !!! //
+// !!! KEEP IN SYNC WITH enum NanoCLRTable (in nanoCLR_TypeSystem VS extension) !!! //
+// !!! KEEP IN SYNC WITH enum NanoCLRTable (in MDP)                             !!! //
 //////////////////////////////////////////////////////////////////////////////////////
-enum nanoClrTable
+enum NanoCLRTable
 {
     TBL_AssemblyRef = 0x00000000,
     TBL_TypeRef = 0x00000001,
@@ -366,11 +366,11 @@ enum CLR_CorCallingConvention
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH enum nanoClrDataType (in nanoCLR_TypeSystem VS extension) !!! //
-// !!! KEEP IN SYNC WITH enum nanoClrDataType (in nanoCLR_TypeSystem Debugger)     !!! //
+// !!! KEEP IN SYNC WITH enum NanoCLRDataType (in nanoCLR_TypeSystem VS extension) !!! //
+// !!! KEEP IN SYNC WITH enum NanoCLRDataType (in nanoCLR_TypeSystem Debugger)     !!! //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-enum nanoClrDataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
+enum NanoCLRDataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
     /// @brief 0 bytes
     DATATYPE_VOID,
@@ -536,11 +536,11 @@ inline CLR_UINT32 CLR_DataFromTk(CLR_UINT32 tk)
 {
     return tk & 0x00FFFFFF;
 }
-inline nanoClrTable CLR_TypeFromTk(CLR_UINT32 tk)
+inline NanoCLRTable CLR_TypeFromTk(CLR_UINT32 tk)
 {
-    return (nanoClrTable)(tk >> 24);
+    return (NanoCLRTable)(tk >> 24);
 }
-inline CLR_UINT32 CLR_TkFromType(nanoClrTable tbl, CLR_UINT32 data)
+inline CLR_UINT32 CLR_TkFromType(NanoCLRTable tbl, CLR_UINT32 data)
 {
     return ((((CLR_UINT32)tbl) << 24) & 0xFF000000) | (data & 0x00FFFFFF);
 }
@@ -554,19 +554,19 @@ inline CLR_UINT32 CLR_UncompressStringToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
+    static const NanoCLRTable c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
     return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef };
+    static const NanoCLRTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef };
     return CLR_TkFromType(c_lookup[(tk >> 15)], 0x7fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressMethodToken(CLR_UINT32 tk)
 {
-    static const nanoClrTable c_lookup[4] = {TBL_MethodDef, TBL_MethodRef, TBL_TypeSpec, TBL_MethodSpec};
+    static const NanoCLRTable c_lookup[4] = {TBL_MethodDef, TBL_MethodRef, TBL_TypeSpec, TBL_MethodSpec};
 
     return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
@@ -635,14 +635,14 @@ inline CLR_UINT32 CLR_UncompressData(const CLR_UINT8 *&p)
     return val;
 }
 
-inline nanoClrDataType CLR_UncompressElementType(const CLR_UINT8 *&p)
+inline NanoCLRDataType CLR_UncompressElementType(const CLR_UINT8 *&p)
 {
-    return (nanoClrDataType)*p++;
+    return (NanoCLRDataType)*p++;
 }
 
 inline CLR_UINT32 CLR_TkFromStream(const CLR_UINT8 *&p)
 {
-    static const nanoClrTable c_lookup[4] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_Max};
+    static const NanoCLRTable c_lookup[4] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_Max};
 
     CLR_UINT32 data = CLR_UncompressData(p);
 
@@ -1036,7 +1036,7 @@ struct CLR_RECORD_ASSEMBLY
     void ComputeCRC();
 #endif
 
-    CLR_OFFSET_LONG SizeOfTable(nanoClrTable tbl) const
+    CLR_OFFSET_LONG SizeOfTable(NanoCLRTable tbl) const
     {
         return startOfTables[tbl + 1] - startOfTables[tbl] - paddingOfTables[tbl];
     }
@@ -1101,9 +1101,9 @@ struct CLR_RECORD_FIELDREF
 
     /// @brief Index into owner table
     ///
-    nanoClrTable Owner() const
+    NanoCLRTable Owner() const
     {
-        static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+        static const NanoCLRTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
 
         return c_lookup[(encodedOwner >> 15)];
     }
@@ -1134,9 +1134,9 @@ struct CLR_RECORD_METHODREF
 
     /// @brief Owner table
     ///
-    nanoClrTable Owner() const
+    NanoCLRTable Owner() const
     {
-        static const nanoClrTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+        static const NanoCLRTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
 
         return c_lookup[(encodedOwner >> 15)];
     }
@@ -1298,9 +1298,9 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief Extends table
     ///
-    nanoClrTable Extends() const
+    NanoCLRTable Extends() const
     {
-        static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+        static const NanoCLRTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
 
         return c_lookup[(encodedExtends >> 15)];
     }
@@ -1314,9 +1314,9 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief EnclosingType table
     ///
-    nanoClrTable EnclosingType() const
+    NanoCLRTable EnclosingType() const
     {
-        static const nanoClrTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+        static const NanoCLRTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
 
         return c_lookup[(encodedEnclosingType >> 15)];
     }
@@ -1586,9 +1586,9 @@ struct CLR_RECORD_METHODSPEC
 
     /// @brief EnclosingType table
     ///
-    nanoClrTable MethodKind() const
+    NanoCLRTable MethodKind() const
     {
-        static const nanoClrTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
+        static const NanoCLRTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
 
         return c_lookup[(encodedMethod >> 15)];
     }

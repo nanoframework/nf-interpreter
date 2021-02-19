@@ -82,7 +82,7 @@ bool CLR_RT_HeapBlock::InitObject()
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock *obj = this;
-    nanoClrDataType dt = obj->DataType();
+    NanoCLRDataType dt = obj->DataType();
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -120,12 +120,12 @@ bool CLR_RT_HeapBlock::InitObject()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_HeapBlock::Convert_Internal(nanoClrDataType et)
+HRESULT CLR_RT_HeapBlock::Convert_Internal(NanoCLRDataType et)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    nanoClrDataType dt = DataType();
+    NanoCLRDataType dt = DataType();
     const CLR_RT_DataTypeLookup &dtlSrc = c_CLR_RT_DataTypeLookup[dt];
     const CLR_RT_DataTypeLookup &dtlDst = c_CLR_RT_DataTypeLookup[et];
     int scaleIn;
@@ -2517,7 +2517,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (fieldInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_HeapBlock *obj = &evalPos[0];
-                    nanoClrDataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2567,7 +2567,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     if (fieldInst.ResolveToken(arg, assm) == false)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_RT_HeapBlock *obj = &evalPos[0];
-                    nanoClrDataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 
@@ -2607,7 +2607,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     CLR_RT_HeapBlock *obj = &evalPos[1];
-                    nanoClrDataType dt = obj->DataType();
+                    NanoCLRDataType dt = obj->DataType();
 
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
 

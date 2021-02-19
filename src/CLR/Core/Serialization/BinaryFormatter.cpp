@@ -195,10 +195,10 @@ bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(CLR_RT_TypeDescriptor *le
     return memcmp(left, right, sizeof(*left)) == 0;
 }
 
-nanoClrDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
+NanoCLRDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (nanoClrDataType)type->m_handlerCls.m_target->DataType;
+    return (NanoCLRDataType)type->m_handlerCls.m_target->DataType;
 }
 
 CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)
@@ -1294,8 +1294,8 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *src = m_value.m_value;
-    nanoClrDataType dt = dst.DataType();
-    nanoClrDataType dt2 = (dt == DATATYPE_ARRAY_BYREF) ? (nanoClrDataType)dst.DereferenceArray()->m_typeOfElement : dt;
+    NanoCLRDataType dt = dst.DataType();
+    NanoCLRDataType dt2 = (dt == DATATYPE_ARRAY_BYREF) ? (NanoCLRDataType)dst.DereferenceArray()->m_typeOfElement : dt;
 
     if (c_CLR_RT_DataTypeLookup[dt2].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
     {

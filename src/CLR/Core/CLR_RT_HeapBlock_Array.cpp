@@ -44,7 +44,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     }
     else
     {
-        nanoClrDataType dt = (nanoClrDataType)inst.m_target->DataType;
+        NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
         if (dtl.m_sizeInBytes == CLR_RT_DataTypeLookup::c_NA)
@@ -127,7 +127,7 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
 
     if (m_fReference)
     {
-        nanoClrDataType dt = (nanoClrDataType)m_typeOfElement;
+        NanoCLRDataType dt = (NanoCLRDataType)m_typeOfElement;
         bool fAllocate = (reflex.m_levels == 1 && dt == DATATYPE_VALUETYPE);
         CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)data;
 

@@ -1436,7 +1436,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    nanoClrDataType dt = (nanoClrDataType)inst.m_target->DataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
@@ -1742,7 +1742,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     NANOCLR_HEADER();
 
     CLR_RT_SignatureParser::Element res;
-    nanoClrDataType dt;
+    NanoCLRDataType dt;
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
@@ -1761,7 +1761,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
 
             if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
-                dt = (nanoClrDataType)inst.m_target->DataType;
+                dt = (NanoCLRDataType)inst.m_target->DataType;
             }
             else
             {
@@ -1822,11 +1822,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
     while (count)
     {
-        nanoClrDataType dt = DATATYPE_VOID;
+        NanoCLRDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
         CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
-        nanoClrDataType dtModifier = DATATYPE_VOID;
+        NanoCLRDataType dtModifier = DATATYPE_VOID;
 
         while (true)
         {
@@ -2022,7 +2022,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
     reference.SetObjectReference(NULL);
 
-    nanoClrDataType dt = (nanoClrDataType)inst.m_target->DataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
 
     //
     // You cannot create an array this way.
@@ -2233,11 +2233,11 @@ HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const C
     NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock *obj = &source;
-    nanoClrDataType dt;
+    NanoCLRDataType dt;
 
     while (true)
     {
-        dt = (nanoClrDataType)obj->DataType();
+        dt = (NanoCLRDataType)obj->DataType();
 
         if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
         {
