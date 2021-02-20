@@ -1,0 +1,26 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+cmake_minimum_required(VERSION 3.15)
+
+project(RPIPicoSdk-download NONE)
+
+include(ExternalProject)
+
+# download nRF Connect SDK source from official GitHub repo
+ExternalProject_Add( 
+    RPIPicoSdk
+    PREFIX RPIPicoSdk
+    SOURCE_DIR ${CMAKE_BINARY_DIR}/RPIPicoSdk_Source
+    GIT_REPOSITORY https://github.com/raspberrypi/pico-sdk
+    GIT_TAG ${RPI_PICO_SDK_VERSION}  # target specified branch
+    GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
+    TIMEOUT 10
+    LOG_DOWNLOAD 1
+    # Disable all other steps
+    INSTALL_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)
