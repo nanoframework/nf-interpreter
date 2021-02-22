@@ -9,6 +9,12 @@ include(AZURERTOS_${TARGET_SERIES}_GCC_options)
 
 ENABLE_LANGUAGE(ASM)
 
+# Azure RTOS settings and inclusion of build system
+set(THREADX_ARCH "cortex_m0")
+set(THREADX_TOOLCHAIN "gnu")
+set(TX_USER_FILE ${TARGET_BASE_LOCATION}/tx_user.h)
+add_subdirectory(${CMAKE_BINARY_DIR}/AzureRTOS_Source AzureSource)
+
 # add packages
 # NF_ADD_COMMON_PACKAGES()
 # NF_ADD_PLATFORM_PACKAGES()
