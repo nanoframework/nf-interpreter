@@ -28,13 +28,13 @@ add_subdirectory(${CMAKE_BINARY_DIR}/AzureRTOS_Source AzureSource)
 #######################
 # nanoBooter executable
 
-add_executable(
-    # executables for project, project sources
-    ${NANOBOOTER_PROJECT_NAME}.elf
+# add_executable(
+#     # executables for project, project sources
+#     ${NANOBOOTER_PROJECT_NAME}.elf
 
-    # need to add configuration manager to allow get/store configuration blocks
-    ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
-)
+#     # need to add configuration manager to allow get/store configuration blocks
+#     ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
+# )
 
 # NF_ADD_PLATFORM_DEPENDENCIES(${NANOBOOTER_PROJECT_NAME})
 
@@ -51,6 +51,8 @@ add_executable(
 add_executable(
     # executables for project, project sources
     ${NANOCLR_PROJECT_NAME}.elf
+
+    hello_world.c
 )
 
 # NF_ADD_PLATFORM_DEPENDENCIES(${NANOCLR_PROJECT_NAME})
@@ -63,11 +65,11 @@ add_executable(
 # NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
 
 # set compiler options
-nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
+# nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf )
+# nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf )
 nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf )
 
 # set linker files
@@ -80,15 +82,22 @@ nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf )
 # endif()
 
 # set linker options
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
+# nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
 ###########################################################
 # the size of CRT heap is defined here
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__crt_heap_size__=0x2000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__crt_heap_size__=0x2000")
+# set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__crt_heap_size__=0x2000")
+# set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__crt_heap_size__=0x2000")
 
 # generate output files
-nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+# nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+# nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
+
+# Add pico_stdlib library which aggregates commonly used features
+target_link_libraries(${NANOCLR_PROJECT_NAME}.elf pico_stdlib)
+
+# create map/bin/hex/uf2 file in addition to ELF.
+# pico_add_extra_outputs(hello_world)
