@@ -29,7 +29,7 @@
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "RTOS": "AZURERTOS",
-          "TARGET_SERIES": "",
+          "TARGET_SERIES": "RP2040",
           "TARGET_BOARD": "RPI_PICO",
           "RTOS_SOURCE_FOLDER": "RPIPICO",
           "RPI_PICO_SDK_SOURCE_FOLDER": "",
