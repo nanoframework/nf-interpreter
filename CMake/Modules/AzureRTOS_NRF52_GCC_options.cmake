@@ -3,9 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
-#################################################################
-# WHEN ADDING A NEW SERIES add the appropriate GCC options below
-#################################################################
+
+set(CMAKE_SYSTEM_PROCESSOR cortex-m4)
 
 # need to specify this for assembler
 set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m4 -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
