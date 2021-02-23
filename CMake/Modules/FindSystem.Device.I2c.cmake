@@ -29,7 +29,9 @@ set(System.Device.I2c_SRCS
 )
 
 foreach(SRC_FILE ${System.Device.I2c_SRCS})
+
     set(System.Device.I2c_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(System.Device.I2c_SRC_FILE ${SRC_FILE}
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
@@ -38,8 +40,13 @@ foreach(SRC_FILE ${System.Device.I2c_SRCS})
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Device.I2c_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Device.I2c_SRC_FILE}")
+    endif()
+
     list(APPEND System.Device.I2c_SOURCES ${System.Device.I2c_SRC_FILE})
+    
 endforeach()
 
 include(FindPackageHandleStandardArgs)
