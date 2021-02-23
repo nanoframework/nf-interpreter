@@ -337,7 +337,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
     // Create a task to handle UART event from ISR
-    sprintf(task_name, "uart%d_events", uart_num);
+    snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
     if (xTaskCreatePinnedToCore(uart_event_task, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
@@ -701,7 +701,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
                 // Create a task to handle UART event from ISR
                 char task_name[16];
-                sprintf(task_name, "uart%d_tx", uart_num);
+                snprintf(task_name, ARRAYSIZE(task_name), "uart%d_tx", uart_num);
 
                 if (xTaskCreate(UartTxWorkerTask, task_name, 2048, palUart, 12, NULL) != pdPASS)
                 {

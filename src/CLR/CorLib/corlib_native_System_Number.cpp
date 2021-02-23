@@ -6,12 +6,13 @@
 #include "CorLib.h"
 
 // compose sprintf format string according to requested parameters
-void nf_GetFormatString(char* formatStr, char formatCh, int precision, bool isLong, bool isFloat, bool isSigned)
+void nf_GetFormatString(char* formatStr, size_t formatStrLen, char formatCh, int precision, bool isLong, bool isFloat, bool isSigned)
 {
+
     if(formatCh == 'X' || formatCh=='x')
-		sprintf(formatStr, "%%0%d%sX", precision, isLong ? "ll" : "");
+		snprintf(formatStr, formatStrLen, "%%0%d%sX", precision, isLong ? "ll" : "");
     else
-        sprintf(formatStr, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "ll" : isFloat ? "f" : "", isFloat ? "" : isSigned ? "d" : "u");
+        snprintf(formatStr, formatStrLen, "%%%s%d%s%s", isFloat ? "." : isSigned ? "-0" : "0", precision, isLong ? "ll" : isFloat ? "f" : "", isFloat ? "" : isSigned ? "d" : "u");
 }
 
 // remove the prepended zeros and (if possible) the decimal point in a float that's formated as string. e.g. "47.1100815000000" => "47.1100815" or "8.0000E-12" => "8E-12"
@@ -127,38 +128,38 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
     {
         case DATATYPE_I1:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, true);
-            sprintf(result, formatStr, value->NumericByRef().s1 );
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s1 );
             break;
 
         case DATATYPE_U1:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, false);
-            sprintf(result, formatStr, value->NumericByRef().u1 );
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u1 );
             break;
 
         case DATATYPE_I2:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, true);
-            sprintf(result, formatStr, value->NumericByRef().s2 );
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s2 );
             break;
 
         case DATATYPE_U2:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, false);
-            sprintf(result, formatStr, value->NumericByRef().u2 );
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u2 );
             break;
 
         case DATATYPE_I4:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, true);
-            sprintf(result, formatStr, value->NumericByRef().s4);
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s4);
             break;
 
         case DATATYPE_U4:
             // get format string
-            nf_GetFormatString(formatStr, formatCh, precision, false, false, false);
-            sprintf(result, formatStr, value->NumericByRef().u4);
+            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
+            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u4);
             break;
 
         case DATATYPE_I8:
@@ -167,8 +168,8 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 hal_snprintf( result, ARRAYSIZE(result), "%I64d",(CLR_INT64_TEMP_CAST)value->NumericByRef().s8 ); 
               #else
                 // get format string
-                nf_GetFormatString(formatStr, formatCh, precision, true, false, true);
-                sprintf(result, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8); 
+                nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, true, false, true);
+                snprintf(result, ARRAYSIZE(result), formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8); 
               #endif // defined(_WIN32)
             }
             break;
@@ -179,8 +180,8 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 hal_snprintf( result, ARRAYSIZE(result), "%I64u",(CLR_UINT64_TEMP_CAST)value->NumericByRef().u8 ); 
               #else
                 // get format string
-                nf_GetFormatString(formatStr, formatCh, precision, true, false, false);
-                sprintf(result, formatStr, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8 );
+                nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, true, false, false);
+                snprintf(result, ARRAYSIZE(result), formatStr, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8 );
               #endif // defined(_WIN32)
             }
             break;
@@ -206,9 +207,9 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 precision = (formatCh == 'G' && precision == 1) ? 9 : precision;
 
                 // get format string
-                nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
+                nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, true, false);
 
-                sprintf(result, formatStr, value->NumericByRef().r4);
+                snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().r4);
                 if (shouldRemovePrependedZeros)
                 {
                     nf_RemovePrependedZeros(result);
@@ -241,9 +242,9 @@ HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJE
                 precision = (formatCh == 'G' && precision == 1) ? 15 : precision;
 
                 // get format string
-                nf_GetFormatString(formatStr, formatCh, precision, false, true, false);
+                nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, true, false);
                 
-                sprintf(result, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
+                snprintf(result, ARRAYSIZE(result), formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
                 if (shouldRemovePrependedZeros)
                 {
                     nf_RemovePrependedZeros(result);
