@@ -5,7 +5,7 @@
 
 
 # set include directories
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/ext/lwip/src/include/lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include/lwip)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
@@ -20,7 +20,9 @@ set(nanoFramework.Networking.Sntp_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.Networking.Sntp_SRCS})
+
     set(nanoFramework.Networking.Sntp_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Networking.Sntp_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -29,8 +31,13 @@ foreach(SRC_FILE ${nanoFramework.Networking.Sntp_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Networking.Sntp_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Networking.Sntp_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Networking.Sntp_SOURCES ${nanoFramework.Networking.Sntp_SRC_FILE})
+    
 endforeach()
 
 
