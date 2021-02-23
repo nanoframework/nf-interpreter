@@ -53,7 +53,9 @@ set(WireProtocol_SRCS
 )
 
 foreach(SRC_FILE ${WireProtocol_SRCS})
+
     set(WireProtocol_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(WireProtocol_SRC_FILE ${SRC_FILE}
         PATHS 
             ${CMAKE_SOURCE_DIR}/src/CLR/WireProtocol
@@ -61,8 +63,13 @@ foreach(SRC_FILE ${WireProtocol_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${WireProtocol_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${WireProtocol_SRC_FILE}")
+    endif()
+
     list(APPEND WireProtocol_SOURCES ${WireProtocol_SRC_FILE})
+    
 endforeach()
 
 

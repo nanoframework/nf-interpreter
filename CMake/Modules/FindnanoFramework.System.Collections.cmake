@@ -23,7 +23,9 @@ set(nanoFramework.System.Collections_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.System.Collections_SRCS})
+
     set(nanoFramework.System.Collections_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.System.Collections_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -32,8 +34,13 @@ foreach(SRC_FILE ${nanoFramework.System.Collections_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.System.Collections_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.System.Collections_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.System.Collections_SOURCES ${nanoFramework.System.Collections_SRC_FILE})
+    
 endforeach()
 
 

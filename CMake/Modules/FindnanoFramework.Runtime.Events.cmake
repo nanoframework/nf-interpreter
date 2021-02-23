@@ -32,7 +32,9 @@ set(nanoFramework.Runtime.Events_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
+
     set(nanoFramework.Runtime.Events_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Runtime.Events_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -45,8 +47,13 @@ foreach(SRC_FILE ${nanoFramework.Runtime.Events_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Runtime.Events_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Runtime.Events_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Runtime.Events_SOURCES ${nanoFramework.Runtime.Events_SRC_FILE})
+    
 endforeach()
 
 

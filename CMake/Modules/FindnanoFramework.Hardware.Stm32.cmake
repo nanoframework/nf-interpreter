@@ -9,10 +9,6 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 
 # set include directories
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Core")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
-# list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/PAL/Include")
 list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
 
 
@@ -27,15 +23,22 @@ set(nanoFramework.Hardware.Stm32_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Stm32_SRCS})
+
     set(nanoFramework.Hardware.Stm32_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Hardware.Stm32_SRC_FILE ${SRC_FILE}
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Hardware.Stm32_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Hardware.Stm32_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Hardware.Stm32_SOURCES ${nanoFramework.Hardware.Stm32_SRC_FILE})
+    
 endforeach()
 
 

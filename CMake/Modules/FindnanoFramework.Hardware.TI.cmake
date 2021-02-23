@@ -27,7 +27,9 @@ set(nanoFramework.Hardware.TI_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.TI_SRCS})
+
     set(nanoFramework.Hardware.TI_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Hardware.TI_SRC_FILE ${SRC_FILE}
         PATHS
 	        "${BASE_PATH_FOR_THIS_MODULE}"
@@ -35,8 +37,13 @@ foreach(SRC_FILE ${nanoFramework.Hardware.TI_SRCS})
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Hardware.TI_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Hardware.TI_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Hardware.TI_SOURCES ${nanoFramework.Hardware.TI_SRC_FILE})
+    
 endforeach()
 
 include(FindPackageHandleStandardArgs)

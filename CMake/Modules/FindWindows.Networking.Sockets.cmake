@@ -27,7 +27,9 @@ set(Windows.Networking.Sockets_SRCS
 )
 
 foreach(SRC_FILE ${Windows.Networking.Sockets_SRCS})
+
     set(Windows.Networking.Sockets_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(Windows.Networking.Sockets_SRC_FILE ${SRC_FILE}
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
@@ -35,8 +37,13 @@ foreach(SRC_FILE ${Windows.Networking.Sockets_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${Windows.Networking.Sockets_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${Windows.Networking.Sockets_SRC_FILE}")
+    endif()
+
     list(APPEND Windows.Networking.Sockets_SOURCES ${Windows.Networking.Sockets_SRC_FILE})
+    
 endforeach()
 
 
