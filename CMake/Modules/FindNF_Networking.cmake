@@ -73,7 +73,9 @@ endif()
 # add source files in two steps
 # 1st pass: common source files
 foreach(SRC_FILE ${NF_Networking_SRCS})
+
     set(NF_Networking_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(NF_Networking_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -87,8 +89,13 @@ foreach(SRC_FILE ${NF_Networking_SRCS})
  
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}")
+    endif()
+
     list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
+
 endforeach()
 
 if(USE_SECURITY_MBEDTLS_OPTION)
@@ -97,7 +104,9 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 
     # 2nd pass: security files if option is selected 
     foreach(SRC_FILE ${NF_Networking_Security_SRCS})
+
         set(NF_Networking_SRC_FILE SRC_FILE-NOTFOUND)
+
         find_file(NF_Networking_SRC_FILE ${SRC_FILE}
             PATHS 
 
@@ -106,8 +115,13 @@ if(USE_SECURITY_MBEDTLS_OPTION)
     
             CMAKE_FIND_ROOT_PATH_BOTH
         )
-        # message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}") # debug helper
+
+        if (BUILD_VERBOSE)
+            message("${SRC_FILE} >> ${NF_Networking_SRC_FILE}")
+        endif()
+    
         list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
+
     endforeach()
 
 endif()
@@ -116,15 +130,22 @@ if(Use_Networking_Extra_Driver)
 
     # 3rd pass: Any extra driver files 
     foreach(SRC_FILE ${NF_Network_Driver_Srcs})
+
         set(NF_Networking_SRC_FILE SRC_FILE-NOTFOUND)
+
         find_file(NF_Networking_SRC_FILE ${SRC_FILE}
             PATHS 
                 ${NF_Network_Driver_Path}
     
             CMAKE_FIND_ROOT_PATH_BOTH
         )
-        # message("${SRC_FILE} >> ${NF_Network_Driver_Srcs}") # debug helper
+
+        if (BUILD_VERBOSE)
+            message("${SRC_FILE} >> ${NF_Network_Driver_Srcs}")
+        endif()
+    
         list(APPEND NF_Networking_SOURCES ${NF_Networking_SRC_FILE})
+        
     endforeach()
 
 endif()

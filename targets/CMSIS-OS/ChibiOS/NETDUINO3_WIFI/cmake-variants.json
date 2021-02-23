@@ -26,7 +26,8 @@
         "short": "NETDUINO3_WIFI",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
-          "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.arm-none-eabi.cmake",
+          "BUILD_VERBOSE" : "OFF",
+         "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "RTOS": "CHIBIOS",

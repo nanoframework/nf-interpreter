@@ -58,12 +58,6 @@ NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
 NF_ADD_COMMON_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
 NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
 
-# add dependencies from STM32F7_CubePackage and SPIFFS (this is required to make sure that components are unzip at the proper locations before the build starts)
-if(NF_FEATURE_USE_SPIFFS)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf STM32F7_CubePackage)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf SPIFFS)
-endif()
-
 # set compiler options
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)

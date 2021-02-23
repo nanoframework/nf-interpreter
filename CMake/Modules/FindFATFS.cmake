@@ -3,9 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(fatfs)
 
 # List of the required FatFs include files.
-list(APPEND FATFS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FatFS_Source/source)
+list(APPEND FATFS_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
 list(APPEND FATFS_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
 set(FATFS_SRCS
@@ -16,15 +18,23 @@ set(FATFS_SRCS
 )
 
 foreach(SRC_FILE ${FATFS_SRCS})
+
     set(FATFS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(FATFS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${CMAKE_BINARY_DIR}/FatFS_Source/source
+            ${fatfs_SOURCE_DIR}/source
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${FATFS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${FATFS_SRC_FILE}")
+    endif()
+
+
     list(APPEND FATFS_SOURCES ${FATFS_SRC_FILE})
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)
