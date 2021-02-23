@@ -3,6 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
 include(NF_Utils)
 
 # check if FATFS_SOURCE was specified or if it's empty (default is empty)
@@ -13,60 +14,32 @@ if(FATFS_SOURCE)
     endif()
 endif()
 
+# FatFS version
+set(FATFS_VERSION_EMPTY TRUE)
+
+# check if build was requested with a specifc FatFS version
+if(DEFINED FATFS_VERSION)
+    if(NOT "${FATFS_VERSION}" STREQUAL "")
+        set(FATFS_VERSION_EMPTY FALSE)
+    endif()
+endif()
+
+# check if build was requested with a specifc FatFS version
+if(FATFS_VERSION_EMPTY)
+    # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+    set(FATFS_VERSION_TAG "R0.14")
+else()
+    # set version 
+    set(FATFS_VERSION_TAG "${FATFS_VERSION}")
+endif()
+
 if(NO_FATFS_SOURCE)
-
-
-    # FatFS version
-    set(FATFS_VERSION_EMPTY TRUE)
-
-    # check if build was requested with a specifc FatFS version
-    if(DEFINED FATFS_VERSION)
-        if(NOT "${FATFS_VERSION}" STREQUAL "")
-            set(FATFS_VERSION_EMPTY FALSE)
-        endif()
-    endif()
-
-    # check if build was requested with a specifc FatFS version
-    if(FATFS_VERSION_EMPTY)
-        # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(FATFS_VERSION_TAG "R0.14")
-    else()
-        # set version 
-        set(FATFS_VERSION_TAG "${FATFS_VERSION}")
-    endif()
-
-    message(STATUS "FatFS version is: ${FATFS_VERSION_TAG}")
-
-    # need to setup a separate CMake project to download the code from the GitHub repository
-    # otherwise it won't be available before the actual build step
-    configure_file("${CMAKE_SOURCE_DIR}/CMake/FatFS.CMakeLists.cmake.in"
-    "${CMAKE_BINARY_DIR}/FatFS_Download/CMakeLists.txt")
-
-    # setup CMake project for FatFS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
-
-    # run build on FatFS download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/FatFS_Download")
-
-    # add FatFS as external project
-    ExternalProject_Add( 
-        FatFS
-        PREFIX FatFS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
-        GIT_REPOSITORY https://github.com/abbrev/fatfs.git #TODO: switch to nF org
-        GIT_TAG ${FATFS_VERSION_TAG}  # target specified branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h"
-
-        # Disable all other steps
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
+    message(STATUS "FatFS ${FATFS_VERSION_TAG} from GitHub repo")
+    
+    FetchContent_Declare(
+        fatfs
+        GIT_REPOSITORY https://github.com/abbrev/fatfs.git
+        GIT_TAG ${FATFS_VERSION_TAG}
     )
 
 else()
@@ -74,36 +47,26 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${FATFS_SOURCE}/")
-        message(STATUS "FatFS (source from: ${FATFS_SOURCE})")
+        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
-        # check if we already have the sources, no need to copy again
-        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/FatFS_Source/ SOURCE_EXISTS)
-
-        if(NOT ${SOURCE_EXISTS})
-            file(COPY "${FATFS_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/FatFS_Source")
-        else()
-            message(STATUS "Using local cache of FatFS source from ${FATFS_SOURCE}")
-        endif()
+        FetchContent_Declare(
+            fatfs
+            GIT_REPOSITORY ${FATFS_SOURCE}
+            GIT_TAG ${FATFS_VERSION_TAG}
+        )
     else()
         message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
     endif()
 
-    # add FatFS as external project
-    ExternalProject_Add(
-        FatFS
-        PREFIX FatFS
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/FatFS_Source
-        INSTALL_COMMAND "${CMAKE_COMMAND}" -E remove "${CMAKE_BINARY_DIR}/FatFS_Source/source/ffconf.h"
-
-        # Disable all other steps
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )        
-
-    # get source dir for FatFS CMake project
-    ExternalProject_Get_Property(FatFS SOURCE_DIR)
-
 endif()
+
+FetchContent_GetProperties(fatfs)
+FetchContent_Populate(fatfs)
+
+# have to delete the ffconf.h template from the repo
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E remove ${fatfs_SOURCE_DIR}/source/ffconf.h
+)
 
 # check if LWIP_SOURCE was specified or if it's empty (default is empty)
 set(NO_LWIP_SOURCE TRUE)
@@ -113,101 +76,56 @@ if(LWIP_SOURCE)
     endif()
 endif()
 
+# LWIP version
+set(LWIP_VERSION_EMPTY TRUE)
+
+# check if build was requested with a specifc LWIP version
+if(DEFINED LWIP_VERSION)
+    if(NOT "${LWIP_VERSION}" STREQUAL "")
+        set(LWIP_VERSION_EMPTY FALSE)
+    endif()
+endif()
+
+# check if build was requested with a specifc LWIP version
+if(LWIP_VERSION_EMPTY)
+    # no LWIP version actualy specified, must be empty which is fine, we'll default to a known good version
+    set(LWIP_GIT_TAG "STABLE-2_0_3_RELEASE")
+else()
+    # set Git tag
+    set(LWIP_GIT_TAG "${LWIP_VERSION}")
+endif()            
+
 if(NO_LWIP_SOURCE)
 
-    # check for Git (needed here for advanced warning to user if it's not installed)
-    find_package(Git)
+    message(STATUS "lwIP ${LWIP_GIT_TAG} from savannah.nongnu.org repo")
 
-    #  check if Git was found, if not report to user and abort
-    if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-    endif()
+    FetchContent_Declare(
+        lwip
+        GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
+        GIT_TAG ${LWIP_GIT_TAG}
+    )
 
-    # LWIP version
-    set(LWIP_VERSION_EMPTY TRUE)
-
-    # check if build was requested with a specifc LWIP version
-    if(DEFINED LWIP_VERSION)
-        if(NOT "${LWIP_VERSION}" STREQUAL "")
-            set(LWIP_VERSION_EMPTY FALSE)
-        endif()
-    endif()
-
-    # check if build was requested with a specifc LWIP version
-    if(LWIP_VERSION_EMPTY)
-        # no LWIP version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(LWIP_GIT_TAG "STABLE-2_0_3_RELEASE")
-    else()
-        # set Git tag
-        set(LWIP_GIT_TAG "${LWIP_VERSION}")
-    endif()            
-
-    message(STATUS "LWIP ${LWIP_GIT_TAG} from savannah.nongnu.org repo")
-
-    # need to setup a separate CMake project to download the code from the GitHub repository
-    # otherwise it won't be available before the actual build step
-    configure_file("${CMAKE_SOURCE_DIR}/CMake/LWIP.CMakeLists.cmake.in"
-                "${CMAKE_BINARY_DIR}/LWIP_Download/CMakeLists.txt")
-
-    # setup CMake project for LWIP download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/LWIP_Download")
-
-    # run build on LWIP download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/LWIP_Download")
-
-    # add LWIP as external project
-    ExternalProject_Add( 
-        LWIP
-        PREFIX LWIP
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/LWIP_Source
-        GIT_REPOSITORY  https://git.savannah.nongnu.org/git/lwip.git
-        GIT_TAG ${LWIP_GIT_TAG}  # target specified branch
-        GIT_SHALLOW 1   # download only the tip of the branch, not the complete history
-        TIMEOUT 10
-        LOG_DOWNLOAD 1
-        # Disable all other steps
-        INSTALL_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )  
 else()
     # LWIP source was specified
 
     # sanity check is source path exists
     if(EXISTS "${LWIP_SOURCE}/")
-        message(STATUS "LWIP (source from: ${LWIP_SOURCE})")
+        message(STATUS "lwIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
 
-        # check if we already have the sources, no need to copy again
-        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/LWIP_Source/ SOURCE_EXISTS)
-
-        if(NOT ${SOURCE_EXISTS})
-            file(COPY "${LWIP_SOURCE}/" DESTINATION "${CMAKE_BINARY_DIR}/LWIP_Source")
-        else()
-            message(STATUS "Using local cache of LWIP source from ${LWIP_SOURCE}")
-        endif()
+        FetchContent_Declare(
+            lwip
+            GIT_REPOSITORY ${LWIP_SOURCE}
+            GIT_TAG ${LWIP_GIT_TAG}
+        )
+    
     else()
         message(FATAL_ERROR "Couldn't find LWIP source at ${LWIP_SOURCE}/")
     endif()
 
-    # add LWIP as external project
-    ExternalProject_Add(
-        LWIP
-        PREFIX LWIP
-        SOURCE_DIR ${CMAKE_BINARY_DIR}/LWIP_Source
-        # Disable all other steps
-        INSTALL_COMMAND ""
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-    )        
-
-    # get source dir for LWIP CMake project
-    ExternalProject_Get_Property(LWIP SOURCE_DIR)
-
 endif()
+
+FetchContent_GetProperties(lwip)
+FetchContent_Populate(lwip)
 
 # append FatFS files
 if(USE_FILESYSTEM_OPTION)
@@ -235,7 +153,6 @@ endif()
 # make vars global
 set(NANOCLR_PROJECT_SOURCES ${NANOCLR_PROJECT_SOURCES} CACHE INTERNAL "make global")
 set(NANOCLR_PROJECT_INCLUDE_DIRS ${NANOCLR_PROJECT_INCLUDE_DIRS} CACHE INTERNAL "make global")
-
 
 list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

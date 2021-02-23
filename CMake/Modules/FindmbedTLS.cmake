@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(mbedtls)
+
 # because of issues when passing the config file as a string when using ExternalProject_Add with mbedTLS
 # we are replicating their CMakeList here. Actually this is more a simplified version...
 
@@ -17,7 +20,7 @@ if(RTOS_FREERTOS_ESP32_CHECK)
  
 else()
 
-    list(APPEND mbedTLS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/mbedTLS_Source/include)
+    list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
 
 endif()
 
@@ -37,7 +40,7 @@ endif(ENABLE_ZLIB_SUPPORT)
 if(RTOS_FREERTOS_ESP32_CHECK)
     set(MBEDTLS_PATH ${ESP32_IDF_PATH}/components/mbedtls/mbedtls/library)
 else()
-    set(MBEDTLS_PATH ${CMAKE_BINARY_DIR}/mbedTLS_Source/library)
+    set(MBEDTLS_PATH ${mbedtls_SOURCE_DIR}/library)
 endif()
 
 set(src_crypto
@@ -103,7 +106,9 @@ set(src_crypto
 )
 
 foreach(SRC_FILE ${src_crypto})
+
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
             ${MBEDTLS_PATH}
@@ -112,13 +117,18 @@ foreach(SRC_FILE ${src_crypto})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}")
+    endif()
+
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
+
 endforeach()
 
 # unset this warning as error required for this source file
-SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/mbedTLS_Source/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
-SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/mbedTLS_Source/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+SET_SOURCE_FILES_PROPERTIES( ${mbedtls_SOURCE_DIR}/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
+SET_SOURCE_FILES_PROPERTIES( ${mbedtls_SOURCE_DIR}/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
 
 set(src_x509
     certs.c
@@ -133,15 +143,22 @@ set(src_x509
 )
 
 foreach(SRC_FILE ${src_x509})
+
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
             ${MBEDTLS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}")
+    endif()
+
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
+
 endforeach()
 
 set(src_tls
@@ -156,15 +173,22 @@ set(src_tls
 )
 
 foreach(SRC_FILE ${src_tls})
+
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
             ${MBEDTLS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}")
+    endif()
+
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
+
 endforeach()
 
 # some sources need to be added from mbedTLS repo or ESP32 depending on build
@@ -201,7 +225,9 @@ else()
 endif()
 
 foreach(SRC_FILE ${src_platform_specific})
+
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -210,8 +236,13 @@ foreach(SRC_FILE ${src_platform_specific})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}")
+    endif()
+
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)

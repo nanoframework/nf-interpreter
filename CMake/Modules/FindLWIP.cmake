@@ -3,13 +3,15 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(lwip)
 
 # List of the required lwIp include files.
-list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/)
-list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/lwip)
-list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/netif)
-list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/compat)
-list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/LWIP_Source/src/include/compat/posix)
+list(APPEND LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/)
+list(APPEND LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/lwip)
+list(APPEND LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/netif)
+list(APPEND LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/compat)
+list(APPEND LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/compat/posix)
 list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 list(APPEND LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP)
 
@@ -173,36 +175,43 @@ if(NF_NETWORKING_SNTP)
 endif()
 
 foreach(SRC_FILE ${LWIP_SRCS})
+
     set(LWIP_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
-            # ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core/ipv4
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/core/ipv6
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/api
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif/ppp
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/netif/ppp/polarssl
+            # ${chibios_SOURCE_DIR}/os/various
+            ${lwip_SOURCE_DIR}/src/core
+            ${lwip_SOURCE_DIR}/src/core/ipv4
+            ${lwip_SOURCE_DIR}/src/core/ipv6
+            ${lwip_SOURCE_DIR}/src/api
+            ${lwip_SOURCE_DIR}/src/netif
+            ${lwip_SOURCE_DIR}/src/netif/ppp
+            ${lwip_SOURCE_DIR}/src/netif/ppp/polarssl
 
 			# ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
 			# TODO: this needs to be changed so it's not platform dependent
 			${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP
 
             # APPS:
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/snmp
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/http
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/lwiperf
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/sntp
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/mdns
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/netbiosns
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/tftp
-            ${CMAKE_BINARY_DIR}/LWIP_Source/src/apps/mqtt
+            ${lwip_SOURCE_DIR}/src/apps/snmp
+            ${lwip_SOURCE_DIR}/src/apps/http
+            ${lwip_SOURCE_DIR}/src/apps/lwiperf
+            ${lwip_SOURCE_DIR}/src/apps/sntp
+            ${lwip_SOURCE_DIR}/src/apps/mdns
+            ${lwip_SOURCE_DIR}/src/apps/netbiosns
+            ${lwip_SOURCE_DIR}/src/apps/tftp
+            ${lwip_SOURCE_DIR}/src/apps/mqtt
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${LWIP_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+		message("${SRC_FILE} >> ${LWIP_SRC_FILE}")
+    endif()
+
     list(APPEND LWIP_SOURCES ${LWIP_SRC_FILE})
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)

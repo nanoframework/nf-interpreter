@@ -198,7 +198,9 @@ else()
 endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
+
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(NF_CoreCLR_SRC_FILE ${SRC_FILE}
         PATHS 
             
@@ -249,8 +251,13 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}")
+    endif()
+
     list(APPEND NF_CoreCLR_SOURCES ${NF_CoreCLR_SRC_FILE})
+    
 endforeach()
 
 

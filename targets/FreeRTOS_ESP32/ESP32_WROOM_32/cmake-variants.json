@@ -26,6 +26,7 @@
         "short": "Esp32_nanoCLR",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
+          "BUILD_VERBOSE" : "OFF",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.xtensa-esp32-elf.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>",
           "ESP32_IDF_PATH": "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>",

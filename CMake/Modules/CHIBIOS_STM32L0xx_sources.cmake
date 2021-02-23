@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(chibios)
+
 # from startup_stm32l0xx.mk
 # List of the ChibiOS generic STM32L0xx startup and CMSIS files.
 
@@ -51,57 +54,61 @@ set(CHIBIOS_PORT_SRCS
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
+
     set(CHIBIOS_L0_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(CHIBIOS_L0_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx
+            ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32L0xx
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/CANv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/EXTIv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USBv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32L0xx
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
+
     if (BUILD_VERBOSE)
-        message("${SRC_FILE} >> ${CHIBIOS_L0_SRC_FILE}") # debug helper
+        message("${SRC_FILE} >> ${CHIBIOS_L0_SRC_FILE}")
     endif()
+
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_L0_SRC_FILE})
 endforeach()
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/portability/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/devices/STM32L0xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/ARM/CMSIS/Core/Include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/ST/STM32L0xx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32L0xx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32L0xx)
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/CANv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USBv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
 
 
 ####################################################################################

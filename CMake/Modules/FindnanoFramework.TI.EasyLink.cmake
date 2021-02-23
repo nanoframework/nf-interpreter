@@ -26,7 +26,9 @@ set(nanoFramework.TI.EasyLink_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.TI.EasyLink_SRCS})
+
     set(nanoFramework.TI.EasyLink_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.TI.EasyLink_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -38,8 +40,13 @@ foreach(SRC_FILE ${nanoFramework.TI.EasyLink_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.TI.EasyLink_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.TI.EasyLink_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.TI.EasyLink_SOURCES ${nanoFramework.TI.EasyLink_SRC_FILE})
+    
 endforeach()
 
 

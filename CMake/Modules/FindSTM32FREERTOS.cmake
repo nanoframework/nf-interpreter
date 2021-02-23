@@ -10,6 +10,7 @@ if(NOT STM32_CHIP_TYPE)
     endif()
     message(STATUS "${TARGET_CHIP} is ${STM32_CHIP_TYPE} device")
 endif()
+
 string(TOLOWER ${STM32_CHIP_TYPE} STM32_CHIP_TYPE_LOWER)
 
 # find path of STM32 CMSIS FreeRTOS port for include files
@@ -101,12 +102,19 @@ set(FREERTOS_SOURCES
 )
 
 foreach(SRC_FILE ${FREERTOS_SOURCES})
+
     set(FREERTOS_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(FREERTOS_SRC_FILE ${SRC_FILE}
         PATH_SUFFIXES FreeRTOS_Source Include ${FREERTOS_PATH_SUFFIXES}
         PATHS ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/MemMang ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC
         CMAKE_FIND_ROOT_PATH_BOTH
     )
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${FREERTOS_SRC_FILE}")
+    endif()
+
     list(APPEND STM32FREERTOS_SOURCES ${FREERTOS_SRC_FILE})
 endforeach()
 

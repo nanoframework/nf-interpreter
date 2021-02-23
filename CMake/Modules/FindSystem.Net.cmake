@@ -30,16 +30,23 @@ set(System.Net_SRCS
 )
 
 foreach(SRC_FILE ${System.Net_SRCS})
+
     set(System.Net_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(System.Net_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net"
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/System.Net
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Net_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Net_SRC_FILE}")
+    endif()
+
     list(APPEND System.Net_SOURCES ${System.Net_SRC_FILE})
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)
