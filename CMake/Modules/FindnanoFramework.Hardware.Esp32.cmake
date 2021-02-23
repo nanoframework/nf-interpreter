@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Hardware.Esp32")
+set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Hardware.ESP32")
 
 
 # set include directories
@@ -18,22 +18,29 @@ list(APPEND nanoFramework.Hardware.Esp32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODU
 set(nanoFramework.Hardware.Esp32_SRCS
 
     nanoFramework_hardware_esp32_native.cpp
-    nanoFramework_hardware_esp32_native_Hardware_Esp32_sleep.cpp
+    nanoFramework_hardware_esp32_native_Hardware_Esp32_Sleep.cpp
     nanoFramework_hardware_esp32_native_Hardware_Esp32_Logging.cpp
     nanoFramework_hardware_esp32_native_Hardware_Esp32_HighResTimer.cpp
 	nanoFramework_hardware_esp32_native_Hardware_Esp32_Configuration.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32_SRCS})
+
     set(nanoFramework.Hardware.Esp32_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.Hardware.Esp32_SRC_FILE ${SRC_FILE}
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Hardware.Esp32_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Hardware.Esp32_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Hardware.Esp32_SOURCES ${nanoFramework.Hardware.Esp32_SRC_FILE})
+
 endforeach()
 
 

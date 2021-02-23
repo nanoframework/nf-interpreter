@@ -31,7 +31,7 @@ endif()
 # append networking files, if enabled
 if(USE_NETWORKING_OPTION)
     list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Network.cpp)
-    list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/target_Network.cpp)
+    list(APPEND TARGET_CHIBIOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_Network.cpp)
 endif()
 
 # make var global

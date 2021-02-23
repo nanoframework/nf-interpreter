@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(chibios)
+
 ###################################################################################################################################
 # WHEN ADDING A NEW SERIES, add the respective name to the list below along with the CMake files with GCC options and source files
 ###################################################################################################################################
@@ -36,21 +39,21 @@ include(CHIBIOS_${TARGET_SERIES}_GCC_options)
 # message("ChibiOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for ChibiOS
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os) 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/license)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${TARGET_BOARD})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt-nil)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/oslib/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/rt/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/${TARGET_SERIES})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/CMSIS/ST/${TARGET_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os) 
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/license)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/oslib/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/rt/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/${TARGET_SERIES})
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/abstractions/cmsis_os)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/ST/${TARGET_SERIES})
 
 # append dummy include directory when not using ChibiOS-Contrib
 if(NOT CHIBIOS_CONTRIB_REQUIRED)
@@ -143,15 +146,17 @@ set(CHIBIOS_SRCS
 )
 
 foreach(SRC_FILE ${CHIBIOS_SRCS})
+
     set(CHIBIOS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(CHIBIOS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/src
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/osal/rt-nil
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/rt/src
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/oslib/src
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/abstractions/cmsis_os
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/various
+            ${chibios_SOURCE_DIR}/os/hal/src
+            ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil
+            ${chibios_SOURCE_DIR}/os/rt/src
+            ${chibios_SOURCE_DIR}/os/oslib/src
+            ${chibios_SOURCE_DIR}/os/common/abstractions/cmsis_os
+            ${chibios_SOURCE_DIR}/os/various
 
             # the following hint order is for the board.c file, it has to match the search order of the main CMake otherwise we'll pick one that is the pair
             # this path hint is for OEM boards for which the board file(s) are probably located directly in the "target" folder along with remaining files
@@ -161,7 +166,7 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
             ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD}
             
             # this path hint is for the usual location of the board.c file
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/boards/${TARGET_BOARD}
+            ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
 
             # this path hint is for the alternative boards folder in the nanoFramework ChibiOS 'overlay' provideded by the community
             ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD}
@@ -171,10 +176,13 @@ foreach(SRC_FILE ${CHIBIOS_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
+
     if (BUILD_VERBOSE)
-        message("${SRC_FILE} >> ${CHIBIOS_SRC_FILE}") # debug helper
+        message("${SRC_FILE} >> ${CHIBIOS_SRC_FILE}")
     endif()
+
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_SRC_FILE})
+
 endforeach()
 
 

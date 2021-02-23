@@ -10,7 +10,7 @@
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-#include <WireProtocol_HAL_interface.h>
+#include <WireProtocol_HAL_Interface.h>
 
 WP_Message inboundMessage;
 

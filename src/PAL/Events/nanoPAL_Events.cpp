@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoPAL_events.h>
+#include <nanoPAL_Events.h>
 
 static uint32_t systemEvents;
 

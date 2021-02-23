@@ -24,7 +24,9 @@ set(nanoFramework.ResourceManager_SRCS
 )
 
 foreach(SRC_FILE ${nanoFramework.ResourceManager_SRCS})
+
     set(nanoFramework.ResourceManager_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoFramework.ResourceManager_SRC_FILE ${SRC_FILE}
         PATHS
 
@@ -33,8 +35,13 @@ foreach(SRC_FILE ${nanoFramework.ResourceManager_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.ResourceManager_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.ResourceManager_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.ResourceManager_SOURCES ${nanoFramework.ResourceManager_SRC_FILE})
+    
 endforeach()
 
 

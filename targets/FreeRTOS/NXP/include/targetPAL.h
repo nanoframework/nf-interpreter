@@ -6,5 +6,4 @@
 #ifndef _TARGETPAL_H_
 #define _TARGETPAL_H_
 
-
 #endif // _TARGETPAL_H_

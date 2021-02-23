@@ -176,9 +176,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
 
                 *(__IO uint16_t *)cursor = *((uint16_t *)buffer);
 
-#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) ||                    \
-    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) ||                    \
-    defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                    \
+    defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
+    defined(STM32F722xx) || defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
 
                 // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
                 __DSB();
@@ -200,9 +200,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
 
                 *(__IO uint8_t *)cursor = *buffer;
 
-#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) ||                    \
-    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) ||                    \
-    defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                    \
+    defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
+    defined(STM32F722xx) || defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
 
                 // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
                 __DSB();
@@ -364,9 +364,9 @@ int flash_lld_erase(uint32_t address)
         // start erase operation
         FLASH->CR |= FLASH_CR_STRT;
 
-#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F767xx) ||                    \
-    defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) || defined(STM32F722xx) ||                    \
-    defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
+#if defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                    \
+    defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
+    defined(STM32F722xx) || defined(STM32F723xx) || defined(STM32F732xx) || defined(STM32F733xx)
 
         // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
         __DSB();
