@@ -221,10 +221,10 @@ NPF_VISIBILITY int npf__itoa_rev(char *buf, npf__int_t i);
 NPF_VISIBILITY int npf__utoa_rev(char *buf, npf__uint_t i, unsigned base,
                                  npf__format_spec_conversion_case_t cc);
 #if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
-NPF_VISIBILITY int npf__fsplit_abs(float f, uint64_t *out_int_part,
+NPF_VISIBILITY int npf__dsplit_abs(double d, uint64_t *out_int_part,
                                    uint64_t *out_frac_part,
                                    int *out_frac_base10_neg_e);
-NPF_VISIBILITY int npf__ftoa_rev(char *buf, float f, unsigned base,
+NPF_VISIBILITY int npf__dtoa_rev(char *buf, double d, unsigned base,
                                  npf__format_spec_conversion_case_t cc,
                                  int *out_frac_chars);
 #endif

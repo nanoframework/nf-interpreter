@@ -304,14 +304,14 @@ int npf__utoa_rev(char *buf, npf__uint_t i, unsigned base,
 
 #if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
 enum {
-    NPF_MANTISSA_BITS = 23,
-    NPF_EXPONENT_BITS = 8,
-    NPF_EXPONENT_BIAS = 127,
+    NPF_MANTISSA_BITS = 52,
+    NPF_EXPONENT_BITS = 11,
+    NPF_EXPONENT_BIAS = 1023,
     NPF_FRACTION_BIN_DIGITS = 64,
     NPF_MAX_FRACTION_DEC_DIGITS = 8
 };
 
-int npf__fsplit_abs(float f, uint64_t *out_int_part, uint64_t *out_frac_part,
+int npf__dsplit_abs(double d, uint64_t *out_int_part, uint64_t *out_frac_part,
                     int *out_frac_base10_neg_exp) {
     /* conversion algorithm by Wojciech Muła (zdjęcia@garnek.pl)
        http://0x80.pl/notesen/2015-12-29-float-to-string.html
@@ -320,17 +320,21 @@ int npf__fsplit_abs(float f, uint64_t *out_int_part, uint64_t *out_frac_part,
     */
 
     /* union-cast is UB, so copy through char*, compiler can optimize. */
-    uint32_t f_bits;
+    uint64_t d_bits;
     {
-        char const *src = (char const *)&f;
-        char *dst = (char *)&f_bits;
+        char const *src = (char const *)&d;
+        char *dst = (char *)&d_bits;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
         *dst++ = *src++;
         *dst++ = *src++;
         *dst++ = *src++;
         *dst++ = *src++;
     }
 
-    int const exponent = ((int)((f_bits >> NPF_MANTISSA_BITS) &
+    int const exponent = ((int)((d_bits >> NPF_MANTISSA_BITS) &
                                 ((1u << NPF_EXPONENT_BITS) - 1u)) -
                           NPF_EXPONENT_BIAS) -
                          NPF_MANTISSA_BITS;
@@ -340,10 +344,10 @@ int npf__fsplit_abs(float f, uint64_t *out_int_part, uint64_t *out_frac_part,
         return 0;
     }
 
-    uint32_t const implicit_one = 1u << NPF_MANTISSA_BITS;
-    uint32_t const mantissa = f_bits & (implicit_one - 1);
-    uint32_t const mantissa_norm = mantissa | implicit_one;
-
+    uint64_t const implicit_one = ((uint64_t)1) << NPF_MANTISSA_BITS;
+    uint64_t const mantissa = d_bits & (implicit_one - 1);
+    uint64_t const mantissa_norm = mantissa | implicit_one;
+    
     if (exponent > 0) {
         *out_int_part = (uint64_t)mantissa_norm << exponent;
     } else if (exponent < 0) {
@@ -395,17 +399,17 @@ int npf__fsplit_abs(float f, uint64_t *out_int_part, uint64_t *out_frac_part,
     return 1;
 }
 
-int npf__ftoa_rev(char *buf, float f, unsigned base,
+int npf__dtoa_rev(char *buf, double d, unsigned base,
                   npf__format_spec_conversion_case_t cc, int *out_frac_chars) {
     char const case_c = (cc == NPF_FMT_SPEC_CONV_CASE_LOWER) ? 'a' - 'A' : 0;
 
-    if (f != f) {
+    if (d != d) {
         *buf++ = (char)('N' + case_c);
         *buf++ = (char)('A' + case_c);
         *buf++ = (char)('N' + case_c);
         return -3;
     }
-    if (f == INFINITY) {
+    if (d == INFINITY) {
         *buf++ = (char)('F' + case_c);
         *buf++ = (char)('N' + case_c);
         *buf++ = (char)('I' + case_c);
@@ -414,7 +418,7 @@ int npf__ftoa_rev(char *buf, float f, unsigned base,
 
     uint64_t int_part, frac_part;
     int frac_base10_neg_exp;
-    if (npf__fsplit_abs(f, &int_part, &frac_part, &frac_base10_neg_exp) == 0) {
+    if (npf__dsplit_abs(d, &int_part, &frac_part, &frac_base10_neg_exp) == 0) {
         *buf++ = (char)('R' + case_c);
         *buf++ = (char)('O' + case_c);
         *buf++ = (char)('O' + case_c);
@@ -680,15 +684,15 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist) {
 
 #if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
                     case NPF_FMT_SPEC_CONV_FLOAT_DECIMAL: { /* 'f', 'F' */
-                        float val;
+                        double val;
                         if (fs.length_modifier ==
                             NPF_FMT_SPEC_LEN_MOD_LONG_DOUBLE) {
-                            val = (float)va_arg(vlist, long double);
+                            val = (double)va_arg(vlist, long double);
                         } else {
-                            val = (float)va_arg(vlist, double);
+                            val = (double)va_arg(vlist, double);
                         }
                         sign = (val < 0) ? -1 : 1;
-                        cbuf_len = npf__ftoa_rev(
+                        cbuf_len = npf__dtoa_rev(
                             cbuf, val, 10, fs.conv_spec_case, &frac_chars);
                         if (cbuf_len < 0) {
                             cbuf_len = -cbuf_len;
@@ -696,8 +700,27 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist) {
                         } else {
                             /* truncate lowest frac digits for precision */
                             if (frac_chars > fs.precision) {
+                                char last_lost_digit = cbuf[frac_chars - fs.precision-1];
                                 cbuf += (frac_chars - fs.precision);
                                 cbuf_len -= (frac_chars - fs.precision);
+                                if (last_lost_digit > '5') {
+                                    // propagate rounding
+                                    char *c = cbuf;
+                                    for(;;) {
+                                        if (*c != '.') {
+                                            *c +=1;
+                                            if (*c <= '9')
+                                                break;
+                                            *c='0';
+                                        }
+                                        c++;
+                                        if (c-cbuf+1 > cbuf_len) {
+                                            *c='1';
+                                            cbuf_len++;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     } break;
