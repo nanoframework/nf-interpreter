@@ -15,4 +15,3 @@
 #include <nanoprintf.h>
 #endif // !defined(_WIN32)
 //#include <spot_net_native.h>
-
