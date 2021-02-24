@@ -5,6 +5,343 @@
 //
 #include "CorLib.h"
 
+bool nf_ParseFormat(char *format, char *formatChar, int *precision)
+{
+    bool ret = true;
+
+    // parse received format
+    if (format != NULL)
+    {
+        *formatChar = format[0];
+        *precision = 0;
+
+        char *cur = format;
+        while (*++cur != 0)
+        {
+            if ((*cur) < '0' || (*cur) > '9')
+            {
+                ret = false;
+                break;
+            }
+            *precision = (*precision) * 10 + ((*cur) - '0');
+        }
+    }
+    else
+    {
+        // defaults
+        *formatChar = 'G';
+        *precision = 0;
+    }
+
+    return ret;
+}
+
+bool nf_ValidateFormatChar(char *formatChar, bool isInteger)
+{
+    bool ret = true;
+
+    switch (*formatChar)
+    {
+        case 'g':
+        case 'G':
+        case 'n':
+        case 'N':
+        case 'f':
+        case 'F':
+            break;
+        case 'x':
+        case 'X':
+        case 'd':
+        case 'D':
+            if (!isInteger)
+            {
+                ret = false;
+            }
+            break;
+        default:
+            ret = false;
+    }
+
+    return ret;
+}
+
+bool nf_AdjustPrecision(CLR_DataType dataType, char *formatChar, int *precision)
+{
+    bool ret = true;
+
+    if (*precision == 0)
+    {
+        switch (*formatChar)
+        {
+            case 'g':
+            case 'G':
+                switch (dataType)
+                {
+                    case DATATYPE_I1:
+                    case DATATYPE_U1:
+                        *precision = 3;
+                        break;
+                    case DATATYPE_I2:
+                    case DATATYPE_U2:
+                        *precision = 5;
+                        break;
+                    case DATATYPE_I4:
+                    case DATATYPE_U4:
+                        *precision = 10;
+                        break;
+                    case DATATYPE_I8:
+                        *precision = 19;
+                        break;
+                    case DATATYPE_U8:
+                        *precision = 20;
+                        break;
+                    case DATATYPE_R4:
+                        *precision = 7;
+                        break;
+                    case DATATYPE_R8:
+                        *precision = 15;
+                        break;
+                    default:
+                        ret = false;
+                        break;
+                }
+                break;
+            case 'f':
+            case 'F':
+            case 'n':
+            case 'N':
+                *precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in NF
+                                // at the moment
+                break;
+            case 'x':
+            case 'X':
+            case 'd':
+            case 'D':
+                *precision = -1;
+                break;
+            default:
+                ret = false;
+        }
+    }
+
+    return ret;
+}
+
+bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char *formatChar, int *precision)
+{
+    bool ret = nf_ParseFormat(format, formatChar, precision);
+
+    if (ret)
+    {
+        ret = nf_ValidateFormatChar(formatChar, isInteger);
+        if (ret)
+        {
+            ret = nf_AdjustPrecision(dataType, formatChar, precision);
+        }
+    }
+
+    return ret;
+}
+
+bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
+{
+    bool ret = true;
+
+    snprintf(buffer, bufferSize, "GGG");
+
+    return ret;
+}
+
+bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
+{
+    bool ret = true;
+
+    if (precision == -1)
+    {
+        precision = 0;
+    }
+
+    CLR_DataType dataType = value->DataType();
+
+    char formatStr[10];
+    snprintf(
+        formatStr,
+        ARRAYSIZE(formatStr),
+        "%%0%d%s%c",
+        precision,
+        (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
+            ? "hh"
+            : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
+                  ? "h"
+                  : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
+                        ? ""
+                        : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
+        formatChar); // x or X should return different results
+
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dhh%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
+            break;
+        case DATATYPE_U1:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dhh%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
+            break;
+        case DATATYPE_I2:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dh%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
+            break;
+        case DATATYPE_U2:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dh%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
+            break;
+        case DATATYPE_I4:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%d%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
+            break;
+        case DATATYPE_U4:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%d%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
+            break;
+        case DATATYPE_I8:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dll%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            break;
+        case DATATYPE_U8:
+            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dll%c", precision, formatChar);
+            snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+
+    return ret;
+}
+
+HRESULT Library_corlib_native_System_Number::
+    FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    char *ret;
+
+    CLR_RT_HeapBlock *value;
+    bool isInteger;
+    char *format;
+    char *numberDecimalSeparator;
+    char *negativeSign;
+    char *numberGroupSeparator;
+    CLR_RT_HeapBlock_Array *numberGroupSizes;
+
+    value = &(stack.Arg0());
+    isInteger = (bool)stack.Arg1().NumericByRef().u1;
+    format = (char *)stack.Arg2().RecoverString();
+    numberDecimalSeparator = (char *)stack.Arg3().RecoverString();
+    FAULT_ON_NULL(numberDecimalSeparator);
+    negativeSign = (char *)stack.Arg4().RecoverString();
+    FAULT_ON_NULL(negativeSign);
+    numberGroupSeparator = (char *)stack.Arg5().RecoverString();
+    FAULT_ON_NULL(numberGroupSeparator);
+    numberGroupSizes = stack.Arg6().DereferenceArray();
+    FAULT_ON_NULL(numberGroupSizes);
+
+    {
+        CLR_RT_TypeDescriptor desc;
+        NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(*value));
+        NANOCLR_CHECK_HRESULT(value->PerformUnboxing(desc.m_handlerCls));
+    }
+
+    // {
+    //     char temporaryStringBuffer[640];
+    //     int realStringSize = snprintf(
+    //         temporaryStringBuffer,
+    //         sizeof(temporaryStringBuffer),
+    //         "params:\r\n\tdt: %d\r\n\ti: %d\r\n\tf: [%s]\r\n\tnds: [%s]\r\n\tns: [%s]\r\n\tngs: [%s]\r\n\tdn: "
+    //         "[%d]\r\n\tdn0: [%d]\r\n",
+    //         value->DataType(),
+    //         isInteger,
+    //         (format) ? format : "NULL",
+    //         numberDecimalSeparator,
+    //         negativeSign,
+    //         numberGroupSeparator,
+    //         numberGroupSizes->m_numOfElements,
+    //         *((CLR_INT32 *)numberGroupSizes->GetElement(0)));
+    //     CLR_EE_DBG_EVENT_BROADCAST(
+    //         CLR_DBG_Commands_c_Monitor_Message,
+    //         realStringSize,
+    //         temporaryStringBuffer,
+    //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
+    // }
+
+    char formatChar;
+    int precision;
+    if (!nf_GetFormatSpec(format, isInteger, value->DataType(), &formatChar, &precision))
+    {
+        ret = format;
+    }
+    else
+    {
+
+        // {
+        //     char temporaryStringBuffer[640];
+        //     int realStringSize = snprintf(
+        //         temporaryStringBuffer,
+        //         sizeof(temporaryStringBuffer),
+        //         "formatChar: %c, precision: %d\r\n",
+        //         formatChar,
+        //         precision);
+        //     CLR_EE_DBG_EVENT_BROADCAST(
+        //         CLR_DBG_Commands_c_Monitor_Message,
+        //         realStringSize,
+        //         temporaryStringBuffer,
+        //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
+        // }
+
+        char result[128];
+
+        bool successfullyFormatted;
+        switch (formatChar)
+        {
+            case 'g':
+            case 'G':
+                successfullyFormatted = nf_Format_G(result, ARRAYSIZE(result), value, formatChar, precision);
+                break;
+            case 'x':
+            case 'X':
+                successfullyFormatted = nf_Format_X(result, ARRAYSIZE(result), value, formatChar, precision);
+                break;
+            case 'n':
+            case 'N':
+            case 'f':
+            case 'F':
+            case 'd':
+            case 'D':
+            {
+                snprintf(result, ARRAYSIZE(result), "XXX");
+                successfullyFormatted = true;
+            }
+            break;
+            default:
+                NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        }
+
+        if (successfullyFormatted)
+        {
+            ret = result;
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+    }
+
+    NANOCLR_SET_AND_LEAVE(stack.SetResult_String(ret));
+    NANOCLR_NOCLEANUP();
+}
+
 // compose sprintf format string according to requested parameters
 void nf_GetFormatString(
     char *formatStr,

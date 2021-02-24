@@ -618,6 +618,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4,
+    NULL,
     Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4,
     NULL,
     NULL,
@@ -1485,7 +1487,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xC8B423C5,
+    0x21B6E212,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 

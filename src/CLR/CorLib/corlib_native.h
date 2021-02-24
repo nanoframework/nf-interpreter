@@ -774,6 +774,7 @@ struct Library_corlib_native_System_MulticastDelegate
 struct Library_corlib_native_System_Number
 {
 
+    NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4);
     NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__CHAR__I4);
 
     //--//
