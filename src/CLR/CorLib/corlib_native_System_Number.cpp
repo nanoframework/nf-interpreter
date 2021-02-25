@@ -212,10 +212,13 @@ bool nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
             break;
     }
 
+    // printf and ToString differs on negative numbers:
+    // printf("%05d", -123) returns "-0123"
+    // -123.ToString("D5") returns "-00123"
     if (precision != 0 && resultLength > 1 && buffer[0] == '-')
     {
-        memmove(&buffer[1], buffer, resultLength + 1);
-        buffer[0] = '-';
+        // our buffer defined bigger than the max number string
+        memmove(&buffer[2], &buffer[1], resultLength);
         buffer[1] = '0';
     }
 
