@@ -235,18 +235,27 @@ bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
         // that's why we ask printf for big precision then
         // post process the string here
 
-        if (resultLength > precision)
-        {
-            int numDigits = 0;
-            int dotIndex = -1;
+        bool isNegative = (buffer[0] == '-');
+        int offsetBecauseOfNegativeSign = (isNegative ? 1 : 0);
+        int savedResultLength = resultLength;
 
-            // leave just the required amount of digits
+        if (resultLength > (precision + offsetBecauseOfNegativeSign))
+        {
+            int dotIndex = -1;
             for (int i = 0; i < resultLength; i++)
             {
                 if (buffer[i] == '.')
                 {
                     dotIndex = i;
+                    break;
                 }
+            }
+
+            int numDigits = 0;
+
+            // leave just the required amount of digits
+            for (int i = 0; i < resultLength; i++)
+            {
                 if (buffer[i] >= '0' && buffer[i] <= '9')
                 {
                     numDigits++;
@@ -281,10 +290,7 @@ bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
                                         buffer[0] = '1';
                                     }
                                     resultLength++;
-                                    if (dotIndex != -1)
-                                    {
-                                        dotIndex++;
-                                    }
+                                    dotIndex++;
                                     break;
                                 }
                                 c--;
@@ -313,6 +319,22 @@ bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
                     buffer[resultLength - 1] = 0;
                     resultLength--;
                 }
+            }
+
+            if ((dotIndex == -1) || (dotIndex > (precision + offsetBecauseOfNegativeSign)))
+            {
+                // insert '.'
+                memmove(
+                    &buffer[2 + offsetBecauseOfNegativeSign],
+                    &buffer[1 + offsetBecauseOfNegativeSign],
+                    resultLength - 1);
+                buffer[1 + offsetBecauseOfNegativeSign] = '.';
+                resultLength++;
+
+                // append 'E+exp'
+                int exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
+                exponent -= offsetBecauseOfNegativeSign;
+                resultLength += snprintf(&buffer[resultLength], bufferSize - resultLength, "E+%02d", exponent);
             }
         }
     }
