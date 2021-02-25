@@ -143,6 +143,45 @@ bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char 
     return ret;
 }
 
+int nf_PrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT_HeapBlock *value)
+{
+    int ret = -1;
+
+    CLR_DataType dataType = value->DataType();
+
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
+            break;
+        case DATATYPE_U1:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
+            break;
+        case DATATYPE_I2:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
+            break;
+        case DATATYPE_U2:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
+            break;
+        case DATATYPE_I4:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
+            break;
+        case DATATYPE_U4:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
+            break;
+        case DATATYPE_I8:
+            ret = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            break;
+        case DATATYPE_U8:
+            ret = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            break;
+        default:
+            break;
+    }
+
+    return ret;
+}
+
 bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     bool ret = true;
@@ -180,46 +219,22 @@ bool nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
             ? 'd'
             : 'u');
 
-    int resultLength = 0;
-    switch (dataType)
+    int resultLength = nf_PrintfOnDataType(buffer, bufferSize, formatStr, value);
+    if (resultLength < 0)
     {
-        case DATATYPE_I1:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
-            break;
-        case DATATYPE_U1:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
-            break;
-        case DATATYPE_I2:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
-            break;
-        case DATATYPE_U2:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
-            break;
-        case DATATYPE_I4:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
-            break;
-        case DATATYPE_U4:
-            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
-            break;
-        case DATATYPE_I8:
-            resultLength = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
-            break;
-        case DATATYPE_U8:
-            resultLength = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().u8);
-            break;
-        default:
-            ret = false;
-            break;
+        ret = false;
     }
-
-    // printf and ToString differs on negative numbers:
-    // printf("%05d", -123) returns "-0123"
-    // -123.ToString("D5") returns "-00123"
-    if (precision != 0 && resultLength > 1 && buffer[0] == '-')
+    else
     {
-        // our buffer defined bigger than the max number string
-        memmove(&buffer[2], &buffer[1], resultLength);
-        buffer[1] = '0';
+        // printf and ToString differs on negative numbers:
+        // printf("%05d", -123) returns "-0123"
+        // -123.ToString("D5") returns "-00123"
+        if (precision != 0 && resultLength > 1 && buffer[0] == '-')
+        {
+            // our buffer defined bigger than the max number string
+            memmove(&buffer[2], &buffer[1], resultLength);
+            buffer[1] = '0';
+        }
     }
 
     return ret;
@@ -251,35 +266,9 @@ bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
                         : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
         formatChar); // x or X should return different results
 
-    switch (dataType)
+    if (nf_PrintfOnDataType(buffer, bufferSize, formatStr, value) < 0)
     {
-        case DATATYPE_I1:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
-            break;
-        case DATATYPE_U1:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
-            break;
-        case DATATYPE_I2:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
-            break;
-        case DATATYPE_U2:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
-            break;
-        case DATATYPE_I4:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
-            break;
-        case DATATYPE_U4:
-            snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
-            break;
-        case DATATYPE_I8:
-            snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
-            break;
-        case DATATYPE_U8:
-            snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
-            break;
-        default:
-            ret = false;
-            break;
+        ret = false;
     }
 
     return ret;
