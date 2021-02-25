@@ -152,6 +152,76 @@ bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
     return ret;
 }
 
+bool nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
+{
+    bool ret = true;
+
+    if (precision == -1)
+    {
+        precision = 0;
+    }
+
+    CLR_DataType dataType = value->DataType();
+
+    char formatStr[10];
+    snprintf(
+        formatStr,
+        ARRAYSIZE(formatStr),
+        "%%0%d%s%c",
+        precision,
+        (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
+            ? "hh"
+            : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
+                  ? "h"
+                  : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
+                        ? ""
+                        : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
+        (dataType == DATATYPE_I1 || dataType == DATATYPE_I2 || dataType == DATATYPE_I4 || dataType == DATATYPE_I8)
+            ? 'd'
+            : 'u');
+
+    int resultLength = 0;
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
+            break;
+        case DATATYPE_U1:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
+            break;
+        case DATATYPE_I2:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
+            break;
+        case DATATYPE_U2:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
+            break;
+        case DATATYPE_I4:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
+            break;
+        case DATATYPE_U4:
+            resultLength = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
+            break;
+        case DATATYPE_I8:
+            resultLength = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            break;
+        case DATATYPE_U8:
+            resultLength = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().u8);
+            break;
+        default:
+            ret = false;
+            break;
+    }
+
+    if (precision != 0 && resultLength > 1 && buffer[0] == '-')
+    {
+        memmove(&buffer[1], buffer, resultLength + 1);
+        buffer[0] = '-';
+        buffer[1] = '0';
+    }
+
+    return ret;
+}
+
 bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     bool ret = true;
@@ -181,35 +251,27 @@ bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
     switch (dataType)
     {
         case DATATYPE_I1:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dhh%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
             break;
         case DATATYPE_U1:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dhh%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
             break;
         case DATATYPE_I2:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dh%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
             break;
         case DATATYPE_U2:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dh%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
             break;
         case DATATYPE_I4:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%d%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
             break;
         case DATATYPE_U4:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%d%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
             break;
         case DATATYPE_I8:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dll%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
         case DATATYPE_U8:
-            //            snprintf(formatStr, ARRAYSIZE(formatStr), "%%0%dll%c", precision, formatChar);
             snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
         default:
@@ -317,13 +379,15 @@ HRESULT Library_corlib_native_System_Number::
             case 'N':
             case 'f':
             case 'F':
-            case 'd':
-            case 'D':
             {
                 snprintf(result, ARRAYSIZE(result), "XXX");
                 successfullyFormatted = true;
             }
             break;
+            case 'd':
+            case 'D':
+                successfullyFormatted = nf_Format_D(result, ARRAYSIZE(result), value, formatChar, precision);
+                break;
             default:
                 NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
         }
