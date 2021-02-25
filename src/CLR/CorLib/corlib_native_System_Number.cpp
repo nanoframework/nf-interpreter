@@ -13,7 +13,7 @@ bool nf_ParseFormat(char *format, char *formatChar, int *precision)
     if (format != NULL && format[0] != 0)
     {
         *formatChar = format[0];
-        *precision = 0;
+        *precision = -1;
 
         char *cur = format;
         while (*++cur != 0)
@@ -23,14 +23,22 @@ bool nf_ParseFormat(char *format, char *formatChar, int *precision)
                 ret = false;
                 break;
             }
-            *precision = (*precision) * 10 + ((*cur) - '0');
+
+            if (*precision == -1)
+            {
+                *precision = ((*cur) - '0');
+            }
+            else
+            {
+                *precision = (*precision) * 10 + ((*cur) - '0');
+            }
         }
     }
     else
     {
         // defaults
         *formatChar = 'G';
-        *precision = 0;
+        *precision = -1;
     }
 
     return ret;
@@ -142,28 +150,76 @@ bool nf_IsIntegerDataType(CLR_DataType dataType)
     return ret;
 }
 
+int nf_GetStrLen(char *buffer)
+{
+    int ret = 0;
+    for (; buffer[ret++] != 0;)
+        ;
+    return ret;
+}
+
+int nf_GetDotIndex(char *buffer, int bufferContentLength)
+{
+    int ret = -1;
+
+    for (int i = 0; i < bufferContentLength; i++)
+    {
+        if (buffer[i] == '.')
+        {
+            ret = i;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 int nf_ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign)
 {
     int ret = bufferContentLength;
 
     if (buffer[0] == '-')
     {
-        int negativeSignLength = 0;
-        for (; negativeSign[negativeSignLength++] != 0;)
-            ;
+        int negativeSignLength = nf_GetStrLen(negativeSign);
 
         // we need it without trailing 0
         negativeSignLength--;
 
         memmove(&buffer[negativeSignLength], &buffer[1], bufferContentLength);
         memcpy(buffer, negativeSign, negativeSignLength);
-        ret += negativeSignLength;
+        ret += negativeSignLength - 1;
     }
 
     return ret;
 }
 
-int nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int precision, char *negativeSign)
+int nf_ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *decimalSeparator)
+{
+    int ret = bufferContentLength;
+
+    int dotIndex = nf_GetDotIndex(buffer, bufferContentLength);
+    if (dotIndex != -1)
+    {
+        int decimalSeparatorLength = nf_GetStrLen(decimalSeparator);
+
+        // we need it without trailing 0
+        decimalSeparatorLength--;
+
+        memmove(&buffer[dotIndex + decimalSeparatorLength], &buffer[dotIndex + 1], bufferContentLength);
+        memcpy(&buffer[dotIndex], decimalSeparator, decimalSeparatorLength);
+        ret += decimalSeparatorLength - 1;
+    }
+
+    return ret;
+}
+
+int nf_Format_G(
+    char *buffer,
+    size_t bufferSize,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator)
 {
     int ret = -1;
 
@@ -171,7 +227,7 @@ int nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int pr
 
     bool isIntegerDataType = nf_IsIntegerDataType(dataType);
 
-    if (precision == 0)
+    if (precision == -1)
     {
         switch (dataType)
         {
@@ -259,15 +315,7 @@ int nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int pr
 
             if (ret > (precision + offsetBecauseOfNegativeSign))
             {
-                int dotIndex = -1;
-                for (int i = 0; i < ret; i++)
-                {
-                    if (buffer[i] == '.')
-                    {
-                        dotIndex = i;
-                        break;
-                    }
-                }
+                int dotIndex = nf_GetDotIndex(buffer, ret);
 
                 int numDigits = 0;
 
@@ -357,17 +405,29 @@ int nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int pr
             }
 
             ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
+            ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
         }
     }
 
     return ret;
 }
 
-int nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int precision, char *negativeSign)
+int nf_Format_D(
+    char *buffer,
+    size_t bufferSize,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator)
 {
     int ret = -1;
 
     CLR_DataType dataType = value->DataType();
+
+    if (precision == -1)
+    {
+        precision = 0;
+    }
 
     char formatStr[10];
     snprintf(
@@ -399,6 +459,7 @@ int nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, int pr
         }
 
         ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
+        ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
 
     return ret;
@@ -409,6 +470,11 @@ int nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char f
     int ret = -1;
 
     CLR_DataType dataType = value->DataType();
+
+    if (precision == -1)
+    {
+        precision = 0;
+    }
 
     char formatStr[10];
     snprintf(
@@ -519,7 +585,8 @@ HRESULT Library_corlib_native_System_Number::
         {
             case 'g':
             case 'G':
-                resultLength = nf_Format_G(result, ARRAYSIZE(result), value, precision, negativeSign);
+                resultLength =
+                    nf_Format_G(result, ARRAYSIZE(result), value, precision, negativeSign, numberDecimalSeparator);
                 break;
             case 'x':
             case 'X':
@@ -539,7 +606,8 @@ HRESULT Library_corlib_native_System_Number::
             break;
             case 'd':
             case 'D':
-                resultLength = nf_Format_D(result, ARRAYSIZE(result), value, precision, negativeSign);
+                resultLength =
+                    nf_Format_D(result, ARRAYSIZE(result), value, precision, negativeSign, numberDecimalSeparator);
                 break;
             default:
                 NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
