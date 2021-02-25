@@ -10,7 +10,7 @@ bool nf_ParseFormat(char *format, char *formatChar, int *precision)
     bool ret = true;
 
     // parse received format
-    if (format != NULL)
+    if (format != NULL && format[0] != 0)
     {
         *formatChar = format[0];
         *precision = 0;
@@ -65,68 +65,6 @@ bool nf_ValidateFormatChar(char *formatChar, bool isInteger)
     return ret;
 }
 
-bool nf_AdjustPrecision(CLR_DataType dataType, char *formatChar, int *precision)
-{
-    bool ret = true;
-
-    if (*precision == 0)
-    {
-        switch (*formatChar)
-        {
-            case 'g':
-            case 'G':
-                switch (dataType)
-                {
-                    case DATATYPE_I1:
-                    case DATATYPE_U1:
-                        *precision = 3;
-                        break;
-                    case DATATYPE_I2:
-                    case DATATYPE_U2:
-                        *precision = 5;
-                        break;
-                    case DATATYPE_I4:
-                    case DATATYPE_U4:
-                        *precision = 10;
-                        break;
-                    case DATATYPE_I8:
-                        *precision = 19;
-                        break;
-                    case DATATYPE_U8:
-                        *precision = 20;
-                        break;
-                    case DATATYPE_R4:
-                        *precision = 7;
-                        break;
-                    case DATATYPE_R8:
-                        *precision = 15;
-                        break;
-                    default:
-                        ret = false;
-                        break;
-                }
-                break;
-            case 'f':
-            case 'F':
-            case 'n':
-            case 'N':
-                *precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in NF
-                                // at the moment
-                break;
-            case 'x':
-            case 'X':
-            case 'd':
-            case 'D':
-                *precision = -1;
-                break;
-            default:
-                ret = false;
-        }
-    }
-
-    return ret;
-}
-
 bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char *formatChar, int *precision)
 {
     bool ret = nf_ParseFormat(format, formatChar, precision);
@@ -134,16 +72,12 @@ bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char 
     if (ret)
     {
         ret = nf_ValidateFormatChar(formatChar, isInteger);
-        if (ret)
-        {
-            ret = nf_AdjustPrecision(dataType, formatChar, precision);
-        }
     }
 
     return ret;
 }
 
-int nf_PrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT_HeapBlock *value)
+int nf_DoPrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT_HeapBlock *value)
 {
     int ret = -1;
 
@@ -175,6 +109,12 @@ int nf_PrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT
         case DATATYPE_U8:
             ret = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
+        case DATATYPE_R4:
+            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().r4);
+            break;
+        case DATATYPE_R8:
+            ret = snprintf(buffer, bufferSize, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
+            break;
         default:
             break;
     }
@@ -182,11 +122,200 @@ int nf_PrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT
     return ret;
 }
 
+bool nf_IsSignedIntegerDataType(CLR_DataType dataType)
+{
+    bool ret =
+        (dataType == DATATYPE_I1 || dataType == DATATYPE_I2 || dataType == DATATYPE_I4 || dataType == DATATYPE_I8);
+    return ret;
+}
+
+bool nf_IsUnsignedIntegerDataType(CLR_DataType dataType)
+{
+    bool ret =
+        (dataType == DATATYPE_U1 || dataType == DATATYPE_U2 || dataType == DATATYPE_U4 || dataType == DATATYPE_U8);
+    return ret;
+}
+
+bool nf_IsIntegerDataType(CLR_DataType dataType)
+{
+    bool ret = nf_IsSignedIntegerDataType(dataType) || nf_IsUnsignedIntegerDataType(dataType);
+    return ret;
+}
+
 bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     bool ret = true;
 
-    snprintf(buffer, bufferSize, "GGG");
+    CLR_DataType dataType = value->DataType();
+
+    bool isIntegerDataType = nf_IsIntegerDataType(dataType);
+
+    if (precision == 0)
+    {
+        switch (dataType)
+        {
+            case DATATYPE_I1:
+            case DATATYPE_U1:
+                precision = 3;
+                break;
+            case DATATYPE_I2:
+            case DATATYPE_U2:
+                precision = 5;
+                break;
+            case DATATYPE_I4:
+            case DATATYPE_U4:
+                precision = 10;
+                break;
+            case DATATYPE_I8:
+                precision = 19;
+                break;
+            case DATATYPE_U8:
+                precision = 20;
+                break;
+            case DATATYPE_R4:
+                precision = 7;
+                break;
+            case DATATYPE_R8:
+                precision = 15;
+                break;
+            default:
+                ret = false;
+                break;
+        }
+    }
+
+    char nonIntegerPrecStr[10];
+    if (!isIntegerDataType)
+    {
+        // value of incoming precision would be more than enough
+        // see diff between printf and ToString precision meaning below
+        snprintf(nonIntegerPrecStr, ARRAYSIZE(nonIntegerPrecStr), "0.%d", precision);
+    }
+
+    char formatStr[10];
+    snprintf(
+        formatStr,
+        ARRAYSIZE(formatStr),
+        "%%%s%s%c",
+        (isIntegerDataType) ? "" : nonIntegerPrecStr,
+        (isIntegerDataType)
+            ? ((dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
+                   ? "hh"
+                   : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
+                         ? "h"
+                         : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4 || dataType == DATATYPE_R4)
+                               ? ""
+                               : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8 || dataType == DATATYPE_R8)
+                                     ? "ll"
+                                     : "???")
+            : "",
+        (!isIntegerDataType) ? 'f' : (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+
+    // {
+    //     char temporaryStringBuffer[640];
+    //     int realStringSize =
+    //         snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "*** %d %s\r\n", dataType, formatStr);
+    //     CLR_EE_DBG_EVENT_BROADCAST(
+    //         CLR_DBG_Commands_c_Monitor_Message,
+    //         realStringSize,
+    //         temporaryStringBuffer,
+    //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
+    // }
+
+    int resultLength = nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value);
+    if (resultLength < 0)
+    {
+        ret = false;
+    }
+    else
+    {
+        // printf and ToString differs on precision numbers:
+        // printf("%.05d", 123.4567890) returns "123.45679"
+        // (123.4567890).ToString("G5") returns "123.45"
+        // that's why we ask printf for big precision then
+        // post process the string here
+
+        if (resultLength > precision)
+        {
+            int numDigits = 0;
+            int dotIndex = -1;
+
+            // leave just the required amount of digits
+            for (int i = 0; i < resultLength; i++)
+            {
+                if (buffer[i] == '.')
+                {
+                    dotIndex = i;
+                }
+                if (buffer[i] >= '0' && buffer[i] <= '9')
+                {
+                    numDigits++;
+                    if (numDigits == precision)
+                    {
+                        resultLength = i + 1;
+                        char first_lost_digit = buffer[resultLength];
+                        buffer[resultLength] = 0;
+                        if (first_lost_digit >= '5')
+                        {
+                            // rounding required because of first lost digit
+                            char *c = &buffer[resultLength - 1];
+                            for (;;)
+                            {
+                                if (*c != '.' && *c != '-')
+                                {
+                                    *c += 1;
+                                    if (*c <= '9')
+                                        break;
+                                    *c = '0';
+                                }
+                                if (c == buffer)
+                                {
+                                    if (*c == '-')
+                                    {
+                                        memmove(&buffer[2], &buffer[1], resultLength + 1);
+                                        buffer[1] = '1';
+                                    }
+                                    else
+                                    {
+                                        memmove(&buffer[1], buffer, resultLength + 1);
+                                        buffer[0] = '1';
+                                    }
+                                    resultLength++;
+                                    if (dotIndex != -1)
+                                    {
+                                        dotIndex++;
+                                    }
+                                    break;
+                                }
+                                c--;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (dotIndex != -1)
+            {
+                // strip trailing zeros
+                for (int i = resultLength - 1; i >= dotIndex; i--)
+                {
+                    if (buffer[i] != '0')
+                    {
+                        break;
+                    }
+                    buffer[i] = 0;
+                    resultLength--;
+                }
+                // strip trailing dot too
+                if (resultLength == dotIndex + 1)
+                {
+                    buffer[resultLength - 1] = 0;
+                    resultLength--;
+                }
+            }
+        }
+    }
 
     return ret;
 }
@@ -194,11 +323,6 @@ bool nf_Format_G(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
 bool nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     bool ret = true;
-
-    if (precision == -1)
-    {
-        precision = 0;
-    }
 
     CLR_DataType dataType = value->DataType();
 
@@ -215,11 +339,9 @@ bool nf_Format_D(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
                   : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
                         ? ""
                         : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
-        (dataType == DATATYPE_I1 || dataType == DATATYPE_I2 || dataType == DATATYPE_I4 || dataType == DATATYPE_I8)
-            ? 'd'
-            : 'u');
+        (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
-    int resultLength = nf_PrintfOnDataType(buffer, bufferSize, formatStr, value);
+    int resultLength = nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value);
     if (resultLength < 0)
     {
         ret = false;
@@ -244,11 +366,6 @@ bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
 {
     bool ret = true;
 
-    if (precision == -1)
-    {
-        precision = 0;
-    }
-
     CLR_DataType dataType = value->DataType();
 
     char formatStr[10];
@@ -266,7 +383,7 @@ bool nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char 
                         : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
         formatChar); // x or X should return different results
 
-    if (nf_PrintfOnDataType(buffer, bufferSize, formatStr, value) < 0)
+    if (nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value) < 0)
     {
         ret = false;
     }
@@ -372,6 +489,9 @@ HRESULT Library_corlib_native_System_Number::
             case 'f':
             case 'F':
             {
+                if (precision < 0)
+                    precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
+                                   // NF at the moment
                 snprintf(result, ARRAYSIZE(result), "XXX");
                 successfullyFormatted = true;
             }
