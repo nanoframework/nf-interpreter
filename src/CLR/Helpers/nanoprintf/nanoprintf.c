@@ -792,6 +792,8 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                                 char last_lost_digit = cbuf[frac_chars - fs.precision - 1];
                                 cbuf += (frac_chars - fs.precision);
                                 cbuf_len -= (frac_chars - fs.precision);
+                                frac_chars = fs.precision;
+
                                 if (last_lost_digit > '5')
                                 {
                                     // propagate rounding
