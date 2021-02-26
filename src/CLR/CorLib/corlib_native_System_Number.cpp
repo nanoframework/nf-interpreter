@@ -5,6 +5,11 @@
 //
 #include "CorLib.h"
 
+// must be big enough to fit the biggest number
+// decorated with negative signs, group separators, etc.
+#define FORMAT_RESULT_BUFFER_SIZE 128
+#define FORMAT_FMTSTR_BUFFER_SIZE 10
+
 bool nf_ParseFormat(char *format, char *formatChar, int *precision)
 {
     bool ret = true;
@@ -85,7 +90,7 @@ bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char 
     return ret;
 }
 
-int nf_DoPrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_RT_HeapBlock *value)
+int nf_DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value)
 {
     int ret = -1;
 
@@ -94,34 +99,35 @@ int nf_DoPrintfOnDataType(char *buffer, size_t bufferSize, char *formatStr, CLR_
     switch (dataType)
     {
         case DATATYPE_I1:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s1);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s1);
             break;
         case DATATYPE_U1:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u1);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u1);
             break;
         case DATATYPE_I2:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s2);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s2);
             break;
         case DATATYPE_U2:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u2);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u2);
             break;
         case DATATYPE_I4:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().s4);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s4);
             break;
         case DATATYPE_U4:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().u4);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u4);
             break;
         case DATATYPE_I8:
-            ret = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
         case DATATYPE_U8:
-            ret = snprintf(buffer, bufferSize, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
             break;
         case DATATYPE_R4:
-            ret = snprintf(buffer, bufferSize, formatStr, value->NumericByRef().r4);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().r4);
             break;
         case DATATYPE_R8:
-            ret = snprintf(buffer, bufferSize, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
+            ret =
+                snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
             break;
         default:
             break;
@@ -213,13 +219,7 @@ int nf_ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *deci
     return ret;
 }
 
-int nf_Format_G(
-    char *buffer,
-    size_t bufferSize,
-    CLR_RT_HeapBlock *value,
-    int precision,
-    char *negativeSign,
-    char *decimalSeparator)
+int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
 {
     int ret = -1;
 
@@ -262,18 +262,18 @@ int nf_Format_G(
 
     if (precision > 0)
     {
-        char nonIntegerPrecStr[10];
+        char nonIntegerPrecStr[FORMAT_FMTSTR_BUFFER_SIZE];
         if (!isIntegerDataType)
         {
             // value of incoming precision would be more than enough
             // see diff between printf and ToString precision meaning below
-            snprintf(nonIntegerPrecStr, ARRAYSIZE(nonIntegerPrecStr), "0.%d", precision);
+            snprintf(nonIntegerPrecStr, FORMAT_FMTSTR_BUFFER_SIZE, "0.%d", precision);
         }
 
-        char formatStr[10];
+        char formatStr[FORMAT_FMTSTR_BUFFER_SIZE]];
         snprintf(
             formatStr,
-            ARRAYSIZE(formatStr),
+            FORMAT_FMTSTR_BUFFER_SIZE,
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
             (isIntegerDataType)
@@ -300,7 +300,7 @@ int nf_Format_G(
         //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
         // }
 
-        ret = nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value);
+        ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
         if (ret > 0)
         {
             // printf and ToString differs on precision numbers:
@@ -400,7 +400,7 @@ int nf_Format_G(
                     // append 'E+exp'
                     int exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
                     exponent -= offsetBecauseOfNegativeSign;
-                    ret += snprintf(&buffer[ret], bufferSize - ret, "E+%02d", exponent);
+                    ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E+%02d", exponent);
                 }
             }
 
@@ -412,13 +412,7 @@ int nf_Format_G(
     return ret;
 }
 
-int nf_Format_D(
-    char *buffer,
-    size_t bufferSize,
-    CLR_RT_HeapBlock *value,
-    int precision,
-    char *negativeSign,
-    char *decimalSeparator)
+int nf_Format_D(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
 {
     int ret = -1;
 
@@ -429,10 +423,10 @@ int nf_Format_D(
         precision = 0;
     }
 
-    char formatStr[10];
+    char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
     snprintf(
         formatStr,
-        ARRAYSIZE(formatStr),
+        FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
         (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
@@ -444,7 +438,7 @@ int nf_Format_D(
                         : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
         (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
-    ret = nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value);
+    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
     if (ret > 0)
     {
         // printf and ToString differs on negative numbers:
@@ -465,7 +459,7 @@ int nf_Format_D(
     return ret;
 }
 
-int nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char formatChar, int precision)
+int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     int ret = -1;
 
@@ -476,10 +470,10 @@ int nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char f
         precision = 0;
     }
 
-    char formatStr[10];
+    char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
     snprintf(
         formatStr,
-        ARRAYSIZE(formatStr),
+        FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
         (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
@@ -491,7 +485,7 @@ int nf_Format_X(char *buffer, size_t bufferSize, CLR_RT_HeapBlock *value, char f
                         : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
         formatChar); // x or X should return different results
 
-    ret = nf_DoPrintfOnDataType(buffer, bufferSize, formatStr, value);
+    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
 
     return ret;
 }
@@ -576,21 +570,18 @@ HRESULT Library_corlib_native_System_Number::
         //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
         // }
 
-        // must be big enough to fit the biggest number
-        // decorated with negative signs, group separators, etc.
-        char result[128];
+        char result[FORMAT_RESULT_BUFFER_SIZE];
 
         int resultLength;
         switch (formatChar)
         {
             case 'g':
             case 'G':
-                resultLength =
-                    nf_Format_G(result, ARRAYSIZE(result), value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = nf_Format_G(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
             case 'x':
             case 'X':
-                resultLength = nf_Format_X(result, ARRAYSIZE(result), value, formatChar, precision);
+                resultLength = nf_Format_X(result, value, formatChar, precision);
                 break;
             case 'n':
             case 'N':
@@ -600,14 +591,13 @@ HRESULT Library_corlib_native_System_Number::
                 if (precision < 0)
                     precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
                                    // NF at the moment
-                snprintf(result, ARRAYSIZE(result), "XXX");
+                snprintf(result, FORMAT_RESULT_BUFFER_SIZE, "NNN");
                 resultLength = true;
             }
             break;
             case 'd':
             case 'D':
-                resultLength =
-                    nf_Format_D(result, ARRAYSIZE(result), value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = nf_Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
             default:
                 NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
