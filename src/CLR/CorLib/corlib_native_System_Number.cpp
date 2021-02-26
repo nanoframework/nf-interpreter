@@ -192,6 +192,37 @@ int nf_GetDotIndex(char *buffer, int bufferContentLength)
     return ret;
 }
 
+void nf_roundUpNumStr(char *buffer, int *bufferContentLength)
+{
+    char *c = &buffer[*bufferContentLength - 1];
+    for (;;)
+    {
+        if (*c != '.' && *c != '-')
+        {
+            *c += 1;
+            if (*c <= '9')
+                break;
+            *c = '0';
+        }
+        if (c == buffer)
+        {
+            if (*c == '-')
+            {
+                memmove(&buffer[2], &buffer[1], *bufferContentLength + 1);
+                buffer[1] = '1';
+            }
+            else
+            {
+                memmove(&buffer[1], buffer, *bufferContentLength + 1);
+                buffer[0] = '1';
+            }
+            (*bufferContentLength)++;
+            break;
+        }
+        c--;
+    }
+}
+
 int nf_ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign)
 {
     int ret = bufferContentLength;
@@ -334,35 +365,10 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
                             buffer[ret] = 0;
                             if (first_lost_digit >= '5')
                             {
-                                // rounding required because of first lost digit
-                                char *c = &buffer[ret - 1];
-                                for (;;)
-                                {
-                                    if (*c != '.' && *c != '-')
-                                    {
-                                        *c += 1;
-                                        if (*c <= '9')
-                                            break;
-                                        *c = '0';
-                                    }
-                                    if (c == buffer)
-                                    {
-                                        if (*c == '-')
-                                        {
-                                            memmove(&buffer[2], &buffer[1], ret + 1);
-                                            buffer[1] = '1';
-                                        }
-                                        else
-                                        {
-                                            memmove(&buffer[1], buffer, ret + 1);
-                                            buffer[0] = '1';
-                                        }
-                                        ret++;
-                                        dotIndex++;
-                                        break;
-                                    }
-                                    c--;
-                                }
+                                int savedRet = ret;
+                                nf_roundUpNumStr(buffer, &ret);
+                                if (savedRet < ret)
+                                    dotIndex++;
                             }
                             break;
                         }
@@ -459,8 +465,6 @@ int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int prec
 {
     int ret = -1;
 
-    CLR_DataType dataType = value->DataType();
-
     if (precision == -1)
     {
         precision = 0;
@@ -472,10 +476,52 @@ int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int prec
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
-        nf_GetPrintfLengthModifier(dataType),
+        nf_GetPrintfLengthModifier(value->DataType()),
         formatChar); // x or X should return different results
 
     ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+
+    return ret;
+}
+
+int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
+{
+    int ret = -1;
+
+    if (precision == -1)
+    {
+        precision = 2; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
+                       // NF at the moment
+    }
+
+    CLR_DataType dataType = value->DataType();
+
+    bool isIntegerDataType = nf_IsIntegerDataType(dataType);
+
+    char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
+    snprintf(
+        formatStr,
+        FORMAT_FMTSTR_BUFFER_SIZE,
+        "%%0.%d%s%c",
+        precision,
+        (isIntegerDataType) ? nf_GetPrintfLengthModifier(dataType) : "",
+        (!isIntegerDataType) ? 'f' : (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+
+    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+    if (ret > 0)
+    {
+        if (isIntegerDataType && (precision > 0))
+        {
+            buffer[ret++] = '.';
+            for (int i = 0; i < precision; i++)
+            {
+                buffer[ret++] = '0';
+            }
+            buffer[ret] = 0;
+        }
+        ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
+        ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+    }
 
     return ret;
 }
@@ -573,10 +619,12 @@ HRESULT Library_corlib_native_System_Number::
             case 'X':
                 resultLength = nf_Format_X(result, value, formatChar, precision);
                 break;
-            case 'n':
-            case 'N':
             case 'f':
             case 'F':
+                resultLength = nf_Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
+                break;
+            case 'n':
+            case 'N':
             {
                 if (precision < 0)
                     precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
