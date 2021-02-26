@@ -78,7 +78,7 @@ bool nf_ValidateFormatChar(char *formatChar, bool isInteger)
     return ret;
 }
 
-bool nf_GetFormatSpec(char *format, bool isInteger, CLR_DataType dataType, char *formatChar, int *precision)
+bool nf_GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision)
 {
     bool ret = nf_ParseFormat(format, formatChar, precision);
 
@@ -133,6 +133,18 @@ int nf_DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value
             break;
     }
 
+    return ret;
+}
+
+const char *nf_GetPrintfLengthModifier(CLR_DataType dataType)
+{
+    const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
+                          ? "hh"
+                          : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
+                                ? "h"
+                                : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
+                                      ? ""
+                                      : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "";
     return ret;
 }
 
@@ -270,23 +282,13 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
             snprintf(nonIntegerPrecStr, FORMAT_FMTSTR_BUFFER_SIZE, "0.%d", precision);
         }
 
-        char formatStr[FORMAT_FMTSTR_BUFFER_SIZE]];
+        char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
         snprintf(
             formatStr,
             FORMAT_FMTSTR_BUFFER_SIZE,
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
-            (isIntegerDataType)
-                ? ((dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
-                       ? "hh"
-                       : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
-                             ? "h"
-                             : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4 || dataType == DATATYPE_R4)
-                                   ? ""
-                                   : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8 || dataType == DATATYPE_R8)
-                                         ? "ll"
-                                         : "???")
-                : "",
+            (isIntegerDataType) ? nf_GetPrintfLengthModifier(dataType) : "",
             (!isIntegerDataType) ? 'f' : (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
         // {
@@ -429,13 +431,7 @@ int nf_Format_D(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
-        (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
-            ? "hh"
-            : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
-                  ? "h"
-                  : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
-                        ? ""
-                        : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
+        nf_GetPrintfLengthModifier(dataType),
         (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
     ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
@@ -476,13 +472,7 @@ int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int prec
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
-        (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
-            ? "hh"
-            : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
-                  ? "h"
-                  : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
-                        ? ""
-                        : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "???",
+        nf_GetPrintfLengthModifier(dataType),
         formatChar); // x or X should return different results
 
     ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
@@ -548,7 +538,7 @@ HRESULT Library_corlib_native_System_Number::
 
     char formatChar;
     int precision;
-    if (!nf_GetFormatSpec(format, isInteger, value->DataType(), &formatChar, &precision))
+    if (!nf_GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
         ret = format;
     }
