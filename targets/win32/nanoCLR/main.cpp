@@ -70,7 +70,7 @@ int _tmain(int argc, _TCHAR *argv[])
 {
     wprintf(L"\n.NET nanoFramework nanoCLR WIN32 v");
     std::cout << VERSION_STRING;
-    wprintf(L"\r\nCopyright (c) 2020 .NET nanoFramework project contributors\r\n\r\n");
+    wprintf(L"\r\nCopyright (c) 2020 .NET Foundation and Contributors\r\n\r\n");
 
     // initialize nanoHAL
     nanoHAL_Initialize();
