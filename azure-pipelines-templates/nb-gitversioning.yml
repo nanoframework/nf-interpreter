@@ -3,7 +3,6 @@
 
 steps:
   - task: DotNetCoreCLI@2  
-    condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Install NBGV tool
     inputs:
       command: custom
@@ -11,7 +10,6 @@ steps:
       arguments: install --tool-path . nbgv
 
   - script: nbgv cloud -a -c
-    condition: ne(variables['system.pullrequest.isfork'], true)
     displayName: Set build number
 
   # Currently Azure pipelines won't let PRs from forks setting the build ID
