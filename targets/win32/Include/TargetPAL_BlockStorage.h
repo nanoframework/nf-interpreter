@@ -17,45 +17,42 @@
 #else
 #define HAL_Time_Sleep_MicroSeconds_BS(x) HAL_Time_Sleep_MicroSeconds(x)
 
-#endif 
-
-
-
+#endif
 
 // for convert byte size to storage sector size
-#define CONVERTBYTETOSECTORSIZE(x,y)     ( (size_t)x + (size_t)y-1)/(size_t)y
+#define CONVERTBYTETOSECTORSIZE(x, y) ((size_t)x + (size_t)y - 1) / (size_t)y
 
-#define CONVERTBYTETOSECTORSIZE_2(x,y,z)   ( (size_t)x + (size_t)y-1)/(size_t)z
+#define CONVERTBYTETOSECTORSIZE_2(x, y, z) ((size_t)x + (size_t)y - 1) / (size_t)z
 
 /////////////////////////////////////////////////////////
 // Description:
 //   Definitions for the Block Storage device interface
 //   for the .NET Micro Framework
-// 
+//
 // Remarks:
 //   The general design of the API is strongly influenced
 //   by the Windows Embedded CE Flash Media Driver (FMD)
 //   API. However, It is not intended to be a direct port
-//   of the FMD architecture to the .NET MF. This design 
+//   of the FMD architecture to the .NET MF. This design
 //   overcomes some of the limitations of the CE design
 //   and includes functionalty an support that is specific
 //   to the .NET MF.
 //
 //   In particular this design adds the following:
-//   * Generalized block storage rather than assuming 
+//   * Generalized block storage rather than assuming
 //     a Resident Flash Array (RFA)
 //   * Support for multiple instances of block storage
 //     devices instead of only one
-//   * Support for legacy CLR Block usage information to 
+//   * Support for legacy CLR Block usage information to
 //     Identify for the system where various types of
-//     information reside in the storage device. 
+//     information reside in the storage device.
 //   * Support for direct use of NOR flash without forcing
-//     additional layering for metadata if an FS is not 
+//     additional layering for metadata if an FS is not
 //     needed or desired on the NOR flash.
 //   * Support for XIP storage media like NOR and ROM.
 //   * Use of an interface (as a structure of function
 //     pointers) to allow layering and standardized support
-//     for various common functionality. (e.g. treating 
+//     for various common functionality. (e.g. treating
 //     NOR flash with varying sized sectors and no metadata
 //     as if it was NAND with fixed sized sectors including
 //     metadata. Thus this kind functionality need only be
@@ -70,94 +67,93 @@
 //           supports XIP which allows byte addresssing and reading
 //           directly from the processor memory bus)
 //
-//  Block  - smallest eraseable unit of the storage device. A block 
+//  Block  - smallest eraseable unit of the storage device. A block
 //           contains one or more sectors that are erased as a whole.
 //           All sectors within a block are always the same size.
 //
 //  Region - Group of adjacent blocks that all contain sectors of the
 //           same size.
-//  
+//
 //  Execute-In-Place (XIP) - Attribute of some storage types, NOR, ROM,
 //          RAM, that allows direct execution of code from the device.
 //          XIP capable devices are at least read-only and byte addresable
 //          on the CPU memory bus.
 //
 
-
 // struct BlockRange
 // {
-   
 
 // public:
 
 //     static bool IsBlocknanoBooterAgnostic( uint32_t BlockType )
 //     {
-//         // The only blocks that should be distinguished by nanoBooter are CONFIG, 
+//         // The only blocks that should be distinguished by nanoBooter are CONFIG,
 //         // Bootstrap and reserved blocks (DirtyBit is another version of CONFIG).
-//         if( BlockType == BlockRange_BLOCKTYPE_BOOTSTRAP || 
+//         if( BlockType == BlockRange_BLOCKTYPE_BOOTSTRAP ||
 //             BlockType == BlockRange_BLOCKTYPE_CONFIG    ||
 //             BlockType == BlockRange_BLOCKTYPE_RESERVED  ||
 //             BlockType == BlockRange_BLOCKTYPE_DIRTYBIT)
 //         {
 //             return FALSE;
-//         }    
+//         }
 
-//         return TRUE;        
+//         return TRUE;
 //     }
-    
+
 //     bool IsReserved() const      { return ((RangeType & BlockRange_RESERVED) == BlockRange_RESERVED);       }
 //     bool IsReadOnly() const      { return ((RangeType & BlockRange_READONLY) == BlockRange_READONLY);       }
 
-//     bool IsReservedData() const    { return ((RangeType & (BlockRange_RESERVED | BlockRange_DATATYPE_RAW )) == (BlockRange_RESERVED | BlockRange_DATATYPE_RAW )); }
-//     bool HasManagedCode() const { return ((RangeType & (BlockRange_DATATYPE_MANAGEDCODE    )) == (BlockRange_DATATYPE_MANAGEDCODE    )); }
+//     bool IsReservedData() const    { return ((RangeType & (BlockRange_RESERVED | BlockRange_DATATYPE_RAW )) ==
+//     (BlockRange_RESERVED | BlockRange_DATATYPE_RAW )); } bool HasManagedCode() const { return ((RangeType &
+//     (BlockRange_DATATYPE_MANAGEDCODE    )) == (BlockRange_DATATYPE_MANAGEDCODE    )); }
 
 //     bool IsCode() const               { return ((RangeType & BlockRange_USAGE_MASK) == BlockUsage_CODE);     }
 //     bool IsBootstrap() const        { return ((RangeType & BlockRange_USAGE_MASK) == BlockUsage_BOOTSTRAP);}
-//     bool IsDirtyBit() const         { return ((RangeType & BlockRange_BLOCKTYPE_CONFIG) == BlockRange_BLOCKTYPE_DIRTYBIT);}
-//     bool IsConfig() const           { return ((RangeType & BlockRange_BLOCKTYPE_CONFIG) == BlockRange_BLOCKTYPE_CONFIG); }
-//     bool IsDeployment() const  { return ((RangeType & BlockRange_USAGE_MASK) == BlockUsage_DEPLOYMENT);}
-//     bool IsFileSystem() const     { return ((RangeType & BlockRange_USAGE_MASK) == BlockUsage_FILESYSTEM); }
-//     uint32_t GetBlockCount() const    { return (EndBlock - StartBlock + 1); }
+//     bool IsDirtyBit() const         { return ((RangeType & BlockRange_BLOCKTYPE_CONFIG) ==
+//     BlockRange_BLOCKTYPE_DIRTYBIT);} bool IsConfig() const           { return ((RangeType &
+//     BlockRange_BLOCKTYPE_CONFIG) == BlockRange_BLOCKTYPE_CONFIG); } bool IsDeployment() const  { return ((RangeType &
+//     BlockRange_USAGE_MASK) == BlockUsage_DEPLOYMENT);} bool IsFileSystem() const     { return ((RangeType &
+//     BlockRange_USAGE_MASK) == BlockUsage_FILESYSTEM); } uint32_t GetBlockCount() const    { return (EndBlock -
+//     StartBlock + 1); }
 
 //     // NOTE: This is the application native code only (not including the managed DAT section)
-//     //       and thus is different from the old MEMORY_USAGE_CODE which contained both 
+//     //       and thus is different from the old MEMORY_USAGE_CODE which contained both
 //     //       the Native code application and the DAT section. Obviously these inlines can be
 //     //       altered or added upon to test for any combination of the flags as desired but seperating
 //     //       the DAT region out on it's own allows for locating ANY managed code sections of storage
 //     bool IsLegacyCode() const    { return (IsCode());     }
 //     uint32_t GetBlockUsage() const { return (RangeType & BlockRange_USAGE_MASK); }
 
-        
 //     /*
 //        Due to the lack of a defined bit ordering for bit fields in the C/C++
 //        languages a bit field structure isn't actually used but this should
 //        help clarify the layout and intent of the constant declarations below.
-        
+
 //         //MSB
 //         unsigned EXECUTABLE:1;
 //         unsigned RESERVED:1;
 //         unsigned READONLY:1;
 //         unsigned UNUSEDBITS:13;
-        
+
 //         // The lower 16 bits are used to define the specific
 //         // usage for blocks when the RESERVED bit set
 //         unsigned BlockType:4
 //         unsigned Usage:12;
 //         //LSB
-//     */    
+//     */
 //     uint32_t RangeType;
 //     uint32_t StartBlock;
 //     uint32_t EndBlock;
-// };    
+// };
 
 // /////////////////////////////////////////////////////////
 // // Description:
 // //    This structure defines characteristics of a particular
 // //    region of a block device.
-// // 
+// //
 // // Remarks:
-// //    There is often more than one instance of this structure for each 
-// //    block device. 
+// //    There is often more than one instance of this structure for each
+// //    block device.
 // //
 // //    The BytesPerBlock value is an optimization to prevent the need
 // //    to routinely caclulate it from SectorsPerBlock * DataBytesPerSector
@@ -181,10 +177,10 @@
 // // Description:
 // //    This structure defines characteristics of a particular
 // //    block device.
-// // 
+// //
 // // Remarks:
-// //    THere is only one instance of this structure for each 
-// //    block device. 
+// //    THere is only one instance of this structure for each
+// //    block device.
 // //
 
 // struct MediaAttribute
@@ -195,9 +191,9 @@
 //     bool SupportsCopyBack:1;
 //     bool ErasedBitsAreZero:1;
 // };
-    
+
 // ///////////////////////////////////////////////////////////
-    
+
 // struct DeviceBlockInfo
 // {
 //     // indicates if the storage media is removeable
@@ -205,13 +201,13 @@
 //     MediaAttribute Attribute;
 
 //     // Maximum Sector Write Time.
-//     uint32_t MaxSectorWrite_uSec;    
+//     uint32_t MaxSectorWrite_uSec;
 
 //     // Maximum erase time for the a block
-//     uint32_t MaxBlockErase_uSec;    
+//     uint32_t MaxBlockErase_uSec;
 
 //     // Bytes Per Sector
-//     uint32_t BytesPerSector;         
+//     uint32_t BytesPerSector;
 
 //     // Total Size
 //     ByteAddress Size;
@@ -224,17 +220,20 @@
 
 //     __nfweak SectorAddress PhysicalToSectorAddress( const BlockRegionInfo* pRegion, ByteAddress phyAddress ) const;
 
-//     __nfweak bool FindRegionFromAddress(ByteAddress Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) const;
+//     __nfweak bool FindRegionFromAddress(ByteAddress Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex )
+//     const;
 
-//     __nfweak bool FindForBlockUsage(uint32_t BlockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) const;
+//     __nfweak bool FindForBlockUsage(uint32_t BlockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t
+//     &BlockRangeIndex ) const;
 
-//     __nfweak bool FindNextUsageBlock(uint32_t BlockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) const;
+//     __nfweak bool FindNextUsageBlock(uint32_t BlockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t
+//     &BlockRangeIndex ) const;
 // };
 
 // ///////////////////////////////////////////////////////////////
 // // Description:
 // //    This structure describes the sector Metadata used for wear
-// //    leveling. 
+// //    leveling.
 // //
 // // Remarks:
 // //    This structure emulates the typical physical layout of the
@@ -244,17 +243,17 @@
 // //
 // //    This information is designed to match that used in
 // //    Windows Embedded CE systems so that the FAL algorithms from
-// //    CE can be more easily ported to the .NET MF. 
+// //    CE can be more easily ported to the .NET MF.
 // //
 // // The following is a typical representation of how the extra area
 // // is utilized:
-// //- - - - - - - - - - - - - - - - 
+// //- - - - - - - - - - - - - - - -
 // //|R|R|R|R|O|V|R|R|E|E|E|E|E|E|E|E|
 // //- - - - - - - - - - - - - - - -
 // //
 // //The following table describes each element.
 // //
-// //Element  Description  
+// //Element  Description
 // //   R     Reserved bytes used by the FAL
 // //   O     Byte for use by the OEM
 // //   V     Byte indicating if the block is valid (a.k.a. bad)
@@ -266,7 +265,7 @@
 //     unsigned char bOEMReserved; // For use by OEM. See OEMReservedBits for more information.
 //     unsigned char bBadBlock;    // Indicates if a block is bad.
 //     unsigned short wReserved2;   // Used by the FAL to maintain state information about the sector.
-    
+
 //     // TODO: Check ECC algorithm implementations on CE to see what data type works most conveniently for this
 //     uint32_t ECC[2];     // Error Correction Code [Should be all 0xFF if not used]
 
@@ -304,7 +303,7 @@
 // /////////////////////////////////////////////////////////
 // // Description:
 // //    This structure defines an interface for block devices
-// // 
+// //
 // // Remarks:
 // //    It is possible a given system might have more than one
 // //    storage device type. This interface abstracts the
@@ -322,12 +321,12 @@
 // //    (mostly for directly attached NOR and NAND). The metadata
 // //    is used by upper layers for wear leveling to ensure that
 // //    data is moved around on the flash when writing to prevent
-// //    failure of the device from too many erase cycles on a sector. 
-// // 
+// //    failure of the device from too many erase cycles on a sector.
+// //
 // // TODO:
 // //    Define standard method of notification that media is
 // //    removed for all removeable media. This will likely
-// //    be a continuation so that the FS Manager can mount 
+// //    be a continuation so that the FS Manager can mount
 // //    an FS and then notify the managed app of the new FS.
 // //
 // struct IBlockStorageDevice
@@ -335,7 +334,7 @@
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Initializes a given block device for use
-//     // 
+//     //
 //     // Input:
 //     //
 //     // Returns:
@@ -346,11 +345,11 @@
 //     //    until after Init returns.
 //     //
 //     bool (*InitializeDevice)(void*);
-    
+
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Initializes a given block device for use
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
@@ -364,7 +363,7 @@
 //     //    Gets the information describing the device
 //     //
 //     const DeviceBlockInfo*  (*GetDeviceInfo)(void*);
-    
+
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Reads data from a set of sectors
@@ -378,19 +377,19 @@
 //     //
 //     //    pSectorMetadata - pointer to an array of structured (one for each sector)
 //     //                      for the extra sector information.
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
-//     //   
+//     //
 //     //   pSectorBuff may be NULL. This is to allow for reading just the metadata.
-//     // 
+//     //
 //     //   pSectorMetadata can be set to NULL if the caller does not need the extra
 //     //   data.
 //     //
-//     //   If the device does not support sector Metadata it should fail if the 
+//     //   If the device does not support sector Metadata it should fail if the
 //     //   pSectorMetadata parameter is not NULL.
 //     //
 //     bool (*Read)(void*, ByteAddress StartSector, uint32_t NumBytes, unsigned char* pSectorBuff);
@@ -408,7 +407,7 @@
 //     //
 //     //    pSectorMetadata - pointer to an array of structures (one for each sector)
 //     //                      for the extra sector information.
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
@@ -418,13 +417,13 @@
 //     //   to manage wear leveling etc... (mostly for NOR and NAND). The metadata
 //     //   is used by upper layers to ensure that data is moved around on the flash
 //     //   when writing to prevent failure of the device from too many erase cycles
-//     //   on a sector. 
-//     //   
-//     //   If the device does not support sector Metadata it should fail if the 
+//     //   on a sector.
+//     //
+//     //   If the device does not support sector Metadata it should fail if the
 //     //   pSectorMetadata parameter is not NULL.
 //     //
 //     //   pSectorMetadata can be set to NULL if the caller does not need the extra
-//     //   data. Implementations must not attempt to write data through a NULL pointer! 
+//     //   data. Implementations must not attempt to write data through a NULL pointer!
 //     //
 //     bool (*Write)(void*, ByteAddress Address, uint32_t NumBytes, unsigned char* pSectorBuf, bool ReadModifyWrite);
 
@@ -437,7 +436,7 @@
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Check a block is erased or not.
-//     // 
+//     //
 //     // Input:
 //     //    BlockStartAddress - Logical Sector Address
 //     //
@@ -446,13 +445,13 @@
 //     //
 //     // Remarks:
 //     //    Check  the block containing the sector address specified.
-//     //    
+//     //
 //     bool (*IsBlockErased)(void*, ByteAddress BlockStartAddress, uint32_t BlockLength);
 
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Erases a block
-//     // 
+//     //
 //     // Input:
 //     //    Address - Logical Sector Address
 //     //
@@ -461,19 +460,19 @@
 //     //
 //     // Remarks:
 //     //    Erases the block containing the sector address specified.
-//     //    
+//     //
 //     bool (*EraseBlock)(void*, ByteAddress Address);
-    
+
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //   Changes the power state of the device
-//     // 
+//     //
 //     // Input:
 //     //    State   - true= power on; false = power off
 //     //
 //     // Remarks:
-//     //   This function allows systems to conserve power by 
-//     //   shutting down the hardware when the system is 
+//     //   This function allows systems to conserve power by
+//     //   shutting down the hardware when the system is
 //     //   going into low power states.
 //     //
 //     void (*SetPowerState)(void*, uint32_t State);
@@ -482,7 +481,6 @@
 
 //     uint32_t (*MaxBlockErase_uSec)(void*);
 // };
-
 
 // ////////////////////////////////////////////////
 // // Description:
@@ -496,7 +494,7 @@
 // //   library footprint when Certain C++ language features are
 // //   used. Since a major goal of the .NET MF is to reduce
 // //   code footprint we avoid anything that brings in additional
-// //   library code. 
+// //   library code.
 // //
 
 // struct BlockStorageDevice : public HAL_DblLinkedNode<BlockStorageDevice>
@@ -507,7 +505,7 @@
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Initializes a given block device for use
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
@@ -516,11 +514,11 @@
 //     //    until after Init returns.
 //     //
 //     bool InitializeDevice() { return this->m_BSD->InitializeDevice( this->m_context ); }
-    
+
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Initializes a given block device for use
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
@@ -548,22 +546,22 @@
 //     //
 //     //    pSectorMetadata - pointer to an array of structured (one for each sector)
 //     //                      for the extra sector information.
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
-//     //   
+//     //
 //     //   pSectorBuff may be NULL. This is to allow for reading just the metadata.
-//     // 
+//     //
 //     //   pSectorMetadata can be set to NULL if the caller does not need the extra
 //     //   data.
 //     //
-//     //   If the device does not support sector Metadata it should fail if the 
+//     //   If the device does not support sector Metadata it should fail if the
 //     //   pSectorMetadata parameter is not NULL.
 //     //
-//     bool Read(ByteAddress Address, uint32_t NumBytes, unsigned char* pSectorBuff) 
+//     bool Read(ByteAddress Address, uint32_t NumBytes, unsigned char* pSectorBuff)
 //     {
 //         return this->m_BSD->Read(this->m_context, Address, NumBytes, pSectorBuff);
 //     }
@@ -581,7 +579,7 @@
 //     //
 //     //    pSectorMetadata - pointer to an array of structures (one for each sector)
 //     //                      for the extra sector information.
-//     // 
+//     //
 //     // Returns:
 //     //   true if succesful; false if not
 //     //
@@ -591,15 +589,15 @@
 //     //   to manage wear leveling etc... (mostly for NOR and NAND). The metadata
 //     //   is used by upper layers to ensure that data is moved around on the flash
 //     //   when writing to prevent failure of the device from too many erase cycles
-//     //   on a sector. 
-//     //   
-//     //   If the device does not support sector Metadata it should fail if the 
+//     //   on a sector.
+//     //
+//     //   If the device does not support sector Metadata it should fail if the
 //     //   pSectorMetadata parameter is not NULL.
 //     //
 //     //   pSectorMetadata can be set to NULL if the caller does not need the extra
-//     //   data. Implementations must not attempt to write data through a NULL pointer! 
+//     //   data. Implementations must not attempt to write data through a NULL pointer!
 //     //
-//     bool Write(ByteAddress Address, uint32_t NumBytes, unsigned char* pSectorBuf, bool ReadModifyWrite) 
+//     bool Write(ByteAddress Address, uint32_t NumBytes, unsigned char* pSectorBuf, bool ReadModifyWrite)
 //     {
 //         return this->m_BSD->Write(this->m_context, Address, NumBytes, pSectorBuf, ReadModifyWrite);
 //     }
@@ -622,7 +620,7 @@
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Check a block is erased or not
-//     // 
+//     //
 //     // Input:
 //     //    Address - Logical Sector Address
 //     //
@@ -631,14 +629,14 @@
 //     //
 //     // Remarks:
 //     //    check the block containing the sector address specified.
-//     //    
-//     bool IsBlockErased(ByteAddress BlockStartAddress, uint32_t BlockLength)  { return this->m_BSD->IsBlockErased(this->m_context, BlockStartAddress, BlockLength); }
-
+//     //
+//     bool IsBlockErased(ByteAddress BlockStartAddress, uint32_t BlockLength)  { return
+//     this->m_BSD->IsBlockErased(this->m_context, BlockStartAddress, BlockLength); }
 
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //    Erases a block
-//     // 
+//     //
 //     // Input:
 //     //    Address - Logical Sector Address
 //     //
@@ -647,45 +645,45 @@
 //     //
 //     // Remarks:
 //     //    Erases the block containing the sector address specified.
-//     //    
+//     //
 //     bool EraseBlock(ByteAddress Address) const { return this->m_BSD->EraseBlock(this->m_context, Address); }
-
 
 //     /////////////////////////////////////////////////////////
 //     // Description:
 //     //   Changes the power state of the device
-//     // 
+//     //
 //     // Input:
 //     //    State   - true= power on; false = power off
 //     //
 //     // Remarks:
-//     //   This function allows systems to conserve power by 
-//     //   shutting down the hardware when the system is 
+//     //   This function allows systems to conserve power by
+//     //   shutting down the hardware when the system is
 //     //   going into low power states.
 //     //
 //     void SetPowerState( uint32_t State ) { this->m_BSD->SetPowerState(this->m_context, State);  }
 
-//     bool FindRegionFromAddress(ByteAddress Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) 
+//     bool FindRegionFromAddress(ByteAddress Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex )
 //     {
 //         const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
 //         return pDevInfo->FindRegionFromAddress( Address, BlockRegionIndex, BlockRangeIndex );
 //     }
 
-//     bool FindForBlockUsage(uint32_t blockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) 
+//     bool FindForBlockUsage(uint32_t blockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t
+//     &BlockRangeIndex )
 //     {
 //         const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
 //         return pDevInfo->FindForBlockUsage( blockUsage, Address, BlockRegionIndex, BlockRangeIndex );
 //     }
 
-//     bool FindNextUsageBlock(uint32_t blockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t &BlockRangeIndex ) 
+//     bool FindNextUsageBlock(uint32_t blockUsage, ByteAddress &Address, uint32_t &BlockRegionIndex, uint32_t
+//     &BlockRangeIndex )
 //     {
 //         const DeviceBlockInfo* pDevInfo = GetDeviceInfo();
 
 //         return pDevInfo->FindNextUsageBlock( blockUsage, Address, BlockRegionIndex, BlockRangeIndex );
 //     }
-    
 
 //     uint32_t MaxSectorWrite_uSec()
 //     {
@@ -701,14 +699,14 @@
 //     void*                m_context; // configuration for this instance of this driver
 
 // };
-    
+
 // -- global List
 
 // struct BlockStorageList
 // {
 //     // initailize the storage
 //     __nfweak static void Initialize();
-    
+
 //     // walk through list of devices and calls Init() function
 //     __nfweak static bool InitializeDevices();
 
@@ -724,11 +722,12 @@
 //     __nfweak static bool RemoveDevice( BlockStorageDevice* pBSD, bool UnInit);
 
 //     // Find the right Device with the corresponding phyiscal address.
-//     // 
-//     __nfweak static bool FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, uint32_t PhysicalAddress, ByteAddress &BlockAddress);
+//     //
+//     __nfweak static bool FindDeviceForPhysicalAddress( BlockStorageDevice** pBSD, uint32_t PhysicalAddress,
+//     ByteAddress &BlockAddress);
 
 //     __nfweak static BlockStorageDevice* GetFirstDevice();
-    
+
 //     __nfweak static BlockStorageDevice* GetNextDevice( BlockStorageDevice& device );
 
 //     // returns number of devices has been declared in the system
@@ -736,10 +735,10 @@
 
 //     // pointer to the BlockStorageDevice which is the primary device with CONFIG block
 //     static BlockStorageDevice* s_primaryDevice;
-    
+
 // private:
 //     // global pointer of all the storage devices
-//     static HAL_DblLinkedList<BlockStorageDevice> s_deviceList; 
+//     static HAL_DblLinkedList<BlockStorageDevice> s_deviceList;
 
 //     static bool s_Initialized;
 // };
@@ -751,17 +750,19 @@ void BlockStorage_AddDevices();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define FLASH_PROTECTION_KEY      0x1055AADD
+#define FLASH_PROTECTION_KEY 0x1055AADD
 
-
-
-#define FLASH_BEGIN_PROGRAMMING_FAST()             { GLOBAL_LOCK(FlashIrq)
-#define FLASH_BEGIN_PROGRAMMING(x)                 { uint32_t FlashOperationStatus = Flash_StartOperation( x )
-#define FLASH_END_PROGRAMMING(banner,address)      Flash_EndOperation( FlashOperationStatus ); }
-#define FLASH_END_PROGRAMMING_FAST(banner,address) }
-
+#define FLASH_BEGIN_PROGRAMMING_FAST()                                                                                 \
+    {                                                                                                                  \
+        GLOBAL_LOCK(FlashIrq)
+#define FLASH_BEGIN_PROGRAMMING(x)                                                                                     \
+    {                                                                                                                  \
+        uint32_t FlashOperationStatus = Flash_StartOperation(x)
+#define FLASH_END_PROGRAMMING(banner, address)                                                                         \
+    Flash_EndOperation(FlashOperationStatus);                                                                          \
+    }
+#define FLASH_END_PROGRAMMING_FAST(banner, address) }
 
 //--//
 
 #endif // _TARGET_PAL_BLOCKSTORAGE_H_
-

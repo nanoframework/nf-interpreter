@@ -6,7 +6,13 @@
 #ifndef _TARGET_HAL_POWER_H_
 #define _TARGET_HAL_POWER_H_ 1
 
-inline void CPU_Reset(){ ::ExitProcess( 0 ); };
-inline bool CPU_IsSoftRebootSupported() { return true; };
+inline void CPU_Reset()
+{
+    ::ExitProcess(0);
+};
+inline bool CPU_IsSoftRebootSupported()
+{
+    return true;
+};
 
 #endif //_TARGET_HAL_POWER_H_

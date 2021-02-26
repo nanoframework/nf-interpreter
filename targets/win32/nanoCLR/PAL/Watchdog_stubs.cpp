@@ -7,6 +7,10 @@
 
 //--//
 
-void Watchdog_Init(){}
+void Watchdog_Init()
+{
+}
 
-void Watchdog_Reset(){}
+void Watchdog_Reset()
+{
+}

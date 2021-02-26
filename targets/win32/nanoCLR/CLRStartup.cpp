@@ -142,7 +142,7 @@ struct Settings : CLR_RT_ParseOptions
 //        CLR_Debug::Printf("Loading Deployment Assemblies.\r\n");
 #endif
 
-        //LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
+        // LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
 
         //--//
 

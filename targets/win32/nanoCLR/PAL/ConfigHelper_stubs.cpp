@@ -7,70 +7,72 @@
 
 //--//
 
-//bool HAL_CONFIG_BLOCK::IsGoodBlock() const
+// bool HAL_CONFIG_BLOCK::IsGoodBlock() const
 //{
 //    return TRUE;
 //}
 //
-//bool HAL_CONFIG_BLOCK::IsGoodData() const
+// bool HAL_CONFIG_BLOCK::IsGoodData() const
 //{
 //    return TRUE;
 //}
 //
-//bool HAL_CONFIG_BLOCK::IsGood() const
+// bool HAL_CONFIG_BLOCK::IsGood() const
 //{
 //    return TRUE;
 //}
 //
-//const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Next() const
+// const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Next() const
 //{
 //    return NULL;
 //}
 //
-//const void* HAL_CONFIG_BLOCK::Data() const
-//{
-//    return NULL;
-//}
-//
-////--//
-//
-//bool HAL_CONFIG_BLOCK::Prepare( const char* Name, void* Data, unsigned int Size )
-//{
-//    return TRUE;
-//}
-//
-////--//
-//
-//const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Find( const char* Name, bool fSkipCurrent, bool fAppend ) const
+// const void* HAL_CONFIG_BLOCK::Data() const
 //{
 //    return NULL;
 //}
 //
 ////--//
 //
-//bool HAL_CONFIG_BLOCK::GetConfigSectorAddress(HAL_CONFIG_BLOCK_STORAGE_DATA& blData)
+// bool HAL_CONFIG_BLOCK::Prepare( const char* Name, void* Data, unsigned int Size )
+//{
+//    return TRUE;
+//}
+//
+////--//
+//
+// const HAL_CONFIG_BLOCK* HAL_CONFIG_BLOCK::Find( const char* Name, bool fSkipCurrent, bool fAppend ) const
+//{
+//    return NULL;
+//}
+//
+////--//
+//
+// bool HAL_CONFIG_BLOCK::GetConfigSectorAddress(HAL_CONFIG_BLOCK_STORAGE_DATA& blData)
 //{
 //    return FALSE;
 //}
 //
-//bool HAL_CONFIG_BLOCK::CompactBlock(HAL_CONFIG_BLOCK_STORAGE_DATA& blData, const ConfigurationSector* cfgStatic, const HAL_CONFIG_BLOCK* cfgEnd)
+// bool HAL_CONFIG_BLOCK::CompactBlock(HAL_CONFIG_BLOCK_STORAGE_DATA& blData, const ConfigurationSector* cfgStatic,
+// const HAL_CONFIG_BLOCK* cfgEnd)
 //{
 //    return FALSE;
 //}
 //
 //
-//bool HAL_CONFIG_BLOCK::UpdateBlock( const HAL_CONFIG_BLOCK_STORAGE_DATA &blData, const void* pAddress, const HAL_CONFIG_BLOCK *Header, void* Data, size_t Length, const void* LastConfigAddress, bool isChipRO )
+// bool HAL_CONFIG_BLOCK::UpdateBlock( const HAL_CONFIG_BLOCK_STORAGE_DATA &blData, const void* pAddress, const
+// HAL_CONFIG_BLOCK *Header, void* Data, size_t Length, const void* LastConfigAddress, bool isChipRO )
 //{
 //    return FALSE;
 //}
 //
-//bool HAL_CONFIG_BLOCK::UpdateBlockWithName( const char* Name, void* Data, size_t Length, bool isChipRO )
+// bool HAL_CONFIG_BLOCK::UpdateBlockWithName( const char* Name, void* Data, size_t Length, bool isChipRO )
 //{
 //    return FALSE;
 //}
 //
 
-bool GetHalSystemInfo(HalSystemInfo& systemInfo)
+bool GetHalSystemInfo(HalSystemInfo &systemInfo)
 {
     return FALSE;
 }
