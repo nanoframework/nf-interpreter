@@ -4,6 +4,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// need this include here to use this in nanoCLR WIN32 project
+#include <stdafx.h>
+
 #include "nf_rt_events_native.h"
 
 // clang-format off
