@@ -133,6 +133,10 @@ int nf_DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value
             break;
     }
 
+    // assure string valid even in cases when nothing was written
+    if (ret >= 0)
+        buffer[ret] = 0;
+
     return ret;
 }
 
@@ -171,8 +175,14 @@ bool nf_IsIntegerDataType(CLR_DataType dataType)
 int nf_GetStrLen(char *buffer)
 {
     int ret = 0;
-    for (; buffer[ret++] != 0;)
-        ;
+    for (;;)
+    {
+        if (buffer[ret] == 0)
+        {
+            break;
+        }
+        ret++;
+    }
     return ret;
 }
 
@@ -231,9 +241,6 @@ int nf_ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negative
     {
         int negativeSignLength = nf_GetStrLen(negativeSign);
 
-        // we need it without trailing 0
-        negativeSignLength--;
-
         memmove(&buffer[negativeSignLength], &buffer[1], bufferContentLength);
         memcpy(buffer, negativeSign, negativeSignLength);
         ret += negativeSignLength - 1;
@@ -251,13 +258,64 @@ int nf_ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *deci
     {
         int decimalSeparatorLength = nf_GetStrLen(decimalSeparator);
 
-        // we need it without trailing 0
-        decimalSeparatorLength--;
-
         memmove(&buffer[dotIndex + decimalSeparatorLength], &buffer[dotIndex + 1], bufferContentLength);
         memcpy(&buffer[dotIndex], decimalSeparator, decimalSeparatorLength);
         ret += decimalSeparatorLength - 1;
     }
+
+    return ret;
+}
+
+int nf_InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSize, char *groupSep)
+{
+    int ret = bufferContentLength;
+
+    int significantDigitsStartAtIndex = 0;
+    int significantDigitCount = bufferContentLength - 1;
+    int dotIndex = nf_GetDotIndex(buffer, bufferContentLength);
+    if (dotIndex != -1)
+    {
+        significantDigitCount = dotIndex;
+    }
+    if (buffer[0] == '-')
+    {
+        significantDigitCount--;
+        significantDigitsStartAtIndex++;
+    }
+
+    int groupSepLength = nf_GetStrLen(groupSep);
+    int groupCount = significantDigitCount / groupSize;
+    int plusLength = groupCount * groupSepLength;
+
+    if (plusLength > 0)
+    {
+        ret = bufferContentLength + plusLength;
+
+        int srcIdx = bufferContentLength;
+        int tgtIdx = ret;
+
+        if (dotIndex != -1)
+        {
+            int fractionPostfixWithDotLength = bufferContentLength - dotIndex;
+            memmove(&buffer[dotIndex + plusLength], &buffer[dotIndex], fractionPostfixWithDotLength);
+            srcIdx -= fractionPostfixWithDotLength;
+            tgtIdx -= fractionPostfixWithDotLength;
+        }
+
+        for (;;)
+        {
+            if ((srcIdx - significantDigitsStartAtIndex) < groupSize)
+                break;
+
+            tgtIdx -= groupSize;
+            srcIdx -= groupSize;
+            memmove(&buffer[tgtIdx], &buffer[srcIdx], groupSize);
+            tgtIdx -= groupSepLength;
+            memcpy(&buffer[tgtIdx], groupSep, groupSepLength);
+        }
+    }
+
+    buffer[ret] = 0;
 
     return ret;
 }
@@ -526,6 +584,46 @@ int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
     return ret;
 }
 
+int nf_Format_N(
+    char *buffer,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator,
+    char *numberGroupSeparator,
+    CLR_RT_HeapBlock_Array *numberGroupSizes)
+{
+    int ret = -1;
+
+    if (precision == -1)
+    {
+        precision = 2; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
+                       // NF at the moment
+    }
+
+    if (numberGroupSizes->m_numOfElements != 1)
+    {
+        // TODO: notimplex
+    }
+    else
+    {
+        ret = nf_Format_F(buffer, value, precision, negativeSign, decimalSeparator);
+        if (ret > 0)
+        {
+            int groupSize = *((CLR_INT32 *)numberGroupSizes->GetElement(0));
+
+            ret = nf_InsertGroupSeparators(buffer, ret, groupSize, numberGroupSeparator);
+        }
+        else if (ret == 0)
+        {
+            buffer[ret++] = '0';
+            buffer[ret] = 0;
+        }
+    }
+
+    return ret;
+}
+
 HRESULT Library_corlib_native_System_Number::
     FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4(CLR_RT_StackFrame &stack)
 {
@@ -560,7 +658,7 @@ HRESULT Library_corlib_native_System_Number::
         NANOCLR_CHECK_HRESULT(value->PerformUnboxing(desc.m_handlerCls));
     }
 
-    // {
+    // { //xxx
     //     char temporaryStringBuffer[640];
     //     int realStringSize = snprintf(
     //         temporaryStringBuffer,
@@ -591,7 +689,7 @@ HRESULT Library_corlib_native_System_Number::
     else
     {
 
-        // {
+        // { // xxx
         //     char temporaryStringBuffer[640];
         //     int realStringSize = snprintf(
         //         temporaryStringBuffer,
@@ -625,14 +723,15 @@ HRESULT Library_corlib_native_System_Number::
                 break;
             case 'n':
             case 'N':
-            {
-                if (precision < 0)
-                    precision = 6; // should be equal to NumberFormatInfo.NumberDecimalDigits which isn't implemented in
-                                   // NF at the moment
-                snprintf(result, FORMAT_RESULT_BUFFER_SIZE, "NNN");
-                resultLength = true;
-            }
-            break;
+                resultLength = nf_Format_N(
+                    result,
+                    value,
+                    precision,
+                    negativeSign,
+                    numberDecimalSeparator,
+                    numberGroupSeparator,
+                    numberGroupSizes);
+                break;
             case 'd':
             case 'D':
                 resultLength = nf_Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
