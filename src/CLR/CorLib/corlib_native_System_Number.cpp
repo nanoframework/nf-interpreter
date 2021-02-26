@@ -10,7 +10,7 @@
 #define FORMAT_RESULT_BUFFER_SIZE 128
 #define FORMAT_FMTSTR_BUFFER_SIZE 10
 
-bool nf_ParseFormat(char *format, char *formatChar, int *precision)
+bool Library_corlib_native_System_Number::ParseFormat(char *format, char *formatChar, int *precision)
 {
     bool ret = true;
 
@@ -49,7 +49,7 @@ bool nf_ParseFormat(char *format, char *formatChar, int *precision)
     return ret;
 }
 
-bool nf_ValidateFormatChar(char *formatChar, bool isInteger)
+bool Library_corlib_native_System_Number::ValidateFormatChar(char *formatChar, bool isInteger)
 {
     bool ret = true;
 
@@ -78,19 +78,19 @@ bool nf_ValidateFormatChar(char *formatChar, bool isInteger)
     return ret;
 }
 
-bool nf_GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision)
+bool Library_corlib_native_System_Number::GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision)
 {
-    bool ret = nf_ParseFormat(format, formatChar, precision);
+    bool ret = ParseFormat(format, formatChar, precision);
 
     if (ret)
     {
-        ret = nf_ValidateFormatChar(formatChar, isInteger);
+        ret = ValidateFormatChar(formatChar, isInteger);
     }
 
     return ret;
 }
 
-int nf_DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value)
+int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value)
 {
     int ret = -1;
 
@@ -140,7 +140,7 @@ int nf_DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value
     return ret;
 }
 
-const char *nf_GetPrintfLengthModifier(CLR_DataType dataType)
+const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(CLR_DataType dataType)
 {
     const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
                           ? "hh"
@@ -152,27 +152,27 @@ const char *nf_GetPrintfLengthModifier(CLR_DataType dataType)
     return ret;
 }
 
-bool nf_IsSignedIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsSignedIntegerDataType(CLR_DataType dataType)
 {
     bool ret =
         (dataType == DATATYPE_I1 || dataType == DATATYPE_I2 || dataType == DATATYPE_I4 || dataType == DATATYPE_I8);
     return ret;
 }
 
-bool nf_IsUnsignedIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsUnsignedIntegerDataType(CLR_DataType dataType)
 {
     bool ret =
         (dataType == DATATYPE_U1 || dataType == DATATYPE_U2 || dataType == DATATYPE_U4 || dataType == DATATYPE_U8);
     return ret;
 }
 
-bool nf_IsIntegerDataType(CLR_DataType dataType)
+bool Library_corlib_native_System_Number::IsIntegerDataType(CLR_DataType dataType)
 {
-    bool ret = nf_IsSignedIntegerDataType(dataType) || nf_IsUnsignedIntegerDataType(dataType);
+    bool ret = IsSignedIntegerDataType(dataType) || IsUnsignedIntegerDataType(dataType);
     return ret;
 }
 
-int nf_GetStrLen(char *buffer)
+int Library_corlib_native_System_Number::GetStrLen(char *buffer)
 {
     int ret = 0;
     for (;;)
@@ -186,7 +186,7 @@ int nf_GetStrLen(char *buffer)
     return ret;
 }
 
-int nf_GetDotIndex(char *buffer, int bufferContentLength)
+int Library_corlib_native_System_Number::GetDotIndex(char *buffer, int bufferContentLength)
 {
     int ret = -1;
 
@@ -202,7 +202,7 @@ int nf_GetDotIndex(char *buffer, int bufferContentLength)
     return ret;
 }
 
-void nf_roundUpNumStr(char *buffer, int *bufferContentLength)
+void Library_corlib_native_System_Number::RoundUpNumStr(char *buffer, int *bufferContentLength)
 {
     char *c = &buffer[*bufferContentLength - 1];
     for (;;)
@@ -233,13 +233,13 @@ void nf_roundUpNumStr(char *buffer, int *bufferContentLength)
     }
 }
 
-int nf_ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign)
+int Library_corlib_native_System_Number::ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign)
 {
     int ret = bufferContentLength;
 
     if (buffer[0] == '-')
     {
-        int negativeSignLength = nf_GetStrLen(negativeSign);
+        int negativeSignLength = GetStrLen(negativeSign);
 
         memmove(&buffer[negativeSignLength], &buffer[1], bufferContentLength);
         memcpy(buffer, negativeSign, negativeSignLength);
@@ -249,14 +249,17 @@ int nf_ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negative
     return ret;
 }
 
-int nf_ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *decimalSeparator)
+int Library_corlib_native_System_Number::ReplaceDecimalSeparator(
+    char *buffer,
+    int bufferContentLength,
+    char *decimalSeparator)
 {
     int ret = bufferContentLength;
 
-    int dotIndex = nf_GetDotIndex(buffer, bufferContentLength);
+    int dotIndex = GetDotIndex(buffer, bufferContentLength);
     if (dotIndex != -1)
     {
-        int decimalSeparatorLength = nf_GetStrLen(decimalSeparator);
+        int decimalSeparatorLength = GetStrLen(decimalSeparator);
 
         memmove(&buffer[dotIndex + decimalSeparatorLength], &buffer[dotIndex + 1], bufferContentLength);
         memcpy(&buffer[dotIndex], decimalSeparator, decimalSeparatorLength);
@@ -266,13 +269,17 @@ int nf_ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *deci
     return ret;
 }
 
-int nf_InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSize, char *groupSep)
+int Library_corlib_native_System_Number::InsertGroupSeparators(
+    char *buffer,
+    int bufferContentLength,
+    int groupSize,
+    char *groupSep)
 {
     int ret = bufferContentLength;
 
     int significantDigitsStartAtIndex = 0;
     int significantDigitCount = bufferContentLength - 1;
-    int dotIndex = nf_GetDotIndex(buffer, bufferContentLength);
+    int dotIndex = GetDotIndex(buffer, bufferContentLength);
     if (dotIndex != -1)
     {
         significantDigitCount = dotIndex;
@@ -283,7 +290,7 @@ int nf_InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSiz
         significantDigitsStartAtIndex++;
     }
 
-    int groupSepLength = nf_GetStrLen(groupSep);
+    int groupSepLength = GetStrLen(groupSep);
     int groupCount = significantDigitCount / groupSize;
     int plusLength = groupCount * groupSepLength;
 
@@ -320,13 +327,18 @@ int nf_InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSiz
     return ret;
 }
 
-int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
+int Library_corlib_native_System_Number::Format_G(
+    char *buffer,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator)
 {
     int ret = -1;
 
     CLR_DataType dataType = value->DataType();
 
-    bool isIntegerDataType = nf_IsIntegerDataType(dataType);
+    bool isIntegerDataType = IsIntegerDataType(dataType);
 
     if (precision == -1)
     {
@@ -377,21 +389,10 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
             FORMAT_FMTSTR_BUFFER_SIZE,
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
-            (isIntegerDataType) ? nf_GetPrintfLengthModifier(dataType) : "",
-            (!isIntegerDataType) ? 'f' : (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+            (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
+            (!isIntegerDataType) ? 'f' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
-        // {
-        //     char temporaryStringBuffer[640];
-        //     int realStringSize =
-        //         snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "*** %d %s\r\n", dataType, formatStr);
-        //     CLR_EE_DBG_EVENT_BROADCAST(
-        //         CLR_DBG_Commands_c_Monitor_Message,
-        //         realStringSize,
-        //         temporaryStringBuffer,
-        //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
-        // }
-
-        ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+        ret = DoPrintfOnDataType(buffer, formatStr, value);
         if (ret > 0)
         {
             // printf and ToString differs on precision numbers:
@@ -406,7 +407,7 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
 
             if (ret > (precision + offsetBecauseOfNegativeSign))
             {
-                int dotIndex = nf_GetDotIndex(buffer, ret);
+                int dotIndex = GetDotIndex(buffer, ret);
 
                 int numDigits = 0;
 
@@ -424,7 +425,7 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
                             if (first_lost_digit >= '5')
                             {
                                 int savedRet = ret;
-                                nf_roundUpNumStr(buffer, &ret);
+                                RoundUpNumStr(buffer, &ret);
                                 if (savedRet < ret)
                                     dotIndex++;
                             }
@@ -470,15 +471,20 @@ int nf_Format_G(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
                 }
             }
 
-            ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
-            ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+            ret = ReplaceNegativeSign(buffer, ret, negativeSign);
+            ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
         }
     }
 
     return ret;
 }
 
-int nf_Format_D(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
+int Library_corlib_native_System_Number::Format_D(
+    char *buffer,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator)
 {
     int ret = -1;
 
@@ -495,10 +501,10 @@ int nf_Format_D(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
-        nf_GetPrintfLengthModifier(dataType),
-        (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+        GetPrintfLengthModifier(dataType),
+        (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
-    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+    ret = DoPrintfOnDataType(buffer, formatStr, value);
     if (ret > 0)
     {
         // printf and ToString differs on negative numbers:
@@ -512,14 +518,14 @@ int nf_Format_D(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
             ret++;
         }
 
-        ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
-        ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+        ret = ReplaceNegativeSign(buffer, ret, negativeSign);
+        ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
 
     return ret;
 }
 
-int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int precision)
+int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int precision)
 {
     int ret = -1;
 
@@ -534,15 +540,20 @@ int nf_Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int prec
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0%d%s%c",
         precision,
-        nf_GetPrintfLengthModifier(value->DataType()),
+        GetPrintfLengthModifier(value->DataType()),
         formatChar); // x or X should return different results
 
-    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+    ret = DoPrintfOnDataType(buffer, formatStr, value);
 
     return ret;
 }
 
-int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *negativeSign, char *decimalSeparator)
+int Library_corlib_native_System_Number::Format_F(
+    char *buffer,
+    CLR_RT_HeapBlock *value,
+    int precision,
+    char *negativeSign,
+    char *decimalSeparator)
 {
     int ret = -1;
 
@@ -554,7 +565,7 @@ int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
 
     CLR_DataType dataType = value->DataType();
 
-    bool isIntegerDataType = nf_IsIntegerDataType(dataType);
+    bool isIntegerDataType = IsIntegerDataType(dataType);
 
     char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
     snprintf(
@@ -562,10 +573,10 @@ int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
         FORMAT_FMTSTR_BUFFER_SIZE,
         "%%0.%d%s%c",
         precision,
-        (isIntegerDataType) ? nf_GetPrintfLengthModifier(dataType) : "",
-        (!isIntegerDataType) ? 'f' : (nf_IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+        (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
+        (!isIntegerDataType) ? 'f' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
-    ret = nf_DoPrintfOnDataType(buffer, formatStr, value);
+    ret = DoPrintfOnDataType(buffer, formatStr, value);
     if (ret > 0)
     {
         if (isIntegerDataType && (precision > 0))
@@ -577,14 +588,14 @@ int nf_Format_F(char *buffer, CLR_RT_HeapBlock *value, int precision, char *nega
             }
             buffer[ret] = 0;
         }
-        ret = nf_ReplaceNegativeSign(buffer, ret, negativeSign);
-        ret = nf_ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
+        ret = ReplaceNegativeSign(buffer, ret, negativeSign);
+        ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
 
     return ret;
 }
 
-int nf_Format_N(
+int Library_corlib_native_System_Number::Format_N(
     char *buffer,
     CLR_RT_HeapBlock *value,
     int precision,
@@ -607,12 +618,12 @@ int nf_Format_N(
     }
     else
     {
-        ret = nf_Format_F(buffer, value, precision, negativeSign, decimalSeparator);
+        ret = Format_F(buffer, value, precision, negativeSign, decimalSeparator);
         if (ret > 0)
         {
             int groupSize = *((CLR_INT32 *)numberGroupSizes->GetElement(0));
 
-            ret = nf_InsertGroupSeparators(buffer, ret, groupSize, numberGroupSeparator);
+            ret = InsertGroupSeparators(buffer, ret, groupSize, numberGroupSeparator);
         }
         else if (ret == 0)
         {
@@ -658,52 +669,14 @@ HRESULT Library_corlib_native_System_Number::
         NANOCLR_CHECK_HRESULT(value->PerformUnboxing(desc.m_handlerCls));
     }
 
-    // { //xxx
-    //     char temporaryStringBuffer[640];
-    //     int realStringSize = snprintf(
-    //         temporaryStringBuffer,
-    //         sizeof(temporaryStringBuffer),
-    //         "params:\r\n\tdt: %d\r\n\ti: %d\r\n\tf: [%s]\r\n\tnds: [%s]\r\n\tns: [%s]\r\n\tngs: [%s]\r\n\tdn: "
-    //         "[%d]\r\n\tdn0: [%d]\r\n",
-    //         value->DataType(),
-    //         isInteger,
-    //         (format) ? format : "NULL",
-    //         numberDecimalSeparator,
-    //         negativeSign,
-    //         numberGroupSeparator,
-    //         numberGroupSizes->m_numOfElements,
-    //         *((CLR_INT32 *)numberGroupSizes->GetElement(0)));
-    //     CLR_EE_DBG_EVENT_BROADCAST(
-    //         CLR_DBG_Commands_c_Monitor_Message,
-    //         realStringSize,
-    //         temporaryStringBuffer,
-    //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
-    // }
-
     char formatChar;
     int precision;
-    if (!nf_GetFormatSpec(format, isInteger, &formatChar, &precision))
+    if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
         ret = format;
     }
     else
     {
-
-        // { // xxx
-        //     char temporaryStringBuffer[640];
-        //     int realStringSize = snprintf(
-        //         temporaryStringBuffer,
-        //         sizeof(temporaryStringBuffer),
-        //         "formatChar: %c, precision: %d\r\n",
-        //         formatChar,
-        //         precision);
-        //     CLR_EE_DBG_EVENT_BROADCAST(
-        //         CLR_DBG_Commands_c_Monitor_Message,
-        //         realStringSize,
-        //         temporaryStringBuffer,
-        //         WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
-        // }
-
         char result[FORMAT_RESULT_BUFFER_SIZE];
 
         int resultLength;
@@ -711,19 +684,19 @@ HRESULT Library_corlib_native_System_Number::
         {
             case 'g':
             case 'G':
-                resultLength = nf_Format_G(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_G(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
             case 'x':
             case 'X':
-                resultLength = nf_Format_X(result, value, formatChar, precision);
+                resultLength = Format_X(result, value, formatChar, precision);
                 break;
             case 'f':
             case 'F':
-                resultLength = nf_Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
             case 'n':
             case 'N':
-                resultLength = nf_Format_N(
+                resultLength = Format_N(
                     result,
                     value,
                     precision,
@@ -734,7 +707,7 @@ HRESULT Library_corlib_native_System_Number::
                 break;
             case 'd':
             case 'D':
-                resultLength = nf_Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
             default:
                 NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -751,281 +724,5 @@ HRESULT Library_corlib_native_System_Number::
     }
 
     NANOCLR_SET_AND_LEAVE(stack.SetResult_String(ret));
-    NANOCLR_NOCLEANUP();
-}
-
-// compose sprintf format string according to requested parameters
-void nf_GetFormatString(
-    char *formatStr,
-    size_t formatStrLen,
-    char formatCh,
-    int precision,
-    bool isLong,
-    bool isFloat,
-    bool isSigned)
-{
-
-    if (formatCh == 'X' || formatCh == 'x')
-        snprintf(formatStr, formatStrLen, "%%0%d%sX", precision, isLong ? "ll" : "");
-    else
-        snprintf(
-            formatStr,
-            formatStrLen,
-            "%%%s%d%s%s",
-            isFloat ? "." : isSigned ? "-0" : "0",
-            precision,
-            isLong ? "ll" : isFloat ? "f" : "",
-            isFloat ? "" : isSigned ? "d" : "u");
-}
-
-// remove the prepended zeros and (if possible) the decimal point in a float that's formated as string. e.g.
-// "47.1100815000000" => "47.1100815" or "8.0000E-12" => "8E-12"
-void nf_RemovePrependedZeros(char *floatStr)
-{
-    int length = hal_strlen_s(floatStr);
-    // flag for finding the decimal point
-    bool pointFound = false;
-    // if not -1 we found the first zero after the decimal point
-    int firstZero = -1;
-    // if not -1 we found an "e" or "E" after the last zero of this is the string length
-    int nextNonZero = length;
-
-    // iterate thru all chars
-    for (int i = 0; i < length; i++)
-    {
-        // no decimal point found until now?
-        if (!pointFound)
-        {
-            // is it the decimal point?
-            if (floatStr[i] == '.')
-            {
-                pointFound = true;
-            }
-
-            // next char
-            continue;
-        }
-
-        // at this point we found the decimal point
-        // no zero found until now?
-        if (firstZero == -1)
-        {
-            // is it a zero?
-            if (floatStr[i] == '0')
-            {
-                // store the position of the first zero after the decimal point
-                firstZero = i;
-            }
-
-            // next char
-            continue;
-        }
-
-        // at this point we found the decimal point and the first zero
-        // an "e" or "E" char stops the sequence of zeros
-        if (floatStr[i] == 'e' || floatStr[i] == 'E')
-        {
-            // store the position of the e/E char
-            nextNonZero = i;
-            // done! we found the positions for the prepended zeros
-            break;
-        }
-
-        // at this point we found the decimal point and the first zero and the current char is not the e/E char
-        // is this not a zero?
-        if (floatStr[i] != '0')
-        {
-            // reset! we need to find another zero
-            firstZero = -1;
-        }
-    }
-
-    // something to remove?
-    if (pointFound && firstZero != -1 && nextNonZero != -1)
-    {
-        // is the char before the first zero the decimal point? => Remove the decimal point
-        int startIndex = floatStr[firstZero - 1] == '.' ? firstZero - 1 : firstZero;
-        // no e/E char after the last trailing zero?
-        if (nextNonZero == length)
-        {
-            // we can cut away the prepended zeros by terminating the string at first zero
-            floatStr[startIndex] = 0;
-        }
-        else
-        {
-            // otherwise we copy the last part over the prepended zeros and terminate the string
-            int lengthToCopy = length - nextNonZero;
-            memcpy(&floatStr[startIndex], &floatStr[nextNonZero], lengthToCopy);
-            floatStr[startIndex + lengthToCopy] = 0;
-        }
-    }
-}
-
-HRESULT Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4(CLR_RT_StackFrame &stack)
-{
-    NATIVE_PROFILE_CLR_CORE();
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock *pArgs = &(stack.Arg0());
-    CLR_RT_HeapBlock *value = pArgs;
-    CLR_DataType dt;
-    CLR_RT_TypeDescriptor desc;
-    char result[24];
-    // This is temporary buffer to create proper format string.
-    char formatStr[8];
-    char formatCh = (char)pArgs[1].NumericByRef().u1;
-    int precision = pArgs[2].NumericByRef().s4;
-    bool shouldRemovePrependedZeros = false;
-
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(*value));
-    NANOCLR_CHECK_HRESULT(value->PerformUnboxing(desc.m_handlerCls));
-
-    dt = value->DataType();
-
-    if (formatCh == 'G' && precision == 0)
-    {
-        precision = 1;
-        shouldRemovePrependedZeros = true;
-    }
-
-    switch (dt)
-    {
-        case DATATYPE_I1:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s1);
-            break;
-
-        case DATATYPE_U1:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u1);
-            break;
-
-        case DATATYPE_I2:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s2);
-            break;
-
-        case DATATYPE_U2:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u2);
-            break;
-
-        case DATATYPE_I4:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, true);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().s4);
-            break;
-
-        case DATATYPE_U4:
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, false, false);
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().u4);
-            break;
-
-        case DATATYPE_I8:
-        {
-#if defined(_WIN32)
-            hal_snprintf(result, ARRAYSIZE(result), "%I64d", (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
-#else
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, true, false, true);
-            snprintf(result, ARRAYSIZE(result), formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
-#endif // defined(_WIN32)
-        }
-        break;
-
-        case DATATYPE_U8:
-        {
-#if defined(_WIN32)
-            hal_snprintf(result, ARRAYSIZE(result), "%I64u", (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8);
-#else
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, true, false, false);
-            snprintf(result, ARRAYSIZE(result), formatStr, (CLR_UINT64_TEMP_CAST)value->NumericByRef().u8);
-#endif // defined(_WIN32)
-        }
-        break;
-
-        case DATATYPE_R4:
-        {
-            // All the formatCh have been converted to upper case in the managed layer
-            _ASSERTE(formatCh == 'G' || formatCh == 'N' || formatCh == 'F' || formatCh == 'D');
-
-            if (precision < 0 || precision > 99)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            }
-
-            // DATATYPE_R4 is float and uses a precision of 9, standard sprintf format is "%.9g"
-
-#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
-            hal_snprintf(result, ARRAYSIZE(result), "%.9g", value->NumericByRef().r4);
-#else
-
-#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-            // use default precision is none is specfied AND if format in not generic
-            precision = (formatCh == 'G' && precision == 1) ? 9 : precision;
-
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, true, false);
-
-            snprintf(result, ARRAYSIZE(result), formatStr, value->NumericByRef().r4);
-            if (shouldRemovePrependedZeros)
-            {
-                nf_RemovePrependedZeros(result);
-            }
-#else
-            CLR_INT32 f = value->NumericByRef().r4;
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-#endif // !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-#endif // defined(_WIN32)
-        }
-        break;
-
-        case DATATYPE_R8:
-        {
-            // All the formatCh have been converted to upper case in the managed layer
-            _ASSERTE(formatCh == 'G' || formatCh == 'N' || formatCh == 'F' || formatCh == 'D');
-
-            if (precision < 0 || precision > 99)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            }
-
-            // DATATYPE_R8 is double and uses a precision of 15, standard sprintf format is "%.15g"
-
-#if defined(_WIN32) || defined(WIN32) || defined(_WIN32_WCE)
-            hal_snprintf(result, ARRAYSIZE(result), "%.15g", (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
-#else
-#if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-            // use default precision is none is specfied AND format is not generic
-            precision = (formatCh == 'G' && precision == 1) ? 15 : precision;
-
-            // get format string
-            nf_GetFormatString(formatStr, ARRAYSIZE(formatStr), formatCh, precision, false, true, false);
-
-            snprintf(result, ARRAYSIZE(result), formatStr, (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8);
-            if (shouldRemovePrependedZeros)
-            {
-                nf_RemovePrependedZeros(result);
-            }
-#else
-            CLR_INT64 d = (CLR_DOUBLE_TEMP_CAST)value->NumericByRef().r8;
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-#endif // !defined(NANOCLR_EMULATED_FLOATINGPOINT)
-#endif // defined(_WIN32)
-        }
-        break;
-
-        default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    NANOCLR_SET_AND_LEAVE(stack.SetResult_String(result));
-
     NANOCLR_NOCLEANUP();
 }
