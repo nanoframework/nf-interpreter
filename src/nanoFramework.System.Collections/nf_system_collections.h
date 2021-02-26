@@ -9,6 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoCLR_Runtime__HeapBlock.h>
 
 struct Library_nf_system_collections_System_Collections_DictionaryEntry
 {

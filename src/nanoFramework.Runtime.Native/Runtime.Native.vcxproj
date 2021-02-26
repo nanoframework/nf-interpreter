@@ -19,77 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Cache.cpp" />
-    <ClCompile Include="Checks.cpp" />
-    <ClCompile Include="CLR_RT_DblLinkedList.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Array.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_ArrayList.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_BinaryBlob.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Delegate.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Delegate_List.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Finalizer.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Lock.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_LockRequest.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Node.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Queue.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Stack.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_String.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_Timer.cpp" />
-    <ClCompile Include="CLR_RT_HeapBlock_WaitForObject.cpp" />
-    <ClCompile Include="CLR_RT_HeapCluster.cpp" />
-    <ClCompile Include="CLR_RT_Interop.cpp" />
-    <ClCompile Include="CLR_RT_Memory.cpp" />
-    <ClCompile Include="CLR_RT_ObjectToEvent_Destination.cpp" />
-    <ClCompile Include="CLR_RT_ObjectToEvent_Source.cpp" />
-    <ClCompile Include="CLR_RT_RuntimeMemory.cpp" />
-    <ClCompile Include="CLR_RT_StackFrame.cpp" />
-    <ClCompile Include="CLR_RT_SystemAssembliesTable.cpp" />
-    <ClCompile Include="CLR_RT_UnicodeHelper.cpp" />
-    <ClCompile Include="Core.cpp" />
-    <ClCompile Include="Execution.cpp" />
-    <ClCompile Include="GarbageCollector.cpp" />
-    <ClCompile Include="GarbageCollector_Compaction.cpp" />
-    <ClCompile Include="GarbageCollector_ComputeReachabilityGraph.cpp" />
-    <ClCompile Include="Interpreter.cpp" />
-    <ClCompile Include="Random.cpp" />
-    <ClCompile Include="Streams.cpp" />
-    <ClCompile Include="StringTable.cpp" />
-    <ClCompile Include="Thread.cpp" />
-    <ClCompile Include="TypeSystemLookup.cpp" />
-    <ClCompile Include="Various.cpp" />
-    <None Include="..\Include\opcode.def" />
-    <None Include="StringTableData.cpp" />
-    <ClCompile Include="TypeSystem.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_GC.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Power.cpp" />
+    <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp" />
+    <ClCompile Include="nf_rt_native.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\nanoHAL_ReleaseInfo.h" />
-    <ClInclude Include="..\Include\netmf_errors.h" />
-    <ClInclude Include="..\Include\nanoCLR_Application.h" />
-    <ClInclude Include="..\Include\nanoCLR_Checks.h" />
-    <ClInclude Include="..\Include\nanoCLR_Debugging.h" />
-    <ClInclude Include="..\Include\nanoCLR_ErrorCodes.h" />
-    <ClInclude Include="..\Include\nanoCLR_Hardware.h" />
-    <ClInclude Include="..\Include\nanoCLR_Interop.h" />
-    <ClInclude Include="..\Include\nanoCLR_Messaging.h" />
-    <ClInclude Include="..\Include\nanoCLR_PlatformDef.h" />
-    <ClInclude Include="..\Include\nanoCLR_Profiling.h" />
-    <ClInclude Include="..\Include\nanoCLR_Runtime.h" />
-    <ClInclude Include="..\Include\nanoCLR_Runtime__HeapBlock.h" />
-    <ClInclude Include="..\Include\nanoCLR_Runtime__Serialization.h" />
-    <ClInclude Include="..\Include\nanoCLR_Types.h" />
-    <ClInclude Include="..\Include\nanoCLR_Win32.h" />
-    <ClInclude Include="..\Include\nanoHAL.h" />
-    <ClInclude Include="..\Include\nanoHAL_Types.h" />
-    <ClInclude Include="..\Include\nanoPAL.h" />
-    <ClInclude Include="..\Include\nanoSupport.h" />
-    <ClInclude Include="Core.h" />
-    <ClInclude Include="corhdr_private.h" />
+    <ClInclude Include="nf_rt_native.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{89CF8BDB-9C8A-4D18-BC3E-4312C5BD34B1}</ProjectGuid>
+    <ProjectGuid>{B829E436-91EA-46B3-949B-3273211C8F56}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Core</RootNamespace>
+    <RootNamespace>Diagnostics_stub</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -126,28 +69,28 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\nf.props" />
+    <Import Project="..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\nf.props" />
+    <Import Project="..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\nf.props" />
+    <Import Project="..\..\nf.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\..\nf.props" />
+    <Import Project="..\..\nf.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(BinDir)</OutDir>
+    <IntDir>$(IntDir)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(BinDir)</OutDir>
@@ -159,11 +102,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32";TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -171,10 +115,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include;..\CorLib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -183,12 +129,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32";TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\targets\win32\Include;..\Include;..\CLR\Include;..\CorLib;..\HAL\Include;..\PAL\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -199,11 +146,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Include;..\CorLib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

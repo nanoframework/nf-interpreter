@@ -16,11 +16,11 @@
     <Filter Include="Source Files\PAL">
       <UniqueIdentifier>{4a8f1020-5d97-4a6f-b9c1-1460ae41f71b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Generated">
-      <UniqueIdentifier>{917f0887-d239-439f-b246-e18c1f726304}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\nanoFramework.Runtime.Events">
       <UniqueIdentifier>{27c2cf5b-4789-40b1-b760-fc55c60546f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Generated">
+      <UniqueIdentifier>{917f0887-d239-439f-b246-e18c1f726304}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +37,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Include\nanoHAL_Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\target_platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
