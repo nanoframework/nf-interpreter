@@ -21,7 +21,7 @@
     <ClInclude Include="CorLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h">
+    <ClInclude Include="..\..\..\targets\win32\Include\target_os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,12 +63,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corlib_native_System_Collections_Queue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="corlib_native_System_Collections_Stack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="corlib_native_System_Diagnostics_Debug.cpp">
