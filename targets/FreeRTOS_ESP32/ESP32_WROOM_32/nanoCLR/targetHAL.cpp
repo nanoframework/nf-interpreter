@@ -62,7 +62,7 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION ::InitializeList();
 
-    // Fixup System & Block storage parameters based on Flash chip and parttion layout
+    // Fixup System & Block storage parameters based on Flash chip and partition layout
     FixUpHalSystemConfig();
     FixUpBlockRegionInfo();
 
