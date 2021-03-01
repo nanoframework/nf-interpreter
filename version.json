@@ -4,14 +4,11 @@
   "assemblyVersion": {
     "precision": "revision"
   },
+  "versionHeightOffset": 160,
   "semVer1NumericIdentifierPadding": 3,
   "nuGetPackageVersion": {
     "semVer": 2.0
   },
-  "publicReleaseRefSpec": [
-    "^refs/heads/master$",
-    "^refs/heads/v\\d+(?:\\.\\d+)?$"
-  ],
   "cloudBuild": {
     "setAllVariables": true,
     "buildNumber": {
