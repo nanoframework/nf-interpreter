@@ -9,6 +9,7 @@
   "nuGetPackageVersion": {
     "semVer": 2.0
   },
+  "publicReleaseRefSpec": [ "refs/head/*" ],
   "cloudBuild": {
     "setAllVariables": true,
     "buildNumber": {
