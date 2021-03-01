@@ -790,18 +790,18 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                             if (frac_chars > fs.precision)
                             {
                                 int isPropagating = 0;
-                                for(int i=0; i < cbuf_len; i++)
+                                for (int i = 0; i < cbuf_len; i++)
                                 {
-                                    int inLosingPart = (i <= (frac_chars - fs.precision -1 ));
+                                    int inLosingPart = (i <= (frac_chars - fs.precision - 1));
 
-                                    if (cbuf[i] >='0' && cbuf[i] <='9')
-                                    { 
+                                    if (cbuf[i] >= '0' && cbuf[i] <= '9')
+                                    {
                                         if (isPropagating)
                                         {
-                                            cbuf[i] +=1;
+                                            cbuf[i] += 1;
                                             if (cbuf[i] > '9')
                                             {
-                                                cbuf[i]='0';
+                                                cbuf[i] = '0';
                                             }
                                             else
                                             {
@@ -811,7 +811,7 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                                         if (inLosingPart && cbuf[i] > '5')
                                         {
                                             isPropagating = 1;
-                                            cbuf[i]='0';
+                                            cbuf[i] = '0';
                                         }
                                     }
                                     if (!isPropagating && !inLosingPart)
@@ -819,15 +819,14 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                                 }
                                 if (isPropagating)
                                 {
-                                    cbuf[cbuf_len]='1';
+                                    cbuf[cbuf_len] = '1';
                                     cbuf_len++;
-                                    cbuf[cbuf_len]=0;
+                                    cbuf[cbuf_len] = 0;
                                 }
 
                                 cbuf += (frac_chars - fs.precision);
                                 cbuf_len -= (frac_chars - fs.precision);
                                 frac_chars = fs.precision;
-
                             }
                         }
                     }
