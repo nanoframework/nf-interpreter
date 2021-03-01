@@ -352,6 +352,7 @@ jobs:
     inputs:
       solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
+      msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
   - task: NuGetCommand@2

@@ -59,7 +59,4 @@ extern portMUX_TYPE globalLockMutex;
 #endif // EVENTS_HEART_BEAT
 #endif
 
-extern int HeapBegin;
-extern int HeapEnd;
-
 #endif //_TARGET_HAL_H_
