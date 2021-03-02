@@ -618,15 +618,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4,
     NULL,
     NULL,
     NULL,
@@ -1339,15 +1331,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__CHAR__I4,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_corlib_native_System_Number::FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4,
     NULL,
     NULL,
     NULL,
@@ -1485,18 +1469,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xC8B423C5,
+    0x859E7E8A,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x82D7696B,
+    0xD4D76535,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 4 }
+    { 100, 5, 0, 5 }
 };
 
 // clang-format on
