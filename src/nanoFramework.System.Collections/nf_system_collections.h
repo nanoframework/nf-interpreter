@@ -9,6 +9,7 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoCLR_Runtime__HeapBlock.h>
 
 struct Library_nf_system_collections_System_Collections_DictionaryEntry
 {
@@ -16,7 +17,6 @@ struct Library_nf_system_collections_System_Collections_DictionaryEntry
     static const int FIELD__Value = 2;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__Entry
@@ -26,7 +26,6 @@ struct Library_nf_system_collections_System_Collections_Hashtable__Entry
     static const int FIELD__next = 3;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable
@@ -39,7 +38,6 @@ struct Library_nf_system_collections_System_Collections_Hashtable
     static const int FIELD___growthFactor = 6;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__HashtableEnumerator
@@ -50,7 +48,6 @@ struct Library_nf_system_collections_System_Collections_Hashtable__HashtableEnum
     static const int FIELD__returnType = 4;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__KeyCollection
@@ -58,7 +55,6 @@ struct Library_nf_system_collections_System_Collections_Hashtable__KeyCollection
     static const int FIELD__ht = 1;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Hashtable__ValueCollection
@@ -66,7 +62,6 @@ struct Library_nf_system_collections_System_Collections_Hashtable__ValueCollecti
     static const int FIELD__ht = 1;
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Queue
@@ -83,7 +78,6 @@ struct Library_nf_system_collections_System_Collections_Queue
     NANOCLR_NATIVE_DECLARE(Peek___OBJECT);
 
     //--//
-
 };
 
 struct Library_nf_system_collections_System_Collections_Stack
@@ -97,9 +91,8 @@ struct Library_nf_system_collections_System_Collections_Stack
     NANOCLR_NATIVE_DECLARE(Push___VOID__OBJECT);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Collections;
 
-#endif  //_NF_SYSTEM_COLLECTIONS_H_
+#endif //_NF_SYSTEM_COLLECTIONS_H_
