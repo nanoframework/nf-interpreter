@@ -24,6 +24,7 @@
     <ClInclude Include="corlib_native.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c" />
     <ClCompile Include="corlib_native.cpp" />
     <ClCompile Include="corlib_native_System_AppDomain.cpp" />
     <ClCompile Include="corlib_native_System_Array.cpp" />
@@ -152,7 +153,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,7 +180,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\targets\os\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

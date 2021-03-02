@@ -774,9 +774,51 @@ struct Library_corlib_native_System_MulticastDelegate
 struct Library_corlib_native_System_Number
 {
 
-    NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__CHAR__I4);
+    NANOCLR_NATIVE_DECLARE(FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4);
 
     //--//
+
+    static bool ParseFormat(char *format, char *formatChar, int *precision);
+    static bool ValidateFormatChar(char *formatChar, bool isInteger);
+    static bool GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision);
+    static int DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value);
+    static bool IsSignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsUnsignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsIntegerDataType(NanoCLRDataType dataType);
+    static int GetStrLen(char *buffer);
+    static int GetDotIndex(char *buffer, int bufferContentLength);
+    static void RoundUpNumStr(char *buffer, int *bufferContentLength);
+    static int ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign);
+    static int ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *decimalSeparator);
+    static int InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSize, char *groupSep);
+    static const char *GetPrintfLengthModifier(NanoCLRDataType dataType);
+    static int Format_G(
+        char *buffer,
+        CLR_RT_HeapBlock *value,
+        int precision,
+        char *negativeSign,
+        char *decimalSeparator);
+    static int Format_D(
+        char *buffer,
+        CLR_RT_HeapBlock *value,
+        int precision,
+        char *negativeSign,
+        char *decimalSeparator);
+    static int Format_X(char *buffer, CLR_RT_HeapBlock *value, char formatChar, int precision);
+    static int Format_F(
+        char *buffer,
+        CLR_RT_HeapBlock *value,
+        int precision,
+        char *negativeSign,
+        char *decimalSeparator);
+    static int Format_N(
+        char *buffer,
+        CLR_RT_HeapBlock *value,
+        int precision,
+        char *negativeSign,
+        char *decimalSeparator,
+        char *numberGroupSeparator,
+        CLR_RT_HeapBlock_Array *numberGroupSizes);
 };
 
 struct Library_corlib_native_System_Random
