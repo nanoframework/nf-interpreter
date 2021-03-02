@@ -6,5 +6,4 @@
 #ifndef _TARGET_PLATFORM_H_
 #define _TARGET_PLATFORM_H_
 
-
 #endif /* _TARGET_PLATFORM_H_ */

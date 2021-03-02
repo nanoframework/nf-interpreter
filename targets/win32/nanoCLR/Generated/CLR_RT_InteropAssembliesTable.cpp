@@ -16,7 +16,7 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Resour
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;
 
-const CLR_RT_NativeAssemblyData* g_CLR_InteropAssembliesNativeData[] = {
+const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_mscorlib,
     &g_CLR_AssemblyNative_System_Math,
     &g_CLR_AssemblyNative_nanoFramework_System_Collections,
