@@ -22,7 +22,7 @@
   </metadata>
   <files>
     <file src="..\..\build\bin\Release\nanoFramework.nanoCLR.exe" target="tools" />
-    <file src="targets\win32\msvc_redist\vcruntime140.dll" target="tools" />
+    <file src="msvc_redist\vcruntime140.dll" target="tools" />
 
     <file src="..\..\assets\nf-logo.png" target="images" />
     <file src="..\..\LICENSE.md" target="" />
