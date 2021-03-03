@@ -7,11 +7,11 @@
 #define _TARGET_HAL_TIME_H_ 1
 
 #define HAL_Time_CurrentSysTicks HAL_Time_CurrentSysTicks
-unsigned int HAL_Time_CurrentSysTicks();
+uint64_t HAL_Time_CurrentSysTicks();
 
 ///// <summary>
 ///// Converts 64bit time value to SystemTime structure. 64bit time is assumed as an offset from 1/1/1601:00:00:00.000
-///in 100ns.
+/// in 100ns.
 ///// </summary>
 ///// <returns>True if conversion is successful.</returns>
 // bool       Time_ToSystemTime(TIME time, SYSTEMTIME* systemTime);
