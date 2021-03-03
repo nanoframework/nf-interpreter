@@ -6,14 +6,6 @@
 
 #include "stdafx.h"
 
-UINT64 FileTimeToUint64(const FILETIME ft)
-{
-    ULARGE_INTEGER x;
-    x.LowPart = ft.dwLowDateTime;
-    x.HighPart = ft.dwHighDateTime;
-    return x.QuadPart;
-}
-
 void HAL_Time_Sleep_MicroSeconds(unsigned int uSec)
 {
     // UNDONE: FIXME: return EmulatorNative::GetITimeDriver()->Sleep_MicroSeconds( uSec );
@@ -24,27 +16,21 @@ void HAL_Time_Sleep_MicroSeconds_InterruptEnabled(unsigned int uSec)
     // UNDONE: FIXME: return EmulatorNative::GetITimeDriver()->Sleep_MicroSecondsInterruptsEnabled( uSec );
 }
 
-unsigned int HAL_Time_CurrentSysTicks()
+uint64_t HAL_Time_CurrentSysTicks()
 {
     FILETIME ft = {0};
-    GetSystemTimeAsFileTime(&ft);
-    auto fileTime = FileTimeToUint64(ft);
-    auto sysTicks = fileTime / CPU_TicksPerSecond();
-
-    return (uint32_t)sysTicks;
+    GetSystemTimePreciseAsFileTime(&ft);
+    SYSTEMTIME lpSystemTime;
+    bool t = FileTimeToSystemTime(&ft, &lpSystemTime);
+    return HAL_Time_ConvertFromSystemTime(&lpSystemTime);
 }
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks)
+uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
 {
-    _ASSERTE(sysTicks <= 0x7FFFFFFF);
+    _ASSERTE(sysTicks < 0x8000000000000000);
 
-    return CPU_MicrosecondsToTicks(sysTicks * CPU_TicksPerSecond());
-}
-
-uint64_t HAL_Time_CurrentTime()
-{
-    return HAL_Time_SysTicksToTime(HAL_Time_CurrentSysTicks());
+    return sysTicks;
 }
 
 uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
@@ -68,14 +54,78 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
     }
 }
 
-void HAL_Time_GetDriftParameters(signed int *a, signed int *b, signed __int64 *c)
+bool HAL_Time_TimeSpanToStringEx(const signed __int64 &ticks, char *&buf, size_t &len)
 {
-    *a = 1;
-    *b = 1;
-    *c = 0;
+    uint64_t ticksAbs;
+    uint64_t rest;
+
+    if (ticks < 0)
+    {
+        ticksAbs = -ticks;
+
+        CLR_SafeSprintf(buf, len, "-");
+    }
+    else
+    {
+        ticksAbs = ticks;
+    }
+
+    rest = ticksAbs % (1000 * TIME_CONVERSION__TICKUNITS);
+    ticksAbs = ticksAbs / (1000 * TIME_CONVERSION__TICKUNITS); // Convert to seconds.
+
+    if (ticksAbs > TIME_CONVERSION__ONEDAY) // More than one day.
+    {
+        CLR_SafeSprintf(buf, len, "%d.", (int32_t)(ticksAbs / TIME_CONVERSION__ONEDAY));
+        ticksAbs %= TIME_CONVERSION__ONEDAY;
+    }
+
+    CLR_SafeSprintf(buf, len, "%02d:", (int32_t)(ticksAbs / TIME_CONVERSION__ONEHOUR));
+    ticksAbs %= TIME_CONVERSION__ONEHOUR;
+    CLR_SafeSprintf(buf, len, "%02d:", (int32_t)(ticksAbs / TIME_CONVERSION__ONEMINUTE));
+    ticksAbs %= TIME_CONVERSION__ONEMINUTE;
+    CLR_SafeSprintf(buf, len, "%02d", (int32_t)(ticksAbs / TIME_CONVERSION__ONESECOND));
+    ticksAbs %= TIME_CONVERSION__ONESECOND;
+
+    ticksAbs = (uint32_t)rest;
+    if (ticksAbs)
+    {
+        CLR_SafeSprintf(buf, len, ".%07d", (uint32_t)ticksAbs);
+    }
+
+    return len != 0;
 }
 
-unsigned int CPU_SystemClock()
+bool DateTimeToString(const uint64_t &time, char *&buf, size_t &len)
 {
-    return 0; // UNDONE: FIXME: EmulatorNative::GetITimeDriver()->SystemClock;
+    SYSTEMTIME st;
+
+    HAL_Time_ToSystemTime(time, &st);
+
+    return CLR_SafeSprintf(
+        buf,
+        len,
+        "%4d/%02d/%02d %02d:%02d:%02d.%03d",
+        st.wYear,
+        st.wMonth,
+        st.wDay,
+        st.wHour,
+        st.wMinute,
+        st.wSecond,
+        st.wMilliseconds);
+}
+
+char *DateTimeToString(const uint64_t &time)
+{
+    static char rgBuffer[128];
+    char *szBuffer = rgBuffer;
+    size_t iBuffer = ARRAYSIZE(rgBuffer);
+
+    DateTimeToString(time, szBuffer, iBuffer);
+
+    return rgBuffer;
+}
+
+const char *HAL_Time_CurrentDateTimeToString()
+{
+    return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }

@@ -6,7 +6,7 @@
 #include <nanoHAL.h>
 
 // Converts CMSIS sysTicks to .NET ticks (100 nanoseconds)
-uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks) 
+uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
 {
     // convert to microseconds from CMSIS SysTicks
     // this is a rewrite of ChibiOS TIME_I2US(n) macro because it will overflow if doing the math using uint32_t
@@ -15,9 +15,10 @@ uint64_t HAL_Time_SysTicksToTime(unsigned int sysTicks)
 }
 
 // because HAL_Time_SysTicksToTime needs to be called from C we need a proxy to allow it to be called from 'C' code
-extern "C" {
-    
-    uint64_t HAL_Time_SysTicksToTime_C(unsigned int sysTicks)
+extern "C"
+{
+
+    uint64_t HAL_Time_SysTicksToTime_C(uint64_t sysTicks)
     {
         return HAL_Time_SysTicksToTime(sysTicks);
     }
@@ -25,30 +26,29 @@ extern "C" {
 
 // implementation required for STM Cube package
 // Provides a tick value in millisecond.
-extern "C" {
-
-uint32_t HAL_GetTick(void)
+extern "C"
 {
-  return TIME_I2MS(chVTGetSystemTimeX());
-}
 
+    uint32_t HAL_GetTick(void)
+    {
+        return TIME_I2MS(chVTGetSystemTimeX());
+    }
 }
 
 // implementation required for STM Cube package
 // This function provides minimum delay (in milliseconds).
-extern "C" {
-
-void HAL_Delay(uint32_t delay)
+extern "C"
 {
-    systime_t start = chVTGetSystemTime();
-    systime_t end = start + TIME_MS2I(delay);
-    
-    do
-    {
-        // do nothing until the timeout expires
-        chThdYield();
-    }
-    while(chVTIsSystemTimeWithin(start, end));
-}
 
+    void HAL_Delay(uint32_t delay)
+    {
+        systime_t start = chVTGetSystemTime();
+        systime_t end = start + TIME_MS2I(delay);
+
+        do
+        {
+            // do nothing until the timeout expires
+            chThdYield();
+        } while (chVTIsSystemTimeWithin(start, end));
+    }
 }
