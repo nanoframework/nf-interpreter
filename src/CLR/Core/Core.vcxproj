@@ -53,7 +53,6 @@
     <ClCompile Include="GarbageCollector_Compaction.cpp" />
     <ClCompile Include="GarbageCollector_ComputeReachabilityGraph.cpp" />
     <ClCompile Include="Interpreter.cpp" />
-    <ClCompile Include="Random.cpp" />
     <ClCompile Include="Streams.cpp" />
     <ClCompile Include="StringTable.cpp" />
     <ClCompile Include="Thread.cpp" />
