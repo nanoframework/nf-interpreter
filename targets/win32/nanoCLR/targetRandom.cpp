@@ -11,7 +11,7 @@ void CLR_RT_Random::Initialize()
 {
 }
 
-void CLR_RT_Random::Initialize( int seed )
+void CLR_RT_Random::Initialize(int seed)
 {
     (void)seed;
 }
@@ -30,11 +30,11 @@ double CLR_RT_Random::NextDouble()
     return ((double)randomDevice()) / ((double)0xFFFFFFFF);
 }
 
-void CLR_RT_Random::NextBytes(unsigned char* buffer, unsigned int count)
+void CLR_RT_Random::NextBytes(unsigned char *buffer, unsigned int count)
 {
     std::random_device randomDevice;
 
-    for(unsigned int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < count; i++)
     {
         buffer[i] = (unsigned char)randomDevice();
     }
