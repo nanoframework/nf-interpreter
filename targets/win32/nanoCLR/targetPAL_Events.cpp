@@ -3,46 +3,45 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "stdafx.h"
+#include <Win32TimerQueue.h>
 
-HAL_COMPLETION g_Events_BoolTimerCompletion;
+static std::unique_ptr<Microsoft::Win32::Timer> boolEventsTimer;
+static bool *saveTimerCompleteFlag = 0;
 
-static void local_Events_SetBoolTimer_Callback(void *arg)
+void local_Events_SetBoolTimer_Callback()
 {
     NATIVE_PROFILE_PAL_EVENTS();
-    bool *TimerCompleteFlag = (bool *)arg;
 
-    *TimerCompleteFlag = TRUE;
+    *saveTimerCompleteFlag = true;
+}
+
+bool Events_Initialize_Platform()
+{
+    boolEventsTimer = NULL;
+
+    return true;
 }
 
 void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 {
     NATIVE_PROFILE_PAL_EVENTS();
+
     // we assume only 1 can be active, abort previous just in case
-    g_Events_BoolTimerCompletion.Abort();
+    if (boolEventsTimer != NULL)
+    {
+        boolEventsTimer.release();
+    }
 
     if (timerCompleteFlag)
     {
-        g_Events_BoolTimerCompletion.InitializeForISR(local_Events_SetBoolTimer_Callback, timerCompleteFlag);
-        g_Events_BoolTimerCompletion.EnqueueDelta(millisecondsFromNow * 1000);
+        // As only one timer running at a time we will just save it
+        saveTimerCompleteFlag = timerCompleteFlag;
+
+        boolEventsTimer =
+            std::make_unique<Microsoft::Win32::Timer>(millisecondsFromNow, local_Events_SetBoolTimer_Callback);
     }
-}
-
-void HAL_COMPLETION::EnqueueDelta64(UINT64 uSecFromNow)
-{
-    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-
-    // grab time first to be closest to now as possible from when this function was called
-    uint64_t now = HAL_Time_CurrentSysTicks();
-    uint64_t eventTimeTicks = CPU_MicrosecondsToTicks(uSecFromNow);
-
-    EnqueueTicks(now * CPU_TicksPerSecond() + eventTimeTicks);
-}
-
-void HAL_COMPLETION::EnqueueDelta(UINT32 uSecFromNow)
-{
-    NATIVE_PROFILE_PAL_ASYNC_PROC_CALL();
-    EnqueueDelta64((UINT64)uSecFromNow);
 }
 
 // mutex, condition variable and flags for CLR's global events state

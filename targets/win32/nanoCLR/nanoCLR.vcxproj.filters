@@ -53,9 +53,6 @@
     <ClCompile Include="Various.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Events.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WatchDog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="targetRandom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="targetPAL_Events.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
