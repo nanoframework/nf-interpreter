@@ -179,7 +179,7 @@
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
-    <ClCompile Include="Events.cpp" />
+    <ClCompile Include="targetPAL_Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
     <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
     <ClCompile Include="Memory.cpp" />
