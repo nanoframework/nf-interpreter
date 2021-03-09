@@ -340,6 +340,9 @@ jobs:
   pool:
     vmImage: 'windows-2019'
 
+  variables:
+    TargetPublishName: WIN32_nanoCLR
+
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
@@ -371,7 +374,17 @@ jobs:
         **\nanoFramework.nanoCLR.Win32*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-
+  
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Collecting EXE to deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+      
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
@@ -427,6 +440,8 @@ jobs:
       allowPackageConflicts: true
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-nf-interpreter'
+
+  - template: azure-pipelines-templates/publish-bintray.yml
 
 #######################
 # generate change log
