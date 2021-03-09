@@ -1,0 +1,18 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# To publish builds of targets in branches other than develop
+# set 'ForceUpload' variable to true on target matrix
+
+steps:
+  - task: cURLUploader@2
+    inputs:
+      files: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe'
+      authType: 'userAndPass'
+      username: 'nfbot'
+      password: '$(BinTrayKey)'
+      url: 'https://api.bintray.com/'
+      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(TargetPublishName)/$(PACKAGE_VERSION)/nanoFramework.nanoCLR.exe;publish=1'
+    # execute on 'ForceUpload' parameter
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    displayName: Upload WIN32 nanoCLR to Bintray

@@ -441,16 +441,7 @@ jobs:
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-nf-interpreter'
 
-  - task: UniversalPackages@0
-    displayName: Publish WIN32 nanoCLR
-    inputs:
-      command: publish
-      publishDirectory: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      vstsFeedPublish: 'feed/nanoframework-images-dev'
-      vstsFeedPackagePublish: '$(TargetPublishName)'
-      versionOption: custom
-      versionPublish: '$(NBGV_AssemblyVersion)'
-      packagePublishDescription: 'WIN32 nanoCLR (preview)'
+  - template: azure-pipelines-templates/publish-win32-nanoclr.yml
 
 #######################
 # generate change log
