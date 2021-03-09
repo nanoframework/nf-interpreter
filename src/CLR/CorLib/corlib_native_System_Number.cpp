@@ -511,7 +511,7 @@ int Library_corlib_native_System_Number::Format_D(
         // printf and ToString differs on negative numbers:
         // printf("%05d", -123) returns "-0123"
         // -123.ToString("D5") returns "-00123"
-        if (precision != 0 && ret > 1 && buffer[0] == '-')
+        if (precision != 0 && ret > 1 && precision >= ret && buffer[0] == '-')
         {
             // our buffer defined bigger than the max number string, no worries
             memmove(&buffer[2], &buffer[1], ret);
