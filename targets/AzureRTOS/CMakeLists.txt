@@ -3,6 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
 include(binutils.arm-none-eabi)
 include(binutils.AzureRTOS)
 include(nf_utils)
@@ -18,72 +19,53 @@ if(RTOS_SOURCE_FOLDER)
     endif()
 endif()
 
+# AzureRTOS version
+set(RTOS_VERSION_EMPTY TRUE)
+
+# check if build was requested with a specifc AzureRTOS version
+if(DEFINED RTOS_VERSION)
+    if(NOT "${RTOS_VERSION}" STREQUAL "")
+        set(RTOS_VERSION_EMPTY FALSE)
+    endif()
+endif()
+
+# check if build was requested with a specifc AzureRTOS version
+if(RTOS_VERSION_EMPTY)
+    # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
+    set(RTOS_VERSION "v6.1.5_rel")
+endif()
+
 if(NO_RTOS_SOURCE_FOLDER)
     # no AzureRTOS source specified, download it from it's repo
-    
-    # check for Git (needed here for advanced warning to user if it's not installed)
-    find_package(Git)
-
-    #  check if Git was found, if not report to user and abort
-    if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find Git, make sure you have it installed.")
-    endif()
-
-    # AzureRTOS version
-    set(RTOS_VERSION_EMPTY TRUE)
-
-    # check if build was requested with a specifc AzureRTOS version
-    if(DEFINED RTOS_VERSION)
-        if(NOT "${RTOS_VERSION}" STREQUAL "")
-            set(RTOS_VERSION_EMPTY FALSE)
-        endif()
-    endif()
-
-    # check if build was requested with a specifc AzureRTOS version
-    if(RTOS_VERSION_EMPTY)
-        # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(RTOS_VERSION "v6.1.5_rel")
-    endif()
 
     message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} from GitHub repo")
 
-    # need to setup a separate CMake project to download the code from the GitHub repository
-    # otherwise it won't be available before the actual build step
-    configure_file(${PROJECT_SOURCE_DIR}/CMake/AzureRTOS.CMakeLists.cmake.in
-                    ${CMAKE_BINARY_DIR}/AzureRTOS_Download/CMakeLists.txt)
-
-    # setup CMake project for AzureRTOS download
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/AzureRTOS_Download)
-
-    # run build on AzureRTOS download CMake project to perform the download
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-                    RESULT_VARIABLE result
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/AzureRTOS_Download)
+    FetchContent_Declare(
+        azure_rtos
+        GIT_REPOSITORY https://github.com/azure-rtos/threadx.git
+        GIT_TAG ${RTOS_VERSION}
+    )
 
 else()
     # AzureRTOS source was specified
 
     # sanity check is source path exists
     if(EXISTS "${RTOS_SOURCE_FOLDER}/")
-        message(STATUS "RTOS is: AzureRTOS (source from: ${RTOS_SOURCE_FOLDER})")
+        message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
 
-        # check if we already have the sources, no need to copy again
-        NF_DIRECTORY_EXISTS_NOT_EMPTY(${CMAKE_BINARY_DIR}/AzureRTOS_Source/ SOURCE_EXISTS)
+        FetchContent_Declare(
+            azure_rtos
+            GIT_REPOSITORY $(RTOS_SOURCE_FOLDER)
+            GIT_TAG ${RTOS_VERSION}
+        )
 
-        if(NOT ${SOURCE_EXISTS})
-            file(COPY "${RTOS_SOURCE_FOLDER}/" DESTINATION "${CMAKE_BINARY_DIR}/AzureRTOS_Source/")
-        else()
-            message(STATUS "Using local cache of AzureRTOS source from ${RTOS_SOURCE_FOLDER}")
-        endif()
-
-        set(AZURERTOS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/AzureRTOS_Source/common/inc) #TODO is this correct?
     else()
         message(FATAL_ERROR "Couldn't find AzureRTOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
 endif()
+
+FetchContent_Populate(azure_rtos)
 
 # AzureRTOS common directories
 add_subdirectory(_common)
