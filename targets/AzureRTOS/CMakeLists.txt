@@ -42,7 +42,7 @@ if(NO_RTOS_SOURCE_FOLDER)
     # check if build was requested with a specifc AzureRTOS version
     if(RTOS_VERSION_EMPTY)
         # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(RTOS_VERSION "v6.1.3_rel")
+        set(RTOS_VERSION "v6.1.5_rel")
     endif()
 
     message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} from GitHub repo")
