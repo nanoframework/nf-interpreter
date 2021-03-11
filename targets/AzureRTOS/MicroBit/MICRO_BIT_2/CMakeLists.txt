@@ -90,5 +90,5 @@ set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_F
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__crt_heap_size__=0x2000")
 
 # generate output files
-nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+# nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+# nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
