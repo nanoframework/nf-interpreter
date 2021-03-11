@@ -147,7 +147,7 @@ bool CPU_GPIO_Initialize()
 
 bool CPU_GPIO_Uninitialize()
 {
-    NANOCLR_FOREACH_NODE(gpio_input_state,pGpio,gpioInputList)
+    NANOCLR_FOREACH_NODE(gpio_input_state, pGpio, gpioInputList)
     {
         UnlinkInputState(pGpio);
     }
