@@ -124,6 +124,23 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
     # add TARGET board directory
     add_subdirectory(Nordic/${TARGET_BOARD})
 
+# try to find MicroBit board in the targets folder
+elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
+
+    # board found
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
+
+    # Define base path for the class libraries
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/_nanoCLR)
+
+    # set target base location
+    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
+
+    add_subdirectory(MicroBit)
+
+    # add TARGET board directory
+    add_subdirectory(MicroBit/${TARGET_BOARD})
+
 # try to find Raspberry Pi Pico board in the targets folder
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
 
