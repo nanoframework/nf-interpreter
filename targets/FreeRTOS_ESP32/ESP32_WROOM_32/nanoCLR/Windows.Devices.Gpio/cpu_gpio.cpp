@@ -147,18 +147,14 @@ bool CPU_GPIO_Initialize()
 
 bool CPU_GPIO_Uninitialize()
 {
-    gpio_input_state *pGpio;
-
-    pGpio = gpioInputList.FirstNode();
-
-    // Clean up input state list
-    while (pGpio->Next() != NULL)
+    NANOCLR_FOREACH_NODE(gpio_input_state, pGpio, gpioInputList)
     {
         UnlinkInputState(pGpio);
-        pGpio = pGpio->Next();
     }
+    NANOCLR_FOREACH_NODE_END();
 
     gpio_uninstall_isr_service();
+
     return true;
 }
 
