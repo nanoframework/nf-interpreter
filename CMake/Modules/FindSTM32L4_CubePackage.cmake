@@ -9,6 +9,7 @@ FetchContent_GetProperties(stm32l4_cubepackage)
 # set include directories
 list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32L4xx/Include)
 list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/STM32L4xx_HAL_Driver/Inc)
+list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/CMSIS/Include)
 
 # HAL source files
 set(STM32L4_CubePackage_SRCS
@@ -61,8 +62,8 @@ endforeach()
 if(${TARGET_BOARD} STREQUAL "ST_B_L475E_IOT01A")
 
     # ST_B_L475E_IOT01A
-    list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/B-L475E-IOT01)
-    list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/hts221)
+    list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/B-L475E-IOT01)
+    list(APPEND STM32L4_CubePackage_INCLUDE_DIRS ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/hts221)
 
     set(BSP_CubePackage_SRCS
 
@@ -89,25 +90,29 @@ if(${TARGET_BOARD} STREQUAL "ST_B_L475E_IOT01A")
             PATHS 
 
             # BSP
-            ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/B-L475E-IOT01
+            ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/B-L475E-IOT01
 
             # Sensors
-            ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/hts221
-            ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/lis3mdl
-            ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/lsm6dsl
-            ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/lps22hb
+            ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/hts221
+            ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/lis3mdl
+            ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/lsm6dsl
+            ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/lps22hb
 
             CMAKE_FIND_ROOT_PATH_BOTH
         )
-        # message("${SRC_FILE} >> ${BSP_CubePackage_SRC_FILE}") # debug helper
+        
+        if (BUILD_VERBOSE)
+            message("${SRC_FILE} >> ${BSP_CubePackage_SRC_FILE}")
+        endif()
+
         list(APPEND STM32L4_CubePackage_SOURCES ${BSP_CubePackage_SRC_FILE})
     endforeach()
 
     # unset these warnings as errors because these come from a 3rd party library 
-    SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
-    SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
-    SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/hts221/hts221.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
-    SET_SOURCE_FILES_PROPERTIES( ${CMAKE_BINARY_DIR}/STM32L4_CubePackage_Source/Drivers/BSP/Components/lps22hb/lps22hb.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+    SET_SOURCE_FILES_PROPERTIES( ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+    SET_SOURCE_FILES_PROPERTIES( ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+    SET_SOURCE_FILES_PROPERTIES( ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/hts221/hts221.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
+    SET_SOURCE_FILES_PROPERTIES( ${stm32l4_cubepackage_SOURCE_DIR}/Drivers/BSP/Components/lps22hb/lps22hb.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
  
 endif()
 
