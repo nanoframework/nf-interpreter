@@ -9,3 +9,5 @@
 #ifdef I_AM_NANOCLR
    #include "nanoCLR/tx_user_nanoCLR.h"
 #endif
+
+#define TX_DISABLE_INLINE

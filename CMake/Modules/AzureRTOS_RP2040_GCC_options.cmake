@@ -6,7 +6,7 @@
 set(CMAKE_SYSTEM_PROCESSOR cortex-m0)
 
 # need to specify this for assembler
-set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0plus -mtune=cortex-m0plus -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
+set(CMAKE_ASM_FLAGS " -mcpu=cortex-m0plus -mtune=cortex-m0plus -mthumb " CACHE INTERNAL "asm compiler flags")
 
 # need to specify linker flags here
 set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -mthumb -mcpu=cortex-m0plus -nostartfiles " CACHE INTERNAL "executable linker flags")
