@@ -112,10 +112,6 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
 
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        add_dependencies(${TARGET}.elf ${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
-    endif()
-
     add_dependencies(${TARGET}.elf azrtos::threadx)
 
     # specific to nanoCRL

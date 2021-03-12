@@ -3,9 +3,12 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
 include(binutils.common)
 include(binutils.AzureRTOS)
 include(AZURERTOS_${TARGET_SERIES}_GCC_options)
+
+FetchContent_GetProperties(azure_rtos)
 
 ENABLE_LANGUAGE(ASM)
 
@@ -13,7 +16,7 @@ ENABLE_LANGUAGE(ASM)
 set(THREADX_ARCH "cortex_m4")
 set(THREADX_TOOLCHAIN "gnu")
 set(TX_USER_FILE ${TARGET_BASE_LOCATION}/tx_user.h)
-add_subdirectory(${CMAKE_BINARY_DIR}/AzureRTOS_Source AzureSource)
+add_subdirectory(${azure_rtos_SOURCE_DIR} AzureSource)
 
 # add packages
 NF_ADD_COMMON_PACKAGES()

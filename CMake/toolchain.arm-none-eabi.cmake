@@ -13,9 +13,6 @@ set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/arm-none-eabi/lib)
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
 
-# name of the CPU CMake is building for
-set(CMAKE_SYSTEM_PROCESSOR ARM)
-
 # macro to setup compilers
 macro(SET_COMPILER_VAR var name)
    find_program(CMAKE_${var} arm-none-eabi-${name} HINTS ${TOOLCHAIN_BIN_DIR} DOC "${name} tool")
