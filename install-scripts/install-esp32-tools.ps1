@@ -38,16 +38,17 @@ $env:NF_TOOLS_PATH = $Path
 
 # need to pass the 'force' switch?
 if ($force) {
-	$commandArgs = " -force"
+	$localCommandArgs = " -force"
 }
 
 # call the script for each of the tools
 Invoke-Expression $PSScriptRoot\install-cmake.ps1
-Invoke-Expression "$PSScriptRoot\install-esp32-toolchain.ps1 $commandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-libs.ps1 $commandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-idf.ps1 $commandArgs"
-Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $commandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-openocd.ps1 $commandArgs"
+Invoke-Expression $PSScriptRoot\install-python.ps1
+Invoke-Expression "$PSScriptRoot\install-esp32-toolchain.ps1 $localCommandArgs"
+Invoke-Expression "$PSScriptRoot\install-esp32-libs.ps1 $localCommandArgs"
+Invoke-Expression "$PSScriptRoot\install-esp32-idf.ps1 $localCommandArgs"
+Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $localCommandArgs"
+Invoke-Expression "$PSScriptRoot\install-esp32-openocd.ps1 $localCommandArgs"
 
 <#
 .SYNOPSIS

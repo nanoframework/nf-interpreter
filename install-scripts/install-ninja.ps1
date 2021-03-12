@@ -99,15 +99,23 @@ if ($IsAzurePipelines -eq $False) {
             [Environment]::GetEnvironmentVariable("Path", "User") + ";$Path",
             "User")      
 
+        "Add ninja to User PATH" | Write-Host -ForegroundColor White
+    }
+    catch {
+        "Fail to update User PATH environment variable. Make sure to manually add '$Path' to the User PATH." | Write-Host -ForegroundColor Red
+    }
+
+    # add to path
+    try {
         # this call can fail if the script is not run with appropriate permissions
         [Environment]::SetEnvironmentVariable(
             "Path",
             [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine) + ";$Path",
             "Machine")      
 
-        "Add ninja to PATH" | Write-Host -ForegroundColor White
+        "Add ninja to System PATH" | Write-Host -ForegroundColor White
     }
     catch {
-        "Fail to update PATH environment variable. Make sure to manually add '$Path' to the PATH." | Write-Host -ForegroundColor Red
+        "Fail to update System PATH environment variable. Make sure to manually add '$Path' to the System PATH." | Write-Host -ForegroundColor Red
     }
 }
