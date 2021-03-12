@@ -49,7 +49,7 @@
 #define EVENTS_HEART_BEAT
 #else
 #ifndef EVENTS_HEART_BEAT
-#define EVENTS_HEART_BEAT __NOP()
+#define EVENTS_HEART_BEAT asm("nop")
 #endif // EVENTS_HEART_BEAT
 #endif
 
