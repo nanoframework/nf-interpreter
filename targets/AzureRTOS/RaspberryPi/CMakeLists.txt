@@ -63,6 +63,10 @@ endif()
 
 FetchContent_Populate(pico_sdk)
 
+# set these to help Pico SDK
+set(PICO_TOOLCHAIN_PATH ${TOOLCHAIN_PREFIX})
+set(PICO_COMPILER "pico_arm_gcc")
+
 # taken from pico_sdk_import.cmake
 set(PICO_SDK_PATH ${pico_sdk_SOURCE_DIR})
 set(PICO_SDK_PATH ${PICO_SDK_PATH} CACHE PATH "Path to the Raspberry Pi Pico SDK" FORCE)
@@ -76,12 +80,6 @@ include(pico_utils)
 message("PICO_SDK_PATH is ${PICO_SDK_PATH}")
 include(pico_pre_load_platform)
 add_subdirectory(${PICO_SDK_PATH} pico-sdk)
-
-# make vars global
-set(NANOCLR_PROJECT_SOURCES ${NANOCLR_PROJECT_SOURCES} CACHE INTERNAL "make global")
-set(NANOCLR_PROJECT_INCLUDE_DIRS ${NANOCLR_PROJECT_INCLUDE_DIRS} CACHE INTERNAL "make global")
-
-list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_include)
 
 # add platform dirs
 add_subdirectory(_include)
