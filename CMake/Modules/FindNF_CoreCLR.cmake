@@ -20,7 +20,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 # others
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
@@ -141,7 +141,7 @@ set(NF_CoreCLR_SRCS
     Messaging_stub.cpp
     
     # Helpers
-    printf.c
+    nanoprintf.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -227,7 +227,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/CLR/Messaging
             
             # Helpers
-            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
