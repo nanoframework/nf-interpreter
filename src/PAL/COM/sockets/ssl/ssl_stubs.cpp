@@ -8,15 +8,6 @@
 
 //--//
 
-extern "C"
-{
-    void ssl_rand_seed(const void *seed, int length)
-    {
-        (void)seed;
-        (void)length;
-    }
-}
-
 __nfweak bool SSL_Initialize()
 {
     NATIVE_PROFILE_PAL_COM();

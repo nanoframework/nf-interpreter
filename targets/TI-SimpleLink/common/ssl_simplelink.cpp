@@ -73,17 +73,6 @@ bool ssl_add_cert_auth_internal(
 // declared at sockets_simplelink
 extern int socketErrorCode;
 
-extern "C"
-{
-void ssl_rand_seed(
-    const void *seed, 
-    int length)
-{
-    (void)seed;
-    (void)length;
-}
-}
-
 bool ssl_initialize_internal()
 {
     memset(&g_SSL_Driver, 0, sizeof(g_SSL_Driver));
