@@ -513,7 +513,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
                 break;
 
             default:
-                errorCode = SOCK_NO_RECOVERY;
+                errorCode = SOCK_EINVAL;
         }
     }
 
