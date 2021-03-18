@@ -6,6 +6,7 @@
 
 #include "sys_net_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -39,6 +40,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::InitializeNetworkInterfaceSettings___VOID,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::UpdateConfiguration___VOID__I4,
+    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetIsNetworkAvailable___STATIC__BOOLEAN,
     NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterfaceCount___STATIC__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4,
@@ -66,6 +68,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties::GetIPAddress___STATIC__SystemNetIPAddress,
     NULL,
     NULL,
     NULL,
@@ -299,7 +302,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x1118F266,
+    0x06699AEA,
     method_lookup,
-    { 100, 1, 3, 1 }
+    { 100, 1, 3, 2 }
 };
+
+// clang-format on

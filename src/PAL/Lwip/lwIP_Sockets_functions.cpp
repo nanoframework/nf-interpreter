@@ -150,6 +150,12 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     return LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(interfaceIndex, updateFlags, config);
 }
 
+HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::Link_status(interfaceIndex, status);
+}
+
 void HAL_SOCK_EventsSet(uint32_t events)
 {
     NATIVE_PROFILE_PAL_NETWORK();

@@ -903,6 +903,13 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface 
     return hr;
 }
 
+HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status)
+{
+    NATIVE_PROFILE_PAL_COM();
+
+    return HAL_SOCK_CONFIGURATION_Link_status(interfaceIndex, status);
+}
+
 bool SOCKETS_DbgInitialize(int ComPortNum)
 {
     NATIVE_PROFILE_PAL_COM();
