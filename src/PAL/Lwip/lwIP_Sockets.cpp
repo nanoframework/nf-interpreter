@@ -79,6 +79,21 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
         0);
 }
 
+HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
+{
+    struct netif *networkInterface =
+        netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
+
+    if (NULL == networkInterface)
+    {
+        return CLR_E_FAIL;
+    }
+
+    *status = netif_is_link_up(networkInterface);
+
+    return S_OK;
+}
+
 #if LWIP_NETIF_LINK_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 {

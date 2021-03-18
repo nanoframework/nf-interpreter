@@ -97,14 +97,14 @@ struct LWIP_SOCKETS_Driver
 
     static int SendTo(SOCK_SOCKET s, const char *buf, int len, int flags, const SOCK_sockaddr *to, int tolen);
 
+    static HRESULT Link_status(uint32_t interfaceIndex, bool *status);
+
     static HRESULT LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex);
 
     static HRESULT UpdateAdapterConfiguration(
         uint32_t interfaceIndex,
         uint32_t updateFlags,
         HAL_Configuration_NetworkInterface *config);
-
-    static HRESULT LoadWirelessConfiguration(uint32_t interfaceIndex, HAL_Configuration_Wireless80211 *wirelessConfig);
 
   private:
     static void Status_callback(struct netif *netif);

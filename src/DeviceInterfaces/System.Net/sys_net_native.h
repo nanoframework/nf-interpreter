@@ -134,6 +134,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
 
     NANOCLR_NATIVE_DECLARE(InitializeNetworkInterfaceSettings___VOID);
     NANOCLR_NATIVE_DECLARE(UpdateConfiguration___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(GetIsNetworkAvailable___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
     NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
@@ -165,6 +166,13 @@ struct Library_sys_net_native_System_Net_IPHostEntry
 {
     static const int FIELD__hostName = 1;
     static const int FIELD__addressList = 2;
+
+    //--//
+};
+
+struct Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties
+{
+    NANOCLR_NATIVE_DECLARE(GetIPAddress___STATIC__SystemNetIPAddress);
 
     //--//
 };
