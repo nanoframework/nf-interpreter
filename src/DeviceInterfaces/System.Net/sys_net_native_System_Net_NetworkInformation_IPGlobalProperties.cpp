@@ -6,7 +6,8 @@
 #include "sys_net_native.h"
 #include <nanoPAL_Sockets.h>
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties::GetIPAddress___STATIC__SystemNetIPAddress(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties::
+    GetIPAddress___STATIC__SystemNetIPAddress(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -41,7 +42,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties:
 
     // loop through all the network interface and check if any is up
     for (int interfaceIndex = 0; interfaceIndex < g_TargetConfiguration.NetworkInterfaceConfigs->Count;
-        interfaceIndex++)
+         interfaceIndex++)
     {
         NANOCLR_CLEAR(config);
 

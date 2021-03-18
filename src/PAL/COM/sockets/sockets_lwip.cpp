@@ -199,13 +199,13 @@ HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface 
 HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status)
 {
     NATIVE_PROFILE_PAL_COM();
-    
-    return HAL_SOCK_CONFIGURATION_Link_status(interfaceIndex, status);
-} 
 
-#define SOCKET_SHUTDOWN_READ         0
-#define SOCKET_SHUTDOWN_WRITE        1
-#define SOCKET_SHUTDOWN_READ_WRITE   2
+    return HAL_SOCK_CONFIGURATION_Link_status(interfaceIndex, status);
+}
+
+#define SOCKET_SHUTDOWN_READ       0
+#define SOCKET_SHUTDOWN_WRITE      1
+#define SOCKET_SHUTDOWN_READ_WRITE 2
 
 #define ISSET_SOCKET_FLAG(x, y) ((y) == ((y) & (x).m_flags))
 #define SET_SOCKET_FLAG(x, y)   (x).m_flags |= (y)
