@@ -32,7 +32,7 @@ void Time_GetDateTime(DATE_TIME_INFO *dt)
 
 // Initalise SSL as a server
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::
-    SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate(
+    SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -41,7 +41,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::
 
 // Initalise SSL as a client
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::
-    SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate(
+    SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -414,6 +414,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_INT32 sslVerify = stack.Arg1().NumericByRef().s4;
     CLR_RT_HeapBlock *hbCert = stack.Arg2().Dereference();
     CLR_RT_HeapBlock *caCert = stack.Arg3().Dereference();
+    bool useDeviceCertificate = (bool)stack.Arg4().NumericByRef().u1;
     CLR_RT_HeapBlock_Array *arrCert = NULL;
     CLR_RT_HeapBlock_Array *privateKey = NULL;
     CLR_UINT8 *sslCert = NULL;
@@ -466,7 +467,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  pk == NULL ? 0 : privateKey->m_numOfElements,
                  password,
                  hal_strlen_s(password),
-                 sslContext)
+                 sslContext,
+                 useDeviceCertificate)
                  ? 0
                  : -1);
     }
@@ -482,7 +484,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  pk == NULL ? 0 : privateKey->m_numOfElements,
                  password,
                  hal_strlen_s(password),
-                 sslContext)
+                 sslContext,
+                 useDeviceCertificate)
                  ? 0
                  : -1);
     }

@@ -50,6 +50,7 @@ static bool SSL_GenericInit(
     const char *password,
     int passwordLength,
     int &contextHandle,
+    bool useDeviceCertificate,
     bool isServer)
 {
     if (!s_InitDone)
@@ -67,6 +68,7 @@ static bool SSL_GenericInit(
         password,
         passwordLength,
         contextHandle,
+        useDeviceCertificate,
         isServer);
 }
 
@@ -103,7 +105,8 @@ bool SSL_ServerInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &contextHandle)
+    int &contextHandle,
+    bool useDeviceCertificate)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -117,6 +120,7 @@ bool SSL_ServerInit(
         password,
         passwordLength,
         contextHandle,
+        useDeviceCertificate,
         true);
 }
 
@@ -129,7 +133,8 @@ bool SSL_ClientInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &contextHandle)
+    int &contextHandle,
+    bool useDeviceCertificate)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -143,6 +148,7 @@ bool SSL_ClientInit(
         password,
         passwordLength,
         contextHandle,
+        useDeviceCertificate,
         false);
 }
 

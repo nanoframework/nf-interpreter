@@ -655,7 +655,9 @@ bool SSL_ServerInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &sslContextHandle);
+    int &sslContextHandle,
+    bool useDeviceCertificate);
+
 bool SSL_ClientInit(
     int sslMode,
     int sslVerify,
@@ -665,7 +667,9 @@ bool SSL_ClientInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &sslContextHandle);
+    int &sslContextHandle,
+    bool useDeviceCertificate);
+
 bool SSL_AddCertificateAuthority(
     int sslContextHandle,
     const char *certificate,

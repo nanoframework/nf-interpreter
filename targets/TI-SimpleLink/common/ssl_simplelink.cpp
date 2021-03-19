@@ -79,6 +79,7 @@ bool ssl_generic_init_internal(
     const char *password,
     int passwordLength,
     int &contextHandle,
+    bool useDeviceCertificate,
     bool isServer)
 {
     (void)password;

@@ -29,7 +29,8 @@ __nfweak bool SSL_ServerInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &contextHandle)
+    int &contextHandle,
+    bool useDeviceCertificate)
 {
     (void)sslMode;
     (void)sslVerify;
@@ -40,6 +41,7 @@ __nfweak bool SSL_ServerInit(
     (void)password;
     (void)passwordLength;
     (void)contextHandle;
+    (void)useDeviceCertificate;
 
     NATIVE_PROFILE_PAL_COM();
 
@@ -55,7 +57,8 @@ __nfweak bool SSL_ClientInit(
     int privateKeyLength,
     const char *password,
     int passwordLength,
-    int &contextHandle)
+    int &contextHandle,
+    bool useDeviceCertificate)
 {
     (void)sslMode;
     (void)sslVerify;
@@ -66,6 +69,7 @@ __nfweak bool SSL_ClientInit(
     (void)password;
     (void)passwordLength;
     (void)contextHandle;
+    (void)useDeviceCertificate;
 
     NATIVE_PROFILE_PAL_COM();
 
