@@ -275,9 +275,9 @@ struct Library_sys_net_native_System_Net_Security_CertificateManager
 struct Library_sys_net_native_System_Net_Security_SslNative
 {
     NANOCLR_NATIVE_DECLARE(
-        SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
+        SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(
-        SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate);
+        SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(SecureAccept___STATIC__VOID__I4__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureConnect___STATIC__VOID__I4__STRING__OBJECT);
     NANOCLR_NATIVE_DECLARE(SecureRead___STATIC__I4__OBJECT__SZARRAY_U1__I4__I4__I4);
@@ -329,8 +329,9 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
 struct Library_sys_net_native_System_Net_Security_SslStream
 {
     static const int FIELD___sslVerification = 6;
-    static const int FIELD___sslContext = 7;
-    static const int FIELD___isServer = 8;
+    static const int FIELD___useStoredDeviceCertificate = 7;
+    static const int FIELD___sslContext = 8;
+    static const int FIELD___isServer = 9;
 
     //--//
 };

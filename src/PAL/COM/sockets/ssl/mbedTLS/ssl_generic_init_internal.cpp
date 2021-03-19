@@ -19,6 +19,7 @@ bool ssl_generic_init_internal(
     const char *password,
     int passwordLength,
     int &contextHandle,
+    bool useDeviceCertificate,
     bool isServer)
 {
     (void)sslMode;
@@ -183,6 +184,24 @@ bool ssl_generic_init_internal(
             context->x509_crt,
             (const unsigned char *)g_TargetConfiguration.CertificateStore->Certificates[configIndex]->Certificate,
             g_TargetConfiguration.CertificateStore->Certificates[configIndex]->CertificateSize);
+    }
+
+    // check if the device certificate is to be used
+    if (useDeviceCertificate)
+    {
+        // check if there is a device certificate stored
+        if (g_TargetConfiguration.DeviceCertificates->Count > 0)
+        {
+            // there is!
+            // fill in the parameters like if it was supplied by the caller
+            // OK to override, that's the intended behaviour
+            certificate = (const char *)g_TargetConfiguration.DeviceCertificates->Certificates[0]->Certificate;
+            certLength = g_TargetConfiguration.DeviceCertificates->Certificates[0]->CertificateSize;
+
+            // clear private keys, just in case
+            privateKey = NULL;
+            privateKeyLength = 0;
+        }
     }
 
     // parse "own" certificate if passed
