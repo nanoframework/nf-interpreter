@@ -30,7 +30,6 @@
     <ClCompile Include="corlib_native_System_Attribute.cpp" />
     <ClCompile Include="corlib_native_System_BitConverter.cpp" />
     <ClCompile Include="corlib_native_System_Collections_ArrayList.cpp" />
-    <ClCompile Include="corlib_native_System_Console.cpp" />
     <ClCompile Include="corlib_native_System_Convert.cpp" />
     <ClCompile Include="corlib_native_System_DateTime.cpp" />
     <ClCompile Include="corlib_native_System_Delegate.cpp" />

@@ -167,9 +167,6 @@
     <ClCompile Include="corlib_native.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="corlib_native_System_Console.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="corlib_native_System_MathInternal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

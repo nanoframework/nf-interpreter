@@ -463,14 +463,6 @@ struct Library_corlib_native_System_ComponentModel_EditorBrowsableState
     //--//
 };
 
-struct Library_corlib_native_System_Console
-{
-
-    NANOCLR_NATIVE_DECLARE(OutNative___STATIC__VOID__STRING__BOOLEAN);
-
-    //--//
-};
-
 struct Library_corlib_native_System_Int64
 {
 
