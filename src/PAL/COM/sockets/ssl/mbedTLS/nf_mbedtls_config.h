@@ -106,6 +106,7 @@ extern "C"
 #define MBEDTLS_AES_C
 #define MBEDTLS_ARC4_C
 #define MBEDTLS_ASN1_PARSE_C
+#define MBEDTLS_ASN1_WRITE_C
 
 #define MBEDTLS_BASE64_C
 
@@ -123,6 +124,7 @@ extern "C"
 #define MBEDTLS_DES_C
 #define MBEDTLS_DHM_C
 #define MBEDTLS_ECDH_C
+#define MBEDTLS_ECDSA_C
 
 #define MBEDTLS_ECP_C
 

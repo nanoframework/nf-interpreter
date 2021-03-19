@@ -209,7 +209,7 @@ if(NF_SECURITY_MBEDTLS)
     endif()
 
     # set tag for currently supported version
-    set(MBEDTLS_GIT_TAG "mbedtls-2.23.0")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
 
     # set options for mbed TLS
     option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
@@ -220,7 +220,7 @@ if(NF_SECURITY_MBEDTLS)
 
         FetchContent_Declare(
             mbedtls
-            GIT_REPOSITORY https://github.com/nanoframework/mbedtls
+            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
             GIT_TAG ${MBEDTLS_GIT_TAG}
         )
 
