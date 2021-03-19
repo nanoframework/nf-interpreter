@@ -910,6 +910,20 @@ HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status)
     return HAL_SOCK_CONFIGURATION_Link_status(interfaceIndex, status);
 }
 
+HRESULT SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
+{
+    NATIVE_PROFILE_PAL_COM();
+
+    return HAL_SOCK_IPAddressFromString(ipString, address);
+}
+
+const char *SOCK_IPAddressToString(uint32_t address)
+{
+    NATIVE_PROFILE_PAL_COM();
+
+    return HAL_SOCK_IPAddressToString(address);
+}
+
 bool SOCKETS_DbgInitialize(int ComPortNum)
 {
     NATIVE_PROFILE_PAL_COM();

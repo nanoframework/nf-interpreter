@@ -156,6 +156,18 @@ HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status
     return LWIP_SOCKETS_Driver::Link_status(interfaceIndex, status);
 }
 
+HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::IPAddressFromString(ipString, address);
+}
+
+const char *HAL_SOCK_IPAddressToString(uint32_t address)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return LWIP_SOCKETS_Driver::IPAddressToString(address);
+}
+
 void HAL_SOCK_EventsSet(uint32_t events)
 {
     NATIVE_PROFILE_PAL_NETWORK();

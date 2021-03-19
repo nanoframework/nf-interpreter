@@ -307,35 +307,13 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    LPCSTR szName = stack.Arg0().RecoverString();
-    struct SOCK_addrinfo hints;
-    struct SOCK_addrinfo *addr = NULL;
-    struct SOCK_sockaddr_in *addr_in;
-    int ret;
+    CLR_UINT64 address;
 
-    memset(&hints, 0, sizeof(hints));
+    LPCSTR ipString = stack.Arg0().RecoverString();
 
-    ret = SOCK_getaddrinfo(szName, NULL, &hints, &addr);
+    NANOCLR_CHECK_HRESULT(SOCK_IPAddressFromString(ipString, &address));
 
-    // getaddrinfo returns a winsock error code rather than SOCK_SOCKET_ERROR, so pass this on to the exception handling
-    if (ret != 0 || addr == NULL || addr->ai_family != SOCK_AF_INET)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
+    stack.PushValue().SetInteger((CLR_UINT64)address);
 
-    _ASSERTE(addr->ai_addr != NULL);
-    _ASSERTE(addr->ai_addrlen >= sizeof(SOCK_sockaddr_in));
-
-    addr_in = (struct SOCK_sockaddr_in *)addr->ai_addr;
-
-    stack.PushValue().SetInteger((CLR_UINT64)addr_in->sin_addr.S_un.S_addr);
-
-    NANOCLR_CLEANUP();
-
-    if (addr)
-    {
-        SOCK_freeaddrinfo(addr);
-    }
-
-    NANOCLR_CLEANUP_END();
+    NANOCLR_NOCLEANUP();
 }

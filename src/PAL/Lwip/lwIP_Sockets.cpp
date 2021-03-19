@@ -94,6 +94,37 @@ HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
     return S_OK;
 }
 
+HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+{
+    ip4_addr_t ipv4Address;
+    // FIXME IPV6
+    // ip6_addr_t ipv6Address
+
+    if (ip4addr_aton(ipString, &ipv4Address))
+    {
+        *address = ipv4Address.addr;
+    }
+    // FIXME IPV6
+    // else if(ip6addr_aton(ipString, &ipv6Address))
+    // {
+    // }
+    else
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    return S_OK;
+}
+
+const char *LWIP_SOCKETS_Driver::IPAddressToString(uint32_t address)
+{
+    // get IP v4 address in numeric format
+    // FIXME IPV6
+    const ip4_addr_t ip4Address = {address};
+
+    return ip4addr_ntoa(&ip4Address);
+}
+
 #if LWIP_NETIF_LINK_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 {
