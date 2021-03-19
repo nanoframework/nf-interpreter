@@ -15,6 +15,7 @@ set(System.Net_SRCS
     sys_net_native_System_Net_Sockets_NativeSocket.cpp
 
     # System.Net.NetworkInformation
+    sys_net_native_System_Net_IPAddress.cpp
     sys_net_native_System_Net_NetworkInformation_NetworkInterface.cpp
     sys_net_native_System_Net_NetworkInformation_IPGlobalProperties.cpp
     sys_net_native_System_Net_NetworkInformation_Wireless80211Configuration.cpp

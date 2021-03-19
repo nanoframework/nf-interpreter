@@ -575,8 +575,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
 
         // IPAddress _address field
         // CLR_INT64 fields need to be accessed by pointer
-        CLR_RT_HeapBlock &addressFieldRef =
-            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___address];
+        CLR_RT_HeapBlock &addressFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
         CLR_INT64 *pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
         *pRes = src->sin_addr.S_un.S_addr;
 
@@ -625,9 +624,8 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::MarshalSockAddre
     FAULT_ON_NULL(remoteEndPointAddress);
 
     // get value of m_Address field (type long)
-    address = (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD___address]
-                  .NumericByRef()
-                  .s8;
+    address =
+        (CLR_INT64)remoteEndPointAddress[Library_sys_net_native_System_Net_IPAddress::FIELD__Address].NumericByRef().s8;
 
     // get value of m_Port field (type int)
     port = endPointAddress[Library_sys_net_native_System_Net_IPEndPoint::FIELD___port].NumericByRef().s4;

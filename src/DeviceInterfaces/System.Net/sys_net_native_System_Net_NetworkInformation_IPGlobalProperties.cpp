@@ -32,8 +32,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties:
     {
         // IPAddress _address field
         // CLR_INT64 fields need to be accessed by pointer
-        CLR_RT_HeapBlock &addressFieldRef =
-            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___address];
+        CLR_RT_HeapBlock &addressFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
         pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
 
         // default to IP Any Address

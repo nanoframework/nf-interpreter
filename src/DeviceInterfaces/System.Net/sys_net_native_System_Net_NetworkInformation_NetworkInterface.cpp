@@ -301,7 +301,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__U4__STRING(
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__I8__STRING(
     CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -328,12 +328,14 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     addr_in = (struct SOCK_sockaddr_in *)addr->ai_addr;
 
-    stack.PushValue().SetInteger((CLR_UINT32)addr_in->sin_addr.S_un.S_addr);
+    stack.PushValue().SetInteger((CLR_UINT64)addr_in->sin_addr.S_un.S_addr);
 
     NANOCLR_CLEANUP();
 
     if (addr)
+    {
         SOCK_freeaddrinfo(addr);
+    }
 
     NANOCLR_CLEANUP_END();
 }

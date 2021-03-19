@@ -37,14 +37,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::InitializeNetworkInterfaceSettings___VOID,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::UpdateConfiguration___VOID__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetIsNetworkAvailable___STATIC__BOOLEAN,
     NULL,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterfaceCount___STATIC__I4,
     Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4,
-    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__U4__STRING,
+    Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPAddressFromString___STATIC__I8__STRING,
     NULL,
     NULL,
     NULL,
@@ -54,6 +53,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    Library_sys_net_native_System_Net_IPAddress::IPv4ToString___STATIC__STRING__U4,
     NULL,
     NULL,
     NULL,
@@ -302,9 +302,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x06699AEA,
+    0xEECB2218,
     method_lookup,
-    { 100, 1, 3, 2 }
+    { 100, 1, 3, 3 }
 };
 
 // clang-format on
