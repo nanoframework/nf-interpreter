@@ -167,6 +167,56 @@ __nfweak void *ConfigurationManager_FindX509CertificateConfigurationBlocks(uint3
     return certificateStore;
 }
 
+__nfweak void *ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(
+    uint32_t startAddress,
+    uint32_t endAddress)
+{
+    uint32_t nextBlock = startAddress;
+    uint32_t allocationSize = 0;
+
+    // first pass: find out how many blocks of this type we have
+    // because these blocks have an unknow size, need to call this without a fixed size
+    uint32_t blockCount = GetBlockCount(startAddress, endAddress, 1, c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
+
+    // start computing allocation size, first part is the struct initial fields
+    allocationSize = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates);
+
+    // second pass: find out the size of each X509 certificate (because they can have different sizes and we need this
+    // to allocate memory for the struct)
+    if (blockCount > 0)
+    {
+        for (uint32_t i = 0; i < blockCount; i++)
+        {
+            nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
+
+            // header
+            allocationSize += offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+
+            // certificate
+            allocationSize += ((HAL_Configuration_X509DeviceCertificate *)nextBlock)->CertificateSize;
+        }
+    }
+
+    // allocate config struct
+    HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates =
+        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(allocationSize);
+
+    // set collection count
+    deviceCertificates->Count = blockCount;
+
+    if (blockCount > 0)
+    {
+        // second pass: get address of each config block
+        for (uint32_t i = 0; i < blockCount; i++)
+        {
+            nextBlock = FindNextBlock(nextBlock, endAddress, c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1);
+            deviceCertificates->Certificates[i] = (HAL_Configuration_X509DeviceCertificate *)nextBlock;
+        }
+    }
+
+    return deviceCertificates;
+}
+
 __nfweak HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
 {
     for (int i = 0; i < g_TargetConfiguration.Wireless80211Configs->Count; i++)

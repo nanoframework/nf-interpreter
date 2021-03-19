@@ -32,6 +32,9 @@ extern "C"
         // X509 CA Root Certificates bundle block
         DeviceConfigurationOption_X509CaRootBundle = 4,
 
+        // X509 Device Certificates
+        DeviceConfigurationOption_X509DeviceCertificates = 5,
+
         // All configuration blocks
         DeviceConfigurationOption_All = 255,
 
@@ -74,6 +77,7 @@ extern "C"
     } HAL_CONFIGURATION_NETWORK_WIRELESSAP;
 
     // certificate store struct
+    // device certificate(s)
     // declared with a flexible array member to allow N config blocks totally independent of compilation
     typedef struct HAL_CONFIGURATION_X509_CERTIFICATE
     {
@@ -85,6 +89,18 @@ extern "C"
 
     } HAL_CONFIGURATION_X509_CERTIFICATE;
 
+    // device certificates
+    // declared with a flexible array member to allow N config blocks totally independent of compilation
+    typedef struct HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE
+    {
+        // count of the configs elements
+        uint8_t Count;
+
+        // pointer to the certificates
+        HAL_Configuration_X509DeviceCertificate *Certificates[];
+
+    } HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE;
+
     // target configuration storage struct
     // the memory allocation for these will have to be done as required according to the number and type of blocks found
     // in memory
@@ -94,6 +110,7 @@ extern "C"
         HAL_CONFIGURATION_NETWORK_WIRELESS80211 *Wireless80211Configs;
         HAL_CONFIGURATION_NETWORK_WIRELESSAP *WirelessAPConfigs;
         HAL_CONFIGURATION_X509_CERTIFICATE *CertificateStore;
+        HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *DeviceCertificates;
 
     } HAL_TARGET_CONFIGURATION;
 
@@ -158,6 +175,11 @@ extern "C"
 
     // function that sweeps a memory region searching for X509 certificates configuration blocks
     void *ConfigurationManager_FindX509CertificateConfigurationBlocks(uint32_t startAddress, uint32_t endAddress);
+
+    // function that sweeps a memory region searching for X509 device certificates configuration blocks
+    void *ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(
+        uint32_t startAddress,
+        uint32_t endAddress);
 
     // gets the HAL_Configuration_Wireless80211 configuration block that has the specified Id, if that exists
     // defined as weak needs to be free to implement the storage of the configuration block as they see fit
