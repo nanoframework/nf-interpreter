@@ -137,7 +137,7 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
     NANOCLR_NATIVE_DECLARE(GetIsNetworkAvailable___STATIC__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterfaceCount___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(GetNetworkInterface___STATIC__SystemNetNetworkInformationNetworkInterface__U4);
-    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__U4__STRING);
+    NANOCLR_NATIVE_DECLARE(IPAddressFromString___STATIC__I8__STRING);
 
     //--//
 };
@@ -147,9 +147,11 @@ struct Library_sys_net_native_System_Net_IPAddress
     static const int FIELD_STATIC__Any = 0;
     static const int FIELD_STATIC__Loopback = 1;
 
-    static const int FIELD___address = 1;
+    static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
     static const int FIELD___numbers = 3;
+
+    NANOCLR_NATIVE_DECLARE(IPv4ToString___STATIC__STRING__U4);
 
     //--//
 };
