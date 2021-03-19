@@ -635,6 +635,8 @@ HRESULT SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t updateFlags);
 HRESULT SOCK_CONFIGURATION_LoadConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex);
 HRESULT SOCK_CONFIGURATION_LinkStatus(uint32_t interfaceIndex, bool *status);
+HRESULT SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
+const char *SOCK_IPAddressToString(uint32_t address);
 
 //--// SSL
 
@@ -727,6 +729,8 @@ HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags);
 HRESULT HAL_SOCK_CONFIGURATION_Link_status(uint32_t interfaceIndex, bool *status);
+HRESULT HAL_SOCK_IPAddressFromString(const char *ipString, uint64_t *address);
+const char *HAL_SOCK_IPAddressToString(uint32_t address);
 
 void *HAL_SOCK_GlobalLockContext();
 void HAL_SOCK_EventsSet(uint32_t events);

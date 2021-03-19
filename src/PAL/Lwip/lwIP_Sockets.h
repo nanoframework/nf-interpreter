@@ -99,6 +99,10 @@ struct LWIP_SOCKETS_Driver
 
     static HRESULT Link_status(uint32_t interfaceIndex, bool *status);
 
+    static HRESULT IPAddressFromString(const char *ipString, uint64_t *address);
+
+    static const char *IPAddressToString(uint32_t address);
+
     static HRESULT LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex);
 
     static HRESULT UpdateAdapterConfiguration(
