@@ -15,7 +15,6 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
 
-
 // nanoFramework class libraries declarations
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;
