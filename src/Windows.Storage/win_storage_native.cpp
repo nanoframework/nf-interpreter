@@ -5,6 +5,7 @@
 
 #include "win_storage_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -109,3 +110,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
     method_lookup,
     { 100, 0, 2, 0 }
 };
+
+// clang-format on
