@@ -514,8 +514,7 @@ else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 endif()
 
-if( API_System.Net OR
-    API_Windows.Networking.Sockets)
+if( API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
@@ -642,7 +641,6 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
-    API_Windows.Networking.Sockets OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)

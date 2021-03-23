@@ -56,7 +56,6 @@ Pre-configured cmake-variants.json for this board
           "API_Windows.Devices.Wifi": "OFF",
           "API_System.Net": "OFF",
           "API_System.Math": "ON",
-          "API_Windows.Networking.Sockets": "OFF",
           "API_Windows.Storage": "ON"
         }
       }
