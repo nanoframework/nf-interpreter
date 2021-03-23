@@ -357,6 +357,29 @@ jobs:
       platform: 'x86'
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
+      
+  - task: DotNetCoreCLI@2
+    displayName: Install SignTool tool
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . SignClient
+
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --input "**/nanoFramework.nanoCLR.exe" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.Win32" `
+      --description "nanoFramework.nanoCLR.Win32" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign nanoCLR WIN32 EXE
+    continueOnError: true
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
 
   - task: NuGetCommand@2
     condition: succeeded()
@@ -384,14 +407,6 @@ jobs:
         **\nanoFramework.nanoCLR.exe
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
-      
-  - task: DotNetCoreCLI@2
-    displayName: Install SignTool tool
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . SignClient
 
   - pwsh: |
       .\SignClient "Sign" `
@@ -401,8 +416,8 @@ jobs:
       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --user "$(SignClientUser)" `
       --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.Win32" `
-      --description "nanoFramework.nanoCLR.Win32" `
+      --name "nanoFramework.nanoCLR.Win32 NuGet" `
+      --description "nanoFramework.nanoCLR.Win32 NuGet" `
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign packages
     continueOnError: true
