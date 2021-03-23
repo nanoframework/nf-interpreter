@@ -251,6 +251,8 @@ jobs:
         NeedsDFU: false 
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('STM32_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
@@ -293,6 +295,8 @@ jobs:
         PackageName: ESP32_PICO
   
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('ESP32_versioncounter', 0)]
     ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools\xtensa-esp32-elf
 
   steps:
@@ -336,6 +340,8 @@ jobs:
         NeedsSRECORD: true
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('NXP_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
 
@@ -381,6 +387,8 @@ jobs:
         GccArm_Version:
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('TI_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
@@ -408,6 +416,8 @@ jobs:
 
   variables:
     TargetPublishName: WIN32_nanoCLR
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('WIN32_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml

@@ -21,7 +21,7 @@ steps:
               # this a dev or release branch, publish to Bintray dev repo
               Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
               # set version
-              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(NBGV_VersionHeight)"
+              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
             }
             else 
             {

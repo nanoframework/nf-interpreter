@@ -29,3 +29,13 @@ steps:
             Write-Host "$("##vso[task.setvariable variable=NBGV_VersionHeight]")$env:System_PullRequest_PullRequestNumber"
             Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
             Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.0-alpha.$env:System_PullRequest_PullRequestNumber"
+
+  - task: PowerShell@2
+    displayName: Get target build counter
+    inputs:
+        targetType: 'inline'
+        script: |
+            $counter = $env:REVISION
+            $version = [int]$counter
+
+            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version.ToString()"
