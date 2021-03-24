@@ -67,75 +67,102 @@ jobs:
       git config --global user.name "nanoframework@outlook.com"
 
       $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
-
-      $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
-      Write-host "Files changed:"
-      $commit.files | % {$_.filename}
-      Write-host ""
-
-      # default values 
-      echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
-      echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
-      echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]false"  
-      echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
-      echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
-      echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
-
-      if( (($commit.files.filename | % {$_.Contains('/')}).Count -eq 0) -Or
-          (($commit.files.filename | % {$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
-          (($commit.files.filename | % {$_.StartsWith('CMake')}).Count -gt 0) -Or
-          (($commit.files.filename | % {$_.StartsWith('src')}).Count -gt 0)
-        )
+      
+      if($env:StartReleaseCandidate -like "true")
       {
-          # files at:
-          # - repo root
-          # - azure-pipelines-templates
-          # - CMake
-          # - src
-
-          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-          
-          Write-host "Building ALL targets"
+          # this is a release prep so NO build
       }
-
-      if( ($commit.files.filename | % {$_.Contains('targets/CMSIS-OS')}).Count -gt 0)
+      else
       {
-          # files at CMSIS-OS folder
-          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+          if($env:System_PullRequest_PullRequestId -ne $null)
+          {
+              # get files changed in PR, if this is a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestId/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-          Write-host "Building CHIBIOS targets"
-      }
+              # filter removed files              
+              $files = $commit.where{$_.status -ne 'removed'}
+          }
+          else
+          {
+              # get files changed in the commit, if this is NOT a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-      if( ($commit.files.filename | % {$_.Contains('targets/FreeRTOS')}).Count -gt 0)
-      {
-          # files at FreeRTOS folder
-          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+              # filter removed files              
+              $files = $commit.files.where{$_.status -ne 'removed'}
+          }
 
-          Write-host "Building FreeRTOS targets"
-      }
+          # get file names only
+          $files = $files | % {$_.filename}
 
-      if( ($commit.files.filename | % {$_.Contains('targets/FreeRTOS_ESP32')}).Count -gt 0)
-      {
-          # files at FreeRTOS_ESP32 folder
-          echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]true"
+          Write-host "Files changed:"
+          $files | % { Write-host $_ }
+          Write-host ""
 
-          Write-host "Building ESP32 targets"
-      }
+          # set default values 
+          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
-      if( ($commit.files.filename | % {$_.Contains('targets/TI-SimpleLink')}).Count -gt 0)
-      {
-          # files at TI-SimpleLink folder
-          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+          if( 
+              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('src')}).Count -gt 0)
+            )
+          {
+              # files at:
+              # - repo root
+              # - azure-pipelines-templates
+              # - CMake
+              # - src
 
-          Write-host "Building TI SimpleLink targets"
-      }
+              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              
+              Write-host "Building ALL targets"
+          }
 
-      if( ($commit.files.filename | % {$_.Contains('targets/win32')}).Count -gt 0)
-      {
-          # files at win32 folder
-          echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+          if( ($files.where{$_.Contains('targets/CMSIS-OS')}).Count -gt 0)
+          {
+              # files at CMSIS-OS folder
+              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-          Write-host "Building WIN32 target"
+              Write-host "Building CHIBIOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
+          {
+              # files at FreeRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+
+              Write-host "Building FreeRTOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/FreeRTOS_ESP32')}).Count -gt 0)
+          {
+              # files at FreeRTOS_ESP32 folder
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]true"
+
+              Write-host "Building ESP32 targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/TI-SimpleLink')}).Count -gt 0)
+          {
+              # files at TI-SimpleLink folder
+              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+              Write-host "Building TI SimpleLink targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/win32')}).Count -gt 0)
+          {
+              # files at win32 folder
+              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+
+              Write-host "Building WIN32 target"
+          }
       }
 
     name: TargetsToBuild
