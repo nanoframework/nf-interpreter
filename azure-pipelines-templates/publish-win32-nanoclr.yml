@@ -5,45 +5,49 @@
 # set 'ForceUpload' variable to true on target matrix
 
 steps:
+
+  # execute on 'ForceUpload' parameter
   - task: PowerShell@2
-    inputs:
-        targetType: 'inline'
-        script: |
-            $repoName = $env:Build_Repository_Name
-            $branchName = $env:Build_SourceBranchName
-
-            Write-Host "repo name is: $repoName"
-            Write-Host "branch name is: $branchName"
-
-            if( $env:Build_SourceBranchName -match "^develop*" -or 
-                $env:Build_SourceBranchName -match "^release*" )
-            {
-              # this a dev or release branch, publish to Bintray dev repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images-dev"
-              # set version
-              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER)"
-            }
-            else 
-            {
-              # this master branch, publish to Bintray stable repo
-              Write-Host "$("##vso[task.setvariable variable=BINTRAY_REPO]")nanoframework-images"
-              # set version
-              Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
-            }
-        errorActionPreference: 'stop'
-        failOnStderr: 'true'
-    # execute on 'ForceUpload' parameter
     condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
-    displayName: Set Bintray repo path
-
-  - task: cURLUploader@2
+    displayName: Set Cloudsmith repo path
     inputs:
-      files: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe'
-      authType: 'userAndPass'
-      username: 'nfbot'
-      password: '$(BinTrayKey)'
-      url: 'https://api.bintray.com/'
-      remotePath: 'content/nfbot/$(BINTRAY_REPO)/$(TargetPublishName)/$(PACKAGE_VERSION)/nanoFramework.nanoCLR.exe;publish=1'
-    # execute on 'ForceUpload' parameter
+      targetType: 'inline'
+      script: |
+          $repoName = $env:Build_Repository_Name
+          $branchName = $env:Build_SourceBranchName
+
+          Write-Host "repo name is: $repoName"
+          Write-Host "branch name is: $branchName"
+
+          if( $env:Build_SourceBranchName -match "^develop*" -or 
+              $env:Build_SourceBranchName -match "^release*" )
+          {
+            # this a dev or release branch, publish to Bintray dev repo
+            Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
+            # set version
+            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
+          }
+          else 
+          {
+            # this master branch, publish to Bintray stable repo
+            Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
+            # set version
+            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
+          }
+      errorActionPreference: 'stop'
+      failOnStderr: 'true'
+
+  - task: PowerShell@2
     condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
-    displayName: Upload WIN32 nanoCLR to Bintray
+    displayName: Upload WIN32 nanoCLR to Cloudsmith
+    inputs:
+      targetType: 'inline'
+      script: |
+
+          # install Cloudsmith CLI
+          python -m pip install --upgrade cloudsmith-cli
+
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+
+      errorActionPreference: 'stop'
+      failOnStderr: 'true'

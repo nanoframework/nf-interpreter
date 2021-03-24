@@ -71,6 +71,7 @@ jobs:
       $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
       Write-host "Files changed:"
       $commit.files | % {$_.filename}
+      Write-host ""
 
       # default values 
       echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
@@ -80,10 +81,10 @@ jobs:
       echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
       echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
-      if( ($commit.files.filename | % {$_.Contains('/')}).Count > 0) -Or
-          ($commit.files.filename | % {$_.StartsWith('azure-pipelines-templates')}).Count > 0) -Or
-          ($commit.files.filename | % {$_.StartsWith('CMake')}).Count > 0) -Or
-          ($commit.files.filename | % {$_.StartsWith('src')}).Count > 0)
+      if( (($commit.files.filename | % {$_.Contains('/')}).Count -eq 0) -Or
+          (($commit.files.filename | % {$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+          (($commit.files.filename | % {$_.StartsWith('CMake')}).Count -gt 0) -Or
+          (($commit.files.filename | % {$_.StartsWith('src')}).Count -gt 0)
         )
       {
           # files at:
@@ -93,40 +94,52 @@ jobs:
           # - src
 
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+          
+          Write-host "Building ALL targets"
       }
 
-      if($commit.files.filename | % {$_.Contains('targets/CMSIS-OS')}).Count > 0)
+      if( ($commit.files.filename | % {$_.Contains('targets/CMSIS-OS')}).Count -gt 0)
       {
           # files at CMSIS-OS folder
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+          Write-host "Building CHIBIOS targets"
       }
 
-      if($commit.files.filename | % {$_.Contains('targets/FreeRTOS')}).Count > 0)
+      if( ($commit.files.filename | % {$_.Contains('targets/FreeRTOS')}).Count -gt 0)
       {
           # files at FreeRTOS folder
           echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+
+          Write-host "Building FreeRTOS targets"
       }
 
-      if($commit.files.filename | % {$_.Contains('targets/FreeRTOS_ESP32')}).Count > 0)
+      if( ($commit.files.filename | % {$_.Contains('targets/FreeRTOS_ESP32')}).Count -gt 0)
       {
           # files at FreeRTOS_ESP32 folder
           echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]true"
+
+          Write-host "Building ESP32 targets"
       }
 
-      if($commit.files.filename | % {$_.Contains('targets/TI-SimpleLink')}).Count > 0)
+      if( ($commit.files.filename | % {$_.Contains('targets/TI-SimpleLink')}).Count -gt 0)
       {
           # files at TI-SimpleLink folder
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+          Write-host "Building TI SimpleLink targets"
       }
 
-      if($commit.files.filename | % {$_.Contains('targets/win32')}).Count > 0)
+      if( ($commit.files.filename | % {$_.Contains('targets/win32')}).Count -gt 0)
       {
           # files at win32 folder
           echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+
+          Write-host "Building WIN32 target"
       }
 
     name: TargetsToBuild
-    displayName: get list of targets to build
+    displayName: Get targets to build
 
   - task: DotNetCoreCLI@2  
     condition: eq( variables['StartReleaseCandidate'], true )
@@ -264,7 +277,7 @@ jobs:
   - template: azure-pipelines-templates/download-hexdfu.yml
   - template: azure-pipelines-templates/build-chibios-stm32.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
@@ -317,7 +330,7 @@ jobs:
       flattenFolders: true
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
 
 #################
 # NXP
@@ -353,7 +366,7 @@ jobs:
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/build-freertos-nxp.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
@@ -399,7 +412,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/build-ti-simplelink.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################

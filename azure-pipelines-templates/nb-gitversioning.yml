@@ -36,6 +36,6 @@ steps:
         targetType: 'inline'
         script: |
             $counter = $env:REVISION
-            $version = [int]$counter
+            $version = ([int]$counter).ToString()
 
-            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version.ToString()"
+            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
