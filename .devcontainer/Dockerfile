@@ -21,7 +21,7 @@ ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.1.zip
 RUN curl -o /tmp/dc-downloads/esp-idf.zip $IDF_URI \
     && unzip -d /tmp/dc-extracted/esp-idf /tmp/dc-downloads/esp-idf.zip
 
-ARG IDF_LIBS_URI=https://dl.bintray.com/nfbot/internal-build-tools/IDF_libs-v3.3.1.zip
+ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.1/IDF_libs-v3.3.1.zip
 RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
     && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
 
