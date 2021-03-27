@@ -344,9 +344,9 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     return 0;
 }
 
-int ssl_pending_internal(int sd)
+int ssl_available_internal(int sd)
 {
-    // Simple Link doesn't have an API to check for pending data
+    // Simple Link doesn't have an API to check for available data
     // just return 0
     return 0;
 }
