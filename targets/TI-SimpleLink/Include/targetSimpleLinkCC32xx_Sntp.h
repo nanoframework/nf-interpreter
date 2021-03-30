@@ -12,8 +12,12 @@
 #include <target_platform.h>
 
 // default SNTP server address
-#ifndef SNTP_SERVER_DEFAULT_ADDRESS
-#define SNTP_SERVER_DEFAULT_ADDRESS "0.pool.ntp.org"
+#ifndef SNTP_SERVER0_DEFAULT_ADDRESS
+#define SNTP_SERVER0_DEFAULT_ADDRESS "0.pool.ntp.org"
+#endif
+
+#ifndef SNTP_SERVER1_DEFAULT_ADDRESS
+#define SNTP_SERVER1_DEFAULT_ADDRESS "1.pool.ntp.org"
 #endif
 
 // Must wait at least 15 sec to retry NTP server (RFC 4330)
@@ -33,7 +37,7 @@
 #define SNTP_RETRY_TIMEOUT (15 * 60)
 #endif
 
-#define NTP_SERVERS     1
+#define NTP_SERVERS     2
 #define NTP_SERVER_PORT 123
 
 //  Time to wait for reply from server (seconds)
