@@ -45,7 +45,7 @@ int ssl_accept_internal(int socket, int contextHandle);
 int ssl_read_internal(int socket, char *data, size_t size);
 int ssl_write_internal(int socket, const char *data, size_t size);
 int ssl_close_socket_internal(int sd);
-int ssl_pending_internal(int sd);
+int ssl_available_internal(int sd);
 bool ssl_exit_context_internal(int contextHandle);
 bool ssl_generic_init_internal(
     int sslMode,

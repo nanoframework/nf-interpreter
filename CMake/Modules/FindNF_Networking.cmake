@@ -50,7 +50,7 @@ set(NF_Networking_Security_SRCS
     ssl_generic_init_internal.cpp
     ssl_initialize_internal.cpp
     ssl_parse_certificate_internal.cpp
-    ssl_pending_internal.cpp
+    ssl_available_internal.cpp
     ssl_read_internal.cpp
     ssl_uninitialize_internal.cpp
     ssl_write_internal.cpp
