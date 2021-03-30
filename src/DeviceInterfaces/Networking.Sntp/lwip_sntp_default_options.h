@@ -8,12 +8,12 @@
 
 // update delay (default 1 hour)
 // (value in milliseconds)
-#define SNTP_UPDATE_DELAY       3600000
+#define SNTP_UPDATE_DELAY 3600000
 
 // better have a startup delay because we can have DHCP enabled (default 15 seconds)
 // value in milliseconds
-#define SNTP_STARTUP_DELAY      15*1000
+#define SNTP_STARTUP_DELAY 15 * 1000
 
 // retry timeout (15 minutes)
 // value in milliseconds
-#define SNTP_RETRY_TIMEOUT      900000
+#define SNTP_RETRY_TIMEOUT 900000

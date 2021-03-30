@@ -12,14 +12,14 @@
 // update delay (default 1 hour)
 // (value in seconds)
 // Must wait at least 15 sec to retry NTP server (RFC 4330)
-#define SNTP_UPDATE_DELAY       (60 * 60)
+#define SNTP_UPDATE_DELAY (60 * 60)
 
 // no startup delay for SNTP
 // value in seconds
-#define SNTP_STARTUP_DELAY      (0)
+#define SNTP_STARTUP_DELAY (0)
 
 // retry timeout
 // value in seconds
-#define SNTP_RETRY_TIMEOUT      (10)
+#define SNTP_RETRY_TIMEOUT (10)
 
 #endif // _TARGET_SNTP_OPTS_H_
