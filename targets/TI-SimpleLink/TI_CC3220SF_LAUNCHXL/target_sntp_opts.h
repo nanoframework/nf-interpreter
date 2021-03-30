@@ -6,7 +6,8 @@
 #ifndef _TARGET_SNTP_OPTS_H_
 #define _TARGET_SNTP_OPTS_H_ 1
 
-#define SNTP_SERVER_DEFAULT_ADDRESS "0.pool.ntp.org"
+#define SNTP_SERVER0_DEFAULT_ADDRESS "0.pool.ntp.org"
+#define SNTP_SERVER1_DEFAULT_ADDRESS "1.pool.ntp.org"
 
 // update delay (default 1 hour)
 // (value in seconds)

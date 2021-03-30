@@ -856,7 +856,8 @@ void * mainThread(void *arg)
     }
 
   #ifdef SL_APP_SNTP
-    sntp_setservername(0, SNTP_SERVER_DEFAULT_ADDRESS);
+    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
     sntp_init();
   #endif
 

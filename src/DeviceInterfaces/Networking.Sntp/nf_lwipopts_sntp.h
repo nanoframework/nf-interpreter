@@ -10,6 +10,7 @@
 
 #include <time.h>
 #include <nanoWeak.h>
+#include "lwip_sntp_default_options.h"
 #include <target_lwip_sntp_opts.h>
 
 #ifdef __cplusplus

@@ -10,6 +10,7 @@
 #include "lwIP_Sockets.h"
 #include "apps/sntp.h"
 #include <target_lwip_sntp_opts.h>
+#include <target_lwip_sntp_opts.h>
 
 extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
@@ -61,7 +62,8 @@ static void initialize_sntp()
 {
 	sntp_stop();
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, SNTP_SERVER_DEFAULT_ADDRESS);
+    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
     sntp_init();
 }
 
