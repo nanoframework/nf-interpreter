@@ -24,7 +24,7 @@ int ssl_available_internal(int sd)
     // It won't work because we are using blockign sockets.
     // Even if we unblock it temporarily, it will still won't return until there is something to be read.
     // That call will block the execution and the watchdog will eventually kick in.
-    // Bottom line: take the information provided by this call as informational. 
+    // Bottom line: take the information provided by this call as informational.
 
     int availableBytes = mbedtls_ssl_check_pending(ssl);
 
