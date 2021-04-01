@@ -376,14 +376,14 @@ if(NF_FEATURE_USE_SPIFFS)
     FetchContent_GetProperties(spiffs)
     FetchContent_Populate(spiffs)
 
-    add_subdirectory(spiffs)
+    add_subdirectory(_spiffs)
 
 endif()
 
 # add target ChibiOS dirs
-add_subdirectory(Include)
-add_subdirectory(common)
-add_subdirectory(nanoBooter)
-add_subdirectory(nanoCLR)
+add_subdirectory(_Include)
+add_subdirectory(_common)
+add_subdirectory(_nanoBooter)
+add_subdirectory(_nanoCLR)
 
 # board folder will be added in main CMakeList
