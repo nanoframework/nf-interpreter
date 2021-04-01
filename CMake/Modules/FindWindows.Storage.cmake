@@ -14,7 +14,7 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 if(RTOS_CHIBIOS_CHECK)
     #list(APPEND Windows.Storage_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/fatfs/src)
     list(APPEND Windows.Storage_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
-    set( PROJECT_COMMON_PATH ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common)
+    set( PROJECT_COMMON_PATH ${CMAKE_SOURCE_DIR}/targets/ChibiOS/common)
 elseif(RTOS_FREERTOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
     # TODO: this needs to be changed so it's not platform & target dependent

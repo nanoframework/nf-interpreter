@@ -124,9 +124,9 @@ jobs:
               Write-host "Building ALL targets"
           }
 
-          if( ($files.where{$_.Contains('targets/CMSIS-OS')}).Count -gt 0)
+          if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
           {
-              # files at CMSIS-OS folder
+              # files at ChibiOS folder
               echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
               Write-host "Building CHIBIOS targets"

@@ -24,7 +24,7 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/common")
 
 endfunction()
 
@@ -175,8 +175,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
-        ${TARGET_CMSIS_COMMON_SOURCES}
-        
         ${TARGET_CHIBIOS_COMMON_SOURCES}
 
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}

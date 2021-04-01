@@ -189,7 +189,7 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${lwip_SOURCE_DIR}/src/netif/ppp
             ${lwip_SOURCE_DIR}/src/netif/ppp/polarssl
 
-			# ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+			# ${CMAKE_SOURCE_DIR}/targets/ChibiOS/Lwip
 			# TODO: this needs to be changed so it's not platform dependent
 			${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/LwIP
 
