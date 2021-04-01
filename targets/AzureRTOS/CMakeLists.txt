@@ -140,6 +140,23 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD
     # add TARGET board directory
     add_subdirectory(RaspberryPi/${TARGET_BOARD})
 
+# try to find Maxim board in the targets folder
+elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
+
+    # board found
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
+
+    # Define base path for the class libraries
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/_nanoCLR)
+
+    # set target base location
+    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
+
+    add_subdirectory(Maxim)
+
+    # add TARGET board directory
+    add_subdirectory(Maxim/${TARGET_BOARD})
+
 else()
 
     # try to find STM board in the Community targets folder
