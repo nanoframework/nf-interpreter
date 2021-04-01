@@ -555,7 +555,10 @@ endif()
 if(API_Windows.Devices.Gpio)
     set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
 else()
-    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
+    # temporary check for option already set by API_System.Device.Gpio
+    if(NOT HAL_USE_GPIO_OPTION)
+        set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
+    endif()        
 endif()
 
 
