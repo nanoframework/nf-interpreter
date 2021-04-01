@@ -129,19 +129,19 @@ FetchContent_Populate(lwip)
 
 # append FatFS files
 if(USE_FILESYSTEM_OPTION)
-    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fatfs/diskio.c")
-    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fatfs/fsl_sd_disk.c")
-    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fatfs/ffsystem.c")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/_fatfs/diskio.c")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/_fatfs/fsl_sd_disk.c")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/_fatfs/ffsystem.c")
 
-    list(APPEND NANOCLR_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/fatfs)
+    list(APPEND NANOCLR_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_fatfs)
 
 endif()
 
 # append networking files, if enabled
 if(USE_NETWORKING_OPTION)
-    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/LwIP/ethernetif.c")
+    list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/_LwIP/ethernetif.c")
 
-    list(APPEND NANOCLR_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/LwIP)
+    list(APPEND NANOCLR_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_LwIP)
 
     # append mbed TLS entropy generator, if hardware has it
     # if(NF_SECURITY_MBEDTLS AND USE_RNG)
@@ -157,7 +157,7 @@ set(NANOCLR_PROJECT_INCLUDE_DIRS ${NANOCLR_PROJECT_INCLUDE_DIRS} CACHE INTERNAL 
 list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # add platform dirs
-add_subdirectory(include)
-add_subdirectory(common)
-add_subdirectory(nanoBooter)
-add_subdirectory(nanoCLR)
+add_subdirectory(_include)
+add_subdirectory(_common)
+add_subdirectory(_nanoBooter)
+add_subdirectory(_nanoCLR)

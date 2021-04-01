@@ -24,8 +24,8 @@ list(APPEND CHIBIOS_CONTRIB_INCLUDE_DIRS ${chibios-contrib_SOURCE_DIR}/os/hal/po
 ####################################################################################################################################
 # Because we've "hacked" ChibiOS overlay mechanism used by the community contributions we can't add the "official" hal_community.c #
 # Instead we have to add the required and equivalent calls that exist in the official source file                                  #
-# in our hal_community.c @ targets/ChibiOS/nf-overlay/os/hal/src/hal_community.c                                          #
-# the include paths are to be added to our hal_community.h @ targets/ChibiOS/nf-overlay/os/hal/include/hal_community.h    #
+# in our hal_community.c @ targets/ChibiOS/_nf-overlay/os/hal/src/hal_community.c                                          #
+# the include paths are to be added to our hal_community.h @ targets/ChibiOS/_nf-overlay/os/hal/include/hal_community.h    #
 ####################################################################################################################################
 
 

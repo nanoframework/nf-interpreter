@@ -77,11 +77,11 @@
         * [ST STM32F769I DISCOVERY](targets/ChibiOS/ST_STM32F769I_DISCOVERY)
         * [Wilderness Labs Netduino3 WiFi](targets/ChibiOS/NETDIUNO3_WIFI)
       * ChibiOS 增强 **nanoFramework**
-        * [STM32 1.Wire driver](targets/ChibiOS/nf-overlay/os/hal/src/stm32_onewire)
-        * [STM32 CRC32 driver](targets/ChibiOS/nf-overlay/os/hal/src/stm32_crc)
-        * [STM32 Flash driver](targets/ChibiOS/nf-overlay/os/hal/src/stm32_flash)
-        * [STM32 Flexible Memory Controller driver](targets/ChibiOS/nf-overlay/os/hal/src/stm32_fsmc)
-        * [STM32 Random number generator driver](targets/ChibiOS/nf-overlay/os/hal/src/stm32_rng)
+        * [STM32 1.Wire driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_onewire)
+        * [STM32 CRC32 driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_crc)
+        * [STM32 Flash driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_flash)
+        * [STM32 Flexible Memory Controller driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_fsmc)
+        * [STM32 Random number generator driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_rng)
   * FreeRTOS 移植
     * [ESP32_WROOM_32](targets/FreeRTOS_ESP32/ESP32_WROOM_32)
     * [NXP_MIMXRT1060_EVK](targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK)
