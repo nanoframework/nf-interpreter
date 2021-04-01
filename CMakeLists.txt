@@ -755,33 +755,31 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/ChibiOS/nanoCLR)
     
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
-    add_subdirectory(targets/CMSIS-OS/common)
-    add_subdirectory(targets/CMSIS-OS/common/Include)
+    add_subdirectory(targets/ChibiOS)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory(targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+            add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder

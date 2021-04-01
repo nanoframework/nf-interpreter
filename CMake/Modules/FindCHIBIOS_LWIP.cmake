@@ -13,7 +13,7 @@ execute_process(
 )
 
 # List of the required lwIp include files.
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/Lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/various/lwip_bindings)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include)
@@ -109,7 +109,7 @@ foreach(SRC_FILE ${LWIP_SRCS})
             ${chibios_SOURCE_DIR}/ext/lwip/src/api
             ${chibios_SOURCE_DIR}/ext/lwip/src/netif
 
-            ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/Lwip
+            ${CMAKE_SOURCE_DIR}/targets/ChibiOS/Lwip
 
             # APPS:
             ${chibios_SOURCE_DIR}/ext/lwip/src/apps/sntp

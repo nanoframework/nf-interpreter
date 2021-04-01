@@ -47,7 +47,7 @@ if(NF_FEATURE_HAS_USB_MSD)
     list(APPEND CHIBIOS_FATFS_SOURCES ${chibios-contrib_SOURCE_DIR}/os/various/fatfs_bindings/fatfs_diskio.c)
 else()
     # get it from the targets directory for fixing STM32F7 series Cache issues
-    list(APPEND CHIBIOS_FATFS_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/FatFS/fatfs_diskio.c)
+    list(APPEND CHIBIOS_FATFS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/FatFS/fatfs_diskio.c)
 endif()
 
 include(FindPackageHandleStandardArgs)

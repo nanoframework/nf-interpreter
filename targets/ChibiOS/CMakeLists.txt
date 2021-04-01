@@ -255,14 +255,14 @@ endif()
 
 # set target base location
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
     # set target base location
-    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
+    set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
 else()
     # try to find board in the Community targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
     else()
         # board NOT found in targets folder
         # can't continue
@@ -279,7 +279,7 @@ include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 # start search in nanoFramework ChibiOS 'overlay' folder
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD})
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
@@ -287,11 +287,11 @@ else()
     # board NOT found in ChibiOS 'overlay'
 
     # try to find it in the target boards
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
         # board found
         # check if the board definition files are available at the target folder
-        if( EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD}/board.c AND
-            EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD}/board.h)
+        if( EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD}/board.c AND
+            EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD}/board.h)
             # definition files found
             set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
 
@@ -313,7 +313,7 @@ else()
 
     else()
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # set flag for this being a community board
             set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
         else()
