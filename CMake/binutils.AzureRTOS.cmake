@@ -105,6 +105,10 @@ macro(NF_ADD_PLATFORM_PACKAGES)
     if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED)
     endif()
+
+    if(MAXIM_MICROS_SDK_REQUIRED)
+        find_package(MaximMicrosSDK REQUIRED)
+    endif()    
      
 endmacro()
 
@@ -143,11 +147,22 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
     target_include_directories(${TARGET}.elf PUBLIC
 
-        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
         ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
         # ${CHIBIOS_LWIP_INCLUDE_DIRS}
         # ${SPIFFS_INCLUDE_DIRS}
     )
+
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        target_include_directories(${TARGET}.elf PUBLIC
+            ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+        )
+    endif()
+    
+    if(MAXIM_MICROS_SDK_REQUIRED)
+        target_include_directories(${TARGET}.elf PUBLIC
+            ${MaximMicrosSDK_INCLUDE_DIRS}
+        )
+    endif()
     
     # includes specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
@@ -186,9 +201,19 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     target_sources(${TARGET}.elf PUBLIC
         
         ${TARGET_AZURERTOS_COMMON_SOURCES}
-
-        ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
     )
+
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        target_sources(${TARGET}.elf PUBLIC
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
+        )
+    endif()
+
+    if(MAXIM_MICROS_SDK_REQUIRED)
+        target_sources(${TARGET}.elf PUBLIC
+            ${MaximMicrosSDK_SOURCES}
+        )
+    endif()
 
     # sources specific to nanoBooter
     if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})

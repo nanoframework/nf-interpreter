@@ -5,6 +5,7 @@
 //
 
 #include "stdafx.h"
+#include <stdint.h>
 
 #include <nanoHAL_Time.h>
 
@@ -46,6 +47,46 @@ uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME *systemTime)
         TIMEUNIT_TO_MILLISECONDS;
 
     return r;
+}
+
+void Seconds_Time_ToSystemTime(uint32_t time, SYSTEMTIME *systemTime)
+{
+    uint32_t ytd = 0;
+    uint32_t mtd = 0;
+
+    // zero milliseconds
+    systemTime->wMilliseconds = 0;
+
+    systemTime->wSecond = time % SECONDS_TO_MINUTES;
+    time /= SECONDS_TO_MINUTES;
+    systemTime->wMinute = time % MINUTES_TO_HOUR;
+    time /= MINUTES_TO_HOUR;
+    systemTime->wHour = time % HOURS_TO_DAY;
+    time /= HOURS_TO_DAY;
+
+    systemTime->wDayOfWeek = (time + BASE_YEAR_DAYOFWEEK_SHIFT) % 7;
+    systemTime->wYear = (unsigned short)(time / DAYS_IN_NORMAL_YEAR + BASE_YEAR);
+    ytd = YEARS_TO_DAYS(systemTime->wYear);
+
+    if (ytd > time)
+    {
+        systemTime->wYear--;
+        ytd = YEARS_TO_DAYS(systemTime->wYear);
+    }
+
+    time -= ytd;
+
+    systemTime->wMonth = (unsigned short)(time / 31 + 1);
+    mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth + 1);
+
+    if (time >= mtd)
+    {
+        systemTime->wMonth++;
+    }
+
+    mtd = MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth);
+
+    systemTime->wDay = (unsigned short)(time - mtd + 1);
 }
 
 bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME *systemTime)
