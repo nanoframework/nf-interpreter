@@ -279,7 +279,7 @@ include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 set(CHIBIOS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 # start search in nanoFramework ChibiOS 'overlay' folder
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/nf-overlay/os/hal/boards/${TARGET_BOARD})
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD})
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")

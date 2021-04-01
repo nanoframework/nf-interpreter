@@ -140,7 +140,7 @@ FetchContent_GetProperties(cmsis)
 FetchContent_Populate(cmsis)
 
 # FreeRTOS common directories
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/common)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_common)
 
 # try to find board in the targets folder
 # and set target base location and base path for class libs
@@ -151,7 +151,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
@@ -168,7 +168,7 @@ elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
@@ -187,7 +187,7 @@ else()
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
@@ -204,7 +204,7 @@ else()
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/nanoCLR)
+        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/_nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})

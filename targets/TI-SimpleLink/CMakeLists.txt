@@ -12,9 +12,9 @@ include(NF_Utils)
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 # add target TI SimpleLink dirs
-add_subdirectory(common)
-add_subdirectory(Include)
-add_subdirectory(nanoCLR)
+add_subdirectory(_common)
+add_subdirectory(_Include)
+add_subdirectory(_nanoCLR)
 
 ########################################
 if("${TARGET_SERIES}" STREQUAL "CC32xx")
