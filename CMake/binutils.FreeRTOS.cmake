@@ -120,7 +120,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
         target_include_directories(${TARGET}.elf PUBLIC
             
-            ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
+            ${TARGET_NXP_NANOBOOTER_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS}
         )
 
@@ -156,7 +156,8 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
-        ${TARGET_CMSIS_COMMON_SOURCES}
+        ${TARGET_FREERTOS_COMMON_SOURCES}
+        ${TARGET_NXP_COMMON_SOURCES}
         
         ${FreeRTOS_SOURCES}
     )
