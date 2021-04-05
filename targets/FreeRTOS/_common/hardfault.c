@@ -5,8 +5,7 @@
 
 #include "MIMXRT1062.h"
 
-__attribute__((used))
-void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress ) 
+__attribute__((used)) void prvGetRegistersFromStack(unsigned int *pulFaultStackAddress)
 {
     /* These are volatile to try and prevent the compiler/linker optimising them
     away as the variables never actually get used.  If the debugger won't show the
@@ -17,19 +16,19 @@ void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress )
     volatile unsigned int r2;
     volatile unsigned int r3;
     volatile unsigned int r12;
-    volatile unsigned int lr; /* Link register. */
-    volatile unsigned int pc; /* Program counter. */
-    volatile unsigned int psr;/* Program status register. */
+    volatile unsigned int lr;  /* Link register. */
+    volatile unsigned int pc;  /* Program counter. */
+    volatile unsigned int psr; /* Program status register. */
 
-    r0 = pulFaultStackAddress[ 0 ];
-    r1 = pulFaultStackAddress[ 1 ];
-    r2 = pulFaultStackAddress[ 2 ];
-    r3 = pulFaultStackAddress[ 3 ];
+    r0 = pulFaultStackAddress[0];
+    r1 = pulFaultStackAddress[1];
+    r2 = pulFaultStackAddress[2];
+    r3 = pulFaultStackAddress[3];
 
-    r12 = pulFaultStackAddress[ 4 ];
-    lr = pulFaultStackAddress[ 5 ];
-    pc = pulFaultStackAddress[ 6 ];
-    psr = pulFaultStackAddress[ 7 ];
+    r12 = pulFaultStackAddress[4];
+    lr = pulFaultStackAddress[5];
+    pc = pulFaultStackAddress[6];
+    psr = pulFaultStackAddress[7];
 
     (void)r0;
     (void)r1;
@@ -47,22 +46,18 @@ void prvGetRegistersFromStack( unsigned int *pulFaultStackAddress )
     // If no debugger connected, just reset the board
     NVIC_SystemReset();
 
-    for( ;; );
+    for (;;)
+        ;
 }
 
-__attribute__((naked))
-void HardFault_Handler(void)
+__attribute__((naked, aligned(4))) void HardFault_Handler(void)
 {
-    __asm volatile
-    (
-        " tst lr, #4                                                \n"
-        " ite eq                                                    \n"
-        " mrseq r0, msp                                             \n"
-        " mrsne r0, psp                                             \n"
-        " ldr r1, [r0, #24]                                         \n"
-        " ldr r2, handler2_address_const                            \n"
-        " bx r2                                                     \n"
-        " handler2_address_const: .word prvGetRegistersFromStack    \n"
-    );
+    __asm volatile(" tst lr, #4                                                \n"
+                   " ite eq                                                    \n"
+                   " mrseq r0, msp                                             \n"
+                   " mrsne r0, psp                                             \n"
+                   " ldr r1, [r0, #24]                                         \n"
+                   " ldr r2, handler2_address_const                            \n"
+                   " bx r2                                                     \n"
+                   " handler2_address_const: .word prvGetRegistersFromStack    \n");
 }
-
