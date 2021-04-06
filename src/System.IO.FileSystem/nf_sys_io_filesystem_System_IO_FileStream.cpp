@@ -24,7 +24,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     const char *workingPath = stack.Arg1().RecoverString();
     const char *fileName = stack.Arg2().RecoverString();
     FileMode mode = (FileMode)(stack.Arg3().NumericByRef().s4);
@@ -130,9 +130,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
     }
-    
+
     NANOCLR_CLEANUP();
-    
+
     // free buffer memory, if allocated
     if (filePath != NULL)
     {
@@ -146,7 +146,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     const char *workingPath = stack.Arg1().RecoverString();
     const char *fileName = stack.Arg2().RecoverString();
     CLR_INT64 position = stack.Arg3().NumericByRef().s8;
@@ -157,7 +157,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     FIL file;
     FRESULT operationResult;
     char *filePath = NULL;
-    unsigned char * buffer = NULL;
+    unsigned char *buffer = NULL;
 
     FAULT_ON_NULL(workingPath);
     FAULT_ON_NULL(fileName);
@@ -237,7 +237,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     }
 
     NANOCLR_CLEANUP();
-    
+
     // free buffer memory, if allocated
     if (filePath != NULL)
     {
