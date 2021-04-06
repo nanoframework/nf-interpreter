@@ -24,7 +24,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     const char *workingPath = stack.Arg0().RecoverString();
     const char *fileName = stack.Arg1().RecoverString();
 
@@ -87,9 +87,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
         }
     }
     stack.SetResult_Boolean(exists);
-    
+
     NANOCLR_CLEANUP();
-    
+
     // free buffer memory, if allocated
     if (filePath != NULL)
     {
