@@ -117,6 +117,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
             // file doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
         }
+        if (operationResult == FR_OK)
+            {
+                // file created (or opened) succesfully
+                // OK to close it
+                f_close(&file);
+            }
         else
         {
             // failed to create the file
@@ -130,10 +136,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     if (filePath != NULL)
     {
         platform_free(filePath);
-    }
-    if (file != NULL)
-    {
-        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
@@ -221,6 +223,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
                 // failed to create the file
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
+            
+            // OK to close it
+            f_close(&file);
         }
         else
         {
@@ -236,10 +241,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     if (filePath != NULL)
     {
         platform_free(filePath);
-    }
-    if (file != NULL)
-    {
-        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
@@ -321,6 +322,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
                 // Failed to write to file
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
+
+            // OK to close it
+            f_close(&file);
         }
         else
         {
@@ -335,10 +339,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     if (filePath != NULL)
     {
         platform_free(filePath);
-    }
-    if (file != NULL)
-    {
-        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
@@ -402,6 +402,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
         {
             // file opened succesfully
             length = f_size(&file);
+
+            // OK to close it
+            f_close(&file);
         }
         else
         {
@@ -417,10 +420,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     if (filePath != NULL)
     {
         platform_free(filePath);
-    }
-    if (file != NULL)
-    {
-        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
