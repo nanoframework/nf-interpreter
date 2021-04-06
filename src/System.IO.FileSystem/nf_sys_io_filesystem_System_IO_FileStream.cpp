@@ -117,13 +117,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
             // file doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
         }
-
-        if (operationResult == FR_OK)
-        {
-            // file created (or opened) succesfully
-            // OK to close it
-            f_close(&file);
-        }
         else
         {
             // failed to create the file
@@ -137,6 +130,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     if (filePath != NULL)
     {
         platform_free(filePath);
+    }
+    if (file != NULL) {
+        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
@@ -221,20 +217,17 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
             operationResult = f_read(&file, buffer, length, &readCount);
             if (operationResult != FR_OK)
             {
-                // Failed to write to file
+                // failed to create the file
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
-
-            // OK to close it
-            f_close(&file);
         }
         else
         {
             // failed to create the file
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
-        stack.SetResult_I4(readCount);
+        }        
     }
+    stack.SetResult_I4(readCount);
 
     NANOCLR_CLEANUP();
 
@@ -242,6 +235,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     if (filePath != NULL)
     {
         platform_free(filePath);
+    }
+    if (file != NULL) {
+        f_close(&file);
     }
 
     NANOCLR_CLEANUP_END();
@@ -251,170 +247,177 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    
+    const char *workingPath = stack.Arg1().RecoverString();
+    const char *fileName = stack.Arg2().RecoverString();
+    CLR_INT64 position = stack.Arg3().NumericByRef().s8;
+    CLR_RT_HeapBlock_Array *pArray = stack.Arg4().DereferenceArray();
+    const CLR_INT32 length = stack.Arg5().NumericByRef().s4;
+
+    FIL file;
+    FRESULT operationResult;
+    char *filePath = NULL;
+    unsigned char *buffer = NULL;
+
+    FAULT_ON_NULL(workingPath);
+    FAULT_ON_NULL(fileName);
+    FAULT_ON_NULL_ARG(pArray);
+
+    buffer = pArray->GetFirstElement();
+
+    // setup file path
+    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+
+    // sanity check for successfull malloc
+    if (filePath == NULL)
     {
-        const char *workingPath = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg2().RecoverString();
-        FAULT_ON_NULL(fileName);
-        CLR_INT64 position = stack.Arg3().NumericByRef().s8;
-        CLR_RT_HeapBlock_Array *pArray = stack.Arg4().DereferenceArray();
-        FAULT_ON_NULL_ARG(pArray);
-        unsigned char *buffer = pArray->GetFirstElement();
-        const CLR_INT32 length = stack.Arg5().NumericByRef().s4;
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
-        FIL file;
-        FRESULT operationResult;
-        char *filePath = NULL;
+    // clear working buffer
+    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
-        // setup file path
-        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    // compose file path
+    CombinePathAndName(filePath, workingPath, fileName);
 
-        // sanity check for successfull malloc
-        if (filePath == NULL)
+    // change directory
+    operationResult = f_chdir(workingPath);
+
+    if (operationResult != FR_OK)
+    {
+        if (operationResult == FR_INVALID_DRIVE)
         {
-            // failed to allocate memory
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            // invalid drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
         }
-
-        // clear working buffer
-        memset(filePath, 0, 2 * FF_LFN_BUF + 1);
-
-        // compose file path
-        CombinePathAndName(filePath, workingPath, fileName);
-
-        // change directory
-        operationResult = f_chdir(workingPath);
-
-        if (operationResult != FR_OK)
+        else
         {
-            if (operationResult == FR_INVALID_DRIVE)
+            // error opening the directoty
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+    }
+    else
+    {
+        // open file
+        operationResult = f_open(&file, filePath, FA_WRITE);
+
+        if (operationResult == FR_OK)
+        {
+            operationResult = f_lseek(&file, position); // Change to actual position
+            if (operationResult != FR_OK)
             {
-                // invalid drive
-                NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+                // failed to change position
+                NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
             }
-            else
+
+            // file opened succesfully
+            CLR_UINT32 written = 0;
+            operationResult = f_write(&file, buffer, length, &written);
+            if (operationResult != FR_OK)
             {
-                // error opening the directoty
-                NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+                // Failed to write to file
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
         }
         else
         {
-            // open file
-            operationResult = f_open(&file, filePath, FA_WRITE);
-
-            if (operationResult == FR_OK)
-            {
-                operationResult = f_lseek(&file, position); // Change to actual position
-                if (operationResult != FR_OK)
-                {
-                    // failed to change position
-                    NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
-                }
-
-                // file opened succesfully
-                CLR_UINT32 written = 0;
-                operationResult = f_write(&file, buffer, length, &written);
-                if (operationResult != FR_OK)
-                {
-                    // Failed to write to file
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-                }
-
-                // OK to close it
-                f_close(&file);
-            }
-            else
-            {
-                // failed to create the file
-                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-            }
-        }
-
-        // free buffer memory, if allocated
-        if (filePath != NULL)
-        {
-            platform_free(filePath);
+            // failed to create the file
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
     }
-    NANOCLR_NOCLEANUP();
+
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if (filePath != NULL)
+    {
+        platform_free(filePath);
+    }
+    if (file != NULL) {
+        f_close(&file);
+    }
+    
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8__STRING__STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    
+    CLR_INT64 length = 0;
+
+    const char *workingPath = stack.Arg1().RecoverString();
+    const char *fileName = stack.Arg2().RecoverString();
+
+    FIL file;
+    FRESULT operationResult;
+    char *filePath = NULL;
+
+    FAULT_ON_NULL(workingPath);
+    FAULT_ON_NULL(fileName);
+
+    // setup file path
+    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+
+    // sanity check for successfull malloc
+    if (filePath == NULL)
     {
-        CLR_INT64 length = 0;
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
-        const char *workingPath = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg2().RecoverString();
-        FAULT_ON_NULL(fileName);
+    // clear working buffer
+    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
-        FIL file;
-        FRESULT operationResult;
-        char *filePath = NULL;
+    // compose file path
+    CombinePathAndName(filePath, workingPath, fileName);
 
-        // setup file path
-        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    // change directory
+    operationResult = f_chdir(workingPath);
 
-        // sanity check for successfull malloc
-        if (filePath == NULL)
+    if (operationResult != FR_OK)
+    {
+        if (operationResult == FR_INVALID_DRIVE)
         {
-            // failed to allocate memory
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // clear working buffer
-        memset(filePath, 0, 2 * FF_LFN_BUF + 1);
-
-        // compose file path
-        CombinePathAndName(filePath, workingPath, fileName);
-
-        // change directory
-        operationResult = f_chdir(workingPath);
-
-        if (operationResult != FR_OK)
-        {
-            if (operationResult == FR_INVALID_DRIVE)
-            {
-                // invalid drive
-                NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
-            }
-            else
-            {
-                // error opening the directoty
-                NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-            }
+            // invalid drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
         }
         else
         {
-            // open file
-            operationResult = f_open(&file, filePath, FA_OPEN_EXISTING);
-
-            if (operationResult == FR_OK)
-            {
-                // file opened succesfully
-                length = f_size(&file);
-
-                // OK to close it
-                f_close(&file);
-            }
-            else
-            {
-                // failed to create the file
-                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-            }
+            // error opening the directoty
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
-
-        // free buffer memory, if allocated
-        if (filePath != NULL)
-        {
-            platform_free(filePath);
-        }
-
-        stack.SetResult_I8(length);
     }
-    NANOCLR_NOCLEANUP();
+    else
+    {
+        // open file
+        operationResult = f_open(&file, filePath, FA_OPEN_EXISTING);
+
+        if (operationResult == FR_OK)
+        {
+            // file opened succesfully
+            length = f_size(&file);
+        }
+        else
+        {
+            // failed to create the file
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+    }
+    stack.SetResult_I8(length);
+    
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if (filePath != NULL)
+    {
+        platform_free(filePath);
+    }
+    if (file != NULL) {
+        f_close(&file);
+    }
+    
+    NANOCLR_CLEANUP_END();
 }
