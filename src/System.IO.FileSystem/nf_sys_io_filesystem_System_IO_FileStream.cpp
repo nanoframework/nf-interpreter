@@ -131,7 +131,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     {
         platform_free(filePath);
     }
-    if (file != NULL) {
+    if (file != NULL)
+    {
         f_close(&file);
     }
 
@@ -225,7 +226,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
         {
             // failed to create the file
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }        
+        }
     }
     stack.SetResult_I4(readCount);
 
@@ -236,7 +237,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     {
         platform_free(filePath);
     }
-    if (file != NULL) {
+    if (file != NULL)
+    {
         f_close(&file);
     }
 
@@ -247,7 +249,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     const char *workingPath = stack.Arg1().RecoverString();
     const char *fileName = stack.Arg2().RecoverString();
     CLR_INT64 position = stack.Arg3().NumericByRef().s8;
@@ -334,10 +336,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     {
         platform_free(filePath);
     }
-    if (file != NULL) {
+    if (file != NULL)
+    {
         f_close(&file);
     }
-    
+
     NANOCLR_CLEANUP_END();
 }
 
@@ -345,7 +348,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     CLR_INT64 length = 0;
 
     const char *workingPath = stack.Arg1().RecoverString();
@@ -407,7 +410,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
         }
     }
     stack.SetResult_I8(length);
-    
+
     NANOCLR_CLEANUP();
 
     // free buffer memory, if allocated
@@ -415,9 +418,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     {
         platform_free(filePath);
     }
-    if (file != NULL) {
+    if (file != NULL)
+    {
         f_close(&file);
     }
-    
+
     NANOCLR_CLEANUP_END();
 }
