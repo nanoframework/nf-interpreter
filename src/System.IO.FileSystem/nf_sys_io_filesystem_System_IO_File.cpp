@@ -24,78 +24,79 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    const char *workingPath = stack.Arg0().RecoverString();
+    const char *fileName = stack.Arg1().RecoverString();
+
+    bool exists = false;
+    FRESULT operationResult;
+    char *filePath = NULL;
+
+    FAULT_ON_NULL(workingPath);
+    FAULT_ON_NULL(fileName);
+
+    // setup file path
+    filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+
+    // sanity check for successfull malloc
+    if (filePath == NULL)
     {
-        const char *workingPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(workingPath);
-        const char *fileName = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(fileName);
+        // failed to allocate memory
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
-        bool exists = false;
+    // clear working buffer
+    memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
-        FRESULT operationResult;
-        char *filePath = NULL;
+    // compose file path
+    CombinePathAndName2(filePath, workingPath, fileName);
 
-        // setup file path
-        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    // change directory
+    operationResult = f_chdir(workingPath);
 
-        // sanity check for successfull malloc
-        if (filePath == NULL)
+    if (operationResult != FR_OK)
+    {
+        if (operationResult == FR_INVALID_DRIVE)
         {
-            // failed to allocate memory
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
-
-        // clear working buffer
-        memset(filePath, 0, 2 * FF_LFN_BUF + 1);
-
-        // compose file path
-        CombinePathAndName2(filePath, workingPath, fileName);
-
-        // change directory
-        operationResult = f_chdir(workingPath);
-
-        if (operationResult != FR_OK)
-        {
-            if (operationResult == FR_INVALID_DRIVE)
-            {
-                // invalid drive
-                NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
-            }
-            else
-            {
-                // error opening the directoty
-                NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-            }
+            // invalid drive
+            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
         }
         else
         {
-            FILINFO fno;
-
-            operationResult = f_stat(filePath, &fno);
-
-            if (operationResult == FR_OK)
-            {
-                exists = true;
-            }
-            else if (operationResult == FR_NO_FILE)
-            {
-                exists = false;
-            }
-            else
-            {
-                exists = false;
-            }
+            // error opening the directoty
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
-
-        // free buffer memory, if allocated
-        if (filePath != NULL)
-        {
-            platform_free(filePath);
-        }
-
-        stack.SetResult_Boolean(exists);
     }
-    NANOCLR_NOCLEANUP();
+    else
+    {
+        FILINFO fno;
+
+        operationResult = f_stat(filePath, &fno);
+
+        if (operationResult == FR_OK)
+        {
+            exists = true;
+        }
+        else if (operationResult == FR_NO_FILE)
+        {
+            exists = false;
+        }
+        else
+        {
+            exists = false;
+        }
+    }
+    stack.SetResult_Boolean(exists);
+
+    NANOCLR_CLEANUP();
+
+    // free buffer memory, if allocated
+    if (filePath != NULL)
+    {
+        platform_free(filePath);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_File::MoveNative___STATIC__VOID__STRING__STRING(CLR_RT_StackFrame &stack)
