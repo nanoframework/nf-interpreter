@@ -220,7 +220,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
             operationResult = f_read(&file, buffer, length, &readCount);
             if (operationResult != FR_OK)
             {
-                // failed to create the file
+                // failed to read the file
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
             }
             
