@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #ifndef _WIN_DEV_WIFI_NATIVE_H_
 #define _WIN_DEV_WIFI_NATIVE_H_
 
@@ -19,7 +18,13 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAvailableNetwork
     static const int FIELD___networkKind = 4;
 
     //--//
+};
 
+struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiConnectionResult
+{
+    static const int FIELD___ConnectionStatus = 1;
+
+    //--//
 };
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter
@@ -33,31 +38,22 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter
 
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeConnect___WindowsDevicesWiFiWiFiConnectionStatus__STRING__STRING__WindowsDevicesWiFiWiFiReconnectionKind);
+    NANOCLR_NATIVE_DECLARE(
+        NativeConnect___WindowsDevicesWiFiWiFiConnectionStatus__STRING__STRING__WindowsDevicesWiFiWiFiReconnectionKind);
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID);
     NANOCLR_NATIVE_DECLARE(NativeScanAsync___VOID);
     NANOCLR_NATIVE_DECLARE(GetNativeScanReport___SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(NativeFindWirelessAdapters___STATIC__SZARRAY_U1);
 
     //--//
-
-};
-
-struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiConnectionResult
-{
-    static const int FIELD___ConnectionStatus = 1;
-
-    //--//
-
 };
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEvent
 {
-    static const int FIELD__EventType = 1;
-    static const int FIELD__Time = 2;
+    static const int FIELD__EventType = 3;
+    static const int FIELD__Time = 4;
 
     //--//
-
 };
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEventListener
@@ -65,7 +61,6 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiEventListener
     static const int FIELD__wifiAdapters = 1;
 
     //--//
-
 };
 
 struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiNetworkReport
@@ -73,7 +68,6 @@ struct Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiNetworkReport
     static const int FIELD___wifiNetworks = 1;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Wifi;
