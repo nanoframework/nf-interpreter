@@ -29,7 +29,7 @@ HRESULT Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum(CLR_RT_
     flagValue = pFlag;
 
     // need to unbox Enum to get value
-    NANOCLR_CHECK_HRESULT(flagTypeDesc.InitializeFromObject(*enumValue));
+    NANOCLR_CHECK_HRESULT(flagTypeDesc.InitializeFromObject(*flagValue));
     NANOCLR_CHECK_HRESULT(flagValue->PerformUnboxing(flagTypeDesc.m_handlerCls));
 
     // check if both types are equivalent
