@@ -60,7 +60,7 @@ steps:
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Set Cloudsmith repo path
     inputs:
       targetType: 'inline'
@@ -107,7 +107,7 @@ steps:
       failOnStderr: 'true'
 
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Upload package to Cloudsmith
     inputs:
       targetType: 'inline'
