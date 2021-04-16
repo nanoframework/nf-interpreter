@@ -57,7 +57,6 @@ struct Library_nf_sys_io_filesystem_System_IO_Directory
     NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_File
@@ -70,7 +69,6 @@ struct Library_nf_sys_io_filesystem_System_IO_File
     NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
@@ -90,7 +88,6 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
     NANOCLR_NATIVE_DECLARE(GetLengthNative___I8__STRING__STRING);
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_MemoryStream
@@ -103,7 +100,6 @@ struct Library_nf_sys_io_filesystem_System_IO_MemoryStream
     static const int FIELD___isOpen = 6;
 
     //--//
-
 };
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
@@ -113,7 +109,6 @@ struct Library_nf_sys_io_filesystem_System_IO_Path
     static const int FIELD_STATIC__m_illegalCharacters = 2;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
