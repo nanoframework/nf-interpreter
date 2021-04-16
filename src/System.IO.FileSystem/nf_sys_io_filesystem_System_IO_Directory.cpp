@@ -6,8 +6,9 @@
 #include "nf_sys_io_filesystem.h"
 #include <ff.h>
 
-extern void CombinePathAndName2(char *outpath, const char *path1, const char *path2);
+extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern void CombinePath(char *outpath, const char *path1, const char *path2);
+extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
@@ -38,7 +39,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
     memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName2(folderPath, workingPath, folderName);
+    CombinePathAndName(folderPath, workingPath, folderName);
 
     // change directory
     operationResult = f_chdir(workingPath);
@@ -163,9 +164,139 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
 
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock *firstFolderPath;
+        CLR_RT_HeapBlock *filePathEntry;
         const char *folderPath = stack.Arg0().RecoverString();
         CLR_RT_HeapBlock &filePaths = stack.PushValue();
+
+        uint16_t fileCount = 0;
+        DIR currentDirectory;
+        FRESULT operationResult;
+        static FILINFO fileInfo;
+
+        FAULT_ON_NULL(folderPath);
+
+        // open directory
+        operationResult = f_opendir(&currentDirectory, folderPath);
+
+        if (operationResult != FR_OK)
+        {
+            if (operationResult == FR_INVALID_DRIVE)
+            {
+                // failed to change drive
+                NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+            }
+            // create an empty array of files paths <String>
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(filePaths, fileCount, g_CLR_RT_WellKnownTypes.m_String));
+        }
+        else
+        {
+            // need to perform this in two steps
+            // 1st: count the file objects
+            // 2nd: create the array items with each file object
+
+            // perform 1st pass
+            for (;;)
+            {
+                // read next file item
+                operationResult = f_readdir(&currentDirectory, &fileInfo);
+
+                // break on error or at end of dir
+                if (operationResult != FR_OK || fileInfo.fname[0] == 0)
+                {
+                    break;
+                }
+
+                // check if this is a file
+                // but skip if:
+                // - has system attribute set
+                // - has hidden attribute set
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
+                {
+                    fileCount++;
+                }
+            }
+        }
+        // create an array of files paths <String>
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(filePaths, fileCount, g_CLR_RT_WellKnownTypes.m_String));
+
+        // get a pointer to the first object in the array (which is of type <String>)
+        filePathEntry = (CLR_RT_HeapBlock *)filePaths.DereferenceArray()->GetFirstElement();
+
+        if (fileCount > 0)
+        {
+            // allocate memory for buffers
+            stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+
+            // sanity check for successfull malloc
+            if (stringBuffer == NULL || workingBuffer == NULL)
+            {
+                // failed to allocate memory
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // perform 2nd pass
+            // need to rewind the directory read index first
+            f_readdir(&currentDirectory, NULL);
+
+            for (;;)
+            {
+                // read next file item
+                operationResult = f_readdir(&currentDirectory, &fileInfo);
+
+                // break on error or at end of dir
+                if (operationResult != FR_OK || fileInfo.fname[0] == 0)
+                {
+                    break;
+                }
+
+                // check if this is a file
+                // but skip if:
+                // - has system attribute set
+                // - has hidden attribute set
+                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
+                {
+                    // clear working buffer
+                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+                    // compose file path
+                    CombinePath(workingBuffer, folderPath, fileInfo.fname);
+                    // set file full path in array of strings
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*filePathEntry, workingBuffer));
+
+                    // move the file array pointer to the next item in the array
+                    filePathEntry++;
+                }
+            }
+        }
+    }
+
+    NANOCLR_CLEANUP();
+
+    if (stringBuffer == NULL)
+    {
+        platform_free(stringBuffer);
+    }
+    if (workingBuffer == NULL)
+    {
+        platform_free(workingBuffer);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING(
+    CLR_RT_StackFrame &stack)
+{
+    char *stringBuffer = NULL;
+    char *workingBuffer = NULL;
+
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *folderPathEntry;
+        const char *folderPath = stack.Arg0().RecoverString();
+        CLR_RT_HeapBlock &folderPaths = stack.PushValue();
 
         uint16_t directoryCount = 0;
         DIR currentDirectory;
@@ -186,13 +317,13 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
             }
             // create an empty array of files paths <String>
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(filePaths, directoryCount, g_CLR_RT_WellKnownTypes.m_String));
+                CLR_RT_HeapBlock_Array::CreateInstance(folderPaths, directoryCount, g_CLR_RT_WellKnownTypes.m_String));
         }
         else
         {
             // need to perform this in two steps
             // 1st: count the directory objects
-            // 2nd: create the array items with each file object
+            // 2nd: create the array items with each directory object
 
             // perform 1st pass
             for (;;)
@@ -218,16 +349,16 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
         }
         // create an array of files paths <String>
         NANOCLR_CHECK_HRESULT(
-            CLR_RT_HeapBlock_Array::CreateInstance(filePaths, directoryCount, g_CLR_RT_WellKnownTypes.m_String));
+            CLR_RT_HeapBlock_Array::CreateInstance(folderPaths, directoryCount, g_CLR_RT_WellKnownTypes.m_String));
 
         // get a pointer to the first object in the array (which is of type <String>)
-        firstFolderPath = (CLR_RT_HeapBlock *)filePaths.DereferenceArray()->GetFirstElement();
+        folderPathEntry = (CLR_RT_HeapBlock *)folderPaths.DereferenceArray()->GetFirstElement();
 
         if (directoryCount > 0)
         {
             // allocate memory for buffers
-            stringBuffer = (char *)malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)malloc(2 * FF_LFN_BUF + 1);
+            stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
             // sanity check for successfull malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -262,10 +393,10 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                     // compose directory path
                     CombinePath(workingBuffer, folderPath, fileInfo.fname);
                     // set directory full path in array of strings
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*firstFolderPath, workingBuffer));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*folderPathEntry, workingBuffer));
 
-                    // move the storage folder pointer to the next item in the array
-                    firstFolderPath++;
+                    // move the folder array pointer to the next item in the array
+                    folderPathEntry++;
                 }
             }
         }
@@ -285,23 +416,33 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative___STATIC__SZARRAY_STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    // {
+    //     CLR_RT_HeapBlock *storageFolder;
+    //     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+    //     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
 
+    //     // create an array of files paths <String>
+    //     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 1, g_CLR_RT_WellKnownTypes.m_String));
+
+    //     // is the SD card file system ready?
+    //     if (sdCardFileSystemReady)
+    //     {
+    //         // get a pointer to the first object in the array (which is of type <String>)
+    //         storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+    //         // as of now we only have one drive,
+    //         // in the future if more comes, we might want to iterate over all drives
+    //         memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
+
+    //         // set the drive letter in string array
+    //         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
+    //     }
+    // }
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
     NANOCLR_NOCLEANUP();
 }
 
@@ -309,8 +450,36 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetCreationTimeNative_
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    {
+        SYSTEMTIME fileInfoTime;
+        CLR_RT_TypeDescriptor dtType;
+        FILINFO fileInfo;
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        const char *folderPath = stack.Arg0().RecoverString();
+        FAULT_ON_NULL(folderPath);
+
+        int operationResult = f_stat(folderPath, &fileInfo);
+        if (operationResult != FR_OK)
+        {
+            // folder doesn't exist
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+
+        // get the date time details and fill in the managed field
+        // compute directory date
+        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+        CLR_RT_HeapBlock &ref = stack.PushValue();
+
+        // initialize <DateTime> type descriptor
+        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+
+        // create an instance of <DateTime>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
+
+        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -319,9 +488,36 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastAccessTimeNativ
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    {
+        SYSTEMTIME fileInfoTime;
+        CLR_RT_TypeDescriptor dtType;
+        FILINFO fileInfo;
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        const char *folderPath = stack.Arg0().RecoverString();
+        FAULT_ON_NULL(folderPath);
 
+        int operationResult = f_stat(folderPath, &fileInfo);
+        if (operationResult != FR_OK)
+        {
+            // folder doesn't exist
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+
+        // get the date time details and fill in the managed field
+        // compute directory date
+        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+        CLR_RT_HeapBlock &ref = stack.PushValue();
+
+        // initialize <DateTime> type descriptor
+        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+
+        // create an instance of <DateTime>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
+
+        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+    }
     NANOCLR_NOCLEANUP();
 }
 
@@ -329,8 +525,35 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    {
+        SYSTEMTIME fileInfoTime;
+        CLR_RT_TypeDescriptor dtType;
+        FILINFO fileInfo;
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        const char *folderPath = stack.Arg0().RecoverString();
+        FAULT_ON_NULL(folderPath);
 
+        int operationResult = f_stat(folderPath, &fileInfo);
+        if (operationResult != FR_OK)
+        {
+            // folder doesn't exist
+            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
+        }
+
+        // get the date time details and fill in the managed field
+        // compute directory date
+        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+        CLR_RT_HeapBlock &ref = stack.PushValue();
+
+        // initialize <DateTime> type descriptor
+        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+
+        // create an instance of <DateTime>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
+
+        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+    }
     NANOCLR_NOCLEANUP();
 }
