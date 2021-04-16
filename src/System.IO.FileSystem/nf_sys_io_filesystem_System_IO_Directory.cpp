@@ -420,30 +420,29 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    // {
-    //     CLR_RT_HeapBlock *storageFolder;
-    //     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    //     char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
+    {
+        // TODO: implement retrieving more than one hardcoded drive
+        // multiple different boards can have different implementations
+        // for now just return "D:\\" as an only available drive
+        CLR_RT_HeapBlock *storageFolder;
+        CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+        char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
 
-    //     // create an array of files paths <String>
-    //     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 1, g_CLR_RT_WellKnownTypes.m_String));
+        // create an array of files paths <String>
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 1, g_CLR_RT_WellKnownTypes.m_String));
 
-    //     // is the SD card file system ready?
-    //     if (sdCardFileSystemReady)
-    //     {
-    //         // get a pointer to the first object in the array (which is of type <String>)
-    //         storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+        // get a pointer to the first object in the array (which is of type <String>)
+        storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
-    //         // as of now we only have one drive,
-    //         // in the future if more comes, we might want to iterate over all drives
-    //         memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
+        // as of now we only have one drive,
+        // in the future if more comes, we might want to iterate over all drives
+        memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
 
-    //         // set the drive letter in string array
-    //         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
-    //     }
-    // }
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-    NANOCLR_NOCLEANUP();
+        // set the drive letter in string array
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
+    }
+}
+NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetCreationTimeNative___STATIC__SystemDateTime__STRING(
