@@ -445,81 +445,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
 NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetCreationTimeNative___STATIC__SystemDateTime__STRING(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        SYSTEMTIME fileInfoTime;
-        CLR_RT_TypeDescriptor dtType;
-        FILINFO fileInfo;
-
-        const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
-
-        int operationResult = f_stat(folderPath, &fileInfo);
-        if (operationResult != FR_OK)
-        {
-            // folder doesn't exist
-            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-        }
-
-        // get the date time details and fill in the managed field
-        // compute directory date
-        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-        CLR_RT_HeapBlock &ref = stack.PushValue();
-
-        // initialize <DateTime> type descriptor
-        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-        // create an instance of <DateTime>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
-        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastAccessTimeNative___STATIC__SystemDateTime__STRING(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        SYSTEMTIME fileInfoTime;
-        CLR_RT_TypeDescriptor dtType;
-        FILINFO fileInfo;
-
-        const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
-
-        int operationResult = f_stat(folderPath, &fileInfo);
-        if (operationResult != FR_OK)
-        {
-            // folder doesn't exist
-            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-        }
-
-        // get the date time details and fill in the managed field
-        // compute directory date
-        fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-        CLR_RT_HeapBlock &ref = stack.PushValue();
-
-        // initialize <DateTime> type descriptor
-        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-        // create an instance of <DateTime>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
-        *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
-    }
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -539,8 +464,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
 
-        // get the date time details and fill in the managed field
-        // compute directory date
+        // get the date time details and return it on Stack as DateTime object
         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
         CLR_RT_HeapBlock &ref = stack.PushValue();

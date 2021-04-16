@@ -198,7 +198,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetCreationTimeNative___STATIC__SystemDateTime__STRING(
+HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -207,18 +207,17 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetCreationTimeNative___STA
         CLR_RT_TypeDescriptor dtType;
         FILINFO fileInfo;
 
-        const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
+        const char *filePath = stack.Arg0().RecoverString();
+        FAULT_ON_NULL(filePath);
 
-        int operationResult = f_stat(folderPath, &fileInfo);
+        int operationResult = f_stat(filePath, &fileInfo);
         if (operationResult != FR_OK)
         {
-            // folder doesn't exist
+            // file doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
 
-        // get the date time details and fill in the managed field
-        // compute directory date
+        // get the date time details and return it on Stack as DateTime object
         fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
 
         CLR_RT_HeapBlock &ref = stack.PushValue();
@@ -232,25 +231,5 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetCreationTimeNative___STA
         CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
         *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
     }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastAccessTimeNative___STATIC__SystemDateTime__STRING(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
     NANOCLR_NOCLEANUP();
 }

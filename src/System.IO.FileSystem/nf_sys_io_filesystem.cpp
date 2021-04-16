@@ -17,8 +17,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING,
     Library_nf_sys_io_filesystem_System_IO_Directory::MoveNative___STATIC__VOID__STRING__STRING,
     Library_nf_sys_io_filesystem_System_IO_Directory::DeleteNative___STATIC__VOID__STRING,
@@ -26,11 +24,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATIC__SZARRAY_STRING__STRING,
     Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING,
     Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative___STATIC__SZARRAY_STRING,
-    Library_nf_sys_io_filesystem_System_IO_Directory::GetCreationTimeNative___STATIC__SystemDateTime__STRING,
-    Library_nf_sys_io_filesystem_System_IO_Directory::GetLastAccessTimeNative___STATIC__SystemDateTime__STRING,
     Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -45,8 +39,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_sys_io_filesystem_System_IO_File::DeleteNative___STATIC__VOID__STRING,
     Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATIC__U1__STRING,
     Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATIC__VOID__STRING__U1,
-    Library_nf_sys_io_filesystem_System_IO_File::GetCreationTimeNative___STATIC__SystemDateTime__STRING,
-    Library_nf_sys_io_filesystem_System_IO_File::GetLastAccessTimeNative___STATIC__SystemDateTime__STRING,
     Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING,
     NULL,
     NULL,
@@ -115,7 +107,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0x78F61FAA,
+    0x3112D24C,
     method_lookup,
     { 1, 0, 0, 0 }
 };
