@@ -65,7 +65,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }
@@ -192,7 +192,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }
@@ -296,7 +296,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }
@@ -389,7 +389,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }

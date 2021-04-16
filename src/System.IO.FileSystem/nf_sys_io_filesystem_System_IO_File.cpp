@@ -63,7 +63,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }
