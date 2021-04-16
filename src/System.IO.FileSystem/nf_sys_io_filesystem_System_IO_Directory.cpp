@@ -441,8 +441,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
         // set the drive letter in string array
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
     }
-}
-NANOCLR_NOCLEANUP();
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative___STATIC__SystemDateTime__STRING(
