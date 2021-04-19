@@ -17,7 +17,6 @@
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
-WP_Message inboundMessage;
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
 
@@ -60,7 +59,7 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
     //req = NULL;
 }
 
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
     // save for latter comparison
     uint16_t requestedSize = *size;
@@ -70,7 +69,7 @@ int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     // receive DMA request
     mxc_uart_req_t rxRequest;
 
-    // sanity check for request of 0 size
+    // check for request with 0 size
     if (*size)
     {
         rxRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
@@ -119,8 +118,8 @@ int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
 
-        // check if the requested read matches the actual read count
-        return (requestedSize == receivedBytes);
+        // check if any bytes where read
+        return receivedBytes > 0;
     }
 
     return true;
@@ -132,9 +131,8 @@ abort_rx:
     return false;
 }
 
-int WP_TransmitMessage(WP_Message *message)
+bool WP_TransmitMessage(WP_Message *message)
 {
-    // transmit DMA request
     mxc_uart_req_t txRequest;
     uint8_t waitResult;
 

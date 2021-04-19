@@ -6,8 +6,6 @@
 #include <WireProtocol_Message.h>
 #include <tx_api.h>
 
-extern WP_Message inboundMessage;
-
 __attribute__((noreturn))
 void ReceiverThread_entry(uint32_t parameter)
 {
@@ -15,13 +13,12 @@ void ReceiverThread_entry(uint32_t parameter)
 
     tx_thread_sleep(50);
 
+    WP_Message_PrepareReception();
+
     // loop until thread receives a request to terminate
     while (1) 
     {
-        WP_Message_Initialize(&inboundMessage);
-        WP_Message_PrepareReception(&inboundMessage);
-
-        WP_Message_Process(&inboundMessage);
+        WP_Message_Process();
 
         // pass control to the OS
         tx_thread_relinquish();

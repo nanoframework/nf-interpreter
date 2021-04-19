@@ -18,14 +18,14 @@ WP_Message inboundMessage;
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
 
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
     // save for latter comparison
     uint16_t requestedSize = *size;
     // reset value
     receivedBytes = 0;
 
-    // sanity check for request of 0 size
+    // check for request with 0 size
     if (*size)
     {
         // read from serial stream with 250ms timeout
@@ -43,14 +43,14 @@ int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
 
-        // check if the requested read matches the actual read count
-        return (requestedSize == receivedBytes);
+        // check if any bytes where read
+        return receivedBytes > 0;
     }
 
     return true;
 }
 
-int WP_TransmitMessage(WP_Message *message)
+bool WP_TransmitMessage(WP_Message *message)
 {
     TRACE(
         TRACE_HEADERS,
