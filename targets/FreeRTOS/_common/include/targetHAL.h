@@ -9,8 +9,7 @@
 #include "FreeRTOS.h"
 #include <target_board.h>
 #include "cmsis_gcc.h"
-// TODO
-// #include <lwipopts.h>
+#include <lwipopts.h>
 
 // global mutex protecting the internal state of the interpreter, including event flags
 #define GLOBAL_LOCK()                                                                                                  \
@@ -41,9 +40,8 @@
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
 
-// TODO
 // get number of sockets from lwIP options
-// #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
 
 #define LPCSTR const char *
 
