@@ -21,6 +21,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
@@ -141,6 +142,7 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     nanoprintf.c
+    nanoRingBuffer.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -225,6 +227,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             
             # Helpers
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
