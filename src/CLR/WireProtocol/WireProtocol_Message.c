@@ -10,8 +10,13 @@
 #include "WireProtocol_Message.h"
 
 uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
-static uint16_t lastOutboundMessage = 65535;
-static uint8_t *marker;
+static uint16_t _lastOutboundMessage = 65535;
+uint64_t _payloadTicks;
+static uint8_t *_marker;
+static uint8_t *_pos;
+static uint16_t _size;
+static uint8_t _rxState;
+static WP_Message _inboundMessage;
 
 // timeout to receive WP payload before bailing out
 // 5 secs (100 nsecs units)
@@ -65,15 +70,13 @@ void WP_Message_Initialize(WP_Message *message)
 {
     memset(&message->m_header, 0, sizeof(message->m_header));
     message->m_payload = NULL;
-    message->m_pos = NULL;
-    message->m_size = 0;
-    message->m_payloadTicks = 0;
-    message->m_rxState = ReceiveState_Idle;
 }
 
-void WP_Message_PrepareReception(WP_Message *message)
+void WP_Message_PrepareReception()
 {
-    message->m_rxState = ReceiveState_Initialize;
+    _rxState = ReceiveState_Initialize;
+
+    WP_Message_Initialize(&_inboundMessage);
 }
 
 void WP_Message_PrepareRequest(
@@ -85,7 +88,7 @@ void WP_Message_PrepareRequest(
 {
     memcpy(
         &message->m_header.m_signature,
-        marker ? marker : (uint8_t *)MARKER_PACKET_V1,
+        _marker ? _marker : (uint8_t *)MARKER_PACKET_V1,
         sizeof(message->m_header.m_signature));
 
 #if defined(WP_IMPLEMENTS_CRC32)
@@ -94,7 +97,7 @@ void WP_Message_PrepareRequest(
     message->m_header.m_crcData = 0;
 #endif
     message->m_header.m_cmd = cmd;
-    message->m_header.m_seq = lastOutboundMessage++;
+    message->m_header.m_seq = _lastOutboundMessage++;
     message->m_header.m_seqReply = 0;
     message->m_header.m_flags = flags;
     message->m_header.m_size = payloadSize;
@@ -118,7 +121,7 @@ void WP_Message_PrepareReply(
 {
     memcpy(
         &message->m_header.m_signature,
-        marker ? marker : (uint8_t *)MARKER_PACKET_V1,
+        _marker ? _marker : (uint8_t *)MARKER_PACKET_V1,
         sizeof(message->m_header.m_signature));
 
 #if defined(WP_IMPLEMENTS_CRC32)
@@ -127,7 +130,7 @@ void WP_Message_PrepareReply(
     message->m_header.m_crcData = 0;
 #endif
     message->m_header.m_cmd = req->m_cmd;
-    message->m_header.m_seq = lastOutboundMessage++;
+    message->m_header.m_seq = _lastOutboundMessage++;
     message->m_header.m_seqReply = req->m_seq;
     message->m_header.m_flags = flags | WP_Flags_c_Reply;
     message->m_header.m_size = payloadSize;
@@ -218,14 +221,14 @@ void WP_Message_ReplyBadPacket(uint32_t flags)
     WP_TransmitMessage(&message);
 }
 
-int WP_Message_Process(WP_Message *message)
+int WP_Message_Process()
 {
-    uint8_t *buf = (uint8_t *)&message->m_header;
+    uint8_t *buf = (uint8_t *)&_inboundMessage.m_header;
     uint16_t len;
 
     while (true)
     {
-        switch (message->m_rxState)
+        switch (_rxState)
         {
             case ReceiveState_Idle:
                 TRACE0(TRACE_STATE, "RxState==IDLE\n");
@@ -233,66 +236,70 @@ int WP_Message_Process(WP_Message *message)
 
             case ReceiveState_Initialize:
                 TRACE0(TRACE_STATE, "RxState==INIT\n");
-                WP_Message_Release(message);
+                WP_Message_Initialize(&_inboundMessage);
 
-                message->m_rxState = ReceiveState_WaitingForHeader;
-                message->m_pos = (uint8_t *)&message->m_header;
-                message->m_size = sizeof(message->m_header);
+                _rxState = ReceiveState_WaitingForHeader;
+                _pos = (uint8_t *)&_inboundMessage.m_header;
+                _size = sizeof(_inboundMessage.m_header);
+
                 break;
 
             case ReceiveState_WaitingForHeader:
                 TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
-                if (WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
+
+                if (WP_ReceiveBytes(_pos, &_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
                     TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
+
                     return false;
                 }
 
-                // Synch to the start of a message.
+                // Synch to the start of a message by looking for a valid MARKER
                 while (true)
                 {
-                    len = sizeof(message->m_header) - message->m_size;
+                    len = sizeof(_inboundMessage.m_header) - _size;
+
                     if (len <= 0)
                     {
                         break;
                     }
 
-                    size_t lenCmp = min(len, sizeof(message->m_header.m_signature));
+                    size_t lenCmp = min(len, sizeof(_inboundMessage.m_header.m_signature));
 
-                    if (memcmp(&message->m_header, MARKER_DEBUGGER_V1, lenCmp) == 0)
+                    if (memcmp(&_inboundMessage.m_header, MARKER_DEBUGGER_V1, lenCmp) == 0)
                     {
                         break;
                     }
-                    if (memcmp(&message->m_header, MARKER_PACKET_V1, lenCmp) == 0)
+                    if (memcmp(&_inboundMessage.m_header, MARKER_PACKET_V1, lenCmp) == 0)
                     {
                         break;
                     }
 
                     memmove(&buf[0], &buf[1], len - 1);
 
-                    message->m_pos--;
-                    message->m_size++;
+                    _pos--;
+                    _size++;
                 }
 
-                if (len >= sizeof(message->m_header.m_signature))
+                if (len >= sizeof(_inboundMessage.m_header.m_signature))
                 {
-                    message->m_rxState = ReceiveState_ReadingHeader;
+                    _rxState = ReceiveState_ReadingHeader;
                 }
                 break;
 
             case ReceiveState_ReadingHeader:
                 TRACE0(TRACE_STATE, "RxState==ReadingHeader\n");
-                if (WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
+                if (WP_ReceiveBytes(_pos, &_size) == false)
                 {
                     // didn't receive the expected amount of bytes, returning false
                     TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
                     return false;
                 }
 
-                if (message->m_size == 0)
+                if (_size == 0)
                 {
-                    message->m_rxState = ReceiveState_CompleteHeader;
+                    _rxState = ReceiveState_CompleteHeader;
                 }
                 break;
 
@@ -301,97 +308,98 @@ int WP_Message_Process(WP_Message *message)
                 TRACE0(TRACE_STATE, "RxState=CompleteHeader\n");
                 bool fBadPacket = true;
 
-                if (WP_Message_VerifyHeader(message))
+                if (WP_Message_VerifyHeader(&_inboundMessage))
                 {
                     TRACE(
                         TRACE_HEADERS,
                         "RXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-                        message->m_header.m_cmd,
-                        message->m_header.m_flags,
-                        message->m_header.m_size);
+                        _inboundMessage.m_header.m_cmd,
+                        _inboundMessage.m_header.m_flags,
+                        _inboundMessage.m_header._size);
 
-                    if (WP_App_ProcessHeader(message))
+                    if (WP_App_ProcessHeader(&_inboundMessage))
                     {
                         fBadPacket = false;
 
-                        if (message->m_header.m_size)
+                        if (_inboundMessage.m_header.m_size)
                         {
-                            if (message->m_payload == NULL) // Bad, no buffer...
+                            if (_inboundMessage.m_payload == NULL) 
                             {
-                                message->m_rxState = ReceiveState_Initialize;
+                                // Bad, no buffer...
+                                _rxState = ReceiveState_Initialize;
                             }
                             else
                             {
-                                message->m_payloadTicks = HAL_Time_CurrentSysTicks();
-                                message->m_rxState = ReceiveState_ReadingPayload;
-                                message->m_pos = message->m_payload;
-                                message->m_size = message->m_header.m_size;
+                                _payloadTicks = HAL_Time_CurrentSysTicks();
+                                _rxState = ReceiveState_ReadingPayload;
+                                _pos = _inboundMessage.m_payload;
+                                _size = _inboundMessage.m_header.m_size;
                             }
                         }
                         else
                         {
-                            message->m_rxState = ReceiveState_CompletePayload;
+                            _rxState = ReceiveState_CompletePayload;
                         }
                     }
                 }
 
                 if (fBadPacket)
                 {
-                    if ((message->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
+                    if ((_inboundMessage.m_header.m_flags & WP_Flags_c_NonCritical) == 0)
                     {
                         WP_Message_ReplyBadPacket(WP_Flags_c_BadHeader);
                     }
 
-                    message->m_rxState = ReceiveState_Initialize;
+                    _rxState = ReceiveState_Initialize;
                 }
             }
             break;
 
             case ReceiveState_ReadingPayload:
             {
-                TRACE(TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", message->m_size);
+                TRACE(TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", message->_size);
 
                 uint64_t curTicks = HAL_Time_CurrentSysTicks();
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to synch on the next header.
 
-                if (HAL_Time_SysTicksToTime_C(curTicks - message->m_payloadTicks) < c_PayloadTimeout)
+                if (HAL_Time_SysTicksToTime_C(curTicks - _payloadTicks) < c_PayloadTimeout)
                 {
-                    message->m_payloadTicks = curTicks;
+                    _payloadTicks = curTicks;
 
-                    if (WP_ReceiveBytes(message->m_pos, &message->m_size) == false)
+                    if (WP_ReceiveBytes(_pos, &_size) == false)
                     {
                         // didn't receive the expected amount of bytes, returning false
                         TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
                         return false;
                     }
 
-                    if (message->m_size == 0)
+                    if (_size == 0)
                     {
-                        message->m_rxState = ReceiveState_CompletePayload;
+                        _rxState = ReceiveState_CompletePayload;
                     }
                 }
                 else
                 {
                     TRACE0(TRACE_ERRORS, "RxError: Payload InterCharacterTimeout exceeded\n");
-                    message->m_rxState = ReceiveState_Initialize;
+                    _rxState = ReceiveState_Initialize;
                 }
             }
             break;
 
             case ReceiveState_CompletePayload:
                 TRACE0(TRACE_STATE, "RxState=CompletePayload\n");
-                if (WP_Message_VerifyPayload(message) == true)
+                if (WP_Message_VerifyPayload(&_inboundMessage) == true)
                 {
-                    WP_App_ProcessPayload(message);
+                    WP_App_ProcessPayload(&_inboundMessage);
                 }
                 else
                 {
                     WP_Message_ReplyBadPacket(WP_Flags_c_BadPayload);
                 }
 
-                message->m_rxState = ReceiveState_Initialize;
+                _rxState = ReceiveState_Initialize;
                 break;
 
             default:
@@ -409,7 +417,7 @@ void WP_SendProtocolMessage(WP_Message *message)
         "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
         message->m_header.m_cmd,
         message->m_header.m_flags,
-        message->m_header.m_size);
+        message->m_header._size);
     WP_TransmitMessage(message);
 }
 
@@ -424,7 +432,7 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
         "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
         message.m_header.m_cmd,
         message.m_header.m_flags,
-        message.m_header.m_size);
+        message.m_header._size);
     WP_TransmitMessage(&message);
 }
 
