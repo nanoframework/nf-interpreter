@@ -37,7 +37,7 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 // CLR thread
 #define CLR_THREAD_STACK_SIZE 4096
-#define CLR_THREAD_PRIORITY   8
+#define CLR_THREAD_PRIORITY   5
 
 TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
@@ -80,25 +80,25 @@ void tx_application_define(void *first_unused_memory)
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
 
-    // Create blink thread
-    status = tx_thread_create(
-        &blinkThread,
-        "Blink Thread",
-        BlinkThread_entry,
-        0,
-        blinkThreadStack,
-        BLINK_THREAD_STACK_SIZE,
-        BLINK_THREAD_PRIORITY,
-        BLINK_THREAD_PRIORITY,
-        TX_NO_TIME_SLICE,
-        TX_AUTO_START);
+    // // Create blink thread
+    // status = tx_thread_create(
+    //     &blinkThread,
+    //     "Blink Thread",
+    //     BlinkThread_entry,
+    //     0,
+    //     blinkThreadStack,
+    //     BLINK_THREAD_STACK_SIZE,
+    //     BLINK_THREAD_PRIORITY,
+    //     BLINK_THREAD_PRIORITY,
+    //     TX_NO_TIME_SLICE,
+    //     TX_AUTO_START);
 
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
+    // if (status != TX_SUCCESS)
+    // {
+    //     while (1)
+    //     {
+    //     }
+    // }
 
     // Create receiver thread
     status = tx_thread_create(
