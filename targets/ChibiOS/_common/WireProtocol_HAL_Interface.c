@@ -87,8 +87,7 @@ bool WP_TransmitMessage(WP_Message *message)
         message->m_header.m_size);
 
     // write header to output stream
-    writeResult =
-        chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
+    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
 
     if (writeResult == sizeof(message->m_header))
     {

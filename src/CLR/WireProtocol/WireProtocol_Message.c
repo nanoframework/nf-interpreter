@@ -323,7 +323,7 @@ int WP_Message_Process()
 
                         if (_inboundMessage.m_header.m_size)
                         {
-                            if (_inboundMessage.m_payload == NULL) 
+                            if (_inboundMessage.m_payload == NULL)
                             {
                                 // Bad, no buffer...
                                 _rxState = ReceiveState_Initialize;
