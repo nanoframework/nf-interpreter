@@ -34,9 +34,9 @@ const mxc_gpio_cfg_t led_pin[] = {
 };
 const unsigned int num_leds = (sizeof(led_pin) / sizeof(mxc_gpio_cfg_t));
 
+
 void RTC_IRQHandler(void)
 {
-
 }
 
 void UART0_IRQHandler(void)
@@ -62,6 +62,23 @@ void StartRTC()
     MXC_RTC_Start();
 }
 
+void StartWireProtocolUART()
+{
+    int32_t error;
+
+    // Initialize the UART
+    if ((error = MXC_UART_Init(MXC_UART_GET_UART(WIRE_PROTOCOL_UART), 115200, MXC_UART_IBRO_CLK)) != E_NO_ERROR)
+    {
+        while (1)
+        {
+        }
+    }
+
+
+    NVIC_ClearPendingIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
+    NVIC_EnableIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
+
+}
 void BoardInit()
 {
     int32_t error;
@@ -72,16 +89,7 @@ void BoardInit()
     MXC_SYS_ClockEnable(MXC_SYS_PERIPH_CLOCK_GPIO2);
 
     // UART
-    NVIC_ClearPendingIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
-    NVIC_EnableIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
-
-    // Initialize the UART
-    if ((error = MXC_UART_Init(MXC_UART_GET_UART(WIRE_PROTOCOL_UART), 115200, MXC_UART_IBRO_CLK)) != E_NO_ERROR)
-    {
-        while (1)
-        {
-        }
-    }
+    StartWireProtocolUART();
 
     // RTC
     StartRTC();
