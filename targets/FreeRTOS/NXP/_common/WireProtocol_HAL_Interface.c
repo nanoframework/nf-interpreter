@@ -58,6 +58,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
     // save for latter comparison
     uint16_t requestedSize = *size;
+    (void)requestedSize;
 
     // check for request with 0 size
     if (*size)
@@ -69,7 +70,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         *size -= read;
 
         // check if any bytes where read
-        return receivedBytes > 0;
+        return read > 0;
     }
 
     return true;

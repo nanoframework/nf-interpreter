@@ -35,7 +35,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         *size -= read;
 
         // check if any bytes where read
-        return receivedBytes > 0;
+        return read > 0;
     }
 
     return true;

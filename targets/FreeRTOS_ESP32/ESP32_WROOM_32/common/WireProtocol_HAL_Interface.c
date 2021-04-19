@@ -99,14 +99,13 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     if (*size)
     {
         // non blocking read from serial port with 100ms timeout
-        volatile size_t read =
-            uart_read_bytes(WP_Port, ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
+        size_t read = uart_read_bytes(WP_Port, ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
 
         ptr += read;
         *size -= read;
 
         // check if any bytes where read
-        return receivedBytes > 0;
+        return read > 0;
     }
 
     return true;
@@ -123,10 +122,9 @@ bool WP_TransmitMessage(WP_Message *message)
     // write header to output stream
     if (uart_write_bytes(WP_Port, (const char *)&message->m_header, sizeof(message->m_header)) !=
         sizeof(message->m_header))
-        ~
-        {
-            return false;
-        }
+    {
+        return false;
+    }
 
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
