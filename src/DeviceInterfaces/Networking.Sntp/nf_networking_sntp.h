@@ -4,19 +4,20 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #ifndef _NF_NETWORKING_SNTP_H_
 #define _NF_NETWORKING_SNTP_H_
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-#include <nanoHAL_time.h>
+#include <nanoHAL_Time.h>
 
 extern "C"
 {
 #ifdef DeviceFamily_CC3220
 #include <targetSimpleLinkCC32xx_Sntp.h>
+#elif defined(_WIN32)
+// empty on purpose
 #else
 #include <apps/sntp.h>
 #endif
@@ -34,9 +35,8 @@ struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
     NANOCLR_NATIVE_DECLARE(set_Server2___STATIC__VOID__STRING);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp;
 
-#endif  //_NF_NETWORKING_SNTP_H_
+#endif //_NF_NETWORKING_SNTP_H_

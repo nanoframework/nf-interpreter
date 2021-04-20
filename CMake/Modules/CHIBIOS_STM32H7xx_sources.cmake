@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(chibios)
+
 # from os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32h7xx.mk
 # List of the ChibiOS generic STM32H7xx startup and CMSIS files.
 
@@ -55,90 +58,95 @@ set(CHIBIOS_PORT_SRCS
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
+
     set(CHIBIOS_H7_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(CHIBIOS_H7_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx/compilers/GCC
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ports/ARMCMx
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/common/ARMCMx
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx
+            ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/STM32H7xx
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv4
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/BDMAv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/CRYPv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/EXTIv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/FDCANv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv3
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MDMAv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/QUADSPIv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RNGv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv3
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2
-            ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32H7xx
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv4
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/BDMAv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv3
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MDMAv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv3
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
+
     if (BUILD_VERBOSE)
-        message("${SRC_FILE} >> ${CHIBIOS_H7_SRC_FILE}") # debug helper
+        message("${SRC_FILE} >> ${CHIBIOS_H7_SRC_FILE}")
     endif()
+
     list(APPEND CHIBIOS_SOURCES ${CHIBIOS_H7_SRC_FILE})
+
 endforeach()
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/portability/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/startup/ARMCMx/devices/STM32H7xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/ARM/CMSIS/Core/Include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/common/ext/ST/STM32H7xx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32H7xx)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32H7xx)
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/ADCv4)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/BDMAv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/CRYPv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/DMAv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/FDCANv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/GPIOv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/I2Cv3)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/MDMAv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/OTGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/QUADSPIv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RNGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SDMMCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/SPIv3)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/TIMv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/USARTv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ChibiOS_Source/os/hal/ports/STM32/LLD/xWDGv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv4)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/BDMAv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/FDCANv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv3)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MDMAv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv3)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
 
 
 ####################################################################################
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
 ####################################################################################
 # component STM32_FLASH
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
 # component STM32_CRC
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
 # component STM32_RNG
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/RNGv1) 
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1) 
 # component STM32_FSMC (Flexible Memory Controller)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FSMCv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1)
 # component STM32_ONEWIRE
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1) 
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1) 
 
 ###############################################################################################################################
 # Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
 # following the template below. 
 #
-# list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/<path-here>)
+# list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/<path-here>)
 ###############################################################################################################################
 
 
@@ -146,21 +154,21 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
 ####################################################################################################
 # component STM32_FLASH
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
 # component STM32_CRC
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
 # component STM32_RNG
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
 # component STM32_FSMC (Flexible Memory Controller)
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_nand_lld.c)
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sdram_lld.c)
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sram_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_nand_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sdram_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sram_lld.c)
 # component STM32_ONEWIRE
-list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1/onewire_lld.c)
+list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1/onewire_lld.c)
 
 ##########################################################################################################################
 # Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
 # overlay component that you are adding following the template below. 
 #
-# list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nf-overlay/os/hal/src/<path-here>)
+# list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
 ##########################################################################################################################

@@ -424,10 +424,6 @@
           "value": "True"
         },
         {
-          "name": "API_Windows.Networking.Sockets:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "OFF"
-        },
-        {
           "name": "API_Windows.Storage:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },

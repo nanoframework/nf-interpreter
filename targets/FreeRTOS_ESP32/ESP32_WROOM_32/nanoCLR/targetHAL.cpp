@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Esp32_os.h>
+#include <esp32_os.h>
 #include <nanoPAL.h>
 #include <nanoHAL_Time.h>
 #include <nanoHAL_Types.h>
@@ -62,7 +62,7 @@ void nanoHAL_Initialize()
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION ::InitializeList();
 
-    // Fixup System & Block storage parameters based on Flash chip and parttion layout
+    // Fixup System & Block storage parameters based on Flash chip and partition layout
     FixUpHalSystemConfig();
     FixUpBlockRegionInfo();
 

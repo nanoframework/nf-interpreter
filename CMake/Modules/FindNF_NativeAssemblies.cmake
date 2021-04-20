@@ -29,7 +29,6 @@ option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm 
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
-option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 
@@ -326,12 +325,6 @@ endif()
 if(API_System.Device.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Spi")
-endif()
-
-# Windows.Networking.Sockets
-if(API_Windows.Networking.Sockets)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Networking.Sockets")
 endif()
 
 # Windows.Devices.Wifi

@@ -28,7 +28,9 @@
         "streetsidesoftware.code-spell-checker",
         "twxs.cmake",
         "ms-vscode.cmake-tools"
-	]
+	],
+	// Make sure we pull all the repos with the latest changes
+	"postAttachCommand": "/usr/local/git-pull-repos.sh"
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.

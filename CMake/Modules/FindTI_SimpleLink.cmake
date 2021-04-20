@@ -30,7 +30,3 @@ include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 # includes for TI_RTOS
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages")
 list(APPEND TI_SimpleLink_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/sysbios")
-
-# include(FindPackageHandleStandardArgs)
-
-# FIND_PACKAGE_HANDLE_STANDARD_ARGS(TI_SimpleLink DEFAULT_MSG TI_SimpleLink_INCLUDE_DIRS TI_SimpleLink_SOURCES)

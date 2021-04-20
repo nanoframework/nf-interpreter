@@ -33,7 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
-include(nf_utils)
+include(NF_Utils)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -424,8 +424,6 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
-# (default is ON so Wire Protocol implements CRC32)
-option(NF_WP_IMPLEMENTS_CRC32 "option for Wire Protocol to implement CRC32" ON)
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
@@ -514,8 +512,7 @@ else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 endif()
 
-if( API_System.Net OR
-    API_Windows.Networking.Sockets)
+if( API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
@@ -647,7 +644,6 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
-    API_Windows.Networking.Sockets OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)
@@ -762,33 +758,31 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
     
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
-    add_subdirectory(targets/CMSIS-OS/common)
-    add_subdirectory(targets/CMSIS-OS/common/Include)
+    add_subdirectory(targets/ChibiOS)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory(targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+            add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
@@ -833,7 +827,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/_nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder

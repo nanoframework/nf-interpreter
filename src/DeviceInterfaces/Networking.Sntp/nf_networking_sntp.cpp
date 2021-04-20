@@ -5,6 +5,8 @@
 
 #include "nf_networking_sntp.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -25,3 +27,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sn
     method_lookup,
     { 100, 0, 4, 4 }
 };
+
+// clang-format on

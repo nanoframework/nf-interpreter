@@ -7,7 +7,7 @@
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
-#include <WireProtocol_HAL_interface.h>
+#include <WireProtocol_HAL_Interface.h>
 
 ////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                   //
@@ -84,72 +84,56 @@ bool WP_Initialise(COM_HANDLE port)
     return true;
 }
 
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
     if (!WP_Port_Intitialised)
+    {
         WP_Initialise(WP_Port);
+    }
 
     // save for latter comparison
     uint16_t requestedSize = *size;
 
-    // int readData = 0;
-    // sanity check for request of 0 size
+    // check for request with 0 size
     if (*size)
     {
-        //////////////////////////////////////////////////////////
-        //               PORTING CHANGE REQUIRED HERE           //
-        //////////////////////////////////////////////////////////
-        // change here to read (size) bytes from the input stream
-        // preferably with read timeout and being able to check
-        // if the requested number of bytes was actually read
-        //////////////////////////////////////////////////////////
-
         // non blocking read from serial port with 100ms timeout
-        volatile size_t read =
-            uart_read_bytes(WP_Port, ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
+        size_t read = uart_read_bytes(WP_Port, ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
 
         ptr += read;
         *size -= read;
 
-        // check if the requested read matches the actual read count
-        return (requestedSize == read);
+        // check if any bytes where read
+        return read > 0;
     }
 
     return true;
 }
 
-int WP_TransmitMessage(WP_Message *message)
+bool WP_TransmitMessage(WP_Message *message)
 {
-    ///////////////////////////////////////////////////////////
-    //              PORTING CHANGE REQUIRED HERE             //
-    ///////////////////////////////////////////////////////////
-    // change here to write (size) bytes to the output stream
-    // preferably with timeout and being able to check
-    // if the write was sucessfull or at least buffered
-    //////////////////////////////////////////////////////////
-
     if (!WP_Port_Intitialised)
+    {
         WP_Initialise(WP_Port);
+    }
 
     // TODO Check if timeout required
     // write header to output stream
-
     if (uart_write_bytes(WP_Port, (const char *)&message->m_header, sizeof(message->m_header)) !=
         sizeof(message->m_header))
+    {
         return false;
+    }
 
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
-        ///////////////////////////////////////////////////////////
-        //              PORTING CHANGE REQUIRED HERE             //
-        ///////////////////////////////////////////////////////////
-        // see description above
-        //////////////////////////////////////////////////////////
         if (uart_write_bytes(WP_Port, (const char *)message->m_payload, message->m_header.m_size) !=
             (int)message->m_header.m_size)
+        {
             return false;
+        }
     }
 
     return true;

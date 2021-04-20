@@ -5,8 +5,13 @@
 
 #include "win_dev_wifi_native.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -50,14 +55,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Wifi =
 {
     "Windows.Devices.Wifi",
-    0xDF2FD922,
+    0xA94A849E,
     method_lookup,
-    { 100, 0, 6, 1 }
+    { 100, 0, 6, 2 }
 };
+
+// clang-format on

@@ -19,7 +19,7 @@ list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Windows.Dev
 # source files
 set(Windows.Devices.Spi_SRCS
     cpu_spi.cpp
-    nanoHAL_spi.cpp
+    nanoHAL_Spi.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiController.cpp
     win_dev_spi_native_Windows_Devices_Spi_SpiDevice.cpp
@@ -29,7 +29,9 @@ set(Windows.Devices.Spi_SRCS
 )
 
 foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
+
     set(Windows.Devices.Spi_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(Windows.Devices.Spi_SRC_FILE ${SRC_FILE}
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
@@ -38,8 +40,13 @@ foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${Windows.Devices.Spi_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${Windows.Devices.Spi_SRC_FILE}")
+    endif()
+
     list(APPEND Windows.Devices.Spi_SOURCES ${Windows.Devices.Spi_SRC_FILE})
+    
 endforeach()
 
 

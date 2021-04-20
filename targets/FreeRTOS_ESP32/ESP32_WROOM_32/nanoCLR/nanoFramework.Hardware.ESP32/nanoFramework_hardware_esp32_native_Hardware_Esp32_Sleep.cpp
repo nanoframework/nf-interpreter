@@ -29,14 +29,28 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
     {
-        gpio_num_t gpio_num = (gpio_num_t)stack.Arg0().NumericByRef().s4;
+        uint64_t mask = (uint64_t)stack.Arg0().NumericByRef().s8;
         int  level = stack.Arg1().NumericByRef().s4;
-        
-        esp_err_t err = esp_sleep_enable_ext0_wakeup( gpio_num, level);
+
+        // Extract pin number from mask value
+        gpio_num_t gpio_num = GPIO_NUM_0;
+        esp_err_t err = 0;
+        if (mask)   // Only enable pin if other than Pin.None
+        {          
+            for (size_t i = 0; i < GPIO_NUM_MAX; i++)
+            {               
+                if (mask & 0x01)
+                {
+                    gpio_num = (gpio_num_t) i;
+                } 
+                mask >>= 1;              
+            }
+            err = esp_sleep_enable_ext0_wakeup( gpio_num, level);
+        }      
 
         // Return err to the managed application
         stack.SetResult_I4( (int)err ) ;
- }
+    }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 

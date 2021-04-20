@@ -7,7 +7,7 @@
 #define _SYS_DEV_DAC_NATIVE_TARGET_H_
 
 #include <sys_dev_dac_native.h>
-#include <Esp32_os.h>
+#include <esp32_os.h>
 
 #define DacChannelCount     2
 #define DacResolutionInBits 8

@@ -244,11 +244,6 @@
           "type": "BOOL"
         },
         {
-          "name": "API_Windows.Networking.Sockets",
-          "value": "OFF",
-          "type": "BOOL"
-        },
-        {
           "name": "API_Windows.Storage",
           "value": "True",
           "type": "BOOL"
@@ -501,11 +496,6 @@
         {
           "name": "API_Windows.Devices.Spi",
           "value": "True",
-          "type": "BOOL"
-        },
-        {
-          "name": "API_Windows.Networking.Sockets",
-          "value": "OFF",
           "type": "BOOL"
         },
         {

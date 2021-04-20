@@ -132,7 +132,7 @@
     <ClCompile Include="CLR_RT_HeapBlock_Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Random.cpp">
+    <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

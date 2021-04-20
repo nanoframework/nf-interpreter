@@ -1,6 +1,6 @@
 trigger:
   branches:
-    include: ["master", "develop*", "release-*", "refs/tags/*" ]
+    include: ["main", "master", "develop*", "release-*", "refs/tags/*" ]
   paths:
     exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
@@ -26,7 +26,7 @@ jobs:
   - checkout: self
     fetchDepth: 1
 
-  # get commint message
+  # get commit message
   - powershell: |
 
       if($env:StartReleaseCandidate -like "true")
@@ -59,7 +59,114 @@ jobs:
       }
 
     name: BuildOptions
-    displayName: Evaluate build options
+    displayName: Get build options
+
+  # check what changed
+  - powershell: |
+      git config --global user.email "nfbot"
+      git config --global user.name "nanoframework@outlook.com"
+
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+      
+      if($env:StartReleaseCandidate -like "true")
+      {
+          # this is a release prep so NO build
+      }
+      else
+      {
+          if($env:System_PullRequest_PullRequestId -ne $null)
+          {
+              # get files changed in PR, if this is a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+
+              # filter removed files              
+              $files = $commit.where{$_.status -ne 'removed'}
+          }
+          else
+          {
+              # get files changed in the commit, if this is NOT a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
+
+              # filter removed files              
+              $files = $commit.files.where{$_.status -ne 'removed'}
+          }
+
+          # get file names only
+          $files = $files | % {$_.filename}
+
+          Write-host "Files changed:"
+          $files | % { Write-host $_ }
+          Write-host ""
+
+          # set default values 
+          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+
+          if( 
+              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('src')}).Count -gt 0)
+            )
+          {
+              # files at:
+              # - repo root
+              # - azure-pipelines-templates
+              # - CMake
+              # - src
+
+              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              
+              Write-host "Building ALL targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+          {
+              # files at ChibiOS folder
+              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+              Write-host "Building CHIBIOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
+          {
+              # files at FreeRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+
+              Write-host "Building FreeRTOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/FreeRTOS_ESP32')}).Count -gt 0)
+          {
+              # files at FreeRTOS_ESP32 folder
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]true"
+
+              Write-host "Building ESP32 targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/TI-SimpleLink')}).Count -gt 0)
+          {
+              # files at TI-SimpleLink folder
+              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+              Write-host "Building TI SimpleLink targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/win32')}).Count -gt 0)
+          {
+              # files at win32 folder
+              echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
+
+              Write-host "Building WIN32 target"
+          }
+      }
+
+    name: TargetsToBuild
+    displayName: Get targets to build
 
   - task: DotNetCoreCLI@2  
     condition: eq( variables['StartReleaseCandidate'], true )
@@ -68,7 +175,6 @@ jobs:
       command: custom
       custom: tool
       arguments: install -g nbgv
-
 
   - powershell: |
 
@@ -147,7 +253,7 @@ jobs:
 #################
 # STM32
 - job: Build_STM32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)) )
 
   dependsOn:
   - Check_Build_Options
@@ -185,6 +291,8 @@ jobs:
         NeedsDFU: false 
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('STM32_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
@@ -196,13 +304,13 @@ jobs:
   - template: azure-pipelines-templates/download-hexdfu.yml
   - template: azure-pipelines-templates/build-chibios-stm32.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS_ESP32'], true)) )
 
   dependsOn:
   - Check_Build_Options
@@ -216,17 +324,19 @@ jobs:
     matrix:
       ESP32_WROOM_32:
         TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
       ESP_WROVER_KIT:
         TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON  -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp" -DTOUCHPANEL_DEVICE="XPT2046.cpp" -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp" -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON  -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp" -DTOUCHPANEL_DEVICE="XPT2046.cpp" -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp" -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp" -DAPI_System.Device.Dac=ON
         PackageName: ESP_WROVER_KIT
       ESP32_PICO:
         TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DTARGET_SERIAL_BAUDRATE=115200 -DTARGET_NAME=ESP32_PICO -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FREERTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DTARGET_SERIAL_BAUDRATE=115200 -DTARGET_NAME=ESP32_PICO -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
         PackageName: ESP32_PICO
   
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('ESP32_versioncounter', 0)]
     ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools\xtensa-esp32-elf
 
   steps:
@@ -247,12 +357,12 @@ jobs:
       flattenFolders: true
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
 
 #################
 # NXP
 - job: Build_NXP_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)) )
 
   dependsOn:
   - Check_Build_Options
@@ -270,6 +380,8 @@ jobs:
         NeedsSRECORD: true
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('NXP_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
 
@@ -281,13 +393,13 @@ jobs:
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/build-freertos-nxp.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)) )
 
   dependsOn:
   - Check_Build_Options
@@ -315,6 +427,8 @@ jobs:
         GccArm_Version:
 
   variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('TI_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
@@ -325,13 +439,13 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/build-ti-simplelink.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)) )
 
   dependsOn:
   - Check_Build_Options
@@ -340,7 +454,14 @@ jobs:
   pool:
     vmImage: 'windows-2019'
 
+  variables:
+    TargetPublishName: WIN32_nanoCLR
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('WIN32_versioncounter', 0)]
+
   steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
   - task: NuGetToolInstaller@0
     inputs:
       versionSpec: '5.8.0'
@@ -348,9 +469,110 @@ jobs:
 
   - task: VSBuild@1
     inputs:
-      solution: 'targets\os\win32\nanoCLR.sln'
+      solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
+      msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
+      
+  - task: DotNetCoreCLI@2
+    displayName: Install SignTool tool
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . SignClient
+
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --input "**/nanoFramework.nanoCLR.exe" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.Win32" `
+      --description "nanoFramework.nanoCLR.Win32" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign nanoCLR WIN32 EXE
+    continueOnError: true
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+
+  - task: NuGetCommand@2
+    condition: succeeded()
+    displayName: Pack managed helpers NuGet
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
+
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Collecting managed helpers deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.Win32*.nupkg
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
+  
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Collecting EXE to deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.ArtifactStagingDirectory)" `
+      --input "**/*.nupkg" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.Win32 NuGet" `
+      --description "nanoFramework.nanoCLR.Win32 NuGet" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign packages
+    continueOnError: true
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    
+  # publish artifacts (only possible if this is not a PR originated on a fork)
+  - task: PublishBuildArtifacts@1
+    condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+    displayName: Publish deployables artifacts
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: deployables
+      ArtifactType: Container
+
+  # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+  - task: NuGetCommand@2
+    condition: and( succeeded(), ne( variables['StartReleaseCandidate'], true ) )
+    continueOnError: true
+    displayName: Push NuGet packages to Azure Artifacts
+    inputs:
+      command: push
+      nuGetFeedType: external
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
+      allowPackageConflicts: true
+
+  # push NuGet class lib package to NuGet (always happens except on PR builds)
+  - task: NuGetCommand@2
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    continueOnError: true
+    displayName: Push NuGet packages to NuGet
+    inputs:
+      command: push
+      nuGetFeedType: external
+      allowPackageConflicts: true
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'NuGet-nf-interpreter'
+
+  - template: azure-pipelines-templates/publish-win32-nanoclr.yml
 
 #######################
 # generate change log
@@ -420,7 +642,7 @@ jobs:
     displayName: Push changelog to GitHub
 
 #######################
-# create or update GitHub release ON tags from master branche or tags
+# create or update GitHub release ON tags from master branch or tags
 - job: Publish_Release
   dependsOn:
   - Build_STM32_targets

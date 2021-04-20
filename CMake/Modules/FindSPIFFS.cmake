@@ -3,8 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(spiffs)
+
 # List of the required include paths
-list(APPEND SPIFFS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/SPIFFS_Source/src)
+list(APPEND SPIFFS_INCLUDE_DIRS ${spiffs_SOURCE_DIR}/src)
 
 set(src_spiffs
 
@@ -22,17 +25,24 @@ set(src_spiffs
 )
 
 foreach(SRC_FILE ${src_spiffs})
+
     set(SPIFFS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(SPIFFS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            "${CMAKE_BINARY_DIR}/SPIFFS_Source/src"
-            "${TARGET_BASE_LOCATION}"
+            ${spiffs_SOURCE_DIR}/src
+            ${TARGET_BASE_LOCATION}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${SPIFFS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${SPIFFS_SRC_FILE}")
+    endif()
+
     list(APPEND SPIFFS_SOURCES ${SPIFFS_SRC_FILE})
+    
 endforeach()
 
 include(FindPackageHandleStandardArgs)

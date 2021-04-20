@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "LWIP_sockets.h"
+#include "lwIP_Sockets.h"
 
 extern "C"
 {
@@ -77,6 +77,52 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
         NetworkChange_NetworkEventType_AvailabilityChanged,
         NetworkChange_NetworkEvents_NetworkNOTAvailable,
         0);
+}
+
+HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
+{
+    struct netif *networkInterface =
+        netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[interfaceIndex].m_interfaceNumber);
+
+    if (NULL == networkInterface)
+    {
+        return CLR_E_FAIL;
+    }
+
+    *status = netif_is_link_up(networkInterface);
+
+    return S_OK;
+}
+
+HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+{
+    ip4_addr_t ipv4Address;
+    // FIXME IPV6
+    // ip6_addr_t ipv6Address
+
+    if (ip4addr_aton(ipString, &ipv4Address))
+    {
+        *address = ipv4Address.addr;
+    }
+    // FIXME IPV6
+    // else if(ip6addr_aton(ipString, &ipv6Address))
+    // {
+    // }
+    else
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
+    return S_OK;
+}
+
+const char *LWIP_SOCKETS_Driver::IPAddressToString(uint32_t address)
+{
+    // get IP v4 address in numeric format
+    // FIXME IPV6
+    const ip4_addr_t ip4Address = {address};
+
+    return ip4addr_ntoa(&ip4Address);
 }
 
 #if LWIP_NETIF_LINK_CALLBACK == 1
@@ -513,7 +559,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
                 break;
 
             default:
-                errorCode = SOCK_NO_RECOVERY;
+                errorCode = SOCK_EINVAL;
         }
     }
 

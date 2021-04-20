@@ -48,7 +48,7 @@ CMake/Modules/FindINTEROP*.cmake
 
 # Visual Studio cache/options directory contents but not the example launch.vs.json
 !.vs/
-.vs/*
+**/.vs/*
 !.vs/launch.vs.SAMPLE.json
 !.vs/tasks.vs.SAMPLE.json
 **/ipch/*
@@ -62,3 +62,4 @@ CMake/Modules/FindINTEROP*.cmake
 **/packages/*
 # except build/, which is used as an MSBuild target.
 !**/packages/build/
+/targets/os/win32/.vs/nanoCLR/v16

@@ -6,74 +6,6 @@
 
 #include "sys_net_native.h"
 
-struct SSL_SeedConfig
-{
-    HAL_DRIVER_CONFIG_HEADER Header;
-
-    //--//
-
-    uint64_t SeedCounter;
-    uint8_t SslSeedKey[260];
-
-    //--//
-    static const char *GetDriverName()
-    {
-        return "SSL_SEED_KEY";
-    }
-};
-
-struct SSL_SeedDriver
-{
-    SSL_SeedConfig Config;
-
-    bool Initialized;
-    HAL_COMPLETION m_completion;
-};
-
-static SSL_SeedDriver g_SSL_SeedData;
-
-// TODO - save seed value
-static void UpdateSslSeedValue(void *arg)
-{
-    (void)arg;
-
-    // if(!HAL_CONFIG_BLOCK::UpdateBlockWithName( g_SSL_SeedData.Config.GetDriverName(), &g_SSL_SeedData.Config,
-    // sizeof(g_SSL_SeedData.Config), TRUE ))
-    // {
-    //     ASSERT(FALSE);
-    //     CPU_Reset();
-    // }
-}
-
-// TODO generate ramdom seed for encryption
-// Maybe move this to specicfic provider files
-
-static void GenerateNewSslSeed()
-{
-    //     uint8_t   signature[ 128 ];
-    //     uint8_t   IVPtr[ BLOCK_SIZE ];
-    //     bool    success;
-
-    //     uint64_t data[ 2 ]  = { ++g_SSL_SeedData.Config.SeedCounter, HAL_Time_CurrentTicks() };
-
-    //     memset( &IVPtr[ 0 ], 0, sizeof(IVPtr) );
-
-    //     // Encrypts a buffer using a symmetric algorithm.
-    // //  BOOL Crypto_Encrypt(BYTE *Key, BYTE *IV, DWORD cbIVSize, BYTE* pPlainText, DWORD cbPlainText, BYTE
-    // *pCypherText, DWORD cbCypherText);
-    //   //success = Crypto_Encrypt( (BYTE*)&g_SSL_SeedData.Config.SslSeedKey[ 0 ], (uint8_t*)IVPtr, sizeof(IVPtr),
-    //   (uint8_t*)&data, sizeof(data), signature, sizeof(signature) ) == CRYPTO_SUCCESS ? S_OK : CLR_E_FAIL;
-
-    //     // ASSERT(success);
-
-    //     ssl_rand_seed(signature, sizeof(signature));
-
-    //     if(!g_SSL_SeedData.m_completion.IsLinked())
-    //     {
-    //          g_SSL_SeedData.m_completion.EnqueueDelta( 5 * 1000000ul ); // 5 seconds
-    //     }
-}
-
 //--//
 
 void Time_GetDateTime(DATE_TIME_INFO *dt)
@@ -100,7 +32,7 @@ void Time_GetDateTime(DATE_TIME_INFO *dt)
 
 // Initalise SSL as a server
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::
-    SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate(
+    SecureServerInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -109,7 +41,7 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::
 
 // Initalise SSL as a client
 HRESULT Library_sys_net_native_System_Net_Security_SslNative::
-    SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate(
+    SecureClientInit___STATIC__I4__I4__I4__SystemSecurityCryptographyX509CertificatesX509Certificate__SystemSecurityCryptographyX509CertificatesX509Certificate__BOOLEAN(
         CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
@@ -482,54 +414,13 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_INT32 sslVerify = stack.Arg1().NumericByRef().s4;
     CLR_RT_HeapBlock *hbCert = stack.Arg2().Dereference();
     CLR_RT_HeapBlock *caCert = stack.Arg3().Dereference();
+    bool useDeviceCertificate = (bool)stack.Arg4().NumericByRef().u1;
     CLR_RT_HeapBlock_Array *arrCert = NULL;
     CLR_RT_HeapBlock_Array *privateKey = NULL;
     CLR_UINT8 *sslCert = NULL;
-    int result;
-    bool isFirstCall = false;
+    volatile int result;
     const char *password = "";
     uint8_t *pk = NULL;
-
-    if (!g_SSL_SeedData.Initialized)
-    {
-        //        bool fOK = FALSE;
-
-        isFirstCall = true;
-
-        // FIXME
-        // #if !defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
-        //         int i;
-
-        // // TODO save seed data
-        //         // if(!HAL_CONFIG_BLOCK::ApplyConfig( g_SSL_SeedData.Config.GetDriverName(), &g_SSL_SeedData.Config,
-        //         sizeof(g_SSL_SeedData.Config) ))
-        //         // {
-        //         //     return CLR_E_NOT_SUPPORTED;
-        //         // }
-
-        //         // validate the security key (make sure it isn't all 0x00 or all 0xFF
-        //         for(i=1; i<sizeof(g_SSL_SeedData.Config.SslSeedKey) && !fOK; i++)
-        //         {
-        //             if( g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0 &&
-        //                 g_SSL_SeedData.Config.SslSeedKey[ i   ] != 0xFF &&
-        //                 g_SSL_SeedData.Config.SslSeedKey[ i-1 ] != g_SSL_SeedData.Config.SslSeedKey[ i ])
-        //             {
-        //                 fOK = TRUE;
-        //             }
-        //         }
-
-        //         if(!fOK)
-        //         {
-        //             return CLR_E_NOT_SUPPORTED;
-        //         }
-        // #endif
-
-        g_SSL_SeedData.m_completion.Initialize();
-
-        g_SSL_SeedData.m_completion.InitializeForUserMode(UpdateSslSeedValue, NULL);
-
-        g_SSL_SeedData.Initialized = TRUE;
-    }
 
     if (hbCert != NULL)
     {
@@ -576,7 +467,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  pk == NULL ? 0 : privateKey->m_numOfElements,
                  password,
                  hal_strlen_s(password),
-                 sslContext)
+                 sslContext,
+                 useDeviceCertificate)
                  ? 0
                  : -1);
     }
@@ -592,17 +484,13 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  pk == NULL ? 0 : privateKey->m_numOfElements,
                  password,
                  hal_strlen_s(password),
-                 sslContext)
+                 sslContext,
+                 useDeviceCertificate)
                  ? 0
                  : -1);
     }
 
     NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
-
-    if (isFirstCall)
-    {
-        GenerateNewSslSeed();
-    }
 
     if (caCert != NULL)
     {

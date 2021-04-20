@@ -4,7 +4,7 @@
 //
 
 #include <nanoPAL_BlockStorage.h>
-#include <Target_BlockStorage_ESP32FlashDriver.h>
+#include <Target_BlockStorage_Esp32FlashDriver.h>
 
 // map here the Block Storage Interface to the ESP32 driver
 IBlockStorageDevice ESP32Flash_BlockStorageInterface =
