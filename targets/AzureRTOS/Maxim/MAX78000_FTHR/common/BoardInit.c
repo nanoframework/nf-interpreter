@@ -7,6 +7,8 @@
 #include <nanoCLR_Headers.h>
 
 #include <platformHAL.h>
+#include <nanoRingBuffer.h>
+#include <platform_UARTDriver.h>
 
 #include <tx_api.h>
 
@@ -14,7 +16,6 @@
 #include <mxc_sys.h>
 #include <mxc_delay.h>
 #include <simo_regs.h>
-#include <uart.h>
 #include <gpio.h>
 #include <led.h>
 #include <dma.h>
@@ -34,6 +35,8 @@ const mxc_gpio_cfg_t led_pin[] = {
 };
 const unsigned int num_leds = (sizeof(led_pin) / sizeof(mxc_gpio_cfg_t));
 
+NanoRingBuffer WPRingBuffer;
+uint8_t rxBuffer[WIRE_PROTOCOL_UART_BUFFER_SIZE];
 
 void RTC_IRQHandler(void)
 {
@@ -43,7 +46,7 @@ void UART0_IRQHandler(void)
 {
     _tx_thread_context_save();
 
-    MXC_UART_AsyncHandler(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
+    NanoUART_AsyncHandler(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
 
     _tx_thread_context_restore();
 }
@@ -65,20 +68,28 @@ void StartRTC()
 void StartWireProtocolUART()
 {
     int32_t error;
+    mxc_uart_regs_t *uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
 
     // Initialize the UART
-    if ((error = MXC_UART_Init(MXC_UART_GET_UART(WIRE_PROTOCOL_UART), 115200, MXC_UART_IBRO_CLK)) != E_NO_ERROR)
+    if ((error = MXC_UART_Init(uart, 115200, MXC_UART_IBRO_CLK)) != E_NO_ERROR)
     {
         while (1)
         {
         }
     }
 
+    // Initilize the RX ring buffer
+    NanoRingBuffer_Initialize(&WPRingBuffer, rxBuffer, WIRE_PROTOCOL_UART_BUFFER_SIZE);
 
     NVIC_ClearPendingIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
     NVIC_EnableIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
 
+    // set threshold
+    MXC_UART_SetRXThreshold(uart, 2);
+
+    NanoUART_EnableInt(uart);
 }
+
 void BoardInit()
 {
     int32_t error;
