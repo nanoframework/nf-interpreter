@@ -69,6 +69,7 @@ FetchContent_Populate(azure_rtos)
 
 # AzureRTOS common directories
 add_subdirectory(_common)
+add_subdirectory(_include)
 
 # try to find STM board in the targets folder
 # and set target base location and base path for class libs
