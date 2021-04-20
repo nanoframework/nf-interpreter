@@ -28,6 +28,7 @@ option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c 
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
+option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
@@ -319,6 +320,12 @@ endif()
 if(API_Windows.Devices.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.Spi")
+endif()
+
+# System.Device.Spi
+if(API_System.Device.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
 # Windows.Networking.Sockets
