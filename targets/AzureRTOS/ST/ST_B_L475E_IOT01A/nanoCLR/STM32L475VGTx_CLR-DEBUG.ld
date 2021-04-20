@@ -15,8 +15,8 @@ __RAM_segment_used_end__ = 0;
 /* Specify the memory areas */
 MEMORY
 {
-  flash0     (rx)  : ORIGIN = 0x08008800, LENGTH = 202K         /* space reserved for nanoCLR */
-  deployment (rx)  : ORIGIN = 0x0803A800, LENGTH = 1M-202K-34K  /* space reserved for application deployment */
+  flash0     (rx)  : ORIGIN = 0x08009000, LENGTH = 202K         /* space reserved for nanoCLR */
+  deployment (rx)  : ORIGIN = 0x0803A800, LENGTH = 1M-202K-36K  /* space reserved for application deployment */
   config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k           /* space reserved for configuration block */
   ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
   ram2       (xrw) : ORIGIN = 0x10000000, LENGTH = 32K          /* managed heap */
