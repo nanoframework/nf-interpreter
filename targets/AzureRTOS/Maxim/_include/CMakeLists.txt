@@ -6,5 +6,8 @@
 # append include directory for target Azure RTOS
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
+# need to include nano Ring Buffer
+list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
+
 # make var global
 set(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
