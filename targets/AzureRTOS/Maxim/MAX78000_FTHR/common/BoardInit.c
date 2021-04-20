@@ -85,7 +85,7 @@ void StartWireProtocolUART()
     NVIC_EnableIRQ(MXC_UART_GET_IRQ(WIRE_PROTOCOL_UART));
 
     // set threshold
-    MXC_UART_SetRXThreshold(uart, 2);
+    MXC_UART_SetRXThreshold(uart, 1);
 
     NanoUART_EnableInt(uart);
 }
