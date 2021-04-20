@@ -12,10 +12,9 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol.h>
 #include <platformHAL.h>
+#include <platform.h>
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
-
-#define WP_UART_FLAG    0x80000000
 
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
@@ -27,7 +26,7 @@ void UART_RxCallback(mxc_uart_req_t *req, int error)
         receivedBytes = req->rxCnt;
 
         // use event flags group as a variable to transmit the amount of received bytes
-        tx_event_flags_set(&wpUartEvent, WP_UART_FLAG, TX_OR);
+        tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
     }
 }
 
@@ -38,7 +37,7 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
         transmittedBytes = req->txCnt;
 
         // use event flags group as a variable to transmit the amount of received bytes
-        tx_event_flags_set(&wpUartEvent, WP_UART_FLAG, TX_OR);
+        tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
     }
 }
 
