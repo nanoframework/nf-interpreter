@@ -110,7 +110,7 @@
  */
 #ifndef MEM_SIZE
 #define MEM_SIZE (22 * 1024)
-#endif MEM_SIZE
+#endif
 
 /*
    ------------------------------------------------
@@ -285,7 +285,7 @@
  * LWIP_NETIF_LINK_CALLBACK==1: Support a callback function from an interface
  * whenever the link changes (i.e., link down)
  */
-#idndef LWIP_NETIF_LINK_CALLBACK
+#ifndef LWIP_NETIF_LINK_CALLBACK
 #define LWIP_NETIF_LINK_CALLBACK 1
 #endif
 
@@ -474,7 +474,7 @@
  */
 #ifndef LWIP_DBG_TYPES_ON
 #define LWIP_DBG_TYPES_ON LWIP_DBG_OFF
-#endif LWIP_DBG_TYPES_ON
+#endif
 
 #if (LWIP_DNS || LWIP_IGMP || LWIP_IPV6) && !defined(LWIP_RAND)
 /* When using IGMP or IPv6, LWIP_RAND() needs to be defined to a random-function returning an u32_t random value*/
