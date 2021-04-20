@@ -4,9 +4,7 @@
 //
 
 #include <mxc_device.h>
-#include <uart.h>
-#include <dma.h>
-#include <mxc_delay.h>
+#include <platform_UARTDriver.h>
 #include <led.h>
 
 #include <tx_api.h>
@@ -17,46 +15,31 @@
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
+#define WP_UART_FLAG    0x80000000
+
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
 
 void UART_RxCallback(mxc_uart_req_t *req, int error)
 {
-    if(error == E_ABORT)
-    {
-        //req = NULL;
-        return;
-    }
-
     if(error == E_SUCCESS)
     {
-        if (MXC_UART_GET_IDX((mxc_uart_regs_t *)req->uart) == WIRE_PROTOCOL_UART)
-        {
-            // use event flags group as a variable to transmit the amount of received bytes
-            tx_event_flags_set(&wpUartEvent, req->rxCnt, TX_OR);
+        receivedBytes = req->rxCnt;
 
-            //req = NULL;
-        }
+        // use event flags group as a variable to transmit the amount of received bytes
+        tx_event_flags_set(&wpUartEvent, WP_UART_FLAG, TX_OR);
     }
 }
 
 void UART_TxCallback(mxc_uart_req_t *req, int error)
 {
-    if(error == E_ABORT)
+    if(error == E_SUCCESS)
     {
-        //req = NULL;
-        return;
-    }
-
-    if (MXC_UART_GET_IDX((mxc_uart_regs_t *)req->uart) == WIRE_PROTOCOL_UART)
-    {
-        //LED_Toggle(LED2);
+        transmittedBytes = req->txCnt;
 
         // use event flags group as a variable to transmit the amount of received bytes
-        tx_event_flags_set(&wpUartEvent, req->txCnt, TX_OR);
+        tx_event_flags_set(&wpUartEvent, WP_UART_FLAG, TX_OR);
     }
-
-    //req = NULL;
 }
 
 bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
@@ -68,6 +51,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     uint8_t waitResult;
     // receive DMA request
     mxc_uart_req_t rxRequest;
+    uint32_t dummy;
 
     // check for request with 0 size
     if (*size)
@@ -78,30 +62,13 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         rxRequest.txLen = 0;
         rxRequest.callback = UART_RxCallback;
 
-        // // //int l = 6;
-//         // MXC_UART_ClearRXFIFO(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
-//         // setup transmit request
-//         mxc_uart_req_t txRequest;
-//         txRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
-//         txRequest.txData = (const uint8_t *)"HELLO\n";
-//         txRequest.txLen = 6;
-//         txRequest.rxLen = 0;
-//         txRequest.callback = UART_TxCallback;
+        // reset var
+        receivedBytes = 0;
 
-//         MXC_UART_TransactionAsync(&txRequest);
-
-// tx_thread_sleep(1000);
-//         //MXC_Delay(200000);
-
-        // MXC_UART_Write(MXC_UART_GET_UART(WIRE_PROTOCOL_UART), (const uint8_t *)"HELLO\n", &l);
-        // LED_Toggle(LED2);
-
-        //MXC_UART_ClearRXFIFO(rxRequest.uart);
-
-        if (MXC_UART_TransactionAsync(&rxRequest) == E_NO_ERROR)
+        if (NanoUART_TransactionAsync(&rxRequest) == E_NO_ERROR)
         {
             // wait for event
-            waitResult = tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &receivedBytes, 10);
+            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_FLAG, TX_OR_CLEAR, &dummy, 20 );
         }
         else
         {
@@ -126,7 +93,8 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
 abort_rx:
     // abort any ongoing UART operation
-    MXC_UART_AbortAsync(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
+    NanoUART_AbortAsync(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
+
     // done here
     return false;
 }
@@ -135,6 +103,7 @@ bool WP_TransmitMessage(WP_Message *message)
 {
     mxc_uart_req_t txRequest;
     uint8_t waitResult;
+    uint32_t dummy;
 
     TRACE(
         TRACE_HEADERS,
@@ -150,17 +119,19 @@ bool WP_TransmitMessage(WP_Message *message)
     txRequest.rxLen = 0;
     txRequest.callback = UART_TxCallback;
 
-    // MXC_UART_ClearTXFIFO(txRequest.uart);
-        LED_Toggle(LED2);
+    LED_Toggle(LED2);
 
-    // write header with 250ms timeout
-    if (MXC_UART_TransactionAsync(&txRequest) != E_SUCCESS)
+    // reset var
+    transmittedBytes = 0;
+
+    // write header
+    if (NanoUART_TransactionAsync(&txRequest) != E_NO_ERROR)
     {
         goto abort_tx;
     }
 
     // wait for event
-    waitResult = tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &transmittedBytes, 10);
+    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_FLAG, TX_OR_CLEAR, &dummy, 15);
 
     if(waitResult != TX_SUCCESS ||
        transmittedBytes != txRequest.txLen)
@@ -175,13 +146,16 @@ bool WP_TransmitMessage(WP_Message *message)
         txRequest.txData = (uint8_t *)message->m_payload;
         txRequest.txLen = message->m_header.m_size;
 
-        if (MXC_UART_TransactionAsync(&txRequest) != E_SUCCESS)
+        // reset var
+        transmittedBytes = 0;
+
+        if (NanoUART_TransactionAsync(&txRequest) != E_NO_ERROR)
         {
             goto abort_tx;
         }
 
         // wait for event
-        waitResult = tx_event_flags_get(&wpUartEvent, 0xFFFF, TX_OR_CLEAR, &transmittedBytes, 50);
+        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_FLAG, TX_OR_CLEAR, &dummy, 60);
     }
 
     if(waitResult != TX_SUCCESS||
@@ -194,7 +168,8 @@ bool WP_TransmitMessage(WP_Message *message)
 
 abort_tx:
     // abort any ongoing UART operation
-    MXC_UART_AbortAsync(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
+    NanoUART_AbortAsync(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
+
     // done here
     return false;
 }
