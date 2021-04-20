@@ -163,6 +163,8 @@ size_t NanoRingBuffer_PushN(NanoRingBuffer *object, const uint8_t *data, size_t 
 
 size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
 {
+    size_t lengthToRead = 0;
+
     // sanity check for 0 length
     if (length == 0)
     {
@@ -175,11 +177,20 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         return 0;
     }
 
-    // can read in a single memcpy
-    if (length <= object->_capacity - object->_read_index)
+    if (length < object->_size)
     {
-        memcpy(data, object->_buffer + object->_read_index, length);
-        object->_read_index += length;
+        lengthToRead = length;
+    }
+    else
+    {
+        lengthToRead = object->_size;
+    }
+
+    // can read in a single memcpy
+    if (lengthToRead <= object->_capacity - object->_read_index)
+    {
+        memcpy(data, object->_buffer + object->_read_index, lengthToRead);
+        object->_read_index += lengthToRead;
 
         // check if we are at end of capacity
         if (object->_read_index == object->_capacity)
@@ -193,14 +204,14 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         size_t chunk1Size = object->_capacity - object->_read_index;
         memcpy(data, object->_buffer + object->_read_index, chunk1Size);
 
-        size_t chunk2Size = length - chunk1Size;
+        size_t chunk2Size = lengthToRead - chunk1Size;
         memcpy(data + chunk1Size, object->_buffer, chunk2Size);
 
         object->_read_index = chunk2Size;
     }
 
     // update ring buffer size
-    object->_size -= length;
+    object->_size -= lengthToRead;
 
     // check for optimization to improve sequential push
     // buffer has to be empty and read and write indexes coincide
@@ -211,11 +222,13 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         object->_read_index = 0;
     }
 
-    return length;
+    return lengthToRead;
 }
 
 size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
 {
+    size_t lengthToRead = 0;
+
     // sanity check for 0 length
     if (length == 0)
     {
@@ -228,10 +241,19 @@ size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
         return 0;
     }
 
-    // can read in a single memcpy
-    if (length <= object->_capacity - object->_read_index)
+    if (length < object->_size)
     {
-        object->_read_index += length;
+        lengthToRead = length;
+    }
+    else
+    {
+        lengthToRead = object->_size;
+    }
+
+    // can read in a single memcpy
+    if (lengthToRead <= object->_capacity - object->_read_index)
+    {
+        object->_read_index += lengthToRead;
 
         // check if we are at end of capacity
         if (object->_read_index == object->_capacity)
@@ -243,12 +265,12 @@ size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
     else
     {
         size_t chunk1Size = object->_capacity - object->_read_index;
-        size_t chunk2Size = length - chunk1Size;
+        size_t chunk2Size = lengthToRead - chunk1Size;
         object->_read_index = chunk2Size;
     }
 
     // update ring buffer size
-    object->_size -= length;
+    object->_size -= lengthToRead;
 
     // check for optimization to improve sequential push
     // buffer has to be empty and read and write indexes coincide
@@ -259,5 +281,5 @@ size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
         object->_read_index = 0;
     }
 
-    return length;
+    return lengthToRead;
 }
