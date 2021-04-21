@@ -6,87 +6,41 @@
 #include "nf_sys_io_filesystem.h"
 #include <ff.h>
 
-extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern void CombinePath(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
+
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const char *workingPath = stack.Arg0().RecoverString();
-    const char *folderName = stack.Arg1().RecoverString();
+    const char *folderPath = stack.Arg0().RecoverString();
 
     bool exists = false;
     FRESULT operationResult;
-    char *folderPath = NULL;
+    FAULT_ON_NULL(folderPath);
 
-    FAULT_ON_NULL(workingPath);
-    FAULT_ON_NULL(folderName);
+    FILINFO fno;
 
-    // setup folder path
-    folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+    operationResult = f_stat(folderPath, &fno);
 
-    // sanity check for successfull malloc
-    if (folderPath == NULL)
+    if (operationResult == FR_OK)
     {
-        // failed to allocate memory
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        exists = true;
     }
-
-    // clear working buffer
-    memset(folderPath, 0, 2 * FF_LFN_BUF + 1);
-
-    // compose file path
-    CombinePathAndName(folderPath, workingPath, folderName);
-
-    // change directory
-    operationResult = f_chdir(workingPath);
-
-    if (operationResult != FR_OK)
+    else if (operationResult == FR_NO_FILE)
     {
-        if (operationResult == FR_INVALID_DRIVE)
-        {
-            // invalid drive
-            NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
-        }
-        else
-        {
-            // error opening the directory
-            NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
-        }
+        exists = false;
     }
     else
     {
-        FILINFO fno;
-
-        operationResult = f_stat(folderPath, &fno);
-
-        if (operationResult == FR_OK)
-        {
-            exists = true;
-        }
-        else if (operationResult == FR_NO_FILE)
-        {
-            exists = false;
-        }
-        else
-        {
-            exists = false;
-        }
+        exists = false;
     }
+
     stack.SetResult_Boolean(exists);
 
-    NANOCLR_CLEANUP();
-
-    // free buffer memory, if allocated
-    if (folderPath != NULL)
-    {
-        platform_free(folderPath);
-    }
-
-    NANOCLR_CLEANUP_END();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::MoveNative___STATIC__VOID__STRING__STRING(
@@ -148,7 +102,12 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CreateNative___STATIC_
         FAULT_ON_NULL(folderPath);
 
         int operationResult = f_mkdir(folderPath);
-        if (operationResult != FR_OK)
+        if (operationResult == FR_EXIST)
+        {
+            // folder already exists
+            NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS)
+        }
+        else if (operationResult != FR_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
