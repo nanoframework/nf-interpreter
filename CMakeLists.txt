@@ -424,8 +424,6 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
-# (default is ON so Wire Protocol implements CRC32)
-option(NF_WP_IMPLEMENTS_CRC32 "option for Wire Protocol to implement CRC32" ON)
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)

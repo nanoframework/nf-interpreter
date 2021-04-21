@@ -125,11 +125,6 @@ typedef struct WP_Message
     WP_Packet      m_header;
     uint8_t*       m_payload;
 
-    uint8_t*       m_pos;
-    uint16_t       m_size;
-    uint64_t       m_payloadTicks;
-    int            m_rxState;
-
     void (*Initialize)(WP_Controller* parent);
     void (*PrepareReception)(void);
     void (*PrepareRequest)(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
