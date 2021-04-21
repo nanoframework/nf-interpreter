@@ -309,6 +309,8 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+
+        g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
     }
 
     if (assm)
