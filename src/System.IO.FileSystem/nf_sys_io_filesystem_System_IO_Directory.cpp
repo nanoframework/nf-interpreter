@@ -28,10 +28,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
     {
         exists = true;
     }
-    else if (operationResult == FR_NO_FILE)
-    {
-        exists = false;
-    }
     else
     {
         exists = false;
