@@ -8,8 +8,6 @@
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
 
-extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
-
 void CombinePathAndName(char *outpath, const char *path1, const char *path2)
 {
     strcat(outpath, path1);
