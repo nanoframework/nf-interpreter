@@ -9,7 +9,6 @@
 extern void CombinePath(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
-
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
 {
