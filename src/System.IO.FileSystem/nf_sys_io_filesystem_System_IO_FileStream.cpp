@@ -8,7 +8,9 @@
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
 
-void CombinePathAndName(char *outpath, const char *path1, const char *path2)
+extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
+
+void CombinePath(char *outpath, const char *path1, const char *path2)
 {
     strcat(outpath, path1);
 
@@ -51,7 +53,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName(filePath, workingPath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);
@@ -178,7 +180,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName(filePath, workingPath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);
@@ -282,7 +284,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName(filePath, workingPath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);
@@ -375,7 +377,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName(filePath, workingPath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);

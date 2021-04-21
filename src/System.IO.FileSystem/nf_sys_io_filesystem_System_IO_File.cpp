@@ -8,20 +8,8 @@
 #include <ff.h>
 #include <nanoHAL_Windows_Storage.h>
 
-extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
-
-void CombinePathAndName2(char *outpath, const char *path1, const char *path2)
-{
-    strcat(outpath, path1);
-
-    // Add "\" to path if required
-    if (outpath[hal_strlen_s(outpath) - 1] != '\\')
-    {
-        strcat(outpath, "\\");
-    }
-    strcat(outpath, path2);
-}
+extern void CombinePath(char *outpath, const char *path1, const char *path2);
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOLEAN__STRING__STRING(
     CLR_RT_StackFrame &stack)
@@ -52,7 +40,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     memset(filePath, 0, 2 * FF_LFN_BUF + 1);
 
     // compose file path
-    CombinePathAndName(filePath, workingPath, fileName);
+    CombinePath(filePath, workingPath, fileName);
 
     // change directory
     operationResult = f_chdir(workingPath);
