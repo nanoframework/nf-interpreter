@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__nfweak int WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
+__nfweak bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
     (void)(ptr);
     (void)(size);
@@ -26,7 +26,7 @@ __nfweak int WP_ReceiveBytes(uint8_t* ptr, unsigned short* size)
 }
 
 // provided as weak to be replaced by actual implementation by HAL interface
-__nfweak int WP_TransmitMessage(WP_Message* message)
+__nfweak bool WP_TransmitMessage(WP_Message *message)
 {
     (void)(message);
 
