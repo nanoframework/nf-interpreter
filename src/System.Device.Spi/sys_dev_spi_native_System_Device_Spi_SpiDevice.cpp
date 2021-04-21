@@ -9,6 +9,7 @@
 
 // define this type here to make it shorter and improve code readability
 typedef Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings SpiConnectionSettings;
+typedef Library_corlib_native_System_SpanByte SpanByte;
 
 void nano_spi_callback(int busIndex)
 {
@@ -55,8 +56,7 @@ bool IsLongRunningOperation(
     }
 }
 
-HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::
-    NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     return NativeTransfer(stack, false);
 }
@@ -73,10 +73,14 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *writeSpanByte;
+        CLR_RT_HeapBlock *readSpanByte;
         unsigned char *writeData = NULL;
         unsigned char *readData = NULL;
         int writeSize = 0;
         int readSize = 0;
+        int readOffset = 0;
+        int writeOffset = 0;
         SPI_WRITE_READ_SETTINGS rws;
 
         bool isLongRunningOperation;
@@ -96,7 +100,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         if (stack.m_customState == 0)
         {
             // get a pointer to the managed spi connectionSettings object instance
-            CLR_RT_HeapBlock *pConfig = pThis[FIELD___connectionSettings].Dereference();
+            CLR_RT_HeapBlock *pConfig = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
             // get data bit length
             int databitLength = pConfig[SpiConnectionSettings::FIELD___databitLength].NumericByRef().s4;
@@ -105,33 +109,80 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             if (data16Bits)
                 databitLength = 16;
 
-            // dereference the write and read buffers from the arguments
-            CLR_RT_HeapBlock_Array *writeBuffer = stack.Arg1().DereferenceArray();
-            if (writeBuffer != NULL)
+            // Buffers used either for the SpanBye either for the Byte array
+            CLR_RT_HeapBlock_Array *writeBuffer;
+            CLR_RT_HeapBlock_Array *readBuffer;
+
+            // For 16 bits, it's directly a buffer, for 8 bits, it's a SpanByte
+            if (data16Bits)
             {
-                // grab the pointer to the array by getting the first element of the array
-                if (data16Bits)
+                writeBuffer = stack.Arg1().DereferenceArray();
+                if (writeBuffer != NULL)
+                {
+                    // grab the pointer to the array by getting the first element of the array
                     writeData = (unsigned char *)writeBuffer->GetFirstElementUInt16();
-                else
-                    writeData = writeBuffer->GetFirstElement();
+                    
+                    // get the size of the buffer by reading the number of elements in the HeapBlock array
+                    writeSize = writeBuffer->m_numOfElements;
+                }
 
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                writeSize = writeBuffer->m_numOfElements;
-            }
-
-            CLR_RT_HeapBlock_Array *readBuffer = stack.Arg2().DereferenceArray();
-            if (readBuffer != NULL)
-            {
-                // grab the pointer to the array by getting the first element of the array
-                if (data16Bits)
+                readBuffer = stack.Arg2().DereferenceArray();
+                if (readBuffer != NULL)
+                {
+                    // grab the pointer to the array by getting the first element of the array
                     readData = (unsigned char *)readBuffer->GetFirstElementUInt16();
-                else
-                    readData = readBuffer->GetFirstElement();
-
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                readSize = readBuffer->m_numOfElements;
+                    
+                    // get the size of the buffer by reading the number of elements in the HeapBlock array
+                    readSize = readBuffer->m_numOfElements;
+                }
             }
+            else
+            {
+                // dereference the write and read SpanByte from the arguments
+                writeSpanByte = stack.Arg1().Dereference();
+                if (writeSpanByte != NULL)
+                {                    
+                    // get buffer
+                    writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+                    if (writeBuffer != NULL)
+                    {
+                        // Get the write offset, only the elements defined by the span must be written, not the whole array
+                        writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
+                        // use the span length as write size, only the elements defined by the span must be written
+                        writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                        writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
+                    }
+                }
+
+                if (writeData == NULL)
+                {
+                    // nothing to write, have to zero this
+                    writeSize = 0;
+                }
+
+                readSpanByte = stack.Arg2().Dereference();
+                if (readSpanByte != NULL)
+                {
+                    // get buffer
+                    readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+                    if (readBuffer != NULL)
+                    {
+                        // Get the read offset, only the elements defined by the span must be read, not the whole array
+                        readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+
+                        // use the span length as read size, only the elements defined by the span must be read
+                        readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                        readData = (unsigned char *)readBuffer->GetElement(readOffset);
+                    }
+                }
+
+                if (readData == NULL)
+                {
+                    // nothing to read, have to zero this
+                    readSize = 0;
+                }
+            }
             // Are we using SPI full-duplex for transfer ?
             bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
@@ -166,9 +217,9 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
                 // protect the buffers from GC so DMA can find them where they are supposed to be
-                if (writeBuffer != NULL)
+                if (writeData != NULL)
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
-                if (readBuffer != NULL)
+                if (readData != NULL)
                     CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
 
                 // Set callback for async calls to nano spi
@@ -235,31 +286,28 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     {
         NANOCLR_HEADER();
         {
-            int32_t controllerID;
+            int32_t chipSelect;
             SPI_DEVICE_CONFIGURATION spiConfig;
 
             // get a pointer to the managed object instance and check that it's not NULL
             CLR_RT_HeapBlock *pThis = stack.This();
             FAULT_ON_NULL(pThis);
 
-            // Get reference to manage code SPI controller
-            CLR_RT_HeapBlock *controller =
-                pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___spiController].Dereference();
-
-            controllerID =
-                controller[Library_sys_dev_spi_native_System_Device_Spi_SpiController::FIELD___controllerId]
-                    .NumericByRef()
-                    .s4;
             // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
                 pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings]
                     .Dereference();
+            
+            chipSelect = config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
             // bus zero based
             spiConfig.BusMode = SpiBusMode_master;
-            spiConfig.Spi_Bus = controllerID;
+            spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4;
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-            spiConfig.ChipSelectActive = false; // TODO - is this something we would like to expose to managed code
+            if(chipSelect == 0)
+                spiConfig.ChipSelectActive = false;
+            else
+                spiConfig.ChipSelectActive = true;
             spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
             spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;

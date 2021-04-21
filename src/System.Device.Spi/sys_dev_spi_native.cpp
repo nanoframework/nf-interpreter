@@ -1,18 +1,9 @@
-﻿//
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
-//
-
-#include "sys_dev_spi_native.h"
+﻿#include "sys_dev_spi_native.h"
 
 // clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -53,16 +44,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___VOID,
-    Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN,
+    Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeInit___VOID,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice___I4,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -72,7 +58,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi =
 {
     "System.Device.Spi",
-    0x360239F1,
+    0x48031DC5,
     method_lookup,
     { 100, 1, 4, 2 }
 };

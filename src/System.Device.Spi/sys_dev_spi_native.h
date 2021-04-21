@@ -1,17 +1,36 @@
+//-----------------------------------------------------------------------------
 //
-// Copyright (c) .NET Foundation and Contributors
-// See LICENSE file in the project root for full license information.
+//                   ** WARNING! ** 
+//    This file was generated automatically by a tool.
+//    Re-running the tool will overwrite this file.
+//    You should copy this file to a custom location
+//    before adding any customization in the copy to
+//    prevent loss of your changes when the tool is
+//    re-run.
 //
+//-----------------------------------------------------------------------------
 
 #ifndef _SYS_DEV_SPI_NATIVE_H_
 #define _SYS_DEV_SPI_NATIVE_H_
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
-#include <nanoCLR_Checks.h>
+#include <nanoPackStruct.h>
+#include <corlib_native.h>
 
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+typedef enum __nfpack DataFlow
+{
+    DataFlow_MsbFirst = 0,
+    DataFlow_LsbFirst = 1,
+} DataFlow;
+
+// typedef enum __nfpack SpiMode
+// {
+//     SpiMode_Mode0 = 0,
+//     SpiMode_Mode1 = 1,
+//     SpiMode_Mode2 = 2,
+//     SpiMode_Mode3 = 3,
+// } SpiMode;
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
 {
@@ -22,6 +41,7 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
     NANOCLR_NATIVE_DECLARE(NativeMinClockFrequency___I4);
 
     //--//
+
 };
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings
@@ -33,37 +53,22 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings
     static const int FIELD___spiSharingMode = 5;
     static const int FIELD___dataFlow = 6;
     static const int FIELD___busId = 7;
-    //--//
-};
-
-struct Library_sys_dev_spi_native_System_Device_Spi_SpiController
-{
-    static const int FIELD___syncLock = 1;
-    static const int FIELD___controllerId = 2;
-
-    NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
+    static const int FIELD___chipSelectLineActiveState = 8;
 
     //--//
-};
 
-struct Library_sys_dev_spi_native_System_Device_Spi_SpiControllerManager
-{
-    static const int FIELD_STATIC__s_syncLock = 0;
-    static const int FIELD_STATIC__s_controllersCollection = 1;
-
-    //--//
 };
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
 {
     static const int FIELD___deviceId = 1;
     static const int FIELD___connectionSettings = 2;
-    static const int FIELD___spiController = 3;
+    static const int FIELD___disposedValue = 3;
     static const int FIELD___syncLock = 4;
-    static const int FIELD___disposedValue = 5;
+    static const int FIELD___bufferSingleOperation = 5;
 
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SZARRAY_U1__SZARRAY_U1__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpenDevice___I4);
@@ -71,8 +76,9 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
     //--//
 
     static HRESULT NativeTransfer(CLR_RT_StackFrame &stack, bool bufferIs16bits);
+
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 
-#endif //_SYS_DEV_SPI_NATIVE_H_
+#endif  //_SYS_DEV_SPI_NATIVE_H_
