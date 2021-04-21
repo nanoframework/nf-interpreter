@@ -6,7 +6,7 @@
 #include "nf_sys_io_filesystem.h"
 #include <ff.h>
 
-extern void CombinePath(char *outpath, const char *path1, const char *path2);
+extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
 
@@ -220,7 +220,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                     // clear working buffer
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
                     // compose file path
-                    CombinePath(workingBuffer, folderPath, fileInfo.fname);
+                    CombinePathAndName(workingBuffer, folderPath, fileInfo.fname);
                     // set file full path in array of strings
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*filePathEntry, workingBuffer));
 
@@ -350,7 +350,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
                     // clear working buffer
                     memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
                     // compose directory path
-                    CombinePath(workingBuffer, folderPath, fileInfo.fname);
+                    CombinePathAndName(workingBuffer, folderPath, fileInfo.fname);
                     // set directory full path in array of strings
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*folderPathEntry, workingBuffer));
 
