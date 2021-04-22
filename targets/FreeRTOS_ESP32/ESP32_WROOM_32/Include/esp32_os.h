@@ -8,8 +8,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include  <sys/time.h>
-#include  <time.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -32,7 +32,7 @@
 #include "spi_master.h"
 #include "gpio.h"
 #include "i2c.h"
-#include "uart.h"   
+#include "uart.h"
 #include "ledc.h"
 #include "adc.h"
 #include "dac.h"
@@ -40,7 +40,7 @@
 #include "esp_spiffs.h"
 #include "pcnt.h"
 
-// Uncomment to support Ethernet 
+// Uncomment to support Ethernet
 //#define ESP32_ETHERNET_SUPPORT
 
 #endif // _ESP32_OS_H_
