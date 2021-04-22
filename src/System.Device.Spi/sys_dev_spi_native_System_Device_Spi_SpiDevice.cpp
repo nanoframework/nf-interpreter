@@ -11,7 +11,7 @@
 typedef Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings SpiConnectionSettings;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
-void nano_spi_callback(int busIndex)
+void System_Device_nano_spi_callback(int busIndex)
 {
     (void)busIndex;
 
@@ -21,7 +21,7 @@ void nano_spi_callback(int busIndex)
 
 // estimate the time required to perform the SPI transaction
 // TODO doesn't take into account of full duplex or sequential ( assumes sequential at the moment )
-bool IsLongRunningOperation(
+bool System_Device_IsLongRunningOperation(
     uint32_t writeSize,
     uint32_t readSize,
     bool fullDuplex,
@@ -100,14 +100,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         if (stack.m_customState == 0)
         {
             // get a pointer to the managed spi connectionSettings object instance
-            CLR_RT_HeapBlock *pConfig = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
-
-            // get data bit length
-            int databitLength = pConfig[SpiConnectionSettings::FIELD___databitLength].NumericByRef().s4;
-            if (databitLength <= 0)
-                databitLength = 8;
-            if (data16Bits)
-                databitLength = 16;
+            // CLR_RT_HeapBlock *pConfig = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
             // Buffers used either for the SpanBye either for the Byte array
             CLR_RT_HeapBlock_Array *writeBuffer;
@@ -186,15 +179,11 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             // Are we using SPI full-duplex for transfer ?
             bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
-            // Only tranfer in 16 bit if Buffer and request are for 16 bit
-            bool dataTransfer16 =
-                (pConfig[SpiConnectionSettings::FIELD___databitLength].NumericByRef().s4 == 16) && data16Bits;
-
             // Set up read/write settings for SPI_Write_Read call
-            rws = {fullDuplex, 0, dataTransfer16, 0};
+            rws = {fullDuplex, 0, data16Bits, 0};
 
             // Check to see if we should run async so as not to hold up other tasks
-            isLongRunningOperation = IsLongRunningOperation(
+            isLongRunningOperation = System_Device_IsLongRunningOperation(
                 writeSize,
                 readSize,
                 fullDuplex,
@@ -223,7 +212,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                     CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
 
                 // Set callback for async calls to nano spi
-                rws.callback = nano_spi_callback;
+                rws.callback = System_Device_nano_spi_callback;
             }
 
             // Start SPI transfer

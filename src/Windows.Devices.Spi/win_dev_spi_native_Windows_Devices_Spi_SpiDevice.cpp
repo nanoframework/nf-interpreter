@@ -95,16 +95,6 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
 
         if (stack.m_customState == 0)
         {
-            // get a pointer to the managed spi connectionSettings object instance
-            CLR_RT_HeapBlock *pConfig = pThis[FIELD___connectionSettings].Dereference();
-
-            // get data bit length
-            int databitLength = pConfig[SpiConnectionSettings::FIELD___databitLength].NumericByRef().s4;
-            if (databitLength <= 0)
-                databitLength = 8;
-            if (data16Bits)
-                databitLength = 16;
-
             // dereference the write and read buffers from the arguments
             CLR_RT_HeapBlock_Array *writeBuffer = stack.Arg1().DereferenceArray();
             if (writeBuffer != NULL)
@@ -135,12 +125,8 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiDevice::NativeTransfer
             // Are we using SPI full-duplex for transfer ?
             bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
-            // Only tranfer in 16 bit if Buffer and request are for 16 bit
-            bool dataTransfer16 =
-                (pConfig[SpiConnectionSettings::FIELD___databitLength].NumericByRef().s4 == 16) && data16Bits;
-
             // Set up read/write settings for SPI_Write_Read call
-            rws = {fullDuplex, 0, dataTransfer16, 0};
+            rws = {fullDuplex, 0, data16Bits, 0};
 
             // Check to see if we should run async so as not to hold up other tasks
             isLongRunningOperation = IsLongRunningOperation(

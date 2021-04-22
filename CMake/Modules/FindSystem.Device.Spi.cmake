@@ -18,8 +18,9 @@ list(APPEND System.Device.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device
 
 # source files
 set(System.Device.Spi_SRCS
-    cpu_spi.cpp
-    nanoHAL_spi.cpp
+    # Those 2 files have to be added when Windows.Devices.Spi won't be present
+    # cpu_spi.cpp   
+    # nanoHAL_spi.cpp
     sys_dev_spi_native_System_Device_Spi_SpiBusInfo.cpp
     sys_dev_spi_native_System_Device_Spi_SpiDevice.cpp
     sys_dev_spi_native.cpp

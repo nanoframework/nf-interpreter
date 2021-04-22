@@ -1,4 +1,9 @@
-﻿#include "sys_dev_spi_native.h"
+﻿//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+#include "sys_dev_spi_native.h"
 
 // clang-format off
 
