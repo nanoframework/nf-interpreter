@@ -105,7 +105,7 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
     {
         return ret;
     }
-    
+
     // esp_eth_set_mac( pMacAdr );  // need later IDF
     esp_eth_enable();
 #endif
