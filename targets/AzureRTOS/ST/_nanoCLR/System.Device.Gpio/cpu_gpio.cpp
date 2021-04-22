@@ -191,12 +191,21 @@ void UnlinkInputState(gpio_input_state *pState)
 {
     tx_timer_delete(&pState->debounceTimer);
 
-    // disable the EXT interrupt channel
+    // get port & pin
+    GPIO_TypeDef *port = GPIO_PORT(pState->pinNumber);
+
+    GPIO_InitTypeDef gpio_init_structure;
+    gpio_init_structure.Pin = GPIO_PIN(pState->pinNumber);
+
+    HAL_GPIO_GetConfig(port, &gpio_init_structure);
+
+    // disable interrupt associated with the pin
     // it's OK to do always this, no matter if it's enabled or not
-    // TODO
-    //    palDisableLineEvent(GetIoLine(pState->pinNumber));
+    gpio_init_structure.Mode &= ~GPIO_MODE_IT_RISING_FALLING;
+    HAL_GPIO_SetConfig(port, &gpio_init_structure);
 
     pState->Unlink();
+
     platform_free(pState);
 }
 
@@ -204,6 +213,7 @@ void UnlinkInputState(gpio_input_state *pState)
 void DeleteInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *pState = GetInputState(pinNumber);
+
     if (pState)
     {
         UnlinkInputState(pState);
@@ -237,7 +247,9 @@ bool CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
 {
     // Check if valid pin number
     if (!IsValidGpioPin(pinNumber))
+    {
         return false;
+    }
 
     int port = pinNumber >> 4, bit = 1 << (pinNumber & 0x0F);
     bool ret = true;
@@ -268,7 +280,9 @@ bool CPU_GPIO_PinIsBusy(GPIO_PIN pinNumber)
 {
     // Check if valid pin number
     if (!IsValidGpioPin(pinNumber))
+    {
         return false;
+    }
 
     int port = pinNumber >> 4, sh = pinNumber & 0x0F;
     return (pinReserved[port] >> sh) & 1;
@@ -493,7 +507,7 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 
     GPIO_TypeDef *port = GPIO_PORT(pinNumber);
     uint32_t pin = GPIO_PIN(pinNumber);
-    
+
     GPIO_InitTypeDef gpio_init_structure;
     gpio_init_structure.Pin = pin;
 
