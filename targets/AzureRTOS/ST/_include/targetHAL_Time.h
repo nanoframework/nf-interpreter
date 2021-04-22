@@ -6,8 +6,8 @@
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_
 
-#include <stm32l4xx_hal.h>
+#include <tx_api.h>
 
-#define HAL_Time_CurrentSysTicks    HAL_GetTick           
+#define HAL_Time_CurrentSysTicks tx_time_get
 
 #endif //_TARGET_HAL_TIME_H_
