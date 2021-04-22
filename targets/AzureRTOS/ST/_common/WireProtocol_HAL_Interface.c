@@ -24,8 +24,9 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     // save for latter comparison
     uint16_t requestedSize = *size;
     (void)requestedSize;
-    
+
     uint32_t dummy;
+    uint8_t waitResult;
 
     // reset value
     receivedBytes = 0;
@@ -37,10 +38,13 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, *size) == HAL_OK)
         {
             // wait for event
-            tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 100);
+            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 100);
 
-            ptr += receivedBytes;
-            *size -= receivedBytes;
+            if(waitResult == TX_SUCCESS)
+            {
+                ptr += receivedBytes;
+                *size -= receivedBytes;
+            }
         }
 
         // abort any ongoing UART operation
@@ -58,6 +62,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 bool WP_TransmitMessage(WP_Message *message)
 {
     uint32_t dummy;
+    uint8_t waitResult;
 
     TRACE(
         TRACE_HEADERS,
@@ -66,30 +71,50 @@ bool WP_TransmitMessage(WP_Message *message)
         message->m_header.m_flags,
         message->m_header.m_size);
 
+    // reset var
+    transmittedBytes = 0;
+
     // write header with 250ms timeout
     if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
     {
-        return false;
+        goto send_failed;
     }
     
     // wait for event
-    tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 25);
+    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 10);
 
-    HAL_UART_DMAStop(&WProtocolUart);
+    if(waitResult != TX_SUCCESS ||
+       transmittedBytes != sizeof(message->m_header))
+    {
+        goto send_failed;
+    }
 
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
+        // reset var
+        transmittedBytes = 0;
+
         if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
         {
-            return false;
+            goto send_failed;
         }
 
         // wait for event
-        tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 25);
+        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 250);
+    }
 
-        HAL_UART_DMAStop(&WProtocolUart);
+    HAL_UART_DMAStop(&WProtocolUart);
+    
+    if(waitResult != TX_SUCCESS ||
+       transmittedBytes != message->m_header.m_size)
+    {
+        return false;
     }
 
     return true;
+
+send_failed:
+    HAL_UART_DMAStop(&WProtocolUart);
+    return false;
 }
