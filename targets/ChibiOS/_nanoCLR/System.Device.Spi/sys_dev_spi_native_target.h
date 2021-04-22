@@ -10,23 +10,24 @@
 #include <hal.h>
 
 // struct representing the SPI bus
-struct NF_PAL_SPI
-{
-    int BusIndex;
-    SPIDriver *Driver;
-    SPIConfig Configuration;
+// To uncomment once Windows.Devices.Spi will be removed
+// struct NF_PAL_SPI
+// {
+//     int BusIndex;
+//     SPIDriver *Driver;
+//     SPIConfig Configuration;
 
-    SPI_Callback Callback;
+//     SPI_Callback Callback;
 
-    bool SequentialTxRx;
-    bool BufferIs16bits;
+//     bool SequentialTxRx;
+//     bool BufferIs16bits;
 
-    uint8_t *WriteBuffer;
-    uint16_t WriteSize;
+//     uint8_t *WriteBuffer;
+//     uint16_t WriteSize;
 
-    uint8_t *ReadBuffer;
-    uint16_t ReadSize;
-};
+//     uint8_t *ReadBuffer;
+//     uint16_t ReadSize;
+// };
 
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function
@@ -70,4 +71,4 @@ void ConfigPins_SPI4();
 void ConfigPins_SPI5();
 void ConfigPins_SPI6();
 
-#endif //_WIN_DEV_SPI_NATIVE_TARGET_H_
+#endif //_SYS_DEV_SPI_NATIVE_TARGET_H_

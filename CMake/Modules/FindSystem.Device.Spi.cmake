@@ -4,7 +4,7 @@
 #
 
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Spi")
+set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Spi)
 
 
 # set include directories
@@ -14,7 +14,8 @@ list(APPEND System.Device.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND System.Device.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.Spi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.Device.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
-
+# TODO remove the following when Windows.Devices.Gpio is removed
+list(APPEND System.Device.Spi_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.Spi)
 
 # source files
 set(System.Device.Spi_SRCS
@@ -24,8 +25,8 @@ set(System.Device.Spi_SRCS
     sys_dev_spi_native_System_Device_Spi_SpiBusInfo.cpp
     sys_dev_spi_native_System_Device_Spi_SpiDevice.cpp
     sys_dev_spi_native.cpp
-
-    target_system_device_spi_config.cpp
+    # this will have to be adjusted to the system_device file once Windows.Devices removed
+    target_windows_devices_spi_config.cpp
 )
 
 foreach(SRC_FILE ${System.Device.Spi_SRCS})
