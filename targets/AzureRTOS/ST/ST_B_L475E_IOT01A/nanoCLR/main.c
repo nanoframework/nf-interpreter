@@ -31,7 +31,7 @@ uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
 
 // receiver thread
 #define RECEIVER_THREAD_STACK_SIZE 2048
-#define RECEIVER_THREAD_PRIORITY   6
+#define RECEIVER_THREAD_PRIORITY   5
 
 TX_THREAD receiverThread;
 uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
@@ -39,7 +39,7 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 // CLR thread
 #define CLR_THREAD_STACK_SIZE 4096
-#define CLR_THREAD_PRIORITY   8
+#define CLR_THREAD_PRIORITY   5
 
 TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
