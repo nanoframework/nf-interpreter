@@ -122,6 +122,10 @@
         {
           "name": "API_Windows.Devices.Spi",
           "value": "ON"
+        },        
+        {
+          "name": "API_System.Device.Spi",
+          "value": "ON"
         },
         {
           "name": "API_Windows.Devices.I2c",
@@ -409,6 +413,10 @@
         },
         {
           "name": "API_Windows.Devices.Spi:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Device.Spi:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

@@ -234,6 +234,11 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.Device.Spi",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.Wifi",
           "value": "True",
           "type": "BOOL"

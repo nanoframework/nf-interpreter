@@ -6,11 +6,11 @@
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.Spi")
 
-
 # set include directories
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL)
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND Windows.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Windows.Devices.Spi)
@@ -37,6 +37,7 @@ foreach(SRC_FILE ${Windows.Devices.Spi_SRCS})
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
             ${CMAKE_SOURCE_DIR}/src/Windows.Devices.Spi
+            ${CMAKE_SOURCE_DIR}/src/System.Device.Spi
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

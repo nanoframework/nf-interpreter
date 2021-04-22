@@ -594,6 +594,11 @@ else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
+if(API_System.Device.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+else()
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+endif()
 
 if(API_nanoFramework.Devices.Can)
     set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
