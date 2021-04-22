@@ -9,6 +9,7 @@
 #include "esp32_os.h"
 #include "eth_phy/phy_lan8720.h"
 #include "soc/emac_reg_v2.h"
+#include <esp32_ethernet_options.h>
 
 extern "C"
 {
@@ -26,14 +27,14 @@ extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 #define CONFIG_PHY_SMI_MDIO_PIN 18
 
 // Uncomment one of these following lines to support switching of a power gpio used on some boards
-//#define CONFIG_PIN_PHY_POWER		12     // Olimex_POE
-//#define CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
+//#define ESP32_CONFIG_PIN_PHY_POWER		12     // Olimex_POE
+//#define ESP32_CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
 
 // Uncomment one of these lines to select alternate clock modes
-#define CONFIG_PHY_CLOCK_MODE ETH_CLOCK_GPIO0_IN // Default
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     //
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
+//#define ESP32_CONFIG_PHY_CLOCK_MODE       ETH_CLOCK_GPIO0_IN      // Default
+//#define ESP32_CONFIG_PHY_CLOCK_MODE       ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
+//#define ESP32_CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     //
+//#define ESP32_CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
 
 #ifdef CONFIG_PHY_LAN8720
 #include "eth_phy/phy_lan8720.h"
@@ -62,15 +63,15 @@ static void eth_gpio_config_rmii(void)
     phy_rmii_smi_configure_pins(PIN_SMI_MDC, PIN_SMI_MDIO);
 }
 
-#ifdef CONFIG_PIN_PHY_POWER
+#ifdef ESP32_CONFIG_PIN_PHY_POWER
 static void phy_device_power_enable_via_gpio(bool enable)
 {
     if (!enable)
         phy_lan8720_default_ethernet_config.phy_power_enable(false);
 
-    gpio_pad_select_gpio((gpio_num_t)CONFIG_PIN_PHY_POWER);
-    gpio_set_direction((gpio_num_t)CONFIG_PIN_PHY_POWER, GPIO_MODE_OUTPUT);
-    gpio_set_level((gpio_num_t)CONFIG_PIN_PHY_POWER, (int)enable);
+    gpio_pad_select_gpio((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER);
+    gpio_set_direction((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER, GPIO_MODE_OUTPUT);
+    gpio_set_level((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER, (int)enable);
 
     // Allow the power up/down to take effect, min 300us
     vTaskDelay(1);
@@ -84,23 +85,30 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
 {
     (void)pMacAdr;
 
+#ifdef ESP32_ETHERNET_SUPPORT
     // Config Ethernet interface which will depend on current hardware
     eth_config_t config = DEFAULT_ETHERNET_PHY_CONFIG;
     /* Set the PHY address in the example configuration */
     config.phy_addr = PHY0;
     config.gpio_config = eth_gpio_config_rmii;
     config.tcpip_input = tcpip_adapter_eth_input;
-    config.clock_mode = CONFIG_PHY_CLOCK_MODE;
+    config.clock_mode = ESP32_CONFIG_PHY_CLOCK_MODE;
+#endif
 
-#ifdef CONFIG_PIN_PHY_POWER
+#ifdef ESP32_CONFIG_PIN_PHY_POWER
     config.phy_power_enable = phy_device_power_enable_via_gpio;
 #endif
+
+#ifdef ESP32_ETHERNET_SUPPORT
     esp_err_t ret = esp_eth_init(&config);
     if (ret != ESP_OK)
+    {
         return ret;
+    }
 
     // esp_eth_set_mac( pMacAdr );  // need later IDF
     esp_eth_enable();
+#endif
 
     return ESP_OK;
 }
