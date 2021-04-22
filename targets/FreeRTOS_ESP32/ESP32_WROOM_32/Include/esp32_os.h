@@ -41,6 +41,6 @@
 #include "pcnt.h"
 
 // Uncomment to support Ethernet 
-//#define ESP32_ETHERNET_SUPPORT 1
+//#define ESP32_ETHERNET_SUPPORT
 
 #endif // _ESP32_OS_H_

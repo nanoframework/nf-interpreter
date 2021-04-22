@@ -6,7 +6,7 @@
 
 #include <nanoHAL.h>
 #include "esp32_os.h"
-
+#include <esp32_ethernet_options.h>
 
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
@@ -51,7 +51,7 @@ int  Network_Interface_Open(int configIndex)
         case TCPIP_ADAPTER_IF_AP:
             return Esp32_WirelessAP_Open(configIndex, pConfig);
 
-#if ESP32_ETHERNET_SUPPORT
+#ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case TCPIP_ADAPTER_IF_ETH:
             return Esp32_Ethernet_Open(configIndex, pConfig);
@@ -74,7 +74,7 @@ bool Network_Interface_Close(int configIndex)
        case TCPIP_ADAPTER_IF_AP:
             return Esp32_WirelessAP_Close(configIndex);
 
-#if ESP32_ETHERNET_SUPPORT
+#ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case TCPIP_ADAPTER_IF_ETH:
             return Esp32_Ethernet_Close(configIndex);
