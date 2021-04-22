@@ -36,7 +36,6 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
     NANOCLR_NATIVE_DECLARE(NativeMinClockFrequency___I4);
 
     //--//
-
 };
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings
@@ -51,7 +50,6 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings
     static const int FIELD___chipSelectLineActiveState = 8;
 
     //--//
-
 };
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
@@ -71,9 +69,8 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
     //--//
 
     static HRESULT NativeTransfer(CLR_RT_StackFrame &stack, bool bufferIs16bits);
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 
-#endif  //_SYS_DEV_SPI_NATIVE_H_
+#endif //_SYS_DEV_SPI_NATIVE_H_

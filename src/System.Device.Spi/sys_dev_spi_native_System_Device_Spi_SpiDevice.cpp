@@ -56,13 +56,14 @@ bool System_Device_IsLongRunningOperation(
     }
 }
 
-HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::
+    NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     return NativeTransfer(stack, false);
 }
 
-HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::
-    NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     return NativeTransfer(stack, true);
 }
@@ -100,7 +101,8 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
         if (stack.m_customState == 0)
         {
             // get a pointer to the managed spi connectionSettings object instance
-            // CLR_RT_HeapBlock *pConfig = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
+            // CLR_RT_HeapBlock *pConfig =
+            // pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
             // Buffers used either for the SpanBye either for the Byte array
             CLR_RT_HeapBlock_Array *writeBuffer;
@@ -114,7 +116,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 {
                     // grab the pointer to the array by getting the first element of the array
                     writeData = (unsigned char *)writeBuffer->GetFirstElementUInt16();
-                    
+
                     // get the size of the buffer by reading the number of elements in the HeapBlock array
                     writeSize = writeBuffer->m_numOfElements;
                 }
@@ -124,7 +126,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 {
                     // grab the pointer to the array by getting the first element of the array
                     readData = (unsigned char *)readBuffer->GetFirstElementUInt16();
-                    
+
                     // get the size of the buffer by reading the number of elements in the HeapBlock array
                     readSize = readBuffer->m_numOfElements;
                 }
@@ -134,12 +136,13 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
                 // dereference the write and read SpanByte from the arguments
                 writeSpanByte = stack.Arg1().Dereference();
                 if (writeSpanByte != NULL)
-                {                    
+                {
                     // get buffer
                     writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
                     if (writeBuffer != NULL)
                     {
-                        // Get the write offset, only the elements defined by the span must be written, not the whole array
+                        // Get the write offset, only the elements defined by the span must be written, not the whole
+                        // array
                         writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
                         // use the span length as write size, only the elements defined by the span must be written
@@ -284,16 +287,15 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
 
             // Get reference to manage code SPI settings
             CLR_RT_HeapBlock *config =
-                pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings]
-                    .Dereference();
-            
+                pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
+
             chipSelect = config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
             // bus zero based
             spiConfig.BusMode = SpiBusMode_master;
             spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4;
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-            if(chipSelect == 0)
+            if (chipSelect == 0)
                 spiConfig.ChipSelectActive = false;
             else
                 spiConfig.ChipSelectActive = true;
