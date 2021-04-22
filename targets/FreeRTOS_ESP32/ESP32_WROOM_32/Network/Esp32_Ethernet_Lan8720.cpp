@@ -30,8 +30,8 @@ extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 //#define CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
 
 // Uncomment one of these lines to select alternate clock modes
-#define CONFIG_PHY_CLOCK_MODE ETH_CLOCK_GPIO0_IN // Default
-//#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
+//#define CONFIG_PHY_CLOCK_MODE ETH_CLOCK_GPIO0_IN // Default
+#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
 //#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     //
 //#define CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
 
