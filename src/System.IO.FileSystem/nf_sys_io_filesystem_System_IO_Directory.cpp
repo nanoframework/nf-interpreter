@@ -18,7 +18,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
 
     bool exists = false;
     FRESULT operationResult;
-    FAULT_ON_NULL(folderPath);
+    FAULT_ON_NULL_ARG(folderPath);
 
     FILINFO fno;
 
@@ -44,9 +44,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::MoveNative___STATIC__V
     NANOCLR_HEADER();
     {
         const char *filePathSrc = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(filePathSrc);
+        FAULT_ON_NULL_ARG(filePathSrc);
         const char *filePathDest = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(filePathDest);
+        FAULT_ON_NULL_ARG(filePathDest);
 
         // rename folder
         FRESULT operationResult = f_rename(filePathSrc, filePathDest);
@@ -70,7 +70,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::DeleteNative___STATIC_
     NANOCLR_HEADER();
     {
         const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
+        FAULT_ON_NULL_ARG(folderPath);
 
         // Delete folder
         FRESULT operationResult = f_unlink(folderPath);
@@ -94,7 +94,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CreateNative___STATIC_
     NANOCLR_HEADER();
     {
         const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
+        FAULT_ON_NULL_ARG(folderPath);
 
         int operationResult = f_mkdir(folderPath);
         if (operationResult == FR_EXIST)
@@ -127,7 +127,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
         FRESULT operationResult;
         static FILINFO fileInfo;
 
-        FAULT_ON_NULL(folderPath);
+        FAULT_ON_NULL_ARG(folderPath);
 
         // open directory
         operationResult = f_opendir(&currentDirectory, folderPath);
@@ -257,7 +257,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
         FRESULT operationResult;
         static FILINFO fileInfo;
 
-        FAULT_ON_NULL(folderPath);
+        FAULT_ON_NULL_ARG(folderPath);
 
         // open directory
         operationResult = f_opendir(&currentDirectory, folderPath);
@@ -409,7 +409,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
         FILINFO fileInfo;
 
         const char *folderPath = stack.Arg0().RecoverString();
-        FAULT_ON_NULL(folderPath);
+        FAULT_ON_NULL_ARG(folderPath);
 
         int operationResult = f_stat(folderPath, &fileInfo);
         if (operationResult != FR_OK)
