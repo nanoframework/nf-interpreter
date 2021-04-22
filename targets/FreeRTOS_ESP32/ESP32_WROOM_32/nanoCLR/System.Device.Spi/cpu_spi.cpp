@@ -282,8 +282,8 @@ HRESULT CPU_SPI_nWrite_nRead(
 
     NANOCLR_HEADER();
     {
-        unsigned char *writeDataBuffer = NULL;
-        unsigned char *readDataBuffer = NULL;
+        uint8_t *writeDataBuffer = NULL;
+        uint8_t *readDataBuffer = NULL;
         bool async = (wrc.callback != 0);
         esp_err_t ret;
 
@@ -313,7 +313,9 @@ HRESULT CPU_SPI_nWrite_nRead(
             // for Half-duplex its the length of both items
             MaxElementlength = writeSize + readSize;
             if (readSize)
+            {
                 MaxElementlength += wrc.readOffset;
+            }
 
             int maxByteDatalength = (wrc.Bits16ReadWrite) ? MaxElementlength * 2 : MaxElementlength;
 
@@ -323,11 +325,15 @@ HRESULT CPU_SPI_nWrite_nRead(
                 // DMA. length included write data, any dummy bytes(readOffset) and read data size
                 writeDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (writeDataBuffer == 0)
+                {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
 
                 readDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (readDataBuffer == 0)
+                {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
 
                 memset(writeDataBuffer, 0, maxByteDatalength);
                 memcpy(writeDataBuffer, writeData, writeSize);
@@ -385,8 +391,8 @@ HRESULT CPU_SPI_nWrite_nRead(
                     case ESP_ERR_INVALID_ARG:
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
-                    default:
                     case ESP_ERR_INVALID_STATE:
+                    default:
                         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                 }
             }
@@ -503,7 +509,9 @@ uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
     }
 
     if (directPin)
+    {
         return MAX_CLOCK_FREQUENCY_NATIVE;
+    }
 
     return MAX_CLOCK_FREQUENCY_GPIO_HALF;
 }

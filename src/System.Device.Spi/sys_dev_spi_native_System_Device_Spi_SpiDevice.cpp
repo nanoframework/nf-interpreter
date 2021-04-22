@@ -76,12 +76,12 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
     {
         CLR_RT_HeapBlock *writeSpanByte;
         CLR_RT_HeapBlock *readSpanByte;
-        unsigned char *writeData = NULL;
-        unsigned char *readData = NULL;
-        int writeSize = 0;
-        int readSize = 0;
-        int readOffset = 0;
-        int writeOffset = 0;
+        uint8_t *writeData = NULL;
+        uint8_t *readData = NULL;
+        int16_t writeSize = 0;
+        int16_t readSize = 0;
+        int16_t readOffset = 0;
+        int16_t writeOffset = 0;
         SPI_WRITE_READ_SETTINGS rws;
 
         bool isLongRunningOperation;
@@ -100,10 +100,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
         if (stack.m_customState == 0)
         {
-            // get a pointer to the managed spi connectionSettings object instance
-            // CLR_RT_HeapBlock *pConfig =
-            // pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
-
             // Buffers used either for the SpanBye either for the Byte array
             CLR_RT_HeapBlock_Array *writeBuffer;
             CLR_RT_HeapBlock_Array *readBuffer;
@@ -210,9 +206,13 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
                 // protect the buffers from GC so DMA can find them where they are supposed to be
                 if (writeData != NULL)
+                {
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
+                }
                 if (readData != NULL)
+                {
                     CLR_RT_ProtectFromGC gcReadBuffer(*readBuffer);
+                }
 
                 // Set callback for async calls to nano spi
                 rws.callback = System_Device_nano_spi_callback;
@@ -296,9 +296,14 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
             spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4;
             spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
             if (chipSelect == 0)
+            {
                 spiConfig.ChipSelectActive = false;
+            }
             else
+            {
                 spiConfig.ChipSelectActive = true;
+            }
+
             spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
             spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;
             spiConfig.Clock_RateHz = config[SpiConnectionSettings::FIELD___clockFrequency].NumericByRef().s4;
