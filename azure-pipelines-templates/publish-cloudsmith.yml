@@ -6,10 +6,8 @@
 
 steps:
 
-  # skip task on PR build and when on branch other than master or nf community targets
-  # execute on 'ForceUpload' parameter
   - task: ArchiveFiles@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: succeeded()
     displayName: Zip binary files (release)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -19,7 +17,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: succeeded()
     displayName: Collecting deployable artifacts (release)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
@@ -28,10 +26,8 @@ steps:
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
-  # skip task on PR build and when on branch other than develop, master or release
-  # execute on 'ForceUpload' parameter
   - task: ArchiveFiles@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: succeeded()
     displayName: Zip binary files (preview)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -41,7 +37,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: succeeded()
     displayName: Collecting deployable artifacts (preview)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
@@ -51,7 +47,7 @@ steps:
       flattenFolders: true
 
   - task: PublishBuildArtifacts@1
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
