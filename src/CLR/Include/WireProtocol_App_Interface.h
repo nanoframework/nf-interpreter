@@ -9,7 +9,7 @@
 #include "WireProtocol.h"
 
 //////////////////////////////////////////
-extern void ReplyToCommand(WP_Message *message, int fSuccess, int fCritical, void *ptr, int size);
+extern void ReplyToCommand(WP_Message* message, int fSuccess, int fCritical, void* ptr, int size);
 
 extern const CommandHandlerLookup c_Lookup_Request[];
 extern const CommandHandlerLookup c_Lookup_Reply[];
