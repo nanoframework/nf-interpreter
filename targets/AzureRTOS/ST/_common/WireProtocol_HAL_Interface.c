@@ -15,15 +15,13 @@ extern UART_HandleTypeDef WProtocolUart;
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
-WP_Message inboundMessage;
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
 
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
-    // save for latter comparison
+    // save for later comparison
     uint16_t requestedSize = *size;
-    (void)requestedSize;
 
     uint32_t dummy;
     uint8_t waitResult;
@@ -35,12 +33,12 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     if (*size)
     {
         // read from serial stream with 250ms timeout
-        if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, *size) == HAL_OK)
+        if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, requestedSize) == HAL_OK)
         {
             // wait for event
             waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 100);
 
-            if(waitResult == TX_SUCCESS)
+            if (waitResult == TX_SUCCESS)
             {
                 ptr += receivedBytes;
                 *size -= receivedBytes;
@@ -59,7 +57,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     return true;
 }
 
-bool WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t dummy;
     uint8_t waitResult;
@@ -79,12 +77,11 @@ bool WP_TransmitMessage(WP_Message *message)
     {
         goto send_failed;
     }
-    
+
     // wait for event
     waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 10);
 
-    if(waitResult != TX_SUCCESS ||
-       transmittedBytes != sizeof(message->m_header))
+    if (waitResult != TX_SUCCESS || transmittedBytes != sizeof(message->m_header))
     {
         goto send_failed;
     }
@@ -105,9 +102,8 @@ bool WP_TransmitMessage(WP_Message *message)
     }
 
     HAL_UART_DMAStop(&WProtocolUart);
-    
-    if(waitResult != TX_SUCCESS ||
-       transmittedBytes != message->m_header.m_size)
+
+    if (waitResult != TX_SUCCESS || transmittedBytes != message->m_header.m_size)
     {
         return false;
     }
