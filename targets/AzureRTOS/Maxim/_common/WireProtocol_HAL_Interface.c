@@ -41,9 +41,9 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
     }
 }
 
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
-    // save for latter comparison
+    // save for later comparison
     uint16_t requestedSize = *size;
     // reset value
     receivedBytes = 0;
@@ -98,7 +98,7 @@ abort_rx:
     return false;
 }
 
-bool WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     mxc_uart_req_t txRequest;
     uint8_t waitResult;
