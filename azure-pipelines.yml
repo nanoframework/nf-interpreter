@@ -351,7 +351,7 @@ jobs:
   - template: azure-pipelines-templates/build-esp32.yml
 
   - task: CopyFiles@1
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    condition: succeeded()
     displayName: Copying bootloader from ESP32 libs
     inputs:
       sourceFolder: $(ESP32_LIBS_PATH)
