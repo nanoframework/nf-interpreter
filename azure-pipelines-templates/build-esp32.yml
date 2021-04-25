@@ -3,6 +3,7 @@
 
 parameters:
   buildDirectory: '$(Build.SourcesDirectory)\build'
+  partitionsDirectory: '$(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)'
 
 steps:
   - task: CMake@1
@@ -26,7 +27,6 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\esptool_py\esptool\esptool.py'
       arguments: '--chip esp32 elf2image --flash_mode dio --flash_freq 40m --flash_size 4MB -o ${{ parameters.buildDirectory }}\nanoCLR.bin ${{ parameters.buildDirectory }}\nanoCLR.elf'
-      workingDirectory:  ${{ parameters.buildDirectory }}
 
   - task: PythonScript@0
     condition: succeeded()
@@ -34,17 +34,14 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)\IDF\partitions_nanoclr_16mb.csv ${{ parameters.buildDirectory }}\partitions_16mb.bin'
-      workingDirectory:  ${{ parameters.buildDirectory }}
-
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\IDF\partitions_nanoclr_16mb.csv ${{ parameters.buildDirectory }}\partitions_16mb.bin'
   - task: PythonScript@0
     condition: succeeded()
     displayName: Generate Esp32 Partition tables for 8MB flash
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)\IDF\partitions_nanoclr_8mb.csv ${{ parameters.buildDirectory }}\partitions_8mb.bin'
-      workingDirectory:  ${{ parameters.buildDirectory }}
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\IDF\partitions_nanoclr_8mb.csv ${{ parameters.buildDirectory }}\partitions_8mb.bin'
 
   - task: PythonScript@0
     condition: succeeded()
@@ -52,8 +49,7 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)\IDF\partitions_nanoclr_4mb.csv ${{ parameters.buildDirectory }}\partitions_4mb.bin'
-      workingDirectory:  ${{ parameters.buildDirectory }}
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\IDF\partitions_nanoclr_4mb.csv ${{ parameters.buildDirectory }}\partitions_4mb.bin'
 
   - task: PythonScript@0
     condition: succeeded()
@@ -61,8 +57,7 @@ steps:
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\partition_table\gen_esp32part.py'
-      arguments: '--verify $(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)\IDF\partitions_nanoclr_2mb.csv ${{ parameters.buildDirectory }}\partitions_2mb.bin'
-      workingDirectory:  ${{ parameters.buildDirectory }}
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\IDF\partitions_nanoclr_2mb.csv ${{ parameters.buildDirectory }}\partitions_2mb.bin'
 
   - task: PythonScript@0
     condition: succeeded()
@@ -71,4 +66,3 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(Agent.TempDirectory)\ESP32_Tools\esp-idf-v3.3.1\components\partition_table\gen_esp32part.py'
       arguments: '${{ parameters.buildDirectory }}\partitions_4mb.bin'
-      workingDirectory:  ${{ parameters.buildDirectory }}
