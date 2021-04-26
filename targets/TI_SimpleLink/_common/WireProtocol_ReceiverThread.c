@@ -15,12 +15,13 @@ void ReceiverThread(UArg arg0, UArg arg1)
     (void)arg0;
     (void)arg1;
 
-    WP_Message_PrepareReception();
-
     // loop forever
     while (1)
     {
-        WP_Message_Process();
+        WP_Message_Initialize(&inboundMessage);
+        WP_Message_PrepareReception(&inboundMessage);
+
+        WP_Message_Process(&inboundMessage);
 
         // Allow other tasks a chance to run
         Task_yield();
