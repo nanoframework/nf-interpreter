@@ -66,8 +66,7 @@ int NanoUART_RevB_TransactionAsync(mxc_uart_revb_req_t *req)
 
         NanoAsyncTxRequests[MXC_UART_GET_IDX((mxc_uart_regs_t *)(req->uart))] = (void *)req;
     }
-
-    if (req->rxLen)
+    else if (req->rxLen)
     {
         // All error interrupts are related to RX
         // MXC_UART_EnableInt((mxc_uart_regs_t*) (req->uart), MXC_UART_REVB_ERRINT_EN);
