@@ -33,7 +33,7 @@ int NanoUART_RevB_AbortAsync(mxc_uart_revb_regs_t* uart);
 int NanoUART_RevB_AsyncCallback(mxc_uart_revb_regs_t *uart, int retVal);
 int NanoUART_RevB_AsyncTxCallback(int uartNum, int retVal);
 int NanoUART_RevB_AsyncRxCallback(int uartNum, int retVal);
-
+void NanoUART_InitRequest(mxc_uart_req_t *rxRequest);
 
 #ifdef __cplusplus
 }
