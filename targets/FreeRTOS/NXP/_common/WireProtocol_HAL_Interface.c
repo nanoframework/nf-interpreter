@@ -32,6 +32,7 @@ lpuart_rtos_config_t lpuart_config = {
 
 bool WP_Initialise()
 {
+
     NVIC_SetPriority(BOARD_UART_IRQ, 5);
 
     lpuart_config.srcclk = BOARD_DebugConsoleSrcFreq();
@@ -48,19 +49,17 @@ bool WP_Initialise()
     return WP_Port_Intitialised;
 }
 
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
     if (!WP_Port_Intitialised)
-    {
         WP_Initialise();
-    }
 
     // save for latter comparison
     uint16_t requestedSize = *size;
-    (void)requestedSize;
 
-    // check for request with 0 size
+    // int readData = 0;
+    // sanity check for request of 0 size
     if (*size)
     {
         size_t read = 0;
@@ -69,19 +68,18 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         ptr += read;
         *size -= read;
 
-        // check if any bytes where read
-        return read > 0;
+        // check if the requested read matches the actual read count
+        return (requestedSize == read);
     }
 
     return true;
 }
 
-bool WP_TransmitMessage(WP_Message *message)
+int WP_TransmitMessage(WP_Message *message)
 {
+
     if (!WP_Port_Intitialised)
-    {
         WP_Initialise();
-    }
 
     if (kStatus_Success != LPUART_RTOS_Send(&handle, (uint8_t *)&message->m_header, sizeof(message->m_header)))
     {
