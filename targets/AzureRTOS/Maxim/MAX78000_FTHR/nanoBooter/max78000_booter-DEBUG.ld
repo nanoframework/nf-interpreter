@@ -150,3 +150,9 @@ SECTIONS {
         . = ALIGN(8);
     } >SRAM
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld
