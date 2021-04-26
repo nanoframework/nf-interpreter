@@ -273,3 +273,8 @@ int NanoUART_RevB_AsyncRxCallback(int uartNum, int retVal)
 
     return E_NO_ERROR;
 }
+
+void NanoUART_InitRequest(mxc_uart_req_t *rxRequest)
+{
+    memset(rxRequest, 0, sizeof(mxc_uart_req_t));
+}
