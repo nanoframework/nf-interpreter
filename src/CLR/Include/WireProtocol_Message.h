@@ -37,8 +37,8 @@ extern "C"
 {
 #endif
 
-    void WP_Message_PrepareReception();
     void WP_Message_Initialize(WP_Message *message);
+    void WP_Message_PrepareReception(WP_Message *message);
     void WP_Message_PrepareRequest(
         WP_Message *message,
         uint32_t cmd,
@@ -56,7 +56,7 @@ extern "C"
     int WP_Message_VerifyHeader(WP_Message *message);
     int WP_Message_VerifyPayload(WP_Message *message);
     void WP_Message_ReplyBadPacket(uint32_t flags);
-    int WP_Message_Process();
+    int WP_Message_Process(WP_Message *message);
 
 #ifdef __cplusplus
 }
