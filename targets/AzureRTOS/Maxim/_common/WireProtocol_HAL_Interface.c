@@ -55,10 +55,11 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
     // check for request with 0 size
     if (*size)
     {
+        NanoUART_InitRequest(&rxRequest);
+
         rxRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
         rxRequest.rxData = ptr;
         rxRequest.rxLen = requestedSize;
-        rxRequest.txLen = 0;
         rxRequest.callback = UART_RxCallback;
 
         // reset var
@@ -111,12 +112,13 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         message->m_header.m_flags,
         message->m_header.m_size);
 
+    NanoUART_InitRequest(&txRequest);
+    
     // setup transmit request
     txRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
+    txRequest.callback = UART_TxCallback;
     txRequest.txData = (uint8_t *)&message->m_header;
     txRequest.txLen = sizeof(message->m_header);
-    txRequest.rxLen = 0;
-    txRequest.callback = UART_TxCallback;
 
     LED_Toggle(LED2);
 
@@ -141,7 +143,11 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
+        NanoUART_InitRequest(&txRequest);
+
         // setup transmit request
+        txRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
+        txRequest.callback = UART_TxCallback;
         txRequest.txData = (uint8_t *)message->m_payload;
         txRequest.txLen = message->m_header.m_size;
 
