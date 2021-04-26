@@ -8,6 +8,8 @@
 #include <cmsis_os.h>
 #include <WireProtocol_Message.h>
 
+extern WP_Message inboundMessage;
+
 #if (HAL_USE_SERIAL_USB == TRUE)
 extern SerialUSBDriver SDU1;
 #endif
@@ -21,8 +23,6 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
 
     osDelay(500);
 
-    WP_Message_PrepareReception();
-
     // loop until thread receives a request to terminate
     while (1)
     {
@@ -33,7 +33,10 @@ __attribute__((noreturn)) void ReceiverThread(void const *argument)
         {
 #endif
 
-            WP_Message_Process();
+            WP_Message_Initialize(&inboundMessage);
+            WP_Message_PrepareReception(&inboundMessage);
+
+            WP_Message_Process(&inboundMessage);
 
 #if (HAL_USE_SERIAL_USB == TRUE)
             // pass control to the OS
