@@ -158,3 +158,9 @@ SECTIONS {
     /* Check if data + heap + stack exceeds RAM limit */
     ASSERT(__StackLimit >= _ebss, "region RAM overflowed with stack")
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld
