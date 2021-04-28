@@ -48,7 +48,7 @@ void BlinkThread_entry(uint32_t parameter)
     while (1)
     {
         BSP_LED_Toggle(LED2);
-        tx_thread_sleep(50);
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
     }
 }
 

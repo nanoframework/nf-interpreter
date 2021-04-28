@@ -11,8 +11,14 @@
 #include <target_board.h>
 #include <nanoHAL_v2.h>
 
+/// 
+/// @brief Convert milliseconds to TX ticks.
+/// 
+///
+#define TX_TICKS_PER_MILLISEC(milliSecs) (milliSecs / (1000/TX_TIMER_TICKS_PER_SECOND))
+
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs / 10);
+#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs / (1000/TX_TIMER_TICKS_PER_SECOND));
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
