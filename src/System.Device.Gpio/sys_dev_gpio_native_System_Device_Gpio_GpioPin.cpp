@@ -22,7 +22,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read___SystemDev
 {
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDef_Index gpioPinTypeDef;
+    CLR_RT_TypeDef_Index pinValueTypeDef;
     CLR_RT_HeapBlock *hbObj;
     bool pinValue;
 
@@ -39,10 +39,10 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read___SystemDev
     NANOCLR_CHECK_HRESULT(Read(pThis, pinValue));
 
     // find <GpioPin> type definition, don't bother checking the result as it exists for sure
-    g_CLR_RT_TypeSystem.FindTypeDef("GpioPin", "System.Device.Gpio", gpioPinTypeDef);
+    g_CLR_RT_TypeSystem.FindTypeDef("PinValue", "System.Device.Gpio", pinValueTypeDef);
 
     // create an instance of <GpioPin>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, gpioPinTypeDef));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, pinValueTypeDef));
 
     // dereference the object in order to reach its fields
     hbObj = top.Dereference();
