@@ -21,21 +21,34 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin::Read___SystemDev
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Index gpioPinTypeDef;
+    CLR_RT_HeapBlock *hbObj;
+    bool pinValue;
+
+    CLR_RT_HeapBlock &top = stack.PushValue();
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
     {
-        bool pinValue;
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        NANOCLR_CHECK_HRESULT(Read(pThis, pinValue));
-
-        stack.SetResult_I4(pinValue);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    NANOCLR_CHECK_HRESULT(Read(pThis, pinValue));
+
+    // find <GpioPin> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef("GpioPin", "System.Device.Gpio", gpioPinTypeDef);
+
+    // create an instance of <GpioPin>
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, gpioPinTypeDef));
+
+    // dereference the object in order to reach its fields
+    hbObj = top.Dereference();
+
+    hbObj[Library_sys_dev_gpio_native_System_Device_Gpio_PinValue::FIELD___value].NumericByRef().u1 = pinValue;
+
     NANOCLR_NOCLEANUP();
 }
 
