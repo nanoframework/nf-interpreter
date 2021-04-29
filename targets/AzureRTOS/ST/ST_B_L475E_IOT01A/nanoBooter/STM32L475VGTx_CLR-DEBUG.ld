@@ -19,7 +19,7 @@ __RAM_segment_used_end__ = 0;
 /* Specify the memory areas */
 MEMORY
 {
-  flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 36K      /* space reserved for nanoBooter */
+  flash0     (rx)  : ORIGIN = 0x08000000, LENGTH = 38K      /* space reserved for nanoBooter */
   deployment (rx)  : ORIGIN = 0x00000000, LENGTH = 0        /* space reserved for application deployment */
   config     (rw)  : ORIGIN = 0x080FF800, LENGTH = 2k       /* space reserved for configuration block */
   ram0       (xrw) : ORIGIN = 0x20000030, LENGTH = 96K-48
