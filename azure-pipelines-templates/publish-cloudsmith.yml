@@ -109,10 +109,13 @@ steps:
       targetType: 'inline'
       script: |
 
+          # update pip (until the build agent image is updated)
+          pythin -m pip install --upgrade pip
+
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli
 
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: 'stop'
-      failOnStderr: 'true'
+      failOnStderr: 'false'
