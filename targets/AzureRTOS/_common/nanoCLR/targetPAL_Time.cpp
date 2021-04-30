@@ -89,7 +89,7 @@ void Time_SetCompare(uint64_t compareValueTicks)
 
             // need to stop the timer first
             tx_timer_deactivate(&nextEventTimer);
-            tx_timer_change(&nextEventTimer, compareValueTicks / 10, 0);
+            tx_timer_change(&nextEventTimer, compareValueTicks, 0);
             tx_timer_activate(&nextEventTimer);
         }
     }
