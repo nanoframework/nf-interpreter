@@ -26,3 +26,9 @@ void ReceiverThread_entry(uint32_t parameter)
 
     // this function never returns
 }
+
+void WP_Message_PrepareReception_Platform()
+{
+    // create mutex for TX operation
+    tx_mutex_create(&wpTxMutex, WP_MUTEX_NAME, TX_NO_INHERIT);
+}
