@@ -14,6 +14,7 @@
 #include <platform.h>
 
 extern UART_HandleTypeDef WProtocolUart;
+extern TX_MUTEX wpTxMutex;
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
@@ -63,6 +64,13 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t dummy;
     uint8_t waitResult;
+    uint8_t success = false;
+
+    // wait for UART TX mutex to become available
+    // if(tx_mutex_get(&wpTxMutex, TX_WAIT_FOREVER) != TX_SUCCESS)
+    // {
+    //     return false;
+    // }
 
     TRACE(
         TRACE_HEADERS,
@@ -77,7 +85,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     // write header with 250ms timeout
     if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
     {
-        goto send_failed;
+        goto complete_operation;
     }
 
     // wait for event
@@ -85,7 +93,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     if (waitResult != TX_SUCCESS || transmittedBytes != sizeof(message->m_header))
     {
-        goto send_failed;
+        goto complete_operation;
     }
 
     // if there is anything on the payload send it to the output stream
@@ -96,23 +104,25 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
         if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
         {
-            goto send_failed;
+            goto complete_operation;
         }
 
         // wait for event
         waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(250));
     }
 
-    HAL_UART_DMAStop(&WProtocolUart);
-
-    if (waitResult != TX_SUCCESS || transmittedBytes != message->m_header.m_size)
+    if (waitResult == TX_SUCCESS && transmittedBytes == message->m_header.m_size)
     {
-        return false;
+        success = true;
     }
 
-    return true;
-
-send_failed:
+complete_operation:
+    // stop any ongoing DMA operation
     HAL_UART_DMAStop(&WProtocolUart);
-    return false;
+
+    // release ownership of mutex
+    //tx_mutex_put(&wpTxMutex);
+    
+    // done here
+    return success;
 }
