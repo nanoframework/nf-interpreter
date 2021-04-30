@@ -15,10 +15,10 @@
 /// @brief Convert milliseconds to TX ticks.
 /// 
 ///
-#define TX_TICKS_PER_MILLISEC(milliSecs) (milliSecs / (1000/TX_TIMER_TICKS_PER_SECOND))
+#define TX_TICKS_PER_MILLISEC(milliSecs) ((milliSecs * TX_TIMER_TICKS_PER_SECOND) / 1000)
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs) tx_thread_sleep(milliSecs / (1000/TX_TIMER_TICKS_PER_SECOND));
+#define PLATFORM_DELAY(milliSecs) tx_thread_sleep((milliSecs * TX_TIMER_TICKS_PER_SECOND) / 1000) ;
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)

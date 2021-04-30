@@ -7,6 +7,8 @@
 
 #include <tx_api.h>
 
+#include <targetHAL.h>
+#include <nanoHAL_v2.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol.h>
 #include <platform.h>
@@ -36,7 +38,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, requestedSize) == HAL_OK)
         {
             // wait for event
-            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 100);
+            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(100));
 
             if (waitResult == TX_SUCCESS)
             {
@@ -79,7 +81,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     }
 
     // wait for event
-    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 10);
+    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(10));
 
     if (waitResult != TX_SUCCESS || transmittedBytes != sizeof(message->m_header))
     {
@@ -98,7 +100,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
 
         // wait for event
-        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 250);
+        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(250));
     }
 
     HAL_UART_DMAStop(&WProtocolUart);

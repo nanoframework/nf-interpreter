@@ -24,6 +24,9 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
     # this series has FPU 
     target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE) 
 
+    # this series has FPU 
+    target_compile_definitions(${TARGET} PUBLIC -DTX_TIMER_TICKS_PER_SECOND=10000) 
+
 endfunction()
 
 
