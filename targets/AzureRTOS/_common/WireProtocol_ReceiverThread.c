@@ -6,8 +6,16 @@
 #include <WireProtocol_Message.h>
 #include <tx_api.h>
 
-__attribute__((noreturn))
-void ReceiverThread_entry(uint32_t parameter)
+// Wire Protocol mutex name
+#if DEBUG
+#define WP_MUTEX_NAME "wp_tx_mutex"
+#else
+#define WP_MUTEX_NAME NULL
+#endif
+
+TX_MUTEX wpTxMutex;
+
+__attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
 {
     (void)parameter;
 
