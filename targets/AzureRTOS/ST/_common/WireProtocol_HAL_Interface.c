@@ -14,17 +14,16 @@
 #include <platform.h>
 
 extern UART_HandleTypeDef WProtocolUart;
-extern TX_MUTEX wpTxMutex;
 
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 uint32_t receivedBytes;
 uint32_t transmittedBytes;
 
-uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
     // save for later comparison
-    uint16_t requestedSize = *size;
+    uint32_t requestedSize = *size;
 
     uint32_t dummy;
     uint8_t waitResult;
@@ -65,12 +64,6 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t dummy;
     uint8_t waitResult;
     uint8_t success = false;
-
-    // wait for UART TX mutex to become available
-    // if(tx_mutex_get(&wpTxMutex, TX_WAIT_FOREVER) != TX_SUCCESS)
-    // {
-    //     return false;
-    // }
 
     TRACE(
         TRACE_HEADERS,
@@ -119,9 +112,6 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 complete_operation:
     // stop any ongoing DMA operation
     HAL_UART_DMAStop(&WProtocolUart);
-
-    // release ownership of mutex
-    //tx_mutex_put(&wpTxMutex);
     
     // done here
     return success;
