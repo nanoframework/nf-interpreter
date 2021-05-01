@@ -41,10 +41,10 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
     }
 }
 
-uint8_t WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
     // save for later comparison
-    uint16_t requestedSize = *size;
+    uint32_t requestedSize = *size;
     // reset value
     receivedBytes = 0;
     uint8_t waitResult;
