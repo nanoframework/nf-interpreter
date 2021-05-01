@@ -85,7 +85,7 @@ const DeviceBlockInfo Device_BlockInfo = {
     // const BlockRegionInfo* pRegions;
     (BlockRegionInfo *)BlockRegions};
 
-MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig = {
+const MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig = {
     {
         // BLOCK_CONFIG
         {
