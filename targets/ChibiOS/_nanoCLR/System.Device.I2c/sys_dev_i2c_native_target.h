@@ -62,7 +62,7 @@ extern NF_PAL_I2C I2C4_PAL;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // when an I2C is defined the declarations below will have the real function/configuration //
-// in the target folder @ target_windows_devices_i2c_config.cpp                             //
+// in the target folder @ target_system_device_i2c_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_I2C1();
 void ConfigPins_I2C2();

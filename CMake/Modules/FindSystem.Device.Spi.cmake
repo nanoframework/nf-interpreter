@@ -25,8 +25,7 @@ set(System.Device.Spi_SRCS
     sys_dev_spi_native_System_Device_Spi_SpiBusInfo.cpp
     sys_dev_spi_native_System_Device_Spi_SpiDevice.cpp
     sys_dev_spi_native.cpp
-    # this will have to be adjusted to the system_device file once Windows.Devices removed
-    target_windows_devices_spi_config.cpp
+    target_system_device_spi_config.cpp
 )
 
 foreach(SRC_FILE ${System.Device.Spi_SRCS})

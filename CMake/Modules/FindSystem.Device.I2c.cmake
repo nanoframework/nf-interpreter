@@ -24,8 +24,7 @@ set(System.Device.I2c_SRCS
     sys_dev_i2c_native.cpp
 
     sys_dev_i2c_native_System_Device_I2c_I2cDevice.cpp
-    # this will have to be adjusted to the system_device file once Windows.Devices removed
-    target_windows_devices_i2c_config.cpp
+    target_system_device_i2c_config.cpp
 )
 
 foreach(SRC_FILE ${System.Device.I2c_SRCS})

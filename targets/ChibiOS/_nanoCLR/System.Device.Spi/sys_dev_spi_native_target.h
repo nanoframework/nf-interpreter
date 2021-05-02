@@ -62,7 +62,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // when an SPI is defined the declarations below will have the real function/configuration //
-// in the target folder @ target_windows_devices_spi_config.cpp                             //
+// in the target folder @ target_system_device_spi_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_SPI1();
 void ConfigPins_SPI2();
