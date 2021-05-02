@@ -37,7 +37,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::WriteBytes___STATIC__VOID__U4__SZARRAY_U1,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory::GetSize___STATIC__I4,
     NULL,
-    NULL,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::DisableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
     Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power::EnableWakeupPin___STATIC__VOID__nanoFrameworkHardwareStm32PowerWakeupPin,
@@ -56,7 +55,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32 =
 {
     "nanoFramework.Hardware.Stm32",
-    0xE171FDE1,
+    0x0874B6FE,
     method_lookup,
     { 100, 0, 4, 4 }
 };
