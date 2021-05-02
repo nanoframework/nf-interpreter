@@ -31,6 +31,7 @@ struct NF_PAL_SPI
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
+#ifndef SPI_CONFIG_PINS
 #define SPI_CONFIG_PINS(                                                                                               \
     num,                                                                                                               \
     gpio_port_sck,                                                                                                     \
@@ -58,6 +59,7 @@ struct NF_PAL_SPI
             (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |            \
              PAL_STM32_OTYPE_PUSHPULL));                                                                               \
     }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // when an SPI is defined the declarations below will have the real function/configuration //

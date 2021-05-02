@@ -44,6 +44,7 @@ extern NF_PAL_I2C I2C4_PAL;
 // the following macro defines a function that configures the GPIO pins for a STM32 I2C peripheral
 // it gets called in the Windows_Devices_I2c_I2cDevice::NativeInit function
 // this is required because the I2C peripherals can use multiple GPIO configuration combinations
+#ifndef I2C_CONFIG_PINS
 #define I2C_CONFIG_PINS(num, gpio_port_scl, gpio_port_sda, scl_pin, sda_pin, alternate_function)                       \
     void ConfigPins_I2C##num()                                                                                         \
     {                                                                                                                  \
@@ -56,6 +57,7 @@ extern NF_PAL_I2C I2C4_PAL;
             sda_pin,                                                                                                   \
             (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
     }
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // when an I2C is defined the declarations below will have the real function/configuration //
