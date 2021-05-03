@@ -13,6 +13,8 @@ void ReceiverThread(void const *argument)
 {
     (void)argument;
 
+    WP_Message_PrepareReception();
+
     // loop forever
     while (1)
     {
