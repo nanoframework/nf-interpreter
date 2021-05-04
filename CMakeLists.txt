@@ -622,7 +622,6 @@ endif()
 if( API_nanoFramework.Devices.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
-    API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR

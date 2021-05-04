@@ -19,8 +19,7 @@ list(APPEND System.Device.Gpio_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Devic
 set(System.Device.Gpio_SRCS
 
     sys_dev_gpio_native.cpp
-    # TODO add this here when Windows.Devices.Gpio is removed
-    # cpu_gpio.cpp
+    cpu_gpio.cpp
 
     sys_dev_gpio_native_System_Device_Gpio_GpioController.cpp
     sys_dev_gpio_native_System_Device_Gpio_GpioPin.cpp
@@ -32,12 +31,6 @@ set(System.Device.Gpio_SRCS
     InterruptHandler.cpp
     Hardware.cpp
 )
-
-# TODO remove this IF() clause here when Windows.Devices.Gpio is removed
-if(NOT API_Windows.Devices.Gpio)
-    # need to have this here in case Windows.Devices.Gpio is not included
-    list(APPEND System.Device.Gpio_SRCS cpu_gpio.cpp)
-endif()
 
 foreach(SRC_FILE ${System.Device.Gpio_SRCS})
 

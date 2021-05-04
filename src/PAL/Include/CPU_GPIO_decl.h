@@ -34,18 +34,17 @@ typedef enum __nfpack GpioPinDriveMode
 } GpioPinDriveMode;
 
 // from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
-// TODO replace GpioPinDriveMode with this one when Windows.Devices.Gpio is removed
-// typedef enum __nfpack PinMode
-// {
-//     PinMode_Input = 0,
-//     PinMode_InputPullDown = 1,
-//     PinMode_InputPullUp = 2,
-//     PinMode_Output = 3,
-//     PinMode_OutputOpenDrain = 4,
-//     PinMode_OutputOpenDrainPullUp = 5,
-//     PinMode_OutputOpenSource = 6,
-//     PinMode_OutputOpenSourcePullDown = 7,
-// } PinMode;
+typedef enum __nfpack PinMode
+{
+    PinMode_Input = 0,
+    PinMode_InputPullDown = 1,
+    PinMode_InputPullUp = 2,
+    PinMode_Output = 3,
+    PinMode_OutputOpenDrain = 4,
+    PinMode_OutputOpenDrainPullUp = 5,
+    PinMode_OutputOpenSource = 6,
+    PinMode_OutputOpenSourcePullDown = 7,
+} PinMode;
 
 // from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
 typedef enum __nfpack GpioPinValue
