@@ -86,6 +86,10 @@ extern "C"
 // ########################## Assert Selection ##############################
 // #define USE_FULL_ASSERT               1U
 
+// ################## Register callback feature configuration ###############
+// #define USE_HAL_UART_REGISTER_CALLBACKS  1U
+// #define USE_HAL_USART_REGISTER_CALLBACKS 1U
+
 // ################## SPI peripheral configuration ##########################
 // #define USE_SPI_CRC                   1U
 

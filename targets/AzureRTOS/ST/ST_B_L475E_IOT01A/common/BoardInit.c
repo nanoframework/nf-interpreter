@@ -6,6 +6,15 @@
 
 #include <nanoCLR_Headers.h>
 #include <stm32l4xx_hal.h>
+#include <stm32l4xx_ll_gpio.h>
+#include <stm32l4xx_ll_bus.h>
+#include <stm32l4xx_ll_rcc.h>
+#include <stm32l4xx_ll_dma.h>
+#include <stm32l4xx_ll_usart.h>
+#include <stm32l4xx_ll_rtc.h>
+#include <stm32l4xx_ll_pwr.h>
+#include <stm32l4xx_ll_utils.h>
+#include <stm32l4xx_ll_system.h>
 #include <stm32l475e_iot01.h>
 #include <stm32l475e_iot01_accelero.h>
 #include <stm32l475e_iot01_gyro.h>
@@ -13,6 +22,9 @@
 #include <stm32l475e_iot01_magneto.h>
 #include <stm32l475e_iot01_psensor.h>
 #include <stm32l475e_iot01_tsensor.h>
+
+#include <nanoRingBuffer.h>
+#include <platformHAL.h>
 
 // LSE as RTC clock
 #define RTC_ASYNCH_PREDIV 0x7F
@@ -25,11 +37,52 @@ RTC_HandleTypeDef RtcHandle;
 
 CRC_HandleTypeDef CrcHandle;
 UART_HandleTypeDef WProtocolUart;
-DMA_HandleTypeDef s_DMAHandle;
 
-#ifdef HAL_RTC_MODULE_ENABLED
+NanoRingBuffer WPRingBuffer;
+
+// ST DMA buffers need to be aligned with 32 bytes cache page size boundary
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
+uint8_t rxBuffer[WIRE_PROTOCOL_UART_BUFFER_SIZE];
+
 void System_IniRtc(void)
 {
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+    LL_PWR_EnableBkUpAccess();
+
+    // Enable LSI
+    LL_RCC_LSI_Enable();
+    while (LL_RCC_LSI_IsReady() != 1)
+    {
+    }
+
+    LL_RCC_ForceBackupDomainReset();
+    LL_RCC_ReleaseBackupDomainReset();
+    LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSI);
+
+    // Enable RTC Clock
+    LL_RCC_EnableRTC();
+
+    LL_RTC_DisableWriteProtection(RTC);
+    LL_RTC_EnableInitMode(RTC);
+    while (LL_RTC_IsActiveFlag_INIT(RTC) != 1)
+    {
+    };
+
+    LL_RTC_SetHourFormat(RTC, LL_RTC_HOURFORMAT_24HOUR);
+    LL_RTC_SetAsynchPrescaler(RTC, RTC_ASYNCH_PREDIV);
+    LL_RTC_SetSynchPrescaler(RTC, RTC_SYNCH_PREDIV);
+    LL_RTC_SetAlarmOutEvent(RTC, LL_RTC_ALARMOUT_DISABLE);
+    LL_RTC_DisableInitMode(RTC);
+    LL_RTC_ClearFlag_RS(RTC);
+
+    while (LL_RTC_IsActiveFlag_RS(RTC) != 1)
+    {
+    };
+
+    LL_RTC_EnableWriteProtection(RTC);
+
     RtcHandle.Instance = RTC;
     RtcHandle.Init.HourFormat = RTC_HOURFORMAT_24;
     RtcHandle.Init.AsynchPrediv = RTC_ASYNCH_PREDIV;
@@ -46,7 +99,6 @@ void System_IniRtc(void)
         }
     }
 }
-#endif // HAL_RTC_MODULE_ENABLED
 
 void SystemClock_Config(void)
 {
@@ -55,7 +107,6 @@ void SystemClock_Config(void)
 
     /* MSI is enabled after System reset, activate PLL with MSI as source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_MSI;
-    ;
     RCC_OscInitStruct.LSEState = RCC_LSE_ON;
     RCC_OscInitStruct.MSIState = RCC_MSI_ON;
     RCC_OscInitStruct.MSICalibrationValue = 0;
@@ -97,87 +148,103 @@ void SystemClock_Config(void)
         while (1)
             ;
     }
+
+    // LL_SetFlashLatency(LL_FLASH_LATENCY_4);
+    // LL_RCC_MSI_Enable();
+    // while (LL_RCC_MSI_IsReady() == 0)
+    // {
+    // };
+
+    // // Main PLL configuration and activation
+    // LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 40, LL_RCC_PLLR_DIV_2);
+    // LL_RCC_PLL_Enable();
+    // LL_RCC_PLL_EnableDomain_SYS();
+    // while (LL_RCC_PLL_IsReady() == 0)
+    // {
+    // };
+
+    // // Sysclk activation on the main PLL
+    // LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+    // LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+    // while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+    // {
+    // };
+
+    // // Set APB1 & APB2 prescaler
+    // LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+    // LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+
+    // LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
+
+    // // Update CMSIS variable
+    // LL_SetSystemCoreClock(80000000);
 }
 
-void WProtocol_COM_Init(COM_TypeDef COM, UART_HandleTypeDef *huart)
+void WProtocol_COM_Init()
 {
-    static DMA_HandleTypeDef hdma_tx;
-    static DMA_HandleTypeDef hdma_rx;
+    // Enable GPIO clock
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 
-    GPIO_InitTypeDef gpio_init_structure;
+    // Configure Tx Pin as : Alternate function, High Speed, Push pull, Pull up
+    LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_6, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetAFPin_0_7(GPIOB, LL_GPIO_PIN_6, LL_GPIO_AF_7);
+    LL_GPIO_SetPinSpeed(GPIOB, LL_GPIO_PIN_6, LL_GPIO_SPEED_FREQ_HIGH);
+    LL_GPIO_SetPinOutputType(GPIOB, LL_GPIO_PIN_6, LL_GPIO_OUTPUT_PUSHPULL);
+    LL_GPIO_SetPinPull(GPIOB, LL_GPIO_PIN_6, LL_GPIO_PULL_UP);
 
-    /* Enable GPIO clock */
-    DISCOVERY_COMx_TX_GPIO_CLK_ENABLE(COM);
-    DISCOVERY_COMx_RX_GPIO_CLK_ENABLE(COM);
+    // Configure Rx Pin as : Alternate function, High Speed, Push pull, Pull up
+    LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_7, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetAFPin_0_7(GPIOB, LL_GPIO_PIN_7, LL_GPIO_AF_7);
+    LL_GPIO_SetPinSpeed(GPIOB, LL_GPIO_PIN_7, LL_GPIO_SPEED_FREQ_HIGH);
+    LL_GPIO_SetPinOutputType(GPIOB, LL_GPIO_PIN_7, LL_GPIO_OUTPUT_PUSHPULL);
+    LL_GPIO_SetPinPull(GPIOB, LL_GPIO_PIN_7, LL_GPIO_PULL_UP);
 
-    /* Enable USART clock */
-    DISCOVERY_COMx_CLK_ENABLE(COM);
+    // USART configuration
+    LL_USART_Disable(USART1);
+    LL_USART_SetTransferDirection(USART1, LL_USART_DIRECTION_TX_RX);
+    LL_USART_ConfigCharacter(USART1, LL_USART_DATAWIDTH_8B, LL_USART_PARITY_NONE, LL_USART_STOPBITS_1);
+    LL_USART_SetHWFlowCtrl(USART1, LL_USART_HWCONTROL_NONE);
+    LL_USART_SetOverSampling(USART1, LL_USART_OVERSAMPLING_16);
+    LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
 
-    /* Enable DMA clock */
-    __HAL_RCC_DMA1_CLK_ENABLE();
+    LL_USART_Enable(USART1);
 
-    /* Configure USART Tx as alternate function */
-    gpio_init_structure.Pin = DISCOVERY_COM1_TX_PIN;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_HIGH;
-    gpio_init_structure.Pull = GPIO_NOPULL;
-    gpio_init_structure.Alternate = DISCOVERY_COM1_TX_AF;
-    HAL_GPIO_Init(DISCOVERY_COM1_TX_GPIO_PORT, &gpio_init_structure);
+    // Enable RXNE and Error interrupts
+    LL_USART_EnableIT_RXNE(USART1);
+    LL_USART_EnableIT_ERROR(USART1);
 
-    /* Configure USART Rx as alternate function */
-    gpio_init_structure.Pin = DISCOVERY_COM1_RX_PIN;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Alternate = DISCOVERY_COM1_RX_AF;
-    HAL_GPIO_Init(DISCOVERY_COM1_TX_GPIO_PORT, &gpio_init_structure);
+    // NVIC Configuration for USART interrupts
+    //  - Set priority for USARTx_IRQn
+    //  - Enable USARTx_IRQn
+    NVIC_SetPriority(USART1_IRQn, 0);
+    NVIC_EnableIRQ(USART1_IRQn);
 
-    /* USART configuration */
-    huart->Instance = DISCOVERY_COM1;
-    HAL_UART_Init(huart);
+    // Enable USART clock
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
+    LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
 
-    // Configure the DMA handler for Transmission process
-    hdma_tx.Instance = DMA1_Channel4;
-    hdma_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_tx.Init.Mode = DMA_NORMAL;
-    hdma_tx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_tx.Init.Request = DMA_REQUEST_2;
+    // Enable DMA clock
+    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
-    HAL_DMA_Init(&hdma_tx);
+    // ##-4- Configure the NVIC for DMA
+    // NVIC configuration for DMA transfer complete interrupt (USART1_TX)
+    NVIC_SetPriority(DMA1_Channel4_IRQn, 0);
+    NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 
-    /* Associate the initialized DMA handle to the UART handle */
-    __HAL_LINKDMA(huart, hdmatx, hdma_tx);
-
-    /* Configure the DMA handler for reception process */
-    hdma_rx.Instance = DMA1_Channel5;
-    hdma_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_rx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_rx.Init.Mode = DMA_NORMAL;
-    hdma_rx.Init.Priority = DMA_PRIORITY_HIGH;
-    hdma_rx.Init.Request = DMA_REQUEST_2;
-
-    HAL_DMA_Init(&hdma_rx);
-
-    /* Associate the initialized DMA handle to the the UART handle */
-    __HAL_LINKDMA(huart, hdmarx, hdma_rx);
-
-    /*##-4- Configure the NVIC for DMA #########################################*/
-    /* NVIC configuration for DMA transfer complete interrupt (USART1_TX) */
-    HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 1);
-    HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-
-    /* NVIC configuration for DMA transfer complete interrupt (USART1_RX) */
-    HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
-
-    /* NVIC for USART */
-    HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
-    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    // Configure the DMA functional parameters for transmission
+    LL_DMA_ConfigTransfer(
+        DMA1,
+        LL_DMA_CHANNEL_4,
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_PRIORITY_HIGH | LL_DMA_MODE_NORMAL | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_BYTE | LL_DMA_MDATAALIGN_BYTE);
+    LL_DMA_ConfigAddresses(
+        DMA1,
+        LL_DMA_CHANNEL_4,
+        (uint32_t)NULL,
+        LL_USART_DMA_GetRegAddr(USART2, LL_USART_DMA_REG_DATA_TRANSMIT),
+        LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4));
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, 0);
+    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_4, LL_DMA_REQUEST_2);
 }
 
 void BoardInit(bool initSensors, bool initGpios)
@@ -197,16 +264,10 @@ void BoardInit(bool initSensors, bool initGpios)
         BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
     }
 
-    WProtocolUart.Instance = USART1;
-    WProtocolUart.Init.BaudRate = 921600;
-    WProtocolUart.Init.WordLength = UART_WORDLENGTH_8B;
-    WProtocolUart.Init.StopBits = UART_STOPBITS_1;
-    WProtocolUart.Init.Parity = UART_PARITY_NONE;
-    WProtocolUart.Init.Mode = UART_MODE_TX_RX;
-    WProtocolUart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    WProtocolUart.Init.OverSampling = UART_OVERSAMPLING_16;
-    WProtocolUart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-    WProtocol_COM_Init(COM1, &WProtocolUart);
+    // Initilize the RX ring buffer
+    NanoRingBuffer_Initialize(&WPRingBuffer, rxBuffer, WIRE_PROTOCOL_UART_BUFFER_SIZE);
+
+    WProtocol_COM_Init(&WProtocolUart);
 
     // only init board sensors if requested
     if (initSensors)
