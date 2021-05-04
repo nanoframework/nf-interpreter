@@ -14,7 +14,7 @@
 #include <hal.h>
 
 /////////////////////////////////////////////////////
-// SPI PAL strucs declared in win_dev_spi_native.h //
+// SPI PAL strucs declared in sys_dev_spi_native.h //
 /////////////////////////////////////////////////////
 #if STM32_SPI_USE_SPI1
 NF_PAL_SPI SPI1_PAL;
