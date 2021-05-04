@@ -7,9 +7,7 @@
 
 #include "win_dev_i2c_native.h"
 
-
-static const CLR_RT_MethodHandler method_lookup[] =
-{
+static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
@@ -47,7 +45,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID,
     Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeDispose___VOID__BOOLEAN,
-    Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1,
+    Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
+        NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1,
     NULL,
     NULL,
     NULL,
@@ -60,9 +59,4 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c =
-{
-    "Windows.Devices.I2c",
-    0x79EDBF71,
-    method_lookup,
-    { 100, 2, 0, 2 }
-};
+    {"Windows.Devices.I2c", 0x79EDBF71, method_lookup, {100, 2, 0, 2}};

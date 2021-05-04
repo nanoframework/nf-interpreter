@@ -24,7 +24,7 @@ enum I2cSharingMode
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.I2c.I2cTransferStatus (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
- enum I2cTransferStatus
+enum I2cTransferStatus
 {
     I2cTransferStatus_FullTransfer = 0,
     I2cTransferStatus_ClockStretchTimeout,
@@ -52,7 +52,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cConnectionSettings
     static const int FIELD___sharingMode = 3;
 
     //--//
-
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController
@@ -65,7 +64,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
-
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cControllerManager
@@ -74,7 +72,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cControllerManager
     static const int FIELD_STATIC__s_controllersCollection = 1;
 
     //--//
-
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult
@@ -83,7 +80,6 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cTransferResult
     static const int FIELD___status = 2;
 
     //--//
-
 };
 
 struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
@@ -98,9 +94,8 @@ struct Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice
     NANOCLR_NATIVE_DECLARE(NativeTransmit___WindowsDevicesI2cI2cTransferResult__SZARRAY_U1__SZARRAY_U1);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_I2c;
 
-#endif  //_WIN_DEV_I2C_NATIVE_H_
+#endif //_WIN_DEV_I2C_NATIVE_H_
