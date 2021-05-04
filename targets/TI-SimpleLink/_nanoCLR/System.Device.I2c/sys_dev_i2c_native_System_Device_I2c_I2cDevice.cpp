@@ -18,6 +18,7 @@ uint8_t I2C1_DeviceCounter = 0;
 
 // need to declare these as external
 // TODO move them here after Windows.Devices.I2c is removed
+// TODO !!! move what here !!!
 extern void HostI2C_CallbackFxn(I2C_Handle handle, I2C_Transaction *transaction, bool transferStatus);
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)

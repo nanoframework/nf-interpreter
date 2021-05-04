@@ -27,6 +27,7 @@ uint8_t I2C4_DeviceCounter;
 
 // need to declare these as external
 // TODO move them here after Windows.Devices.I2c is removed
+// TODO !!! move what here !!!
 extern void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig);
 extern bool IsLongRunningOperation(
     uint16_t writeSize,

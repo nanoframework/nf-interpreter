@@ -15,6 +15,7 @@ static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {0, 0};
 
 // need to declare these as external
 // TODO move them here after Windows.Devices.I2c is removed
+// TODO !!! move what here !!!
 extern void Esp32_I2c_UnitializeAll();
 extern void SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config);
 

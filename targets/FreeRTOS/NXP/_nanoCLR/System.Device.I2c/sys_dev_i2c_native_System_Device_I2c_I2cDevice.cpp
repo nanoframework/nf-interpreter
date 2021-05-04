@@ -36,6 +36,7 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 
 // need to declare these as external
 // TODO move them here after Windows.Devices.I2c is removed
+// TODO !!! move what here !!!
 extern i2c_structure_t *I2C_ChoosePeripheralStructure(uint8_t busIndex);
 extern void I2C_InitPins(uint8_t busIndex);
 extern void I2C_InitClocks(void);
