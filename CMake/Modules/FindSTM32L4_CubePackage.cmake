@@ -36,6 +36,14 @@ set(STM32L4_CubePackage_SRCS
     stm32l4xx_hal_uart_ex.c
     stm32l4xx_hal_uart.c
     stm32l4xx_hal.c
+
+    stm32l4xx_ll_dma.c
+    stm32l4xx_ll_dma2d.c
+    stm32l4xx_ll_pwr.c
+    stm32l4xx_ll_rcc.c
+    stm32l4xx_ll_rtc.c
+    stm32l4xx_ll_usart.c
+    stm32l4xx_ll_utils.c
 )
 
 foreach(SRC_FILE ${STM32L4_CubePackage_SRCS})
