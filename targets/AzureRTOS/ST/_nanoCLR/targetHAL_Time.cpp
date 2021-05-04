@@ -9,29 +9,18 @@
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
 
-#include <stm32l4xx_hal.h>
+#include <stm32l4xx_ll_rtc.h>
 
 #include <tx_api.h>
-
-extern RTC_HandleTypeDef RtcHandle;
 
 // Returns the current date time from the RTC
 uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
     SYSTEMTIME st;
-
-    RTC_DateTypeDef date;
-    RTC_TimeTypeDef time;
-
-    /* Get the RTC current Time */
-    HAL_RTC_GetTime(&RtcHandle, &time, RTC_FORMAT_BIN);
-    /* Get the RTC current Date */
-    HAL_RTC_GetDate(&RtcHandle, &date, RTC_FORMAT_BIN);
-
-    st.wDay = (unsigned short)date.Date;
-    st.wMonth = (unsigned short)date.Month;
-    st.wYear = (unsigned short)(date.Year + 2000);
-    st.wDayOfWeek = (unsigned short)date.WeekDay;
+    st.wDay = (unsigned short)LL_RTC_DATE_GetDay(RTC);
+    st.wMonth = (unsigned short)LL_RTC_DATE_GetMonth(RTC);
+    st.wYear = (unsigned short)(LL_RTC_DATE_GetYear(RTC) + 2000);
+    st.wDayOfWeek = (unsigned short)LL_RTC_DATE_GetWeekDay(RTC);
 
     // zero 'time' fields if date part only is required
     if (datePartOnly)
@@ -46,9 +35,9 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
         // full date&time required, fill in 'time' fields too
 
         st.wMilliseconds = 0;
-        st.wSecond = time.Seconds;
-        st.wMinute = time.Minutes;
-        st.wHour = time.Hours;
+        st.wSecond = LL_RTC_TIME_GetSecond(RTC);
+        st.wMinute = LL_RTC_TIME_GetMinute(RTC);
+        st.wHour = LL_RTC_TIME_GetHour(RTC);
     }
 
     return HAL_Time_ConvertFromSystemTime(&st);
@@ -58,30 +47,14 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
     SYSTEMTIME systemTime;
 
-    RTC_DateTypeDef date;
-    RTC_TimeTypeDef time;
-
     HAL_Time_ToSystemTime(utcTime, &systemTime);
 
     // date part
     // year time base is 2000
-    date.Year = systemTime.wYear - 2000;
-    date.Month = systemTime.wMonth - 1;
-    date.Date = systemTime.wDay;
-    date.WeekDay = systemTime.wDayOfWeek;
-
-    HAL_RTC_SetDate(&RtcHandle, &date, RTC_FORMAT_BCD);
+    LL_RTC_DATE_Config(RTC, systemTime.wDayOfWeek, systemTime.wDay, systemTime.wMonth - 1, systemTime.wYear - 2000);
 
     // time part
-    time.Hours = systemTime.wHour;
-    time.Minutes = systemTime.wMinute;
-    time.Seconds = systemTime.wSecond;
-    time.SubSeconds = 0x00;
-    //time.TimeFormat = RTC_HOURFORMAT24;
-    time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-    time.StoreOperation = RTC_STOREOPERATION_RESET;
-
-    HAL_RTC_SetTime(&RtcHandle, &time, RTC_FORMAT_BCD);
+    LL_RTC_TIME_Config(RTC, LL_RTC_TIME_FORMAT_AM_OR_24, systemTime.wHour, systemTime.wMinute, systemTime.wSecond);
 }
 
 bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len)
