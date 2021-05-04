@@ -560,24 +560,10 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Gpio)
-    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-else()
-    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
 if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for System.Device.I2c")
-endif()
-
-
-if(API_Windows.Devices.I2c)
-    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
-else()
-    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
 endif()
 
 
@@ -587,12 +573,6 @@ else()
     set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
 endif()
 
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-endif()
 
 if(API_System.Device.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")

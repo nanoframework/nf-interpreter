@@ -17,15 +17,13 @@ typedef enum __nfpack DataFlow
     DataFlow_LsbFirst = 1,
 } DataFlow;
 
-// TODO: as this is already existing in Windows.Devices.Spi, this should be uncommented
-// once it will be fully removed.
-// typedef enum __nfpack SpiMode
-// {
-//     SpiMode_Mode0 = 0,
-//     SpiMode_Mode1 = 1,
-//     SpiMode_Mode2 = 2,
-//     SpiMode_Mode3 = 3,
-// } SpiMode;
+typedef enum __nfpack SpiMode
+{
+    SpiMode_Mode0 = 0,
+    SpiMode_Mode1 = 1,
+    SpiMode_Mode2 = 2,
+    SpiMode_Mode3 = 3,
+} SpiMode;
 
 struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
 {

@@ -15,9 +15,6 @@ list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.Device.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.I2c)
 
-# TODO remove the following when Windows.Devices.Gpio is removed
-list(APPEND System.Device.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.I2c)
-
 # source files
 set(System.Device.I2c_SRCS
 
