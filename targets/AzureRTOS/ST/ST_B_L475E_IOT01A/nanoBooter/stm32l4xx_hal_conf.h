@@ -74,7 +74,7 @@ extern "C"
 
 #define EXTERNAL_SAI2_CLOCK_VALUE 48000U
 
-//########################### System Configuration #########################
+    // ########################### System Configuration #########################
 
 #define VDD_VALUE                3300U
 #define TICK_INT_PRIORITY        0x0FU
@@ -83,8 +83,12 @@ extern "C"
 #define INSTRUCTION_CACHE_ENABLE 1U
 #define DATA_CACHE_ENABLE        1U
 
-    // ########################## Assert Selection ##############################
-    // #define USE_FULL_ASSERT               1U
+// ########################## Assert Selection ##############################
+// #define USE_FULL_ASSERT               1U
+
+// ################## Register callback feature configuration ###############
+// #define USE_HAL_UART_REGISTER_CALLBACKS  1U
+// #define USE_HAL_USART_REGISTER_CALLBACKS 1U
 
     // ################## SPI peripheral configuration ##########################
     // #define USE_SPI_CRC                   1U

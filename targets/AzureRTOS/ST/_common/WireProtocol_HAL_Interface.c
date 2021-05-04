@@ -9,6 +9,7 @@
 
 #include <targetHAL.h>
 #include <nanoHAL_v2.h>
+#include <platform_UARTDriver.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol.h>
 #include <platform.h>
@@ -25,35 +26,24 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
     // save for later comparison
     uint32_t requestedSize = *size;
 
-    uint32_t dummy;
-    uint8_t waitResult;
-
-    // reset value
-    receivedBytes = 0;
+    volatile uint32_t read;
 
     // check for request with 0 size
     if (*size)
     {
-        // read from serial stream with 250ms timeout
-        if (HAL_UART_Receive_DMA(&WProtocolUart, ptr, requestedSize) == HAL_OK)
-        {
-            // wait for event
-            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(100));
-
-            if (waitResult == TX_SUCCESS)
-            {
-                ptr += receivedBytes;
-                *size -= receivedBytes;
-            }
-        }
-
-        // abort any ongoing UART operation
-        HAL_UART_DMAStop(&WProtocolUart);
+        // read from serial stream with 20ms timeout
+        read = nano_HAL_UART_ReadTimeout(ptr, requestedSize, 20);
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
 
         // check if any bytes where read
-        return receivedBytes > 0;
+        if(read == 0)
+        {
+            return false;
+        }
+
+        ptr += read;
+        *size -= read;
     }
 
     return true;
@@ -76,7 +66,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     transmittedBytes = 0;
 
     // write header with 250ms timeout
-    if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
+    //if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
     {
         goto complete_operation;
     }
@@ -95,7 +85,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         // reset var
         transmittedBytes = 0;
 
-        if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
+        //if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
         {
             goto complete_operation;
         }
@@ -111,7 +101,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
 complete_operation:
     // stop any ongoing DMA operation
-    HAL_UART_DMAStop(&WProtocolUart);
+    //HAL_UART_DMAStop(&WProtocolUart);
     
     // done here
     return success;
