@@ -282,18 +282,6 @@ if(API_System.Device.Gpio)
     PerformSettingsForApiEntry("System.Device.Gpio")
 endif()
 
-# Windows.Devices.Gpio
-if(API_Windows.Devices.Gpio)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Gpio")
-endif()
-
-# Windows.Devices.I2c
-if(API_Windows.Devices.I2c)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.I2c")
-endif()
-
 # System.Device.I2c
 if(API_System.Device.I2c)
     ##### API name here (doted name)
@@ -310,12 +298,6 @@ endif()
 if(API_Windows.Devices.SerialCommunication)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
-endif()
-
-# Windows.Devices.Spi
-if(API_Windows.Devices.Spi)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Spi")
 endif()
 
 # System.Device.Spi
