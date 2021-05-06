@@ -6,12 +6,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #include "win_dev_gpio_native.h"
 
-
-static const CLR_RT_MethodHandler method_lookup[] =
-{
+static const CLR_RT_MethodHandler method_lookup[] = {
     NULL,
     NULL,
     NULL,
@@ -26,7 +23,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeInit___VOID,
-    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeRead___WindowsDevicesGpioGpioChangeCount__BOOLEAN,
+    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::
+        NativeRead___WindowsDevicesGpioGpioChangeCount__BOOLEAN,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStart___VOID,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeStop___VOID,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter::NativeDispose___VOID,
@@ -66,8 +64,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::Toggle___VOID,
     NULL,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::DisposeNative___VOID,
-    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode,
-    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode,
+    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
+        NativeIsDriveModeSupported___BOOLEAN__WindowsDevicesGpioGpioPinDriveMode,
+    Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
+        NativeSetDriveMode___VOID__WindowsDevicesGpioGpioPinDriveMode,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeInit___BOOLEAN__I4,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebounceTimeout___VOID,
     Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::WriteNative___VOID__WindowsDevicesGpioGpioPinValue,
@@ -97,9 +97,4 @@ static const CLR_RT_MethodHandler method_lookup[] =
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio =
-{
-    "Windows.Devices.Gpio",
-    0xC41539BE,
-    method_lookup,
-    { 100, 1, 2, 2 }
-};
+    {"Windows.Devices.Gpio", 0xC41539BE, method_lookup, {100, 1, 2, 2}};

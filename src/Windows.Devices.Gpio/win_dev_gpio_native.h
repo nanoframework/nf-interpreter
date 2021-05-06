@@ -47,7 +47,6 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCount
     static const int FIELD__RelativeTime = 2;
 
     //--//
-
 };
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
@@ -66,7 +65,6 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioChangeCounter
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
     //--//
-
 };
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
@@ -94,7 +92,7 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin
 
     //--//
 
-    static HRESULT ExtractDebounceTimeSpanValue( CLR_RT_HeapBlock& timeSpanValue, CLR_UINT64& value );
+    static HRESULT ExtractDebounceTimeSpanValue(CLR_RT_HeapBlock &timeSpanValue, CLR_UINT64 &value);
 };
 
 struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
@@ -105,9 +103,8 @@ struct Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioController
     NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_Gpio;
 
-#endif  //_WIN_DEV_GPIO_NATIVE_TARGET_H_
+#endif //_WIN_DEV_GPIO_NATIVE_TARGET_H_
