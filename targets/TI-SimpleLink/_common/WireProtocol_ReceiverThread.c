@@ -7,26 +7,27 @@
 #include <ti/sysbios/knl/Task.h>
 #include <xdc/std.h>
 
-extern WP_Message inboundMessage;
-
-void WP_Message_Initialize(WP_Message *a);
-void WP_Message_PrepareReception(WP_Message *a);
-void WP_Message_Process(WP_Message *a);
+void WP_Message_PrepareReception();
+void WP_Message_Process();
 
 void ReceiverThread(UArg arg0, UArg arg1)
 {
     (void)arg0;
     (void)arg1;
 
+    WP_Message_PrepareReception();
+
     // loop forever
     while (1)
     {
-        WP_Message_Initialize(&inboundMessage);
-        WP_Message_PrepareReception(&inboundMessage);
-
-        WP_Message_Process(&inboundMessage);
+        WP_Message_Process();
 
         // Allow other tasks a chance to run
         Task_yield();
     }
+}
+
+void WP_Message_PrepareReception_Platform()
+{
+    // empty on purpose, nothing to configure
 }

@@ -509,3 +509,8 @@ int nanoBooter_GetTargetInfo(TargetInfo *targetInfo)
 }
 
 ///////////////////////////////////////////////////////////////
+
+void WP_Message_PrepareReception_Platform()
+{
+    // empty on purpose, nothing to configure
+}
