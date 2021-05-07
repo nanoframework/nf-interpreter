@@ -681,10 +681,10 @@ jobs:
       githubRepositoryName: nf-interpreter
       githubTag: v$(NBGV_AssemblyVersion)
       githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
-      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Bintray repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
+      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Cloudsmith repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: false
-      githubReleasePrerelease: true
+      githubReleasePrerelease: false
       githubReuseDraftOnly: false
       githubReuseRelease: true
       githubEditRelease: true

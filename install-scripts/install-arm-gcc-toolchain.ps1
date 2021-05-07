@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the ARM GNU GCC toolchain from our Bintray repository if it's not already available
+# This PS installs the ARM GNU GCC toolchain from our Cloudsmith repository if it's not already available
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (

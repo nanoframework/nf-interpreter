@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the pre-compiled EPS32 libraries from our Bintray repository
+# This PS installs the pre-compiled EPS32 libraries from our Cloudsmith repository
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (

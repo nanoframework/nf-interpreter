@@ -22,14 +22,14 @@ steps:
           if( $env:Build_SourceBranchName -match "^develop*" -or 
               $env:Build_SourceBranchName -match "^release*" )
           {
-            # this a dev or release branch, publish to Bintray dev repo
+            # this a dev or release branch, publish to Cloudsmith dev repo
             Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
             # set version
             Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
           }
           else 
           {
-            # this master branch, publish to Bintray stable repo
+            # this master branch, publish to Cloudsmith stable repo
             Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
             # set version
             Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
