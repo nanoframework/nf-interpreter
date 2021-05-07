@@ -1,6 +1,6 @@
 trigger:
   branches:
-    include: ["main", "master", "develop*", "release-*", "refs/tags/*" ]
+    include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
   paths:
     exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
 
@@ -205,7 +205,7 @@ jobs:
       $branch = $release.Split(' ')[0]
 
       # start PR for release
-      $prRequestBody = @{title="Release $branch";body="";head="$branch";base="master"} | ConvertTo-Json
+      $prRequestBody = @{title="Release $branch";body="";head="$branch";base="main"} | ConvertTo-Json
       $githubApiEndpoint = "https://api.github.com/repos/$env:Build_Repository_Name/pulls"
       [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
@@ -469,7 +469,7 @@ jobs:
   - task: NuGetToolInstaller@0
     inputs:
       versionSpec: '5.8.0'
-    displayName: 'Install specifc version of NuGet'
+    displayName: 'Install specific version of NuGet'
 
   - task: VSBuild@1
     inputs:
@@ -587,7 +587,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'windows-2019'
@@ -616,7 +616,7 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
     displayName: Generate change log
 
   # generate change log without future version
@@ -624,7 +624,7 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
     displayName: Generate change log
 
   # push new changelog to GitHub repo
@@ -646,7 +646,7 @@ jobs:
     displayName: Push changelog to GitHub
 
 #######################
-# create or update GitHub release ON tags from master branch or tags
+# create or update GitHub release ON tags from main branch or tags
 - job: Publish_Release
   dependsOn:
   - Build_STM32_targets
@@ -656,7 +656,7 @@ jobs:
   - Build_WIN32_nanoCLR
   - Generate_change_log
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'master'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
   pool:
     vmImage: 'windows-2019'
@@ -673,7 +673,7 @@ jobs:
     displayName: Set build number
 
   - task: GitHubReleasePublish@1
-    condition: endsWith(variables['Build.SourceBranch'], 'master')
+    condition: endsWith(variables['Build.SourceBranch'], 'main')
     displayName: Create/Update GitHub stable release
     inputs:
       githubEndpoint: 'nanoframework'
@@ -681,7 +681,7 @@ jobs:
       githubRepositoryName: nf-interpreter
       githubTag: v$(NBGV_AssemblyVersion)
       githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
-      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Bintray repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/master#firmware-for-reference-boards).'
+      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Bintray repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
       githubTargetCommitsh: $(Build.SourceVersion)
       githubReleaseDraft: false
       githubReleasePrerelease: true
