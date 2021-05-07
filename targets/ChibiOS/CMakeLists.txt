@@ -27,6 +27,21 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
     endif()
 endif()
 
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)

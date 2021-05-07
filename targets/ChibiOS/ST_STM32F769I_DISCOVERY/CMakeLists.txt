@@ -88,3 +88,27 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAG
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
+# generate bin file for deployment
+if(SRECORD_TOOL_AVAILABLE)
+
+    ############################################################################################################
+    ## when changing the linker file make sure to update the addresses below with the offset of the CLR image ##
+    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating                    ##
+    ############################################################################################################
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        NF_GENERATE_BIN_PACKAGE(
+            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            10000
+            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+    else()
+        NF_GENERATE_BIN_PACKAGE(
+            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            10000
+            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+    endif()
+
+endif()
