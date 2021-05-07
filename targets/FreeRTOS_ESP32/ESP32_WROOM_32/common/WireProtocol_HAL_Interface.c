@@ -100,13 +100,13 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         size_t read = uart_read_bytes(WP_Port, ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }

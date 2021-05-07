@@ -64,7 +64,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         LPUART_RTOS_Receive(&handle, ptr, requestedSize, &read);
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }

@@ -30,7 +30,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         UART2_readTimeout(uart, ptr, requestedSize, &read, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }

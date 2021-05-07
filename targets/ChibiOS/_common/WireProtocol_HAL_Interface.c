@@ -31,7 +31,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         size_t read = chnReadTimeout(&SDU1, ptr, requestedSize, TIME_MS2I(100));
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }
@@ -63,7 +63,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }

@@ -18,7 +18,7 @@ uint8_t WP_App_ProcessHeader(WP_Message *message)
     }
 
     message->m_payload = receptionBuffer;
-    
+
     return true;
 }
 

@@ -1023,7 +1023,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
     {
         success = RequestToLaunchProprietaryBootloader();
     }
-    
+
     WP_ReplyToCommand(msg, success, false, NULL, 0);
 
     // on success, apply reboot options and set reboot pending flag
