@@ -452,14 +452,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 
     if ((msg->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
-        struct Flash_BlockRegionInfo
-        {
-            unsigned int StartAddress;
-            unsigned int NumBlocks;
-            unsigned int BytesPerBlock;
-            unsigned int Usage;
-
-        } *pData = NULL;
+        Flash_BlockRegionInfo *pData = NULL;
 
         unsigned int rangeCount = 0;
         unsigned int rangeIndex = 0;
@@ -495,14 +488,18 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
         {
             if (cnt == 1)
             {
-                pData =
-                    (struct Flash_BlockRegionInfo *)platform_malloc(rangeCount * sizeof(struct Flash_BlockRegionInfo));
+                uint32_t allocationSize = rangeCount * sizeof(struct Flash_BlockRegionInfo);
+
+                pData = (Flash_BlockRegionInfo *)platform_malloc(allocationSize);
 
                 if (pData == NULL)
                 {
                     WP_ReplyToCommand(msg, true, false, NULL, 0);
                     return false;
                 }
+
+                // clear memory
+                memset(pData, 0, allocationSize);
             }
             for (unsigned int i = 0; i < numDevices; i++)
             {
@@ -523,7 +520,10 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
                                 BlockRegionInfo_BlockAddress(pRegion, pRegion->BlockRanges[k].StartBlock);
                             pData[rangeIndex].NumBlocks = BlockRange_GetBlockCount(pRegion->BlockRanges[k]);
                             pData[rangeIndex].BytesPerBlock = pRegion->BytesPerBlock;
-                            pData[rangeIndex].Usage = pRegion->BlockRanges[k].RangeType & BlockRange_USAGE_MASK;
+                            pData[rangeIndex].Flags = pRegion->BlockRanges[k].RangeType & BlockRange_USAGE_MASK;
+                            // add the media attributes to the flags
+                            pData[rangeIndex].Flags |= pRegion->Attributes & BlockRegionAttributes_MASK;
+
                             rangeIndex++;
                         }
                     }
@@ -1075,6 +1075,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
     HAL_Configuration_NetworkInterface *configNetworkInterface;
     HAL_Configuration_Wireless80211 *configWireless80211NetworkInterface;
     HAL_Configuration_X509CaRootBundle *x509Certificate;
+    HAL_Configuration_X509DeviceCertificate *x509DeviceCertificate;
 
     switch ((DeviceConfigurationOption)cmd->Configuration)
     {
@@ -1141,6 +1142,33 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
             platform_free(x509Certificate);
             break;
 
+        case DeviceConfigurationOption_X509DeviceCertificates:
+
+            if (g_TargetConfiguration.DeviceCertificates->Count > cmd->BlockIndex)
+            {
+                // because X509 certificate has a variable length need to compute the block size in two steps
+                sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+                sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[cmd->BlockIndex]->CertificateSize;
+            }
+
+            x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
+            memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
+
+            if (ConfigurationManager_GetConfigurationBlock(
+                    x509DeviceCertificate,
+                    (DeviceConfigurationOption)cmd->Configuration,
+                    cmd->BlockIndex) == true)
+            {
+                size = sizeOfBlock;
+                success = true;
+
+                WP_ReplyToCommand(message, success, false, (uint8_t *)x509DeviceCertificate, size);
+            }
+
+            platform_free(x509DeviceCertificate);
+
+            break;
+
         case DeviceConfigurationOption_WirelessNetworkAP:
             // TODO missing implementation for now
             break;
@@ -1180,6 +1208,7 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
         case DeviceConfigurationOption_X509CaRootBundle:
+        case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
             if (ConfigurationManager_StoreConfigurationBlock(
                     cmd->Data,

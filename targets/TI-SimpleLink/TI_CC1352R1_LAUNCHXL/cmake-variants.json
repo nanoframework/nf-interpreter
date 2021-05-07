@@ -26,11 +26,13 @@
         "short": "TI_CC1352R1_LAUNCHXL",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
+          "BUILD_VERBOSE" : "OFF",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "RTOS": "TI_SIMPLELINK",
           "TARGET_SERIES": "CC13x2_26x2",
           "TARGET_BOARD": "TI_CC1352R1_LAUNCHXL",
+          "RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915",
           "TI_SL_CC13x2_26x2_SDK_SOURCE": "",
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",

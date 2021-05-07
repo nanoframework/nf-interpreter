@@ -151,6 +151,7 @@ endif()
  target_include_directories(NanoApiLib PUBLIC
     # directories for nanoFramework libraries
     ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
+    ${CMAKE_CURRENT_SOURCE_DIR}/Include
     ${CMAKE_CURRENT_BINARY_DIR}
     ${NF_CoreCLR_INCLUDE_DIRS}
 
@@ -221,35 +222,40 @@ endif()
 set(GEN_ESP32_BIN_PATH ${EXECUTABLE_OUTPUT_PATH} )
 set(NANOCLR_BIN_FILE ${GEN_ESP32_BIN_PATH}/${NANOCLR_PROJECT_NAME}.bin)
 set(ESPTOOL_PY_FILE ${ESP32_IDF_PATH}/components/esptool_py/esptool/esptool.py )
-set(ESPTOOL_PY_FLAGS "--chip esp32 elf2image --flash_mode \"dio\" --flash_freq \"40m\" --flash_size \"4MB\" " )
-set(GEN_ESP32PART_PY_FILE ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
+set(ESPTOOL_PY_FLAGS "--chip" "esp32" "elf2image" "--flash_mode" "dio" "--flash_freq" "40m" "--flash_size" "4MB" )
+# message("ESPTOOL_PY_FLAGS:${ESPTOOL_PY_FLAGS}" )
 
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
     COMMAND ${ESPTOOL_PY_FILE} ${ESPTOOL_PY_FLAGS} -o ${NANOCLR_BIN_FILE}   ${EXECUTABLE_OUTPUT_PATH}/${NANOCLR_PROJECT_NAME}.elf
     COMMENT "Generate nanoCLR BIN file for deployment" )
     
-# # Create partition table
-add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv
-                                              ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
-    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv
-                                              ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
-    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv
-                                              ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-    COMMAND ${GEN_ESP32PART_PY_FILE} --verify ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv
-                                              ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
-    COMMENT "Generate Esp32 Partition tables for 2MB, 4MB, 8MB and 16MB flash" )
+# Create partition tables
+set(ESP32_PARTITION_TABLE_UTILITY ${ESP32_IDF_PATH}/components/partition_table/gen_esp32part.py )
 
-# list partition table
 add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${GEN_ESP32PART_PY_FILE}  ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
-    COMMENT "List flash 4Mb Esp32 Partition tables"
-)
+    COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+    --flash-size 16MB 
+    ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_16mb.csv
+    ${GEN_ESP32_BIN_PATH}/partitions_16mb.bin
+    COMMENT "Generate ESP32 partition table for 16MB flash" )
 
-#message("CMAKE_CXX_FLAGS:${CMAKE_CXX_FLAGS}" )
-#message("CMAKE_EXE_LINKER_FLAGS:${CMAKE_EXE_LINKER_FLAGS}" )
-#message("CMAKE_EXE_LINKER_FLAGS_DEBUG:${CMAKE_EXE_LINKER_FLAGS_DEBUG}" )
-#message("CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT:${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT}" )
-#message("CMAKE_CXX_LINK_EXECUTABLE:${CMAKE_CXX_LINK_EXECUTABLE}" )
-#message("CMAKE_C_LINK_EXECUTABLE:${CMAKE_C_LINK_EXECUTABLE}" )
-#message("FLAGS:${FLAGS}" )
+add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+    COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+    --flash-size 8MB 
+    ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_8mb.csv
+    ${GEN_ESP32_BIN_PATH}/partitions_8mb.bin
+    COMMENT "Generate ESP32 partition table for 8MB flash" )
+
+add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+    COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+    --flash-size 4MB 
+    ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_4mb.csv
+    ${GEN_ESP32_BIN_PATH}/partitions_4mb.bin
+    COMMENT "Generate Esp32 partition table for 4MB flash" )
+
+add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+    COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+    --flash-size 2MB 
+    ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/IDF/partitions_nanoclr_2mb.csv
+    ${GEN_ESP32_BIN_PATH}/partitions_2mb.bin
+    COMMENT "Generate Esp32 partition table for 2MB flash" )

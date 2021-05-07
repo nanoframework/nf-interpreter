@@ -21,15 +21,22 @@ set(System.Math_SRCS
 )
 
 foreach(SRC_FILE ${System.Math_SRCS})
+
     set(System.Math_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(System.Math_SRC_FILE ${SRC_FILE}
         PATHS 
-            "${BASE_PATH_FOR_THIS_MODULE}"
+            ${BASE_PATH_FOR_THIS_MODULE}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Math_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Math_SRC_FILE}")
+    endif()
+
     list(APPEND System.Math_SOURCES ${System.Math_SRC_FILE})
+
 endforeach()
 
 

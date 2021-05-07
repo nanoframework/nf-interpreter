@@ -101,22 +101,6 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
 
-    # sources specific to nanoBooter
-    if(${TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
-
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS)
-
-    endif()
-
-    # sources specific to nanoCRL
-    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
-    
-        # add dependency from FreeRTOS (this is required to make sure the FreeRTOS repo is downloaded before the build starts)
-        add_dependencies(${TARGET}.elf FreeRTOS CMSIS LWIP)
-
-    endif()
-
 endmacro()
 
 # Add FreeRTOS platform include directories to a specific CMake target
@@ -136,7 +120,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
         target_include_directories(${TARGET}.elf PUBLIC
             
-            ${TARGET_CMSIS_NANOBOOTER_INCLUDE_DIRS}
+            ${TARGET_NXP_NANOBOOTER_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOBOOTER_INCLUDE_DIRS}
         )
 
@@ -151,7 +135,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
             ${NANOCLR_PROJECT_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
             ${LWIP_INCLUDE_DIRS}
-            ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/fatfs
+            ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/_fatfs
             ${FATFS_INCLUDE_DIRS}
 
         )
@@ -172,7 +156,8 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
-        ${TARGET_CMSIS_COMMON_SOURCES}
+        ${TARGET_FREERTOS_COMMON_SOURCES}
+        ${TARGET_NXP_COMMON_SOURCES}
         
         ${FreeRTOS_SOURCES}
     )

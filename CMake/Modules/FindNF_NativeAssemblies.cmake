@@ -16,6 +16,7 @@ option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtim
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
 option(API_nanoFramework.System.Collections     "option for nanoFramework.System.Collections")
 option(API_nanoFramework.System.Text            "option for nanoFramework.System.Text")
+option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
@@ -27,7 +28,7 @@ option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c 
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
-option(API_Windows.Networking.Sockets           "option for Windows.Networking.Sockets")
+option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 
@@ -162,223 +163,225 @@ endmacro()
 # 2. change the call to PerformSettingsForApiEntry() macro with the API name (doted naming)
 ############################################################################################
 
-# macro(ParseNativeAssemblies)
+# Hardware.Esp32
+if(API_Hardware.Esp32)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
+endif()
 
-    # Hardware.Esp32
-    if(API_Hardware.Esp32)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32")
-    endif()
+# nanoFramework.Hardware.Esp32.Rmt
+if(API_nanoFramework.Hardware.Esp32.Rmt)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
 
-    # nanoFramework.Hardware.Esp32.Rmt
-    if(API_nanoFramework.Hardware.Esp32.Rmt)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
-    endif()
+# Hardware.Stm32
+if(API_Hardware.Stm32)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
+endif()
 
-    # Hardware.Stm32
-    if(API_Hardware.Stm32)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
-    endif()
+# nanoFramework.Devices.Can
+if(API_nanoFramework.Devices.Can)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+endif()
 
-    # nanoFramework.Devices.Can
-    if(API_nanoFramework.Devices.Can)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Devices.Can")
-    endif()
+# nanoFramework.Graphics
+if(API_nanoFramework.Graphics)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Graphics")
+endif()
 
-    # nanoFramework.Graphics
-    if(API_nanoFramework.Graphics)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Graphics")
-    endif()
+# nanoFramework.Devices.OneWire
+if(API_nanoFramework.Devices.OneWire)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
+endif()
 
-    # nanoFramework.Devices.OneWire
-    if(API_nanoFramework.Devices.OneWire)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
-    endif()
+# nanoFramework.Networking.Sntp
+if(API_nanoFramework.Networking.Sntp)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
+endif()
 
-    # nanoFramework.Networking.Sntp
-    if(API_nanoFramework.Networking.Sntp)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Networking.Sntp")
-    endif()
+# nanoFramework.ResourceManager
+if(API_nanoFramework.ResourceManager)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.ResourceManager")
+endif()
 
-    # nanoFramework.ResourceManager
-    if(API_nanoFramework.ResourceManager)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.ResourceManager")
-    endif()
+# nanoFramework.System.Collections
+if(API_nanoFramework.System.Collections)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.Collections")
+endif()
 
-    # nanoFramework.System.Collections
-    if(API_nanoFramework.System.Collections)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.System.Collections")
-    endif()
+# nanoFramework.System.Text
+if(API_nanoFramework.System.Text)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.Text")
+endif()
 
-    # nanoFramework.System.Text
-    if(API_nanoFramework.System.Text)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.System.Text")
-    endif()
+# nanoFramework.TI.EasyLink
+if(API_nanoFramework.TI.EasyLink)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
+endif()
 
-    # nanoFramework.TI.EasyLink
-    if(API_nanoFramework.TI.EasyLink)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.TI.EasyLink")
-    endif()
+# nanoFramework.Hardware.TI
+if(API_nanoFramework.Hardware.TI)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
+endif()
 
-    # nanoFramework.Hardware.TI
-    if(API_nanoFramework.Hardware.TI)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
-    endif()
+# nanoFramework.Runtime.Events
+if(API_nanoFramework.Runtime.Events)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Runtime.Events")
 
-    # nanoFramework.Runtime.Events
-    if(API_nanoFramework.Runtime.Events)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("nanoFramework.Runtime.Events")
+    # this one is special because it requires also another assembly for events that is internal (doens't have a managed end)
 
-        # this one is special because it requires also another assembly for events that is internal (doens't have a managed end)
+    # append to list of declaration for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;")
+    # append to list of entries for Interop Assemblies table
+    list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
 
-        # append to list of declaration for Interop Assemblies table
-        list(APPEND CLR_RT_NativeAssemblyDataList "extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs;")
-        # append to list of entries for Interop Assemblies table
-        list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_nanoFramework_Runtime_Events_EventSink_DriverProcs,")
+endif()
 
-    endif()
+# System.IO.FileSystem
+if(API_System.IO.FileSystem)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.IO.FileSystem")
+endif()
 
-    # System.Math
-    if(API_System.Math)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Math")
-    endif()
+# System.Math
+if(API_System.Math)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Math")
+endif()
 
-    # System.Net
-    if(API_System.Net)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Net")
-    endif()
+# System.Net
+if(API_System.Net)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Net")
+endif()
 
-    # Windows.Devices.Adc
-    if(API_Windows.Devices.Adc)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Adc")
-    endif()
+# Windows.Devices.Adc
+if(API_Windows.Devices.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.Adc")
+endif()
 
-    # System.Device.Dac
-    if(API_System.Device.Dac)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Device.Dac")
-    endif()
+# System.Device.Dac
+if(API_System.Device.Dac)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Dac")
+endif()
 
-    # System.Device.Gpio
-    if(API_System.Device.Gpio)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Device.Gpio")
-    endif()
+# System.Device.Gpio
+if(API_System.Device.Gpio)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Gpio")
+endif()
 
-    # Windows.Devices.Gpio
-    if(API_Windows.Devices.Gpio)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Gpio")
-    endif()
+# Windows.Devices.Gpio
+if(API_Windows.Devices.Gpio)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.Gpio")
+endif()
 
-	# Windows.Devices.I2c
-    if(API_Windows.Devices.I2c)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.I2c")
-    endif()
+# Windows.Devices.I2c
+if(API_Windows.Devices.I2c)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.I2c")
+endif()
 
-	# System.Device.I2c
-    if(API_System.Device.I2c)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("System.Device.I2c")
-    endif()
+# System.Device.I2c
+if(API_System.Device.I2c)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.I2c")
+endif()
 
-    # Windows.Devices.Pwm
-    if(API_Windows.Devices.Pwm)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Pwm")
-    endif()
+# Windows.Devices.Pwm
+if(API_Windows.Devices.Pwm)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.Pwm")
+endif()
 
-    # Windows.Devices.SerialCommunication
-    if(API_Windows.Devices.SerialCommunication)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
-    endif()
+# Windows.Devices.SerialCommunication
+if(API_Windows.Devices.SerialCommunication)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
+endif()
+
+# Windows.Devices.Spi
+if(API_Windows.Devices.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.Spi")
+endif()
+
+# System.Device.Spi
+if(API_System.Device.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Spi")
+endif()
+
+# Windows.Devices.Wifi
+if(API_Windows.Devices.Wifi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Devices.Wifi")
+endif()
+
+# Windows.Storage
+if(API_Windows.Storage)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Windows.Storage")
+endif()
+
+# Interop assemblies
+ParseInteropAssemblies()
+
+
+# parse the declarations to have new lines and ';'
+string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
+# parse the list to have new lines, ',' and identation
+string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_NativeAssemblyDataTableEntriesList}")
+
+
+# get the count of interop assemblies
+list(LENGTH CLR_RT_NativeAssemblyDataTableEntriesList CLR_RT_NativeAssembliesCount)
+
+
+# configure code file with Interop Assemblies table and...
+configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
+# ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
+list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
+
+# output the list of APIs included
+list(LENGTH apiListing apiListingLenght)
+
+if(apiListingLenght GREATER 0)
     
-    # Windows.Devices.Spi
-    if(API_Windows.Devices.Spi)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Devices.Spi")
-    endif()
+    # APIs included
+    message(STATUS "")
+    message(STATUS " *** APIs included ***")
+    message(STATUS "")
 
-    # Windows.Networking.Sockets
-    if(API_Windows.Networking.Sockets)
-        ##### API name here (doted name)
-        PerformSettingsForApiEntry("Windows.Networking.Sockets")
-    endif()
- 
-    # Windows.Devices.Wifi
-    if(API_Windows.Devices.Wifi)
-       ##### API name here (doted name)
-       PerformSettingsForApiEntry("Windows.Devices.Wifi")
-    endif()
- 
-    # Windows.Storage
-    if(API_Windows.Storage)
-       ##### API name here (doted name)
-       PerformSettingsForApiEntry("Windows.Storage")
-    endif()
-
-    # Interop assemblies
-    ParseInteropAssemblies()
-
-
-    # parse the declarations to have new lines and ';'
-    string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
-    # parse the list to have new lines, ',' and identation
-    string(REPLACE ";" "\n    " CLR_RT_NativeAssemblyDataTableEntries "${CLR_RT_NativeAssemblyDataTableEntriesList}")
-
-
-    # get the count of interop assemblies
-    list(LENGTH CLR_RT_NativeAssemblyDataTableEntriesList CLR_RT_NativeAssembliesCount)
-
-
-    # configure code file with Interop Assemblies table and...
-    configure_file("${CMAKE_SOURCE_DIR}/InteropAssemblies/CLR_RT_InteropAssembliesTable.cpp.in"
-                    "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp" @ONLY)
-    # ... now add Interop Assemblies table to ChibiOS nanoCLR sources list
-    list(APPEND NF_NativeAssemblies_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/CLR_RT_InteropAssembliesTable.cpp")
-
-    # output the list of APIs included
-    list(LENGTH apiListing apiListingLenght)
-
-    if(apiListingLenght GREATER 0)
-        
-        # APIs included
-        message(STATUS "")
-        message(STATUS " *** APIs included ***")
-        message(STATUS "")
-
-        foreach(entry ${apiListing})
-            message(STATUS " ${entry}")
-        endforeach(entry ${})
-        
-        message(STATUS "")
-        message(STATUS " ***  end of APIs  ***")
-        message(STATUS "")
-
-    else()
-        # no APIs were included
-        message(STATUS " *** NO APIs included ***")    
-    endif()
-
-    include(FindPackageHandleStandardArgs)
-
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
+    foreach(entry ${apiListing})
+        message(STATUS " ${entry}")
+    endforeach(entry ${})
     
-# endmacro()
+    message(STATUS "")
+    message(STATUS " ***  end of APIs  ***")
+    message(STATUS "")
+
+else()
+    # no APIs were included
+    message(STATUS " *** NO APIs included ***")    
+endif()
+
+include(FindPackageHandleStandardArgs)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)

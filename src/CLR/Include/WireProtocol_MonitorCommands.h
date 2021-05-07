@@ -169,6 +169,16 @@ typedef struct Monitor_UpdateConfiguration_Reply
 
 } Monitor_UpdateConfiguration_Reply;
 
+typedef struct __nfpack Flash_BlockRegionInfo
+{
+    uint32_t StartAddress;
+    uint32_t NumBlocks;
+    uint32_t BytesPerBlock;
+    uint32_t Flags;
+} Flash_BlockRegionInfo;
+
+#define BlockRegionAttributes_MASK  ((uint32_t)0x0000FF00)
+
 // clang-format on
 
 //////////////////////////////////////////

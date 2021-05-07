@@ -12,7 +12,7 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-#include "Esp32_os.h"
+#include "esp32_os.h"
 #include "targetHAL_ConfigStorage.h"
 
 #include "esp_vfs.h"

@@ -21,7 +21,7 @@
     <ClInclude Include="CorLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\targets\os\win32\Include\target_os.h">
+    <ClInclude Include="..\..\..\targets\win32\Include\target_os.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

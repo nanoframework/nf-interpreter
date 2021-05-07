@@ -20,7 +20,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 # others
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
@@ -78,7 +78,6 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Attribute.cpp
     corlib_native_System_BitConverter.cpp
     corlib_native_System_Collections_ArrayList.cpp
-    corlib_native_System_Console.cpp
     corlib_native_System_Convert.cpp
     corlib_native_System_DateTime.cpp
     corlib_native_System_Delegate.cpp
@@ -141,7 +140,7 @@ set(NF_CoreCLR_SRCS
     Messaging_stub.cpp
     
     # Helpers
-    printf.c
+    nanoprintf.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -198,7 +197,9 @@ else()
 endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
+
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(NF_CoreCLR_SRC_FILE ${SRC_FILE}
         PATHS 
             
@@ -227,7 +228,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/CLR/Messaging
             
             # Helpers
-            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/TinyPrintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
@@ -249,8 +250,13 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${NF_CoreCLR_SRC_FILE}")
+    endif()
+
     list(APPEND NF_CoreCLR_SOURCES ${NF_CoreCLR_SRC_FILE})
+    
 endforeach()
 
 

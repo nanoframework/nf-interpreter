@@ -9,61 +9,59 @@
 
 extern GraphicsDriver g_GraphicsDriver;
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_LongerSide___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_LongerSide___STATIC__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4(g_GraphicsDriver.GetLongerSide());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ShorterSide___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ShorterSide___STATIC__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4(g_GraphicsDriver.GetShorterSide());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Width___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenWidth___STATIC__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4(g_GraphicsDriver.GetWidth());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Height___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_ScreenHeight___STATIC__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4(g_GraphicsDriver.GetHeight());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_BitsPerPixel___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_BitsPerPixel___STATIC__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4(g_GraphicsDriver.GetBitsPerPixel());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Orientation___I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     stack.SetResult_I4((CLR_INT32)g_GraphicsDriver.GetOrientation());
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::ChangeOrientation___BOOLEAN__BYREF_I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_INT32 orientation = stack.Arg0().NumericByRef().s4;
     g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation);
     NANOCLR_NOCLEANUP_NOLABEL();
 }
-
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Dispose___VOID__BOOLEAN(CLR_RT_StackFrame& stack)
-{
-    NANOCLR_HEADER();
-    (void)stack;
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-

@@ -17,9 +17,12 @@ set(nanoHALCore_SRCS
     nanoHAL_Boot.c
 
 )
+
 # message("BASE_PATH_FOR_PLATFORM >> ${BASE_PATH_FOR_PLATFORM}") # debug helper
 foreach(SRC_FILE ${nanoHALCore_SRCS})
+
     set(nanoHALCore_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(nanoHALCore_SRC_FILE ${SRC_FILE}
         PATHS 
             
@@ -34,8 +37,13 @@ foreach(SRC_FILE ${nanoHALCore_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoHALCore_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoHALCore_SRC_FILE}")
+    endif()
+
     list(APPEND nanoHALCore_SOURCES ${nanoHALCore_SRC_FILE})
+    
 endforeach()
 
 

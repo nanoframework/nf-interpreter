@@ -33,8 +33,16 @@ set(System.Device.Gpio_SRCS
     Hardware.cpp
 )
 
+# TODO remove this IF() clause here when Windows.Devices.Gpio is removed
+if(NOT API_Windows.Devices.Gpio)
+    # need to have this here in case Windows.Devices.Gpio is not included
+    list(APPEND System.Device.Gpio_SRCS cpu_gpio.cpp)
+endif()
+
 foreach(SRC_FILE ${System.Device.Gpio_SRCS})
+
     set(System.Device.Gpio_SRC_FILE SRC_FILE-NOTFOUND)
+
     find_file(System.Device.Gpio_SRC_FILE ${SRC_FILE}
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
@@ -49,8 +57,13 @@ foreach(SRC_FILE ${System.Device.Gpio_SRCS})
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Device.Gpio_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Device.Gpio_SRC_FILE}")
+    endif()
+
     list(APPEND System.Device.Gpio_SOURCES ${System.Device.Gpio_SRC_FILE})
+    
 endforeach()
 
 include(FindPackageHandleStandardArgs)

@@ -33,7 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
-include(nf_utils)
+include(NF_Utils)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -228,7 +228,7 @@ option(USE_RNG "option to enable use of true random generator hardware block" ON
 if(USE_RNG)
     message(STATUS "Random Number Generation by target MCU is activated")
 else()
-    message(STATUS "Random Number Generation by target MCU is NOT activated")
+    message(STATUS "Random Number Generation by target MCU **IS NOT** activated")
 endif()
 
 #################################################################
@@ -242,7 +242,7 @@ option(NF_FEATURE_DEBUGGER "option to enable support for debugging")
 if(NF_FEATURE_DEBUGGER)
     message(STATUS "Support for debugging managed applications is included.")
 else()
-    message(STATUS "Support for debugging managed applications IS NOT included.")
+    message(STATUS "Support for debugging managed applications **IS NOT** included.")
 endif()
 
 #################################################################
@@ -253,7 +253,7 @@ option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
 if(NF_FEATURE_USE_APPDOMAINS)
     message(STATUS "Application Domains support is included")
 else()
-    message(STATUS "Application Domains support IS NOT included")
+    message(STATUS "Application Domains support **IS NOT** included")
 endif()
 
 #################################################################
@@ -288,7 +288,7 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     message(STATUS "Configuration block storage is included")
 else()
     set(TARGET_HAS_CONFIG_BLOCK FALSE CACHE INTERNAL "Option for config block")
-    message(STATUS "Configuration block storage IS NOT included")
+    message(STATUS "Configuration block storage **IS NOT** included")
 endif()
 
 #################################################################
@@ -306,9 +306,20 @@ if(NF_FEATURE_HAS_SDCARD)
     # force inclusion of Windows.Storage API
     set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
 
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+
+    if(RTOS_FREERTOS_ESP32_CHECK)
+        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
+        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
+        
+        # force **REMOVAL** of System.IO.FileSystem API
+        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
+    endif()
+
     message(STATUS "Support for SD Card is included")
 else()
-    message(STATUS "Support for SD Card IS NOT included")
+    message(STATUS "Support for SD Card **IS NOT** included")
 endif()
 
 #################################################################
@@ -331,9 +342,20 @@ if(NF_FEATURE_HAS_USB_MSD)
     # force inclusion of Windows.Storage API
     set(API_Windows.Storage ON CACHE INTERNAL "Forcing Windows.Storage API option to ON")
 
+    # force inclusion of System.IO.FileSystem API
+    set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
+
+    if(RTOS_FREERTOS_ESP32_CHECK)
+        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
+        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
+        
+        # force **REMOVAL** of System.IO.FileSystem API
+        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
+    endif()
+
     message(STATUS "Support for USB Mass Storage is included")
 else()
-    message(STATUS "Support for USB Mass Storage IS NOT included")
+    message(STATUS "Support for USB Mass Storage **IS NOT** included")
 endif()
 
 #################################################################
@@ -358,7 +380,7 @@ if(NF_FEATURE_USE_SPIFFS)
     message(STATUS "Support for SPIFFS is included")
 else()
     set(NF_FEATURE_USE_SPIFFS_OPTION FALSE CACHE INTERNAL "Set nF SPIFFS feature FALSE")
-    message(STATUS "Support for SPIFFS IS NOT included")
+    message(STATUS "Support for SPIFFS **IS NOT** included")
 endif()
 
 #################################################################
@@ -402,8 +424,6 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
-# (default is ON so Wire Protocol implements CRC32)
-option(NF_WP_IMPLEMENTS_CRC32 "option for Wire Protocol to implement CRC32" ON)
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
@@ -492,8 +512,7 @@ else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 endif()
 
-if( API_System.Net OR
-    API_Windows.Networking.Sockets)
+if( API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
@@ -575,6 +594,11 @@ else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
+if(API_System.Device.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+else()
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+endif()
 
 if(API_nanoFramework.Devices.Can)
     set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
@@ -620,9 +644,9 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
-    API_Windows.Networking.Sockets OR
     API_nanoFramework.Devices.Can OR
-    API_Windows.Storage)
+    API_Windows.Storage OR
+    API_System.IO.FileSystem)
 
     # these APIs requires nanoFramework.Runtime.Events
     set(API_nanoFramework.Runtime.Events ON CACHE INTERNAL "enable of API_nanoFramework.Runtime.Events")
@@ -666,7 +690,7 @@ if(USE_NETWORKING_OPTION)
 
 else()
     set(HAL_USE_MAC_OPTION FALSE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
-    message(STATUS "Support for networking IS NOT enabled")
+    message(STATUS "Support for networking **IS NOT** enabled")
 endif()
 
 #################################################################
@@ -734,33 +758,31 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
     
-    add_subdirectory(targets/CMSIS-OS/ChibiOS)
-    add_subdirectory(targets/CMSIS-OS/common)
-    add_subdirectory(targets/CMSIS-OS/common/Include)
+    add_subdirectory(targets/ChibiOS)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
         message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
-        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
 
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
-            add_subdirectory(targets-community/CMSIS-OS/ChibiOS/${TARGET_BOARD})
+            add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
         else()
         # board NOT found in targets folder
             # board NOT found in targets folder
@@ -805,7 +827,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/_nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder

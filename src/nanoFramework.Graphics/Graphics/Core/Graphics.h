@@ -12,13 +12,13 @@
 #include "nanoCLR_Types.h"
 #include "nanoCLR_Interop.h"
 #include "nanoCLR_Runtime.h"
-#include "nanoCLR_Platformdef.h"
+#include "nanoCLR_PlatformDef.h"
 #include "nanoCLR_Runtime__HeapBlock.h"
 #include "nanoCLR_Checks.h"
 #include "nanoPAL.h"
 #include "nanoHAL_Time.h"
-#include "nanoPAL_events.h"
-#include "nanohal.h"
+#include "nanoPAL_Events.h"
+#include "nanoHAL.h"
 #include "nanoHAL_v2.h"
 #include "corlib_native.h"
 
@@ -532,10 +532,15 @@ struct CLR_GFX_Bitmap
 
     PROHIBIT_ALL_CONSTRUCTORS(CLR_GFX_Bitmap);
 };
+
 struct CLR_GFX_Font
 {
     static const int FIELD__m_font = 1;
-    static const CLR_INT32 c_DefaultKerning = 1024; // Must keep in sync with Microsoft.SPOT.Font.DefaultKerning
+
+    /////////////////////////////////////////////////////////////////////
+    // !!! KEEP IN SYNC WITH nanoFramework.UI.Font.DefaultKerning  !!! //
+    /////////////////////////////////////////////////////////////////////
+    static const CLR_INT32 c_DefaultKerning = 1024;
     static const CLR_UINT16 c_UnicodeReplacementCharacter = 0xFFFD;
 
     CLR_GFX_FontDescription m_font;

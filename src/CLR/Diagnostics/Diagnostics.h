@@ -12,7 +12,6 @@
 
 #include <corlib_native.h>
 #if !defined(_WIN32)
-#include <printf.h>
+#include <nanoprintf.h>
 #endif // !defined(_WIN32)
 //#include <spot_net_native.h>
-

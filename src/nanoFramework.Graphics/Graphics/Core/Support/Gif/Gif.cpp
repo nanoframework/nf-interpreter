@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "Gif.h"
+#include "gif.h"
 
 HRESULT CLR_GFX_Bitmap::CreateInstanceGif(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size)
 {

@@ -7,6 +7,9 @@
 #ifndef _NF_RT_EVENTS_NATIVE_H_
 #define _NF_RT_EVENTS_NATIVE_H_
 
+// need this include here to use this in nanoCLR WIN32 project
+#include <stdafx.h>
+
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>

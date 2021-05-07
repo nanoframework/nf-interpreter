@@ -97,7 +97,9 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     {
         unsigned char *writeData = NULL;
         unsigned char *readData = NULL;
+        int writeOffset = 0;
         int writeSize = 0;
+        int readOffset = 0;
         int readSize = 0;
         esp_err_t i2cStatus;
 
@@ -130,11 +132,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
             if (writeBuffer != NULL)
             {
-                // grab the pointer to the array by getting the first element of the array
-                writeData = writeBuffer->GetFirstElement();
+                // Get the write offset, only the elements defined by the span must be written, not the whole array
+                writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                writeSize = writeBuffer->m_numOfElements;
+                // grab the pointer to the array by starting and the offset specified in the span
+                writeData = writeBuffer->GetElement(writeOffset);
+
+                // use the span length as write size, only the elements defined by the span must be written
+                writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
             }
         }
 
@@ -144,11 +149,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
             if (readBuffer != NULL)
             {
-                // grab the pointer to the array by getting the first element of the array
-                readData = readBuffer->GetFirstElement();
+                // Get the read offset, only the elements defined by the span must be read, not the whole array
+                readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                readSize = readBuffer->m_numOfElements;
+                // grab the pointer to the array by starting and the offset specified in the span
+                readData = readBuffer->GetElement(readOffset);
+
+                // use the span length as read size, only the elements defined by the span must be read
+                readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
             }
         }
 

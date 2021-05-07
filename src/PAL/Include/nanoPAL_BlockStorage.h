@@ -166,11 +166,14 @@ typedef struct BlockRange
 //    to routinely calculate it from SectorsPerBlock * DataBytesPerSector
 //
 
+// these attributes are placed at 2nd LSB
+// this is to ease usage on Flash_BlockRegionInfo.Flags struct
 typedef enum BlockRegionAttribute
 {
     // block region is memory mapped
-
-    BlockRegionAttribute_MemoryMapped = 0x0001,
+    BlockRegionAttribute_MemoryMapped = 0x0100,
+    // programming width is 64bits
+    BlockRegionAttribute_ProgramWidthIs64bits = 0x0200,
 
 } BlockRegionAttribute;
 

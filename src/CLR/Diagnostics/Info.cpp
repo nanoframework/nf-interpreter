@@ -9,6 +9,9 @@
 
 #if defined(_WIN32)
 
+#include <iostream>
+#include <nanoCLR_Win32.h>
+
 static std::string *s_redirectedString = NULL;
 
 void CLR_Debug::RedirectToString(std::string *str)
@@ -218,8 +221,8 @@ void CLR_Debug::Emit(const char *text, int len)
         if (s_chars > 80 || strchr(s_buffer, '\n'))
         {
             Watchdog_Reset();
-
-#if defined(PLATFORM_WINDOWS_EMULATOR)
+#ifdef WIN32
+            OutputDebugStringA(s_buffer);
             HAL_Windows_Debug_Print(s_buffer);
 #endif
 

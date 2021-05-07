@@ -24,7 +24,7 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/CMSIS-OS/ChibiOS/common")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common")
 
 endfunction()
 
@@ -121,33 +121,6 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
 
-    # add dependency from ChibiOS (this is required to make sure the ChibiOS repo is downloaded before the build starts)
-    add_dependencies(${TARGET}.elf ChibiOS)
-
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        add_dependencies(${TARGET}.elf ${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
-    endif()
-
-    # specific to nanoCRL
-    if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
-
-        # add dependencies from CHIBIOS_NETWORK_COMPONENTS (this is required to make sure that ChibiOS network components are unzip at the proper locations before the build starts)
-        # only required if networking is ON
-        if(USE_NETWORKING_OPTION)
-            add_dependencies(${NANOCLR_PROJECT_NAME}.elf CHIBIOS_NETWORK_COMPONENTS)
-
-            # add dependency for security provider mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                add_dependencies(${NANOCLR_PROJECT_NAME}.elf mbedTLS)
-            endif()
-        endif()
-
-        if(NF_FEATURE_USE_SPIFFS)
-            add_dependencies(${NANOCLR_PROJECT_NAME}.elf SPIFFS)
-        endif()
-
-    endif()
-
 endmacro()
 
 # Add ChibiOS platform include directories to a specific CMake target
@@ -202,8 +175,6 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
     
-        ${TARGET_CMSIS_COMMON_SOURCES}
-        
         ${TARGET_CHIBIOS_COMMON_SOURCES}
 
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}

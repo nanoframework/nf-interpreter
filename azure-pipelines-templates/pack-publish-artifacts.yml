@@ -15,5 +15,5 @@ steps:
         *.dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    condition: succeeded()
     displayName: Collecting deployable artifacts

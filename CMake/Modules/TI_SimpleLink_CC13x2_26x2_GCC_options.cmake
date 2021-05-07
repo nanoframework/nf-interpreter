@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(simplelinkcc13x2_26x2sdk)
+
 #################################################################
 # WHEN ADDING A NEW SERIES add the appropriate GCC options below
 #################################################################
@@ -11,7 +14,7 @@
 set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m4 -x assembler-with-cpp" CACHE INTERNAL "asm compiler flags")
 
 # need to specify linker flags here
-set(CMAKE_EXE_LINKER_FLAGS " -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mcpu=cortex-m4 -nostartfiles -static -Wl,--gc-sections -L${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/source -L${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages -L${CMAKE_BINARY_DIR}/SimpleLinkCC13x2_26x2SDK_Source/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Wall " CACHE INTERNAL "executable linker flags")
+set(CMAKE_EXE_LINKER_FLAGS " -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gdwarf-3 -gstrict-dwarf -Wall -mcpu=cortex-m4 -nostartfiles -static -Wl,--gc-sections -L${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source -L${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages -L${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Wall " CACHE INTERNAL "executable linker flags")
 
 
 function(NF_SET_COMPILER_OPTIONS TARGET)

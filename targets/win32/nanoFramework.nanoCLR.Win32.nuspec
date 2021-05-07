@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>nanoFramework.nanoCLR.Win32</id>
+    <version>$version$</version>
+    <title>nanoFramework.nanoCLR.Win32</title>
+    <authors>nanoFramework project contributors</authors>
+    <owners>nanoFramework project contributors,dotnetfoundation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">LICENSE.md</license>
+    <releaseNotes></releaseNotes>
+    <developmentDependency>true</developmentDependency>
+    <projectUrl>https://github.com/nanoframework/lib-CoreLibrary</projectUrl>
+    <icon>images\nf-logo.png</icon>
+    <repository type="git" url="https://github.com/nanoframework/lib-CoreLibrary" commit="$commit$" />
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>    
+    <description>This package includes the .NET nanoFramework nanoCLR for Win32.</description>
+    <tags>nanoFramework C# csharp netmf netnf</tags>
+    <packageTypes>
+      <packageType name="Dependency" />
+    </packageTypes>
+  </metadata>
+  <files>
+    <file src="..\..\build\bin\Release\nanoFramework.nanoCLR.exe" target="tools" />
+    <file src="msvc_redist\vcruntime140.dll" target="tools" />
+
+    <file src="..\..\assets\nf-logo.png" target="images" />
+    <file src="..\..\LICENSE.md" target="" />
+  </files>
+</package>

@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(freertos)
+
 ###################################################################################################################################
 # WHEN ADDING A NEW series add the respective name to the list bellow along with the CMake files with GCC options and source files
 ###################################################################################################################################
@@ -27,8 +30,8 @@ include(FreeRTOS_${TARGET_SERIES}_GCC_options)
 # message("FreeRTOS board series is ${TARGET_SERIES}") # debug helper
 
 # set include directories for FreeRTOS
-list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/include)
-list(APPEND FreeRTOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/FreeRTOS_Source/portable/GCC/ARM_CM7/r0p1)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${freertos_SOURCE_DIR}/include)
+list(APPEND FreeRTOS_INCLUDE_DIRS ${freertos_SOURCE_DIR}/portable/GCC/ARM_CM7/r0p1)
 
 # source files and GCC options according to target vendor and series
 
@@ -45,16 +48,23 @@ set(FreeRTOS_SRCS
 )
 
 foreach(SRC_FILE ${FreeRTOS_SRCS})
+
     set(FreeRTOS_SRC_FILE SRC_FILE -NOTFOUND)
+
     find_file(FreeRTOS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${CMAKE_BINARY_DIR}/FreeRTOS_Source
+        ${freertos_SOURCE_DIR}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${FreeRTOS_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${FreeRTOS_SRC_FILE}") # debug helper
+    endif()
+     
     list(APPEND FreeRTOS_SOURCES ${FreeRTOS_SRC_FILE})
+
 endforeach()
 
 

@@ -5,6 +5,7 @@
 
 #include "win_storage_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -15,7 +16,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNative___STATIC__VOID__BOOLEAN,
     Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNative___STATIC__VOID__I4__I4,
     Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative___STATIC__VOID,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -105,7 +105,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage =
 {
     "Windows.Storage",
-    0x5160A7B6,
+    0x954A4192,
     method_lookup,
     { 100, 0, 2, 0 }
 };
+
+// clang-format on

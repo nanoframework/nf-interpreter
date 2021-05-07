@@ -332,7 +332,7 @@ enum CLR_CorCallingConvention
               /////////////////////////////////////////////////////////////////////////////////////////////
 };
 
-enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
+enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.Tools.MetadataProcessor!!
 {
     DATATYPE_VOID, // 0 bytes
 
@@ -364,11 +364,19 @@ enum CLR_DataType // KEEP IN SYNC WITH Microsoft.SPOT.DataType!!
 #endif
     DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, // All the above types don't need fix-up on assignment.
 
-    DATATYPE_OBJECT,    // Shortcut for System.Object
-    DATATYPE_CLASS,     // CLASS <class Token>
-    DATATYPE_VALUETYPE, // VALUETYPE <class Token>
-    DATATYPE_SZARRAY,   // Shortcut for single dimension zero lower bound array SZARRAY <type>
-    DATATYPE_BYREF,     // BYREF <type>
+    DATATYPE_OBJECT,                    // Shortcut for System.Object
+    DATATYPE_GENERIC = DATATYPE_OBJECT, // shortcut for generic type
+    DATATYPE_CLASS,                     // CLASS <class Token>
+    DATATYPE_VALUETYPE,                 // VALUETYPE <class Token>
+    DATATYPE_SZARRAY,                   // Shortcut for single dimension zero lower bound array SZARRAY <type>
+    DATATYPE_BYREF,                     // BYREF <type>
+
+    // Generic parameter in a generic type definition, represented as number
+    DATATYPE_VAR,
+    // Generic type instantiation
+    DATATYPE_GENERICINST,
+    // Generic parameter in a generic method definition, represented as number
+    DATATYPE_MVAR,
 
     ////////////////////////////////////////
 
@@ -471,6 +479,8 @@ inline CLR_UINT32 CLR_UncompressStringToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 {
+    // TODO: length of this table should be 4 as it is dereferenced with two bits masked from token
+    // The fourth value is undefined/random
     static const CLR_TABLESENUM c_lookup[3] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec};
     return CLR_TkFromType(c_lookup[(tk >> 14) & 3], 0x3fff & tk);
 }

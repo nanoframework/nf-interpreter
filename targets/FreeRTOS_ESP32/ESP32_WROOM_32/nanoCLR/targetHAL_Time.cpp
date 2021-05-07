@@ -8,7 +8,7 @@
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
-#include <Esp32_os.h>
+#include <esp32_os.h>
 
 #define TIME_CONVERSION__TO_USECS	10
 
