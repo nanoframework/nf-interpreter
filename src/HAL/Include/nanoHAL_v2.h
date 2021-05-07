@@ -16,6 +16,10 @@
 #include "nanoHAL_Boot.h"
 #include <nanoVersion.h>
 
+#if defined(_WIN32)
+#include <crtdbg.h>
+#endif
+
 typedef uint32_t GPIO_PIN;
 
 typedef enum SYSTEM_STATE
@@ -179,7 +183,7 @@ extern "C"
 
     void nanoHAL_Initialize_C();
     void nanoHAL_Uninitialize_C();
-    void HeapLocation_C(unsigned char** baseAddress, unsigned int* sizeInBytes);
+    void HeapLocation_C(unsigned char **baseAddress, unsigned int *sizeInBytes);
 
     // Call to the external memory configuration and initialization function
     // If a target has external memory it has to provide the implementation for it.
@@ -212,9 +216,9 @@ extern "C"
 {
 #endif
 
-    void* platform_malloc(size_t size);
-    void platform_free(void* ptr);
-    void* platform_realloc(void* ptr, size_t size);
+    void *platform_malloc(size_t size);
+    void platform_free(void *ptr);
+    void *platform_realloc(void *ptr, size_t size);
 
 #ifdef __cplusplus
 }
@@ -266,7 +270,7 @@ extern "C"
 {
 #endif
 
-    void HAL_Assert(const char* Func, int Line, const char* File);
+    void HAL_Assert(const char *Func, int Line, const char *File);
     // HAL_AssertEx is to be defined at platform layer
     void HAL_AssertEx();
 
@@ -290,7 +294,7 @@ extern "C"
 #else
 #if defined(_DEBUG)
 #if !defined _ASSERTE
-//#error
+#define ASSERT(i) _ASSERTE(i)
 #endif
 #define ASSERT(i)        _ASSERTE(i)
 #define _SIDE_ASSERTE(i) _ASSERTE(i)
@@ -336,13 +340,13 @@ extern "C"
 
 #if !defined(BUILD_RTM)
 
-    void debug_printf(const char* format, ...);
+    void debug_printf(const char *format, ...);
 
 #else
 
-    __inline void debug_printf(const char* format, ...)
-    {
-    }
+__inline void debug_printf(const char *format, ...)
+{
+}
 
 #endif // !defined(BUILD_RTM)
 
