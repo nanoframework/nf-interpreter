@@ -1,8 +1,8 @@
 # Changelog
 
-## [v1.6.4.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.3) (2021-05-07)
+## [v1.6.4.5](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.5) (2021-05-07)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.5.0.103...v1.6.4.3)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.3...v1.6.4.5)
 
 **Implemented enhancements:**
 
@@ -849,6 +849,10 @@
 - Update corlib\_native\_System\_Number.cpp [\#550](https://github.com/nanoframework/nf-interpreter/pull/550)
 - Update corlib\_native\_System\_Number.cpp [\#549](https://github.com/nanoframework/nf-interpreter/pull/549)
 - Update targetHAL\_Time.cpp [\#548](https://github.com/nanoframework/nf-interpreter/pull/548)
+
+## [v1.6.4.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.3) (2021-05-07)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.5.0.103...v1.6.4.3)
 
 ## [v1.5.0.103](https://github.com/nanoframework/nf-interpreter/tree/v1.5.0.103) (2020-10-14)
 
