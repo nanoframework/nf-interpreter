@@ -748,11 +748,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation,
     NULL,
     Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation,
-    NULL,
     Library_nanoFramework_Graphics_nanoFramework_UI_Ink::SetInkRegion___STATIC__VOID__U4__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkUIBitmap,
     Library_nanoFramework_Graphics_nanoFramework_UI_Ink::ResetInkRegion___STATIC__VOID,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -939,7 +936,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
 {
     "nanoFramework.Graphics",
-    0xFC87C8D9,
+    0xA77924CB,
     method_lookup,
     { 100, 0, 0, 2 }
 };
