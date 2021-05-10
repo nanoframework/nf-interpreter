@@ -39,6 +39,7 @@ Invoke-Expression $PSScriptRoot\install-cmake.ps1
 Invoke-Expression "$PSScriptRoot\install-arm-gcc-toolchain.ps1 $localCommandArgs"
 Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $localCommandArgs"
 Invoke-Expression "$PSScriptRoot\install-nf-hex2dfu.ps1 $localCommandArgs"
+Invoke-Expression "$PSScriptRoot\install-srecord.ps1 $localCommandArgs"
 Invoke-Expression "$PSScriptRoot\install-openocd.ps1 $localCommandArgs"
 
 <#
