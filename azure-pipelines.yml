@@ -551,7 +551,7 @@ jobs:
     
   # publish artifacts (only possible if this is not a PR originated on a fork)
   - task: PublishBuildArtifacts@1
-    condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+    condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
@@ -560,7 +560,7 @@ jobs:
 
   # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), ne( variables['StartReleaseCandidate'], true ) )
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
