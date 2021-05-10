@@ -71,7 +71,7 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch stable_20.3.x https://github.com/nanoframework/chibios.git ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git ./sources/ChibiOs-Contrib
 # Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.23.0 https://github.com/nanoframework/mbedtls.git ./sources/mbedtls \
+RUN git clone --branch mbedtls-2.26.0 https://github.com/nanoframework/mbedtls.git ./sources/mbedtls \
     && git clone --branch R0.14 https://github.com/abbrev/fatfs.git ./sources/fatfs
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git ./sources/FreeRTOS \
