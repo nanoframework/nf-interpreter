@@ -38,9 +38,8 @@ struct Library_nf_native_system_math_System_Math
     NANOCLR_NATIVE_DECLARE(Truncate___STATIC__R8__R8);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math;
 
-#endif  //_NF_NATIVE_SYSTEM_MATH_H_
+#endif //_NF_NATIVE_SYSTEM_MATH_H_
