@@ -65,6 +65,7 @@
     <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_SpinWait.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
