@@ -83,7 +83,7 @@ HRESULT Library_corlib_native_System_Threading_SpinWait::Spin(CLR_RT_StackFrame 
 
     longRunning = timeoutMiliseconds > (CLR_INT64)CLR_RT_Thread::c_TimeQuantum_Milliseconds;
 
-    if(longRunning)
+    if (longRunning)
     {
         // this is longer than the thread time quantum
         hbTimeout.SetInteger(timeoutMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
@@ -94,13 +94,14 @@ HRESULT Library_corlib_native_System_Threading_SpinWait::Spin(CLR_RT_StackFrame 
         if (stack.m_customState == 1)
         {
             // bump custom state
-            stack.m_customState = 2;            
+            stack.m_customState = 2;
         }
 
         while (eventResult)
         {
             // non-blocking wait allowing other threads to run while we wait for the timeout to occur
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_NoEvent, eventResult));
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_NoEvent, eventResult));
 
             // don't bother checking the result, it will be a timeout for sure
         }
