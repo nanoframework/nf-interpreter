@@ -417,6 +417,24 @@ HRESULT Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4(
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__I4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_INT32 iterations = stack.m_arguments[0].NumericByRef().s4;
+
+    // basically do nothing, except loop until reaching 0
+    for (; iterations == 0; iterations--)
+    {
+#ifndef _WIN32
+        __asm("nop");
+#endif
+    }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread(
     CLR_RT_StackFrame &stack)
 {

@@ -737,6 +737,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_ManualResetEvent::Set___BOOLEAN,
     Library_corlib_native_System_Threading_Monitor::Enter___STATIC__VOID__OBJECT,
     Library_corlib_native_System_Threading_Monitor::Exit___STATIC__VOID__OBJECT,
+    Library_corlib_native_System_Threading_SpinWait::SpinOnce___VOID,
+    Library_corlib_native_System_Threading_SpinWait::SpinUntil___STATIC__VOID__SystemTimeSpan,
+    Library_corlib_native_System_Threading_SpinWait::SpinUntil___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::_ctor___VOID__SystemThreadingThreadStart,
     Library_corlib_native_System_Threading_Thread::Start___VOID,
     Library_corlib_native_System_Threading_Thread::Abort___VOID,
@@ -752,6 +755,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemThreadingThreadState,
     Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4,
     NULL,
+    Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread,
     NULL,
     NULL,
@@ -1412,6 +1416,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemThreadingThreadState,
     Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4,
     NULL,
+    Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread,
     NULL,
     NULL,
@@ -1469,18 +1474,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x61924053,
+    0x20298F9D,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x79B0DEE8,
+    0xA8C95A92,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 7 }
+    { 100, 5, 0, 8 }
 };
 
 // clang-format on
