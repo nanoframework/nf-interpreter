@@ -1046,6 +1046,17 @@ struct Library_corlib_native_System_Threading_Monitor
     //--//
 };
 
+struct Library_corlib_native_System_Threading_SpinWait
+{
+    NANOCLR_NATIVE_DECLARE(SpinOnce___VOID);
+    NANOCLR_NATIVE_DECLARE(SpinUntil___STATIC__VOID__SystemTimeSpan);
+    NANOCLR_NATIVE_DECLARE(SpinUntil___STATIC__VOID__I4);
+
+    //--//
+
+    static HRESULT Spin(CLR_RT_StackFrame &stack, bool isTimeSpan);
+};
+
 struct Library_corlib_native_System_Threading_Thread
 {
 
@@ -1069,6 +1080,7 @@ struct Library_corlib_native_System_Threading_Thread
     NANOCLR_NATIVE_DECLARE(Join___BOOLEAN__SystemTimeSpan);
     NANOCLR_NATIVE_DECLARE(get_ThreadState___SystemThreadingThreadState);
     NANOCLR_NATIVE_DECLARE(Sleep___STATIC__VOID__I4);
+    NANOCLR_NATIVE_DECLARE(SpinWait___STATIC__VOID__I4);
     NANOCLR_NATIVE_DECLARE(get_CurrentThread___STATIC__SystemThreadingThread);
 #if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetDomain___STATIC__SystemAppDomain);
