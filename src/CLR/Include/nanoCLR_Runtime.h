@@ -3357,6 +3357,9 @@ extern bool g_CLR_RT_fBadStack;
 //--//
 typedef enum Events
 {
+    // this event is to be used when there is no event to actually wait for
+    Event_NoEvent = 0x00000001,
+
     Event_SerialPortIn = 0x00000002,
     Event_SerialPortOut = 0x00000004,
     Event_EndPoint = 0x00000008,
