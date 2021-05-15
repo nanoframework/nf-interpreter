@@ -71,6 +71,7 @@ endif()
 # check if build was requested with a specifc ChibiOS version
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(RTOS_VERSION "stable_20.3.x")
 endif()
 
@@ -167,6 +168,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     # check if build was requested with a specifc FatFS version
     if(FATFS_VERSION_EMPTY)
         # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
         set(FATFS_VERSION_TAG "R0.14")
     else()
         # set version 
@@ -224,6 +226,7 @@ if(NF_SECURITY_MBEDTLS)
     endif()
 
     # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
 
     # set options for mbed TLS

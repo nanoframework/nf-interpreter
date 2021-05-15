@@ -45,6 +45,7 @@ endif()
 # check if build was requested with a specifc FreeRTOS version
 if(RTOS_VERSION_EMPTY)
     # no FreeRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(RTOS_VERSION "V10.4.1-kernel-only")
 endif()
 
@@ -101,7 +102,8 @@ endif()
 
 # check if build was requested with a specifc CMSIS version
 if(CMSIS_VERSION_EMPTY)
-    # no CMSIS version actualy specified, must be empty which is fine, we'll default to a known good version
+    # no CMSIS version actualy specified, must be empty which is fine, we'll default to a known good version*
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(CMSIS_GIT_TAG "5.5.1")
 else()
     # set Git tag

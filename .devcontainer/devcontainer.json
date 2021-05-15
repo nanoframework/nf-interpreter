@@ -1,6 +1,13 @@
 {
 	"name": "nanoFramework",
-	"dockerFile": "Dockerfile",
+	// Adjust this file to chose the platform you want using the prebuild containers
+	// - Dockerfile.All = you can build anything but it's a very large container
+	// - Dockerfile.AzureRTOS = for AzureRTOS targets
+	// - Dockerfile.ChibiOS = for ChibiOS based targets (ex: STM32, Netduino, Orgpal)
+	// - Dockerfile.ESP32 = for ESP32 targets
+	// - Dockerfile.TI = for TI targets
+	// If you prefer, you can use the source files and adjust them they are located, with the same names in ./sources. This will alow you to customize them and add anything you may need on top.
+	"dockerFile": "Dockerfile.ChibiOS",
 	"context": ".",
 	"mounts": [
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
@@ -29,8 +36,8 @@
         "twxs.cmake",
         "ms-vscode.cmake-tools"
 	],
-	// Make sure we pull all the repos with the latest changes
-	"postAttachCommand": "/usr/local/git-pull-repos.sh"
+	// You can pull all the repos with the latest changes, this is only valid if you are using the ./sources/Dockerfile.all containers
+	// "postAttachCommand": "/usr/local/git-pull-repos.sh"
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Use 'postCreateCommand' to run commands after the container is created.
