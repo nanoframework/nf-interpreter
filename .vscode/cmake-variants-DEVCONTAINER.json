@@ -306,7 +306,6 @@
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.Device.Spi": "ON",
           "API_Windows.Devices.Spi": "OFF",
-          "API_Windows.Networking.Sockets": "OFF",
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON"
@@ -348,7 +347,6 @@
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.Device.Spi": "ON",
           "API_Windows.Devices.Spi": "ON",
-          "API_Windows.Networking.Sockets": "OFF",
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
