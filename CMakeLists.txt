@@ -504,7 +504,8 @@ endif()
 # and/or manage other APIs that are required
 
 if( API_nanoFramework.Devices.OneWire OR
-    API_Windows.Devices.SerialCommunication)
+    API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports)
 
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 
@@ -644,6 +645,7 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)

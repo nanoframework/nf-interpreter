@@ -27,6 +27,7 @@ option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
+option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
@@ -313,6 +314,12 @@ endif()
 if(API_Windows.Devices.SerialCommunication)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
+endif()
+
+# API_System.IO.Ports
+if(API_System.IO.Ports)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.IO.Ports")
 endif()
 
 # Windows.Devices.Spi

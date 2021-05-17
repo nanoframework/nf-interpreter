@@ -53,7 +53,8 @@
           "API_Windows.Devices.I2c": "ON",
           "API_System.Device.I2c": "ON",
           "API_Windows.Devices.Pwm": "ON",
-          "API_Windows.Devices.SerialCommunication": "ON"
+          "API_Windows.Devices.SerialCommunication": "ON",
+          "API_System.IO.Ports": "ON"
         }
       }
     }
