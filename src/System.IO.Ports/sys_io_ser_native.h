@@ -102,6 +102,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     static const int FIELD___stream = 16;
     static const int FIELD___syncLock = 17;
     static const int FIELD___newLine = 18;
+    static const int FIELD___hasBeenOpened = 19;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);

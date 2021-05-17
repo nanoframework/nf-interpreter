@@ -555,7 +555,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         }
 
         if (uart_set_pin(uart_num, txPin, rxPin, rtsPin, ctsPin) != ESP_OK)
-        {
+        {            
             ESP_LOGE(TAG, "Failed to set UART pins");
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
