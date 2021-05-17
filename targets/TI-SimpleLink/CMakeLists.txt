@@ -139,7 +139,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     endif()
 
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(TI_SL_CC13x2_26x2_SDK_TAG "4.40.04.04" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
+    set(TI_SL_CC13x2_26x2_SDK_TAG "5.10.00.48" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
 
     if(NO_TI_SL_CC13x2_26x2_SDK_SOURCE)
         # no TI SimpleLink CC13x2_26x2 SDK source specified, download it from our repo
@@ -190,7 +190,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     if(TI_SYSCONFIG_VERSION_EMPTY)
         # no TI SysConfig version actualy specified, must be empty which is fine, we'll default to a known good version
             # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(TI_SYSCONFIG_VERSION_TAG "1.7.0")
+        set(TI_SYSCONFIG_VERSION_TAG "1.8.1")
     else()
         # set Git tag
         set(TI_SYSCONFIG_VERSION_TAG "${TI_SYSCONFIG_VERSION}")

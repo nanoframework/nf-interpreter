@@ -12,9 +12,6 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 
-// board Header files
-#include <ti_drivers_config.h>
-
 #include <ti/drivers/gpio/GPIOCC26XX.h>
 // clang-format off
 #include DeviceFamily_constructPath(inc/hw_prcm.h)
@@ -60,6 +57,10 @@ int main(void)
     // Call board init functions
     Board_init();
 
+    GPIO_init();
+    ADC_init();
+    ConfigUART();
+
     // setup Task thread
     Task_Params_init(&taskParams);
     taskParams.stackSize = THREADSTACKSIZE;
@@ -90,10 +91,6 @@ int main(void)
         while (1)
             ;
     }
-
-    GPIO_init();
-    ADC_init();
-    ConfigUART();
 
     BIOS_start();
 
