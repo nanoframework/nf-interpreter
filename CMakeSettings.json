@@ -140,6 +140,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.IO.Ports",
+          "value": "ON"
+        },        
+        {
           "name": "API_Windows.Devices.Adc",
           "value": "ON"
         },
@@ -409,6 +413,10 @@
         },
         {
           "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.IO.Ports:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

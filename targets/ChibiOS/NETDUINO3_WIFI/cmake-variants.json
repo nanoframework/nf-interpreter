@@ -54,6 +54,7 @@
           "API_System.Device.I2c": "ON",
           "API_Windows.Devices.Pwm": "ON",
           "API_Windows.Devices.SerialCommunication": "ON",
+          "API_System.IO.Ports": "ON",
           "API_Windows.Devices.Adc": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.ResourceManager": "ON",
