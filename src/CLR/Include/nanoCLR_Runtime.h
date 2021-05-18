@@ -1529,6 +1529,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_NotImplementedException;
     CLR_RT_TypeDef_Index m_NullReferenceException;
     CLR_RT_TypeDef_Index m_OutOfMemoryException;
+    CLR_RT_TypeDef_Index m_TimeoutException;
     CLR_RT_TypeDef_Index m_ObjectDisposedException;
     CLR_RT_TypeDef_Index m_ConstraintException;
     CLR_RT_TypeDef_Index m_WatchdogException;

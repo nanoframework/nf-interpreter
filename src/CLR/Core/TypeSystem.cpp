@@ -2794,6 +2794,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System", "NotImplementedException", m_NotImplementedException),
     TIL("System", "NullReferenceException", m_NullReferenceException),
     TIL("System", "OutOfMemoryException", m_OutOfMemoryException),
+    TIL("System", "TimeoutException", m_TimeoutException),
     TIL("System", "ObjectDisposedException", m_ObjectDisposedException),
     TIL("System.Threading", "ThreadAbortException", m_ThreadAbortException),
     TIL("nanoFramework.Runtime.Native", "ConstraintException", m_ConstraintException),
