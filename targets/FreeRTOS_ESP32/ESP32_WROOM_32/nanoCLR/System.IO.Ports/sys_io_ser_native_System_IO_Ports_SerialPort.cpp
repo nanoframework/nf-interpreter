@@ -908,16 +908,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
             if (!eventResult)
             {
                 // event timeout
-
-                // compute how many bytes to read                
-                // take InputStreamOptions_Partial as default and read requested quantity or what's available
-                bytesToRead = count;
-
-                if (count > palUart->RxRingBuffer.Length())
-                {
-                    // need to adjust because there aren't enough bytes available
-                    bytesToRead = palUart->RxRingBuffer.Length();
-                }
+                NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
         }
     }
