@@ -100,6 +100,4 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
     { 100, 1, 1, 2 }
 };
 
-
-
 // clang-format on

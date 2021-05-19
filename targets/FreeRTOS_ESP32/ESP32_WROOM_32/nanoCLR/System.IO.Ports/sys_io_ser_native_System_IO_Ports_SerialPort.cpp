@@ -628,15 +628,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
-        // get pointer to outputStream field
-        // CLR_RT_HeapBlock *outputStream = pThis[FIELD___outputStream].Dereference();
-        // get pointer to _unstoredBufferLength field and udpate field value
-        // outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::
-        //                  FIELD___unstoredBufferLength]
-        //     .NumericByRef()
-        //     .s4 = palUart->TxRingBuffer.Length();
-
         // null pointers and vars
         pThis = NULL;
     }
@@ -803,7 +794,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4( 
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame &stack )
 {
-        NANOCLR_HEADER();
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array *dataBuffer;
     NF_PAL_UART *palUart = NULL;
@@ -813,7 +804,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     size_t count = 0;
     size_t bytesRead = 0;
     size_t bytesToRead = 0;
-    int16_t readOffset = 0;     
+    size_t readOffset = 0;     
     uart_port_t uart_num;
 
     int64_t *timeoutTicks;
