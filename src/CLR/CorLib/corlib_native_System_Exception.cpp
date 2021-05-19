@@ -27,6 +27,7 @@ static const ExceptionLookup c_ExceptionLookup[] = {
     EL(CLR_E_NOTIMPL, m_NotImplementedException),
     EL(CLR_E_NULL_REFERENCE, m_NullReferenceException),
     EL(CLR_E_OUT_OF_MEMORY, m_OutOfMemoryException),
+    EL(CLR_E_TIMEOUT, m_TimeoutException),
     EL(CLR_E_OBJECT_DISPOSED, m_ObjectDisposedException),
     EL(CLR_E_WATCHDOG_TIMEOUT, m_WatchdogException),
 
