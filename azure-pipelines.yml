@@ -22,6 +22,9 @@ jobs:
   pool:
     vmImage: 'windows-2019'
 
+  variables:
+    DOTNET_NOLOGO: true
+
   steps:
   - checkout: self
     fetchDepth: 1
@@ -296,6 +299,7 @@ jobs:
         NeedsSRECORD: true
 
   variables:
+    DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
@@ -345,6 +349,7 @@ jobs:
         PackageName: ESP32_LILYGO
 
   variables:
+    DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('ESP32_versioncounter', 0)]
     ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools\xtensa-esp32-elf
@@ -390,6 +395,7 @@ jobs:
         NeedsSRECORD: true
 
   variables:
+    DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('NXP_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
@@ -437,6 +443,7 @@ jobs:
         GccArm_Version:
 
   variables:
+    DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('TI_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
@@ -465,6 +472,7 @@ jobs:
     vmImage: 'windows-2019'
 
   variables:
+    DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('WIN32_versioncounter', 0)]
@@ -509,7 +517,7 @@ jobs:
 
   - task: NuGetCommand@2
     condition: succeeded()
-    displayName: Pack managed helpers NuGet
+    displayName: Pack nanoCLR WIN32
     inputs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
