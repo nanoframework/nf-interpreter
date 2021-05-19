@@ -5,35 +5,36 @@
 
 #include <hal.h>
 #include <nanoHAL.h>
-#include "win_dev_serial_native_target.h"
+#include "sys_io_ser_native_target.h"
 
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
 /////////////////////////////////////////////////////////
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-NF_PAL_UART Uart1_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-NF_PAL_UART Uart2_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-NF_PAL_UART Uart3_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-NF_PAL_UART Uart4_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-NF_PAL_UART Uart5_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-NF_PAL_UART Uart6_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-NF_PAL_UART Uart7_PAL;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-NF_PAL_UART Uart8_PAL;
-#endif
+// TODO: uncomment when Windows.Deveices.SerialCommunication will be removed
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+// NF_PAL_UART Uart1_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+// NF_PAL_UART Uart2_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+// NF_PAL_UART Uart3_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+// NF_PAL_UART Uart4_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+// NF_PAL_UART Uart5_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+// NF_PAL_UART Uart6_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+// NF_PAL_UART Uart7_PAL;
+// #endif
+// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+// NF_PAL_UART Uart8_PAL;
+// #endif
 
 // This callback is invoked when a transmission buffer has been completely read by the driver.
 static void TxEnd1(UARTDriver *uartp)
@@ -527,15 +528,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         // clear bits for stop bits setting
         palUart->Uart_cfg.cr2 &= ~USART_CR2_STOP;
 
-        switch ((SerialStopBitCount)pThis[FIELD___stopBits].NumericByRef().s4)
+        switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
         {
-            case SerialStopBitCount_One:
+            case StopBits_One:
                 // already set with the above
                 break;
-            case SerialStopBitCount_OnePointFive:
+            case StopBits_OnePointFive:
                 palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1 + USART_CR2_STOP_0;
                 break;
-            case SerialStopBitCount_Two:
+            case StopBits_Two:
                 palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1;
                 break;
         }
@@ -699,17 +700,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
-        // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
-        // get pointer to outputStream field
-        // CLR_RT_HeapBlock *outputStream =
-        //    pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream]
-        //        .Dereference();
-        // get pointer to _unstoredBufferLength field and udpate field value
-        // outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::
-        //                 FIELD___unstoredBufferLength]
-        //    .NumericByRef()
-        //    .s4 = palUart->TxRingBuffer.Length();
-
         // null pointers and vars
         pThis = NULL;
     }
@@ -782,8 +772,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4( 
 #endif
     }
 
-    // setup timeout from _writetTimeout field
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(pThis[FIELD___writeTimeout] * TIME_CONVERSION__TO_MILLISECONDS, timeoutTicks));
+    CLR_RT_HeapBlock hbTimeout;            
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    // setup timeout
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // push dummy length value onto the eval stack
     // this is going to be used to store how many bytes where buffered to Tx
@@ -878,13 +870,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     NF_PAL_UART *palUart = NULL;
 
     uint8_t *data;
-    size_t dataLength = 0;
 
     size_t count = 0;
     size_t bytesRead = 0;
+    size_t readOffset = 0;  
     size_t bytesToRead = 0;
-
-    InputStreamOptions options = InputStreamOptions_None;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
@@ -907,15 +897,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     // get a the pointer to the array by using the first element of the array
     data = dataBuffer->GetElement(readOffset);
 
-    // get the length of the data buffer
-    dataLength = dataBuffer->m_numOfElements;
-
     // get how many bytes are requested to read
     count = stack.Arg3().NumericByRef().s4;
-
-    // get the InputStreamOptions option
-    //we don't have this option anymore, this was a Windows.Devices one (InputStreamOptions)stack.Arg3().NumericByRef().s4;
-    options = InputStreamOptions_ReadAhead;
 
     // Choose the driver for this SerialDevice
     switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
@@ -962,31 +945,16 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
 #endif
     }
 
-    // setup timeout from the _readtimeout heap block
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(pThis[FIELD___readTimeout]  * TIME_CONVERSION__TO_MILLISECONDS, timeoutTicks));
+    CLR_RT_HeapBlock hbTimeout;            
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    // setup timeout
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // figure out what's available in the Rx ring buffer
     if (palUart->RxRingBuffer.Length() >= count)
     {
         // read from Rx ring buffer
         bytesToRead = count;
-
-        // is the read ahead option enabled?
-        if (options == InputStreamOptions_ReadAhead)
-        {
-            // yes
-            // check how many bytes we can store in the buffer argument
-            if (dataLength < palUart->RxRingBuffer.Length())
-            {
-                // read as many bytes has the buffer can hold
-                bytesToRead = dataLength;
-            }
-            else
-            {
-                // read everything that's available in the ring buffer
-                bytesToRead = palUart->RxRingBuffer.Length();
-            }
-        }
 
         // we have enough bytes, skip wait for event
         eventResult = false;
@@ -1035,35 +1003,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
             if (!eventResult)
             {
                 // event timeout
-
-                // compute how many bytes to read
-                // considering the InputStreamOptions read ahead option
-                if (options == InputStreamOptions_ReadAhead)
-                {
-                    // yes
-                    // check how many bytes we can store in the buffer argument
-                    if (dataLength < palUart->RxRingBuffer.Length())
-                    {
-                        // read as many bytes has the buffer can hold
-                        bytesToRead = dataLength;
-                    }
-                    else
-                    {
-                        // read everything that's available in the ring buffer
-                        bytesToRead = palUart->RxRingBuffer.Length();
-                    }
-                }
-                else
-                {
-                    // take InputStreamOptions_Partial as default and read requested quantity or what's available
-                    bytesToRead = count;
-
-                    if (count > palUart->RxRingBuffer.Length())
-                    {
-                        // need to adjust because there aren't enough bytes available
-                        bytesToRead = palUart->RxRingBuffer.Length();
-                    }
-                }
+                NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
         }
     }
