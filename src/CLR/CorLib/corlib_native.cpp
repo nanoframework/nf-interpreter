@@ -1488,7 +1488,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 #endif
 
     method_lookup,
-    { 100, 5, 0, 8 }
+    { 100, 5, 0, 9 }
 };
 
 // clang-format on
