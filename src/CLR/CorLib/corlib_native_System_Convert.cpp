@@ -16,26 +16,29 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 
 		char* str = (char*)stack.Arg0().RecoverString();
         signed int radix = stack.Arg4().NumericByRef().s4;
-
-#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
-        // suport for conversion from any base
-        char* endptr = NULL;
-
         bool isUInt64 = false;
 
         bool isSigned = (bool)stack.Arg1().NumericByRef().u1;
         long long minValue = stack.Arg2().NumericByRef().s8;
         long long maxValue = stack.Arg3().NumericByRef().s8;
-        
-        // UInt64? => use also strtoull the result will be casted to Int64
-        if (minValue == 0 && maxValue == 0) {
+        if (minValue == 0 && maxValue == 0)
+        {
             isUInt64 = true;
             isSigned = false;
+        }
+        //allow spaces before digits
+        while (*str == ' ') 
+        {
+            str++;
+        }
+        char* endptr = NULL;
 
-            //allow spaces before digits
-            while (*str == ' ') {
-                str++;
-            }
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+        // suport for conversion from any base
+
+        
+        // UInt64? => use also strtoull the result will be casted to Int64
+        if (isUint64)
 
             //UInt64 can't begin with minus
             if (*str == '-' ) {
@@ -86,30 +89,75 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
     NANOCLR_NOCLEANUP();
 #else
         // support for conversion from base 10 and 16 (partial)
-
         if(radix == 10)
         {
             // conversion from base 10
-
+            bool negReturnExpected = false;
             // check for minus sign
-            if(*str == '-')
+            if (*str == '-')
             {
-                // call GetIntegerPart() in 'guess' mode by throwing a crazy number for the length
-                result = GetIntegerPart((str + 1), 99);
-
-                // is negative
-                result *= -1;
+                if (isSigned == false)
+                {
+                    // Can not use negative string with unsigned interface.  This exception is just fail safe - the
+                    // callers of this native method are checking and throwing a better formatted exception
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                }
+                negReturnExpected = true;
+                str++;
             }
-            // check for plus sign
-            else if(*str == '+')
+            else if (*str == '+')
             {
-                // call GetIntegerPart() in 'guess' mode by throwing a crazy number for the length
-                result = GetIntegerPart((str + 1), 99);
+                str++;
+            }
+            uint64_t intPart = 0;
+            uint64_t lastValue = 0;
+            for (int i = 0; i < 99; i++)  // guess at no more than 99 characters
+            {
+                if (*str < '0' 
+                    || *str > '9')
+                {
+                    endptr = str;
+                    // allow spaces after digits
+                    while (*endptr == ' ')
+                    {
+                        endptr++;
+                    }
+                    // should reach end of string no aditional chars
+                    if (*endptr == 0)
+                    {
+                        break;
+                    }
+                    NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);   // non-numeric (and not trailing space) 
+                }
+                intPart = (intPart * 10) + (*str - '0');  // advance the digits and add the current number
+                if (intPart < lastValue)  // the above operation overflowed the value
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                }
+                lastValue = intPart;
+                str++;
+                if (*str == '\0')
+                {
+                    break;
+                }
+            }
+            // intPart now holds a positive number from the string. 
+            result = (int64_t)intPart;   // this MAY have made the result negative by overflowing the buffer - which we do for uint64 logic
+            if (negReturnExpected)
+            {
+                result *= -1; 
+                if (result < minValue)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                }
             }
             else
             {
-                // call GetIntegerPart() in 'guess' mode by throwing a crazy number for the length
-                result = GetIntegerPart(str, 99);
+                if (isUInt64 == false                       // result will be negative for large uints, and we checked for overflow above
+                    && result > maxValue)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+                }
             }
 
         }
@@ -117,6 +165,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         {
             // conversion from base 16
             result = GetIntegerFromHexString(str);
+            //??? check against min/max?  Signed possible?  
         }
         else
         {
@@ -125,8 +174,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         }
 
         stack.SetResult_I8(result);
+        NANOCLR_NOCLEANUP();
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+
+    //NANOCLR_NOCLEANUP_NOLABEL();
 #endif // defined(SUPPORT_ANY_BASE_CONVERSION)
     
 }
@@ -300,17 +351,14 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             if (hasMinusExponentialSign || hasPlusExponentialSign) exponentialSign++;
             // get the exponential part
             int exponent = GetIntegerPart((str+exponentialSign+1), (length-exponentialSign-1));
-            // each time multiply or divide by 10
-            for (int i = 0; i < exponent; i++)
+            double outExponent = pow(10, exponent);
+           if (hasMinusExponentialSign)
             {
-                if (hasMinusExponentialSign)
-                {
-                    returnValue /= 10;
-                }
-                else
-                {
-                    returnValue *= 10;
-                }
+               returnValue = returnValue / outExponent;
+            }
+            else
+            {
+               returnValue = returnValue * outExponent;
             }
         }
 

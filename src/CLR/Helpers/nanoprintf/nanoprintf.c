@@ -3,6 +3,16 @@
 // Portions Copyright (c) 2001, 2002 Georges Menie. All rights reserved.
 // Portions Copyright (c) 2009-2013 Daniel D Miller. All rights reserved.
 // See LICENSE file in the project root for full license information.
+// 
+// Notes on this implementation: This is a small/fast implementation of printf variants
+// for double (floating) numbers.  It is a compromise of size and speed over capability.
+// In general the algorithm used in this code can only format a small range of the possible
+// values that can be fit in a double.  A double can hold roughly +/-1e308, but the code in 
+// this program uses shifting of 64 bits, so a range of roughly +/-1e18 (2^63). The method
+// npf_dsplit_abs supports this limitation and will return a value of "oor" (out-of-range) 
+// for numbers over 2^63.  It will return zero for any numbers below 2^-63.
+// 
+// See the information here: http://0x80.pl/notesen/2015-12-29-float-to-string.html 
 //
 
 /*
