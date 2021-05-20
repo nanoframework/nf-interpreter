@@ -6,6 +6,8 @@
 #ifndef _SYS_IO_SER_NATIVE_
 #define _SYS_IO_SER_NATIVE_
 
+#define UART_INTERRUPT_PRIO 4U
+
 #include "FreeRTOS.h"
 #include <nanoHAL.h>
 #include <target_windows_devices_serialcommunication_config.h>
