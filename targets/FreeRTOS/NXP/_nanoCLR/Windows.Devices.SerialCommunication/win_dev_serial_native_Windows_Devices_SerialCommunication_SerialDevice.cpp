@@ -65,84 +65,86 @@ static void vWEvent(void *pvParameters)
     }
 }
 
-static void UART_Handle(LPUART_Type *base, uint8_t uartNum)
-{
-    NATIVE_INTERRUPT_START
-    uint32_t status;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+// MOVED TO sys_io_ser_native_System_IO_Ports_SerialPort
+// static void UART_Handle(LPUART_Type *base, uint8_t uartNum)
+// {
+//     NATIVE_INTERRUPT_START
+//     uint32_t status;
+//     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+//     NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
-    status = LPUART_GetStatusFlags(base);
+//     status = LPUART_GetStatusFlags(base);
 
-    if (kLPUART_RxOverrunFlag & status)
-    {
+//     if (kLPUART_RxOverrunFlag & status)
+//     {
 
-        // Clear overrun flag, otherwise the RX does not work.
-        base->STAT |= 1U << LPUART_STAT_OR_SHIFT;
-    }
+//         // Clear overrun flag, otherwise the RX does not work.
+//         base->STAT |= 1U << LPUART_STAT_OR_SHIFT;
+//     }
 
-    if (kLPUART_RxDataRegFullFlag & status)
-    {
-        char byte = LPUART_ReadByte(base);
-        // push char to ring buffer
-        // don't care about the success of the operation, if it's full we are droping the char anyway
-        palUart->RxRingBuffer.Push((uint8_t)byte);
+//     if (kLPUART_RxDataRegFullFlag & status)
+//     {
+//         char byte = LPUART_ReadByte(base);
+//         // push char to ring buffer
+//         // don't care about the success of the operation, if it's full we are droping the char anyway
+//         palUart->RxRingBuffer.Push((uint8_t)byte);
 
-        // is there a read operation going on?
-        if (palUart->RxBytesToRead > 0)
-        {
-            // check if the requested bytes are available in the buffer
-            if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
-            {
-                // reset Rx bytes to read count
-                palUart->RxBytesToRead = 0;
+//         // is there a read operation going on?
+//         if (palUart->RxBytesToRead > 0)
+//         {
+//             // check if the requested bytes are available in the buffer
+//             if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
+//             {
+//                 // reset Rx bytes to read count
+//                 palUart->RxBytesToRead = 0;
 
-                // Notify task that we want to receive data.
-                xTaskNotifyFromISR(palUart->xRTaskToNotify, 0x02, eSetBits, &xHigherPriorityTaskWoken);
-            }
-        }
-    }
+//                 // Notify task that we want to receive data.
+//                 xTaskNotifyFromISR(palUart->xRTaskToNotify, 0x02, eSetBits, &xHigherPriorityTaskWoken);
+//             }
+//         }
+//     }
 
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-    NATIVE_INTERRUPT_END
-}
+//     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+//     NATIVE_INTERRUPT_END
+// }
 
 // Override of the default MIMXRT1060 UART interrupt routines to simple UART_Handle function, which
 // reads 1 byte of input data to RTOS stream buffer, if theres buffer overflow it drops data and clears interrupts.
 
-extern "C"
-{
-    // LPUART8 is currently used for debugging, disable it or will collide with debugger
-    // void LPUART1_IRQHandler(void) { UART_Handle(LPUART1, 1); }
-    void LPUART2_IRQHandler(void)
-    {
-        UART_Handle(LPUART2, 2);
-    }
-    void LPUART3_IRQHandler(void)
-    {
-        UART_Handle(LPUART3, 3);
-    }
-    void LPUART4_IRQHandler(void)
-    {
-        UART_Handle(LPUART4, 4);
-    }
-    void LPUART5_IRQHandler(void)
-    {
-        UART_Handle(LPUART5, 5);
-    }
-    void LPUART6_IRQHandler(void)
-    {
-        UART_Handle(LPUART6, 6);
-    }
-    void LPUART7_IRQHandler(void)
-    {
-        UART_Handle(LPUART7, 7);
-    }
-    void LPUART8_IRQHandler(void)
-    {
-        UART_Handle(LPUART8, 8);
-    }
-}
+// MOVED TO sys_io_ser_native_System_IO_Ports_SerialPort
+// extern "C"
+// {
+//     // LPUART8 is currently used for debugging, disable it or will collide with debugger
+//     // void LPUART1_IRQHandler(void) { UART_Handle(LPUART1, 1); }
+//     void LPUART2_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART2, 2);
+//     }
+//     void LPUART3_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART3, 3);
+//     }
+//     void LPUART4_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART4, 4);
+//     }
+//     void LPUART5_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART5, 5);
+//     }
+//     void LPUART6_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART6, 6);
+//     }
+//     void LPUART7_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART7, 7);
+//     }
+//     void LPUART8_IRQHandler(void)
+//     {
+//         UART_Handle(LPUART8, 8);
+//     }
+// }
 
 // Deinitialize serial port and allocated free memory
 HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID(
