@@ -190,9 +190,8 @@ void uart_event_task_sys(void *pvParameters)
                             //  check if callbacks are registered so this is called only if there is anyone listening
                             //  otherwise don't bother
                             if (palUart
-                                    ->SerialDevice
-                                        [Library_sys_io_ser_native_System_IO_Ports_SerialPort::
-                                             FIELD___callbacksDataReceivedEvent]
+                                    ->SerialDevice[Library_sys_io_ser_native_System_IO_Ports_SerialPort::
+                                                       FIELD___callbacksDataReceivedEvent]
                                     .Dereference() != NULL)
                             {
                                 PostManagedEvent(
@@ -247,7 +246,7 @@ bool IsLongRunningOperation_sys(uint32_t bufferSize, uint32_t baudRate, uint32_t
     }
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -279,7 +278,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -297,7 +296,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -366,7 +365,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) != pdPASS)
+    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
+        pdPASS)
     {
         ESP_LOGE(TAG, "Failed to start UART events task");
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
@@ -378,7 +378,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -424,7 +424,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
         // parity
         switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
-        {            
+        {
             default:
             case Parity_None:
                 uart_config.parity = UART_PARITY_DISABLE;
@@ -555,7 +555,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         }
 
         if (uart_set_pin(uart_num, txPin, rxPin, rtsPin, ctsPin) != ESP_OK)
-        {            
+        {
             ESP_LOGE(TAG, "Failed to set UART pins");
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
@@ -566,7 +566,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -596,7 +597,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
         // get the size of the buffer
         length = (size_t)dataBuffer->m_numOfElements;
 
-        if(count > length)
+        if (count > length)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
         }
@@ -634,7 +635,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -701,8 +702,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4( 
 
         if (palUart->IsLongRunning)
         {
-            CLR_RT_HeapBlock hbTimeout;            
-            hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+            CLR_RT_HeapBlock hbTimeout;
+            hbTimeout.SetInteger(
+                (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
             // setup timeout
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
@@ -792,7 +794,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4( 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -804,7 +807,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     size_t count = 0;
     size_t bytesRead = 0;
     size_t bytesToRead = 0;
-    size_t readOffset = 0;     
+    size_t readOffset = 0;
     uart_port_t uart_num;
 
     int64_t *timeoutTicks;
@@ -830,7 +833,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     // get how many bytes are requested to read
     count = stack.Arg3().NumericByRef().s4;
 
-    
     // Get Uart number for serial device
     uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
 
@@ -841,7 +843,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    CLR_RT_HeapBlock hbTimeout;            
+    CLR_RT_HeapBlock hbTimeout;
     hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     // setup timeout
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
@@ -917,10 +919,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     stack.SetResult_U4(bytesRead);
 
     NANOCLR_NOCLEANUP();
-
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -948,10 +949,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     uart_pattern_queue_reset(uart_num, 10);
 
     NANOCLR_NOCLEANUP();
-
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
