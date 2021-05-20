@@ -628,7 +628,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
         count = stack.Arg3().NumericByRef().s4;
 
         CLR_RT_HeapBlock hbTimeout;
-        hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+        hbTimeout.SetInteger(
+            (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
         // setup timeout
         NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
