@@ -588,7 +588,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
         int64_t *timeoutTicks;
-        InputStreamOptions options = InputStreamOptions_None;
 
         bool eventResult = true;
 
