@@ -435,6 +435,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
         // get the size of the buffer
         length = (size_t)dataBuffer->m_numOfElements;
 
+        if (count > length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
+        }
+
         // check if there is enough room in the buffer
         if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < length)
         {
@@ -622,31 +627,16 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
         // get how many bytes are requested to read
         count = stack.Arg3().NumericByRef().s4;
 
-        // setup timeout from _readTimeout field
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTimeSpan(pThis[FIELD___readTimeout], timeoutTicks));
+        CLR_RT_HeapBlock hbTimeout;
+        hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+        // setup timeout
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
         // Check what's avaliable in Rx ring buffer
         if (palUart->RxRingBuffer.Length() >= count)
         {
             // read from Rx ring buffer
             bytesToRead = count;
-
-            // is the read ahead option enabled?
-            if (options == InputStreamOptions_ReadAhead)
-            {
-
-                // yes, check how many bytes we can store in the buffer argument
-                if (dataLength < palUart->RxRingBuffer.Length())
-                {
-                    // read as many bytes has the buffer can hold
-                    bytesToRead = dataLength;
-                }
-                else
-                {
-                    // read everything that's available in the ring buffer
-                    bytesToRead = palUart->RxRingBuffer.Length();
-                }
-            }
 
             // we have enough bytes, skip wait for event
             eventResult = false;
