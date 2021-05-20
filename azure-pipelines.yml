@@ -287,7 +287,7 @@ jobs:
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
-        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON-D API_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
+        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=CHIBIOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
