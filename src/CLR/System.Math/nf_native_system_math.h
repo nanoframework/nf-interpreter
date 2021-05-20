@@ -13,6 +13,7 @@
 struct Library_nf_native_system_math_System_Math
 {
     NANOCLR_NATIVE_DECLARE(Abs___STATIC__R8__R8);
+    NANOCLR_NATIVE_DECLARE(Abs___STATIC__R4__R4);
     NANOCLR_NATIVE_DECLARE(Acos___STATIC__R8__R8);
     NANOCLR_NATIVE_DECLARE(Asin___STATIC__R8__R8);
     NANOCLR_NATIVE_DECLARE(Atan___STATIC__R8__R8);
