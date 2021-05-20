@@ -83,6 +83,19 @@ HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R8__R8(CLR_RT_S
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+HRESULT Library_nf_native_system_math_System_Math::Abs___STATIC__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    float d = stack.Arg0().NumericByRefConst().r4;
+    float res = fabsf(d);
+
+    stack.SetResult_R4(res);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_nf_native_system_math_System_Math::Acos___STATIC__R8__R8(CLR_RT_StackFrame &stack)
 {
 #if (NANOCLR_LIGHT_MATH == TRUE)
