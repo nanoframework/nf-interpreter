@@ -651,7 +651,7 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                             NPF_EXTRACT(SHORT, short, int);
                             NPF_EXTRACT(LONG, long, long);
                             NPF_EXTRACT(LONG_DOUBLE, int, int);
-                            NPF_EXTRACT(CHAR, char, int);
+                            NPF_EXTRACT(CHAR, signed char, int);
 #if NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS == 1
                             NPF_EXTRACT(LARGE_LONG_LONG, long long, long long);
                             NPF_EXTRACT(LARGE_INTMAX, intmax_t, intmax_t);

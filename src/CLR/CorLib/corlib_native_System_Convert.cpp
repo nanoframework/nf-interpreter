@@ -38,10 +38,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 
         
         // UInt64? => use also strtoull the result will be casted to Int64
-        if (isUint64)
+        if (isUInt64)
+        {
 
             //UInt64 can't begin with minus
-            if (*str == '-' ) {
+            if (*str == '-' ) 
+            {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
             }
         }
@@ -57,32 +59,39 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         // It is necessary to add a check
 
         // if no valid conversion endptr is equal str
-        if (str == endptr) {
+        if (str == endptr) 
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
         // allow spaces after digits
-        while (*endptr == ' ') {
+        while (*endptr == ' ') 
+        {
             endptr++;
         }
 
         // should reach end of string no aditional chars
-        if (*endptr != 0) {
+        if (*endptr != 0) 
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
         
         // the signed values for SByte, Int16 and Int32 are always positive for base 2, 8 or 16 conversions
         // because the 64-bit function strtoll is used; need the post process the value
         // if the result is greater max and smaller (max + 1) * 2 this value should be subtracted
-        if (radix == 2 || radix == 8 || radix == 16) {
+        if (radix == 2 || radix == 8 || radix == 16) 
+        {
             if (isSigned && result > maxValue && result < (maxValue + 1) * 2) result -= (maxValue + 1) * 2;
         }
 
-        if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue) {
+        if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue) 
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        } else if (!isUInt64 && (result > maxValue || result < minValue)) {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        } else {
+        } else if (!isUInt64 && (result > maxValue || result < minValue)) 
+        {
+             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        } else 
+        {
             stack.SetResult_I8(result);
         }
     }
