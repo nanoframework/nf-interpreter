@@ -878,11 +878,10 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
  *  Function parameters:
  *  1. this - Heap block at the top of evaluation stack.
  *  2. cls  - Runtime Type Definition of the type specified after instruction.
- * 
- *  The function takes the object pointed by top of ev. stack. Then it does 3 operatioins:
+ *  The functoin takes the object pointed by top of ev. stack. Then it does 3 operatioins:
  *  1. Dereferences the object
  *  2. Validates the type of data kept by object corresponds to type in cls.
- *  3. Moves de-referenced data to top of evaluation stack.
+ *  3. Moves de-referenced date to top of evaluation stack.
  *******************************************************************************************/
 
 HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
@@ -894,7 +893,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     if (this->DataType() != DATATYPE_OBJECT)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Finds the object that keeps the boxed type.
@@ -904,7 +903,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST); 
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
@@ -916,7 +915,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         // This "if" compares underlying type in object and cls. Should be equal in order to continue.
         if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->dataType)))
         {
-            // No luck. The types in src object and specified by cls are different. Need to throw exception.
+            // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }
