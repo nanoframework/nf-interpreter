@@ -72,6 +72,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Networking.Sntp", "..\..\sr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.Net", "..\..\src\DeviceInterfaces\System.Net\System.Net.vcxproj", "{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.IO.Ports", "..\..\src\System.IO.Ports\System.IO.Ports.vcxproj", "{46556AFC-C248-4082-ABE6-9B07F4E57579}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -430,6 +432,17 @@ Global
 		{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336}.Release|x64.Build.0 = Release|x64
 		{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336}.Release|x86.ActiveCfg = Release|Win32
 		{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336}.Release|x86.Build.0 = Release|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|Any CPU.Build.0 = Debug|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|x64.ActiveCfg = Debug|x64
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|x64.Build.0 = Debug|x64
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|x86.ActiveCfg = Debug|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Debug|x86.Build.0 = Debug|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Release|Any CPU.ActiveCfg = Release|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Release|x64.ActiveCfg = Release|x64
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Release|x64.Build.0 = Release|x64
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Release|x86.ActiveCfg = Release|Win32
+		{46556AFC-C248-4082-ABE6-9B07F4E57579}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -460,6 +473,7 @@ Global
 		{3CAE286F-0EF8-45E4-8111-AFA0AA9282B4} = {383CE434-88F9-4BD4-99C3-D7F19558868D}
 		{84C62EFC-DBA2-4D47-BB81-322E8902C6D6} = {383CE434-88F9-4BD4-99C3-D7F19558868D}
 		{87B3B6FB-AE1F-4777-ABBF-3E42E0DEB336} = {76169580-0DE3-48D0-9545-8FC438C54094}
+		{46556AFC-C248-4082-ABE6-9B07F4E57579} = {383CE434-88F9-4BD4-99C3-D7F19558868D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {432A3A35-F7BC-47DA-B887-9F18A369A065}
