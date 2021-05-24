@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_serial_native_target.h"
+#include "sys_io_ser_native_target.h"
 
 /////////////////////////////////////////////////////////
 // UART PAL strucs delcared in win_dev_serial_native.h //
@@ -65,90 +65,117 @@ static void vWEvent(void *pvParameters)
     }
 }
 
-// MOVED TO sys_io_ser_native_System_IO_Ports_SerialPort
-// static void UART_Handle(LPUART_Type *base, uint8_t uartNum)
-// {
-//     NATIVE_INTERRUPT_START
-//     uint32_t status;
-//     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-//     NF_PAL_UART *palUart = Uart_PAL[uartNum];
+static void UART_Handle(LPUART_Type *base, uint8_t uartNum)
+{
+    NATIVE_INTERRUPT_START
+    uint32_t status;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
-//     status = LPUART_GetStatusFlags(base);
+    status = LPUART_GetStatusFlags(base);
 
-//     if (kLPUART_RxOverrunFlag & status)
-//     {
+    if (kLPUART_RxOverrunFlag & status)
+    {
 
-//         // Clear overrun flag, otherwise the RX does not work.
-//         base->STAT |= 1U << LPUART_STAT_OR_SHIFT;
-//     }
+        // Clear overrun flag, otherwise the RX does not work.
+        base->STAT |= 1U << LPUART_STAT_OR_SHIFT;
+    }
 
-//     if (kLPUART_RxDataRegFullFlag & status)
-//     {
-//         char byte = LPUART_ReadByte(base);
-//         // push char to ring buffer
-//         // don't care about the success of the operation, if it's full we are droping the char anyway
-//         palUart->RxRingBuffer.Push((uint8_t)byte);
+    if (kLPUART_RxDataRegFullFlag & status)
+    {
+        char byte = LPUART_ReadByte(base);
+        // push char to ring buffer
+        // don't care about the success of the operation, if it's full we are droping the char anyway
+        palUart->RxRingBuffer.Push((uint8_t)byte);
 
-//         // is there a read operation going on?
-//         if (palUart->RxBytesToRead > 0)
-//         {
-//             // check if the requested bytes are available in the buffer
-//             if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
-//             {
-//                 // reset Rx bytes to read count
-//                 palUart->RxBytesToRead = 0;
+        // is there a read operation going on?
+        if (palUart->RxBytesToRead > 0)
+        {
+            // check if the requested bytes are available in the buffer
+            if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead)
+            {
+                // reset Rx bytes to read count
+                palUart->RxBytesToRead = 0;
 
-//                 // Notify task that we want to receive data.
-//                 xTaskNotifyFromISR(palUart->xRTaskToNotify, 0x02, eSetBits, &xHigherPriorityTaskWoken);
-//             }
-//         }
-//     }
+                // Notify task that we want to receive data.
+                xTaskNotifyFromISR(palUart->xRTaskToNotify, 0x02, eSetBits, &xHigherPriorityTaskWoken);
+            }
+        }
+    }
 
-//     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-//     NATIVE_INTERRUPT_END
-// }
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    NATIVE_INTERRUPT_END
+}
 
 // Override of the default MIMXRT1060 UART interrupt routines to simple UART_Handle function, which
 // reads 1 byte of input data to RTOS stream buffer, if theres buffer overflow it drops data and clears interrupts.
 
-// MOVED TO sys_io_ser_native_System_IO_Ports_SerialPort
-// extern "C"
-// {
-//     // LPUART8 is currently used for debugging, disable it or will collide with debugger
-//     // void LPUART1_IRQHandler(void) { UART_Handle(LPUART1, 1); }
-//     void LPUART2_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART2, 2);
-//     }
-//     void LPUART3_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART3, 3);
-//     }
-//     void LPUART4_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART4, 4);
-//     }
-//     void LPUART5_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART5, 5);
-//     }
-//     void LPUART6_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART6, 6);
-//     }
-//     void LPUART7_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART7, 7);
-//     }
-//     void LPUART8_IRQHandler(void)
-//     {
-//         UART_Handle(LPUART8, 8);
-//     }
-// }
+extern "C"
+{
+    // LPUART8 is currently used for debugging, disable it or will collide with debugger
+    // void LPUART1_IRQHandler(void) { UART_Handle(LPUART1, 1); }
+    void LPUART2_IRQHandler(void)
+    {
+        UART_Handle(LPUART2, 2);
+    }
+    void LPUART3_IRQHandler(void)
+    {
+        UART_Handle(LPUART3, 3);
+    }
+    void LPUART4_IRQHandler(void)
+    {
+        UART_Handle(LPUART4, 4);
+    }
+    void LPUART5_IRQHandler(void)
+    {
+        UART_Handle(LPUART5, 5);
+    }
+    void LPUART6_IRQHandler(void)
+    {
+        UART_Handle(LPUART6, 6);
+    }
+    void LPUART7_IRQHandler(void)
+    {
+        UART_Handle(LPUART7, 7);
+    }
+    void LPUART8_IRQHandler(void)
+    {
+        UART_Handle(LPUART8, 8);
+    }
+}
 
-// Deinitialize serial port and allocated free memory
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeDispose___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        uint8_t uartNum = 0;
+        size_t read_count = 0;
+
+        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
+
+        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+
+        // Quit if parameters or device is invalid or out of range
+        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        read_count = palUart->RxBytesToRead;
+
+        stack.SetResult_U4(read_count);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -181,9 +208,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-// Initialise a new Serial port, allocate buffer memory and create FreeRTOS idle tasks
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeInit___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -276,9 +301,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-// Set up serial port Configuration
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeConfig___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -325,13 +348,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
-            case SerialParity_None:
+            case Parity_None:
                 config->parityMode = kLPUART_ParityDisabled;
                 break;
-            case SerialParity_Even:
+            case Parity_Even:
                 config->parityMode = kLPUART_ParityEven;
                 break;
-            case SerialParity_Odd:
+            case Parity_Odd:
                 config->parityMode = kLPUART_ParityOdd;
                 break;
         }
@@ -341,10 +364,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
                 break;
-            case SerialStopBitCount_One:
+            case StopBits_One:
                 config->stopBitCount = kLPUART_OneStopBit;
                 break;
-            case SerialStopBitCount_Two:
+            case StopBits_Two:
                 config->stopBitCount = kLPUART_TwoStopBit;
                 break;
         }
@@ -371,8 +394,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-// Write data into buffer
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeWrite___VOID__SZARRAY_U1(
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -384,6 +406,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         uint8_t *data = NULL;
         uint8_t uartNum = 0;
         size_t length = 0;
+        size_t count = 0;
+        size_t writeOffset = 0;
 
         if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
         {
@@ -403,12 +427,18 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // dereference the data buffer from the argument
         CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
-
-        // get a  the pointer to the array by using the first element of the array
-        data = dataBuffer->GetFirstElement();
+        writeOffset = stack.Arg2().NumericByRef().s4;
+        count = stack.Arg3().NumericByRef().s4;
+        // get a the pointer to the array by using the first element of the array
+        data = dataBuffer->GetElement(writeOffset);
 
         // get the size of the buffer
-        length = dataBuffer->m_numOfElements;
+        length = (size_t)dataBuffer->m_numOfElements;
+
+        if (count > length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
+        }
 
         // check if there is enough room in the buffer
         if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < length)
@@ -427,23 +457,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_IO);
         }
 
-        // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
-        // get pointer to outputStream field
-        CLR_RT_HeapBlock *outputStream =
-            pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream]
-                .Dereference();
-        // get pointer to _unstoredBufferLength field and udpate field value
-        outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::
-                         FIELD___unstoredBufferLength]
-            .NumericByRef()
-            .s4 = palUart->TxRingBuffer.Length();
+        // null pointers and vars
+        pThis = NULL;
     }
     NANOCLR_NOCLEANUP();
 }
 
-// Store - Send buffer and wait
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeStore___U4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -559,8 +579,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::
-    NativeRead___U4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -568,14 +588,13 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
         int64_t *timeoutTicks;
-        InputStreamOptions options = InputStreamOptions_None;
 
         bool eventResult = true;
 
         uint8_t uartNum = 0;
         size_t bytesRead = 0;
         size_t bytesToRead = 0;
-        size_t dataLength = 0;
+        size_t readOffset = 0;
 
         uint8_t *data = NULL;
 
@@ -596,47 +615,28 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
-        // get how many bytes are requested to read
-        count = stack.Arg2().NumericByRef().s4;
-
-        // Dereference the data buffer from the argument
+        // dereference the data buffer from the argument
         dataBuffer = stack.Arg1().DereferenceArray();
+        // The offset to start filling the buffer
+        readOffset = stack.Arg2().NumericByRef().s4;
 
         // get a the pointer to the array by using the first element of the array
-        data = dataBuffer->GetFirstElement();
+        data = dataBuffer->GetElement(readOffset);
 
-        // get the length of the data buffer
-        dataLength = dataBuffer->m_numOfElements;
+        // get how many bytes are requested to read
+        count = stack.Arg3().NumericByRef().s4;
 
-        // Get the InputStreamOptions option
-        // TODO: Implement transfer options.
-        options = (InputStreamOptions)stack.Arg3().NumericByRef().s4;
-
-        // setup timeout from _readTimeout field
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTimeSpan(pThis[FIELD___readTimeout], timeoutTicks));
+        CLR_RT_HeapBlock hbTimeout;
+        hbTimeout.SetInteger(
+            (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+        // setup timeout
+        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
         // Check what's avaliable in Rx ring buffer
         if (palUart->RxRingBuffer.Length() >= count)
         {
             // read from Rx ring buffer
             bytesToRead = count;
-
-            // is the read ahead option enabled?
-            if (options == InputStreamOptions_ReadAhead)
-            {
-
-                // yes, check how many bytes we can store in the buffer argument
-                if (dataLength < palUart->RxRingBuffer.Length())
-                {
-                    // read as many bytes has the buffer can hold
-                    bytesToRead = dataLength;
-                }
-                else
-                {
-                    // read everything that's available in the ring buffer
-                    bytesToRead = palUart->RxRingBuffer.Length();
-                }
-            }
 
             // we have enough bytes, skip wait for event
             eventResult = false;
@@ -682,37 +682,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine
                         .WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
+
                 if (!eventResult)
                 {
                     // event timeout
-                    // compute how many bytes to read
-                    // considering the InputStreamOptions read ahead option
-                    if (options == InputStreamOptions_ReadAhead)
-                    {
-                        // yes, check how many bytes we can store in the buffer argument
-                        if (dataLength < palUart->RxRingBuffer.Length())
-                        {
-                            // read as many bytes has the buffer can hold
-                            bytesToRead = dataLength;
-                        }
-                        else
-                        {
-                            // read everything that's available in the ring buffer
-                            bytesToRead = palUart->RxRingBuffer.Length();
-                        }
-                    }
-                    if (options == InputStreamOptions_Partial)
-                    {
-                        // take InputStreamOptions_Partial as default and read requested quantity or what's available
-                        bytesToRead = count;
-
-                        if (count > palUart->RxRingBuffer.Length())
-                        {
-                            // need to adjust because there aren't enough bytes available
-                            bytesToRead = palUart->RxRingBuffer.Length();
-                        }
-                    }
-                    // If InputStreamOptions is set to None return timeout exception
                     NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
                 }
             }
@@ -726,13 +699,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // pop timeout heap block from stack and return how many bytes were read
         stack.PopValue();
+
+        // return how many bytes were read
         stack.SetResult_U4(bytesRead);
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeSetWatchChar___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -757,42 +731,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::get_BytesToRead___U4(
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING(
     CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        uint8_t uartNum = 0;
-        size_t read_count = 0;
-
-        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
-
-        // Quit if parameters or device is invalid or out of range
-        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
-        read_count = palUart->RxBytesToRead;
-
-        stack.SetResult_U4(read_count);
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-// Return available devices
-HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::
-    GetDeviceSelector___STATIC__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     char deviceSelectorString[41] = {0};
@@ -811,7 +751,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     deviceSelectorString[len - 1] = 0;
 
     // because the caller is expecting a result to be returned
-    // we need set a return result in the stack argument using the a ppropriate SetResult according to the variable type
+    // we need set a return result in the stack argument using the appropriate SetResult according to the variable type
     // (a string here)
     stack.SetResult_String(deviceSelectorString);
     NANOCLR_NOCLEANUP_NOLABEL();

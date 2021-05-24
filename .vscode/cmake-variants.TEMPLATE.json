@@ -99,6 +99,7 @@
           "API_System.Device.I2c": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Pwm": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.SerialCommunication": "OFF-default-ON-to-add-this-API",
+          "API_System.IO.Ports": "OFF-default-ON-to-add-this-API",
           "API_Windows.Devices.Spi": "OFF-default-ON-to-add-this-API",
           "API_Hardware.Esp32": "OFF-default-ON-to-add-this-API",
           "API_Hardware.Stm32": "OFF-default-ON-to-add-this-API",

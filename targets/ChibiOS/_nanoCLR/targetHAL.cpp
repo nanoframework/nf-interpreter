@@ -26,6 +26,7 @@
 #endif
 #if (HAL_USE_UART == TRUE)
 #include <win_dev_serial_native_target.h>
+#include <sys_io_ser_native_target.h>
 #endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
