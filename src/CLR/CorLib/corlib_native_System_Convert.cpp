@@ -176,7 +176,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         {
             // conversion from base 16
             result = GetIntegerFromHexString(str);
-            //??? check against min/max?  Signed possible?  
+            //??? check against min/max?  Signed possible?
         }
         else
         {
