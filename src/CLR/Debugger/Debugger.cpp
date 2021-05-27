@@ -1287,8 +1287,8 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
     }
 
-    // if there is anything to change, need to wait and apply the changes 
-    if(conditionsCopy)
+    // if there is anything to change, need to wait and apply the changes
+    if (conditionsCopy)
     {
         Events_WaitForEvents(0, 50);
 
