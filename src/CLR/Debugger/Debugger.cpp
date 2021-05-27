@@ -442,6 +442,8 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         fStopOnBoot = (cmdReply != NULL) && (cmdReply->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
     }
 
+    Events_WaitForEvents(0, 50);
+
     if (CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
     {
         if (fStopOnBoot)
@@ -1285,9 +1287,15 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
     }
 
-    // set & reset new conditions
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |= cmd->FlagsToSet;
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
+    // if there is anything to change, need to wait and apply the changes
+    if (conditionsCopy)
+    {
+        Events_WaitForEvents(0, 50);
+
+        // set & reset new conditions
+        g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |= cmd->FlagsToSet;
+        g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
+    }
 
     return true;
 }
