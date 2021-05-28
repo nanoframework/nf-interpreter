@@ -2789,6 +2789,7 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System", "Exception", m_Exception),
     TIL("System", "IndexOutOfRangeException", m_IndexOutOfRangeException),
     TIL("System", "InvalidCastException", m_InvalidCastException),
+    TIL("System", "FormatException", m_FormatException),
     TIL("System", "InvalidOperationException", m_InvalidOperationException),
     TIL("System", "NotSupportedException", m_NotSupportedException),
     TIL("System", "NotImplementedException", m_NotImplementedException),

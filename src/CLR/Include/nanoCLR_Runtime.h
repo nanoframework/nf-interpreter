@@ -1525,6 +1525,7 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ThreadAbortException;
     CLR_RT_TypeDef_Index m_InvalidOperationException;
     CLR_RT_TypeDef_Index m_InvalidCastException;
+    CLR_RT_TypeDef_Index m_FormatException;
     CLR_RT_TypeDef_Index m_NotSupportedException;
     CLR_RT_TypeDef_Index m_NotImplementedException;
     CLR_RT_TypeDef_Index m_NullReferenceException;
