@@ -22,6 +22,7 @@ static const ExceptionLookup c_ExceptionLookup[] = {
     EL(CLR_E_OUT_OF_RANGE, m_ArgumentOutOfRangeException),
     EL(CLR_E_INDEX_OUT_OF_RANGE, m_IndexOutOfRangeException),
     EL(CLR_E_INVALID_CAST, m_InvalidCastException),
+    EL(CLR_E_FORMAT_EXCEPTION, m_FormatException),
     EL(CLR_E_INVALID_OPERATION, m_InvalidOperationException),
     EL(CLR_E_NOT_SUPPORTED, m_NotSupportedException),
     EL(CLR_E_NOTIMPL, m_NotImplementedException),
