@@ -445,9 +445,13 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     if (CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
     {
         if (fStopOnBoot)
+        {
             CLR_EE_DBG_SET(Stopped);
+        }
         else
+        {
             CLR_EE_DBG_CLR(Stopped);
+        }
     }
 
     return true;
@@ -1269,25 +1273,28 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
         (CLR_DBG_Commands::Debugging_Execution_ChangeConditions *)msg->m_payload;
 
     // save current value
-    int32_t conditionsCopy = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
+    int32_t newConditions = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
 
     // apply received flags
-    conditionsCopy |= cmd->FlagsToSet;
-    conditionsCopy &= ~cmd->FlagsToReset;
+    newConditions |= cmd->FlagsToSet;
+    newConditions &= ~cmd->FlagsToReset;
 
     // send confirmation reply
     if ((msg->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
     {
         CLR_DBG_Commands::Debugging_Execution_ChangeConditions::Reply cmdReply;
 
-        cmdReply.CurrentState = conditionsCopy;
+        cmdReply.CurrentState = (CLR_UINT32)newConditions;
 
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
     }
 
-    // set & reset new conditions
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |= cmd->FlagsToSet;
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
+    // if there is anything to change, apply the changes
+    if (cmd->FlagsToSet || cmd->FlagsToReset)
+    {
+        // update conditions
+        g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
+    }
 
     return true;
 }
