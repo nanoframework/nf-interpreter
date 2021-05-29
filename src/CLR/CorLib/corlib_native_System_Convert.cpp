@@ -4,10 +4,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <cerrno> // this appears first so that errno macro can get redefined in other system headers used in corlib_native.h
 #include "corlib_native.h"
 #include <ctype.h>
 #include <base64.h>
-#include <c++\9.3.1\cerrno>
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
     CLR_RT_StackFrame &stack)
@@ -42,7 +42,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
         }
-    
+
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
         // suport for conversion from any base
 
@@ -52,13 +52,14 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         }
 
         // convert via strtoll / strtoull
-        //errno = 0;
+
+        errno = 0;
         result = isSigned ? strtoll(str, &endptr, radix) : (long long)strtoull(str, &endptr, radix);
-        //if (errno ==
-        //    ERANGE) // catch the case of exceeding signed/unsigned int64.  Catch formatting errors in the next statement
-        //{
-        //    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        //}
+        if (errno ==
+            ERANGE) // catch the case of exceeding signed/unsigned int64.  Catch formatting errors in the next statement
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+        }
 
         // if no valid conversion endptr is equal str
         if (str == endptr)
@@ -170,7 +171,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
             }
             else
             {
-                if (isUInt64 == false                 // result will be negative for large uints, and we checked for overflow above
+                if (isUInt64 == false // result will be negative for large uints, and we checked for overflow above
                     && intPart > (uint64_t)maxValue)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
