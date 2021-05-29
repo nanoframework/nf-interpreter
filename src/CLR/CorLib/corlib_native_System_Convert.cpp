@@ -366,30 +366,6 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             // string starts with the decimal point, only has fractional part
             returnValue = GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
         }
-        // else if (hasMinusSign || hasPlusSign)
-        //{
-        //    // string starts with sign and...
-
-        //    if (decimalPoint == 1)
-        //    {
-        //        // ... is followed by a decimal point, only has fractional part
-        //        returnValue =
-        //            GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
-        //    }
-        //    else
-        //    {
-        //        // ... has integer and fractional parts
-        //        returnValue = GetIntegerPart(str + 1, decimalPoint - 1);
-        //        returnValue =
-        //            (returnValue +
-        //             GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1)));
-        //    }
-
-        //    if (hasMinusSign)
-        //    {
-        //        returnValue *= -1;
-        //    }
-        //}
         else
         {
             // string has integer and fractional parts
