@@ -4,10 +4,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <cerrno> // this appears first so that errno macro can get redefined in other system headers used in corlib_native.h
 #include "corlib_native.h"
 #include <ctype.h>
 #include <base64.h>
+
+// need this here instead of the standard "#include <cerrno>" because that brings issues when compiling 
+extern int errno;
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
     CLR_RT_StackFrame &stack)
