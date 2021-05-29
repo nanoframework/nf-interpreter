@@ -9,6 +9,9 @@
 #include <ctype.h>
 #include <base64.h>
 
+// need this here instead of the standard "#include <cerrno>" because that brings issues when compiling 
+extern int errno;
+
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -185,6 +188,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         {
             // conversion from base 16
             result = GetIntegerFromHexString(str);
+            //??? check against min/max?  Signed possible?
         }
         else
         {
