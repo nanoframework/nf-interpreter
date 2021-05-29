@@ -120,6 +120,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.Spi",
           "value": "ON"
         },        
@@ -129,6 +133,10 @@
         },
         {
           "name": "API_Windows.Devices.I2c",
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Device.I2c",
           "value": "ON"
         },
         {
@@ -404,7 +412,15 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Device.Gpio:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Device.I2c:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
