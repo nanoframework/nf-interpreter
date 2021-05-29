@@ -14,9 +14,8 @@ typedef int HRESULT;
 // Severity values
 //
 
-#define SEVERITY_SUCCESS    0
-#define SEVERITY_ERROR      1
-
+#define SEVERITY_SUCCESS 0
+#define SEVERITY_ERROR   1
 
 //
 // Generic test for success on any status value (non-negative numbers
@@ -29,43 +28,44 @@ typedef int HRESULT;
 // and the inverse
 //
 
-#define FAILED(Status) ((HRESULT)(Status)<0)
-
+#define FAILED(Status) ((HRESULT)(Status) < 0)
 
 //
 // Success codes
 //
-#define S_OK                                   ((HRESULT)0x00000000L)
-#define S_FALSE                                ((HRESULT)0x00000001L)
-
+#define S_OK    ((HRESULT)0x00000000L)
+#define S_FALSE ((HRESULT)0x00000001L)
 
 //
 // Return the code
 //
 
-#define HRESULT_CODE(hr)    ((hr) & 0xFFFF)
+#define HRESULT_CODE(hr) ((hr)&0xFFFF)
 
 //
 //  Return the facility
 //
 
-#define HRESULT_FACILITY(hr)  (((hr) >> 16) & 0x1fff)
+#define HRESULT_FACILITY(hr) (((hr) >> 16) & 0x1fff)
 
 //
 //  Return the severity
 //
 
-#define HRESULT_SEVERITY(hr)  (((hr) >> 31) & 0x1)
+#define HRESULT_SEVERITY(hr) (((hr) >> 31) & 0x1)
 
 //
 // Create an HRESULT value from component pieces
 //
 
-#define MAKE_HRESULT(sev,fac,code) ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )
+#define MAKE_HRESULT(sev, fac, code)                                                                                   \
+    ((HRESULT)(((unsigned long)(sev) << 31) | ((unsigned long)(fac) << 16) | ((unsigned long)(code))))
 
 #endif // !defined(WIN32) && !defined(_WIN32)
 
 //--//
+
+// clang-format off
 
 //
 // These are denormalized HRESULTs, only the 8 most significant bits are set, to allow use of MOV <rd>,#<imm> by the compiler.
@@ -166,6 +166,6 @@ typedef int HRESULT;
 #define CLR_S_NO_THREADS                               MAKE_HRESULT( SEVERITY_SUCCESS, 0x0400, 0x0000 )
 #define CLR_S_RESTART_EXECUTION                        MAKE_HRESULT( SEVERITY_SUCCESS, 0x0500, 0x0000 )
 
+// clang-format off
 
 #endif  // __NF_ERRORS_H__
-
