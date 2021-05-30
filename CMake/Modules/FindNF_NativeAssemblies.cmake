@@ -5,7 +5,7 @@
 
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
-# e.g.: for namespace Windows.Devices.Gpio, the CMake option is 'API_Windows.Devices.Gpio' 
+# e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
