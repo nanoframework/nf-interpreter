@@ -8,7 +8,8 @@
 #include <ctype.h>
 #include <base64.h>
 
-// when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h and lower (HAL).  Win32 does not use it
+// when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h
+// and lower (HAL).  Win32 does not use it
 #include <cerrno>
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
@@ -76,7 +77,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 #endif //_REENT_ONLY
 
         // catch the case of exceeding signed/unsigned int64. Catch formatting errors in the next statement
-        if (error_code == ERANGE) 
+        if (error_code == ERANGE)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
@@ -149,7 +150,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
 
             uint64_t intPart = 0;
             uint64_t lastValue = 0;
-            
+
             // guess at no more than 99 characters
             for (int i = 0; i < 99; i++)
             {
@@ -172,7 +173,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
                     // non-numeric (and not trailing space)
                     NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
                 }
-                
+
                 // advance the digits and add the current number
                 intPart = (intPart * 10) + (*str - '0');
 
@@ -181,9 +182,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
                     // the above operation overflowed the value
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
-                
+
                 lastValue = intPart;
-                
+
                 str++;
                 if (*str == '\0')
                 {
@@ -215,10 +216,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
-                
+
                 // this MAY have made the result negative by overflowing the buffer - which we do
                 // for uint64 logic.  The c# code will cast the int64 to uint64 removing the sign
-                result = (int64_t)intPart; 
+                result = (int64_t)intPart;
             }
         }
         else if (radix == 16)
@@ -261,10 +262,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         // suport for conversion from any base
 
         char *endptr = str;
-        
+
         // notice we don't try to catch errno=ERANGE - IEEE574 says overflows should just convert to infinity values
         double returnValue = strtod(str, &endptr);
-        
+
         if (endptr == str)
         {
             // didn't parse the string completely
@@ -312,7 +313,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
                         if (length == 0 && hasMinusSign == false)
                         {
                             hasMinusSign = true;
-                            
+
                             // point past the leading sign
                             str++;
 
@@ -345,7 +346,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
                         if (length == 0 && hasPlusSign == false)
                         {
                             hasPlusSign = true;
-                            
+
                             // point past the leading sign
                             str++;
 
@@ -444,7 +445,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
             // get the exponential part
             int exponent = GetIntegerPart((str + exponentialSign + 1), (length - exponentialSign - 1));
             double outExponent = pow(10, exponent);
-            
+
             if (hasMinusExponentialSign)
             {
                 returnValue = returnValue / outExponent;
