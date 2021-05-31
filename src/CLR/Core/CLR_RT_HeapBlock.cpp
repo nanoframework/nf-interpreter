@@ -893,7 +893,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     if (this->DataType() != DATATYPE_OBJECT)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
     }
 
     // Finds the object that keeps the boxed type.
@@ -903,7 +903,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
