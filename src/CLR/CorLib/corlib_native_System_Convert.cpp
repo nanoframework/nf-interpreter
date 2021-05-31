@@ -7,7 +7,9 @@
 #include "corlib_native.h"
 #include <ctype.h>
 #include <base64.h>
-#include <cerrno> // when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h and lower (HAL).  Win32 does not use it
+
+// when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h and lower (HAL).  Win32 does not use it
+#include <cerrno>
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
     CLR_RT_StackFrame &stack)
@@ -30,6 +32,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
             isUInt64 = true;
             isSigned = false;
         }
+
         // allow spaces before digits
         while (*str == ' ')
         {
@@ -54,20 +57,26 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         // convert via strtoll / strtoull
         int error_code;
 
-#ifdef _REENT_ONLY // Have to use reentrant version of strtoll because lwip sets _REENT_ONLY to require all stdlib calls
-                   // to be reentrant
+        // Have to use reentrant version of strtoll because lwip sets _REENT_ONLY to require all stdlib calls
+        // to be reentrant
+#ifdef _REENT_ONLY
+
         _reent reent_data;
         reent_data._errno = 0;
         result = isSigned ? _strtoll_r(&reent_data, str, &endptr, radix)
                           : (long long)_strtoull_r(&reent_data, str, &endptr, radix);
         error_code = (int)reent_data._errno;
+
 #else
+
         errno = 0;
         result = isSigned ? strtoll(str, &endptr, radix) : (long long)strtoull(str, &endptr, radix);
         error_code = errno;
+
 #endif //_REENT_ONLY
-        if (error_code ==
-            ERANGE) // catch the case of exceeding signed/unsigned int64.  Catch formatting errors in the next statement
+
+        // catch the case of exceeding signed/unsigned int64. Catch formatting errors in the next statement
+        if (error_code == ERANGE) 
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
@@ -96,7 +105,9 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         if (radix == 2 || radix == 8 || radix == 16)
         {
             if (isSigned && result > maxValue && result < (maxValue + 1) * 2)
+            {
                 result -= (maxValue + 1) * 2;
+            }
         }
 
         if (negReturnExpected && isSigned == false && result != 0)
@@ -135,61 +146,79 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
             {
                 str++;
             }
+
             uint64_t intPart = 0;
             uint64_t lastValue = 0;
-            for (int i = 0; i < 99; i++) // guess at no more than 99 characters
+            
+            // guess at no more than 99 characters
+            for (int i = 0; i < 99; i++)
             {
                 if (*str < '0' || *str > '9')
                 {
                     endptr = str;
+
                     // allow spaces after digits
                     while (*endptr == ' ')
                     {
                         endptr++;
                     }
+
                     // should reach end of string no aditional chars
                     if (*endptr == 0)
                     {
                         break;
                     }
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION); // non-numeric (and not trailing space)
+
+                    // non-numeric (and not trailing space)
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
                 }
-                intPart = (intPart * 10) + (*str - '0'); // advance the digits and add the current number
-                if (intPart < lastValue)                 // the above operation overflowed the value
+                
+                // advance the digits and add the current number
+                intPart = (intPart * 10) + (*str - '0');
+
+                if (intPart < lastValue)
                 {
+                    // the above operation overflowed the value
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
+                
                 lastValue = intPart;
+                
                 str++;
                 if (*str == '\0')
                 {
                     break;
                 }
             }
+
             // intPart now holds a positive number from the string.
             if (negReturnExpected)
             {
-                if (isSigned == false && intPart > 0) // it's ok to use -0 even for unsigned types, but otherwise - NO.
+                // it's ok to use -0 even for unsigned types, but otherwise - NO.
+                if (isSigned == false && intPart > 0)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
 
-                if (intPart > (uint64_t)(minValue * -1)) // too big to make a negative value?
+                // too big to make a negative value?
+                if (intPart > (uint64_t)(minValue * -1))
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
+
                 result = intPart * -1;
             }
             else
             {
-                if (isUInt64 == false // result will be negative for large uints, and we checked for overflow above
-                    && intPart > (uint64_t)maxValue)
+                // result will be negative for large uints, and we checked for overflow above
+                if (isUInt64 == false && intPart > (uint64_t)maxValue)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
                 }
-                result =
-                    (int64_t)intPart; // this MAY have made the result negative by overflowing the buffer - which we do
-                                      // for uint64 logic.  The c# code will cast the int64 to uint64 removing the sign
+                
+                // this MAY have made the result negative by overflowing the buffer - which we do
+                // for uint64 logic.  The c# code will cast the int64 to uint64 removing the sign
+                result = (int64_t)intPart; 
             }
         }
         else if (radix == 16)
@@ -230,13 +259,18 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
         // suport for conversion from any base
+
         char *endptr = str;
-        double returnValue = strtod(str, &endptr); // notice we don't try to catch errno=ERANGE - IEEE574 says overflows
-                                                   // should just convert to infinity values
-        if (endptr == str)                         // didn't parse the string completely
+        
+        // notice we don't try to catch errno=ERANGE - IEEE574 says overflows should just convert to infinity values
+        double returnValue = strtod(str, &endptr);
+        
+        if (endptr == str)
         {
+            // didn't parse the string completely
             NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
         }
+
         // allow spaces after digits
         while (*endptr == ' ')
         {
@@ -278,8 +312,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
                         if (length == 0 && hasMinusSign == false)
                         {
                             hasMinusSign = true;
-                            str++;    // point past the leading sign
-                            length--; // don't count this in the length
+                            
+                            // point past the leading sign
+                            str++;
+
+                            // don't count this in the length
+                            length--;
                         }
                         else
                         {
@@ -307,8 +345,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
                         if (length == 0 && hasPlusSign == false)
                         {
                             hasPlusSign = true;
-                            str++;    // point past the leading sign
-                            length--; // don't count this in the length
+                            
+                            // point past the leading sign
+                            str++;
+
+                            // don't count this in the length
+                            length--;
                         }
                         else
                         {
@@ -395,10 +437,14 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         {
             // advance by one if a sign (+ or -) is after the exponential sign
             if (hasMinusExponentialSign || hasPlusExponentialSign)
+            {
                 exponentialSign++;
+            }
+
             // get the exponential part
             int exponent = GetIntegerPart((str + exponentialSign + 1), (length - exponentialSign - 1));
             double outExponent = pow(10, exponent);
+            
             if (hasMinusExponentialSign)
             {
                 returnValue = returnValue / outExponent;
