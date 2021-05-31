@@ -160,11 +160,11 @@ typedef int HRESULT;
 
 //--//
 
-#define CLR_S_THREAD_EXITED                             MAKE_HRESULT( SEVERITY_SUCCESS, 0x0100, 0x0000 )
-#define CLR_S_QUANTUM_EXPIRED                           MAKE_HRESULT( SEVERITY_SUCCESS, 0x0200, 0x0000 )
-#define CLR_S_NO_READY_THREADS                          MAKE_HRESULT( SEVERITY_SUCCESS, 0x0300, 0x0000 )
-#define CLR_S_NO_THREADS                                MAKE_HRESULT( SEVERITY_SUCCESS, 0x0400, 0x0000 )
-#define CLR_S_RESTART_EXECUTION                         MAKE_HRESULT( SEVERITY_SUCCESS, 0x0500, 0x0000 )
+#define CLR_S_THREAD_EXITED                             MAKE_HRESULT(SEVERITY_SUCCESS, 0x0100, 0x0000)
+#define CLR_S_QUANTUM_EXPIRED                           MAKE_HRESULT(SEVERITY_SUCCESS, 0x0200, 0x0000)
+#define CLR_S_NO_READY_THREADS                          MAKE_HRESULT(SEVERITY_SUCCESS, 0x0300, 0x0000)
+#define CLR_S_NO_THREADS                                MAKE_HRESULT(SEVERITY_SUCCESS, 0x0400, 0x0000)
+#define CLR_S_RESTART_EXECUTION                         MAKE_HRESULT(SEVERITY_SUCCESS, 0x0500, 0x0000)
 
 // clang-format off
 

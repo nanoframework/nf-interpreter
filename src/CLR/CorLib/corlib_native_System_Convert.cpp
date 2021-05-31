@@ -4,13 +4,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <cerrno> // this appears first so that errno macro can get redefined in other system headers used in corlib_native.h
 #include "corlib_native.h"
 #include <ctype.h>
 #include <base64.h>
-
-// need this here instead of the standard "#include <cerrno>" because that brings issues when compiling 
-extern int errno;
+#include <cerrno>         // when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h and lower (HAL).  Win32 does not use it
 
 HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
     CLR_RT_StackFrame &stack)
@@ -55,11 +52,19 @@ HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING
         }
 
         // convert via strtoll / strtoull
-
+        int error_code;
+        
+#ifdef _REENT_ONLY   // Have to use reentrant version of strtoll because lwip sets _REENT_ONLY to require all stdlib calls to be reentrant
+        _reent reent_data;
+        reent_data._errno = 0;
+        result = isSigned ? _strtoll_r(&reent_data, str, &endptr, radix) : (long long)_strtoull_r(&reent_data, str, &endptr, radix);
+        error_code = (int)reent_data._errno;
+#else
         errno = 0;
         result = isSigned ? strtoll(str, &endptr, radix) : (long long)strtoull(str, &endptr, radix);
-        if (errno ==
-            ERANGE) // catch the case of exceeding signed/unsigned int64.  Catch formatting errors in the next statement
+        error_code = errno;
+#endif  //_REENT_ONLY
+        if (error_code == ERANGE) // catch the case of exceeding signed/unsigned int64.  Catch formatting errors in the next statement
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
         }
