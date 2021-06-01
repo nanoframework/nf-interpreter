@@ -16,7 +16,7 @@ int CLR_RT_EventCache::LookupEntry::Callback_Compare( void* state, CLR_RT_AVLTre
     LookupEntry* leftDirect  = (LookupEntry*)left;
     LookupEntry* rightDirect = (LookupEntry*)right;
 
-    return leftDirect->m_payload.Compare( rightDirect->m_payload );
+                                    return leftDirect->m_payload.Compare( rightDirect->m_payload );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
