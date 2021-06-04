@@ -217,12 +217,8 @@ int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
 
     if (pWireless->Options & Wireless80211Configuration_ConfigurationOptions_SmartConfig)
     {
-        // FIXME
-        // Disable for now, When the smart_config starts it scans for wireless AP
-        // If it doesn't find any AP it ends up with a exception which causes the device to restart
-
         // Start Smart config (if enabled)
-        // Start_wifi_smart_config();
+        Start_wifi_smart_config();
     }
 
     return Esp32_Wait_NetNumber(ESP_IF_WIFI_STA);
