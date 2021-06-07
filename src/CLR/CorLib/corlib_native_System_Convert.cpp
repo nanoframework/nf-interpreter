@@ -469,6 +469,8 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 {
     NANOCLR_HEADER();
 
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+
     size_t outputLength;
     char *outArray = NULL;
     char *outArrayWitLineBreak = NULL;
@@ -580,12 +582,20 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
         platform_free((void *)outArrayWitLineBreak);
     }
 
+#else
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY_U1__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
 
     CLR_RT_HeapBlock_String *inString = NULL;
     size_t outputLength;
@@ -649,6 +659,14 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     }
 
     NANOCLR_CLEANUP_END();
+
+#else
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+
+#endif
 }
 
 double Library_corlib_native_System_Convert::GetDoubleFractionalPart(char *str, int length)
