@@ -483,8 +483,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     size_t length = (size_t)stack.Arg2().NumericByRef().s4;
     bool insertLineBreaks = (bool)stack.Arg3().NumericByRefConst().u1;
 
-    if (inArray == NULL)
-        NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
+    FAULT_ON_NULL_ARG(inArray);
 
     inArrayPointer = (uint8_t *)inArray->GetFirstElement();
     inArrayPointer += (offset * sizeof(uint8_t));
@@ -497,7 +496,9 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
 
     // check if have allocation
     if (outArray == NULL)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
     // perform the operation
     // need to tweak the parameter with the output length because it includes room for the terminator
@@ -582,69 +583,43 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY_U1__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
+    CLR_RT_HeapBlock_String *inString = NULL;
     size_t outputLength;
     char *outArray = NULL;
-    uint16_t *inArrayPointerTmp = NULL;
-    uint8_t *inArrayPointer = NULL;
-    uint8_t charValue;
     CLR_UINT8 *returnArray;
-    int16_t i = 0;
     uint16_t result;
+    size_t length;
 
-    CLR_RT_HeapBlock_Array *inArray = stack.Arg0().DereferenceArray();
-    size_t length = (size_t)stack.Arg1().NumericByRef().s4;
+    inString = stack.Arg0().DereferenceString();
+    FAULT_ON_NULL(inString);
 
-    if (inArray == NULL)
-        NANOCLR_SET_AND_LEAVE(CLR_E_ARGUMENT_NULL);
+    FAULT_ON_NULL_ARG(inString->StringText());
 
+    length = (size_t)hal_strlen_s(inString->StringText());
+
+    // estimate output length
     outputLength = length / 4 * 3;
 
-    // transform the 16 bits inArray to a 8 bits array so mbed knows how to convert it
-    inArrayPointerTmp = (uint16_t *)inArray->GetFirstElementUInt16();
-    inArrayPointer = (uint8_t *)inArray->GetFirstElement();
-    for (i = 0; i < (int16_t)length; i++)
-    {
-        *inArrayPointer = *inArrayPointerTmp;
-        inArrayPointer++;
-        inArrayPointerTmp++;
-    }
-
-    // pointer is pointing to the end
-    // point to last char in array and get it
-    inArrayPointer--;
-    charValue = *inArrayPointer;
-    // adjust output length
-    if (charValue == '=')
-    {
-        outputLength--;
-    }
-
-    // point to before last char and get it
-    inArrayPointer--;
-    charValue = *inArrayPointer;
-    // adjust output length
-    if (charValue == '=')
-    {
-        outputLength--;
-    }
-
-    // reset pointer position (-2 because above we already went back two positions)
-    inArrayPointer -= length - 2;
-
+    // alloc output array
     outArray = (char *)platform_malloc(outputLength + 1);
     // check malloc success
     if (outArray == NULL)
+    {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
     // perform the operation
     // need to tweak the parameter with the output length because it includes room for the terminator
-    result =
-        mbedtls_base64_decode((unsigned char *)outArray, (outputLength + 1), &outputLength, inArrayPointer, length);
+    result = mbedtls_base64_decode(
+        (unsigned char *)outArray,
+        (outputLength + 1),
+        &outputLength,
+        (const unsigned char *)inString->StringText(),
+        length);
 
     if (result != 0)
     {
@@ -652,8 +627,8 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    // create heap block array instance with appropriate size (the length of the output array) and type (byte which is
-    // uint8_t)
+    // create heap block array instance with appropriate size (the length of the output array)
+    // and type (byte which is uint8_t)
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.PushValueAndClear(),
         outputLength,
@@ -665,10 +640,15 @@ HRESULT Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZAR
     // copy outArray to the returnArray
     memcpy(returnArray, outArray, outputLength);
 
-    // need to free memory from outArray
-    platform_free(outArray);
+    NANOCLR_CLEANUP();
 
-    NANOCLR_NOCLEANUP();
+    if (outArray)
+    {
+        // need to free memory from outArray
+        platform_free(outArray);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 double Library_corlib_native_System_Convert::GetDoubleFractionalPart(char *str, int length)
