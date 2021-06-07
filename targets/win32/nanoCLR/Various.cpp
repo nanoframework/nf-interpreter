@@ -97,16 +97,6 @@ bool ConfigurationManager_StoreConfigurationBlock(
     return true;
 }
 
-int mbedtls_base64_encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
-{
-    return 0;
-}
-
-int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
-{
-    return 0;
-}
-
 void NFReleaseInfo::Init(
     NFReleaseInfo &NFReleaseInfo,
     unsigned short int major,
