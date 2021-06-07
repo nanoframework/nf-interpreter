@@ -178,6 +178,7 @@
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
+    <ClCompile Include="base64.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="targetPAL_Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
