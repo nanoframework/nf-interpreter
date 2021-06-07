@@ -331,6 +331,7 @@ int Library_corlib_native_System_Number::InsertGroupSeparators(
 int Library_corlib_native_System_Number::Format_G(
     char *buffer,
     CLR_RT_HeapBlock *value,
+    char formatChar,
     int precision,
     char *negativeSign,
     char *decimalSeparator)
@@ -468,7 +469,14 @@ int Library_corlib_native_System_Number::Format_G(
                     // append 'E+exp'
                     int exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
                     exponent -= offsetBecauseOfNegativeSign;
-                    ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E+%02d", exponent);
+                    if (formatChar == 'g')
+                    {
+                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e+%02d", exponent);
+                    }
+                    else
+                    {
+                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E+%02d", exponent);
+                    }
                 }
             }
 
@@ -838,7 +846,7 @@ HRESULT Library_corlib_native_System_Number::
         {
             case 'g':
             case 'G':
-                resultLength = Format_G(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_G(result, value, formatChar, precision, negativeSign, numberDecimalSeparator);
                 break;
             case 'x':
             case 'X':
