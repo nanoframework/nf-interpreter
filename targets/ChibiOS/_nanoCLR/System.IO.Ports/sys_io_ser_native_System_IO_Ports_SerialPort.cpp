@@ -606,104 +606,104 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    NF_PAL_UART *palUart = NULL;
-
-    uint8_t *data;
-    unsigned int length = 0;
-    size_t count = 0;
-    int16_t writeOffset = 0;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-    }
+        NF_PAL_UART *palUart = NULL;
 
-    // dereference the data buffer from the argument
-    CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
-    writeOffset = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
+        uint8_t *data;
+        unsigned int length = 0;
+        size_t count = 0;
+        int16_t writeOffset = 0;
 
-    // get a the pointer to the array by using the first element of the array
-    data = dataBuffer->GetElement(writeOffset);
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
-    // get the size of the buffer
-    length = dataBuffer->m_numOfElements;
+        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+        }
 
-    if (count > length)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
-    }
+        // dereference the data buffer from the argument
+        CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
+        writeOffset = stack.Arg2().NumericByRef().s4;
+        count = stack.Arg3().NumericByRef().s4;
 
-    // get pointer to PAL UART
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
-    {
+        // get a the pointer to the array by using the first element of the array
+        data = dataBuffer->GetElement(writeOffset);
+
+        // get the size of the buffer
+        length = dataBuffer->m_numOfElements;
+
+        if (count > length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
+        }
+
+        // get pointer to PAL UART
+        switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+        {
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
+            case 1:
+                palUart = &Uart1_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
+            case 2:
+                palUart = &Uart2_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
+            case 3:
+                palUart = &Uart3_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
+            case 4:
+                palUart = &Uart4_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
+            case 5:
+                palUart = &Uart5_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
+            case 6:
+                palUart = &Uart6_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
+            case 7:
+                palUart = &Uart7_PAL;
+                break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
+            case 8:
+                palUart = &Uart8_PAL;
+                break;
 #endif
+        }
+
+        // check if there is enough room in the buffer
+        if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < count)
+        {
+            // not enough room in the buffer
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
+        }
+
+        // push data to buffer
+        size_t bytesWritten = palUart->TxRingBuffer.Push(data, count);
+
+        // check if all requested bytes were written
+        if (bytesWritten != count)
+        {
+            // not sure if this is the best exception to throw here...
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        // null pointers and vars
+        pThis = NULL;
     }
-
-    // check if there is enough room in the buffer
-    if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < count)
-    {
-        // not enough room in the buffer
-        NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
-    }
-
-    // push data to buffer
-    size_t bytesWritten = palUart->TxRingBuffer.Push(data, count);
-
-    // check if all requested bytes were written
-    if (bytesWritten != count)
-    {
-        // not sure if this is the best exception to throw here...
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    // null pointers and vars
-    pThis = NULL;
-
     NANOCLR_NOCLEANUP();
 }
 
