@@ -50,6 +50,8 @@ steps:
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli
 
+          Write-Host "Uploading nanoFramework.nanoCLR.exe v$(PACKAGE_VERSION)"
+
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: 'stop'

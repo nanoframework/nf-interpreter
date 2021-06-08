@@ -23,11 +23,9 @@ steps:
         script: |
             Write-Host "$("##vso[task.setvariable variable=NBGV_Version]")0.0.0"
             Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMajor]")0"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")0"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_BuildNumber]")0"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionHeight]")$env:System_PullRequest_PullRequestNumber"
+            Write-Host "$("##vso[task.setvariable variable=NBGV_VersionMinor]")$env:System_PullRequest_PullRequestNumber"
             Write-Host "$("##vso[task.setvariable variable=NBGV_AssemblyInformationalVersion]")00000000000"
-            Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.0-alpha.$env:System_PullRequest_PullRequestNumber"
+            Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")0.0.$env:System_PullRequest_PullRequestNumber-alpha.$env:NBGV_BuildNumber"
 
   - task: PowerShell@2
     displayName: Get target build counter
