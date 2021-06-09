@@ -31,7 +31,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     // we assume only 1 can be active, abort previous just in case
     if (boolEventsTimer != NULL)
     {
-        boolEventsTimer.release();
+        delete boolEventsTimer.release();
     }
 
     if (timerCompleteFlag)
