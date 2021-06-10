@@ -902,7 +902,8 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                     {
                         /* float precision is after the decimal point */
                         int const precision_start =
-                            (fs.conv_spec == NPF_FMT_SPEC_CONV_FLOAT_DECIMAL) ? frac_chars : cbuf_len;
+                            (fs.conv_spec == NPF_FMT_SPEC_CONV_FLOAT_DECIMAL) ? frac_chars : fs.precision; 
+                                    // If not a float or decimal then the prec_pad has to end up as zero so we don't attempt any padding
                         prec_pad = NPF_MAX(0, fs.precision - precision_start);
                     }
 #elif NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS == 1

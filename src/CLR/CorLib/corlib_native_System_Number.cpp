@@ -283,7 +283,7 @@ int Library_corlib_native_System_Number::InsertGroupSeparators(
     int dotIndex = GetDotIndex(buffer, bufferContentLength);
     if (dotIndex != -1)
     {
-        significantDigitCount = dotIndex;
+        significantDigitCount = dotIndex - 1;
     }
     if (buffer[0] == '-')
     {
@@ -312,7 +312,7 @@ int Library_corlib_native_System_Number::InsertGroupSeparators(
 
         for (;;)
         {
-            if ((srcIdx - significantDigitsStartAtIndex) < groupSize)
+            if ((srcIdx - significantDigitsStartAtIndex) <= groupSize)
                 break;
 
             tgtIdx -= groupSize;
@@ -423,6 +423,11 @@ int Library_corlib_native_System_Number::Format_G(
                         {
                             ret = i + 1;
                             char first_lost_digit = buffer[ret];
+                            if (first_lost_digit == '.'
+                                && (ret + 1) < savedResultLength)
+                            {
+                                first_lost_digit = buffer[ret + 1];
+                            }
                             buffer[ret] = 0;
                             if (first_lost_digit >= '5')
                             {
