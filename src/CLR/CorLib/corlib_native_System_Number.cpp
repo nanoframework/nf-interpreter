@@ -423,8 +423,7 @@ int Library_corlib_native_System_Number::Format_G(
                         {
                             ret = i + 1;
                             char first_lost_digit = buffer[ret];
-                            if (first_lost_digit == '.'
-                                && (ret + 1) < savedResultLength)
+                            if (first_lost_digit == '.' && (ret + 1) < savedResultLength)
                             {
                                 first_lost_digit = buffer[ret + 1];
                             }
