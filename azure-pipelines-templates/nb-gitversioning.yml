@@ -3,7 +3,7 @@
 
 steps:
   - task: DotNetCoreCLI@2  
-    condition: ne(variables['system.pullrequest.isfork'], true)
+    condition: succeeded()
     displayName: Install NBGV tool
     inputs:
       command: custom
@@ -11,7 +11,7 @@ steps:
       arguments: install --tool-path . nbgv
 
   - script: nbgv cloud -a -c
-    condition: ne(variables['system.pullrequest.isfork'], true)
+    condition: succeeded()
     displayName: Set build number
 
   # Force version number for PRs
@@ -44,4 +44,3 @@ steps:
             {
                 Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
             }
-

@@ -147,64 +147,68 @@ extern "C"
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+
+    uint8_t uartNum = 0;
+    size_t read_count = 0;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
     {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        uint8_t uartNum = 0;
-        size_t read_count = 0;
-
-        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
-
-        // Quit if parameters or device is invalid or out of range
-        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
-        read_count = palUart->RxBytesToRead;
-
-        stack.SetResult_U4(read_count);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    palUart = Uart_PAL[uartNum];
+    read_count = palUart->RxBytesToRead;
+
+    stack.SetResult_U4(read_count);
+
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+
+    uint8_t uartNum = 0;
+    LPUART_Type *base = NULL;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+    base = lpuart_bases[uartNum];
+
+    // Quit if parameters or device is invalid or out of range
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == NULL)
     {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        uint8_t uartNum = 0;
-        LPUART_Type *base = NULL;
-
-        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
-        base = lpuart_bases[uartNum];
-
-        // Quit if parameters or device is invalid or out of range
-        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == NULL)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
-
-        // Free ring buffers memory
-        free(palUart->TxBuffer);
-        free(palUart->RxBuffer);
-
-        // Deinitialize device and delete FreeRTOS idle tasks
-        LPUART_Deinit(base);
-        vTaskDelete(palUart->xRTaskToNotify);
-        vTaskDelete(palUart->xWTaskToNotify);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    palUart = Uart_PAL[uartNum];
+
+    // Free ring buffers memory
+    free(palUart->TxBuffer);
+    free(palUart->RxBuffer);
+
+    // Deinitialize device and delete FreeRTOS idle tasks
+    LPUART_Deinit(base);
+    vTaskDelete(palUart->xRTaskToNotify);
+    vTaskDelete(palUart->xWTaskToNotify);
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -359,7 +363,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
                 break;
         }
 
-        switch (pThis[FIELD___stopBits].NumericByRef().s4)
+        switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
         {
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -628,7 +632,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
 
         CLR_RT_HeapBlock hbTimeout;
         hbTimeout.SetInteger(
-            (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+            (CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
         // setup timeout
         NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
@@ -672,7 +676,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
                 }
                 else
                 { // need to read from the UART
-                  // update custom state
+                    // update custom state
                     stack.m_customState = 2;
                 }
             }
@@ -709,25 +713,28 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    uint8_t uartNum;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Choose the driver for this SerialDevice
+    uartNum = (uint8_t)pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Quit if parameters or device is invalid or out of range
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
     {
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // Choose the driver for this SerialDevice
-        uint8_t uartNum = (uint8_t)pThis[FIELD___portIndex].NumericByRef().s4;
-
-        // Quit if parameters or device is invalid or out of range
-        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
-
-        // set watch char
-        palUart->WatchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    palUart = Uart_PAL[uartNum];
+
+    // set watch char
+    palUart->WatchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -735,6 +742,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
     char deviceSelectorString[41] = {0};
     int len = 0;
     for (uint8_t i = 1; i < (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])); i++)
@@ -754,5 +762,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable type
     // (a string here)
     stack.SetResult_String(deviceSelectorString);
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }

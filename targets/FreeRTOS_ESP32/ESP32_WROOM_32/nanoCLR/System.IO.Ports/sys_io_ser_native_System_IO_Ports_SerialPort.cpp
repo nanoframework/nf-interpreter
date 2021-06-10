@@ -844,7 +844,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     }
 
     CLR_RT_HeapBlock hbTimeout;
-    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     // setup timeout
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
@@ -955,15 +955,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
-        // COM1 is being used for VS debug, so it's not available
-        char deviceSelectorString[15] = "COM2,COM3";
 
-        // because the caller is expecting a result to be returned
-        // we need set a return result in the stack argument using the appropriate SetResult according to the variable
-        // type (a string here)
-        stack.SetResult_String(deviceSelectorString);
-    }
+    // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
+    // COM1 is being used for VS debug, so it's not available
+    char deviceSelectorString[15] = "COM2,COM3";
+
+    // because the caller is expecting a result to be returned
+    // we need set a return result in the stack argument using the appropriate SetResult according to the variable
+    // type (a string here)
+    stack.SetResult_String(deviceSelectorString);
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
