@@ -787,6 +787,7 @@ struct Library_corlib_native_System_Number
     static int Format_G(
         char *buffer,
         CLR_RT_HeapBlock *value,
+        char formatChar,
         int precision,
         char *negativeSign,
         char *decimalSeparator);
