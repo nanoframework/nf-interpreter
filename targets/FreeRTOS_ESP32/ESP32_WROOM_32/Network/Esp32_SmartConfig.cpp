@@ -35,7 +35,7 @@ static  void sc_callback(smartconfig_status_t status, void *pdata)
                 ESP_LOGI(TAG, "PASSWORD:%s", wifi_config->sta.password);
 
                 // Try to connect and Save config
-                Network_Interface_Connect(  0,  
+                Network_Interface_Start_Connect(  0,  
                                             (const char *)wifi_config->sta.ssid, 
                                             (const char *)wifi_config->sta.password, 
                                             NETWORK_CONNECT_SAVE_CONFIG + NETWORK_CONNECT_RECONNECT 

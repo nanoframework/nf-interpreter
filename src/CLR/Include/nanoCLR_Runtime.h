@@ -3370,6 +3370,7 @@ typedef enum Events
     Event_SpiMaster = 0x00000100,
     Event_OneWireMaster = 0x00000200,
     Event_Radio = 0x00000400,
+    Event_Wifi_Station = 0x00000800,
     Event_AppDomain = 0x02000000,
     Event_Socket = 0x20000000,
     Event_IdleCPU = 0x40000000,

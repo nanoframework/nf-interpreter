@@ -13,6 +13,8 @@
 #include <target_lwip_sntp_opts.h>
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
+extern bool Esp32_ConnectInProgress;
+extern int  Esp32_ConnectResult;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
@@ -57,6 +59,19 @@ static void PostAPStationChanged(uint connect, uint netInfo)
     Network_PostEvent(NetworkChange_NetworkEventType_APStationChanged, connect, netInfo);
 }
 
+static void PostConnectResult(int result)
+{
+    Esp32_ConnectResult = result;
+    Esp32_ConnectInProgress = false;
+
+#ifdef NetEventPrint
+    ets_printf("PostConnectResult  reason : %d\n", result);
+#endif
+
+    // fire event for Wifi station job complete
+    Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
+}
+
 static void initialize_sntp()
 {
     sntp_stop();
@@ -82,8 +97,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     {
         // Wifi station events
         case SYSTEM_EVENT_STA_START:
-            // Smart config commented out as giving exception when running
-            // xTaskCreate(smartconfig_task, "smartconfig_example_task", 4096, NULL, 3, NULL);
 #ifdef NetEventPrint
             ets_printf("SYSTEM_EVENT_STA_START\n");
 #endif
@@ -95,7 +108,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
 #endif
             PostAddressChanged(TCPIP_ADAPTER_IF_STA);
             initialize_sntp();
-            // xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
             break;
 
         case SYSTEM_EVENT_STA_LOST_IP:
@@ -109,16 +121,28 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
 #ifdef NetEventPrint
             ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
 #endif
+            if ( Esp32_ConnectInProgress)
+            {
+                PostConnectResult(0);
+            }
+
             PostAvailabilityOn(TCPIP_ADAPTER_IF_STA);
             break;
 
         case SYSTEM_EVENT_STA_DISCONNECTED:
 #ifdef NetEventPrint
-            ets_printf("SYSTEM_EVENT_STA_DISCONNECTED\n");
+            ets_printf("SYSTEM_EVENT_STA_DISCONNECTED  reason : %d\n", event->event_info.disconnected.reason);
 #endif
-            PostAvailabilityOff(TCPIP_ADAPTER_IF_STA);
-            esp_wifi_connect();
-            // xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
+
+            if ( Esp32_ConnectInProgress)
+            {
+                PostConnectResult(event->event_info.disconnected.reason);
+            }
+            else
+            {
+                PostAvailabilityOff(TCPIP_ADAPTER_IF_STA);
+                esp_wifi_connect();
+            }
             break;
 
         // Scan of available Wifi networks complete
@@ -192,7 +216,6 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
             PostAPStationChanged(0, TCPIP_ADAPTER_IF_AP + (stationIndex << 8));
 #ifdef NetEventPrint
             ets_printf("SYSTEM_EVENT_AP_STADISCONNECTED %d\n", event->event_info.sta_disconnected.aid);
-            PrintStations();
 #endif
             break;
 
