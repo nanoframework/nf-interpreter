@@ -19,7 +19,10 @@ int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config);
 bool Esp32_Ethernet_Close(int index);
 int Esp32_Wireless_Scan();
 int Esp32_Wireless_Disconnect();
-int Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 *pWireless);
+int Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless);
+
+bool Esp32_ConnectInProgress = false;
+int Esp32_ConnectResult = 0;
 
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
@@ -122,7 +125,7 @@ bool GetWirelessConfig(int configIndex, HAL_Configuration_Wireless80211 **pWirel
 //
 //  Connect to wireless network SSID using passphase
 //
-int Network_Interface_Connect(int configIndex, const char *ssid, const char *passphase, int options)
+int Network_Interface_Start_Connect(int configIndex, const char *ssid, const char *passphase, int options)
 {
     HAL_Configuration_Wireless80211 *pWireless;
 
@@ -133,15 +136,19 @@ int Network_Interface_Connect(int configIndex, const char *ssid, const char *pas
 
     if (options & NETWORK_CONNECT_RECONNECT)
     {
-        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple sintax '|='
+        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '|='
         pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
             pWireless->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
-        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple sintax '^='
+        // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '^='
         pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
             pWireless->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+
+        // Make sure we are still enabled because AutoConnect includes Enable
+        pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
+            pWireless->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
     }
 
     // Update Wireless structure with new SSID and passphase
@@ -162,9 +169,22 @@ int Network_Interface_Connect(int configIndex, const char *ssid, const char *pas
     {
         // Wireless
         case TCPIP_ADAPTER_IF_STA:
-            esp_err_t err = Esp32_Wireless_Connect(pWireless);
+            Esp32_ConnectInProgress = true;
+            esp_err_t err = Esp32_Wireless_Start_Connect(pWireless);
 
             return (int)err;
+    }
+
+    return SOCK_SOCKET_ERROR;
+}
+
+int Network_Interface_Connect_Result(int configIndex)
+{
+    switch ((tcpip_adapter_if_t)configIndex)
+    {
+        // Wireless
+        case TCPIP_ADAPTER_IF_STA:
+            return Esp32_ConnectInProgress ? -1 : Esp32_ConnectResult;
     }
 
     return SOCK_SOCKET_ERROR;

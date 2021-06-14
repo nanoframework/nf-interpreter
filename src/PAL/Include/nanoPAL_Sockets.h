@@ -520,7 +520,8 @@ bool Network_Interface_Bind(int index);
 int Network_Interface_Open(int index);
 bool Network_Interface_Close(int index);
 int Network_Interface_Disconnect(int index);
-int Network_Interface_Connect(int index, const char *ssid, const char *passphase, int options);
+int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options);
+int Network_Interface_Connect_Result(int configIndex);
 bool Network_Interface_Start_Scan(int index);
 
 // Wireless AP methods
