@@ -22,7 +22,7 @@ int Esp32_Wireless_Disconnect();
 int Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless);
 
 bool Esp32_ConnectInProgress = false;
-int  Esp32_ConnectResult = 0;
+int Esp32_ConnectResult = 0;
 
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
@@ -184,10 +184,10 @@ int Network_Interface_Connect_Result(int configIndex)
     {
         // Wireless
         case TCPIP_ADAPTER_IF_STA:
-            return Esp32_ConnectInProgress? -1 : Esp32_ConnectResult;
+            return Esp32_ConnectInProgress ? -1 : Esp32_ConnectResult;
     }
 
-    return SOCK_SOCKET_ERROR;    
+    return SOCK_SOCKET_ERROR;
 }
 
 int Network_Interface_Disconnect(int configIndex)

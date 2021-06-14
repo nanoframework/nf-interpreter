@@ -14,7 +14,7 @@
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 extern bool Esp32_ConnectInProgress;
-extern int  Esp32_ConnectResult;
+extern int Esp32_ConnectResult;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
@@ -121,7 +121,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
 #ifdef NetEventPrint
             ets_printf("SYSTEM_EVENT_STA_CONNECTED\n");
 #endif
-            if ( Esp32_ConnectInProgress)
+            if (Esp32_ConnectInProgress)
             {
                 PostConnectResult(0);
             }
@@ -134,7 +134,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
             ets_printf("SYSTEM_EVENT_STA_DISCONNECTED  reason : %d\n", event->event_info.disconnected.reason);
 #endif
 
-            if ( Esp32_ConnectInProgress)
+            if (Esp32_ConnectInProgress)
             {
                 PostConnectResult(event->event_info.disconnected.reason);
             }
