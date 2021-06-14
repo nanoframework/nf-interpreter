@@ -133,7 +133,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
             hbTimeout.SetInteger((CLR_INT64)20000 * TIME_CONVERSION__TO_MILLISECONDS);
 
             res = (esp_err_t)Network_Interface_Start_Connect(netIndex, szSsid, szPassPhase, reconnectionKind);
-            if ( res != ESP_OK )
+            if (res != ESP_OK)
             {
                 Status = UnspecifiedFailure;
                 eventResult = false;
@@ -144,7 +144,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
         while (eventResult)
         {
             int connectResult = Network_Interface_Connect_Result(netIndex);
-            if ( connectResult >= 0 )
+            if (connectResult >= 0)
             {
                 // Map ESP32 wifi reason code to WiFiConnectionStatus
                 switch (connectResult)
@@ -173,7 +173,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
                 break;
             }
 
-            // Get timeout 
+            // Get timeout
             NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
             // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
