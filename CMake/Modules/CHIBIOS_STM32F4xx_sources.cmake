@@ -85,6 +85,7 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDIOv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1
+            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv1
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
@@ -121,6 +122,7 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RN
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDIOv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv1)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
