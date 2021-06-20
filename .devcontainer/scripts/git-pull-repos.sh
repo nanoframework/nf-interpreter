@@ -10,7 +10,7 @@ git pull origin nf-build
 cd /sources/AzureRTOS
 git pull
 cd /sources/ChibiOs
-git pull origin stable_20.3.x
+git pull origin stable_21.6.x
 cd /sources/ChibiOs-Contrib
 git pull origin nanoframework
 cd /sources/mbedtls
