@@ -29,7 +29,7 @@ endif()
 # check if build was requested with a specifc Maxim Integrated Micros SDK version
 if(MAXIM_MICROS_SDK_VERSION_EMPTY)
     # no Maxim Integrated Micros SDK version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(MAXIM_MICROS_SDK_VERSION "v1.0.0.1_nano")
+    set(MAXIM_MICROS_SDK_VERSION "v1.0.0.2_nano")
 endif()
 
 if(NO_MAXIM_MICROS_SDK_SOURCE_FOLDER)
