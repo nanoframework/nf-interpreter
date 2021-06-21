@@ -1552,6 +1552,8 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_WeakReference;
 
+    CLR_RT_TypeDef_Index m_Guid;
+
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
     CLR_RT_TypeDef_Index m_Bitmap;
     CLR_RT_TypeDef_Index m_Font;
