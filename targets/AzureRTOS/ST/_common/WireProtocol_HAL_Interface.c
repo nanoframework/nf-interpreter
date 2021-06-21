@@ -66,7 +66,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     transmittedBytes = 0;
 
     // write header with 250ms timeout
-    //if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
+    if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
     {
         goto complete_operation;
     }
@@ -85,7 +85,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         // reset var
         transmittedBytes = 0;
 
-        //if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
+        if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
         {
             goto complete_operation;
         }
