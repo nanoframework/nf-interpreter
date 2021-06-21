@@ -13,8 +13,9 @@
 static virtual_timer_t nextEventTimer;
 void*  nextEventCallbackDummyArg = NULL;
 
-static void NextEventTimer_Callback( void* arg )
+static void NextEventTimer_Callback(virtual_timer_t *vtp, void* arg )
 {
+    (void)vtp;
     (void)arg;
 
     // this call also schedules the next one, if there is one
