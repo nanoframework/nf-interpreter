@@ -48,8 +48,8 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/oslib/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/rt/include)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/${TARGET_SERIES})
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/abstractions/cmsis_os)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/include)
@@ -112,10 +112,12 @@ set(CHIBIOS_SRCS
 
     # RT
     chsys.c
+    chrfcu.c
     chdebug.c
     chtrace.c
     chvt.c
     chschd.c
+    chinstances.c
     chthreads.c
     chtm.c
     chstats.c
@@ -132,6 +134,8 @@ set(CHIBIOS_SRCS
     chmemheaps.c
     chmempools.c
     chpipes.c
+    chobjcaches.c
+    chdelegates.c
     chfactory.c
 
     # required to use malloc and other newlib stuff
