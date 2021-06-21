@@ -26,16 +26,13 @@ void WP_Reception_Callback()
         {
             // TX complete, signal event
             tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
-
-            // zero counters
-            rxOperationSize = 0;
-            rxOperationSize = 0;
         }
     }
     else
     {
         // store in ring buffer
-        NanoRingBuffer_Push(&WPRingBuffer, LL_USART_ReceiveData8(USART1));
+        uint8_t rxChar = LL_USART_ReceiveData8(USART1);
+        NanoRingBuffer_Push(&WPRingBuffer, rxChar);
     }
 }
 
