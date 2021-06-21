@@ -131,10 +131,13 @@ size_t NanoRingBuffer_PushN(NanoRingBuffer *object, const uint8_t *data, size_t 
         lengthToWrite = (object->_capacity - object->_size);
     }
 
+    uint8_t *destination = object->_buffer;
+    destination += object->_write_index;
+
     // single memcpy
     if (lengthToWrite <= object->_capacity - object->_write_index)
     {
-        memcpy(object->_buffer + object->_write_index, data, lengthToWrite);
+        memcpy(destination, data, lengthToWrite);
         object->_write_index += lengthToWrite;
 
         // check if we are the end of the capacity
@@ -147,7 +150,7 @@ size_t NanoRingBuffer_PushN(NanoRingBuffer *object, const uint8_t *data, size_t 
     else
     {
         size_t chunk1Size = object->_capacity - object->_write_index;
-        memcpy(object->_buffer + object->_write_index, data, chunk1Size);
+        memcpy(destination, data, chunk1Size);
 
         size_t chunk2Size = lengthToWrite - chunk1Size;
         memcpy(object->_buffer, data + chunk1Size, chunk2Size);
@@ -186,10 +189,13 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         lengthToRead = object->_size;
     }
 
+    uint8_t *source = object->_buffer;
+    source += object->_read_index;
+
     // can read in a single memcpy
     if (lengthToRead <= object->_capacity - object->_read_index)
     {
-        memcpy(data, object->_buffer + object->_read_index, lengthToRead);
+        memcpy(data, source, lengthToRead);
         object->_read_index += lengthToRead;
 
         // check if we are at end of capacity
@@ -202,7 +208,7 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
     else
     {
         size_t chunk1Size = object->_capacity - object->_read_index;
-        memcpy(data, object->_buffer + object->_read_index, chunk1Size);
+        memcpy(data, source, chunk1Size);
 
         size_t chunk2Size = lengthToRead - chunk1Size;
         memcpy(data + chunk1Size, object->_buffer, chunk2Size);
