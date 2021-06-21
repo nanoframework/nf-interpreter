@@ -920,13 +920,13 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         }
 
         // now check edge cases
-        
+
         //////////////////////////////////////////////////////////
         // GUID: can't cast to anything except another GUID object
         CLR_RT_TypeDescriptor srcTypeDes;
         NANOCLR_CHECK_HRESULT(srcTypeDes.InitializeFromObject(*src));
 
-        CLR_RT_TypeDef_Instance& inst = srcTypeDes.m_handlerCls;
+        CLR_RT_TypeDef_Instance &inst = srcTypeDes.m_handlerCls;
 
         if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Guid.m_data)
         {
