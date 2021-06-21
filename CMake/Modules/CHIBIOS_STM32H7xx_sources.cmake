@@ -53,8 +53,7 @@ set(CHIBIOS_PORT_SRCS
 
     # RT
     chcore.c
-    chcore_v7m.c
-    chcoreasm_v7m.S
+    chcoreasm.S
 )
 
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
@@ -64,9 +63,9 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
     find_file(CHIBIOS_H7_SRC_FILE ${SRC_FILE}
         PATHS 
 
-            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
-            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M
             ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32H7xx
@@ -103,6 +102,8 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 endforeach()
 
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32H7xx)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
