@@ -91,7 +91,7 @@ size_t NanoRingBuffer_Push(NanoRingBuffer *object, const uint8_t data)
     destination += object->_write_index;
 
     *destination = data;
-    object->_write_index += sizeof(uint8_t);
+    object->_write_index++;
 
     // check if we are the end of the capacity
     if (object->_write_index == object->_capacity)
@@ -100,7 +100,10 @@ size_t NanoRingBuffer_Push(NanoRingBuffer *object, const uint8_t data)
     }
 
     // update ring buffer size
-    object->_size += sizeof(uint8_t);
+    object->_size++;
+
+    ASSERT(object->_write_index <= object->_capacity);
+    ASSERT(object->_size <= object->_capacity);
 
     return 1;
 }
@@ -122,7 +125,7 @@ size_t NanoRingBuffer_PushN(NanoRingBuffer *object, const uint8_t *data, size_t 
         return 0;
     }
 
-    if (length < (object->_capacity - object->_size))
+    if (length <= (object->_capacity - object->_size))
     {
         lengthToWrite = length;
     }
@@ -152,14 +155,19 @@ size_t NanoRingBuffer_PushN(NanoRingBuffer *object, const uint8_t *data, size_t 
         size_t chunk1Size = object->_capacity - object->_write_index;
         memcpy(destination, data, chunk1Size);
 
+        data += chunk1Size;
+
         size_t chunk2Size = lengthToWrite - chunk1Size;
-        memcpy(object->_buffer, data + chunk1Size, chunk2Size);
+        memcpy(object->_buffer, data, chunk2Size);
 
         object->_write_index = chunk2Size;
     }
 
     // update ring buffer size
     object->_size += lengthToWrite;
+
+    ASSERT(object->_write_index <= object->_capacity);
+    ASSERT(object->_size <= object->_capacity);
 
     return lengthToWrite;
 }
@@ -180,14 +188,16 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         return 0;
     }
 
-    if (length < object->_size)
-    {
-        lengthToRead = length;
-    }
-    else
+    if (length > object->_size)
     {
         lengthToRead = object->_size;
     }
+    else
+    {
+        lengthToRead = length;
+    }
+
+    ASSERT(lengthToRead <= object->_size);
 
     uint8_t *source = object->_buffer;
     source += object->_read_index;
@@ -210,8 +220,10 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         size_t chunk1Size = object->_capacity - object->_read_index;
         memcpy(data, source, chunk1Size);
 
+        data += chunk1Size;
+        
         size_t chunk2Size = lengthToRead - chunk1Size;
-        memcpy(data + chunk1Size, object->_buffer, chunk2Size);
+        memcpy(data, object->_buffer, chunk2Size);
 
         object->_read_index = chunk2Size;
     }
@@ -227,6 +239,9 @@ size_t NanoRingBuffer_PopN(NanoRingBuffer *object, uint8_t *data, size_t length)
         object->_write_index = 0;
         object->_read_index = 0;
     }
+
+    ASSERT(object->_read_index <= object->_capacity);
+    ASSERT(object->_size <= object->_capacity);
 
     return lengthToRead;
 }
@@ -247,13 +262,13 @@ size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
         return 0;
     }
 
-    if (length < object->_size)
+    if (length > object->_size)
     {
-        lengthToRead = length;
+        lengthToRead = object->_size;
     }
     else
     {
-        lengthToRead = object->_size;
+        lengthToRead = length;
     }
 
     // can read in a single memcpy
@@ -286,6 +301,9 @@ size_t NanoRingBuffer_Pop(NanoRingBuffer *object, size_t length)
         object->_write_index = 0;
         object->_read_index = 0;
     }
+
+    ASSERT(object->_read_index <= object->_capacity);
+    ASSERT(object->_size <= object->_capacity);
 
     return lengthToRead;
 }
