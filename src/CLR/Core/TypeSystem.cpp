@@ -2816,6 +2816,8 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Reflection", "RuntimeFieldInfo", m_FieldInfo),
 
     TIL("System", "WeakReference", m_WeakReference),
+    
+    TIL("System", "Guid", m_Guid),
 
     TIL("nanoFramework.UI", "Bitmap", m_Bitmap),
     TIL("nanoFramework.UI", "Font", m_Font),
