@@ -58,7 +58,7 @@ static const CommandHandlerLookup c_Lookup_Reply[] = {
     /*******************************************************************************************************************************************************************/
 };
 
-int Messaging_ProcessPayload(WP_Message* message)
+uint8_t Messaging_ProcessPayload(WP_Message* message)
 {
     // Prevent processing duplicate packets
     if (message->m_header.m_seq == lastPacketSequence)
