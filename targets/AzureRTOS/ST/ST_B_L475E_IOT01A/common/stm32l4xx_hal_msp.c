@@ -90,5 +90,5 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef *hrng)
 
 uint32_t HAL_GetTick(void)
 {
-    return tx_time_get() * 10;
+    return tx_time_get() / (TX_TIMER_TICKS_PER_SECOND / 1000);
 }
