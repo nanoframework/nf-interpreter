@@ -112,6 +112,7 @@ uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_
 
     return readBytes;
 }
+
 uint32_t nano_HAL_UART_SendTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_t timeout)
 {
     uint32_t txBytes;
@@ -175,5 +176,22 @@ void USART_Error_Callback()
     {
         // Unexpected IT source
         LL_USART_ClearFlag_ORE(USART1);
+    }
+
+    // reception active?
+    if (rxOperationCount > 0)
+    {
+        rxOperationCount = 0;        
+    }
+
+    if(txOperationCount > 0)
+    {
+        txOperationCount = 0;
+        
+        // Disable TXE interrupt
+        LL_USART_DisableIT_TXE(USART1);
+        
+        // Disable TC interrupt
+        LL_USART_DisableIT_TC(USART1); 
     }
 }
