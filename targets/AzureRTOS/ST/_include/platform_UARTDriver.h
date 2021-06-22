@@ -24,8 +24,12 @@ extern NanoRingBuffer WPRingBuffer;
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 void WP_Reception_Callback();
+void WP_Transmition_Callback();
+void WP_TransmitionComplete_Callback();
 void USART_Error_Callback(void);
+
 uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_t timeout);
+uint32_t nano_HAL_UART_SendTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_t timeout);
 
 #ifdef __cplusplus
 }
