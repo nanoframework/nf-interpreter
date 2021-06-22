@@ -9,7 +9,6 @@
 #include <stm32l4xx_ll_gpio.h>
 #include <stm32l4xx_ll_bus.h>
 #include <stm32l4xx_ll_rcc.h>
-#include <stm32l4xx_ll_dma.h>
 #include <stm32l4xx_ll_usart.h>
 #include <stm32l4xx_ll_rtc.h>
 #include <stm32l4xx_ll_pwr.h>
@@ -199,20 +198,6 @@ void WProtocol_COM_Init()
     LL_GPIO_SetPinOutputType(GPIOB, LL_GPIO_PIN_7, LL_GPIO_OUTPUT_PUSHPULL);
     LL_GPIO_SetPinPull(GPIOB, LL_GPIO_PIN_7, LL_GPIO_PULL_UP);
 
-    // USART configuration
-    LL_USART_Disable(USART1);
-    LL_USART_SetTransferDirection(USART1, LL_USART_DIRECTION_TX_RX);
-    LL_USART_ConfigCharacter(USART1, LL_USART_DATAWIDTH_8B, LL_USART_PARITY_NONE, LL_USART_STOPBITS_1);
-    LL_USART_SetHWFlowCtrl(USART1, LL_USART_HWCONTROL_NONE);
-    LL_USART_SetOverSampling(USART1, LL_USART_OVERSAMPLING_16);
-    LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
-
-    LL_USART_Enable(USART1);
-
-    // Enable RXNE and Error interrupts
-    LL_USART_EnableIT_RXNE(USART1);
-    LL_USART_EnableIT_ERROR(USART1);
-
     // NVIC Configuration for USART interrupts
     //  - Set priority for USARTx_IRQn
     //  - Enable USARTx_IRQn
@@ -223,28 +208,29 @@ void WProtocol_COM_Init()
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
     LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
 
-    // Enable DMA clock
-    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+    // USART configuration
+    // need to disable before changing configurations
+    LL_USART_Disable(USART1);
 
-    // ##-4- Configure the NVIC for DMA
-    // NVIC configuration for DMA transfer complete interrupt (USART1_TX)
-    NVIC_SetPriority(DMA1_Channel4_IRQn, 0);
-    NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+    LL_USART_SetTransferDirection(USART1, LL_USART_DIRECTION_TX_RX);
+    LL_USART_ConfigCharacter(USART1, LL_USART_DATAWIDTH_8B, LL_USART_PARITY_NONE, LL_USART_STOPBITS_1);
+    LL_USART_SetTransferBitOrder(USART1, LL_USART_BITORDER_LSBFIRST);
+    LL_USART_ConfigClock(USART1, LL_USART_PHASE_2EDGE, LL_USART_POLARITY_LOW, LL_USART_LASTCLKPULSE_OUTPUT);
+    LL_USART_SetHWFlowCtrl(USART1, LL_USART_HWCONTROL_NONE);
+    LL_USART_SetOverSampling(USART1, LL_USART_OVERSAMPLING_16);
+    LL_USART_SetBaudRate(USART1, LL_RCC_GetUSARTClockFreq(LL_RCC_USART1_CLKSOURCE), LL_USART_OVERSAMPLING_16, 921600);
 
-    // Configure the DMA functional parameters for transmission
-    LL_DMA_ConfigTransfer(
-        DMA1,
-        LL_DMA_CHANNEL_4,
-        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_PRIORITY_HIGH | LL_DMA_MODE_NORMAL | LL_DMA_PERIPH_NOINCREMENT |
-            LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_BYTE | LL_DMA_MDATAALIGN_BYTE);
-    LL_DMA_ConfigAddresses(
-        DMA1,
-        LL_DMA_CHANNEL_4,
-        (uint32_t)NULL,
-        LL_USART_DMA_GetRegAddr(USART2, LL_USART_DMA_REG_DATA_TRANSMIT),
-        LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_4));
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, 0);
-    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_4, LL_DMA_REQUEST_2);
+    LL_USART_Enable(USART1);
+
+    // Poll USART initialisation
+    // TODO: needs to be improve so it won't block
+    while((!(LL_USART_IsActiveFlag_TEACK(USART1))) || (!(LL_USART_IsActiveFlag_REACK(USART1))))
+    { 
+    }
+
+    // Enable RXNE and Error interrupts
+    LL_USART_EnableIT_RXNE(USART1);
+    LL_USART_EnableIT_ERROR(USART1);
 }
 
 void BoardInit(bool initSensors, bool initGpios)
