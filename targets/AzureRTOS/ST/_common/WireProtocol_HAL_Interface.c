@@ -19,7 +19,6 @@ extern UART_HandleTypeDef WProtocolUart;
 TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 uint32_t receivedBytes;
-uint32_t transmittedBytes;
 
 uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
@@ -51,8 +50,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    uint32_t dummy;
-    uint8_t waitResult;
+    uint32_t txBytes;
     uint8_t success = false;
 
     TRACE(
@@ -62,47 +60,26 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         message->m_header.m_flags,
         message->m_header.m_size);
 
-    // reset var
-    transmittedBytes = 0;
+    // write header with 10ms timeout
+    txBytes = nano_HAL_UART_SendTimeout((uint8_t *)&message->m_header, sizeof(message->m_header), 10);
 
-    // write header with 250ms timeout
-    if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)&message->m_header, sizeof(message->m_header)) != HAL_OK)
+    if(txBytes == sizeof(message->m_header))
     {
-        goto complete_operation;
-    }
-
-    // wait for event
-    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(10));
-
-    if (waitResult != TX_SUCCESS || transmittedBytes != sizeof(message->m_header))
-    {
-        goto complete_operation;
-    }
-
-    // if there is anything on the payload send it to the output stream
-    if (message->m_header.m_size && message->m_payload)
-    {
-        // reset var
-        transmittedBytes = 0;
-
-        if (HAL_UART_Transmit_DMA(&WProtocolUart, (uint8_t *)message->m_payload, message->m_header.m_size) != HAL_OK)
+        // if there is anything on the payload, send it to the output stream
+        if (message->m_header.m_size && message->m_payload)
         {
-            goto complete_operation;
+            txBytes = nano_HAL_UART_SendTimeout((uint8_t *)message->m_payload, message->m_header.m_size, 250);
+            
+            if (txBytes == message->m_header.m_size)
+            {
+                success = true;    
+            }
         }
-
-        // wait for event
-        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(250));
     }
-
-    if (waitResult == TX_SUCCESS && transmittedBytes == message->m_header.m_size)
+    else
     {
         success = true;
     }
-
-complete_operation:
-    // stop any ongoing DMA operation
-    //HAL_UART_DMAStop(&WProtocolUart);
     
-    // done here
     return success;
 }

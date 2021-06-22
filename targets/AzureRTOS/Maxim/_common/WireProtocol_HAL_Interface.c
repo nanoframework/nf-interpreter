@@ -26,7 +26,7 @@ void UART_RxCallback(mxc_uart_req_t *req, int error)
         receivedBytes = req->rxCnt;
 
         // use event flags group as a variable to transmit the amount of received bytes
-        tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
+        tx_event_flags_set(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR);
     }
 }
 
@@ -37,7 +37,7 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
         transmittedBytes = req->txCnt;
 
         // use event flags group as a variable to transmit the amount of received bytes
-        tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
+        tx_event_flags_set(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR);
     }
 }
 
@@ -68,7 +68,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         if (NanoUART_TransactionAsync(&rxRequest) == E_NO_ERROR)
         {
             // wait for event
-            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 20 );
+            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 20 );
         }
         else
         {
@@ -132,7 +132,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     }
 
     // wait for event
-    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 15);
+    waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 15);
 
     if(waitResult != TX_SUCCESS ||
        transmittedBytes != txRequest.txLen)
@@ -160,7 +160,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         }
 
         // wait for event
-        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, 60);
+        waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 60);
     }
 
     if(waitResult != TX_SUCCESS||
