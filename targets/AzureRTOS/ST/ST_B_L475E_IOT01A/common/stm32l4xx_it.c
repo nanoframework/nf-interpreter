@@ -6,17 +6,11 @@
 
 #include <stm32l4xx_hal.h>
 #include <stm32l475e_iot01.h>
-#include <stm32l4xx_ll_dma.h>
-
-#include <tx_api.h>
 
 #include <platform.h>
 #include <platform_UARTDriver.h>
 
 extern UART_HandleTypeDef WProtocolUart;
-extern TX_EVENT_FLAGS_GROUP wpUartEvent;
-// extern uint32_t receivedBytes;
-extern uint32_t transmittedBytes;
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Exceptions Handlers                         */
@@ -100,46 +94,28 @@ void USART1_IRQHandler(void)
         // RXNE flag will be cleared by reading of RDR register (done in call)
         WP_Reception_Callback();
     }
-    else
+
+    if(LL_USART_IsEnabledIT_TXE(USART1) && LL_USART_IsActiveFlag_TXE(USART1))
     {
-        // Call Error function
+        // TXE flag will be automatically cleared when writing new data in TDR register
+
+        // Call function in charge of handling empty DR => will lead to transmission of next character
+        WP_Transmition_Callback();
+    }
+  
+    if(LL_USART_IsEnabledIT_TC(USART1) && LL_USART_IsActiveFlag_TC(USART1))
+    {
+        // Clear TC flag
+        LL_USART_ClearFlag_TC(USART1);
+        
+        // Call function in charge of handling end of transmission of sent character
+        // and prepare next character transmission 
+        WP_TransmitionComplete_Callback();
+    }
+
+    if(LL_USART_IsEnabledIT_ERROR(USART1) && LL_USART_IsActiveFlag_NE(USART1))
+    {
+        /* Call Error function */
         USART_Error_Callback();
     }
 }
-
-void DMA1_Channel4_IRQHandler(void)
-{
-    if (LL_DMA_IsActiveFlag_TC7(DMA1))
-    {
-        LL_DMA_ClearFlag_GI7(DMA1);
-
-        // set event flag
-        tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
-    }
-    else if (LL_DMA_IsActiveFlag_TE7(DMA1))
-    {
-        // Disable DMA1 Tx Channel
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_7);
-    }
-}
-
-// void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
-// {
-//     if (UartHandle->Instance == USART1)
-//     {
-//         // update count
-//         transmittedBytes = UartHandle->TxXferSize - UartHandle->TxXferCount;
-//     }
-// }
-
-// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
-// {
-//     if (UartHandle->Instance == USART1)
-//     {
-//         // update count
-//         receivedBytes = UartHandle->RxXferSize - UartHandle->RxXferCount;
-
-//         // set event flag
-//         tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
-//     }
-// }

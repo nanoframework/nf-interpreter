@@ -8,36 +8,72 @@
 
 #include <tx_api.h>
 
+// RX control vars
 uint32_t rxOperationSize;
 uint32_t rxOperationCount;
 uint8_t *rxOperationBuffer;
 
+// TX control vars
+uint32_t txOperationSize;
+uint32_t txOperationCount;
+uint8_t *txOperationBuffer;
+
 void WP_Reception_Callback()
 {
+    uint8_t rxChar = LL_USART_ReceiveData8(USART1);
+
     // reception active?
     if (rxOperationCount > 0)
     {
         // ongoing RX operation
-        *rxOperationBuffer = LL_USART_ReceiveData8(USART1);
+        *rxOperationBuffer = rxChar;
         rxOperationBuffer++;
         rxOperationCount--;
 
         if (rxOperationCount == 0U)
         {
-            // TX complete, signal event
-            tx_event_flags_set(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR);
+            // RX complete, signal event
+            tx_event_flags_set(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR);
         }
     }
     else
     {
         // store in ring buffer
-        uint8_t rxChar = LL_USART_ReceiveData8(USART1);
         NanoRingBuffer_Push(&WPRingBuffer, rxChar);
     }
 }
 
+void WP_Transmition_Callback()
+{
+    if(txOperationCount == 1)
+    {
+        // Disable TXE interrupt
+        LL_USART_DisableIT_TXE(USART1);
+        
+        // Enable TC interrupt
+        LL_USART_EnableIT_TC(USART1);
+    }
+
+    // Fill TDR with a new char
+    LL_USART_TransmitData8(USART1, *txOperationBuffer);
+
+    txOperationBuffer++;
+    txOperationCount--;
+}
+
+void WP_TransmitionComplete_Callback()
+{
+    // Disable TC interrupt
+    LL_USART_DisableIT_TC(USART1);
+
+    // TX complete, signal event
+    tx_event_flags_set(&wpUartEvent, WP_UART_TX_EVENT_FLAG, TX_OR);
+}
+
 uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_t timeout)
 {
+    TX_INTERRUPT_SAVE_AREA
+    
     uint32_t readBytes;
     uint32_t dummy;
 
@@ -46,6 +82,8 @@ uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_
     rxOperationCount = requestedSize;
     rxOperationBuffer = ptr;
 
+    TX_DISABLE
+
     // try read whatever is in the ring buffer
     readBytes = NanoRingBuffer_PopN(&WPRingBuffer, rxOperationBuffer, requestedSize);
     rxOperationCount -= readBytes;
@@ -53,13 +91,12 @@ uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_
     // update pointer
     rxOperationBuffer += readBytes;
 
+    TX_RESTORE
+
     if (rxOperationCount > 0)
     {
-        // not all requested bytes were read
-        // uart->RxState = HAL_UART_STATE_BUSY_RX;
-
         // wait for event
-        tx_event_flags_get(&wpUartEvent, WP_UART_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(timeout));
+        tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(timeout));
 
         readBytes = rxOperationSize - rxOperationCount;
 
@@ -74,6 +111,43 @@ uint32_t nano_HAL_UART_ReadTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_
     rxOperationCount = 0;
 
     return readBytes;
+}
+uint32_t nano_HAL_UART_SendTimeout(uint8_t *ptr, uint32_t requestedSize, uint32_t timeout)
+{
+    uint32_t txBytes;
+    uint32_t dummy;
+
+    // are there enough bytes in the ring buffer?
+    txOperationSize = requestedSize;
+    txOperationCount = requestedSize;
+    txOperationBuffer = ptr;
+    
+    if (txOperationCount > 0)
+    {
+        // Start USART transmission : Will initiate TXE interrupt after TDR register is empty
+        LL_USART_TransmitData8(USART1, *txOperationBuffer);
+
+        txOperationBuffer++;
+        txOperationCount--;
+
+        // Enable TXE interrupt
+        LL_USART_EnableIT_TXE(USART1); 
+
+        // wait for event
+        tx_event_flags_get(&wpUartEvent, WP_UART_TX_EVENT_FLAG, TX_OR_CLEAR, &dummy, TX_TICKS_PER_MILLISEC(timeout));
+
+        txBytes = txOperationSize - txOperationCount;
+    }
+    else
+    {
+        txBytes = requestedSize;
+    }
+
+    // zero counters
+    txOperationSize = 0;
+    txOperationCount = 0;
+
+    return txBytes;
 }
 
 void USART_Error_Callback()
