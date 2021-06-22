@@ -165,39 +165,57 @@ bool STM32FlashDriver_Write(
         }
         else
         {
-            temp = *(uint64_t *)buffer;
+            // clear content
+            data = 0;
 
-            // "move" data to start of position
-            data = temp << sizeof(uint8_t) * (sizeof(uint64_t) - remainingBytes);
+            do
+            {
+                // clear content
+                temp = 0;
+            
+                // load LSbyte
+                temp = *buffer;
 
-            // need to clear the "remaining" bytes
+                // "move" data to start of position
+                data |= temp << 8 * (sizeof(uint64_t) - remainingBytes);
+
+                buffer++;
+                remainingBytes--;
+
+            } while (remainingBytes > 0);
+              
+            // need to clear any of the "remaining" bytes
             data |= 0xFFFFFFFFFFFFFFFF;
         }
 
         success = (HAL_FLASH_Program(programType, address, data) == HAL_OK);
         if (success)
         {
-            if (programType == FLASH_TYPEPROGRAM_FAST_AND_LAST || programType == FLASH_TYPEPROGRAM_FAST)
+            // check if counters need to be updated
+            if (remainingBytes >= sizeof(uint64_t))
             {
-                // increase address
-                address += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
+                if (programType == FLASH_TYPEPROGRAM_FAST_AND_LAST || programType == FLASH_TYPEPROGRAM_FAST)
+                {
+                    // increase address
+                    address += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
 
-                // move buffer pointer
-                buffer += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
+                    // move buffer pointer
+                    buffer += (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
 
-                // update counter
-                remainingBytes -= (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
-            }
-            else
-            {
-                // increase address
-                address += sizeof(uint64_t);
+                    // update counter
+                    remainingBytes -= (sizeof(uint64_t) * FLASH_NB_DOUBLE_WORDS_IN_ROW);
+                }
+                else
+                {
+                    // increase address
+                    address += sizeof(uint64_t);
 
-                // move buffer pointer
-                buffer += sizeof(uint64_t);
+                    // move buffer pointer
+                    buffer += sizeof(uint64_t);
 
-                // update counter
-                remainingBytes -= sizeof(uint64_t);
+                    // update counter
+                    remainingBytes -= sizeof(uint64_t);
+                }
             }
         }
         else
@@ -206,6 +224,8 @@ bool STM32FlashDriver_Write(
             // get error
             volatile uint32_t errorCode = HAL_FLASH_GetError();
             (void)errorCode;
+
+            __NOP();
 #endif
             break;
         }
