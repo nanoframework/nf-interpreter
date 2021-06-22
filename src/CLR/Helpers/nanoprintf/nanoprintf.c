@@ -555,7 +555,7 @@ int npf__dtoa_rev(char *buf, double d, unsigned base, npf__format_spec_conversio
 
 int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
 {
-    npf__format_spec_t fs;
+    npf__format_spec_t fs = {};
     char const *cur = format;
     int n = 0, sign = 0, i;
 
