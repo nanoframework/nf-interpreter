@@ -50,8 +50,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4,
     NULL,
     NULL,
@@ -102,7 +100,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
     "System.IO.Ports",
     0x61B8380C,
     method_lookup,
-    { 100, 1, 1, 2 }
+    { 100, 1, 1, 3 }
 };
 
 // clang-format on
