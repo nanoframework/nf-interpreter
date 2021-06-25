@@ -202,10 +202,10 @@ option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
 
 if(NF_FEATURE_LIGHT_MATH)
     set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
-    message(STATUS "Complex math functions not available")
+    message(STATUS "Complex math functions available")
 else()
     set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
-    message(STATUS "Complex math functions available")
+    message(STATUS "Complex math functions not available")
 endif()
 
 ###################################################################################
