@@ -19,7 +19,7 @@
  * generator plugin. Do not edit manually.
  */
 
-#include "hal.h"
+#include "hal__.h"
 #include "stm32_gpio.h"
 
 /*===========================================================================*/

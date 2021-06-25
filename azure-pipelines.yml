@@ -31,7 +31,6 @@ jobs:
 
   # get commit message
   - powershell: |
-
       if($env:StartReleaseCandidate -like "true")
       {
         # this is a release prep so NO build
