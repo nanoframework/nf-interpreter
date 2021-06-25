@@ -53,6 +53,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialDataEvent
     static const int FIELD__Event = 4;
 
     //--//
+
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialDataReceivedEventArgs
@@ -60,6 +61,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialDataReceivedEventArgs
     static const int FIELD___data = 1;
 
     //--//
+
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceController
@@ -69,6 +71,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceController
     static const int FIELD_STATIC__s_deviceCollection = 2;
 
     //--//
+
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
@@ -94,6 +97,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     static const int FIELD___syncLock = 17;
     static const int FIELD___newLine = 18;
     static const int FIELD___hasBeenOpened = 19;
+    static const int FIELD___encoding = 20;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
@@ -106,6 +110,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
+
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceEventListener
@@ -113,6 +118,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceEventListener
     static const int FIELD___serialDevicesMap = 1;
 
     //--//
+
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialStream
@@ -120,6 +126,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialStream
     static const int FIELD___serial = 1;
 
     //--//
+
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
