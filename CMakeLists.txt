@@ -424,6 +424,15 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
+# Wire Protocol options
+option(NF_WP_IMPLEMENTS_CRC32 "option to report if target implements CRC32 in Wire Protocol" ON)
+
+# handle Wire Protocol _TRACE_ preferences, if any
+option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
+option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
+option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
+option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
+option(NF_WP_TRACE_ALL "option to Trace  with Wire Protocol")
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
