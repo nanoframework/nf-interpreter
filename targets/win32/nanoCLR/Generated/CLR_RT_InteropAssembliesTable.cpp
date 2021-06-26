@@ -14,6 +14,7 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Resour
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Networking_Sntp;
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
 
 // nanoFramework class libraries declarations
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
@@ -31,6 +32,7 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_Windows_Storage,
     &g_CLR_AssemblyNative_nanoFramework_Networking_Sntp,
     &g_CLR_AssemblyNative_System_Net,
+    &g_CLR_AssemblyNative_System_IO_Ports,
     NULL};
 
 uint16_t g_CLR_InteropAssembliesCount = ARRAYSIZE(g_CLR_InteropAssembliesNativeData) - 1;
