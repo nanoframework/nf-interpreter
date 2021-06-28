@@ -244,18 +244,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         }
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-        txBufferSize = UART1_TX_SIZE;
-#endif
         // alloc buffer memory
-        palUart->TxBuffer = (uint8_t *)platform_malloc(txBufferSize);
-        // sanity check
-        if (palUart->TxBuffer == NULL)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-        }
+        palUart->TxBuffer = (uint8_t *)Uart1_TxBuffer;
 
         // init buffer
-        palUart->TxRingBuffer.Initialize(palUart->TxBuffer, txBufferSize);
+        palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
+#else
+#error "UART1 NOT CONFIGURED. Check TI SYSCONFIG."
+#endif
 
         // all the rest
         palUart->UartNum = uartNum;
@@ -418,9 +414,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
         //                  FIELD___unstoredBufferLength]
         //     .NumericByRef()
         //     .s4 = palUart->TxRingBuffer.Length();
-
-        // null pointers and vars
-        pThis = NULL;
     }
     NANOCLR_NOCLEANUP();
 }
@@ -428,6 +421,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock hbTimeout;
 
     NF_PAL_UART *palUart = NULL;
 
@@ -491,8 +486,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4(C
 
         if (palUart->IsLongRunning)
         {
+
             // setup timeout
-            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTimeSpan(pThis[FIELD___writeTimeout], timeoutTicks));
+            hbTimeout.SetInteger(
+                (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
             // this is a long running operation and hasn't started yet
             // perform operation by launching a thread to
@@ -751,6 +749,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable
     // type (a string here)
     stack.SetResult_String(deviceSelectorString);
-    
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
