@@ -578,7 +578,7 @@
  * sys_thread_new() when the thread is created.
  */
 #ifndef TCPIP_THREAD_PRIO
-#define TCPIP_THREAD_PRIO (NORMALPRIO)
+#define TCPIP_THREAD_PRIO (NORMALPRIO + 2)
 #endif
 
 /**
