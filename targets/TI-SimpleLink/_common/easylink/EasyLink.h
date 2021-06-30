@@ -155,13 +155,16 @@ extern "C"
 #endif
 
 #include <nanoCLR_Headers.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <ti/drivers/rf/RF.h>
+#include <stdlib.h>
 #include "ti_easylink_config.h"
 #include "ti_drivers_config.h"
 #include "ti_radio_config.h"
 
 //! \brief EasyLink API Version
-#define EASYLINK_API_VERSION "EasyLink-v3.10.01"
+#define EASYLINK_API_VERSION "EasyLink-v4.10.00"
 
 //! \brief defines the Tx/Rx Max Address Size
 #define EASYLINK_MAX_ADDR_SIZE              8
@@ -294,7 +297,8 @@ typedef struct
 
     union{
 #if ((defined LAUNCHXL_CC1352P1) || (defined LAUNCHXL_CC1352P_2) || \
-     (defined LAUNCHXL_CC1352P_4))
+     (defined LAUNCHXL_CC1352P_4)|| (defined LP_CC1352P7_1)      || \
+     (defined LP_CC1352P7_4))
         rfc_CMD_PROP_RADIO_DIV_SETUP_PA_t *RF_pCmdPropRadioDivSetup;
 #else
         rfc_CMD_PROP_RADIO_DIV_SETUP_t *RF_pCmdPropRadioDivSetup;
