@@ -8,6 +8,8 @@
 
 // #include <nanoHAL_Power.h>
 
+#define PLATFORM_DELAY(milliSecs) Sleep(milliSecs);
+
 // set min possible number of sockets
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 1
 

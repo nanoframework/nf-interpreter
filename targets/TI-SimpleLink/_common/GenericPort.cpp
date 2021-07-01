@@ -39,20 +39,3 @@ extern "C" uint32_t DebuggerPort_WriteProxy(const char *format, ...)
 
     return chars;
 }
-
-uint32_t GenericPort_Write(int portNum, const char *data, size_t size)
-{
-    (void)portNum;
-    size_t bytesWritten;
-
-    if (CLR_EE_DBG_IS_NOT(Enabled))
-    {
-        // debugger port is NOT in use, OK to output to UART
-        // send characters directly to the UART port
-        UART2_writeTimeout(uart, data, size, &bytesWritten, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
-
-        return bytesWritten;
-    }
-
-    return (uint32_t)size;
-}
