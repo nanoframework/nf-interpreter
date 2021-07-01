@@ -6,8 +6,43 @@
 #include <nanoHAL.h>
 #include <nanoWeak.h>
 #include "FreeRTOS.h"
+#include "task.h"
 #include "time.h"
 #include <sys/time.h>
+
+
+#if configUSE_16_BIT_TICKS == 0
+#define TOPVALUE ((uint64_t)0x100000000ull)
+#elif configUSE_16_BIT_TICKS == 1
+#define TOPVALUE ((uint64_t)0x10000ull)
+#else
+#error "Tick resolution not supported."
+#endif
+
+uint64_t HAL_Time_CurrentSysTicks(void)
+{
+
+    static uint64_t extendedCounter = 0;
+    static uint32_t prevKernelTick = 0;
+    uint32_t kernelTick = 0;
+
+    // Check if we have overflow during this call
+    // It is assumed that this function gets called twice within its overflow range
+    // (e.g. for 32-bit counter this is 49.71 days)
+    GLOBAL_LOCK();
+    {
+        kernelTick = xTaskGetTickCountFromISR();
+
+        if (prevKernelTick > kernelTick)
+        {
+            extendedCounter += TOPVALUE;
+        }
+        prevKernelTick = kernelTick;
+    }
+    GLOBAL_UNLOCK();
+
+    return extendedCounter + kernelTick;
+}
 
 // Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
 uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)

@@ -8,10 +8,21 @@
 
 #include  <sys/time.h>
 #include  <time.h>
-
 #include <esp32_os.h>
+#include <stdint.h>
+#include <targetHAL.h>
 
-#define HAL_Time_CurrentSysTicks    xTaskGetTickCount
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    uint64_t HAL_Time_CurrentSysTicks(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #define ESP32_TICKS_PER_MS(x)       ((x * (uint64_t)configTICK_RATE_HZ) / 1000)
 
 #endif //_TARGET_HAL_TIME_H_

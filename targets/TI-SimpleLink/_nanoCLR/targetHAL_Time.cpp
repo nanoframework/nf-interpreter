@@ -14,6 +14,33 @@
 #include <time.h>
 #include <ti/sysbios/hal/Seconds.h>
 
+#define TOPVALUE ((uint64_t)0x100000000ull)
+
+uint64_t HAL_Time_CurrentSysTicks(void)
+{
+
+    static uint64_t extendedCounter = 0;
+    static uint32_t prevKernelTick = 0;
+    uint32_t kernelTick = 0;
+
+    // Check if we have overflow during this call
+    // It is assumed that this function gets called twice within its overflow range
+    // (e.g. for 32-bit counter this is 49.71 days)
+    GLOBAL_LOCK();
+    {
+        kernelTick = Clock_getTicks();
+
+        if (prevKernelTick > kernelTick)
+        {
+            extendedCounter += TOPVALUE;
+        }
+        prevKernelTick = kernelTick;
+    }
+    GLOBAL_UNLOCK();
+
+    return extendedCounter + kernelTick;
+}
+
 // Returns the current date time from the RTC 
 uint64_t  HAL_Time_CurrentDateTime(bool datePartOnly)
 {
