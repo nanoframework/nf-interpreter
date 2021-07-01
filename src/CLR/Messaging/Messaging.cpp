@@ -385,8 +385,9 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
     return true;
 }
 
-// wrapper function for CLR_Messaging::ProcessPayload(
-extern "C" bool Messaging_ProcessPayload(WP_Message *msg)
+// wrapper function for CLR_Messaging::ProcessPayload(...)
+// has to mirror declaration of the function with the same name for platorms that implement nanoBooter
+extern "C" uint8_t Messaging_ProcessPayload(WP_Message *msg)
 {
     if (g_CLR_DBG_Debugger == NULL)
     {
