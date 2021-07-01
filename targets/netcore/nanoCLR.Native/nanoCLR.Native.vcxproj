@@ -163,10 +163,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="..\Include\nanoHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
+    <ClInclude Include="nanoCLR_native.h" />
     <ClInclude Include="platform_selector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
+    <ClCompile Include="nanoCLR_native.cpp" />
     <ClCompile Include="targetPAL_Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
     <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
@@ -201,7 +202,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="targetPAL_Time.cpp" />
     <ClCompile Include="targetRandom.cpp" />
     <ClCompile Include="Target_BlockStorage.cpp" />
@@ -313,7 +313,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
       <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>
-    </ProjectReference>  
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

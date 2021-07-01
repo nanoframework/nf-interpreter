@@ -42,12 +42,12 @@
     <ClInclude Include="..\Include\target_platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="nanoCLR_native.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Various.cpp">
@@ -132,6 +132,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="nanoCLR_native.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
