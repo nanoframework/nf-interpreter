@@ -1,13 +1,30 @@
-// pch.h: This is a precompiled header file.
-// Files listed below are compiled only once, improving build performance for future builds.
-// This also affects IntelliSense performance, including code completion and many code browsing features.
-// However, files listed here are ALL re-compiled if any one of them is updated between builds.
-// Do not add files here that you will be updating frequently as this negates the performance advantage.
+//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
 
-#ifndef PCH_H
-#define PCH_H
+#pragma once
 
-// add headers that you want to pre-compile here
-#include "framework.h"
+#include "targetver.h"
 
-#endif //PCH_H
+#include <stdio.h>
+#include <tchar.h>
+
+#include <Windows.h>
+#include <mutex>
+
+// TODO: reference additional headers your program requires here
+
+#include <crtdbg.h>
+#include <nanoCLR_Runtime.h>
+#include <nanoCLR_Hardware.h>
+#include <nanoCLR_Application.h>
+#include <base64.h>
+
+#include "nanoCLR_ParseOptions.h"
+
+#pragma comment(lib, "kernel32.lib")
