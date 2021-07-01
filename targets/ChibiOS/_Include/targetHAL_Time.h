@@ -9,14 +9,12 @@
 #include <stdint.h>
 #include <targetHAL.h>
 
-#define HAL_Time_CurrentSysTicks HAL_Time_ExtendedCurrentSysTicks
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-    uint64_t HAL_Time_ExtendedCurrentSysTicks(void);
+    uint64_t HAL_Time_CurrentSysTicks(void);
 
 #ifdef __cplusplus
 }

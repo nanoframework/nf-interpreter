@@ -13,7 +13,7 @@
 #define TOPVALUE ((uint64_t)0x10000ull)
 #endif
 
-uint64_t HAL_Time_ExtendedCurrentSysTicks(void)
+uint64_t HAL_Time_CurrentSysTicks(void)
 {
 
     static uint64_t extendedCounter = 0;
