@@ -10,7 +10,6 @@
 #include "time.h"
 #include <sys/time.h>
 
-
 #if configUSE_16_BIT_TICKS == 0
 #define TOPVALUE ((uint64_t)0x100000000ull)
 #elif configUSE_16_BIT_TICKS == 1

@@ -6,8 +6,8 @@
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_ 1
 
-#include  <sys/time.h>
-#include  <time.h>
+#include <sys/time.h>
+#include <time.h>
 #include <esp32_os.h>
 #include <stdint.h>
 #include <targetHAL.h>
@@ -23,6 +23,6 @@ extern "C"
 }
 #endif
 
-#define ESP32_TICKS_PER_MS(x)       ((x * (uint64_t)configTICK_RATE_HZ) / 1000)
+#define ESP32_TICKS_PER_MS(x) ((x * (uint64_t)configTICK_RATE_HZ) / 1000)
 
 #endif //_TARGET_HAL_TIME_H_
