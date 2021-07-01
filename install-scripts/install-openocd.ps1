@@ -35,7 +35,7 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
 $openOCDPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 If ($openOCDPathExists -eq $False -or $force) {
-    $url = "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.10.0-13/xpack-openocd-0.10.0-13-win32-x64.zip"
+    $url = "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.11.0-1/xpack-openocd-0.11.0-1-win32-x64.zip"
     $output = "$zipRoot\openocd.zip"
     
     # Don't download again if already exists
@@ -60,7 +60,7 @@ If ($openOCDPathExists -eq $False -or $force) {
     Expand-Archive -Path $output -DestinationPath "$Path\temp"
 
     # move to final location
-    Get-ChildItem -Path "$Path\temp\xPack\OpenOCD\0.10.0-13" -Recurse | Move-Item -Destination "$Path"
+    Get-ChildItem -Path "$Path\temp\xPack\OpenOCD\xpack-openocd-0.11.0-1" -Recurse | Move-Item -Destination "$Path"
 
     # remove temp directory
     Remove-Item $Path\temp -Recurse -Force
@@ -86,8 +86,8 @@ catch {
 # SIG # Begin signature block
 # MIIeWwYJKoZIhvcNAQcCoIIeTDCCHkgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC9FlSl0i+bOP9x
-# MT97un5farpNVfbkx2EgV7TD32gJ3qCCDg8wggPFMIICraADAgECAhACrFwmagtA
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCCpzOTmVV1Gefnn
+# L+w3UfoHFtYGD3m7kG/2vEo0DvTBxqCCDg8wggPFMIICraADAgECAhACrFwmagtA
 # m48LefKuRiV3MA0GCSqGSIb3DQEBBQUAMGwxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xKzApBgNV
 # BAMTIkRpZ2lDZXJ0IEhpZ2ggQXNzdXJhbmNlIEVWIFJvb3QgQ0EwHhcNMDYxMTEw
@@ -167,17 +167,17 @@ catch {
 # b3VuZGF0aW9uIFByb2plY3RzIENvZGUgU2lnbmluZyBDQQIQDP8BdPDQJNgmxzG3
 # FCJmOTANBglghkgBZQMEAgEFAKCBhDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAA
 # MBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgor
-# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCD2FJJPp45QdVnl9tMop+1qtrubjo90
-# 4smYqenL7XybVTANBgkqhkiG9w0BAQEFAASCAQCdCRdV2h7KIUUxSKSqeajBHcd1
-# vvuxW/08CJhEtOzuKPwXIitLak1ocKIhaVegJ0A/Lmvdes8px3Jr/1KqbGrhMke4
-# ElqocX5SC/D6P60/S/xN7MNW86JC9f7qtu+6XIfJAONa8xxEAd+SQURc2piqzzu3
-# Vi0NOtd/hnlO/afHyCU1sob92lAgT28X/MJnVGH/X+uY0s4BPEsnJhrYdJaLfC8a
-# b7D0ma9rxIZXrZLiW1X/sxx9zukdNZWnuFmJnMx1Xm0i3Bgq4uoWhKDhIWdfZJ1U
-# 2oJ7beiEN8e0XONiTiq1nyiBB+danvrZOwa5BVK78jMjuQ3QLNrhrSrdwVACoYIN
+# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCD1PVoxxFeV0ALJ4af2vEdrwtf5vPg+
+# lZfS4qR0MepSlzANBgkqhkiG9w0BAQEFAASCAQCOKY6dsV4Wob+ccri76w0mXusc
+# CyfJ3Hr8fG1ywOAv/W1pPJ9esxF9zbgXN3E0Xt66V5D6ihHf40cfePEMHffZ8seN
+# SRNZCsU5s5c+8JTuWMYkgo7izTJbJJ3HkOHKUaJgGfN1q7l9aBFfzjHBQ3seEdtw
+# py3l2KvySOPWGPmSInPv+mMfdyxuR2gphIK83HrHwqNfnY4AL2PwxssjVs80p0sP
+# f++usjYCL4YtVpaJV6xz5JERMvmXQiK+o7WL1sn4HJcm5XAwxr/6HBNLGJ5o/J9H
+# syJeYq88M2BzEJWP7jCr3Jc8QZ3D/7/P6ukFJ0aeNKhsGcwUZoLNmENb9V2ooYIN
 # fjCCDXoGCisGAQQBgjcDAwExgg1qMIINZgYJKoZIhvcNAQcCoIINVzCCDVMCAQMx
 # DzANBglghkgBZQMEAgEFADB4BgsqhkiG9w0BCRABBKBpBGcwZQIBAQYJYIZIAYb9
-# bAcBMDEwDQYJYIZIAWUDBAIBBQAEINAlH4dlfZY5HOeMHv4UXqgPIIBs+BGaV8ti
-# jccSFb/1AhEA7Z4All5nE1mQZN8OYz2ijxgPMjAyMTA2MTcxMzE0NTRaoIIKNzCC
+# bAcBMDEwDQYJYIZIAWUDBAIBBQAEINS9wKKh6x+39/5y/BSQLDyoBi4tUWhRZJ48
+# NPIVQWm/AhEA0kxdNWAVJSdDZMHW4JTT5RgPMjAyMTA3MDEwOTUxMjFaoIIKNzCC
 # BP4wggPmoAMCAQICEA1CSuC+Ooj/YEAhzhQA8N0wDQYJKoZIhvcNAQELBQAwcjEL
 # MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3
 # LmRpZ2ljZXJ0LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElE
@@ -236,14 +236,14 @@ catch {
 # VVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3LmRpZ2ljZXJ0
 # LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElEIFRpbWVzdGFt
 # cGluZyBDQQIQDUJK4L46iP9gQCHOFADw3TANBglghkgBZQMEAgEFAKCB0TAaBgkq
-# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDYxNzEz
-# MTQ1NFowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
-# m/MwLwYJKoZIhvcNAQkEMSIEIBfUgzQ0BoWa5B0hDPX3PoTCTgdSee9p+MMNkx53
-# 68f7MDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEILMQkAa8CtmDB5FXKeBEA0Fcg+Mp
-# K2FPJpZMjTVx7PWpMA0GCSqGSIb3DQEBAQUABIIBAHuFfAfPxbVsDAEeOIvMFbsk
-# Cmz4C9NbKmjn5fW1TYGoNYAX1LOISfXrv0UXmKErksQ5163bcN1UF80stQZSOc+z
-# LoTc3XyrVVYvwdyV9g+adQYytgGzEtBOa3NrwYPtvX8KO9SsNJDxzh4IWXTMAO6u
-# VUVQE5tnebTP+jkm2WY2yVU8FWkmAkppqXTN+8QjxX7rzDBp3xdKq1+SFyz3Wlti
-# VAhrx2DXJXZRDzeRrKrejb+iw8zlnTcJ990vdDL3QpQQlrFiHoqdIEGBIlVHjx+O
-# CmYjFbTlJGo9cah33aAVBPLVJNZSzj7ufOiMC8Z+LKz90Vb2utWQfm30ZHGHQ7w=
+# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDcwMTA5
+# NTEyMVowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
+# m/MwLwYJKoZIhvcNAQkEMSIEIJlxVX7pPNjchG3CPc2cG2suaMMv0joL55eDe9o9
+# RqEoMDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEILMQkAa8CtmDB5FXKeBEA0Fcg+Mp
+# K2FPJpZMjTVx7PWpMA0GCSqGSIb3DQEBAQUABIIBAGzMUfvJfIpRI2Tl+gtf/txP
+# WyOE3KBqeOdejPrTdQRoFBKi04pkgJKM4rmKe+NakrTbOMzARFmV57i4Qq5QIMzl
+# GESyHG10vRhEaSjEv3euiCCNVh9Z7aNUC7cJf4L5TM/4kyB/K3y028C1NI605B9j
+# LiF9yjhnROOI8wefbRplsPoJn1ffoUeSwrISnCAX9yR7EQy9ayAkkMLhRbmGu7gV
+# PaornZPAWwkspDLIe/vj7jPF5/UiYgZUwK+wsU0hrITuVVbb+lfTAuJZuloKyrOZ
+# A+fLR55kVxbdKsloS2I1fgICjxaLXrBDeVP8oHEtGbbMjDgCSzWtrUag9mSIZwc=
 # SIG # End signature block
