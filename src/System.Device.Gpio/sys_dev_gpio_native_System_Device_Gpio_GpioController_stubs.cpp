@@ -6,8 +6,7 @@
 
 #include "sys_dev_gpio_native.h"
 
-
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::get_PinCount___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::get_PinCount___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -16,7 +15,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::get_PinCo
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::DisposeNative___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -25,7 +24,8 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::DisposeNa
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::IsPinModeSupported___BOOLEAN__I4__SystemDeviceGpioPinMode( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::
+    IsPinModeSupported___BOOLEAN__I4__SystemDeviceGpioPinMode(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -34,7 +34,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::IsPinMode
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::IsPinOpen___BOOLEAN__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::IsPinOpen___BOOLEAN__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -43,7 +43,8 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::IsPinOpen
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMode___VOID__I4__SystemDeviceGpioPinMode( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMode___VOID__I4__SystemDeviceGpioPinMode(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -52,7 +53,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRead___U1__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRead___U1__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -61,7 +62,8 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeRea
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeWrite___VOID__I4__U1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::NativeWrite___VOID__I4__U1(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
