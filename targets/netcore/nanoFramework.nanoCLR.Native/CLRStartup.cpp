@@ -12,7 +12,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct Settings : CLR_RT_ParseOptions
+struct Settings
 {
     CLR_SETTINGS m_clrOptions;
     CLR_RT_ParseOptions::BufferMap m_assemblies;
@@ -373,7 +373,6 @@ struct Settings : CLR_RT_ParseOptions
         m_fInitialized = false;
 #if defined(_WIN32)
         m_configureRuntimeCallback = NULL;
-        BuildOptions();
 #endif
     }
 
@@ -414,20 +413,6 @@ struct Settings : CLR_RT_ParseOptions
     m_commands.push_back(cmd)
 #define PARAM_EXTRACT_STRING(lst, index) ((CLR_RT_ParseOptions::Parameter_Generic *)(*lst)[index])->m_data.c_str()
 
-    void BuildOptions()
-    {
-        CLR_RT_ParseOptions::Command *cmd;
-        CLR_RT_ParseOptions::Parameter *param;
-
-        OPTION_CALL(Cmd_Load, L"-load", L"Loads an assembly formatted for nanoCLR");
-        PARAM_GENERIC(L"<file>", L"File to load");
-
-        OPTION_CALL(Cmd_LoadDatabase, L"-loadDatabase", L"Loads a set of assemblies");
-        PARAM_GENERIC(L"<file>", L"Image to load");
-
-        OPTION_CALL(Cmd_Resolve, L"-resolve", L"Tries to resolve cross-assembly references");
-    }
-
     HRESULT CheckAssemblyFormat(CLR_RECORD_ASSEMBLY *header, const wchar_t *src)
     {
         NANOCLR_HEADER();
@@ -443,135 +428,6 @@ struct Settings : CLR_RT_ParseOptions
 
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
-
-        NANOCLR_NOCLEANUP();
-    }
-
-    HRESULT Cmd_Load(CLR_RT_ParseOptions::ParameterList *params = NULL)
-    {
-        NANOCLR_HEADER();
-
-        const wchar_t *szName = PARAM_EXTRACT_STRING(params, 0);
-        CLR_RT_Buffer *buffer = new CLR_RT_Buffer();
-        CLR_RECORD_ASSEMBLY *header;
-
-        NANOCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile(szName, *buffer));
-
-        header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
-        NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header, szName));
-
-        m_assemblies[szName] = buffer;
-
-        NANOCLR_CLEANUP();
-
-        if (FAILED(hr))
-        {
-            delete buffer;
-        }
-
-        NANOCLR_CLEANUP_END();
-    }
-
-    HRESULT Cmd_LoadDatabase(CLR_RT_ParseOptions::ParameterList *params = NULL)
-    {
-        NANOCLR_HEADER();
-
-        if (!m_fInitialized)
-        {
-            CLR_RT_ExecutionEngine::CreateInstance();
-        }
-
-        {
-            const wchar_t *szFile = PARAM_EXTRACT_STRING(params, 0);
-            CLR_RT_Buffer buffer;
-            CLR_RECORD_ASSEMBLY *header;
-            CLR_RECORD_ASSEMBLY *headerEnd;
-            std::wstring strName;
-
-            NANOCLR_CHECK_HRESULT(CLR_RT_FileStore::LoadFile(szFile, buffer));
-
-            header = (CLR_RECORD_ASSEMBLY *)&buffer[0];
-            headerEnd = (CLR_RECORD_ASSEMBLY *)&buffer[buffer.size() - 1];
-
-            while (header + 1 <= headerEnd && header->GoodAssembly())
-            {
-                CLR_RT_Buffer *bufferSub = new CLR_RT_Buffer();
-                CLR_RECORD_ASSEMBLY *headerSub;
-                CLR_RT_Assembly *assm;
-
-                bufferSub->resize(header->TotalSize());
-
-                headerSub = (CLR_RECORD_ASSEMBLY *)&(*bufferSub)[0];
-
-                if ((CLR_UINT8 *)header + header->TotalSize() > (CLR_UINT8 *)headerEnd)
-                {
-                    // checksum passed, but not enough data in assembly
-                    _ASSERTE(FALSE);
-                    delete bufferSub;
-                    break;
-                }
-                memcpy(headerSub, header, header->TotalSize());
-
-                m_assemblies[strName] = bufferSub;
-
-                if (FAILED(hr = CLR_RT_Assembly::CreateInstance(headerSub, assm)))
-                {
-                    delete bufferSub;
-                    break;
-                }
-
-                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->m_szName, strName);
-                m_assemblies[strName] = bufferSub;
-
-                assm->DestroyInstance();
-
-                header = (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
-            }
-        }
-
-        NANOCLR_CLEANUP();
-
-        if (!m_fInitialized)
-        {
-            CLR_RT_ExecutionEngine::DeleteInstance();
-        }
-
-        NANOCLR_CLEANUP_END();
-    }
-
-    HRESULT Cmd_Resolve(CLR_RT_ParseOptions::ParameterList *params = NULL)
-    {
-        NANOCLR_HEADER();
-
-        bool fError = false;
-
-        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
-        {
-            const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
-            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
-            {
-                const char *szName = pASSM->GetString(src->name);
-
-                if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
-                {
-                    printf(
-                        "Missing assembly: %s (%d.%d.%d.%d)\n",
-                        szName,
-                        src->version.iMajorVersion,
-                        src->version.iMinorVersion,
-                        src->version.iBuildNumber,
-                        src->version.iRevisionNumber);
-
-                    fError = true;
-                }
-            }
-        }
-        NANOCLR_FOREACH_ASSEMBLY_END();
-
-        if (fError)
-            NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
-
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
         NANOCLR_NOCLEANUP();
     }
@@ -726,27 +582,6 @@ void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallb
     s_ClrSettings.m_configureRuntimeCallback = configureRuntimeCallback;
 }
 
-HRESULT ClrLoadPE(const wchar_t *szPeFilePath)
-{
-    CLR_RT_StringVector vec;
-
-    vec.push_back(L"-load");
-
-    vec.push_back(szPeFilePath);
-
-    return s_ClrSettings.ProcessOptions(vec);
-}
-
-HRESULT ClrLoadDAT(const wchar_t *szDatFilePath)
-{
-    CLR_RT_StringVector vec;
-
-    vec.push_back(L"-loadDatabase");
-
-    vec.push_back(szDatFilePath);
-
-    return s_ClrSettings.ProcessOptions(vec);
-}
 #endif
 
 void ClrStartup(CLR_SETTINGS params)
