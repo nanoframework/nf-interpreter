@@ -28,13 +28,14 @@ typedef struct NANO_CLR_SETTINGS
 } NANO_CLR_SETTINGS;
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
+typedef void(__stdcall *DebugPrintCallback)(const char *szText);
+
+extern DebugPrintCallback gDebugPrintCallback;
 
 extern "C" NANOCLRNATIVE_API void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings);
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();
 
 extern "C" NANOCLRNATIVE_API void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);
-
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size);
-
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size);
-
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();
+extern "C" NANOCLRNATIVE_API void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback);

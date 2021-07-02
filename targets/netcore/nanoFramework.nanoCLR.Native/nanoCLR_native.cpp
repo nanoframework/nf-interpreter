@@ -44,6 +44,8 @@
 
 #endif
 
+DebugPrintCallback gDebugPrintCallback = NULL;
+
 /////////////////////////////////////////////////////////////////////////////
 
 // All solutions are expected to provide an implementation of this
@@ -68,10 +70,6 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
-    wprintf(L"\n.NET nanoFramework nanoCLR WIN32 v");
-    std::cout << VERSION_STRING;
-    wprintf(L"\r\nCopyright (c) 2020 .NET Foundation and Contributors\r\n\r\n");
-
     // initialize nanoHAL
     nanoHAL_Initialize();
 
@@ -87,4 +85,9 @@ void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
 #if !defined(BUILD_RTM)
     CLR_Debug::Printf("Exiting.\r\n");
 #endif
+}
+
+void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
+{
+    gDebugPrintCallback = debugPrintCallback;
 }

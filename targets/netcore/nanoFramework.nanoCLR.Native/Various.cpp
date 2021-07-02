@@ -5,6 +5,7 @@
 //
 #include "stdafx.h"
 
+#include "nanoCLR_native.h"
 #include "platform_selector.h"
 #include <iostream>
 
@@ -41,20 +42,8 @@ uint64_t HAL_Windows_GetPerformanceTicks()
 
 void HAL_Windows_Debug_Print(char *szText)
 {
-    std::string str = (std::string)szText;
-
-    // clear trailing LR & CR
-    int pos;
-    if ((pos = str.find_last_of('\n')) != std::string::npos)
-    {
-        str.erase(pos);
-    }
-    if ((pos = str.find_last_of('\r')) != std::string::npos)
-    {
-        str.erase(pos);
-    }
-
-    std::cout << (std::string)str + "\n" << std::flush;
+    if (gDebugPrintCallback)
+        gDebugPrintCallback(szText);
 }
 
 // HAL_Configuration_Windows g_HAL_Configuration_Windows;
