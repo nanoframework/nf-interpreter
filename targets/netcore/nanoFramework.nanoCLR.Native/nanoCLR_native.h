@@ -11,4 +11,30 @@
 #define NANOCLRNATIVE_API __declspec(dllimport)
 #endif
 
-extern "C" NANOCLRNATIVE_API void nanoclr_run(int argc, _TCHAR *argv[]);
+typedef struct NANO_CLR_SETTINGS
+{
+    // this is the maximum number of context switches that execution engine thread scheduler can handle
+    // higher number: more threads and timers can be handled
+    unsigned short MaxContextSwitches;
+
+    // set this to TRUE if the default behaviour is for the execution engine to wait for a debugger to be connected
+    // when building is set for RTM this configuration is ignored
+    bool WaitForDebugger;
+
+    // set this to TRUE if a connection from a debugger is to be awaited after the execution engine terminates
+    // this is required for launching a debug session in Visual Studio
+    // when building is set for RTM this configuration is ignored
+    bool EnterDebuggerLoopAfterExit;
+} NANO_CLR_SETTINGS;
+
+typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
+
+extern "C" NANOCLRNATIVE_API void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings);
+
+extern "C" NANOCLRNATIVE_API void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);
+
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size);
+
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size);
+
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();

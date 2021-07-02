@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -7,7 +6,21 @@ namespace nanoFramework.nanoCLR.Host
     {
         public const string NativeLibraryName = "nanoFramework.nanoCLR.Native";
 
+        public delegate int ConfigureDelegate();
+
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void nanoclr_run(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr)] string[] argv);
+        public static extern void NanoClr_SetConfigureCallback([MarshalAs(UnmanagedType.FunctionPtr)] ConfigureDelegate configureCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void NanoClr_Run(NanoClrSettings nanoClrSettings);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
+        public static extern void NanoClr_ReferenceAssembly(string assemblyName, byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
+        public static extern void NanoClr_ReferenceAssemblySet(byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
+        public static extern void NanoClr_Resolve();
     }
 }

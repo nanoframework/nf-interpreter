@@ -4,6 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "stdafx.h"
+#include "nanoCLR_native.h"
 
 #if defined(_WIN32)
 
@@ -16,6 +17,10 @@ struct Settings : CLR_RT_ParseOptions
     CLR_SETTINGS m_clrOptions;
     CLR_RT_ParseOptions::BufferMap m_assemblies;
     bool m_fInitialized;
+#if defined(_WIN32)
+    ConfigureRuntimeCallback m_configureRuntimeCallback;
+#endif
+
 
     //--//
 
@@ -121,7 +126,12 @@ struct Settings : CLR_RT_ParseOptions
         // clear flag (in case EE wasn't restarted)
         CLR_EE_DBG_CLR(StateResolutionFailed);
 
-        NANOCLR_CHECK_HRESULT(ProcessOptions(m_clrOptions.StartArgs));
+#if defined(_WIN32)
+        if (m_configureRuntimeCallback)
+        {
+            NANOCLR_CHECK_HRESULT(m_configureRuntimeCallback());
+        }
+#endif
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Loading Assemblies.\r\n");
@@ -362,6 +372,7 @@ struct Settings : CLR_RT_ParseOptions
     {
         m_fInitialized = false;
 #if defined(_WIN32)
+        m_configureRuntimeCallback = NULL;
         BuildOptions();
 #endif
     }
@@ -564,6 +575,129 @@ struct Settings : CLR_RT_ParseOptions
 
         NANOCLR_NOCLEANUP();
     }
+
+    HRESULT ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size)
+    {
+        NANOCLR_HEADER();
+
+        CLR_RT_Buffer *buffer = new CLR_RT_Buffer(data, data + size);
+        CLR_RECORD_ASSEMBLY *header;
+
+        header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
+        NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header, szFile));
+
+        m_assemblies[szFile] = buffer;
+
+        NANOCLR_CLEANUP();
+
+        if (FAILED(hr))
+        {
+            delete buffer;
+        }
+
+        NANOCLR_CLEANUP_END();
+    }
+
+    HRESULT ReferenceAssemblySet(const CLR_UINT8 *data, size_t size)
+    {
+        NANOCLR_HEADER();
+
+        if (!m_fInitialized)
+        {
+            CLR_RT_ExecutionEngine::CreateInstance();
+        }
+
+        {
+            CLR_RT_Buffer buffer(data, data + size);
+            CLR_RECORD_ASSEMBLY *header;
+            CLR_RECORD_ASSEMBLY *headerEnd;
+            std::wstring strName;
+
+            header = (CLR_RECORD_ASSEMBLY *)&buffer[0];
+            headerEnd = (CLR_RECORD_ASSEMBLY *)&buffer[buffer.size() - 1];
+
+            while (header + 1 <= headerEnd && header->GoodAssembly())
+            {
+                CLR_RT_Buffer *bufferSub = new CLR_RT_Buffer();
+                CLR_RECORD_ASSEMBLY *headerSub;
+                CLR_RT_Assembly *assm;
+
+                bufferSub->resize(header->TotalSize());
+
+                headerSub = (CLR_RECORD_ASSEMBLY *)&(*bufferSub)[0];
+
+                if ((CLR_UINT8 *)header + header->TotalSize() > (CLR_UINT8 *)headerEnd)
+                {
+                    // checksum passed, but not enough data in assembly
+                    _ASSERTE(FALSE);
+                    delete bufferSub;
+                    break;
+                }
+                memcpy(headerSub, header, header->TotalSize());
+
+                m_assemblies[strName] = bufferSub;
+
+                if (FAILED(hr = CLR_RT_Assembly::CreateInstance(headerSub, assm)))
+                {
+                    delete bufferSub;
+                    break;
+                }
+
+                CLR_RT_UnicodeHelper::ConvertFromUTF8(assm->m_szName, strName);
+                m_assemblies[strName] = bufferSub;
+
+                assm->DestroyInstance();
+
+                header = (CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
+            }
+        }
+
+        NANOCLR_CLEANUP();
+
+        if (!m_fInitialized)
+        {
+            CLR_RT_ExecutionEngine::DeleteInstance();
+        }
+
+        NANOCLR_CLEANUP_END();
+    }
+
+    HRESULT Resolve()
+    {
+        NANOCLR_HEADER();
+
+        bool fError = false;
+
+        NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
+        {
+            const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
+            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, src++)
+            {
+                const char *szName = pASSM->GetString(src->name);
+
+                if (g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, true) == NULL)
+                {
+                    printf(
+                        "Missing assembly: %s (%d.%d.%d.%d)\n",
+                        szName,
+                        src->version.iMajorVersion,
+                        src->version.iMinorVersion,
+                        src->version.iBuildNumber,
+                        src->version.iRevisionNumber);
+
+                    fError = true;
+                }
+            }
+        }
+        NANOCLR_FOREACH_ASSEMBLY_END();
+
+        if (fError)
+            NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
+
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+
+        NANOCLR_NOCLEANUP();
+    }
 #endif //#if defined(_WIN32)
 };
 
@@ -572,6 +706,26 @@ static Settings s_ClrSettings;
 //--//
 
 #if defined(_WIN32)
+HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size)
+{
+    return s_ClrSettings.ReferenceAssembly(szFile, data, size);
+}
+
+HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size)
+{
+    return s_ClrSettings.ReferenceAssemblySet(data, size);
+}
+
+HRESULT NanoClr_Resolve()
+{
+    return s_ClrSettings.Resolve();
+}
+
+void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback)
+{
+    s_ClrSettings.m_configureRuntimeCallback = configureRuntimeCallback;
+}
+
 HRESULT ClrLoadPE(const wchar_t *szPeFilePath)
 {
     CLR_RT_StringVector vec;
