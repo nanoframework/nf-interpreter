@@ -4,7 +4,7 @@ using System.Xml;
 namespace nanoFramework.nanoCLR.Host
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct NanoClrSettings
+    internal struct NanoClrSettings
     {
         public ushort MaxContextSwitches { get; set; }
 

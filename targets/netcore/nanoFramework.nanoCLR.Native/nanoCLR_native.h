@@ -19,12 +19,12 @@ typedef struct NANO_CLR_SETTINGS
 
     // set this to TRUE if the default behaviour is for the execution engine to wait for a debugger to be connected
     // when building is set for RTM this configuration is ignored
-    bool WaitForDebugger;
+    BOOL WaitForDebugger;
 
     // set this to TRUE if a connection from a debugger is to be awaited after the execution engine terminates
     // this is required for launching a debug session in Visual Studio
     // when building is set for RTM this configuration is ignored
-    bool EnterDebuggerLoopAfterExit;
+    BOOL EnterDebuggerLoopAfterExit;
 } NANO_CLR_SETTINGS;
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
@@ -33,8 +33,8 @@ typedef void(__stdcall *DebugPrintCallback)(const char *szText);
 extern DebugPrintCallback gDebugPrintCallback;
 
 extern "C" NANOCLRNATIVE_API void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings);
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT NanoClr_LoadAssembliesSet(const CLR_UINT8 *data, size_t size);
 extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();
 
 extern "C" NANOCLRNATIVE_API void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);

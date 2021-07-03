@@ -2,30 +2,37 @@
 
 namespace nanoFramework.nanoCLR.Host
 {
-    public class Interop
+    internal class Interop
     {
-        public const string NativeLibraryName = "nanoFramework.nanoCLR.Native";
+        internal const uint ClrOk = 0;
+        internal const uint ClrErrorFail = 0xFF000000;
+        private const string NativeLibraryName = "nanoFramework.nanoCLR.Native";
 
-        public delegate int ConfigureDelegate();
+        internal delegate uint ConfigureDelegate();
 
-        public delegate void DebugPrintDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
-
-        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void NanoClr_Run(NanoClrSettings nanoClrSettings);
-
-        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
-        public static extern void NanoClr_ReferenceAssembly(string assemblyName, byte[] data, int length);
-
-        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
-        public static extern void NanoClr_ReferenceAssemblySet(byte[] data, int length);
-
-        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl, PreserveSig = false)]
-        public static extern void NanoClr_Resolve();
+        internal delegate void DebugPrintDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void NanoClr_SetConfigureCallback([MarshalAs(UnmanagedType.FunctionPtr)] ConfigureDelegate configureCallback);
+        internal static extern void NanoClr_Run(NanoClrSettings nanoClrSettings);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl,
+            PreserveSig = false)]
+        internal static extern void NanoClr_LoadAssembly(string assemblyName, byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl,
+            PreserveSig = false)]
+        internal static extern void NanoClr_LoadAssembliesSet(byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl,
+            PreserveSig = false)]
+        internal static extern void NanoClr_Resolve();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void NanoClr_SetDebugPrintCallback([MarshalAs(UnmanagedType.FunctionPtr)] DebugPrintDelegate debugPrintCallback);
+        internal static extern void NanoClr_SetConfigureCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] ConfigureDelegate configureCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void NanoClr_SetDebugPrintCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] DebugPrintDelegate debugPrintCallback);
     }
 }

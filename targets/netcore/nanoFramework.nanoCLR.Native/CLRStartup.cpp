@@ -432,7 +432,7 @@ struct Settings
         NANOCLR_NOCLEANUP();
     }
 
-    HRESULT ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size)
+    HRESULT LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size)
     {
         NANOCLR_HEADER();
 
@@ -440,9 +440,9 @@ struct Settings
         CLR_RECORD_ASSEMBLY *header;
 
         header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
-        NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header, szFile));
+        NANOCLR_CHECK_HRESULT(CheckAssemblyFormat(header, name));
 
-        m_assemblies[szFile] = buffer;
+        m_assemblies[name] = buffer;
 
         NANOCLR_CLEANUP();
 
@@ -454,7 +454,7 @@ struct Settings
         NANOCLR_CLEANUP_END();
     }
 
-    HRESULT ReferenceAssemblySet(const CLR_UINT8 *data, size_t size)
+    HRESULT LoadAssembliesSet(const CLR_UINT8 *data, size_t size)
     {
         NANOCLR_HEADER();
 
@@ -562,14 +562,14 @@ static Settings s_ClrSettings;
 //--//
 
 #if defined(_WIN32)
-HRESULT NanoClr_ReferenceAssembly(const wchar_t *szFile, const CLR_UINT8 *data, size_t size)
+HRESULT NanoClr_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size)
 {
-    return s_ClrSettings.ReferenceAssembly(szFile, data, size);
+    return s_ClrSettings.LoadAssembly(name, data, size);
 }
 
-HRESULT NanoClr_ReferenceAssemblySet(const CLR_UINT8 *data, size_t size)
+HRESULT NanoClr_LoadAssembliesSet(const CLR_UINT8 *data, size_t size)
 {
-    return s_ClrSettings.ReferenceAssemblySet(data, size);
+    return s_ClrSettings.LoadAssembliesSet(data, size);
 }
 
 HRESULT NanoClr_Resolve()
