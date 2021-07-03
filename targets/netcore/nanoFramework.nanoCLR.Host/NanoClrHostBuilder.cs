@@ -10,6 +10,7 @@ namespace nanoFramework.nanoCLR.Host
         private static NanoClrHost _nanoClrHost = null;
         private readonly List<Action> _configureSteps = new();
         private readonly List<Action> _preInitConfigureSteps = new();
+        private IDeviceSink _wireProtocolSink;
 
         public int MaxContextSwitches { get; set; } = 50;
         public bool WaitForDebugger { get; set; } = false;
@@ -59,12 +60,22 @@ namespace nanoFramework.nanoCLR.Host
             return this;
         }
 
+        public NanoClrHostBuilder UseWireProtocolSink(IDeviceSink sink)
+        {
+            _wireProtocolSink = sink;
+            return this;
+        }
+
+        public NanoClrHostBuilder UseSerialPortWireProtocol(string comPort, bool traceWire = false) =>
+            UseWireProtocolSink(new SerialPortSink(comPort, traceWire: traceWire));
+
         public NanoClrHost Build()
         {
             if (_nanoClrHost != null)
                 throw new InvalidOperationException("Cannot build two NanoClr runtime hosts");
 
             _nanoClrHost = new NanoClrHost();
+            _nanoClrHost.WireProtocolSink = _wireProtocolSink;
             _nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
             _nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
             _nanoClrHost.NanoClrSettings = new NanoClrSettings

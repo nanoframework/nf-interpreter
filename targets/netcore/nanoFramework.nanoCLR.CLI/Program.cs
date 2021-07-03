@@ -12,12 +12,10 @@ namespace nanoFramework.nanoCLR.CLI
             LogErrors(() =>
             {
                 var hostBuilder = NanoClrHost.CreateBuilder();
+                hostBuilder.UseConsoleDebugPrint();
 
                 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o =>
                 {
-                    hostBuilder.WaitForDebugger = o.WaitForDebugger;
-                    hostBuilder.EnterDebuggerLoopAfterExit = o.EnterDebuggerLoopAfterExit;
-
                     if (o.Assemblies.Any())
                         hostBuilder.LoadAssemblies(o.Assemblies);
 
@@ -27,8 +25,12 @@ namespace nanoFramework.nanoCLR.CLI
                     if (o.TryResolve)
                         hostBuilder.TryResolve();
 
-                    if (o.Debug)
-                        hostBuilder.UseConsoleDebugPrint();
+                    if (o.DebugPort != null)
+                    {
+                        hostBuilder.WaitForDebugger = true;
+                        hostBuilder.EnterDebuggerLoopAfterExit = true;
+                        hostBuilder.UseSerialPortWireProtocol(o.DebugPort, o.TraceWire);
+                    }
 
                     hostBuilder.Build().Run();
                 });

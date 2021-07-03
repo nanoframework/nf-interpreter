@@ -29,8 +29,12 @@ typedef struct NANO_CLR_SETTINGS
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
 typedef void(__stdcall *DebugPrintCallback)(const char *szText);
+typedef void(__stdcall *WireTransmitCallback)(const CLR_UINT8 *data, size_t size);
 
 extern DebugPrintCallback gDebugPrintCallback;
+
+extern WireTransmitCallback gWireTransmitCallback;
+extern CLR_RT_Buffer gWireReceiveBuffer;
 
 extern "C" NANOCLRNATIVE_API void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings);
 extern "C" NANOCLRNATIVE_API HRESULT NanoClr_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size);
@@ -39,3 +43,6 @@ extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();
 
 extern "C" NANOCLRNATIVE_API void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);
 extern "C" NANOCLRNATIVE_API void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback);
+
+extern "C" NANOCLRNATIVE_API void NanoClr_SetWireTransmitCallback(WireTransmitCallback wireTransmitCallback);
+extern "C" NANOCLRNATIVE_API void NanoClr_WireReceive(const CLR_UINT8 *data, size_t size);

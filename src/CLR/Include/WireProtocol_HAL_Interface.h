@@ -8,6 +8,11 @@
 
 #include "WireProtocol.h"
 
+#if __cplusplus
+extern "C"
+{
+#endif
+
 //////////////////////////////////////////
 
 ///
@@ -28,5 +33,9 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size);
 uint8_t WP_TransmitMessage(WP_Message *message);
 
 void WP_CheckAvailableIncomingData();
+
+#if __cplusplus
+}
+#endif
 
 #endif // _WIREPROTOCOL_HAL_INTERFACE_H_

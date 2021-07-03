@@ -2,7 +2,8 @@
   "profiles": {
     "nanoCLR.CLI": {
       "commandName": "Project",
-      "nativeDebugging": true
+      "nativeDebugging": true,
+      "commandLineArgs": "-d COM5"
     }
   }
 }

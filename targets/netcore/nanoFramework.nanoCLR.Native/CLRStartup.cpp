@@ -19,6 +19,7 @@ struct Settings
     bool m_fInitialized;
 #if defined(_WIN32)
     ConfigureRuntimeCallback m_configureRuntimeCallback;
+    bool m_configured;
 #endif
 
 
@@ -60,6 +61,7 @@ struct Settings
         {
 #if defined(_WIN32)
             CLR_EE_DBG_SET(Enabled);
+            CLR_EE_DBG_SET(Quiet);
 #endif
             CLR_EE_DBG_SET(Stopped);
         }
@@ -127,9 +129,10 @@ struct Settings
         CLR_EE_DBG_CLR(StateResolutionFailed);
 
 #if defined(_WIN32)
-        if (m_configureRuntimeCallback)
+        if (!m_configured && m_configureRuntimeCallback)
         {
             NANOCLR_CHECK_HRESULT(m_configureRuntimeCallback());
+            m_configured = true;
         }
 #endif
 
@@ -149,10 +152,10 @@ struct Settings
 
         // don't load assemblies because we don't have any deployment storage
 #if !defined(BUILD_RTM)
-//        CLR_Debug::Printf("Loading Deployment Assemblies.\r\n");
+        CLR_Debug::Printf("Loading Deployment Assemblies.\r\n");
 #endif
 
-        // LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
+        LoadDeploymentAssemblies(BlockUsage_DEPLOYMENT);
 
         //--//
 
@@ -332,6 +335,7 @@ struct Settings
         NANOCLR_HEADER();
 
         BlockStorageStream stream;
+        memset(&stream, 0, sizeof(BlockStorageStream));
         const DeviceBlockInfo *deviceInfo;
 
         // find the block
@@ -373,6 +377,7 @@ struct Settings
         m_fInitialized = false;
 #if defined(_WIN32)
         m_configureRuntimeCallback = NULL;
+        m_configured = false;
 #endif
     }
 

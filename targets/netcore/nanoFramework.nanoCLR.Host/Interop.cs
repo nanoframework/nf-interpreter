@@ -12,6 +12,9 @@ namespace nanoFramework.nanoCLR.Host
 
         internal delegate void DebugPrintDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
 
+        internal delegate void WireTransmitDelegate([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+            byte[] data, int length);
+
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void NanoClr_Run(NanoClrSettings nanoClrSettings);
 
@@ -34,5 +37,12 @@ namespace nanoFramework.nanoCLR.Host
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void NanoClr_SetDebugPrintCallback(
             [MarshalAs(UnmanagedType.FunctionPtr)] DebugPrintDelegate debugPrintCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void NanoClr_SetWireTransmitCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate wireTransmitCallback);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void NanoClr_WireReceive(byte[] data, int length);
     }
 }

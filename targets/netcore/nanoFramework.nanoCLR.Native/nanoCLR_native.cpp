@@ -46,6 +46,9 @@
 
 DebugPrintCallback gDebugPrintCallback = NULL;
 
+WireTransmitCallback gWireTransmitCallback = NULL;
+CLR_RT_Buffer gWireReceiveBuffer;
+
 /////////////////////////////////////////////////////////////////////////////
 
 // All solutions are expected to provide an implementation of this
@@ -80,6 +83,9 @@ void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
 
+    if (clrSettings.WaitForDebugger || clrSettings.EnterDebuggerLoopAfterExit)
+        WP_Message_PrepareReception();
+
     ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
@@ -90,4 +96,15 @@ void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
 void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
 {
     gDebugPrintCallback = debugPrintCallback;
+}
+
+void NanoClr_SetWireTransmitCallback(WireTransmitCallback wireTransmitCallback)
+{
+    gWireTransmitCallback = wireTransmitCallback;
+}
+
+void NanoClr_WireReceive(const CLR_UINT8 *data, size_t size)
+{
+    gWireReceiveBuffer = CLR_RT_Buffer(data, data + size);
+    WP_Message_Process();
 }

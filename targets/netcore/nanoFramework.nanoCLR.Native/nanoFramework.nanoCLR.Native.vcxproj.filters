@@ -36,13 +36,19 @@
     <ClInclude Include="..\Include\targetPAL_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\nanoHAL_Time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Include\target_platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="nanoCLR_native.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="target_BlockStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\targetHAL_Time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -72,9 +78,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PAL\time_stubs.cpp">
-      <Filter>Source Files\PAL</Filter>
-    </ClCompile>
-    <ClCompile Include="PAL\blockstorageList_stubs.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
     <ClCompile Include="PAL\Watchdog_stubs.cpp">
@@ -138,6 +141,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="nanoCLR_native.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WireProtocol_HAL_Interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Device_BlockStorage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="platform_BlockStorage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

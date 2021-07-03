@@ -164,15 +164,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\Include\nanoHAL_Time.h" />
+    <ClInclude Include="..\Include\targetHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
     <ClInclude Include="nanoCLR_native.h" />
     <ClInclude Include="platform_selector.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="target_BlockStorage.h" />
+    <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Device_BlockStorage.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp" />
     <ClCompile Include="..\..\..\src\HAL\nanoHAL_Time.cpp" />
@@ -186,11 +189,11 @@
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="nanoCLR_native.cpp" />
+    <ClCompile Include="platform_BlockStorage.cpp" />
     <ClCompile Include="targetPAL_Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
     <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
     <ClCompile Include="Memory.cpp" />
-    <ClCompile Include="PAL\blockstorageList_stubs.cpp" />
     <ClCompile Include="PAL\COMDirector_stubs.cpp" />
     <ClCompile Include="PAL\ConfigHelper_stubs.cpp" />
     <ClCompile Include="PAL\time_stubs.cpp" />
@@ -207,10 +210,12 @@
     <ClCompile Include="targetRandom.cpp" />
     <ClCompile Include="Target_BlockStorage.cpp" />
     <ClCompile Include="targetHAL_Time.cpp" />
+    <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
     <ClCompile Include="Various.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="WatchDog.cpp" />
+    <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\CLR\Core\Core.vcxproj">
