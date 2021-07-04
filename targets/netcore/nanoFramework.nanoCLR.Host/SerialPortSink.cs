@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 using System;
 using System.IO.Ports;
 using System.Linq;
@@ -22,7 +27,7 @@ namespace nanoFramework.nanoCLR.Host
 
         private void SerialPortOnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            var bytes = _serialPort.ReadAllBytes();
+            byte[] bytes = _serialPort.ReadAllBytes();
             if (_traceWire)
                 Console.WriteLine($"Received from host: {HexDump.HexDump.Format(bytes)}");
             if (bytes.Any())

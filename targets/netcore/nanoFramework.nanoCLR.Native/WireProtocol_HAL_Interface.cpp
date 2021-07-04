@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 #include "stdafx.h"
 
 #include "nanoCLR_native.h"
@@ -30,7 +35,10 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         std::memcpy(data.data(), (const uint8_t *)&message->m_header, sizeof(message->m_header));
         if (message->m_header.m_size)
         {
-            std::memcpy(&data[sizeof(message->m_header)], (const uint8_t *)message->m_payload, message->m_header.m_size);
+            std::memcpy(
+                &data[sizeof(message->m_header)],
+                (const uint8_t *)message->m_payload,
+                message->m_header.m_size);
         }
         gWireTransmitCallback(data.data(), data.size());
     }

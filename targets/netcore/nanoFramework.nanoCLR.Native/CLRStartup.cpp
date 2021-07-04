@@ -22,7 +22,6 @@ struct Settings
     bool m_configured;
 #endif
 
-
     //--//
 
     HRESULT Initialize(CLR_SETTINGS params)

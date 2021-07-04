@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +12,7 @@ namespace nanoFramework.nanoCLR.Host
 {
     public class NanoClrHostBuilder
     {
-        private static NanoClrHost _nanoClrHost = null;
+        private static NanoClrHost s_nanoClrHost = null;
         private readonly List<Action> _configureSteps = new();
         private readonly List<Action> _preInitConfigureSteps = new();
         private IDeviceSink _wireProtocolSink;
@@ -71,20 +76,20 @@ namespace nanoFramework.nanoCLR.Host
 
         public NanoClrHost Build()
         {
-            if (_nanoClrHost != null)
+            if (s_nanoClrHost != null)
                 throw new InvalidOperationException("Cannot build two NanoClr runtime hosts");
 
-            _nanoClrHost = new NanoClrHost();
-            _nanoClrHost.WireProtocolSink = _wireProtocolSink;
-            _nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
-            _nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
-            _nanoClrHost.NanoClrSettings = new NanoClrSettings
+            s_nanoClrHost = new NanoClrHost();
+            s_nanoClrHost.WireProtocolSink = _wireProtocolSink;
+            s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
+            s_nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
+            s_nanoClrHost.NanoClrSettings = new NanoClrSettings
             {
                 MaxContextSwitches = (ushort) MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,
                 EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit
             };
-            return _nanoClrHost;
+            return s_nanoClrHost;
         }
     }
 }

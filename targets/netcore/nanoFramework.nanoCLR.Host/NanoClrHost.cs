@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
+using System;
 using System.Collections.Generic;
 
 namespace nanoFramework.nanoCLR.Host
@@ -6,6 +11,7 @@ namespace nanoFramework.nanoCLR.Host
     public class NanoClrHost
     {
         private bool _isRunning = false;
+
         private Interop.WireTransmitDelegate _wireReceiveCallback;
         internal List<Action> PreInitConfigureSteps { get; } = new();
         internal List<Action> ConfigureSteps { get; } = new();

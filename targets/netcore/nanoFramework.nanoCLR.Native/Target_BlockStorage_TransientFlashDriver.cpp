@@ -9,8 +9,7 @@
 
 CLR_RT_Buffer *storage = NULL;
 
-
-bool TransientFlashDriver_InitializeDevice(void* context)
+bool TransientFlashDriver_InitializeDevice(void *context)
 {
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
 
@@ -20,7 +19,7 @@ bool TransientFlashDriver_InitializeDevice(void* context)
     return true;
 }
 
-bool TransientFlashDriver_UninitializeDevice(void* context)
+bool TransientFlashDriver_UninitializeDevice(void *context)
 {
     delete storage;
 
@@ -30,10 +29,10 @@ bool TransientFlashDriver_UninitializeDevice(void* context)
 
 DeviceBlockInfo *TransientFlashDriver_GetDeviceInfo(void *context)
 {
-    
+
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
-    
-    return config->BlockConfig.BlockDeviceInformation;  
+
+    return config->BlockConfig.BlockDeviceInformation;
 }
 
 bool TransientFlashDriver_Read(void *context, ByteAddress startAddress, unsigned int numBytes, unsigned char *buffer)
@@ -47,7 +46,12 @@ bool TransientFlashDriver_Read(void *context, ByteAddress startAddress, unsigned
     return true;
 }
 
-bool TransientFlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
+bool TransientFlashDriver_Write(
+    void *context,
+    ByteAddress startAddress,
+    unsigned int numBytes,
+    unsigned char *buffer,
+    bool readModifyWrite)
 {
     if (!storage)
         TransientFlashDriver_InitializeDevice(context);

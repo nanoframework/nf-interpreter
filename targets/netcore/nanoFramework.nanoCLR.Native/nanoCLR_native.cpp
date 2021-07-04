@@ -70,7 +70,6 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
     return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
 
-
 void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
     // initialize nanoHAL

@@ -35,7 +35,6 @@ SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(
     return (phyAddress - pRegion->Start) / blockInfo->BytesPerSector;
 }
 
-
 bool DeviceBlockInfo_FindRegionFromAddress(
     DeviceBlockInfo *blockInfo,
     ByteAddress address,

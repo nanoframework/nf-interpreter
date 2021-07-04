@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
+using System.Collections.Generic;
 using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
