@@ -177,13 +177,16 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart;
+    uint8_t uartNum;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
     // Choose the driver for this SerialDevice
-    palUart = GetPalUartFromUartNum((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    palUart = GetPalUartFromUartNum(uartNum);
     if (palUart == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
