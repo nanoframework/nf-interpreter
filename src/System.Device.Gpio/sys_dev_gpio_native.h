@@ -10,7 +10,6 @@
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
-#include <corlib_native.h>
 #include <CPU_GPIO_decl.h>
 
 typedef enum __nfpack PinEventTypes
