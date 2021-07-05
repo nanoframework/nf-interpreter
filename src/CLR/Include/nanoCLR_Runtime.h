@@ -2415,6 +2415,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
         SetResult_I4(val);
     }
 
+    inline void PushValueU4(CLR_UINT32 val)
+    {
+        SetResult_U4(val);
+    }
+
     //--//
 
     CLR_RT_StackFrame *Caller()
