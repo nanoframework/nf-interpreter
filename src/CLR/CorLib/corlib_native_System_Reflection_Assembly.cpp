@@ -282,49 +282,115 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     CLR_RT_HeapBlock_Array *array = NULL;
     CLR_RT_Assembly *assm = NULL;
-    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     CLR_RT_HeapBlock *hbObj;
     CLR_RECORD_ASSEMBLY *header;
+    CLR_RT_Assembly_Index idx;
+    CLR_RT_HeapBlock hbTimeout;
+
+    CLR_INT64 *timeoutTicks;
+    bool eventResult = true;
 
     array = stack.Arg0().DereferenceArray();
     FAULT_ON_NULL(array);
 
     header = (CLR_RECORD_ASSEMBLY *)array->GetFirstElement();
 
-    if (header->GoodAssembly())
+    // !! need to cast to CLR_INT64 otherwise it wont setup a proper timeout
+    hbTimeout.SetInteger((CLR_INT64)2 * CLR_RT_Thread::c_TimeQuantum_Milliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+
+    // setup timeout
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // parsing step only required in the first step
+    if (stack.m_customState == 1)
     {
-        //
-        // Sorry, you'll have to reboot to load this assembly.
-        //
-        if (header->flags & CLR_RECORD_ASSEMBLY::c_Flags_NeedReboot)
+        if (header->GoodAssembly())
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
+            //
+            // Sorry, you'll have to reboot to load this assembly.
+            //
+            if (header->flags & CLR_RECORD_ASSEMBLY::c_Flags_NeedReboot)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
+            }
+
+            NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
+
+            assm->m_pFile = array;
+
+            g_CLR_RT_TypeSystem.Link(assm);
+
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+
+            if (assm->m_iStaticFields > 0)
+            {
+                // need to execute static constructors
+                g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
+
+                // bump custom state so the read value above is pushed only once
+                stack.m_customState = 2;
+            }
+            else
+            {
+                // no need to execute static constructors
+                eventResult = false;
+            }
+
+            // push assembly index onto the eval stack
+            stack.PushValueU4(assm->m_idx);
         }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+    }
+    else
+    {
+        // get assembly index from the eval stack
+        idx.Set(stack.m_evalStack[1].NumericByRef().u4);
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
-
-        assm->m_pFile = array;
-
-        g_CLR_RT_TypeSystem.Link(assm);
-
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
+        assm = g_CLR_RT_TypeSystem.m_assemblies[idx.Assembly() - 1];
     }
 
-    if (assm)
+    while (eventResult)
     {
-        CLR_RT_Assembly_Index idx;
-        idx.Set(assm->m_idx);
+        if (assm->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted)
+        {
+            // static constructors executed, we are good here
+            break;
+        }
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_NoEvent, eventResult))
 
-        hbObj = top.Dereference();
+        // check for failure
+        if (!eventResult)
+        {
+            // can't happen!
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+    }
+
+    // pop assembly index from stack
+    stack.PopValue();
+
+    // pop timeout heap block from stack
+    stack.PopValue();
+
+    if (assm->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted)
+    {
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.m_Assembly));
+
+        hbObj = stack.TopValue().Dereference();
         hbObj->SetReflection(idx);
     }
 
     NANOCLR_CLEANUP();
 
-    if (FAILED(hr))
+    if (FAILED(hr) && hr != CLR_E_THREAD_WAITING)
     {
         if (assm)
         {
