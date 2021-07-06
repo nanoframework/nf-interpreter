@@ -37,6 +37,7 @@ option(API_nanoFramework.Graphics               "option for nanoFramework.Graphi
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.Hardware.Esp32.Nimble  "option for nanoFramework.Hardware.Esp32.Nimble")
 
 
 # Stm32 only
@@ -174,6 +175,12 @@ endif()
 if(API_nanoFramework.Hardware.Esp32.Rmt)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
+
+# nanoFramework.Hardware.Esp32.Nimble
+if(API_nanoFramework.Hardware.Esp32.Nimble)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Nimble")
 endif()
 
 # Hardware.Stm32

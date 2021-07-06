@@ -9,7 +9,7 @@ param (
     [switch]$force = $false
 )
 
-$idfVersion = "esp-idf-v3.3.1"
+$idfVersion = "esp-idf-v3.3.5"
 
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber

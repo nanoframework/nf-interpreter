@@ -15,7 +15,9 @@
 #ifndef _SOC_CPU_H
 #define _SOC_CPU_H
 
-#include <nanoCLR_Headers.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include "xtensa/corebits.h"
 #include "xtensa/config/core.h"
 

@@ -3,7 +3,41 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# Fix issue in IDF 3.3.1 where cpu.h gives a compile error
+option(USE_PSRAM_FIX "Enable ESP32 psram fix" OFF)
+
+message("")
+
+# Select build variant
+if(${TARGET_VARIANT} STREQUAL "BLE")
+    message("-- *** ESP32 BLE variant selected          ***")
+    message("-- *** Support for BLE, no PSRAM support   ***")
+    message("-- *** Suitable for ESP32 versions 1 to 3  ***")
+    set( ESP32_VARIANT_LIBRARY "_BLE")
+elseif(${TARGET_VARIANT} STREQUAL "V3")
+    message("-- *** ESP32 V3 only variant selected    ***")
+    message("-- *** Support for PSRAM and BLE         ***")
+    message("-- *** Suitable for ESP32 version 3 only ***")
+    set( ESP32_VARIANT_LIBRARY "_V3")
+else()
+    message("-- *** ESP32 generic variant selected      ***")
+    message("-- *** Support for PSRAM with fixes        ***")
+    message("-- *** Suitable for ESP32 versions 1 to 3  ***")
+    set( ESP32_VARIANT_LIBRARY "")
+    set( USE_PSRAM_FIX ON CACHE INTERNAL "Esp32 Psram fix enabled")
+    if (NANOCLR_ESP32_NIMBLE)
+        set( NANOCLR_ESP32_NIMBLE OFF CACHE INTERNAL "Make sure NIMBLE is off" )
+        message("-- *** Nimble BLE disabled as no room in generic build  ***")
+    endif()
+endif()
+
+message("")
+
+set ( ESP32_LIBS_PATH  "${ESP32_LIBS_PATH}${ESP32_VARIANT_LIBRARY}")
+message("-- *** Using library path:${ESP32_LIBS_PATH} ***")
+
+message("")
+
+# Fix issue in IDF 3.3.5 where cpu.h gives a compile error
 file(COPY "cpu.h" DESTINATION "${ESP32_IDF_PATH}/components/soc/esp32/include/soc/")
 
 
@@ -316,7 +350,7 @@ list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libapp_trace.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libapp_update.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libasio.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libaws_iot.a)
-#list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbootloader_support.a)
+list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbootloader_support.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbt.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libcoap.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libconsole.a)
@@ -347,11 +381,12 @@ list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libjsmn.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libjson.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/liblibsodium.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/liblog.a)
-# list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libmbedtls.a)
+list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libmbedtls.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libmdns.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libmicro-ecc.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libmqtt.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libnewlib.a)
+list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libnimble.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libnghttp.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libnvs_flash.a)
 # list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libopenssl.a)
@@ -372,7 +407,6 @@ list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwear_levelling.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwifi_provisioning.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libwpa_supplicant.a)
 list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libxtensa-debug-module.a)
-list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/libbootloader_support.a)
 
 # Lwip lib is built separately 
 #list(APPEND DIRECT_LINK_LIBS ${DIRECT_LINK_PATH}/liblwip.a)

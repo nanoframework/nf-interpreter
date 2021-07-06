@@ -48,7 +48,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         // Get ADC device number from channel
         int adcUnit = channel <= 9 ? 1 : 2;
 
-        adc_power_on();         // Make sure powered on
+        adc_power_acquire();         // Make sure powered on
 
         switch(adcUnit)
         {

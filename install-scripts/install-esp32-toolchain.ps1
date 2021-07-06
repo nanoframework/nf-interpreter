@@ -53,7 +53,7 @@ else {
 If ($xtensaPathExists -eq $False -or $force) {
     # Download xtensa ESP32 toolchain and install
 
-    $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-80-g6c4433a-5.2.0.zip"
+    $url = "https://dl.espressif.com/dl/xtensa-esp32-elf-win32-1.22.0-97-gc752ad5-5.2.0.zip"
     $output = "$zipRoot\xtensa-esp32-elf-win32.zip"
     
     # Don't download again if already exists

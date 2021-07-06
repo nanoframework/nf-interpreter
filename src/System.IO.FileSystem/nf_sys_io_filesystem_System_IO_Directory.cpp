@@ -9,6 +9,13 @@
 extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
+#if (PLATFORM_ESP32)
+// ESP32 uses the DIR struct for VFS and FatFs uses FF_DIR
+#define NANO_DIR  FF_DIR
+#else
+#define NANO_DIR  DDIR
+#endif
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -123,7 +130,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
         CLR_RT_HeapBlock &filePaths = stack.PushValue();
 
         uint16_t fileCount = 0;
-        DIR currentDirectory;
+        NANO_DIR currentDirectory;
         FRESULT operationResult;
         static FILINFO fileInfo;
 
@@ -253,7 +260,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
         CLR_RT_HeapBlock &folderPaths = stack.PushValue();
 
         uint16_t directoryCount = 0;
-        DIR currentDirectory;
+        NANO_DIR currentDirectory;
         FRESULT operationResult;
         static FILINFO fileInfo;
 

@@ -32,6 +32,7 @@ add_subdirectory("nanoCLR")
 #add_subdirectory("Graphics")
 #endif()
 
+
 #######################
 # nanoCLR executable
 
@@ -82,9 +83,21 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
 
     # Add psram workarounds for newlib
     if( "${LIBSHORT}" STREQUAL "newlib" )
-        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc-psram-workaround.a " )
-        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
-    endif()
+        if(USE_PSRAM_FIX)
+            message("Build including newlib with PSRAM workarrounds")
+            set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc-psram-workaround.a " )
+            set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
+            add_compile_options("-mfix-esp32-psram-cache-issue")
+            target_compile_options(NanoApiLib PUBLIC "-mfix-esp32-psram-cache-issue")
+            if(USE_NETWORKING_OPTION)
+                target_compile_options(NetworkLib PUBLIC "-mfix-esp32-psram-cache-issue")
+            endif()
+        else()    
+            message("Build including normal newlib (no psram work arounds)")
+            set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a " )
+            set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm.a " )
+        endif()
+   endif()
 
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -l${LIBSHORT} " )
     
@@ -95,7 +108,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
     if( "${LIBSHORT}" STREQUAL "bt" )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${ESP32_IDF_PATH}/components/bt/lib -lbtdm_app " )
     endif()
-
+    
     # Add options into LINK_FLAGS in same position as IDF link
     if( "${LIBSHORT}" STREQUAL "cxx" )
         # Cxx Library needs an undefine
@@ -107,7 +120,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211  -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lespnow -lphy -lmesh")
 	
         set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L  ${CMAKE_CURRENT_SOURCE_DIR} -T esp32_out.ld ")
-        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.project.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.libgcc.ld   ")
+        set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L ${ESP32_IDF_PATH}/components/esp32/ld -u ld_include_panic_highint_hdl -T esp32.project.ld -T esp32.rom.ld -T esp32.peripherals.ld -T esp32.rom.libgcc.ld -T esp32.rom.spiram_incompatible_fns.ld ")
     endif()
 
 
@@ -122,7 +135,7 @@ if(USE_NETWORKING_OPTION)
     set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
 endif()
 
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive  -L${CMAKE_CURRENT_BINARY_DIR} -lNanoApiLib -Wl,--no-whole-archive " )
+set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNanoApiLib -Wl,--no-whole-archive " )
 
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -lgcc -lstdc++ -lgcov -Wl,--end-group -Wl,-EL  ")
 
@@ -167,7 +180,6 @@ target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 
 # set platform for NanoApiLib
 # ESP32 has FPU
 target_compile_definitions(NanoApiLib PUBLIC "-DPLATFORM_ESP32 -DUSE_FPU=TRUE ")
-
 
 # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
 if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)

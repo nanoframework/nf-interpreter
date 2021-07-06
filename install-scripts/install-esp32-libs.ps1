@@ -9,7 +9,7 @@ param (
     [switch]$force = $false
 )
 
-$libsVersion = "libs-v3.3.1"
+$libsVersion = "libs-v3.3.5"
 
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
@@ -42,36 +42,41 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
     $Path = $Path + "\$libsVersion"
 }
 
-# check if path already exists
-$esp32LibPathExists = Test-Path $Path -ErrorAction SilentlyContinue
+$Libs = "", "_BLE", "_V3"
 
-If ($esp32LibPathExists -eq $False -or $force) {
-    $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.1/IDF_$libsVersion.zip"
-    $output = "$zipRoot\esp-idf-libs.zip"
+foreach($Libvar in $Libs)
+{
+    # check if path already exists 
+    $esp32LibPathExists = Test-Path ($Path+$Libvar) -ErrorAction SilentlyContinue
 
-    # Don't download again if already exists. User can remove from zips to force... 
-    if (![System.IO.File]::Exists($output) -or $force) {    
-        "Downloading ESP32 pre-compiled libs..." | Write-Host -ForegroundColor White -NoNewline
+    If ($esp32LibPathExists -eq $False -or $force) {
+        $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5"+$Libvar+"/IDF_$libsVersion" + $Libvar + ".zip"
+        $output = "$zipRoot\esp-idf-libs" + $Libvar + ".zip"
 
-        # Stop security tripping us up
-        [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+        # Don't download again if already exists. User can remove from zips to force... 
+        if (![System.IO.File]::Exists($output) -or $force) {    
+            "Downloading ESP32 pre-compiled lib..." | Write-Host -ForegroundColor White -NoNewline
 
-        # download zip IDF
-        (New-Object Net.WebClient).DownloadFile($url, $output)
+            # Stop security tripping us up
+            [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+
+            # download zip IDF
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        }
+
+        # unzip to install path, if not on Azure
+        if ($IsAzurePipelines -eq $False) {
+            "Installing ESP32 pre-compiled lib @ '" + $Path + $Libvar + "'..." | Write-Host -ForegroundColor White -NoNewline
+
+            # unzip
+            Expand-Archive -Path $output -DestinationPath ($Path + $Libvar)
+
+            "OK" | Write-Host -ForegroundColor Green
+        }
     }
-
-    # unzip to install path, if not on Azure
-    if ($IsAzurePipelines -eq $False) {
-        "Installing ESP32 pre-compiled libs @ '$Path'..." | Write-Host -ForegroundColor White -NoNewline
-
-        # unzip
-        Expand-Archive -Path $output -DestinationPath $Path
-
-        "OK" | Write-Host -ForegroundColor Green
+    else {
+        "Skipping install of ESP32 pre-compiled libs" | Write-Host -ForegroundColor Yellow
     }
-}
-else {
-    "Skipping install of ESP32 pre-compiled libs" | Write-Host -ForegroundColor Yellow
 }
 
 # set env variable, if not on Azure
