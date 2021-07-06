@@ -413,10 +413,8 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *pconfig, u
     // Set default to Auto Connect + Enable + WirelessFlags_SmartConfig so station can be started by default
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable wifi to save power etc
-    pconfig->Options = (Wireless80211Configuration_ConfigurationOptions)(
-        Wireless80211Configuration_ConfigurationOptions_AutoConnect |
-        Wireless80211Configuration_ConfigurationOptions_Enable |
-        Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+    pconfig->Options =
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
 }
 
 //  Default initialisation of wireless config blocks for ESP32 targets

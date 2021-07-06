@@ -1129,8 +1129,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
             // check if cert store is empty OR request index doesn't exist
             // (mind the zero based index)
-            if (
-                g_TargetConfiguration.CertificateStore->Count == 0 ||
+            if (g_TargetConfiguration.CertificateStore->Count == 0 ||
                 g_TargetConfiguration.CertificateStore->Count < cmd->BlockIndex + 1)
             {
                 // we are done here, just send an empty reply
@@ -1164,8 +1163,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
             // check if device cert store is empty OR request index doesn't exist
             // (mind the zero based index)
-            if (
-                g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+            if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
                 g_TargetConfiguration.DeviceCertificates->Count < cmd->BlockIndex + 1)
             {
                 // we are done here, just send an empty reply
