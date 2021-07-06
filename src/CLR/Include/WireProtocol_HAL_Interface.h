@@ -8,7 +8,7 @@
 
 #include "WireProtocol.h"
 
-#if __cplusplus
+#if defined(__cplusplus)
 extern "C"
 {
 #endif
@@ -34,7 +34,7 @@ extern "C"
 
     void WP_CheckAvailableIncomingData();
 
-#if __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
