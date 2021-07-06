@@ -1127,53 +1127,72 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
         case DeviceConfigurationOption_X509CaRootBundle:
 
-            if (g_TargetConfiguration.CertificateStore->Count > cmd->BlockIndex)
+            // check if cert store is empty OR request index doesn't exist
+            // (mind the zero based index)
+            if (
+                g_TargetConfiguration.CertificateStore->Count == 0 ||
+                g_TargetConfiguration.CertificateStore->Count < cmd->BlockIndex + 1)
+            {
+                // we are done here, just send an empty reply
+                success = true;
+            }
+            else
             {
                 // because X509 certificate has a variable length need to compute the block size in two steps
                 sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
                 sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[cmd->BlockIndex]->CertificateSize;
+
+                x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
+                memset(x509Certificate, 0, sizeof(sizeOfBlock));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        x509Certificate,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeOfBlock;
+                    success = true;
+
+                    WP_ReplyToCommand(message, success, false, (uint8_t *)x509Certificate, size);
+                }
+                platform_free(x509Certificate);
             }
 
-            x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
-            memset(x509Certificate, 0, sizeof(sizeOfBlock));
-
-            if (ConfigurationManager_GetConfigurationBlock(
-                    x509Certificate,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex) == true)
-            {
-                size = sizeOfBlock;
-                success = true;
-
-                WP_ReplyToCommand(message, success, false, (uint8_t *)x509Certificate, size);
-            }
-            platform_free(x509Certificate);
             break;
 
         case DeviceConfigurationOption_X509DeviceCertificates:
 
-            if (g_TargetConfiguration.DeviceCertificates->Count > cmd->BlockIndex)
+            // check if device cert store is empty OR request index doesn't exist
+            // (mind the zero based index)
+            if (
+                g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+                g_TargetConfiguration.DeviceCertificates->Count < cmd->BlockIndex + 1)
+            {
+                // we are done here, just send an empty reply
+                success = true;
+            }
+            else
             {
                 // because X509 certificate has a variable length need to compute the block size in two steps
                 sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
                 sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[cmd->BlockIndex]->CertificateSize;
+
+                x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
+                memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        x509DeviceCertificate,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeOfBlock;
+                    success = true;
+
+                    WP_ReplyToCommand(message, success, false, (uint8_t *)x509DeviceCertificate, size);
+                }
+
+                platform_free(x509DeviceCertificate);
             }
-
-            x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
-            memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
-
-            if (ConfigurationManager_GetConfigurationBlock(
-                    x509DeviceCertificate,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex) == true)
-            {
-                size = sizeOfBlock;
-                success = true;
-
-                WP_ReplyToCommand(message, success, false, (uint8_t *)x509DeviceCertificate, size);
-            }
-
-            platform_free(x509DeviceCertificate);
 
             break;
 
