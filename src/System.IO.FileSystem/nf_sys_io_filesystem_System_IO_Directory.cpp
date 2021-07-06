@@ -11,9 +11,9 @@ extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
 #if (PLATFORM_ESP32)
 // ESP32 uses the DIR struct for VFS and FatFs uses FF_DIR
-#define NANO_DIR  FF_DIR
+#define NANO_DIR FF_DIR
 #else
-#define NANO_DIR  DIR
+#define NANO_DIR DIR
 #endif
 
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC__BOOLEAN__STRING(
