@@ -9,7 +9,7 @@
 extern void CombinePathAndName(char *outpath, const char *path1, const char *path2);
 extern SYSTEMTIME GetDateTime(uint16_t date, uint16_t time);
 
-#if (PLATFORM_ESP32)
+#if defined(PLATFORM_ESP32)
 // ESP32 uses the DIR struct for VFS and FatFs uses FF_DIR
 #define NANO_DIR FF_DIR
 #else
