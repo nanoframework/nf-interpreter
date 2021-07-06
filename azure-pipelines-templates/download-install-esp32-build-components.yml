@@ -4,8 +4,8 @@
 steps:
   - task: Cache@2
     inputs:
-      key: '3-3-1 | esp331ToolsKey'
-      restoreKeys: esp331ToolchainKey
+      key: '3-3-5 | esp335ToolsKey'
+      restoreKeys: esp335ToolchainKey
       path: $(Agent.TempDirectory)\ESP32_Tools
       cacheHitVar: ESP_TOOLS_CACHE_RESTORED
     displayName: Cache ESP32 tools
