@@ -162,7 +162,9 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
         tempMask = 0x00000000;
         tempLen = (dataLength > 2) ? 3 : (dataLength > 1) ? 2 : 1;
         for (int i = remainder - 1; i >= 0 && tempLen > 0; i--, tempLen--)
+        {
             tempMask |= (uint32_t)(0x000000FF << (i * 8));
+        }
 
         tempRegisterValue &= ~tempMask;
 
@@ -219,6 +221,9 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
 
         // clear the bytes we'll be filling
         tempRegisterValue &= (uint32_t)(0x00FFFFFF >> ((remainder - 1) * 8));
+
+        // adjust remainder to the amount of bytes to move
+        remainder = 4 - remainder;
 
         int offset = 3;
         do
