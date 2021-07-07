@@ -1,0 +1,106 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
+//
+
+#include "sys_io_ser_native.h"
+
+// clang-format off
+
+static const CLR_RT_MethodHandler method_lookup[] =
+{
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID,
+    NULL,
+    NULL,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
+{
+    "System.IO.Ports",
+    0x61B8380C,
+    method_lookup,
+    { 100, 1, 1, 3 }
+};
+
+// clang-format on

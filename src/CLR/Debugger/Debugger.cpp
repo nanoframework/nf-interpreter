@@ -59,6 +59,8 @@ void CLR_DBG_Debugger::Debugger_Discovery()
 
     CLR_INT32 wait_sec = 5;
 
+    uint8_t loopCounter = 1;
+
     CLR_INT64 expire = HAL_Time_CurrentTime() + (wait_sec * TIME_CONVERSION__TO_SECONDS);
 
     // Send "presence" ping.
@@ -69,7 +71,7 @@ void CLR_DBG_Debugger::Debugger_Discovery()
     {
         CLR_EE_DBG_EVENT_BROADCAST(
             CLR_DBG_Commands::c_Monitor_Ping,
-            sizeof(cmd),
+            0,
             &cmd,
             WP_Flags_c_NoCaching | WP_Flags_c_NonCritical);
 
@@ -96,6 +98,11 @@ void CLR_DBG_Debugger::Debugger_Discovery()
             CLR_Debug::Printf("No debugger found...\r\n");
             break;
         }
+
+        // pause for multiples of 250ms so this is not flooding the channel with PING packets
+        PLATFORM_DELAY(loopCounter * 250);
+
+        loopCounter++;
     }
 
     g_CLR_RT_ExecutionEngine.WaitForDebugger();
@@ -438,9 +445,13 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     if (CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
     {
         if (fStopOnBoot)
+        {
             CLR_EE_DBG_SET(Stopped);
+        }
         else
+        {
             CLR_EE_DBG_CLR(Stopped);
+        }
     }
 
     return true;
@@ -1005,30 +1016,27 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
 
     CLR_DBG_Commands::Monitor_Reboot *cmd = (CLR_DBG_Commands::Monitor_Reboot *)msg->m_payload;
 
-    if (NULL != cmd)
+    if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
+        (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
-            (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
-        {
-            success = RequestToLaunchNanoBooter();
-        }
-        else if (
-            CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
-            (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
-        {
-            success = RequestToLaunchProprietaryBootloader();
-        }
-
-        g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
+        success = RequestToLaunchNanoBooter();
     }
-
-    Events_WaitForEvents(0, 100); // give message a little time to be flushed
+    else if (
+        CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
+        (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter))
+    {
+        success = RequestToLaunchProprietaryBootloader();
+    }
 
     WP_ReplyToCommand(msg, success, false, NULL, 0);
 
-    Events_WaitForEvents(0, 100); // give message a little time to be flushed
+    // on success, apply reboot options and set reboot pending flag
+    if (success)
+    {
+        g_CLR_RT_ExecutionEngine.m_iReboot_Options = cmd->m_flags;
 
-    CLR_EE_DBG_SET(RebootPending);
+        CLR_EE_DBG_SET(RebootPending);
+    }
 
     return true;
 }
@@ -1119,53 +1127,70 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
 
         case DeviceConfigurationOption_X509CaRootBundle:
 
-            if (g_TargetConfiguration.CertificateStore->Count > cmd->BlockIndex)
+            // check if cert store is empty OR request index doesn't exist
+            // (mind the zero based index)
+            if (g_TargetConfiguration.CertificateStore->Count == 0 ||
+                g_TargetConfiguration.CertificateStore->Count < cmd->BlockIndex + 1)
+            {
+                // we are done here, just send an empty reply
+                success = true;
+            }
+            else
             {
                 // because X509 certificate has a variable length need to compute the block size in two steps
                 sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
                 sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[cmd->BlockIndex]->CertificateSize;
+
+                x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
+                memset(x509Certificate, 0, sizeof(sizeOfBlock));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        x509Certificate,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeOfBlock;
+                    success = true;
+
+                    WP_ReplyToCommand(message, success, false, (uint8_t *)x509Certificate, size);
+                }
+                platform_free(x509Certificate);
             }
 
-            x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
-            memset(x509Certificate, 0, sizeof(sizeOfBlock));
-
-            if (ConfigurationManager_GetConfigurationBlock(
-                    x509Certificate,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex) == true)
-            {
-                size = sizeOfBlock;
-                success = true;
-
-                WP_ReplyToCommand(message, success, false, (uint8_t *)x509Certificate, size);
-            }
-            platform_free(x509Certificate);
             break;
 
         case DeviceConfigurationOption_X509DeviceCertificates:
 
-            if (g_TargetConfiguration.DeviceCertificates->Count > cmd->BlockIndex)
+            // check if device cert store is empty OR request index doesn't exist
+            // (mind the zero based index)
+            if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+                g_TargetConfiguration.DeviceCertificates->Count < cmd->BlockIndex + 1)
+            {
+                // we are done here, just send an empty reply
+                success = true;
+            }
+            else
             {
                 // because X509 certificate has a variable length need to compute the block size in two steps
                 sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
                 sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[cmd->BlockIndex]->CertificateSize;
+
+                x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
+                memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
+
+                if (ConfigurationManager_GetConfigurationBlock(
+                        x509DeviceCertificate,
+                        (DeviceConfigurationOption)cmd->Configuration,
+                        cmd->BlockIndex) == true)
+                {
+                    size = sizeOfBlock;
+                    success = true;
+
+                    WP_ReplyToCommand(message, success, false, (uint8_t *)x509DeviceCertificate, size);
+                }
+
+                platform_free(x509DeviceCertificate);
             }
-
-            x509DeviceCertificate = (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeOfBlock);
-            memset(x509DeviceCertificate, 0, sizeof(sizeOfBlock));
-
-            if (ConfigurationManager_GetConfigurationBlock(
-                    x509DeviceCertificate,
-                    (DeviceConfigurationOption)cmd->Configuration,
-                    cmd->BlockIndex) == true)
-            {
-                size = sizeOfBlock;
-                success = true;
-
-                WP_ReplyToCommand(message, success, false, (uint8_t *)x509DeviceCertificate, size);
-            }
-
-            platform_free(x509DeviceCertificate);
 
             break;
 
@@ -1264,20 +1289,28 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Execution_ChangeConditions *cmd =
         (CLR_DBG_Commands::Debugging_Execution_ChangeConditions *)msg->m_payload;
 
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions |= cmd->FlagsToSet;
-    g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions &= ~cmd->FlagsToReset;
+    // save current value
+    int32_t newConditions = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
 
-    // updating the debugging execution conditions requires sometime to propagate
-    // make sure we allow enough time for that to happen
-    OS_DELAY(100);
+    // apply received flags
+    newConditions |= cmd->FlagsToSet;
+    newConditions &= ~cmd->FlagsToReset;
 
+    // send confirmation reply
     if ((msg->m_header.m_flags & WP_Flags_c_NonCritical) == 0)
     {
         CLR_DBG_Commands::Debugging_Execution_ChangeConditions::Reply cmdReply;
 
-        cmdReply.CurrentState = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
+        cmdReply.CurrentState = (CLR_UINT32)newConditions;
 
         WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+    }
+
+    // if there is anything to change, apply the changes
+    if (cmd->FlagsToSet || cmd->FlagsToReset)
+    {
+        // update conditions
+        g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
     }
 
     return true;

@@ -202,10 +202,10 @@ option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
 
 if(NF_FEATURE_LIGHT_MATH)
     set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
-    message(STATUS "Complex math functions not available")
+    message(STATUS "Complex math functions available")
 else()
     set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
-    message(STATUS "Complex math functions available")
+    message(STATUS "Complex math functions not available")
 endif()
 
 ###################################################################################
@@ -424,6 +424,15 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
+# Wire Protocol options
+option(NF_WP_IMPLEMENTS_CRC32 "option to report if target implements CRC32 in Wire Protocol")
+
+# handle Wire Protocol _TRACE_ preferences, if any
+option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
+option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
+option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
+option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
+option(NF_WP_TRACE_ALL "option to Trace  with Wire Protocol")
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
@@ -504,7 +513,8 @@ endif()
 # and/or manage other APIs that are required
 
 if( API_nanoFramework.Devices.OneWire OR
-    API_Windows.Devices.SerialCommunication)
+    API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports)
 
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 
@@ -594,6 +604,11 @@ else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
 endif()
 
+if(API_System.Device.Spi)
+    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+else()
+    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
+endif()
 
 if(API_nanoFramework.Devices.Can)
     set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
@@ -639,6 +654,7 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)

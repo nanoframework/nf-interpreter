@@ -58,13 +58,13 @@ typedef enum WP_Flags
 // enum with machine states for Wire Procotol receiver
 typedef enum ReceiveState
 {
-    ReceiveState_Idle             = (1 << 0),
-    ReceiveState_Initialize       = (2 << 0),
-    ReceiveState_WaitingForHeader = (3 << 0),
-    ReceiveState_ReadingHeader    = (4 << 0),
-    ReceiveState_CompleteHeader   = (5 << 0),
-    ReceiveState_ReadingPayload   = (6 << 0),
-    ReceiveState_CompletePayload  = (7 << 0),
+    ReceiveState_Idle             = 1,
+    ReceiveState_Initialize       = 2,
+    ReceiveState_WaitingForHeader = 3,
+    ReceiveState_ReadingHeader    = 4,
+    ReceiveState_CompleteHeader   = 5,
+    ReceiveState_ReadingPayload   = 6,
+    ReceiveState_CompletePayload  = 7,
 }ReceiveState;
 
 // enum with CLR monitor commands
@@ -124,19 +124,6 @@ typedef struct WP_Message
 {
     WP_Packet      m_header;
     uint8_t*       m_payload;
-
-    void (*Initialize)(WP_Controller* parent);
-    void (*PrepareReception)(void);
-    void (*PrepareRequest)(unsigned int cmd, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
-    void (*PrepareReply)(const void** req, unsigned int flags, unsigned int payloadSize, unsigned char* payload);
-    void (*SetPayload)(unsigned char* payload);
-    void (*Release)(void);
-    bool (*Process)(void);
-
-    bool (*VerifyHeader)(void);
-    bool (*VerifyPayload)(void);
-    void (*ReplyBadPacket)(unsigned int flags);
-
 }WP_Message;
 
 

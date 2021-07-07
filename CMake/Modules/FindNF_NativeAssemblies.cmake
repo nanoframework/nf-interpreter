@@ -5,7 +5,7 @@
 
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
-# e.g.: for namespace Windows.Devices.Gpio, the CMake option is 'API_Windows.Devices.Gpio' 
+# e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
@@ -27,7 +27,9 @@ option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
+option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
+option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 
@@ -314,10 +316,22 @@ if(API_Windows.Devices.SerialCommunication)
     PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
 endif()
 
+# API_System.IO.Ports
+if(API_System.IO.Ports)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.IO.Ports")
+endif()
+
 # Windows.Devices.Spi
 if(API_Windows.Devices.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.Spi")
+endif()
+
+# System.Device.Spi
+if(API_System.Device.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
 # Windows.Devices.Wifi

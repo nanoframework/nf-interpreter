@@ -4,6 +4,26 @@
 // Portions Copyright (c) 2009-2013 Daniel D Miller. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+// Notes on this implementation: This is a small/fast implementation of printf variants
+// for double (floating) numbers.  It is a compromise of size and speed over capability.
+// In general the algorithm used in this code can only format a small range of the possible
+// values that can be fit in a double.  A double can hold roughly +/-1e308, but the code in
+// this program uses shifting of 64 bits, so a range of roughly +/-1e18 (2^63). The method
+// npf_dsplit_abs supports this limitation and will return a value of "oor" (out-of-range)
+// for numbers over 2^63.  It will return zero for any numbers below 2^-63.
+//
+// See the information here: http://0x80.pl/notesen/2015-12-29-float-to-string.html
+//
+// Notes on this implementation: This is a small/fast implementation of printf variants
+// for double (floating) numbers.  It is a compromise of size and speed over capability.
+// In general the algorithm used in this code can only format a small range of the possible
+// values that can be fit in a double.  A double can hold roughly +/-1e308, but the code in
+// this program uses shifting of 64 bits, so a range of roughly +/-1e18 (2^63). The method
+// npf_dsplit_abs supports this limitation and will return a value of "oor" (out-of-range)
+// for numbers over 2^63.  It will return zero for any numbers below 2^-63.
+//
+// See the information here: http://0x80.pl/notesen/2015-12-29-float-to-string.html
+//
 
 /*
     The implementation of nanoprintf begins here, to be compiled only if
@@ -641,7 +661,7 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                             NPF_EXTRACT(SHORT, short, int);
                             NPF_EXTRACT(LONG, long, long);
                             NPF_EXTRACT(LONG_DOUBLE, int, int);
-                            NPF_EXTRACT(CHAR, char, int);
+                            NPF_EXTRACT(CHAR, signed char, int);
 #if NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS == 1
                             NPF_EXTRACT(LARGE_LONG_LONG, long long, long long);
                             NPF_EXTRACT(LARGE_INTMAX, intmax_t, intmax_t);
@@ -882,7 +902,9 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                     {
                         /* float precision is after the decimal point */
                         int const precision_start =
-                            (fs.conv_spec == NPF_FMT_SPEC_CONV_FLOAT_DECIMAL) ? frac_chars : cbuf_len;
+                            (fs.conv_spec == NPF_FMT_SPEC_CONV_FLOAT_DECIMAL) ? frac_chars : fs.precision;
+                        // If not a float or decimal then the prec_pad has to end up as zero so we don't attempt any
+                        // padding
                         prec_pad = NPF_MAX(0, fs.precision - precision_start);
                     }
 #elif NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS == 1

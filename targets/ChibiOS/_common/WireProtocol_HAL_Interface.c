@@ -6,6 +6,7 @@
 #include <ch.h>
 #include <hal.h>
 
+#include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
@@ -15,54 +16,60 @@
 #include <serialcfg.h>
 #endif
 
-WP_Message inboundMessage;
-
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    // save for later comparison
+    uint32_t requestedSize = *size;
     (void)requestedSize;
 
     // check for request with 0 size
     if (*size)
     {
-        // read from serial stream with 250ms timeout
-        size_t read = chnReadTimeout(&SDU1, ptr, *size, TIME_MS2I(250));
+        // read from serial stream with 100ms timeout
+        size_t read = chnReadTimeout(&SDU1, ptr, requestedSize, TIME_MS2I(100));
+
+        // check if any bytes where read
+        if (read == 0)
+        {
+            return false;
+        }
 
         ptr += read;
         *size -= read;
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
-
-        // check if any bytes where read
-        return read > 0;
     }
 
     return true;
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    volatile uint32_t read;
+
+    // save for later comparison
+    uint32_t requestedSize = *size;
     (void)requestedSize;
 
     // check for request with 0 size
     if (*size)
     {
-        // non blocking read from serial port with 10ms timeout
-        volatile size_t read = chnReadTimeout(&SERIAL_DRIVER, ptr, *size, TIME_MS2I(10));
-
-        ptr += read;
-        *size -= read;
+        // non blocking read from serial port with 100ms timeout
+        read = chnReadTimeout(&SERIAL_DRIVER, ptr, requestedSize, TIME_MS2I(20));
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         // check if any bytes where read
-        return read > 0;
+        if (read == 0)
+        {
+            return false;
+        }
+
+        ptr += read;
+        *size -= read;
     }
 
     return true;
@@ -75,7 +82,7 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-bool WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;
@@ -115,7 +122,7 @@ bool WP_TransmitMessage(WP_Message *message)
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-bool WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;

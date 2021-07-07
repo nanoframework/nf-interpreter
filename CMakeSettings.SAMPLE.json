@@ -214,7 +214,17 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Device.I2c",
           "value": "True",
           "type": "BOOL"
         },
@@ -229,7 +239,17 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.IO.Ports",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.Spi",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Device.Spi",
           "value": "True",
           "type": "BOOL"
         },
@@ -474,7 +494,17 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Device.I2c",
           "value": "True",
           "type": "BOOL"
         },
@@ -485,6 +515,11 @@
         },
         {
           "name": "API_Windows.Devices.SerialCommunication",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.IO.Ports",
           "value": "True",
           "type": "BOOL"
         },

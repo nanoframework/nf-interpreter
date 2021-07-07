@@ -65,6 +65,7 @@
     <ClCompile Include="corlib_native_System_Threading_Interlocked.cpp" />
     <ClCompile Include="corlib_native_System_Threading_ManualResetEvent.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Monitor.cpp" />
+    <ClCompile Include="corlib_native_System_Threading_SpinWait.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Thread.cpp" />
     <ClCompile Include="corlib_native_System_Threading_Timer.cpp" />
     <ClCompile Include="corlib_native_System_Threading_WaitHandle.cpp" />
@@ -77,7 +78,7 @@
     <ProjectGuid>{58E950CC-2FF6-423C-B006-A70A19272F20}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CorLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -150,7 +151,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -177,7 +178,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

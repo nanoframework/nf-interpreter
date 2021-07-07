@@ -27,6 +27,21 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
     endif()
 endif()
 
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)
@@ -56,6 +71,7 @@ endif()
 # check if build was requested with a specifc ChibiOS version
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(RTOS_VERSION "stable_20.3.x")
 endif()
 
@@ -152,6 +168,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     # check if build was requested with a specifc FatFS version
     if(FATFS_VERSION_EMPTY)
         # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
         set(FATFS_VERSION_TAG "R0.14")
     else()
         # set version 
@@ -209,6 +226,7 @@ if(NF_SECURITY_MBEDTLS)
     endif()
 
     # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
 
     # set options for mbed TLS

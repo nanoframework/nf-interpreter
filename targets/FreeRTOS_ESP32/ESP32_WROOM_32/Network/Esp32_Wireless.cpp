@@ -139,7 +139,7 @@ esp_err_t Esp32_InitaliseWifi()
     return ec;
 }
 
-esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 *pWireless)
+esp_err_t Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless)
 {
     esp_err_t ec;
 
@@ -162,7 +162,7 @@ esp_err_t Esp32_Wireless_Connect(HAL_Configuration_Wireless80211 *pWireless)
         return ec;
 
     ec = esp_wifi_connect();
-    ESP_LOGI(TAG, "WiFi Connect to %s result %d", sta_config.sta.ssid, ec);
+    ESP_LOGI(TAG, "WiFi Start Connect to %s result %d", sta_config.sta.ssid, ec);
     if (ec != ESP_OK)
         return ec;
 
@@ -210,19 +210,15 @@ int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
     if ((pWireless->Options & Wireless80211Configuration_ConfigurationOptions_AutoConnect) &&
         (hal_strlen_s((const char *)pWireless->Ssid) > 0))
     {
-        Esp32_Wireless_Connect(pWireless);
+        Esp32_Wireless_Start_Connect(pWireless);
 
         // Maybe remove SmartConfig flag if conected ok
     }
 
     if (pWireless->Options & Wireless80211Configuration_ConfigurationOptions_SmartConfig)
     {
-        // FIXME
-        // Disable for now, When the smart_config starts it scans for wireless AP
-        // If it doesn't find any AP it ends up with a exception which causes the device to restart
-
         // Start Smart config (if enabled)
-        // Start_wifi_smart_config();
+        Start_wifi_smart_config();
     }
 
     return Esp32_Wait_NetNumber(ESP_IF_WIFI_STA);

@@ -893,7 +893,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     if (this->DataType() != DATATYPE_OBJECT)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
     }
 
     // Finds the object that keeps the boxed type.
@@ -903,7 +903,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
@@ -916,6 +916,21 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->dataType)))
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        }
+
+        // now check edge cases
+
+        //////////////////////////////////////////////////////////
+        // GUID: can't cast to anything except another GUID object
+        CLR_RT_TypeDescriptor srcTypeDes;
+        NANOCLR_CHECK_HRESULT(srcTypeDes.InitializeFromObject(*src));
+
+        CLR_RT_TypeDef_Instance &inst = srcTypeDes.m_handlerCls;
+
+        if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Guid.m_data)
+        {
+            // can't cast GUID class to anything else except another GUID
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }

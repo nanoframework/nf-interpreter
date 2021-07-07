@@ -35,7 +35,7 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
 $openOCDPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 If ($openOCDPathExists -eq $False -or $force) {
-    $url = "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.10.0-13/xpack-openocd-0.10.0-13-win32-x64.zip"
+    $url = "https://github.com/xpack-dev-tools/openocd-xpack/releases/download/v0.11.0-1/xpack-openocd-0.11.0-1-win32-x64.zip"
     $output = "$zipRoot\openocd.zip"
     
     # Don't download again if already exists
@@ -60,7 +60,7 @@ If ($openOCDPathExists -eq $False -or $force) {
     Expand-Archive -Path $output -DestinationPath "$Path\temp"
 
     # move to final location
-    Get-ChildItem -Path "$Path\temp\xPack\OpenOCD\0.10.0-13" -Recurse | Move-Item -Destination "$Path"
+    Get-ChildItem -Path "$Path\temp\xPack\OpenOCD\xpack-openocd-0.11.0-1" -Recurse | Move-Item -Destination "$Path"
 
     # remove temp directory
     Remove-Item $Path\temp -Recurse -Force
@@ -71,17 +71,23 @@ else {
     "Skipping instal of OpenOCD" | Write-Host -ForegroundColor Yellow
 }
 
-$env:OPENOCD_PATH = $Path
-# this call can fail if the script is not run with appropriate permissions
-[System.Environment]::SetEnvironmentVariable("OPENOCD_PATH", $env:OPENOCD_PATH, "User")
+"Setting User Environment Variable OPENOCD_PATH='" + $env:OPENOCD_PATH + "'" | Write-Host -ForegroundColor Yellow
 
-"Set User Environment OPENOCD_PATH='" + $env:OPENOCD_PATH + "'" | Write-Host -ForegroundColor Yellow
+$env:OPENOCD_PATH = $Path
+
+try {
+    # this call can fail if the script is not run with appropriate permissions
+    [System.Environment]::SetEnvironmentVariable("OPENOCD_PATH", $env:OPENOCD_PATH, "User")
+}
+catch {
+    "Failed to set User Environment Variable OPENOCD_PATH. Make sure to manually add 'OPENOCD_PATH' with '" + $env:OPENOCD_PATH + "'." | Write-Host -ForegroundColor Red
+}
 
 # SIG # Begin signature block
-# MIIeIgYJKoZIhvcNAQcCoIIeEzCCHg8CAQExDzANBglghkgBZQMEAgEFADB5Bgor
+# MIIeWwYJKoZIhvcNAQcCoIIeTDCCHkgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC+mx44cvygm5tP
-# EyQVyqTKXAlXz9ZzP6kYSFUAcrjYQKCCDg8wggPFMIICraADAgECAhACrFwmagtA
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCCpzOTmVV1Gefnn
+# L+w3UfoHFtYGD3m7kG/2vEo0DvTBxqCCDg8wggPFMIICraADAgECAhACrFwmagtA
 # m48LefKuRiV3MA0GCSqGSIb3DQEBBQUAMGwxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xKzApBgNV
 # BAMTIkRpZ2lDZXJ0IEhpZ2ggQXNzdXJhbmNlIEVWIFJvb3QgQ0EwHhcNMDYxMTEw
@@ -156,22 +162,22 @@ $env:OPENOCD_PATH = $Path
 # fbrFicrII5VQXMus77/h7JfCAxMy4IKym0IOPEA+4wo1+mGNyGzsdTd4fqLibuUB
 # SFhQry8tS8JFAnil8J6F9WK3GvJn6gZhbavPZr442KUsb0EomhYmni25kaotNrmQ
 # D7Q+k2GMyx7DtgKF86uIbyfSoMavS4Yf9N7hVXmLeTeGrC5GqqcyDfe+reWOPDU6
-# EIEZMcWHkoyvJNRFXACjvNV4MK6u282mMjGCD2kwgg9lAgEBMG4wWjELMAkGA1UE
+# EIEZMcWHkoyvJNRFXACjvNV4MK6u282mMjGCD6Iwgg+eAgEBMG4wWjELMAkGA1UE
 # BhMCVVMxGDAWBgNVBAoTDy5ORVQgRm91bmRhdGlvbjExMC8GA1UEAxMoLk5FVCBG
 # b3VuZGF0aW9uIFByb2plY3RzIENvZGUgU2lnbmluZyBDQQIQDP8BdPDQJNgmxzG3
 # FCJmOTANBglghkgBZQMEAgEFAKCBhDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAA
 # MBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgor
-# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCCp278zQoirOMEomFqvM/ZI4A16sSsR
-# qsHoEZamHVI8hzANBgkqhkiG9w0BAQEFAASCAQCr70a1hUBXZDvFqabYvZcxHrI5
-# 3CUMuzRR93xS4+nZKqSHPU+pdi0LY0vZogRqsYyIenfEUsgc+c2f6GoxbNI6QqWn
-# WizWmL9wWB4V9rVJ6DW0cBnebG8cvJDx70lxJjVpk1lOjcnBiYl3bpYfdMcvOrRx
-# QfYYLKH5lMdYscWYCmP85toEYKBtzNALU/ZUo96jAC7Em7uVnONwkkiV6hUJYNrQ
-# WwUfC2cmVaq2XQBzzJqmXuiJVL8MVP/kTbXb/tkSIF9US/60xRt6s/98paFW0hIu
-# BlCRWBacoyfx6oAj8wrwJI0Ed/7WI46H5T8ZKZrUOKNCPtoXW++MvPi7RnhToYIN
-# RTCCDUEGCisGAQQBgjcDAwExgg0xMIINLQYJKoZIhvcNAQcCoIINHjCCDRoCAQMx
+# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCD1PVoxxFeV0ALJ4af2vEdrwtf5vPg+
+# lZfS4qR0MepSlzANBgkqhkiG9w0BAQEFAASCAQCOKY6dsV4Wob+ccri76w0mXusc
+# CyfJ3Hr8fG1ywOAv/W1pPJ9esxF9zbgXN3E0Xt66V5D6ihHf40cfePEMHffZ8seN
+# SRNZCsU5s5c+8JTuWMYkgo7izTJbJJ3HkOHKUaJgGfN1q7l9aBFfzjHBQ3seEdtw
+# py3l2KvySOPWGPmSInPv+mMfdyxuR2gphIK83HrHwqNfnY4AL2PwxssjVs80p0sP
+# f++usjYCL4YtVpaJV6xz5JERMvmXQiK+o7WL1sn4HJcm5XAwxr/6HBNLGJ5o/J9H
+# syJeYq88M2BzEJWP7jCr3Jc8QZ3D/7/P6ukFJ0aeNKhsGcwUZoLNmENb9V2ooYIN
+# fjCCDXoGCisGAQQBgjcDAwExgg1qMIINZgYJKoZIhvcNAQcCoIINVzCCDVMCAQMx
 # DzANBglghkgBZQMEAgEFADB4BgsqhkiG9w0BCRABBKBpBGcwZQIBAQYJYIZIAYb9
-# bAcBMDEwDQYJYIZIAWUDBAIBBQAEIB8S5oQhOXRiWG2u+zLD0yY+kGhghuMSlyt3
-# iYgx2E/TAhEA+wwRC73B4wh7okbEXkLYURgPMjAyMTAzMTcxNTAwMzRaoIIKNzCC
+# bAcBMDEwDQYJYIZIAWUDBAIBBQAEINS9wKKh6x+39/5y/BSQLDyoBi4tUWhRZJ48
+# NPIVQWm/AhEA0kxdNWAVJSdDZMHW4JTT5RgPMjAyMTA3MDEwOTUxMjFaoIIKNzCC
 # BP4wggPmoAMCAQICEA1CSuC+Ooj/YEAhzhQA8N0wDQYJKoZIhvcNAQELBQAwcjEL
 # MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3
 # LmRpZ2ljZXJ0LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElE
@@ -226,17 +232,18 @@ $env:OPENOCD_PATH = $Path
 # FDVDBGiy23UC4HLHmNY8ZOUfSBAYX4k4YU1iRiSHY4yRUiyvKYnleB/WCxSlgNcS
 # R3CzddWThZN+tpJn+1Nhiaj1a5bA9FhpDXzIAbG5KHW3mWOFIoxhynmUfln8jA/j
 # b7UBJrZspe6HUSHkWGCbugwtK22ixH67xCUrRwIIfEmuE7bhfEJCKMYYVs9BNLZm
-# XbZ0e/VWMyIvIjayS6JKldj1po5SMYICTTCCAkkCAQEwgYYwcjELMAkGA1UEBhMC
+# XbZ0e/VWMyIvIjayS6JKldj1po5SMYIChjCCAoICAQEwgYYwcjELMAkGA1UEBhMC
 # VVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3LmRpZ2ljZXJ0
 # LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElEIFRpbWVzdGFt
-# cGluZyBDQQIQDUJK4L46iP9gQCHOFADw3TANBglghkgBZQMEAgEFAKCBmDAaBgkq
-# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDMxNzE1
-# MDAzNFowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
-# m/MwLwYJKoZIhvcNAQkEMSIEIPDMTgjCrjPUlBgA7Nzk0EViWZybv8ND7yTtPp+v
-# wYboMA0GCSqGSIb3DQEBAQUABIIBAJ6DAuinN2CW5KafUL3lc63e+RTev4ij8XUT
-# gim9sOhOQS65oKpeUmlHhOV57JhP59ihj7jbIRmEBBE0xJ2j8ON9SsIIzq2wN8w9
-# UND+YwLBpA4GakAj0/LuFPxqsrQWCHia6i17JV89HVrUqchXY2Ww/56LV3ApDDVr
-# 1E67wbYEdsb+eYTzeNiEbH/l+kuXHqphEtfl9UP9m8WbCX9TmyKmO2qGR7t+poXt
-# xXcpnBPA0ZHORZDUkvNqR2Q/kiL+r6MkmGQ0nrtxwFxJjlhBrtM1ru1Ty4wMY21F
-# IYjO1isuQ8DmzD4IBOFZVTbuK7E8mxbcZ2IDHSif/KqjQZxCJO0=
+# cGluZyBDQQIQDUJK4L46iP9gQCHOFADw3TANBglghkgBZQMEAgEFAKCB0TAaBgkq
+# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDcwMTA5
+# NTEyMVowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
+# m/MwLwYJKoZIhvcNAQkEMSIEIJlxVX7pPNjchG3CPc2cG2suaMMv0joL55eDe9o9
+# RqEoMDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEILMQkAa8CtmDB5FXKeBEA0Fcg+Mp
+# K2FPJpZMjTVx7PWpMA0GCSqGSIb3DQEBAQUABIIBAGzMUfvJfIpRI2Tl+gtf/txP
+# WyOE3KBqeOdejPrTdQRoFBKi04pkgJKM4rmKe+NakrTbOMzARFmV57i4Qq5QIMzl
+# GESyHG10vRhEaSjEv3euiCCNVh9Z7aNUC7cJf4L5TM/4kyB/K3y028C1NI605B9j
+# LiF9yjhnROOI8wefbRplsPoJn1ffoUeSwrISnCAX9yR7EQy9ayAkkMLhRbmGu7gV
+# PaornZPAWwkspDLIe/vj7jPF5/UiYgZUwK+wsU0hrITuVVbb+lfTAuJZuloKyrOZ
+# A+fLR55kVxbdKsloS2I1fgICjxaLXrBDeVP8oHEtGbbMjDgCSzWtrUag9mSIZwc=
 # SIG # End signature block

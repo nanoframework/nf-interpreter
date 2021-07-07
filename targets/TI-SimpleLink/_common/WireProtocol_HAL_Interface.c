@@ -17,12 +17,10 @@
 
 UART2_Handle uart = NULL;
 
-WP_Message inboundMessage;
-
-bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    // save for later comparison
+    uint32_t requestedSize = *size;
     size_t read;
 
     // check for request with 0 size
@@ -31,17 +29,20 @@ bool WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
         // non blocking read from serial port with 500ms timeout
         UART2_readTimeout(uart, ptr, requestedSize, &read, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
 
+        // check if any bytes where read
+        if (read == 0)
+        {
+            return false;
+        }
+
         ptr += read;
         *size -= read;
-
-        // check if any bytes where read
-        return read > 0;
     }
 
     return true;
 }
 
-bool WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;

@@ -29,6 +29,7 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
         endif()
     endif()
 
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(TI_SL_CC32xx_SDK_TAG "4.10.00.07")
 
     if(NO_TI_SL_CC32xx_SDK_SOURCE)
@@ -78,7 +79,8 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     # check if build was requested with a specifc TI XDCTools version
     if(TI_XDCTOOLS_VERSION_EMPTY)
         # no TI XDCTools version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(TI_XDCTOOLS_VERSION_TAG "3.61.00.16")
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+        set(TI_XDCTOOLS_VERSION_TAG "3.62.00.08")
     else()
         # set SVN tag
         set(TI_XDCTOOLS_VERSION_TAG "${TI_XDCTOOLS_VERSION}")
@@ -136,7 +138,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
         endif()
     endif()
 
-    set(TI_SL_CC13x2_26x2_SDK_TAG "4.40.04.04" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    set(TI_SL_CC13x2_26x2_SDK_TAG "5.10.00.48" CACHE INTERNAL "TI CC13x2_26x2 SDK tag")
 
     if(NO_TI_SL_CC13x2_26x2_SDK_SOURCE)
         # no TI SimpleLink CC13x2_26x2 SDK source specified, download it from our repo
@@ -186,7 +189,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     # check if build was requested with a specifc TI SysConfig version
     if(TI_SYSCONFIG_VERSION_EMPTY)
         # no TI SysConfig version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(TI_SYSCONFIG_VERSION_TAG "1.7.0")
+            # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+        set(TI_SYSCONFIG_VERSION_TAG "1.8.1")
     else()
         # set Git tag
         set(TI_SYSCONFIG_VERSION_TAG "${TI_SYSCONFIG_VERSION}")
@@ -239,7 +243,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     # check if build was requested with a specifc TI XDCTools version
     if(TI_XDCTOOLS_VERSION_EMPTY)
         # no TI XDCTools version actualy specified, must be empty which is fine, we'll default to a known good version
-        set(TI_XDCTOOLS_VERSION_TAG "3.61.01.25")
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+        set(TI_XDCTOOLS_VERSION_TAG "3.62.00.08")
     else()
         # set tag
         set(TI_XDCTOOLS_VERSION_TAG "${TI_XDCTOOLS_VERSION}")
@@ -265,8 +270,8 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
 
             FetchContent_Declare(
                 ti_xdctools
-                GIT_REPOSITORY ${TI_XDCTOOLS_SOURCE}
-                GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
+                SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
+                # GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
             )
 
         else()

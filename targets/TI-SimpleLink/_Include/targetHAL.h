@@ -71,6 +71,11 @@
 
 #define NANOCLR_STOP() HARD_BREAKPOINT()
 
+__attribute__((always_inline)) static inline void __NOP(void)
+{
+    __asm("  nop");
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEBUGGER HELPER                                                                                 //
 // The line below is meant to be used as helper on checking that the execution engine is running. //

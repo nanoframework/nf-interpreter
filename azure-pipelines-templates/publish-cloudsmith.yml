@@ -6,10 +6,8 @@
 
 steps:
 
-  # skip task on PR build and when on branch other than master or nf community targets
-  # execute on 'ForceUpload' parameter
   - task: ArchiveFiles@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: succeeded()
     displayName: Zip binary files (release)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -19,19 +17,17 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'master'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: succeeded()
     displayName: Collecting deployable artifacts (release)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        *.zip
+        '$(TargetPublishName)-$(NBGV_AssemblyVersion).zip'
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
-  # skip task on PR build and when on branch other than develop, master or release
-  # execute on 'ForceUpload' parameter
   - task: ArchiveFiles@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: succeeded()
     displayName: Zip binary files (preview)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -41,17 +37,17 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( contains(variables['Build.SourceBranchName'], 'develop'), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: succeeded()
     displayName: Collecting deployable artifacts (preview)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        *.zip
+        $(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
   - task: PublishBuildArtifacts@1
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest') )
+    condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
@@ -60,7 +56,7 @@ steps:
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Set Cloudsmith repo path
     inputs:
       targetType: 'inline'
@@ -95,7 +91,7 @@ steps:
             }
             else 
             {
-              # this master branch, publish to Cloudsmith stable repo
+              # this main branch, publish to Cloudsmith stable repo
               Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
               # set publishing package name
               Write-Host "$("##vso[task.setvariable variable=PUBLISHING_PACKAGE_NAME]")$(TargetPublishName)-$(NBGV_AssemblyVersion)"
@@ -107,16 +103,21 @@ steps:
       failOnStderr: 'true'
 
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'master'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Upload package to Cloudsmith
     inputs:
       targetType: 'inline'
       script: |
 
+          # update pip (until the build agent image is updated)
+          python -m pip install --upgrade pip
+
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli
+
+          Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) v$(PACKAGE_VERSION)"
 
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: 'stop'
-      failOnStderr: 'true'
+      failOnStderr: 'false'

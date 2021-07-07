@@ -51,12 +51,11 @@ extern "C"
         uint32_t flags,
         uint32_t payloadSize,
         uint8_t *payload);
-    void WP_Message_SetPayload(WP_Message *message, uint8_t *payload);
-    void WP_Message_Release(WP_Message *message);
-    int WP_Message_VerifyHeader(WP_Message *message);
-    int WP_Message_VerifyPayload(WP_Message *message);
-    void WP_Message_ReplyBadPacket(uint32_t flags);
-    int WP_Message_Process();
+    uint8_t WP_Message_VerifyHeader(WP_Message *message);
+    uint8_t WP_Message_VerifyPayload(WP_Message *message);
+    void WP_Message_Process();
+
+    void WP_Message_PrepareReception_Platform();
 
 #ifdef __cplusplus
 }

@@ -105,6 +105,7 @@ set(NF_CoreCLR_SRCS
     corlib_native_System_Threading_Interlocked.cpp
     corlib_native_System_Threading_ManualResetEvent.cpp
     corlib_native_System_Threading_Monitor.cpp
+    corlib_native_System_Threading_SpinWait.cpp
     corlib_native_System_Threading_Thread.cpp
     corlib_native_System_Threading_Timer.cpp
     corlib_native_System_Threading_WaitHandle.cpp

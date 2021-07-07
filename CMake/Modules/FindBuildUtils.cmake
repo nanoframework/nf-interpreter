@@ -48,6 +48,30 @@ function(NF_GENERATE_HEX_PACKAGE FILE1 FILE2 OUTPUTFILENAME)
 
 endfunction()
 
+# generates a binary file with nanoBooter + nanoCLR at the proper addresses
+# ready to be drag & drop on targets that feature DAPLink 
+function(NF_GENERATE_BIN_PACKAGE FILE1 FILE2 OFFSET OUTPUTFILENAME)
+
+    add_custom_command(
+            
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+
+        COMMAND ${TOOL_SRECORD_PREFIX}/srec_cat
+
+        ${FILE1} -Binary
+        ${FILE2} -Binary -offset 0x${OFFSET}
+        -o ${OUTPUTFILENAME} -Binary
+
+        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX} 
+
+        COMMENT "exporting hex files to one binary file" 
+    )
+
+    # need to add a dependency of NANOCLR to NANOBOOTER because SRECORD util needs hex outputs of both targets
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf ${NANOBOOTER_PROJECT_NAME}.elf)
+
+endfunction()
+
 function(NF_GENERATE_BUILD_OUTPUT_FILES TARGET)
 
     # need to remove the .elf suffix from target name

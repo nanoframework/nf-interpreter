@@ -173,6 +173,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_Radio;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_WIFI_STATION)
+    {
+        eventsCLR |= Event_Wifi_Station;
+    }
+
     if (eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents(eventsCLR);

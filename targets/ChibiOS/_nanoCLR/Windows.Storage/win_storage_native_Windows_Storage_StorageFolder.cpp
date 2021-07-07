@@ -1078,7 +1078,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         }
         else
         {
-            // error opening the directoty
+            // error opening the directory
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
         }
     }

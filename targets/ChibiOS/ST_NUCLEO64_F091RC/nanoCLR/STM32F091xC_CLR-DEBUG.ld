@@ -10,6 +10,11 @@
 /*
  * STM32F091xC memory setup.
  */
+
+/*
+* When updating the flash0 address below make sure to update the address in NF_GENERATE_BIN_PACKAGE 
+*/
+
 MEMORY
 {
     flash0     (rx) : org = 0x08005000, len = 256k - 20k - 46k   /* flash size less the space reserved for nanoBooter and application deployment*/
