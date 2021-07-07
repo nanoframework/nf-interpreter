@@ -812,12 +812,12 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Only used by ESP32 at the moment
-        if(API_nanoFramework.Hardware.Esp32.Nimble)
-            set(NANOCLR_ESP32_NIMBLE TRUE CACHE INTERNAL "Nimble BLE Support")
-            message(STATUS "Support for Nimble BLE enabled")
+        if(API_nanoFramework.Hardware.Esp32.Ble)
+            set(NANOCLR_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+            message(STATUS "Support for BLE enabled")
         else()
-            set(NANOCLR_ESP32_NIMBLE FALSE CACHE INTERNAL "No Nimble BLE Support")
-            message(STATUS "Support for Nimble BLE disabled")
+            set(NANOCLR_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+            message(STATUS "Support for BLE disabled")
         endif()
 
         # check watchdog feature

@@ -14,9 +14,6 @@
 
 
 
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Ble;
 
-
-
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Nimble;
-
-#endif  //_NANOFRAMEWORK_HARDWARE_ESP32_NIMBLE_NATIVE_H_
+#endif  //_NANOFRAMEWORK_HARDWARE_ESP32_BLE_NATIVE_H_

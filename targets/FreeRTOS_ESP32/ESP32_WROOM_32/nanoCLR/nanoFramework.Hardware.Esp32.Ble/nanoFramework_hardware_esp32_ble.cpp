@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nanoFramework_hardware_esp32_nimble_native.h"
+#include "nanoFramework_hardware_esp32_ble_native.h"
 
 #include <esp32_os.h>
 #include "Esp32_DeviceMapping.h"

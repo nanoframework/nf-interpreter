@@ -14,7 +14,7 @@
 #define SDC_MAX_OPEN_FILES	    5
 #endif
 
-#define NANOCLR_ESP32_NIMBLE                @NANOCLR_ESP32_NIMBLE@
+#define NANOCLR_ESP32_BLEE                @NANOCLR_ESP32_BLE@
 
 
 #endif /* _TARGET_PLATFORM_H_ */
