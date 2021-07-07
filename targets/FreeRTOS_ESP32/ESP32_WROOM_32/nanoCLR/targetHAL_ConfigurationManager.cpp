@@ -413,10 +413,8 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *pconfig, u
     // Set default to Auto Connect + Enable + WirelessFlags_SmartConfig so station can be started by default
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable wifi to save power etc
-    pconfig->Options = (Wireless80211Configuration_ConfigurationOptions)(
-        Wireless80211Configuration_ConfigurationOptions_AutoConnect |
-        Wireless80211Configuration_ConfigurationOptions_Enable |
-        Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+    pconfig->Options =
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
 }
 
 //  Default initialisation of wireless config blocks for ESP32 targets
@@ -775,7 +773,6 @@ bool ConfigurationManager_StoreConfigurationBlock(
 {
     bool result = false;
     bool requiresEnumeration = false;
-    size_t blobSize = 0;
 
 #ifdef DEBUG_CONFIG
     ets_printf(
@@ -797,30 +794,30 @@ bool ConfigurationManager_StoreConfigurationBlock(
     {
         if (configuration == DeviceConfigurationOption_Network)
         {
-            // set blob size
-            blobSize = sizeof(HAL_Configuration_NetworkInterface);
+            // set blockSize size
+            blockSize = sizeof(HAL_Configuration_NetworkInterface);
         }
         else if (configuration == DeviceConfigurationOption_Wireless80211Network)
         {
-            // set blob size
-            blobSize = sizeof(HAL_Configuration_Wireless80211);
+            // set blockSize size
+            blockSize = sizeof(HAL_Configuration_Wireless80211);
         }
         else if (configuration == DeviceConfigurationOption_WirelessNetworkAP)
         {
-            // set blob size
-            blobSize = sizeof(HAL_Configuration_WirelessAP);
+            // set blockSize size
+            blockSize = sizeof(HAL_Configuration_WirelessAP);
         }
         else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
         {
-            // set blob size ( Total size of  X509 certificate )
+            // set blockSize size ( Total size of  X509 certificate )
             // because X509 certificate has a variable length need to compute the block size in two steps
-            blobSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-            blobSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+            blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+            blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
 
 #ifdef DEBUG_CONFIG
             ets_printf(
-                "StoreConfig x509 blobSize:%d, certsize:%d",
-                blobSize,
+                "StoreConfig x509 blockSize:%d, certsize:%d",
+                blockSize,
                 ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize);
 #endif
         }
@@ -832,9 +829,9 @@ bool ConfigurationManager_StoreConfigurationBlock(
     }
 
     // Anything to save
-    if (blobSize != 0)
+    if (blockSize != 0)
     {
-        result = StoreConfigBlock(configuration, configurationIndex, configurationBlock, blobSize);
+        result = StoreConfigBlock(configuration, configurationIndex, configurationBlock, blockSize);
     }
 
     if (requiresEnumeration)
