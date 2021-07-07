@@ -38,11 +38,11 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
 
     // check if the store address is starting at a register address boundary
     remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(RTC_BKP0R_Msk);
+    registerAddress = (uint32_t *)(storeAddress - remainder);
 
     if (remainder > 0)
     {
         // read register
-        registerAddress = (uint32_t *)(storeAddress - remainder);
         tempRegisterValue = *registerAddress;
 
         // adjust remainder to the amount of bytes to move
@@ -96,15 +96,14 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
         // read register
         tempRegisterValue = *registerAddress;
 
-        // adjust remainder to the amount of bytes to move
-        remainder = 4 - remainder;
-
+        int offset = 3;
         do
         {
-            *data = (uint8_t)(tempRegisterValue >> (remainder * 8));
+            *data = (uint8_t)(tempRegisterValue >> (offset * 8));
             remainder--;
             data++;
             counter++;
+            offset--;
         } while (remainder);
     }
 
@@ -134,6 +133,7 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
     uint32_t counter = 0;
     uint32_t remainder;
     int32_t index = 3;
+    uint32_t tempMask, tempLen;
 
     // sanity check for out of range position
     if (position > (BACKUP_SIZE - 1))
@@ -148,18 +148,25 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
 
     // check if the store address is starting at a register address boundary
     remainder = (uint32_t)((uint32_t *)storeAddress) % sizeof(RTC_BKP0R_Msk);
+    registerAddress = (uint32_t *)(storeAddress - remainder);
 
     if (remainder > 0)
     {
         // read register
-        registerAddress = (uint32_t *)(storeAddress - remainder);
         tempRegisterValue = *registerAddress;
 
         // adjust remainder to the amount of bytes to move
         remainder = 4 - remainder;
 
         // clear the bytes we'll be filling
-        tempRegisterValue &= (uint32_t)(0xFFFFFF00 << ((remainder - 1) * 8));
+        tempMask = 0x00000000;
+        tempLen = (dataLength > 2) ? 3 : (dataLength > 1) ? 2 : 1;
+        for (int i = remainder - 1; i >= 0 && tempLen > 0; i--, tempLen--)
+        {
+            tempMask |= (uint32_t)(0x000000FF << (i * 8));
+        }
+
+        tempRegisterValue &= ~tempMask;
 
         do
         {
@@ -218,12 +225,14 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemo
         // adjust remainder to the amount of bytes to move
         remainder = 4 - remainder;
 
+        int offset = 3;
         do
         {
-            tempRegisterValue |= (uint32_t)((uint32_t)*data << (remainder * 8));
+            tempRegisterValue |= (uint32_t)((uint32_t)*data << (offset * 8));
             remainder--;
             data++;
             counter++;
+            offset--;
         } while (remainder);
 
         // write back register
