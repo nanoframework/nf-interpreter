@@ -8,11 +8,8 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_MonitorCommands.h>
 
-// Initialize to a packet sequence number impossible to encounter
-static uint32_t lastPacketSequence = 0x00FEFFFF;
-
 // defining this array here makes is local helping reduce the image size because of compiler opmitizations
-static const CommandHandlerLookup c_Lookup_Request[] = {
+const CommandHandlerLookup c_Lookup_Request[] = {
 /*******************************************************************************************************************************************************************/
 #define DEFINE_CMD(cmd)                                                                                                \
     {                                                                                                                  \
@@ -47,7 +44,7 @@ static const CommandHandlerLookup c_Lookup_Request[] = {
 ////////////////////////////////////////////////////
 
 // defining this array here makes is local helping reduce the image size because of compiler opmitizations
-static const CommandHandlerLookup c_Lookup_Reply[] = {
+const CommandHandlerLookup c_Lookup_Reply[] = {
 /*******************************************************************************************************************************************************************/
 #define DEFINE_CMD(cmd)                                                                                                \
     {                                                                                                                  \
@@ -58,54 +55,12 @@ static const CommandHandlerLookup c_Lookup_Reply[] = {
     /*******************************************************************************************************************************************************************/
 };
 
-uint8_t Messaging_ProcessPayload(WP_Message* message)
+uint8_t GetSizeOfLookup_Reply()
 {
-    // Prevent processing duplicate packets
-    if (message->m_header.m_seq == lastPacketSequence)
-    {
-        return false; // Do not even respond to a repeat packet
-    }
+    return ARRAYSIZE(c_Lookup_Reply);
+}
 
-    // save this packet sequence number
-    lastPacketSequence = message->m_header.m_seq;
-
-    if (message->m_header.m_flags & WP_Flags_c_NACK)
-    {
-        //
-        // Bad packet...
-        //
-        return true;
-    }
-
-    size_t num;
-    const CommandHandlerLookup *cmd;
-
-    if (message->m_header.m_flags & WP_Flags_c_Reply)
-    {
-        num = ARRAYSIZE(c_Lookup_Reply);
-        cmd = c_Lookup_Reply;
-    }
-    else
-    {
-        num = ARRAYSIZE(c_Lookup_Request);
-        cmd = c_Lookup_Request;
-    }
-
-    while (num--)
-    {
-        if (cmd->command == message->m_header.m_cmd)
-        {
-            // execute command handler and save the result
-            int commandHandlerExecuteResult = ((int (*)(WP_Message *))cmd->handler)(message);
-
-            WP_ReplyToCommand(message, commandHandlerExecuteResult, false, NULL, 0);
-            return true;
-        }
-
-        cmd++;
-    }
-
-    WP_ReplyToCommand(message, false, false, NULL, 0);
-
-    return true;
+uint8_t GetSizeOfLookup_Request()
+{
+    return ARRAYSIZE(c_Lookup_Request);
 }
