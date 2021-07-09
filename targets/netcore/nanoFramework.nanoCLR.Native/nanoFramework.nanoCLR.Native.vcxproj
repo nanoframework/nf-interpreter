@@ -110,7 +110,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -138,7 +138,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLRNATIVE_EXPORTS;NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\..\win32\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -167,9 +167,9 @@
     <ClInclude Include="..\Include\targetHAL_Time.h" />
     <ClInclude Include="..\Include\targetPAL_time.h" />
     <ClInclude Include="..\Include\target_platform.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="nanoCLR_native.h" />
     <ClInclude Include="platform_selector.h" />
-    <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="target_BlockStorage.h" />
     <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h" />
@@ -186,35 +186,34 @@
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
-    <ClCompile Include="base64.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\base64.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="nanoCLR_native.cpp" />
     <ClCompile Include="platform_BlockStorage.cpp" />
-    <ClCompile Include="targetPAL_Events.cpp" />
-    <ClCompile Include="FileStore_Win32.cpp" />
-    <ClCompile Include="Generated\CLR_RT_InteropAssembliesTable.cpp" />
-    <ClCompile Include="Memory.cpp" />
-    <ClCompile Include="PAL\COMDirector_stubs.cpp" />
-    <ClCompile Include="PAL\ConfigHelper_stubs.cpp" />
-    <ClCompile Include="PAL\time_stubs.cpp" />
-    <ClCompile Include="PAL\Watchdog_stubs.cpp" />
-    <ClCompile Include="ParseOptions_Win32.cpp" />
-    <ClCompile Include="platform_heap.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetPAL_Events.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\FileStore_Win32.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\Generated\CLR_RT_InteropAssembliesTable.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\Memory.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\COMDirector_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\ConfigHelper_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\time_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\PAL\Watchdog_stubs.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\platform_heap.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="targetPAL_Time.cpp" />
-    <ClCompile Include="targetRandom.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetPAL_Time.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetRandom.cpp" />
     <ClCompile Include="Target_BlockStorage.cpp" />
-    <ClCompile Include="targetHAL_Time.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\targetHAL_Time.cpp" />
     <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
     <ClCompile Include="Various.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="WatchDog.cpp" />
+    <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
     <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -313,6 +312,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Text\System.Text.vcxproj">
       <Project>{70922447-ebf0-4473-b014-776f8c9426e7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.vcxproj">
+      <Project>{830a7e28-7b2b-4be6-8888-a39775a0092a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.IO.Ports\System.IO.Ports.vcxproj">
       <Project>{46556afc-c248-4082-abe6-9b07f4e57579}</Project>
