@@ -29,19 +29,16 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    if (gWireTransmitCallback != NULL)
+    auto data = CLR_RT_Buffer(sizeof(message->m_header) + message->m_header.m_size);
+    std::memcpy(data.data(), &message->m_header, sizeof(message->m_header));
+    if (message->m_header.m_size)
     {
-        auto data = std::vector<byte>(sizeof(message->m_header) + message->m_header.m_size);
-        std::memcpy(data.data(), (const uint8_t *)&message->m_header, sizeof(message->m_header));
-        if (message->m_header.m_size)
-        {
-            std::memcpy(
-                &data[sizeof(message->m_header)],
-                (const uint8_t *)message->m_payload,
-                message->m_header.m_size);
-        }
-        gWireTransmitCallback(data.data(), data.size());
+        std::memcpy(
+            &data[sizeof(message->m_header)],
+            message->m_payload,
+            message->m_header.m_size);
     }
+    gWireTransmitBuffer.insert(gWireTransmitBuffer.end(), data.begin(), data.end());
     return true;
 }
 

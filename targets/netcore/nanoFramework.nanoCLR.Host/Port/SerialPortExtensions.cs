@@ -4,13 +4,12 @@
 //
 
 using System.Collections.Generic;
-using System.IO.Ports;
 
-namespace nanoFramework.nanoCLR.Host
+namespace nanoFramework.nanoCLR.Host.Port
 {
     public static class SerialPortExtensions
     {
-        public static byte[] ReadAllBytes(this SerialPort port)
+        public static byte[] ReadAllBytes(this System.IO.Ports.SerialPort port)
         {
             var bytes = new List<byte>();
             do

@@ -3,7 +3,7 @@
     "nanoCLR.CLI": {
       "commandName": "Project",
       "nativeDebugging": true,
-      "commandLineArgs": "-d COM5"
+      "commandLineArgs": "-d COM3"
     }
   }
 }

@@ -48,6 +48,7 @@ DebugPrintCallback gDebugPrintCallback = NULL;
 
 WireTransmitCallback gWireTransmitCallback = NULL;
 CLR_RT_Buffer gWireReceiveBuffer;
+CLR_RT_Buffer gWireTransmitBuffer;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -82,9 +83,6 @@ void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
 
-    if (clrSettings.WaitForDebugger || clrSettings.EnterDebuggerLoopAfterExit)
-        WP_Message_PrepareReception();
-
     ClrStartup(clrSettings);
 
 #if !defined(BUILD_RTM)
@@ -97,13 +95,35 @@ void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
     gDebugPrintCallback = debugPrintCallback;
 }
 
-void NanoClr_SetWireTransmitCallback(WireTransmitCallback wireTransmitCallback)
+size_t NanoClr_WireReceive(CLR_UINT8 *data, size_t size)
 {
-    gWireTransmitCallback = wireTransmitCallback;
+    const auto toRead = size > gWireTransmitBuffer.size() ? gWireTransmitBuffer.size() : size;
+    std::memcpy(data, gWireTransmitBuffer.data(), toRead);
+    gWireTransmitBuffer.erase(gWireTransmitBuffer.begin(), gWireTransmitBuffer.begin() + toRead);
+    return toRead;
 }
 
-void NanoClr_WireReceive(const CLR_UINT8 *data, size_t size)
+void NanoClr_WireTransmit(const CLR_UINT8 *data, size_t size)
 {
-    gWireReceiveBuffer = CLR_RT_Buffer(data, data + size);
+    gWireReceiveBuffer.insert(gWireReceiveBuffer.end(), data, data + size);
+}
+
+size_t NanoClr_WireBytesAvailable()
+{
+    return gWireTransmitBuffer.size();
+}
+
+void NanoClr_WireProcess()
+{
     WP_Message_Process();
 }
+
+void NanoClr_WireOpen()
+{
+    WP_Message_PrepareReception();
+}
+
+void NanoClr_WireClose()
+{
+}
+       

@@ -5,18 +5,19 @@
 
 using System;
 using System.Collections.Generic;
+using nanoFramework.nanoCLR.Host.Port;
 
 namespace nanoFramework.nanoCLR.Host
 {
     public class NanoClrHost
     {
         private bool _isRunning = false;
+        private IChannel _wireProtocolChannel;
 
-        private Interop.WireTransmitDelegate _wireReceiveCallback;
         internal List<Action> PreInitConfigureSteps { get; } = new();
         internal List<Action> ConfigureSteps { get; } = new();
         internal NanoClrSettings NanoClrSettings { get; set; } = NanoClrSettings.Default;
-        internal IDeviceSink WireProtocolSink { get; set; }
+        internal IPort WireProtocolPort { get; set; }
 
         internal NanoClrHost()
         {
@@ -28,39 +29,26 @@ namespace nanoFramework.nanoCLR.Host
                 return;
             _isRunning = true;
 
-            Interop.NanoClr_SetConfigureCallback(ConfigureRuntime);
+            Native.NanoClr_SetConfigureCallback(ConfigureRuntime);
 
-            if (WireProtocolSink != null)
-                InitWireProtocolSink();
+            if (WireProtocolPort != null)
+                InitWireProtocol(WireProtocolPort);
 
             PreInitConfigureRuntime();
-            Interop.NanoClr_Run(NanoClrSettings);
+            Native.NanoClr_Run(NanoClrSettings);
 
             Cleanup();
         }
 
         private void Cleanup()
         {
-            if (WireProtocolSink != null)
-                WireProtocolSink.Close();
+            _wireProtocolChannel?.Disconnect();
         }
 
-        private void InitWireProtocolSink()
+        private void InitWireProtocol(IPort wireProtocolPort)
         {
-            _wireReceiveCallback = new Interop.WireTransmitDelegate(WireReceiveCallback);
-            Interop.NanoClr_SetWireTransmitCallback(_wireReceiveCallback);
-            WireProtocolSink.Initialize(WireTransmitToDevice);
-            WireProtocolSink.Open();
-        }
-
-        private void WireReceiveCallback(byte[] bytes, int length)
-        {
-            WireProtocolSink.ReceivedFromDevice(bytes);
-        }
-
-        private void WireTransmitToDevice(byte[] bytes)
-        {
-            Interop.NanoClr_WireReceive(bytes, bytes.Length);
+            _wireProtocolChannel = new Channel(wireProtocolPort, new WireProtocolPort());
+            _wireProtocolChannel.Connect();
         }
 
         private void PreInitConfigureRuntime() =>
@@ -69,7 +57,7 @@ namespace nanoFramework.nanoCLR.Host
         private uint ConfigureRuntime()
         {
             ConfigureSteps.ForEach(s => s());
-            return Interop.ClrOk;
+            return Native.ClrOk;
         }
 
         public static NanoClrHostBuilder CreateBuilder() => new NanoClrHostBuilder { };

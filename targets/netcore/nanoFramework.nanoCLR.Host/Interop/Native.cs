@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host
 {
-    internal class Interop
+    internal class Native
     {
         internal const uint ClrOk = 0;
         internal const uint ClrErrorFail = 0xFF000000;
@@ -44,10 +44,21 @@ namespace nanoFramework.nanoCLR.Host
             [MarshalAs(UnmanagedType.FunctionPtr)] DebugPrintDelegate debugPrintCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void NanoClr_SetWireTransmitCallback(
-            [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate wireTransmitCallback);
+        internal static extern void NanoClr_WireOpen();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void NanoClr_WireReceive(byte[] data, int length);
+        internal static extern void NanoClr_WireClose();
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int NanoClr_WireReceive(byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void NanoClr_WireTransmit(byte[] data, int length);
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int NanoClr_WireBytesAvailable();
+
+        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void NanoClr_WireProcess();
     }
 }
