@@ -33,10 +33,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     std::memcpy(data.data(), &message->m_header, sizeof(message->m_header));
     if (message->m_header.m_size)
     {
-        std::memcpy(
-            &data[sizeof(message->m_header)],
-            message->m_payload,
-            message->m_header.m_size);
+        std::memcpy(&data[sizeof(message->m_header)], message->m_payload, message->m_header.m_size);
     }
     gWireTransmitBuffer.insert(gWireTransmitBuffer.end(), data.begin(), data.end());
     return true;
