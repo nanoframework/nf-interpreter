@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using nanoFramework.nanoCLR.Host.Interop;
 using nanoFramework.nanoCLR.Host.Port;
 
 namespace nanoFramework.nanoCLR.Host
@@ -47,7 +48,7 @@ namespace nanoFramework.nanoCLR.Host
 
         private void InitWireProtocol(IPort wireProtocolPort)
         {
-            _wireProtocolChannel = new Channel(wireProtocolPort, new WireProtocolPort());
+            _wireProtocolChannel = new Channel(wireProtocolPort, new NativeWireProtocolPort());
             _wireProtocolChannel.Connect();
         }
 

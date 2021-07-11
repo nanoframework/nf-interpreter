@@ -30,12 +30,23 @@ namespace nanoFramework.nanoCLR.CLI
                     if (o.TryResolve)
                         hostBuilder.TryResolve();
 
-                    if (o.DebugPort != null)
+                    if (o.DebugSerialPort != null || o.DebugTcpIpPort != null || o.DebugNamedPipe != null)
                     {
                         hostBuilder.WaitForDebugger = true;
                         hostBuilder.EnterDebuggerLoopAfterExit = true;
-                        hostBuilder.UseSerialPortWireProtocol(o.DebugPort, o.TraceWire);
                     }
+
+                    if (o.DebugSerialPort != null)
+                        hostBuilder.UseSerialPortWireProtocol(o.DebugSerialPort);
+
+                    if (o.DebugTcpIpPort != null)
+                        hostBuilder.UseTcpIpPortWireProtocol(o.DebugTcpIpPort.Value);
+
+                    if (o.DebugNamedPipe != null)
+                        hostBuilder.UseNamedPipeWireProtocol(o.DebugNamedPipe);
+
+                    if (o.TraceWire)
+                        hostBuilder.UsePortTrace();
 
                     hostBuilder.Build().Run();
                 });

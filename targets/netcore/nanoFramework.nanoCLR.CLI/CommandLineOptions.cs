@@ -19,7 +19,13 @@ namespace nanoFramework.nanoCLR.CLI
         public string AssembliesSet { get; set; }
 
         [Option('d', "debug", Required = false, HelpText = "Set COM port for debug")]
-        public string DebugPort { get; set; }
+        public string DebugSerialPort { get; set; }
+
+        [Option('p', "port", Required = false, HelpText = "Set TCP/IP port for incoming debug connection")]
+        public int? DebugTcpIpPort { get; set; }
+
+        [Option('n', "name", Required = false, HelpText = "Set Pipe Name for incoming debug connection")]
+        public string DebugNamedPipe { get; set; }
 
         [Option('t', "traceWire", Required = false, HelpText = "Trace wire data packets")]
         public bool TraceWire { get; set; }

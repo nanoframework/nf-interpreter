@@ -5,7 +5,7 @@
 
 using System.Collections.Generic;
 
-namespace nanoFramework.nanoCLR.Host.Port
+namespace nanoFramework.nanoCLR.Host.Port.Serial
 {
     public static class SerialPortExtensions
     {
