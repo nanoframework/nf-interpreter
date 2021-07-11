@@ -5,7 +5,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace nanoFramework.nanoCLR.Host
+namespace nanoFramework.nanoCLR.Host.Interop
 {
     internal class Native
     {

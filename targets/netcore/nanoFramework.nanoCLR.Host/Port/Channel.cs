@@ -1,4 +1,8 @@
-using System;
+//
+// Copyright (c) 2017 The nanoFramework project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 using System.Threading;
 
 namespace nanoFramework.nanoCLR.Host.Port
@@ -40,13 +44,15 @@ namespace nanoFramework.nanoCLR.Host.Port
                 {
                     PortB.TransmitData(PortA.ReceiveData());
                 }
+
                 PortB.Process();
                 if (PortB.BytesAvailable > 0)
                 {
                     PortA.TransmitData(PortB.ReceiveData());
                 }
+
                 PortA.Process();
-                if(PortA.BytesAvailable == 0 && PortB.BytesAvailable == 0)
+                if (PortA.BytesAvailable == 0 && PortB.BytesAvailable == 0)
                     Thread.Sleep(100);
             }
         }

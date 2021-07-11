@@ -7,7 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using nanoFramework.nanoCLR.Host.Interop;
 using nanoFramework.nanoCLR.Host.Port;
+using nanoFramework.nanoCLR.Host.Port.NamedPipe;
+using nanoFramework.nanoCLR.Host.Port.Serial;
+using nanoFramework.nanoCLR.Host.Port.TcpIp;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -72,8 +77,17 @@ namespace nanoFramework.nanoCLR.Host
             return this;
         }
 
-        public NanoClrHostBuilder UseSerialPortWireProtocol(string comPort, bool traceWire = false) =>
+        public NanoClrHostBuilder UseSerialPortWireProtocol(string comPort) =>
             UseWireProtocolPort(new SerialPort(comPort));
+
+        public NanoClrHostBuilder UseTcpIpPortWireProtocol(int port) =>
+            UseWireProtocolPort(new TcpIpListeningPort(port));
+
+        public NanoClrHostBuilder UseNamedPipeWireProtocol(string name) =>
+            UseWireProtocolPort(new NamedPipeServerPort(name));
+
+        public NanoClrHostBuilder UsePortTrace() =>
+            UseWireProtocolPort(new TraceDataPort(_wireProtocolPort));
 
         public NanoClrHost Build()
         {
