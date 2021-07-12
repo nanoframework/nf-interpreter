@@ -23,8 +23,10 @@ namespace nanoFramework.nanoCLR.Host.Port
 
         public void TransmitData(byte[] data)
         {
-            if(data.Length >0)
+            if (data.Length > 0)
+            {
                 Native.NanoClr_WireTransmit(data, data.Length);
+            }
         }
 
         public void Process() => Native.NanoClr_WireProcess();

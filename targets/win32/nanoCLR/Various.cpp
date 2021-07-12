@@ -39,24 +39,6 @@ uint64_t HAL_Windows_GetPerformanceTicks()
     return 0; // UNDONE: FIXME: return EmulatorNative::GetEmulatorNative()->GetCurrentTicks();
 }
 
-void HAL_Windows_Debug_Print(char *szText)
-{
-    std::string str = (std::string)szText;
-
-    // clear trailing LR & CR
-    int pos;
-    if ((pos = str.find_last_of('\n')) != std::string::npos)
-    {
-        str.erase(pos);
-    }
-    if ((pos = str.find_last_of('\r')) != std::string::npos)
-    {
-        str.erase(pos);
-    }
-
-    std::cout << (std::string)str + "\n" << std::flush;
-}
-
 // HAL_Configuration_Windows g_HAL_Configuration_Windows;
 
 // unsigned int LOAD_IMAGE_CalcCRC;
@@ -168,6 +150,9 @@ void __cdecl nanoHAL_Initialize(void)
 {
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION::InitializeList();
+
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
 
     Events_Initialize();
 }
@@ -495,7 +480,22 @@ void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents)
 
 int nanoBooter_GetTargetInfo(TargetInfo *targetInfo)
 {
-    return 0;
+    targetInfo->BooterVersion.usMajor = 0;
+    targetInfo->BooterVersion.usMinor = 0;
+    targetInfo->BooterVersion.usBuild = 0;
+    targetInfo->BooterVersion.usRevision = 0;
+
+    targetInfo->ClrVersion.usMajor = VERSION_MAJOR;
+    targetInfo->ClrVersion.usMinor = VERSION_MINOR;
+    targetInfo->ClrVersion.usBuild = VERSION_MINOR;
+    targetInfo->ClrVersion.usRevision = VERSION_REVISION;
+
+    memcpy(&targetInfo->InfoString, OEMSYSTEMINFOSTRING, ARRAYSIZE(OEMSYSTEMINFOSTRING));
+    memcpy(&targetInfo->TargetName, TARGETNAMESTRING, ARRAYSIZE(TARGETNAMESTRING));
+    memcpy(&targetInfo->PlatformName, PLATFORMNAMESTRING, ARRAYSIZE(PLATFORMNAMESTRING));
+    memcpy(&targetInfo->PlatformInfoString, TARGETINFOSTRING, ARRAYSIZE(TARGETINFOSTRING));
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////

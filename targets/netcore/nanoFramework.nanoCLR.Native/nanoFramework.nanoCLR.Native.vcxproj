@@ -175,6 +175,7 @@
     <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\win32\nanoCLR\Various.cpp" />
     <ClCompile Include="Device_BlockStorage.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="..\..\..\src\CLR\Core\NativeEventDispatcher\NativeEventDispatcher.cpp" />
@@ -210,9 +211,7 @@
     <ClCompile Include="Target_BlockStorage.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\targetHAL_Time.cpp" />
     <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp" />
-    <ClCompile Include="Various.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Target_HAL.cpp" />
     <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp" />
     <ClCompile Include="WireProtocol_HAL_Interface.cpp" />
   </ItemGroup>

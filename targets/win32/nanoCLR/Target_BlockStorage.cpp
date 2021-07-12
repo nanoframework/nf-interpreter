@@ -8,6 +8,11 @@
 /////////////////////////////////////////////////////
 // DeviceBlockInfo stubs
 
+void BlockStorage_AddDevices()
+{
+
+}
+
 __nfweak SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(
     DeviceBlockInfo *blockInfo,
     const BlockRegionInfo *pRegion,

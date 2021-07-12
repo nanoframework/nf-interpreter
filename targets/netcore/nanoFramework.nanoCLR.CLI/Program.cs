@@ -22,13 +22,19 @@ namespace nanoFramework.nanoCLR.CLI
                 Parser.Default.ParseArguments<CommandLineOptions>(args).WithParsed(o =>
                 {
                     if (o.Assemblies.Any())
+                    {
                         hostBuilder.LoadAssemblies(o.Assemblies);
+                    }
 
                     if (o.AssembliesSet != null)
+                    {
                         hostBuilder.LoadAssembliesSet(o.AssembliesSet);
+                    }
 
                     if (o.TryResolve)
+                    {
                         hostBuilder.TryResolve();
+                    }
 
                     if (o.DebugSerialPort != null || o.DebugTcpIpPort != null || o.DebugNamedPipe != null)
                     {
@@ -37,16 +43,24 @@ namespace nanoFramework.nanoCLR.CLI
                     }
 
                     if (o.DebugSerialPort != null)
+                    {
                         hostBuilder.UseSerialPortWireProtocol(o.DebugSerialPort);
+                    }
 
                     if (o.DebugTcpIpPort != null)
+                    {
                         hostBuilder.UseTcpIpPortWireProtocol(o.DebugTcpIpPort.Value);
+                    }
 
                     if (o.DebugNamedPipe != null)
+                    {
                         hostBuilder.UseNamedPipeWireProtocol(o.DebugNamedPipe);
+                    }
 
                     if (o.TraceWire)
+                    {
                         hostBuilder.UsePortTrace();
+                    }
 
                     hostBuilder.Build().Run();
                 });

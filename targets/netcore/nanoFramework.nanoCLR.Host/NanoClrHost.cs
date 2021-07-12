@@ -27,13 +27,18 @@ namespace nanoFramework.nanoCLR.Host
         public void Run()
         {
             if (_isRunning)
+            {
                 return;
+            }
+
             _isRunning = true;
 
             Native.NanoClr_SetConfigureCallback(ConfigureRuntime);
 
             if (WireProtocolPort != null)
+            {
                 InitWireProtocol(WireProtocolPort);
+            }
 
             PreInitConfigureRuntime();
             Native.NanoClr_Run(NanoClrSettings);

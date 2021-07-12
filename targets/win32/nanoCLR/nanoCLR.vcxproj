@@ -202,6 +202,7 @@
     <ClCompile Include="targetRandom.cpp" />
     <ClCompile Include="Target_BlockStorage.cpp" />
     <ClCompile Include="targetHAL_Time.cpp" />
+    <ClCompile Include="Target_HAL.cpp" />
     <ClCompile Include="Various.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>

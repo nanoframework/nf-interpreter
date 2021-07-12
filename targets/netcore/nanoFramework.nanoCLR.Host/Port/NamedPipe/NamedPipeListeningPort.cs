@@ -19,7 +19,6 @@ namespace nanoFramework.nanoCLR.Host.Port.NamedPipe
         public NamedPipeServerPort(string pipeName)
         {
             _pipeName = pipeName;
-
         }
 
         protected override void OpenListener()
@@ -32,7 +31,8 @@ namespace nanoFramework.nanoCLR.Host.Port.NamedPipe
 
         protected override IPort WaitForConnection()
         {
-            var pipeServer = new NamedPipeServerStream(_pipeName, PipeDirection.InOut, maxNumberOfServerInstances: MaxThreads, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var pipeServer = new NamedPipeServerStream(_pipeName, PipeDirection.InOut,
+                maxNumberOfServerInstances: MaxThreads, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             pipeServer.WaitForConnection();
             return new StreamedConnection(pipeServer,
                 bytesAvailable: () => FixedBufferSize,
