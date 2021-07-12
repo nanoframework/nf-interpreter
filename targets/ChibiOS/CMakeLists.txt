@@ -72,7 +72,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "master") # !!! TODO: revert to set(RTOS_VERSION "stable_21.6.x") when mirror available !!!
+    set(RTOS_VERSION "stable_21.6.x")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
@@ -81,7 +81,7 @@ if(NO_RTOS_SOURCE_FOLDER)
 
     FetchContent_Declare(
         chibios
-        GIT_REPOSITORY https://github.com/nanoframework/chibios
+        GIT_REPOSITORY https://github.com/nanoframework/ChibiOS_mirror
         GIT_TAG ${RTOS_VERSION}
     )
 
