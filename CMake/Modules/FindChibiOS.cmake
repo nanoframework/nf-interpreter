@@ -31,6 +31,9 @@ else()
     set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
 endif()
 
+# store the package name for later use
+set(TARGET_STM32_SERIES STM32${TARGET_SERIES_SHORT} CACHE INTERNAL "name for STM32 Cube package")
+
 # including here the CMake files for the source files specific to the target series
 include(CHIBIOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 

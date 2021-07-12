@@ -14,42 +14,6 @@ FetchContent_GetProperties(chibios)
 ################################################################################################
 
 set(CHIBIOS_PORT_SRCS
-       # startup code
-       crt1.c
-       vectors.S
-       crt0_v7m.S
-   
-       nvic.c
-       stm32_isr.c
-       hal_lld.c
-   
-       hal_adc_lld.c
-       hal_can_lld.c
-       hal_crypto_lld.c
-       hal_dac_lld.c
-       stm32_dma.c
-       stm32_exti.c
-       hal_pal_lld.c
-       hal_i2c_lld.c
-       hal_mac_lld.c
-       hal_usb_lld.c
-       hal_wspi_lld.c 
-       hal_trng_lld.c
-       hal_rtc_lld.c
-       hal_sdc_lld.c
-   
-       hal_i2s_lld.c
-       hal_spi_lld.c
-   
-       hal_st_lld.c
-       hal_gpt_lld.c
-       hal_icu_lld.c
-       hal_pwm_lld.c
-   
-       hal_serial_lld.c
-       hal_uart_lld.c
-   
-       hal_wdg_lld.c
    
        # RT
        chcore.c
@@ -64,30 +28,7 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
         PATHS 
 
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M/compilers/GCC
-            ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
             ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M
-            ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
-
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F4xx
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDIOv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -100,35 +41,7 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 
 endforeach()
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32F4xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32F4xx)
-
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDIOv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
-
 
 ####################################################################################
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 

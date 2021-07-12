@@ -9,6 +9,9 @@ include(binutils.ChibiOS)
 include(STM32_CubePackage)
 include(NF_Utils)
 
+# Set target series
+NF_SET_STM32_TARGET_SERIES()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
