@@ -154,7 +154,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 
-    CLR_UINT32 stats_start = HAL_Time_CurrentSysTicks();
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
 
 #endif
 

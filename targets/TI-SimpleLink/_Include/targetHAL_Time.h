@@ -6,8 +6,18 @@
 #ifndef _TARGET_HAL_TIME_H_
 #define _TARGET_HAL_TIME_H_ 1
 
-#include <ti/sysbios/knl/Clock.h>
+#include <stdint.h>
+#include <targetHAL.h>
 
-#define HAL_Time_CurrentSysTicks    Clock_getTicks
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    uint64_t HAL_Time_CurrentSysTicks(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_TARGET_HAL_TIME_H_
