@@ -32,7 +32,10 @@ namespace nanoFramework.nanoCLR.Host.Port
         private byte[] TraceData(string message, byte[] data)
         {
             if (data.Length == 0)
+            {
                 return data;
+            }
+
             Console.WriteLine($"{message}:");
             Console.WriteLine(HexDump.HexDump.Format(data));
             return data;

@@ -92,7 +92,9 @@ namespace nanoFramework.nanoCLR.Host
         public NanoClrHost Build()
         {
             if (s_nanoClrHost != null)
+            {
                 throw new InvalidOperationException("Cannot build two NanoClr runtime hosts");
+            }
 
             s_nanoClrHost = new NanoClrHost();
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;

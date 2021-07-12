@@ -75,9 +75,6 @@
     <ClCompile Include="Target_BlockStorage_TransientFlashDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Various.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\win32\nanoCLR\WatchDog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -123,6 +120,12 @@
     <ClCompile Include="..\..\win32\nanoCLR\PAL\Watchdog_stubs.cpp">
       <Filter>Source Files\PAL</Filter>
     </ClCompile>
+    <ClCompile Include="Target_HAL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\win32\nanoCLR\Various.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Include\targetHAL_Time.h">
@@ -137,9 +140,6 @@
     <ClInclude Include="nanoCLR_native.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\win32\nanoCLR\platform_selector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -150,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Target_BlockStorage_TransientFlashDriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="platform_selector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

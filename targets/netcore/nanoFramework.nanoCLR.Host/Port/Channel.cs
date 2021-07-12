@@ -53,7 +53,9 @@ namespace nanoFramework.nanoCLR.Host.Port
 
                 PortA.Process();
                 if (PortA.BytesAvailable == 0 && PortB.BytesAvailable == 0)
+                {
                     Thread.Sleep(100);
+                }
             }
         }
     }
