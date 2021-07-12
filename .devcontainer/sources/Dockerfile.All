@@ -17,15 +17,23 @@ RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
 
-ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.1.zip
+ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.5.zip
 RUN curl -o /tmp/dc-downloads/esp-idf.zip $IDF_URI \
     && unzip -d /tmp/dc-extracted/esp-idf /tmp/dc-downloads/esp-idf.zip
 
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.1/IDF_libs-v3.3.1.zip
+ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5/IDF_libs-v3.3.5.zip
 RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
     && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
 
-ARG XTENSA_URI=https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_BLE/IDF_libs-v3.3.5_BLE.zip
+RUN curl -o /tmp/dc-downloads/esp-idf-libs-ble.zip $IDF_LIBS_URI -L \
+    && unzip -d /tmp/dc-extracted/esp-idf-libs_BLE /tmp/dc-downloads/esp-idf-libs-ble.zip
+
+ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_V3/IDF_libs-v3.3.5_V3.zip
+RUN curl -o /tmp/dc-downloads/esp-idf-libs-v3.zip $IDF_LIBS_URI -L \
+    && unzip -d /tmp/dc-extracted/esp-idf-libs_V3 /tmp/dc-downloads/esp-idf-libs-v3.zip
+
+ARG XTENSA_URI=https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-97-gc752ad5-5.2.0.tar.gz
 RUN  mkdir -p /tmp/dc-extracted/xtensa \
     && curl -o /tmp/dc-downloads/xtensa.tar.gz $XTENSA_URI \
     && tar -xzf /tmp/dc-downloads/xtensa.tar.gz -C /tmp/dc-extracted/xtensa --strip-components 1

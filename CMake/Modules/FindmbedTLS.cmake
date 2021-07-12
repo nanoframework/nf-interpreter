@@ -13,6 +13,10 @@ FetchContent_GetProperties(mbedtls)
 # the list of the required include paths needs to be platform specific because of ESP32 port
 if(RTOS_FREERTOS_ESP32_CHECK)
 
+    if (BUILD_VERBOSE)
+        message("Using IDF path >> ${ESP32_IDF_PATH}")
+    endif()
+
     # List of the required include paths
     list(APPEND mbedTLS_INCLUDE_DIRS ${ESP32_IDF_PATH}/components/mbedtls/port/include)
     list(APPEND mbedTLS_INCLUDE_DIRS ${ESP32_IDF_PATH}/components/mbedtls/port/include/mbedtls)

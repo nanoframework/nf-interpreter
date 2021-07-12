@@ -1,7 +1,7 @@
 echo off
 
-SET idfVer=3.3.1
-SET targetDir=c:\Esp32_tools\libs-v%idfVer%
+SET idfVer=3.3.5
+SET targetDir=c:\Esp32_tools\libs-v%idfVer%_BLE
 
 echo Copy IDF libraries to %targetDir%
 
@@ -58,6 +58,7 @@ copy /Y build\micro-ecc\libmicro-ecc.a %targetDir%
 copy /Y build\mqtt\libmqtt.a %targetDir%
 
 copy /Y build\newlib\libnewlib.a %targetDir%
+copy /Y build\nimble\libnimble.a %targetDir%
 
 copy /Y build\nghttp\libnghttp.a %targetDir%
 copy /Y build\nvs_flash\libnvs_flash.a %targetDir%

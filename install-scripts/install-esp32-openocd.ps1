@@ -35,7 +35,7 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
 $openOCDPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 If ($openOCDPathExists -eq $False -or $force) {
-    $url = "https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20190212/openocd-esp32-win32-0.10.0-esp32-20190212.zip"
+    $url = "https://github.com/espressif/openocd-esp32/releases/download/v0.10.0-esp32-20210401/openocd-esp32-win32-0.10.0-esp32-20210401.zip"
     $output = "$zipRoot\openocd-esp32.zip"
     
     # Don't download again if already exists

@@ -309,14 +309,6 @@ if(NF_FEATURE_HAS_SDCARD)
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
-        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
-        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
-        
-        # force **REMOVAL** of System.IO.FileSystem API
-        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
-    endif()
-
     message(STATUS "Support for SD Card is included")
 else()
     message(STATUS "Support for SD Card **IS NOT** included")
@@ -813,7 +805,20 @@ elseif(RTOS_FREERTOS_CHECK)
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD}")
+        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD} variant: ${TARGET_VARIANT}")
+
+        if (NOT TARGET_VARIANT)
+            set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
+        endif()
+
+        # Only used by ESP32 at the moment
+        if(API_nanoFramework.Hardware.Esp32.Ble)
+            set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+            message(STATUS "Support for BLE enabled")
+        else()
+            set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+            message(STATUS "Support for BLE disabled")
+        endif()
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 

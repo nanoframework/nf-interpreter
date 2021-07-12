@@ -42,7 +42,7 @@ macro(NF_ADD_COMMON_PACKAGES)
 
     # security provider is mbedTLS
     if(USE_SECURITY_MBEDTLS_OPTION)
-        find_package(mbedTLS REQUIRED)
+            find_package(mbedTLS REQUIRED)
     endif()
 
 endmacro()
