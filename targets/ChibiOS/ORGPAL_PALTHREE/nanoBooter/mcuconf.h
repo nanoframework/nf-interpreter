@@ -307,14 +307,14 @@
 /*
  * SIO driver system settings.
  */
-#define STM32_SIO_USE_USART1                FALSE
-#define STM32_SIO_USE_USART2                FALSE
-#define STM32_SIO_USE_USART3                FALSE
-#define STM32_SIO_USE_UART4                 FALSE
-#define STM32_SIO_USE_UART5                 FALSE
-#define STM32_SIO_USE_USART6                FALSE
-#define STM32_SIO_USE_UART7                 FALSE
-#define STM32_SIO_USE_UART8                 FALSE
+#define STM32_SIO_USE_USART1 FALSE
+#define STM32_SIO_USE_USART2 FALSE
+#define STM32_SIO_USE_USART3 FALSE
+#define STM32_SIO_USE_UART4  FALSE
+#define STM32_SIO_USE_UART5  FALSE
+#define STM32_SIO_USE_USART6 FALSE
+#define STM32_SIO_USE_UART7  FALSE
+#define STM32_SIO_USE_UART8  FALSE
 
 /*
  * SPI driver system settings.
@@ -420,8 +420,8 @@
 /*
  * WSPI driver system settings.
  */
-#define STM32_WSPI_USE_QUADSPI1        FALSE
-#define STM32_WSPI_QUADSPI1_DMA_STREAM STM32_DMA_STREAM_ID(2, 7)
+#define STM32_WSPI_USE_QUADSPI1             FALSE
+#define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
 // header for nanoFramework overlay drivers
