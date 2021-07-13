@@ -21,8 +21,9 @@ bool Events_Uninitialize_Platform()
     return true;
 }
 
-static void local_Events_SetBoolTimer_Callback(void *arg)
+static void local_Events_SetBoolTimer_Callback(virtual_timer_t *vtp, void *arg)
 {
+    (void)vtp;
     NATIVE_PROFILE_PAL_EVENTS();
     bool *timerCompleteFlag = (bool *)arg;
 

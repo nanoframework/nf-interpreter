@@ -84,11 +84,22 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
 endfunction()
 
+function(NF_SET_STM32_TARGET_SERIES)
+    # process target series, which is in the format "STM32F4xx"
+    string(REPLACE "STM32" "" TARGET_SERIES_SHORT_1 "${TARGET_SERIES}")
+    string(REPLACE "xx" "" TARGET_SERIES_SHORT "${TARGET_SERIES_SHORT_1}")
+    
+    # store the series short name for later use
+    set(TARGET_SERIES_SHORT ${TARGET_SERIES_SHORT} CACHE INTERNAL "STM32 target series short name")
+
+endfunction()
+
 # Add packages that are common to ChibiOS platform builds
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_PACKAGES)
 
     find_package(ChibiOS REQUIRED)
+    find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED)
     find_package(ChibiOSnfOverlay REQUIRED)
 
     # ChibiOS contrib repo
@@ -130,6 +141,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
     target_include_directories(${TARGET}.elf PUBLIC
 
         ${CHIBIOS_INCLUDE_DIRS}
+        ${CHIBIOS_HAL_INCLUDE_DIRS}
         ${ChibiOSnfOverlay_INCLUDE_DIRS}
         ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
@@ -180,6 +192,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
 
         ${CHIBIOS_SOURCES}
+        ${CHIBIOS_HAL_SOURCES}
         ${ChibiOSnfOverlay_SOURCES}
     )
 

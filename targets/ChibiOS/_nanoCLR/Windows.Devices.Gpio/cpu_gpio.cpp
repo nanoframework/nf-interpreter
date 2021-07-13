@@ -43,8 +43,9 @@ bool IsValidGpioPin(GPIO_PIN pinNumber)
     return (pinNumber <= GPIO_MAX_PIN);
 }
 
-static void DebounceTimerCallback(void *arg)
+static void DebounceTimerCallback(virtual_timer_t *vtp, void *arg)
 {
+    (void)vtp;
     gpio_input_state *pState = (gpio_input_state *)arg;
 
     // get current pin state

@@ -9,6 +9,9 @@ include(binutils.ChibiOS)
 include(STM32_CubePackage)
 include(NF_Utils)
 
+# Set target series
+NF_SET_STM32_TARGET_SERIES()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -72,7 +75,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "stable_20.3.x")
+    set(RTOS_VERSION "stable_21.6.x")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
@@ -81,7 +84,7 @@ if(NO_RTOS_SOURCE_FOLDER)
 
     FetchContent_Declare(
         chibios
-        GIT_REPOSITORY https://github.com/nanoframework/chibios
+        GIT_REPOSITORY https://github.com/nanoframework/ChibiOS_mirror
         GIT_TAG ${RTOS_VERSION}
     )
 
