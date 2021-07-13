@@ -426,14 +426,14 @@
  *          default configuration.
  */
 #if !defined(SIO_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SIO_DEFAULT_BITRATE                 38400
+#define SIO_DEFAULT_BITRATE 38400
 #endif
 
 /**
  * @brief   Support for thread synchronization API.
  */
 #if !defined(SIO_USE_SYNCHRONIZATION) || defined(__DOXYGEN__)
-#define SIO_USE_SYNCHRONIZATION             TRUE
+#define SIO_USE_SYNCHRONIZATION TRUE
 #endif
 
 /*===========================================================================*/
