@@ -80,12 +80,12 @@ endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from nanoFramework GitHub repo")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
     FetchContent_Declare(
         chibios
-        GIT_REPOSITORY https://github.com/nanoframework/ChibiOS_mirror
-        GIT_TAG ${RTOS_VERSION}
+        SVN_REPOSITORY https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION}
+        SVN_REVISION -rHEAD
     )
 
 else()
@@ -93,12 +93,13 @@ else()
 
     # sanity check is source path exists
     if(EXISTS ${RTOS_SOURCE_FOLDER}/)
+    
         message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
 
         FetchContent_Declare(
             chibios
-            GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
-            GIT_TAG ${RTOS_VERSION}
+            SVN_REPOSITORY ${RTOS_SOURCE_FOLDER}
+            SVN_REVISION -rHEAD
         )
 
     else()
