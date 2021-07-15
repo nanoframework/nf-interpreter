@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using hhdvspkit;
 
@@ -8,6 +10,7 @@ namespace nanoFramework.nanoCLR.VirtualCom
 {
     public class VirtualComManager
     {
+        private const string LicenseResourceName = "nanoFramework.nanoCLR.VirtualCom.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
         private readonly SerialPortLibrary _serialPortLibrary = new SerialPortLibrary();
@@ -18,6 +21,7 @@ namespace nanoFramework.nanoCLR.VirtualCom
 
         public void Initialize()
         {
+            InstallLicense();
         }
 
         IBridgePortDevice[] GetBridgePorts() =>
@@ -111,6 +115,19 @@ namespace nanoFramework.nanoCLR.VirtualCom
             }
 
             return new PortPair {PortA = portA, PortB = portB};
+        }
+
+        private void InstallLicense()
+        {
+            var assembly = typeof(VirtualComManager).GetTypeInfo().Assembly;
+            Stream resource = assembly.GetManifestResourceStream(LicenseResourceName);
+            MemoryStream memoryStream = new MemoryStream();
+            resource.CopyTo(memoryStream);
+            var bytes = memoryStream.ToArray();
+            if (bytes.Length > 0)
+            {
+                _serialPortLibrary.installLicenseInMemory(bytes);
+            }
         }
     }
 }

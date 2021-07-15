@@ -19,4 +19,13 @@
         <HintPath>Vendor\hhdvspkit.interop.dll</HintPath>
       </Reference>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="License" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="License\vspt.vsptlic" />
+      <EmbeddedResource Include="License\vspt.vsptlic" />
+    </ItemGroup>
 </Project>
