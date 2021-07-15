@@ -79,6 +79,8 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
+COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_BLE /sources/esp-idf-libs_BLE
+COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_V3 /sources/esp-idf-libs_V3
 COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
 COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh

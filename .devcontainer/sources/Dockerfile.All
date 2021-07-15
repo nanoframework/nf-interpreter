@@ -100,6 +100,8 @@ RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
+COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_BLE /sources/esp-idf-libs_BLE
+COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_V3 /sources/esp-idf-libs_V3
 COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
 COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/local/bin/titools
