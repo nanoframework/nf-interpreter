@@ -8,7 +8,8 @@ using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public class CommandLineOptions
+    [Verb("run", HelpText = "Run nanoCLR assembly.")]
+    public class RunCommandLineOptions
     {
         public const string DefaultComPort = "COM3";
 
@@ -20,6 +21,9 @@ namespace nanoFramework.nanoCLR.CLI
 
         [Option('d', "debug", Required = false, HelpText = "Set COM port for debug")]
         public string DebugSerialPort { get; set; }
+
+        [Option('v', "virtual-pair", Required = false, HelpText = "Use virtual COM port pair for debug")]
+        public string DebugVirtualPortPair { get; set; }
 
         [Option('p', "port", Required = false, HelpText = "Set TCP/IP port for incoming debug connection")]
         public int? DebugTcpIpPort { get; set; }

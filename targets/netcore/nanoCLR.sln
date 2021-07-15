@@ -80,6 +80,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nanoFramework.nanoCLR.Host"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.Device.Gpio", "..\..\src\System.Device.Gpio\System.Device.Gpio.vcxproj", "{830A7E28-7B2B-4BE6-8888-A39775A0092A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "nanoFramework.nanoCLR.VirtualCom", "nanoFramework.nanoCLR.VirtualCom\nanoFramework.nanoCLR.VirtualCom.csproj", "{5AA86705-CD71-4E6B-B0BE-7B0EB2078BD8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -218,6 +220,10 @@ Global
 		{830A7E28-7B2B-4BE6-8888-A39775A0092A}.Debug|x86.Build.0 = Debug|Win32
 		{830A7E28-7B2B-4BE6-8888-A39775A0092A}.Release|x86.ActiveCfg = Release|Win32
 		{830A7E28-7B2B-4BE6-8888-A39775A0092A}.Release|x86.Build.0 = Release|Win32
+		{5AA86705-CD71-4E6B-B0BE-7B0EB2078BD8}.Debug|x86.ActiveCfg = Debug|x86
+		{5AA86705-CD71-4E6B-B0BE-7B0EB2078BD8}.Debug|x86.Build.0 = Debug|x86
+		{5AA86705-CD71-4E6B-B0BE-7B0EB2078BD8}.Release|x86.ActiveCfg = Release|x86
+		{5AA86705-CD71-4E6B-B0BE-7B0EB2078BD8}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

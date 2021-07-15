@@ -3,7 +3,7 @@
     "nanoCLR.CLI": {
       "commandName": "Project",
       "nativeDebugging": true,
-      "commandLineArgs": "-d COM3"
+      "commandLineArgs": "run -v com8:com9"
     }
   }
 }
