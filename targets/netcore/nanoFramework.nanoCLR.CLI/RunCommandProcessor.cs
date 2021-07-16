@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.Linq;
 using nanoFramework.nanoCLR.Host;
 using nanoFramework.nanoCLR.VirtualCom;
@@ -16,6 +17,11 @@ namespace nanoFramework.nanoCLR.CLI
         {
             if (opts.DebugVirtualPortPair != null)
             {
+                if (VirtualComCommandProcessor.CheckIfSupported(virtualComManager))
+                {
+                    return -1;
+                }
+
                 var (comA, _) =
                     VirtualComCommandProcessor.CreateVirtualPortPairIfNotExists(virtualComManager,
                         opts.DebugVirtualPortPair);

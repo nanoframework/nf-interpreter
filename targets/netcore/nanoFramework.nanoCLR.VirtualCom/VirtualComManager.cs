@@ -13,15 +13,28 @@ namespace nanoFramework.nanoCLR.VirtualCom
         private const string LicenseResourceName = "nanoFramework.nanoCLR.VirtualCom.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
-        private readonly SerialPortLibrary _serialPortLibrary = new SerialPortLibrary();
+        public bool IsSupported { get; private set; }
+        private SerialPortLibrary _serialPortLibrary = null;
 
         public VirtualComManager()
         {
         }
 
-        public void Initialize()
+        public bool Initialize()
         {
-            InstallLicense();
+            try
+            {
+                _serialPortLibrary = new SerialPortLibrary();
+                InstallLicense();
+                IsSupported = true;
+            }
+            catch (Exception e)
+            {
+                IsSupported = false;
+                return false;
+            }
+
+            return true;
         }
 
         IBridgePortDevice[] GetBridgePorts() =>

@@ -14,6 +14,11 @@ namespace nanoFramework.nanoCLR.VirtualCom
     {
         public static int ProcessVerb(VirtualComCommandLineOptions opts, VirtualComManager virtualComManager)
         {
+            if (CheckIfSupported(virtualComManager))
+            {
+                return -1;
+            }
+
             if (opts.List)
             {
                 ListVirtualPortPairs(virtualComManager);
@@ -30,6 +35,17 @@ namespace nanoFramework.nanoCLR.VirtualCom
             }
 
             return 0;
+        }
+
+        public static bool CheckIfSupported(VirtualComManager virtualComManager)
+        {
+            if (!virtualComManager.IsSupported)
+            {
+                Console.WriteLine("Virtual Com Port Management Software not installed.");
+                return true;
+            }
+
+            return false;
         }
 
         public static void DeleteVirtualPortPair(VirtualComManager virtualComManager, string name)
