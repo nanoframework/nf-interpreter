@@ -92,16 +92,14 @@ else()
     # ChibiOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS ${RTOS_SOURCE_FOLDER}/)
+    if(EXISTS ${RTOS_SOURCE_FOLDER}/) # TODO: should also check content!
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with svn.")
-
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
             FetchContent_Declare(
                 chibios
-                SVN_REPOSITORY ${RTOS_SOURCE_FOLDER}
-                SVN_REVISION -rHEAD
-            )     
-        else()
+                SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+            )
+        else() # Probably not required (currently used by dev container!)
             message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with: git svn clone RUL -rHEAD.")
 
             FetchContent_Declare(
@@ -135,13 +133,12 @@ if(CHIBIOS_CONTRIB_REQUIRED)
         # ChibiOS-Contrib source was specified
 
         # sanity check is source path exists
-        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/)
+        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/) # TODO: should also check content!
             message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
             FetchContent_Declare(
                 chibios-contrib
-                GIT_REPOSITORY ${CHIBIOS_CONTRIB_SOURCE}
-                GIT_TAG nanoframework
+                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
             )
 
         else()
@@ -200,13 +197,12 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
         # FatFS source was specified
 
         # sanity check is source path exists
-        if(EXISTS ${FATFS_SOURCE}/)
+        if(EXISTS ${FATFS_SOURCE}/) # TODO: should also check content!
             message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
             FetchContent_Declare(
                 fatfs
-                GIT_REPOSITORY ${FATFS_SOURCE}
-                GIT_TAG ${FATFS_VERSION_TAG}
+                SOURCE_DIR ${FATFS_SOURCE}
             )
 
         else()
@@ -259,14 +255,13 @@ if(NF_SECURITY_MBEDTLS)
         # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
 
         # sanity check is source path exists
-        if(EXISTS ${MBEDTLS_SOURCE}/)
+        if(EXISTS ${MBEDTLS_SOURCE}/) # TODO: should also check content!
 
-            message(STATUS "mbedTLS ${FATFS_VERSION_TAG} (source from: ${MBEDTLS_SOURCE})")
+            message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
             
             FetchContent_Declare(
                 mbedtls
-                GIT_REPOSITORY ${MBEDTLS_SOURCE}
-                GIT_TAG ${MBEDTLS_GIT_TAG}
+                SOURCE_DIR ${MBEDTLS_SOURCE}
             )
 
         else()
