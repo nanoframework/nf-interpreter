@@ -9,8 +9,9 @@ cd /sources/STM32CubeH7
 git pull origin nf-build
 cd /sources/AzureRTOS
 git pull
-cd /sources/ChibiOs
-git pull origin stable_21.6.x
+cd /
+rm -rf /sources/ChibiOs
+git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.6.x -rHEAD /sources/ChibiOs
 cd /sources/ChibiOs-Contrib
 git pull origin nanoframework
 cd /sources/mbedtls

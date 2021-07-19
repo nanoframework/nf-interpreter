@@ -93,15 +93,23 @@ else()
 
     # sanity check is source path exists
     if(EXISTS ${RTOS_SOURCE_FOLDER}/)
-    
-        message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with svn.")
 
-        FetchContent_Declare(
-            chibios
-            SVN_REPOSITORY ${RTOS_SOURCE_FOLDER}
-            SVN_REVISION -rHEAD
-        )
+            FetchContent_Declare(
+                chibios
+                SVN_REPOSITORY ${RTOS_SOURCE_FOLDER}
+                SVN_REVISION -rHEAD
+            )     
+        else()
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with: git svn clone RUL -rHEAD.")
 
+            FetchContent_Declare(
+                chibios
+                GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
+                GIT_TAG master
+            )
+        endif()
     else()
         message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
