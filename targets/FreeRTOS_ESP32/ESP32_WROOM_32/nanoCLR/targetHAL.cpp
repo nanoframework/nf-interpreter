@@ -134,11 +134,10 @@ void nanoHAL_Initialize()
     // SOCKETS_DbgInitialize( 0 );
 
 #if (NANOCLR_ESP32_BLE == TRUE)
-        // Bluetooth test code
-        // blehr_start();  // Heart rate monitor device test
-        ibeacon_start();  // Ibeacon test code
+    // Bluetooth test code
+    // blehr_start();  // Heart rate monitor device test
+    // ibeacon_start();  // Ibeacon test code
 #endif
-
 }
 
 void nanoHAL_Uninitialize()
