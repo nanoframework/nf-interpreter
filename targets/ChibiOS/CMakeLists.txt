@@ -92,21 +92,26 @@ else()
     # ChibiOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS ${RTOS_SOURCE_FOLDER}/) # TODO: should also check content!
+    if(EXISTS ${RTOS_SOURCE_FOLDER}/)
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
+
             message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
             FetchContent_Declare(
                 chibios
                 SOURCE_DIR ${RTOS_SOURCE_FOLDER}
             )
-        else() # Probably not required (currently used by dev container!)
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with: git svn clone RUL -rHEAD.")
+
+        else()
+            # running on *nix requires setting up a local git repo from SVN
+            # with git svn clone https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION} -rHEAD
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
 
             FetchContent_Declare(
                 chibios
                 GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
                 GIT_TAG master
             )
+
         endif()
     else()
         message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
@@ -133,7 +138,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
         # ChibiOS-Contrib source was specified
 
         # sanity check is source path exists
-        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/) # TODO: should also check content!
+        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/)
             message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
             FetchContent_Declare(
@@ -197,7 +202,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
         # FatFS source was specified
 
         # sanity check is source path exists
-        if(EXISTS ${FATFS_SOURCE}/) # TODO: should also check content!
+        if(EXISTS ${FATFS_SOURCE}/)
             message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
             FetchContent_Declare(
@@ -255,9 +260,9 @@ if(NF_SECURITY_MBEDTLS)
         # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
 
         # sanity check is source path exists
-        if(EXISTS ${MBEDTLS_SOURCE}/) # TODO: should also check content!
+        if(EXISTS ${MBEDTLS_SOURCE}/)
 
-            message(STATUS "mbedTLS source from: ${MBEDTLS_SOURCE}")
+        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
             FetchContent_Declare(
                 mbedtls
