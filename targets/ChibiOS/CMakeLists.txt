@@ -94,21 +94,24 @@ else()
     # sanity check is source path exists
     if(EXISTS ${RTOS_SOURCE_FOLDER}/)
         if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with svn.")
 
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
             FetchContent_Declare(
                 chibios
-                SVN_REPOSITORY ${RTOS_SOURCE_FOLDER}
-                SVN_REVISION -rHEAD
-            )     
+                SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+            )
+
         else()
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER}) and has to be cloned with: git svn clone RUL -rHEAD.")
+            # running on *nix requires setting up a local git repo from SVN
+            # with git svn clone https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION} -rHEAD
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
 
             FetchContent_Declare(
                 chibios
                 GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
                 GIT_TAG master
             )
+
         endif()
     else()
         message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
@@ -140,8 +143,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
             FetchContent_Declare(
                 chibios-contrib
-                GIT_REPOSITORY ${CHIBIOS_CONTRIB_SOURCE}
-                GIT_TAG nanoframework
+                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
             )
 
         else()
@@ -205,8 +207,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
             FetchContent_Declare(
                 fatfs
-                GIT_REPOSITORY ${FATFS_SOURCE}
-                GIT_TAG ${FATFS_VERSION_TAG}
+                SOURCE_DIR ${FATFS_SOURCE}
             )
 
         else()
@@ -261,12 +262,11 @@ if(NF_SECURITY_MBEDTLS)
         # sanity check is source path exists
         if(EXISTS ${MBEDTLS_SOURCE}/)
 
-            message(STATUS "mbedTLS ${FATFS_VERSION_TAG} (source from: ${MBEDTLS_SOURCE})")
+        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
             FetchContent_Declare(
                 mbedtls
-                GIT_REPOSITORY ${MBEDTLS_SOURCE}
-                GIT_TAG ${MBEDTLS_GIT_TAG}
+                SOURCE_DIR ${MBEDTLS_SOURCE}
             )
 
         else()
