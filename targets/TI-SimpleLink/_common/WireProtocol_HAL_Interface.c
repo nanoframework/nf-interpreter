@@ -17,61 +17,35 @@
 
 UART2_Handle uart = NULL;
 
-WP_Message inboundMessage;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////
-// The functions below are the ones that need to be ported to new channels/HALs when required
-// These are to be considered as a reference implementations when working on new ports
-//
-// This reference implementation provides communication through:
-// - serial port (UART/USART)
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    // save for later comparison
+    uint32_t requestedSize = *size;
     size_t read;
 
-    // int readData = 0;
-    // sanity check for request of 0 size
+    // check for request with 0 size
     if (*size)
     {
-        //////////////////////////////////////////////////////////
-        //               PORTING CHANGE REQUIRED HERE           //
-        //////////////////////////////////////////////////////////
-        // change here to read (size) bytes from the input stream
-        // preferably with read timeout and being able to check
-        // if the requested number of bytes was actually read
-        //////////////////////////////////////////////////////////
-
         // non blocking read from serial port with 500ms timeout
         UART2_readTimeout(uart, ptr, requestedSize, &read, UART_TIMEOUT_MILLISECONDS / Clock_tickPeriod);
 
+        // check if any bytes where read
+        if (read == 0)
+        {
+            return false;
+        }
+
         ptr += read;
         *size -= read;
-
-        // check if the requested read matches the actual read count
-        return (requestedSize == read);
     }
 
     return true;
 }
 
-int WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;
-
-    ///////////////////////////////////////////////////////////
-    //              PORTING CHANGE REQUIRED HERE             //
-    ///////////////////////////////////////////////////////////
-    // change here to write (size) bytes to the output stream
-    // preferably with timeout and being able to check
-    // if the write was successfull or at least buffered
-    //////////////////////////////////////////////////////////
 
     TRACE(
         TRACE_HEADERS,
@@ -95,12 +69,6 @@ int WP_TransmitMessage(WP_Message *message)
         // if there is anything on the payload send it to the output stream
         if (message->m_header.m_size && message->m_payload)
         {
-            ///////////////////////////////////////////////////////////
-            //              PORTING CHANGE REQUIRED HERE             //
-            ///////////////////////////////////////////////////////////
-            // see description above
-            //////////////////////////////////////////////////////////
-
             // reset flag
             operationResult = false;
 

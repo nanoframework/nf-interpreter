@@ -37,8 +37,9 @@ static virtual_timer_t sdCardDebounceTimer;
 static bool sdCardPresent;
 
 // Insertion monitor timer callback function.
-static void SdCardInsertionMonitorCallback(void *p)
+static void SdCardInsertionMonitorCallback(virtual_timer_t *vtp, void *p)
 {
+    (void)vtp;
     BaseBlockDevice *bbdp = p;
     bool currentStatus;
 

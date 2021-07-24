@@ -42,7 +42,7 @@ steps:
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        *.zip
+        $(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
@@ -114,6 +114,8 @@ steps:
 
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli
+
+          Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) v$(PACKAGE_VERSION)"
 
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 

@@ -6,6 +6,7 @@
 #include <ch.h>
 #include <hal.h>
 
+#include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
@@ -15,79 +16,60 @@
 #include <serialcfg.h>
 #endif
 
-WP_Message inboundMessage;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////
-// The functions below are the ones that need to be ported to new channels/HALs when required
-// These are to be considered as a reference implementations when working on new ports
-//
-// This reference implementation provides communication through:
-// - serial port (UART/USART)
-// - serial over USB (USB CDC class device)
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    // save for later comparison
+    uint32_t requestedSize = *size;
+    (void)requestedSize;
 
-    // sanity check for request of 0 size
+    // check for request with 0 size
     if (*size)
     {
-        //////////////////////////////////////////////////////////
-        //               PORTING CHANGE REQUIRED HERE           //
-        //////////////////////////////////////////////////////////
-        // change here to read (size) bytes from the input stream
-        // preferably with read timeout and being able to check
-        // if the requested number of bytes was actually read
-        //////////////////////////////////////////////////////////
+        // read from serial stream with 100ms timeout
+        size_t read = chnReadTimeout(&SDU1, ptr, requestedSize, TIME_MS2I(100));
 
-        // read from serial stream with 250ms timeout
-        size_t read = chnReadTimeout(&SDU1, ptr, *size, TIME_MS2I(250));
+        // check if any bytes where read
+        if (read == 0)
+        {
+            return false;
+        }
 
         ptr += read;
         *size -= read;
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
-
-        // check if the requested read matches the actual read count
-        return (requestedSize == read);
     }
 
     return true;
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
+uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
-    // save for latter comparison
-    uint16_t requestedSize = *size;
+    volatile uint32_t read;
 
-    // sanity check for request of 0 size
+    // save for later comparison
+    uint32_t requestedSize = *size;
+    (void)requestedSize;
+
+    // check for request with 0 size
     if (*size)
     {
-        //////////////////////////////////////////////////////////
-        //               PORTING CHANGE REQUIRED HERE           //
-        //////////////////////////////////////////////////////////
-        // change here to read (size) bytes from the input stream
-        // preferably with read timeout and being able to check
-        // if the requested number of bytes was actually read
-        //////////////////////////////////////////////////////////
-
-        // non blocking read from serial port with 250ms timeout
-        volatile size_t read = chnReadTimeout(&SERIAL_DRIVER, ptr, *size, TIME_MS2I(250));
-
-        ptr += read;
-        *size -= read;
+        // non blocking read from serial port with 100ms timeout
+        read = chnReadTimeout(&SERIAL_DRIVER, ptr, requestedSize, TIME_MS2I(20));
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
-        // check if the requested read matches the actual read count
-        return (requestedSize == read);
+        // check if any bytes where read
+        if (read == 0)
+        {
+            return false;
+        }
+
+        ptr += read;
+        *size -= read;
     }
 
     return true;
@@ -100,18 +82,10 @@ int WP_ReceiveBytes(uint8_t *ptr, uint16_t *size)
 
 #if (HAL_USE_SERIAL_USB == TRUE)
 
-int WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;
-
-    ///////////////////////////////////////////////////////////
-    //              PORTING CHANGE REQUIRED HERE             //
-    ///////////////////////////////////////////////////////////
-    // change here to write (size) bytes to the output stream
-    // preferably with timeout and being able to check
-    // if the write was successful or at least buffered
-    //////////////////////////////////////////////////////////
 
     TRACE(
         TRACE_HEADERS,
@@ -121,8 +95,7 @@ int WP_TransmitMessage(WP_Message *message)
         message->m_header.m_size);
 
     // write header to output stream
-    writeResult =
-        chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
+    writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
 
     if (writeResult == sizeof(message->m_header))
     {
@@ -131,16 +104,10 @@ int WP_TransmitMessage(WP_Message *message)
         // if there is anything on the payload send it to the output stream
         if (message->m_header.m_size && message->m_payload)
         {
-            ///////////////////////////////////////////////////////////
-            //              PORTING CHANGE REQUIRED HERE             //
-            ///////////////////////////////////////////////////////////
-            // see description above
-            //////////////////////////////////////////////////////////
-
             // reset flag
             operationResult = false;
 
-            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
+            writeResult = chnWriteTimeout(&SDU1, message->m_payload, message->m_header.m_size, TIME_MS2I(50));
 
             if (writeResult == message->m_header.m_size)
             {
@@ -155,18 +122,10 @@ int WP_TransmitMessage(WP_Message *message)
 }
 #elif (HAL_USE_SERIAL == TRUE)
 
-int WP_TransmitMessage(WP_Message *message)
+uint8_t WP_TransmitMessage(WP_Message *message)
 {
     uint32_t writeResult;
     bool operationResult = false;
-
-    ///////////////////////////////////////////////////////////
-    //              PORTING CHANGE REQUIRED HERE             //
-    ///////////////////////////////////////////////////////////
-    // change here to write (size) bytes to the output stream
-    // preferably with timeout and being able to check
-    // if the write was sucessfull or at least buffered
-    //////////////////////////////////////////////////////////
 
     TRACE(
         TRACE_HEADERS,
@@ -177,7 +136,7 @@ int WP_TransmitMessage(WP_Message *message)
 
     // write header to output stream
     writeResult =
-        chnWriteTimeout(&SERIAL_DRIVER, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(250));
+        chnWriteTimeout(&SERIAL_DRIVER, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
 
     if (writeResult == sizeof(message->m_header))
     {
@@ -186,16 +145,10 @@ int WP_TransmitMessage(WP_Message *message)
         // if there is anything on the payload send it to the output stream
         if (message->m_header.m_size && message->m_payload)
         {
-            ///////////////////////////////////////////////////////////
-            //              PORTING CHANGE REQUIRED HERE             //
-            ///////////////////////////////////////////////////////////
-            // see description above
-            //////////////////////////////////////////////////////////
-
             // reset flag
             operationResult = false;
 
-            writeResult = chnWriteTimeout(&SERIAL_DRIVER, message->m_payload, message->m_header.m_size, TIME_MS2I(250));
+            writeResult = chnWriteTimeout(&SERIAL_DRIVER, message->m_payload, message->m_header.m_size, TIME_MS2I(50));
 
             if (writeResult == message->m_header.m_size)
             {

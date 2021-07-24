@@ -30,12 +30,12 @@
         },
         {
           "name": "ESP32_IDF_PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.3.1",
+          "value": "C:/ESP32_TOOLS/esp-idf-v3.3.5",
           "type": "PATH"
         },
         {
           "name": "ESP32_LIBS_PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.3.1",
+          "value": "C:/ESP32_TOOLS/libs-v3.3.5",
           "type": "PATH"
         },
         {
@@ -214,7 +214,17 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Device.I2c",
           "value": "True",
           "type": "BOOL"
         },
@@ -225,6 +235,11 @@
         },
         {
           "name": "API_Windows.Devices.SerialCommunication",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.IO.Ports",
           "value": "True",
           "type": "BOOL"
         },
@@ -479,7 +494,17 @@
           "type": "BOOL"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
           "name": "API_Windows.Devices.I2c",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.Device.I2c",
           "value": "True",
           "type": "BOOL"
         },
@@ -490,6 +515,11 @@
         },
         {
           "name": "API_Windows.Devices.SerialCommunication",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "API_System.IO.Ports",
           "value": "True",
           "type": "BOOL"
         },

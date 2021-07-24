@@ -5,7 +5,7 @@
 
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
-# e.g.: for namespace Windows.Devices.Gpio, the CMake option is 'API_Windows.Devices.Gpio' 
+# e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
 # and the namespace designation is 'Windows.Devices.Gpio'
 ###########################################################################################
 
@@ -27,6 +27,7 @@ option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
+option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
@@ -36,6 +37,7 @@ option(API_nanoFramework.Graphics               "option for nanoFramework.Graphi
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.Hardware.Esp32.Ble     "option for nanoFramework.Hardware.Esp32.Ble")
 
 
 # Stm32 only
@@ -173,6 +175,12 @@ endif()
 if(API_nanoFramework.Hardware.Esp32.Rmt)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
+
+# nanoFramework.Hardware.Esp32.Ble
+if(API_nanoFramework.Hardware.Esp32.Ble)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Ble")
 endif()
 
 # Hardware.Stm32
@@ -313,6 +321,12 @@ endif()
 if(API_Windows.Devices.SerialCommunication)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
+endif()
+
+# API_System.IO.Ports
+if(API_System.IO.Ports)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.IO.Ports")
 endif()
 
 # Windows.Devices.Spi

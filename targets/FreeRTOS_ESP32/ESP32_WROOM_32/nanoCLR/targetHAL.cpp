@@ -19,6 +19,10 @@ void Storage_Uninitialize();
 extern "C" void FixUpHalSystemConfig();
 extern "C" void FixUpBlockRegionInfo();
 
+// Test code for BLE, will be removed once we have managed code interface
+extern void blehr_start();
+extern void ibeacon_start();
+
 //
 //  Reboot handlers clean up on reboot
 //
@@ -118,7 +122,6 @@ void nanoHAL_Initialize()
     // Ink_Initialize();
 
     g_DisplayDriver.Clear();
-
 #endif
 
     // no PAL events required until now
@@ -129,6 +132,12 @@ void nanoHAL_Initialize()
 
     // Start Network Debugger
     // SOCKETS_DbgInitialize( 0 );
+
+#if (NANOCLR_ESP32_BLE == TRUE)
+    // Bluetooth test code
+    // blehr_start();  // Heart rate monitor device test
+    // ibeacon_start();  // Ibeacon test code
+#endif
 }
 
 void nanoHAL_Uninitialize()

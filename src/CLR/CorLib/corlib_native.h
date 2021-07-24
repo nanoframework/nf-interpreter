@@ -490,7 +490,7 @@ struct Library_corlib_native_System_Convert
     NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4);
     NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4);
+    NANOCLR_NATIVE_DECLARE(FromBase64String___STATIC__SZARRAY_U1__STRING);
 
     //--//
 
@@ -787,6 +787,7 @@ struct Library_corlib_native_System_Number
     static int Format_G(
         char *buffer,
         CLR_RT_HeapBlock *value,
+        char formatChar,
         int precision,
         char *negativeSign,
         char *decimalSeparator);
@@ -1046,6 +1047,17 @@ struct Library_corlib_native_System_Threading_Monitor
     //--//
 };
 
+struct Library_corlib_native_System_Threading_SpinWait
+{
+    NANOCLR_NATIVE_DECLARE(SpinOnce___VOID);
+    NANOCLR_NATIVE_DECLARE(SpinUntil___STATIC__VOID__SystemTimeSpan);
+    NANOCLR_NATIVE_DECLARE(SpinUntil___STATIC__VOID__I4);
+
+    //--//
+
+    static HRESULT Spin(CLR_RT_StackFrame &stack, bool isTimeSpan);
+};
+
 struct Library_corlib_native_System_Threading_Thread
 {
 
@@ -1069,6 +1081,7 @@ struct Library_corlib_native_System_Threading_Thread
     NANOCLR_NATIVE_DECLARE(Join___BOOLEAN__SystemTimeSpan);
     NANOCLR_NATIVE_DECLARE(get_ThreadState___SystemThreadingThreadState);
     NANOCLR_NATIVE_DECLARE(Sleep___STATIC__VOID__I4);
+    NANOCLR_NATIVE_DECLARE(SpinWait___STATIC__VOID__I4);
     NANOCLR_NATIVE_DECLARE(get_CurrentThread___STATIC__SystemThreadingThread);
 #if (NANOCLR_REFLECTION == TRUE)
     NANOCLR_NATIVE_DECLARE(GetDomain___STATIC__SystemAppDomain);

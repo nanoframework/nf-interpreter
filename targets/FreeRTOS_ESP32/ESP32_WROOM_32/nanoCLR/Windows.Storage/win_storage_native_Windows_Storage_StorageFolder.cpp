@@ -57,7 +57,7 @@ void CombinePath(char *outpath, const char *path1, const char *path2)
     strcat(outpath, path2);
 }
 
-SYSTEMTIME GetDateTime(time_t *time)
+SYSTEMTIME GetDateTimeStat(time_t *time)
 {
     SYSTEMTIME fileTime;
 
@@ -83,6 +83,30 @@ SYSTEMTIME GetDateTime(time_t *time)
     return fileTime;
 }
 
+// Added here for IO.Filesystem
+SYSTEMTIME GetDateTime(uint16_t date, uint16_t time)
+{
+    SYSTEMTIME fileTime;
+
+    memset(&fileTime, 0, sizeof(SYSTEMTIME));
+
+    // date (bit15:9) Year origin from 1980 (0..127)
+    fileTime.wYear = (date >> 9) + 1980;
+    // date (bit8:5) Month (1..12)
+    fileTime.wMonth = (date >> 5) & 0x000F;
+    // date (bit4:0) Day (1..31)
+    fileTime.wDay = date & 0x001F;
+
+    // time (bit15:11) Hour (0..23)
+    fileTime.wHour = (time >> 11) & 0x001F;
+    // time (bit10:5) Minute (0..59)
+    fileTime.wMinute = (time >> 5) & 0x003F;
+    // time (bit4:0) Second / 2 (0..29)
+    fileTime.wSecond = time & 0x001F;
+
+    return fileTime;
+}
+
 uint64_t GetFileTimeFromPath(char *path)
 {
     char *workingPath = NULL;
@@ -98,7 +122,7 @@ uint64_t GetFileTimeFromPath(char *path)
     // compute folder/file date/time
     if (stat(workingPath, &fileInfo) == 0)
     {
-        fileInfoTime = GetDateTime(&fileInfo.st_ctime);
+        fileInfoTime = GetDateTimeStat(&fileInfo.st_ctime);
     }
     else
     {

@@ -226,7 +226,7 @@ void CLR_Debug::Emit(const char *text, int len)
             HAL_Windows_Debug_Print(s_buffer);
 #endif
 
-            if (CLR_EE_DBG_IS(Enabled) && !CLR_EE_DBG_IS(Quiet))
+            if (CLR_EE_DBG_IS(Enabled) && CLR_EE_DBG_IS_NOT(Quiet))
             {
                 CLR_EE_DBG_EVENT_BROADCAST(
                     CLR_DBG_Commands_c_Monitor_Message,
@@ -235,8 +235,9 @@ void CLR_Debug::Emit(const char *text, int len)
                     WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);
             }
 
-            if (HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
+            if (CLR_EE_DBG_IS_NOT(Enabled) || HalSystemConfig.DebugTextPort != HalSystemConfig.DebuggerPort)
             {
+
 #if !defined(_WIN32)
                 DebuggerPort_Write(
                     HalSystemConfig.DebugTextPort,
@@ -963,6 +964,7 @@ const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
         CASE_HRESULT_TO_STRING(CLR_E_TYPE_UNAVAILABLE);
         CASE_HRESULT_TO_STRING(CLR_E_INVALID_CAST);
         CASE_HRESULT_TO_STRING(CLR_E_OUT_OF_RANGE);
+        CASE_HRESULT_TO_STRING(CLR_E_FORMAT_EXCEPTION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_VIOLATION);
         CASE_HRESULT_TO_STRING(CLR_E_SERIALIZATION_BADSTREAM);
         CASE_HRESULT_TO_STRING(CLR_E_DIVIDE_BY_ZERO);

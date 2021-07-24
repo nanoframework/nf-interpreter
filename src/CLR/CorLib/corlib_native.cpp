@@ -147,6 +147,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::Trim___STRING,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING,
     Library_corlib_native_System_String::op_Equality___STATIC__BOOLEAN__STRING__STRING,
     Library_corlib_native_System_String::op_Inequality___STATIC__BOOLEAN__STRING__STRING,
@@ -342,10 +345,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
+    Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY_U1__STRING,
     NULL,
-    NULL,
-    Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4,
     NULL,
     NULL,
     NULL,
@@ -502,6 +505,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemReflectionAssembly__SZARRAY_U1,
     NULL,
     Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -736,6 +742,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_ManualResetEvent::Set___BOOLEAN,
     Library_corlib_native_System_Threading_Monitor::Enter___STATIC__VOID__OBJECT,
     Library_corlib_native_System_Threading_Monitor::Exit___STATIC__VOID__OBJECT,
+    Library_corlib_native_System_Threading_SpinWait::SpinOnce___VOID,
+    Library_corlib_native_System_Threading_SpinWait::SpinUntil___STATIC__VOID__SystemTimeSpan,
+    Library_corlib_native_System_Threading_SpinWait::SpinUntil___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::_ctor___VOID__SystemThreadingThreadStart,
     Library_corlib_native_System_Threading_Thread::Start___VOID,
     Library_corlib_native_System_Threading_Thread::Abort___VOID,
@@ -751,6 +760,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemThreadingThreadState,
     Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4,
     NULL,
+    Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread,
     NULL,
     NULL,
@@ -771,6 +781,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Threading_WaitHandle::WaitMultiple___STATIC__I4__SZARRAY_SystemThreadingWaitHandle__I4__BOOLEAN__BOOLEAN,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -886,6 +899,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_String::ToLower___STRING,
     Library_corlib_native_System_String::ToUpper___STRING,
     Library_corlib_native_System_String::Trim___STRING,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     Library_corlib_native_System_String::Equals___STATIC__BOOLEAN__STRING__STRING,
@@ -1079,10 +1095,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN,
+    Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY_U1__STRING,
     NULL,
-    NULL,
-    Library_corlib_native_System_Convert::FromBase64CharArray___STATIC__SZARRAY_U1__SZARRAY_CHAR__I4,
     NULL,
     NULL,
     NULL,
@@ -1217,6 +1233,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Enum::HasFlag___BOOLEAN__SystemEnum,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1410,6 +1429,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Threading_Thread::get_ThreadState___SystemThreadingThreadState,
     Library_corlib_native_System_Threading_Thread::Sleep___STATIC__VOID__I4,
     NULL,
+    Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__I4,
     Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATIC__SystemThreadingThread,
     NULL,
     NULL,
@@ -1430,6 +1450,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Threading_WaitHandle::WaitMultiple___STATIC__I4__SZARRAY_SystemThreadingWaitHandle__I4__BOOLEAN__BOOLEAN,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1467,18 +1490,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x7B586F51,
+    0x132BDB6F,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x670A0475,
+    0x9F36C4A2,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 6 }
+    { 100, 5, 0, 12 }
 };
 
 // clang-format on

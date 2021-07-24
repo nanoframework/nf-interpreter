@@ -14,43 +14,10 @@ FetchContent_GetProperties(chibios)
 ################################################################################
 
 set(CHIBIOS_PORT_SRCS
-    # startup code
-    crt1.c
-    vectors.S
-    crt0_v6m.S
-
-    nvic.c
-    stm32_isr.c
-    hal_lld.c
-
-    hal_adc_lld.c
-    hal_can_lld.c
-    hal_dac_lld.c
-    stm32_dma.c
-    stm32_exti.c
-    hal_pal_lld.c
-    hal_i2c_lld.c
-    hal_rtc_lld.c
-
-    hal_i2s_lld.c
-    hal_spi_lld.c
-
-    hal_st_lld.c
-    hal_gpt_lld.c
-    hal_icu_lld.c
-    hal_pwm_lld.c
-
-    hal_serial_lld.c
-    hal_uart_lld.c
-
-    hal_usb_lld.c
-
-    hal_wdg_lld.c
 
     # RT
     chcore.c
-    chcore_v6m.c
-    chcoreasm_v6m.S
+    chcoreasm.S
 )
 foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 
@@ -59,25 +26,10 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
     find_file(CHIBIOS_F0_SRC_FILE ${SRC_FILE}
         PATHS 
         
-            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx/compilers/GCC
-            ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC
-            ${chibios_SOURCE_DIR}/os/common/ports/ARMCMx
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M/compilers/GCC
+            ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M
             ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx
 
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F0xx
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBv1
-            ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -90,26 +42,7 @@ foreach(SRC_FILE ${CHIBIOS_PORT_SRCS})
 
 endforeach()
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32F0xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32F0xx)
-
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
-
+list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv6-M)
 
 ####################################################################################
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 

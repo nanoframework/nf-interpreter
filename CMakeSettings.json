@@ -120,6 +120,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Device.Gpio",
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.Spi",
           "value": "ON"
         },        
@@ -132,6 +136,10 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Device.I2c",
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.Pwm",
           "value": "ON"
         },
@@ -139,6 +147,10 @@
           "name": "API_Windows.Devices.SerialCommunication",
           "value": "ON"
         },
+        {
+          "name": "API_System.IO.Ports",
+          "value": "ON"
+        },        
         {
           "name": "API_Windows.Devices.Adc",
           "value": "ON"
@@ -206,7 +218,7 @@
           "PATH": "C:\\Windows\\system32;C:\\Program Files\\Espressif\\ESP-IDF Tools\\mconf-idf;c:\\python27;${env.PATH}",
 
           // ESP32 paths set up in environment so we can use in variables
-          "ESP32_IDF_VERSION": "v3.3.1",
+          "ESP32_IDF_VERSION": "v3.3.5",
           "ESP32_TOOLS": "C:/ESP32_TOOLS",
           "ESP32_IDF": "${env.ESP32_TOOLS}/esp-idf-${env.ESP32_IDF_VERSION}",
           "ESP32_LIB": "${env.ESP32_TOOLS}/libs-${env.ESP32_IDF_VERSION}",
@@ -400,7 +412,15 @@
           "value": "ON"
         },
         {
+          "name": "API_System.Device.Gpio:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
           "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.Device.I2c:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
@@ -409,6 +429,10 @@
         },
         {
           "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
+          "value": "ON"
+        },
+        {
+          "name": "API_System.IO.Ports:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the pre-compiled EPS32 libraries from our Bintray repository
+# This PS installs the pre-compiled EPS32 libraries from our Cloudsmith repository
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
@@ -9,7 +9,7 @@ param (
     [switch]$force = $false
 )
 
-$libsVersion = "libs-v3.3.1"
+$libsVersion = "libs-v3.3.5"
 
 # check if running on Azure Pipelines by looking at this two environment variables
 $IsAzurePipelines = $env:Agent_HomeDirectory -and $env:Build_BuildNumber
@@ -42,36 +42,41 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
     $Path = $Path + "\$libsVersion"
 }
 
-# check if path already exists
-$esp32LibPathExists = Test-Path $Path -ErrorAction SilentlyContinue
+$Libs = "", "_BLE", "_V3"
 
-If ($esp32LibPathExists -eq $False -or $force) {
-    $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.1/IDF_$libsVersion.zip"
-    $output = "$zipRoot\esp-idf-libs.zip"
+foreach($Libvar in $Libs)
+{
+    # check if path already exists 
+    $esp32LibPathExists = Test-Path ($Path+$Libvar) -ErrorAction SilentlyContinue
 
-    # Don't download again if already exists. User can remove from zips to force... 
-    if (![System.IO.File]::Exists($output) -or $force) {    
-        "Downloading ESP32 pre-compiled libs..." | Write-Host -ForegroundColor White -NoNewline
+    If ($esp32LibPathExists -eq $False -or $force) {
+        $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5"+$Libvar+"/IDF_$libsVersion" + $Libvar + ".zip"
+        $output = "$zipRoot\esp-idf-libs" + $Libvar + ".zip"
 
-        # Stop security tripping us up
-        [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+        # Don't download again if already exists. User can remove from zips to force... 
+        if (![System.IO.File]::Exists($output) -or $force) {    
+            "Downloading ESP32 pre-compiled lib..." | Write-Host -ForegroundColor White -NoNewline
 
-        # download zip IDF
-        (New-Object Net.WebClient).DownloadFile($url, $output)
+            # Stop security tripping us up
+            [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+
+            # download zip IDF
+            (New-Object Net.WebClient).DownloadFile($url, $output)
+        }
+
+        # unzip to install path, if not on Azure
+        if ($IsAzurePipelines -eq $False) {
+            "Installing ESP32 pre-compiled lib @ '" + $Path + $Libvar + "'..." | Write-Host -ForegroundColor White -NoNewline
+
+            # unzip
+            Expand-Archive -Path $output -DestinationPath ($Path + $Libvar)
+
+            "OK" | Write-Host -ForegroundColor Green
+        }
     }
-
-    # unzip to install path, if not on Azure
-    if ($IsAzurePipelines -eq $False) {
-        "Installing ESP32 pre-compiled libs @ '$Path'..." | Write-Host -ForegroundColor White -NoNewline
-
-        # unzip
-        Expand-Archive -Path $output -DestinationPath $Path
-
-        "OK" | Write-Host -ForegroundColor Green
+    else {
+        "Skipping install of ESP32 pre-compiled libs" | Write-Host -ForegroundColor Yellow
     }
-}
-else {
-    "Skipping install of ESP32 pre-compiled libs" | Write-Host -ForegroundColor Yellow
 }
 
 # set env variable, if not on Azure
@@ -79,11 +84,17 @@ if ($IsAzurePipelines -eq $False) {
     # need to replace forward slash for paths to work with GCC and CMake
     $Path = "$Path".Replace('\', '/')
 
-    $env:ESP32_LIBS_PATH = $Path
-    # this call can fail if the script is not run with appropriate permissions
-    [System.Environment]::SetEnvironmentVariable("ESP32_LIBS_PATH", $env:ESP32_LIBS_PATH, "User")
+    "Setting User Environment Variable ESP32_LIBS_PATH='" + $env:ESP32_LIBS_PATH + "'" | Write-Host -ForegroundColor Yellow
 
-    "Set User Environment ESP32_LIBS_PATH='" + $env:ESP32_LIBS_PATH + "'" | Write-Host -ForegroundColor Yellow
+    $env:ESP32_LIBS_PATH = $Path
+    
+    try {
+        # this call can fail if the script is not run with appropriate permissions
+        [System.Environment]::SetEnvironmentVariable("ESP32_LIBS_PATH", $env:ESP32_LIBS_PATH, "User")
+    }
+    catch {
+        "Failed to set User Environment Variable ESP32_LIBS_PATH. Make sure to manually add 'ESP32_LIBS_PATH' with '" + $env:ESP32_LIBS_PATH + "'." | Write-Host -ForegroundColor Red
+    }
 }
 
 # on Azure, adjust libs path
@@ -95,10 +106,10 @@ if ($IsAzurePipelines -eq $True) {
 }
 
 # SIG # Begin signature block
-# MIIeIgYJKoZIhvcNAQcCoIIeEzCCHg8CAQExDzANBglghkgBZQMEAgEFADB5Bgor
+# MIIeWwYJKoZIhvcNAQcCoIIeTDCCHkgCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBtCSqpetlOsnwQ
-# I4v0Ud3uZQXemvBTd8ir/U0XQePGhaCCDg8wggPFMIICraADAgECAhACrFwmagtA
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBcK7FQPX1YsKaf
+# zRmMY9cJYW1H+CrmUlAURxzOHSjtwKCCDg8wggPFMIICraADAgECAhACrFwmagtA
 # m48LefKuRiV3MA0GCSqGSIb3DQEBBQUAMGwxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xKzApBgNV
 # BAMTIkRpZ2lDZXJ0IEhpZ2ggQXNzdXJhbmNlIEVWIFJvb3QgQ0EwHhcNMDYxMTEw
@@ -173,22 +184,22 @@ if ($IsAzurePipelines -eq $True) {
 # fbrFicrII5VQXMus77/h7JfCAxMy4IKym0IOPEA+4wo1+mGNyGzsdTd4fqLibuUB
 # SFhQry8tS8JFAnil8J6F9WK3GvJn6gZhbavPZr442KUsb0EomhYmni25kaotNrmQ
 # D7Q+k2GMyx7DtgKF86uIbyfSoMavS4Yf9N7hVXmLeTeGrC5GqqcyDfe+reWOPDU6
-# EIEZMcWHkoyvJNRFXACjvNV4MK6u282mMjGCD2kwgg9lAgEBMG4wWjELMAkGA1UE
+# EIEZMcWHkoyvJNRFXACjvNV4MK6u282mMjGCD6Iwgg+eAgEBMG4wWjELMAkGA1UE
 # BhMCVVMxGDAWBgNVBAoTDy5ORVQgRm91bmRhdGlvbjExMC8GA1UEAxMoLk5FVCBG
 # b3VuZGF0aW9uIFByb2plY3RzIENvZGUgU2lnbmluZyBDQQIQDP8BdPDQJNgmxzG3
 # FCJmOTANBglghkgBZQMEAgEFAKCBhDAYBgorBgEEAYI3AgEMMQowCKACgAChAoAA
 # MBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAMBgor
-# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCC7TKm15SKp/NSvgLDt3GiINhKYfo9u
-# AuL92JOv0Z+O6zANBgkqhkiG9w0BAQEFAASCAQBzo/CFOHrkpEBCsdv+QHUFCHgI
-# esqIWaoj8UK56HZkjTqJkQqKrm7Mw6q+Ax6Fcbvu6IAgQ3i/3WT9KK2e/Iwy6u9J
-# RHb/lm6Wa9lbxOCaqIYNigCb0/T28MZ9TsQ5KjvR/26cMMG5vzFiofH7seLJwAZ6
-# Ni/3gVJVDhP6vlWr0Sb6LiL5LVv/YzWtmMiaqhTDtELH+jPOCQFnKQ3jfkyw1zk7
-# X5kNjbCBUeBgRxXSR3RNWyQh/kDncpOHg+Nj/TRL1QG76zi0gjRszy2L5WSIBr8c
-# J7V/hYFG6xNiUNvg/j/zSvOwzPXT50wNdbzrDvNVHK/IvydXwB58wLSGiSygoYIN
-# RTCCDUEGCisGAQQBgjcDAwExgg0xMIINLQYJKoZIhvcNAQcCoIINHjCCDRoCAQMx
+# BgEEAYI3AgEVMC8GCSqGSIb3DQEJBDEiBCDhFDeKwLNtMj8BLmrJe/wMcqB+MV+X
+# shVH2MiM7sDRBTANBgkqhkiG9w0BAQEFAASCAQBPlocLuJD/U6tTMnwg6X9LgS7y
+# 4KWW+QsMI5rVtFe9XJWe8ZC1/gmD/Ned23/lNOoz5uyWHTefaYFXkxX3DsbZoaZk
+# w5nEz3OS6bemUtX0wPjD2BMN7OWdfD7I2yJbHSSvj2lZZcvJdWGJ5fzUvCClPPHG
+# 2wMr8nLpW1bFukLKsDJOvyHaK2uTLAt7OEvJcYRoT8bOjjDYgki0eC9tVIkfcPWT
+# gZe1k/oUhVRFt5mRLefsmM0jSVDSzyaY/LXFAUEMCKToa8IzV/CV61J6Ww97GJVb
+# i9QgHw/oR5wg5W4h07l2r+q9F3fcdxDXsA5eWBDx10DJhsUr4b01yEbNJ4hooYIN
+# fjCCDXoGCisGAQQBgjcDAwExgg1qMIINZgYJKoZIhvcNAQcCoIINVzCCDVMCAQMx
 # DzANBglghkgBZQMEAgEFADB4BgsqhkiG9w0BCRABBKBpBGcwZQIBAQYJYIZIAYb9
-# bAcBMDEwDQYJYIZIAWUDBAIBBQAEIOb7RMdheMCrVD4ok8ZUNvM2n+oLYVMqb5Xt
-# MmPlB2j0AhEA60xbK9ChSL1SJACm1kIhABgPMjAyMTAzMjQxMDQ5MzFaoIIKNzCC
+# bAcBMDEwDQYJYIZIAWUDBAIBBQAEICBnaf8rT1DacaiAggyM/bvzjE4vdctZQz7D
+# e+DJhopaAhEAiQwtt0837EtCOzEcwiVyPxgPMjAyMTA2MTcxMzE0NTFaoIIKNzCC
 # BP4wggPmoAMCAQICEA1CSuC+Ooj/YEAhzhQA8N0wDQYJKoZIhvcNAQELBQAwcjEL
 # MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3
 # LmRpZ2ljZXJ0LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElE
@@ -243,17 +254,18 @@ if ($IsAzurePipelines -eq $True) {
 # FDVDBGiy23UC4HLHmNY8ZOUfSBAYX4k4YU1iRiSHY4yRUiyvKYnleB/WCxSlgNcS
 # R3CzddWThZN+tpJn+1Nhiaj1a5bA9FhpDXzIAbG5KHW3mWOFIoxhynmUfln8jA/j
 # b7UBJrZspe6HUSHkWGCbugwtK22ixH67xCUrRwIIfEmuE7bhfEJCKMYYVs9BNLZm
-# XbZ0e/VWMyIvIjayS6JKldj1po5SMYICTTCCAkkCAQEwgYYwcjELMAkGA1UEBhMC
+# XbZ0e/VWMyIvIjayS6JKldj1po5SMYIChjCCAoICAQEwgYYwcjELMAkGA1UEBhMC
 # VVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3LmRpZ2ljZXJ0
 # LmNvbTExMC8GA1UEAxMoRGlnaUNlcnQgU0hBMiBBc3N1cmVkIElEIFRpbWVzdGFt
-# cGluZyBDQQIQDUJK4L46iP9gQCHOFADw3TANBglghkgBZQMEAgEFAKCBmDAaBgkq
-# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDMyNDEw
-# NDkzMVowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
-# m/MwLwYJKoZIhvcNAQkEMSIEIC2a7L7uJWUKjYgP19GDNwRRsQzd/iBn7laBAKkF
-# Hg0DMA0GCSqGSIb3DQEBAQUABIIBAFeUOsOBCrFiO8/qqegfLedP0nqOhu7tZXt4
-# FZ0pfOwou90MeSMJD20KPYDGpjpCLat1mhRQus3ryzNH4cBe4ARBnINU9LkzKkU0
-# flPA1EJOVgcijf+hzTiJwjDt5iSXigFbeX9Jav/vOSSIK4FXEvWYCY2sYCAJ5RQ7
-# dLLfnC8cXX4DrEoNLGPChCOHCFNjNWmAd8tH+SOQy/vn0WUSmzhX26OYtcTAmROw
-# eeWX87VItsMODdOwW2ayqfAtcz/vzYVBPnRjBUKzv7uXP5udZkm4igzaF2Oxj+vU
-# IVM+ZkWrSJotE9uOBkJIeKBM+JcMS8kYGiPmYB7ZyxoZsFN46Vo=
+# cGluZyBDQQIQDUJK4L46iP9gQCHOFADw3TANBglghkgBZQMEAgEFAKCB0TAaBgkq
+# hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwHAYJKoZIhvcNAQkFMQ8XDTIxMDYxNzEz
+# MTQ1MVowKwYLKoZIhvcNAQkQAgwxHDAaMBgwFgQU4deCqOGRvu9ryhaRtaq0lKYk
+# m/MwLwYJKoZIhvcNAQkEMSIEIOQYUH2NYmzACWCndk9eqLhMewrBsORUoDB7SS0J
+# ZjXlMDcGCyqGSIb3DQEJEAIvMSgwJjAkMCIEILMQkAa8CtmDB5FXKeBEA0Fcg+Mp
+# K2FPJpZMjTVx7PWpMA0GCSqGSIb3DQEBAQUABIIBAAu8VKicsc3u9goW2Nfspsai
+# 3v8nB0dFsv2uenaMmLIeD3TYY/pZmoGRYkukLX1I8mVq5MPVASCmwLGY54fW5wXP
+# knYI9v5XSAgeEGXd6I5aok9yR6YhlKHS52pbImECJYrgMOP3qmF4gfv4nSg00QZF
+# sUE0Ir2I8tTEwyc6lza4g9/tveKezTNWcbo0346FnYWCJkYoi3VqSrakPqzK3HZY
+# VRFotDb+mixYEpzAr/yWf63NPnhqN+i34yEXO/XoLorxCa/UfKSccIfNsw1yffjk
+# 1paN9Qwblyqkyx1BcYWBjW4N25+iMOPfFpOt2tkGnZuy0r3uQHUSZ4aL/f0i+EE=
 # SIG # End signature block

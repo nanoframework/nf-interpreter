@@ -40,7 +40,7 @@ HEAPSIZE = 0x3000; /* Size of heap buffer used by HeapMem */
 MEMORY
 {
     /* original flash LENGTH was 0x00057fa8 */
-    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x0003E000
+    FLASH (RX)      : ORIGIN = 0x00000000, LENGTH = 0x00041000
     /*
      * Customer Configuration Area and Bootloader Backdoor configuration in
      * flash, 40 bytes
@@ -48,6 +48,7 @@ MEMORY
     FLASH_CCFG (RX) : ORIGIN = 0x00057fa8, LENGTH = 0x00000058
     SRAM (RWX)      : ORIGIN = 0x20000000, LENGTH = 0x00014000
     GPRAM (RWX)     : ORIGIN = 0x11000000, LENGTH = 0x00002000
+    LOG_DATA (R)    : ORIGIN = 0x90000000, LENGTH = 0x40000
 }
 
 REGION_ALIAS("REGION_TEXT", FLASH);
@@ -55,6 +56,7 @@ REGION_ALIAS("REGION_BSS", SRAM);
 REGION_ALIAS("REGION_DATA", SRAM);
 REGION_ALIAS("REGION_STACK", SRAM);
 REGION_ALIAS("REGION_HEAP", SRAM);
+REGION_ALIAS("REGION_LOG", LOG_DATA);
 REGION_ALIAS("REGION_ARM_EXIDX", FLASH);
 REGION_ALIAS("REGION_ARM_EXTAB", FLASH);
 
@@ -282,4 +284,8 @@ SECTIONS {
         KEEP(*(.stack))
         . += STACKSIZE;
     } > REGION_STACK AT> REGION_STACK
+
+    .log_data (COPY) : {
+        KEEP (*(.log_data))
+    } > REGION_LOG
 }

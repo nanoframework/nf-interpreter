@@ -3,6 +3,9 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(simplelinkcc13x2_26x2sdk)
+
 ###################################################################################################################################
 # WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
 ###################################################################################################################################
@@ -28,5 +31,5 @@ include(TI_SimpleLink_${TARGET_SERIES}_sources)
 include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 
 # includes for TI_RTOS
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages")
-list(APPEND TI_SimpleLink_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/SimpleLinkCC32xxSdk_Source/kernel/tirtos/packages/ti/sysbios")
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages)
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/ti/sysbios)

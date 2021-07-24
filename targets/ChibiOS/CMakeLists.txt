@@ -9,6 +9,9 @@ include(binutils.ChibiOS)
 include(STM32_CubePackage)
 include(NF_Utils)
 
+# Set target series
+NF_SET_STM32_TARGET_SERIES()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -24,6 +27,21 @@ if(DEFINED TOOL_HEX2DFU_PREFIX)
         message(FATAL_ERROR "hex2dfu tool not found")
     else()
         set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+    endif()
+endif()
+
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
     endif()
 endif()
 
@@ -56,17 +74,18 @@ endif()
 # check if build was requested with a specifc ChibiOS version
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(RTOS_VERSION "stable_20.3.x")
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    set(RTOS_VERSION "stable_21.6.x")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from nanoFramework GitHub repo")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
     FetchContent_Declare(
         chibios
-        GIT_REPOSITORY https://github.com/nanoframework/chibios
-        GIT_TAG ${RTOS_VERSION}
+        SVN_REPOSITORY https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION}
+        SVN_REVISION -rHEAD
     )
 
 else()
@@ -74,14 +93,26 @@ else()
 
     # sanity check is source path exists
     if(EXISTS ${RTOS_SOURCE_FOLDER}/)
-        message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 
-        FetchContent_Declare(
-            chibios
-            GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
-            GIT_TAG ${RTOS_VERSION}
-        )
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+            FetchContent_Declare(
+                chibios
+                SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+            )
 
+        else()
+            # running on *nix requires setting up a local git repo from SVN
+            # with git svn clone https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION} -rHEAD
+            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+
+            FetchContent_Declare(
+                chibios
+                GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
+                GIT_TAG master
+            )
+
+        endif()
     else()
         message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
     endif()
@@ -112,8 +143,7 @@ if(CHIBIOS_CONTRIB_REQUIRED)
 
             FetchContent_Declare(
                 chibios-contrib
-                GIT_REPOSITORY ${CHIBIOS_CONTRIB_SOURCE}
-                GIT_TAG nanoframework
+                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
             )
 
         else()
@@ -152,6 +182,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     # check if build was requested with a specifc FatFS version
     if(FATFS_VERSION_EMPTY)
         # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
+        # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
         set(FATFS_VERSION_TAG "R0.14")
     else()
         # set version 
@@ -176,8 +207,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
             FetchContent_Declare(
                 fatfs
-                GIT_REPOSITORY ${FATFS_SOURCE}
-                GIT_TAG ${FATFS_VERSION_TAG}
+                SOURCE_DIR ${FATFS_SOURCE}
             )
 
         else()
@@ -209,6 +239,7 @@ if(NF_SECURITY_MBEDTLS)
     endif()
 
     # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
     set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
 
     # set options for mbed TLS
@@ -231,12 +262,11 @@ if(NF_SECURITY_MBEDTLS)
         # sanity check is source path exists
         if(EXISTS ${MBEDTLS_SOURCE}/)
 
-            message(STATUS "mbedTLS ${FATFS_VERSION_TAG} (source from: ${MBEDTLS_SOURCE})")
+        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
             FetchContent_Declare(
                 mbedtls
-                GIT_REPOSITORY ${MBEDTLS_SOURCE}
-                GIT_TAG ${MBEDTLS_GIT_TAG}
+                SOURCE_DIR ${MBEDTLS_SOURCE}
             )
 
         else()

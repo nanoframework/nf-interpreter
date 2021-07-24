@@ -202,10 +202,10 @@ option(NF_FEATURE_LIGHT_MATH "option to build without complex math functions")
 
 if(NF_FEATURE_LIGHT_MATH)
     set(TARGET_LIGHT_MATH TRUE CACHE INTERNAL "Complex Math functions disabled")
-    message(STATUS "Complex math functions not available")
+    message(STATUS "Complex math functions available")
 else()
     set(TARGET_LIGHT_MATH FALSE CACHE INTERNAL "Complex Math functions enabled")
-    message(STATUS "Complex math functions available")
+    message(STATUS "Complex math functions not available")
 endif()
 
 ###################################################################################
@@ -308,14 +308,6 @@ if(NF_FEATURE_HAS_SDCARD)
 
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
-
-    if(RTOS_FREERTOS_ESP32_CHECK)
-        # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
-        message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
-        
-        # force **REMOVAL** of System.IO.FileSystem API
-        set(API_System.IO.FileSystem OFF CACHE INTERNAL "Forcing **REMOVAL** of System.IO.FileSystem API option")
-    endif()
 
     message(STATUS "Support for SD Card is included")
 else()
@@ -424,6 +416,15 @@ if(RTOS_CHIBIOS_CHECK)
 endif()
 
 #################################################################
+# Wire Protocol options
+option(NF_WP_IMPLEMENTS_CRC32 "option to report if target implements CRC32 in Wire Protocol")
+
+# handle Wire Protocol _TRACE_ preferences, if any
+option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
+option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
+option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
+option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
+option(NF_WP_TRACE_ALL "option to Trace  with Wire Protocol")
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)
@@ -504,7 +505,8 @@ endif()
 # and/or manage other APIs that are required
 
 if( API_nanoFramework.Devices.OneWire OR
-    API_Windows.Devices.SerialCommunication)
+    API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports)
 
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
 
@@ -644,6 +646,7 @@ if( API_nanoFramework.Devices.OneWire OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
     API_Windows.Devices.SerialCommunication OR
+    API_System.IO.Ports OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)
@@ -802,7 +805,20 @@ elseif(RTOS_FREERTOS_CHECK)
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD}")
+        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD} variant: ${TARGET_VARIANT}")
+
+        if (NOT TARGET_VARIANT)
+            set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
+        endif()
+
+        # Only used by ESP32 at the moment
+        if(API_nanoFramework.Hardware.Esp32.Ble)
+            set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+            message(STATUS "Support for BLE enabled")
+        else()
+            set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+            message(STATUS "Support for BLE disabled")
+        endif()
 
         # check watchdog feature
         # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 

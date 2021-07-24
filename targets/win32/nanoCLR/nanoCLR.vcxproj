@@ -22,7 +22,7 @@
     <ProjectGuid>{B5515C8A-B056-4320-8EA4-8CACE21A7D2E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>nanoCLR</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -107,7 +107,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -134,7 +134,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -178,6 +178,7 @@
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncCompletions.cpp" />
     <ClCompile Include="..\..\..\src\PAL\AsyncProcCall\AsyncContinuations.cpp" />
     <ClCompile Include="..\..\..\src\PAL\Double\nanoPAL_NativeDouble.cpp" />
+    <ClCompile Include="base64.cpp" />
     <ClCompile Include="CLRStartup.cpp" />
     <ClCompile Include="targetPAL_Events.cpp" />
     <ClCompile Include="FileStore_Win32.cpp" />
@@ -302,6 +303,12 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\nanoFramework.System.Text\System.Text.vcxproj">
       <Project>{70922447-ebf0-4473-b014-776f8c9426e7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.vcxproj">
+      <Project>{830a7e28-7b2b-4be6-8888-a39775a0092a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.IO.Ports\System.IO.Ports.vcxproj">
+      <Project>{46556afc-c248-4082-abe6-9b07f4e57579}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
       <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>

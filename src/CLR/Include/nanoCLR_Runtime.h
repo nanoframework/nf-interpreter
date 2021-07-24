@@ -1525,10 +1525,12 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_ThreadAbortException;
     CLR_RT_TypeDef_Index m_InvalidOperationException;
     CLR_RT_TypeDef_Index m_InvalidCastException;
+    CLR_RT_TypeDef_Index m_FormatException;
     CLR_RT_TypeDef_Index m_NotSupportedException;
     CLR_RT_TypeDef_Index m_NotImplementedException;
     CLR_RT_TypeDef_Index m_NullReferenceException;
     CLR_RT_TypeDef_Index m_OutOfMemoryException;
+    CLR_RT_TypeDef_Index m_TimeoutException;
     CLR_RT_TypeDef_Index m_ObjectDisposedException;
     CLR_RT_TypeDef_Index m_ConstraintException;
     CLR_RT_TypeDef_Index m_WatchdogException;
@@ -1549,6 +1551,8 @@ struct CLR_RT_WellKnownTypes
     CLR_RT_TypeDef_Index m_FieldInfo;
 
     CLR_RT_TypeDef_Index m_WeakReference;
+
+    CLR_RT_TypeDef_Index m_Guid;
 
     CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
     CLR_RT_TypeDef_Index m_Bitmap;
@@ -2409,6 +2413,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     inline void PushValueI4(CLR_INT32 val)
     {
         SetResult_I4(val);
+    }
+
+    inline void PushValueU4(CLR_UINT32 val)
+    {
+        SetResult_U4(val);
     }
 
     //--//
@@ -3357,6 +3366,9 @@ extern bool g_CLR_RT_fBadStack;
 //--//
 typedef enum Events
 {
+    // this event is to be used when there is no event to actually wait for
+    Event_NoEvent = 0x00000001,
+
     Event_SerialPortIn = 0x00000002,
     Event_SerialPortOut = 0x00000004,
     Event_EndPoint = 0x00000008,
@@ -3365,6 +3377,7 @@ typedef enum Events
     Event_SpiMaster = 0x00000100,
     Event_OneWireMaster = 0x00000200,
     Event_Radio = 0x00000400,
+    Event_Wifi_Station = 0x00000800,
     Event_AppDomain = 0x02000000,
     Event_Socket = 0x20000000,
     Event_IdleCPU = 0x40000000,
@@ -3392,7 +3405,8 @@ struct CLR_RT_ExecutionEngine
     static const int c_fDebugger_StateResolutionFailed = 0x00000001;
     static const int c_fDebugger_StateProgramRunning = 0x00000400;
     static const int c_fDebugger_StateProgramExited = 0x00000800;
-    static const int c_fDebugger_StateMask = c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited;
+    static const int c_fDebugger_StateMask =
+        c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited + c_fDebugger_StateResolutionFailed;
     //
     static const int c_fDebugger_BreakpointsDisabled = 0x00001000;
     //

@@ -3,14 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# handle Wire Protocol _TRACE_ preferences, if any
-option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
-option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
-option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
-option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
-option(NF_WP_TRACE_ALL "option to Trace  with Wire Protocol")
-option(NF_WP_IMPLEMENTS_CRC32 "option to report if target implements CRC32 in Wire Protocol")
-
 # this one has to follow the declaration on src\CLR\Include\WireProtocol_Message.h
 # #define TRACE_ERRORS 1
 # #define TRACE_HEADERS 2

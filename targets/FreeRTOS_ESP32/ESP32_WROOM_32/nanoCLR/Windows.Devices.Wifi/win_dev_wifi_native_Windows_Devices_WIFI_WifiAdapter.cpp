@@ -6,6 +6,7 @@
 
 #include "win_dev_wifi_native.h"
 #include "nf_rt_events_native.h"
+#include "esp_wifi_types.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH Windows.Devices.WiFi (in managed code) !!! //
@@ -106,44 +107,85 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
         int reconnectionKind;
         esp_err_t res;
         int netIndex;
+        CLR_RT_HeapBlock hbTimeout;
+        CLR_INT64 *timeout;
+        bool eventResult = true;
+        WiFiConnectionStatus Status = UnspecifiedFailure;
 
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
 
-        WiFiConnectionStatus Status = Success;
-
-        // Get SSID
-        szSsid = stack.Arg1().RecoverString();
-        FAULT_ON_NULL(szSsid);
-
-        // Get Password
-        szPassPhase = stack.Arg2().RecoverString();
-        FAULT_ON_NULL(szPassPhase);
-
-        // Reconnect kind
-        reconnectionKind = stack.Arg3().NumericByRef().s4;
-
-        res = (esp_err_t)Network_Interface_Connect(netIndex, szSsid, szPassPhase, reconnectionKind);
-        switch (res)
+        if (stack.m_customState == 0)
         {
-            case ESP_OK:
-                Status = Success;
+            NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
+
+            // Get SSID
+            szSsid = stack.Arg1().RecoverString();
+            FAULT_ON_NULL(szSsid);
+
+            // Get Password
+            szPassPhase = stack.Arg2().RecoverString();
+            FAULT_ON_NULL(szPassPhase);
+
+            // Reconnect kind
+            reconnectionKind = stack.Arg3().NumericByRef().s4;
+
+            // Set timeout for connect
+            hbTimeout.SetInteger((CLR_INT64)20000 * TIME_CONVERSION__TO_MILLISECONDS);
+
+            res = (esp_err_t)Network_Interface_Start_Connect(netIndex, szSsid, szPassPhase, reconnectionKind);
+            if (res != ESP_OK)
+            {
+                Status = UnspecifiedFailure;
+                eventResult = false;
+            }
+        }
+
+        // Wait for connect to finish
+        while (eventResult)
+        {
+            int connectResult = Network_Interface_Connect_Result(netIndex);
+            if (connectResult >= 0)
+            {
+                // Map ESP32 wifi reason code to WiFiConnectionStatus
+                switch (connectResult)
+                {
+                    case 0:
+                        Status = Success;
+                        break;
+
+                    case WIFI_REASON_NO_AP_FOUND:
+                        Status = NetworkNotAvailable;
+                        break;
+
+                    case WIFI_REASON_AUTH_EXPIRE:
+                    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+                    case WIFI_REASON_BEACON_TIMEOUT:
+                    case WIFI_REASON_AUTH_FAIL:
+                    case WIFI_REASON_ASSOC_FAIL:
+                    case WIFI_REASON_HANDSHAKE_TIMEOUT:
+                        Status = InvalidCredential;
+                        break;
+
+                    default:
+                        Status = UnspecifiedFailure;
+                        break;
+                }
                 break;
-            case ESP_ERR_WIFI_SSID:
-                Status = NetworkNotAvailable;
-                break;
-            case ESP_ERR_WIFI_PASSWORD:
-                Status = InvalidCredential;
-                break;
-            case ESP_ERR_WIFI_TIMEOUT:
+            }
+
+            // Get timeout
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+
+            // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
+            NANOCLR_CHECK_HRESULT(
+                g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Wifi_Station, eventResult));
+
+            if (!eventResult)
+            {
+                // Timeout
                 Status = Timeout;
                 break;
-
-            default:
-            case ESP_ERR_WIFI_NOT_INIT:
-            case ESP_ERR_WIFI_NOT_STARTED:
-            case ESP_ERR_WIFI_CONN:
-                Status = UnspecifiedFailure;
-                break;
+            }
         }
 
         // Return value to the managed application
