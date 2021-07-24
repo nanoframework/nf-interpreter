@@ -1,11 +1,29 @@
 # Changelog
 
-## [v1.6.4.5](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.5) (2021-05-07)
+## [v1.6.5.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.5.3) (2021-07-24)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.3...v1.6.4.5)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.5...v1.6.5.3)
 
 **Implemented enhancements:**
 
+- Refactor repeated code in WireProtocol [\#1970](https://github.com/nanoframework/nf-interpreter/pull/1970)
+- Update EasyLink code for SDK [\#1967](https://github.com/nanoframework/nf-interpreter/pull/1967)
+- Increase priority of network threads for STM32 targets [\#1965](https://github.com/nanoframework/nf-interpreter/pull/1965)
+- Add Sys.IO.Port to TI SimpleLink [\#1964](https://github.com/nanoframework/nf-interpreter/pull/1964)
+- Add NOP definition to TI Simplelink [\#1963](https://github.com/nanoframework/nf-interpreter/pull/1963)
+- Fixes to String.Format  [\#1951](https://github.com/nanoframework/nf-interpreter/pull/1951)
+- Fixes in System.IO.Port [\#1948](https://github.com/nanoframework/nf-interpreter/pull/1948)
+- Add base64 conversions to Win32 CLR [\#1945](https://github.com/nanoframework/nf-interpreter/pull/1945)
+- Restore FindTypeDef code for reflection types [\#1942](https://github.com/nanoframework/nf-interpreter/pull/1942)
+- Improvements in convert and format handling [\#1938](https://github.com/nanoframework/nf-interpreter/pull/1938)
+- Improve code in ChangeConditions [\#1935](https://github.com/nanoframework/nf-interpreter/pull/1935)
+- Improve time sensitive WP requests [\#1934](https://github.com/nanoframework/nf-interpreter/pull/1934)
+- Add Serial API for TI CC13x2\_26x2 [\#1930](https://github.com/nanoframework/nf-interpreter/pull/1930)
+- Adding System.IO.Ports support [\#1921](https://github.com/nanoframework/nf-interpreter/pull/1921)
+- Adding TimeoutException [\#1919](https://github.com/nanoframework/nf-interpreter/pull/1919)
+- Implement SpinWait [\#1914](https://github.com/nanoframework/nf-interpreter/pull/1914)
+- Add support to generate DAPLink files [\#1907](https://github.com/nanoframework/nf-interpreter/pull/1907)
+- Rework Wire Protocol [\#1906](https://github.com/nanoframework/nf-interpreter/pull/1906)
 - Allow NXP targets to override all lwIP settings [\#1886](https://github.com/nanoframework/nf-interpreter/pull/1886)
 - Rework of WireProtocol [\#1884](https://github.com/nanoframework/nf-interpreter/pull/1884)
 - Add support for System.IO.Directory [\#1883](https://github.com/nanoframework/nf-interpreter/pull/1883)
@@ -333,6 +351,23 @@
 
 **Fixed bugs:**
 
+- Disable Bluetooth test code to allow debugging [\#1990](https://github.com/nanoframework/nf-interpreter/pull/1990)
+- Make available enough memory for SSL [\#1986](https://github.com/nanoframework/nf-interpreter/pull/1986)
+- Corrected some position combinations when R/W to backup memory [\#1978](https://github.com/nanoframework/nf-interpreter/pull/1978)
+- Fix update config with certificate \(CA and device\) [\#1977](https://github.com/nanoframework/nf-interpreter/pull/1977)
+- Fix Serial BytesToRead [\#1974](https://github.com/nanoframework/nf-interpreter/pull/1974)
+- Fix Assembly.Load with static constructors and fields [\#1973](https://github.com/nanoframework/nf-interpreter/pull/1973)
+- Fix debugger discovery [\#1969](https://github.com/nanoframework/nf-interpreter/pull/1969)
+- Fix System.IO.Port declaration [\#1961](https://github.com/nanoframework/nf-interpreter/pull/1961)
+- Fix unbox.any for GUID type [\#1956](https://github.com/nanoframework/nf-interpreter/pull/1956)
+- Fix WiFi Connect [\#1952](https://github.com/nanoframework/nf-interpreter/pull/1952)
+- Fix memory leak [\#1950](https://github.com/nanoframework/nf-interpreter/pull/1950)
+- Add missing flag in CLR\_DBG\_Commands \(\#1949\) [\#1949](https://github.com/nanoframework/nf-interpreter/pull/1949)
+- Rework default base64 implementation [\#1946](https://github.com/nanoframework/nf-interpreter/pull/1946)
+- Fix FromBase64 [\#1944](https://github.com/nanoframework/nf-interpreter/pull/1944)
+- Enable SmartConfig [\#1943](https://github.com/nanoframework/nf-interpreter/pull/1943)
+- Fixes in System.Convert  [\#1928](https://github.com/nanoframework/nf-interpreter/pull/1928)
+- Fix naming for github container registry [\#1916](https://github.com/nanoframework/nf-interpreter/pull/1916)
 - Fix System.Device GpioPin.Read [\#1898](https://github.com/nanoframework/nf-interpreter/pull/1898)
 - Revert "Rework of WireProtocol \(\#1884\)" [\#1897](https://github.com/nanoframework/nf-interpreter/pull/1897)
 - Fixes Enum.HasFlag throwing ArgumentException [\#1882](https://github.com/nanoframework/nf-interpreter/pull/1882)
@@ -598,6 +633,19 @@
 
 **Documentation and other chores:**
 
+- Update ChibiOS to v21.6 [\#1982](https://github.com/nanoframework/nf-interpreter/pull/1982)
+- Update for new ESP32 targets [\#1980](https://github.com/nanoframework/nf-interpreter/pull/1980)
+- Update for new ESP32 targets [\#1979](https://github.com/nanoframework/nf-interpreter/pull/1979)
+- Add System.Device.Gpio project to WIN32 CLR [\#1972](https://github.com/nanoframework/nf-interpreter/pull/1972)
+- Remove GenericPort\_Write for SimpleLink [\#1968](https://github.com/nanoframework/nf-interpreter/pull/1968)
+- Update System.IO.Port declaration [\#1962](https://github.com/nanoframework/nf-interpreter/pull/1962)
+- Update mscorlib declaration [\#1954](https://github.com/nanoframework/nf-interpreter/pull/1954)
+- Update System.Net declaration [\#1953](https://github.com/nanoframework/nf-interpreter/pull/1953)
+- Update System.Math [\#1933](https://github.com/nanoframework/nf-interpreter/pull/1933)
+- Update System.Math [\#1926](https://github.com/nanoframework/nf-interpreter/pull/1926)
+- Update SerialCommunication [\#1917](https://github.com/nanoframework/nf-interpreter/pull/1917)
+- Update mscorlib declaration [\#1912](https://github.com/nanoframework/nf-interpreter/pull/1912)
+- Update declaration of graphics assembly [\#1909](https://github.com/nanoframework/nf-interpreter/pull/1909)
 - Correct declaration of Windows.Storage [\#1903](https://github.com/nanoframework/nf-interpreter/pull/1903)
 - Update checksum for STM32 hardware lib [\#1899](https://github.com/nanoframework/nf-interpreter/pull/1899)
 - Adding ESP32 LiLyGo target to the main README [\#1895](https://github.com/nanoframework/nf-interpreter/pull/1895)
@@ -850,9 +898,17 @@
 - Update corlib\_native\_System\_Number.cpp [\#549](https://github.com/nanoframework/nf-interpreter/pull/549)
 - Update targetHAL\_Time.cpp [\#548](https://github.com/nanoframework/nf-interpreter/pull/548)
 
+## [v1.6.4.5](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.5) (2021-05-07)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.3...v1.6.4.5)
+
 ## [v1.6.4.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.3) (2021-05-07)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.5.0.103...v1.6.4.3)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v100...v1.6.4.3)
+
+## [v100](https://github.com/nanoframework/nf-interpreter/tree/v100) (2020-12-02)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.5.0.103...v100)
 
 ## [v1.5.0.103](https://github.com/nanoframework/nf-interpreter/tree/v1.5.0.103) (2020-10-14)
 
