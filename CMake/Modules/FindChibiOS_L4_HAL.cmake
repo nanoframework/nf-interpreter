@@ -6,6 +6,8 @@
 include(FetchContent)
 FetchContent_GetProperties(chibios)
 
+include(binutils.ChibiOS)
+
 # set include directories for ChibiOS HAL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
@@ -185,6 +187,7 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
+NF_ADD_BOARD_CONFIG_FILE()
 
 include(FindPackageHandleStandardArgs)
 
