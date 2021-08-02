@@ -6,6 +6,8 @@
 include(FetchContent)
 FetchContent_GetProperties(chibios)
 
+include(binutils.ChibiOS)
+
 # set include directories for ChibiOS HAL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
@@ -46,7 +48,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH targets/AzureRTOS/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS/HAL)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
@@ -182,6 +184,7 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
+NF_ADD_BOARD_CONFIG_FILE()
 
 include(FindPackageHandleStandardArgs)
 
