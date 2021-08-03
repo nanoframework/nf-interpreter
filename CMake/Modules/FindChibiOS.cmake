@@ -71,40 +71,6 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay
 
 # source files for ChibiOS
 set(CHIBIOS_SRCS
-    # HAL-OSAL files
-    hal.c
-    hal_st.c
-    
-    hal_buffers.c
-    hal_queues.c
-    hal_mmcsd.c
-    
-    hal_adc.c
-    hal_can.c
-    hal_crypto.c
-    hal_dac.c
-    hal_gpt.c
-    hal_i2c.c
-    hal_i2s.c
-    hal_icu.c
-    hal_mac.c
-    hal_mmc_spi.c
-    hal_pal.c
-    hal_pwm.c
-    hal_rtc.c
-    hal_sdc.c
-    hal_serial.c
-    hal_serial_usb.c
-    hal_sio.c
-    hal_spi.c
-    hal_trng.c
-    hal_uart.c
-    hal_usb.c
-    hal_wdg.c
-    hal_wspi.c
-
-    # OSAL RT
-    osal.c
 
     # RT
     chsys.c
