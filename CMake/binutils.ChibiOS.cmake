@@ -244,13 +244,6 @@ endmacro()
 # To be called from target series HAL CMake module
 macro(NF_ADD_BOARD_CONFIG_FILE)
 
-    # include path for board.h
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
-    # append include directory for boards in the nanoFramework ChibiOS 'overlay'
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD})
-    # append include directory for boards in the nanoFramework ChibiOS 'overlay' provideded by the community
-    list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD})
-
     # adjust search path here
     if(RTOS_CHIBIOS_CHECK)
 
@@ -293,6 +286,12 @@ macro(NF_ADD_BOARD_CONFIG_FILE)
     if (BUILD_VERBOSE)
         message("board.c >> ${CHIBIOS_SRC_FILE}")
     endif()
+
+    # get path to board.h file
+    string(REPLACE "/board.c" "" BOARD_HEADER_PATH "${CHIBIOS_SRC_FILE}")
+    
+    # include path for board.h
+    list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${BOARD_HEADER_PATH})
 
     list(APPEND CHIBIOS_HAL_SOURCES ${CHIBIOS_SRC_FILE})
 
