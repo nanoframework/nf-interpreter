@@ -3,24 +3,31 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <hal.h>
+
 #include <nanoHAL.h>
 #include <nanoHAL_Types.h>
 #include <nanoCLR_Types.h>
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
 
-#include <stm32l4xx_ll_rtc.h>
-
 #include <tx_api.h>
 
 // Returns the current date time from the RTC
 uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
+#if (HAL_USE_RTC == TRUE)
+
+    // use RTC to get date time
     SYSTEMTIME st;
-    st.wDay = (unsigned short)LL_RTC_DATE_GetDay(RTC);
-    st.wMonth = (unsigned short)LL_RTC_DATE_GetMonth(RTC);
-    st.wYear = (unsigned short)(LL_RTC_DATE_GetYear(RTC) + 2000);
-    st.wDayOfWeek = (unsigned short)LL_RTC_DATE_GetWeekDay(RTC);
+    RTCDateTime _dateTime;
+
+    rtcGetTime(&RTCD1, &_dateTime);
+
+    st.wDay = (unsigned short)_dateTime.day;
+    st.wMonth = (unsigned short)_dateTime.month;
+    st.wYear = (unsigned short)(_dateTime.year + 1980); // ChibiOS is counting years since 1980
+    st.wDayOfWeek = (unsigned short)_dateTime.dayofweek;
 
     // zero 'time' fields if date part only is required
     if (datePartOnly)
@@ -34,13 +41,37 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
     {
         // full date&time required, fill in 'time' fields too
 
-        st.wMilliseconds = 0;
-        st.wSecond = LL_RTC_TIME_GetSecond(RTC);
-        st.wMinute = LL_RTC_TIME_GetMinute(RTC);
-        st.wHour = LL_RTC_TIME_GetHour(RTC);
+        st.wMilliseconds = (unsigned short)(_dateTime.millisecond % 1000);
+        _dateTime.millisecond /= 1000;
+        st.wSecond = (unsigned short)(_dateTime.millisecond % 60);
+        _dateTime.millisecond /= 60;
+        st.wMinute = (unsigned short)(_dateTime.millisecond % 60);
+        _dateTime.millisecond /= 60;
+        st.wHour = (unsigned short)(_dateTime.millisecond % 24);
     }
 
     return HAL_Time_ConvertFromSystemTime(&st);
+
+#else
+
+    if (datePartOnly)
+    {
+        SYSTEMTIME st;
+        HAL_Time_ToSystemTime(HAL_Time_CurrentTime(), &st);
+
+        st.wHour = 0;
+        st.wMinute = 0;
+        st.wSecond = 0;
+        st.wMilliseconds = 0;
+
+        return HAL_Time_ConvertFromSystemTime(&st);
+    }
+    else
+    {
+        return HAL_Time_CurrentTime();
+    }
+
+#endif
 };
 
 void HAL_Time_SetUtcTime(uint64_t utcTime)
@@ -49,12 +80,29 @@ void HAL_Time_SetUtcTime(uint64_t utcTime)
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
 
-    // date part
-    // year time base is 2000
-    LL_RTC_DATE_Config(RTC, systemTime.wDayOfWeek, systemTime.wDay, systemTime.wMonth - 1, systemTime.wYear - 2000);
+#if (HAL_USE_RTC == TRUE)
 
-    // time part
-    LL_RTC_TIME_Config(RTC, LL_RTC_TIME_FORMAT_AM_OR_24, systemTime.wHour, systemTime.wMinute, systemTime.wSecond);
+    // set RTC
+    RTCDateTime newTime;
+
+    newTime.year = systemTime.wYear - 1980; // ChibiOS time base is 1980-01-01
+    newTime.month = systemTime.wMonth;
+    newTime.day = systemTime.wDay;
+    newTime.dayofweek = systemTime.wDayOfWeek;
+    newTime.millisecond =
+        ((((uint32_t)systemTime.wHour * 3600) + ((uint32_t)systemTime.wMinute * 60) + (uint32_t)systemTime.wSecond) *
+         1000);
+
+    // set RTC time
+    rtcSetTime(&RTCD1, &newTime);
+
+#else
+
+    // TODO FIXME
+    // need to add implementation when RTC is not being used
+    // can't mess with the systicks because the scheduling can fail
+
+#endif
 }
 
 bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len)
