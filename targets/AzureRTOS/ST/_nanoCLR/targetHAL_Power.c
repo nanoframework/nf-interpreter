@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stm32l4xx_hal.h>
+#include <hal.h>
 
 #include <nanoHAL_Power.h>
 #include <nanoHAL_v2.h>
@@ -36,38 +36,41 @@ inline void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents)
 void CPU_SetPowerMode(PowerLevel_type powerLevel)
 {
     // default to false
-    // bool success = false;
+    bool success = false;
 
     switch (powerLevel)
     {
         case PowerLevel__Off:
             // stop watchdog
-            // TODO
-            // wdgStop(&WDGD1);
+            wdgStop(&WDGD1);
 
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C();
 
-            // chSysDisable();
-            // disable interrupts
+            osalSysDisable();
 
             /////////////////////////////////////////////////////////////////////////
             // stop the idependent watchdog, for series where the option is available
+#if defined(STM32L4XX)
 
+            (void)success;
             // TODO FIXME this code needs to follow the same workflow as the STM32F7
-            // CLEAR_BIT(FLASH->OPTR, FLASH_OPTR_IWDG_STDBY);
+            CLEAR_BIT(FLASH->OPTR, FLASH_OPTR_IWDG_STDBY);
+
+#endif
 
             /////////////////////////////////////////////////////
             // set alarm interrupt enable
             // set power control register to: power down deep sleep
             /////////////////////////////////////////////////////
 
-            __HAL_RTC_ALARMA_ENABLE(&RtcHandle);
-            __HAL_RTC_ALARM_ENABLE_IT(&RtcHandle, RTC_IT_ALRA);
+            // TODO
+            //__HAL_RTC_ALARMA_ENABLE(&RtcHandle);
+            //__HAL_RTC_ALARM_ENABLE_IT(&RtcHandle, RTC_IT_ALRA);
 
-            // TODO 
+            // TODO
             // need review here to use ST HAL HAL_PWREx_EnterSTOP2Mode
-            
+
             // set SLEEPDEEP bit of Cortex SCR
             SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPDEEP_Msk));
 

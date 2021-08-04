@@ -3,21 +3,17 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoCLR_Headers.h>
-#include <stm32l4xx_hal.h>
-#include <stm32l475e_iot01.h>
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #include <cmsis_utils.h>
 #include <tx_api.h>
 
+#include <serialcfg.h>
 #include <LaunchCLR.h>
 #include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-
-void BoardInit(bool initSensors, bool initGpios);
-
-extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
@@ -47,7 +43,7 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        BSP_LED_Toggle(LED2);
+        palTogglePad(GPIOB, GPIOB_LD2);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
     }
 }
@@ -58,9 +54,17 @@ void tx_application_define(void *first_unused_memory)
     uint16_t status;
 
     systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
+    
+    // Starting EFL driver
+    eflStart(&EFLD1, NULL);
 
-    // Create a byte memory pool from which to allocate the thread stacks.
-    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, NULL);
+
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
 
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
@@ -72,6 +76,9 @@ void tx_application_define(void *first_unused_memory)
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
+
+    // Create a byte memory pool from which to allocate the thread stacks.
+    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
     // Create blink thread
     status = tx_thread_create(
@@ -112,28 +119,18 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
-
-    // create UART event group
-    status = tx_event_flags_create(&wpUartEvent, "wpUart event");
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
+    
+    // report successfull nanoBooter execution
+    ReportSuccessfullNanoBooter();
 }
 
 //  Application entry point.
 int main(void)
 {
-    // init board WITHOUT sensors but WITH GPIOs
-    BoardInit(false, true);
+    halInit();
 
     // init boot clipboard
     InitBootClipboard();
-
-    // report successfull nanoBooter execution
-    ReportSuccessfullNanoBooter();
 
     // the following IF is not mandatory, it's just providing a way for a user to 'force'
     // the board to remain in nanoBooter and not launching nanoCLR
@@ -142,16 +139,19 @@ int main(void)
     if (!IsToRemainInBooter())
     {
         // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-        if (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
+        // TODO
+        //if (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
         {
             // check for valid CLR image
             // we are checking for a valid image right after nanoBooter
-            if (CheckValidCLRImage((uint32_t)&__nanoImage_end__))
-            {
-                // there seems to be a valid CLR image
-                // launch nanoCLR
-                LaunchCLR((uint32_t)&__nanoImage_end__);
-            }
+            // TODO
+            // if (CheckValidCLRImage((uint32_t)&__nanoImage_end__))
+            // {
+            //     // there seems to be a valid CLR image
+            //     // launch nanoCLR
+            //     // TODO
+            //     // LaunchCLR((uint32_t)&__nanoImage_end__);
+            // }
         }
     }
 
