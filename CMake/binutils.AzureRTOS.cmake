@@ -24,7 +24,12 @@ function(NF_SET_LINK_MAP TARGET)
     string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common")
+
+    if(CHIBIOS_HAL_REQUIRED)
+        set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common")
+    else()
+        set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${PROJECT_SOURCE_DIR}/build/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common")
+    endif()
 
 endfunction()
 
@@ -41,7 +46,12 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
     # definition for platform 
     # (always ARM here)
-    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM")
+    if(CHIBIOS_HAL_REQUIRED)
+        # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
+        target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM -DHAL_USE_COMMUNITY")
+    else()
+        target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM")
+    endif()
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
@@ -83,6 +93,16 @@ function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
 endfunction()
 
+function(NF_SET_STM32_TARGET_SERIES)
+    # process target series, which is in the format "STM32F4xx"
+    string(REPLACE "STM32" "" TARGET_SERIES_SHORT_1 "${TARGET_SERIES}")
+    string(REPLACE "xx" "" TARGET_SERIES_SHORT "${TARGET_SERIES_SHORT_1}")
+    
+    # store the series short name for later use
+    set(TARGET_SERIES_SHORT ${TARGET_SERIES_SHORT} CACHE INTERNAL "STM32 target series short name")
+
+endfunction()
+
 # Add packages that are common to Azure RTOS platform builds
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_PACKAGES)
@@ -101,6 +121,11 @@ macro(NF_ADD_PLATFORM_PACKAGES)
     #     find_package(STM32F7_CubePackage REQUIRED)
     #     find_package(SPIFFS REQUIRED)
     # endif()
+    
+    if(CHIBIOS_HAL_REQUIRED)
+        find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED)
+        find_package(ChibiOSnfOverlay REQUIRED)
+    endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED)
@@ -115,6 +140,10 @@ endmacro()
 # Add Azure RTOS platform dependencies to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    if(CHIBIOS_HAL_REQUIRED)
+        # add_dependencies(${TARGET}.elf CHIBIOS_STARTUP_HAL)
+    endif()
 
     add_dependencies(${TARGET}.elf azrtos::threadx)
 
@@ -151,6 +180,13 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         # ${CHIBIOS_LWIP_INCLUDE_DIRS}
         # ${SPIFFS_INCLUDE_DIRS}
     )
+
+    if(CHIBIOS_HAL_REQUIRED)
+        target_include_directories(${TARGET}.elf PUBLIC
+            ${CHIBIOS_HAL_INCLUDE_DIRS}
+            ${ChibiOSnfOverlay_INCLUDE_DIRS}
+        )
+    endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
         target_include_directories(${TARGET}.elf PUBLIC
@@ -203,9 +239,16 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         ${TARGET_AZURERTOS_COMMON_SOURCES}
     )
 
+    if(CHIBIOS_HAL_REQUIRED)
+        target_sources(${TARGET}.elf PUBLIC
+            ${CHIBIOS_HAL_SOURCES}
+            ${ChibiOSnfOverlay_SOURCES}
+        )
+    endif()
+
     if(STM32_CUBE_PACKAGE_REQUIRED)
         target_sources(${TARGET}.elf PUBLIC
-                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
+            ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
         )
     endif()
 

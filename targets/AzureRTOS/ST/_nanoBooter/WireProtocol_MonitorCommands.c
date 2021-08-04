@@ -4,12 +4,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <hal.h>
+
 #include <nanoHAL_v2.h>
 #include <WireProtocol.h>
 #include <Debugger.h>
 #include <WireProtocol_MonitorCommands.h>
 #include <Target_BlockStorage_STM32FlashDriver.h>
-#include <stm32l4xx_hal.h>
 #include <target_board.h>
 
 int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int32_t mode, uint32_t *errorCode)
@@ -66,7 +67,7 @@ int Monitor_Reboot(WP_Message *message)
         else
         {
             // RESET CPU to load nanoCLR
-            HAL_NVIC_SystemReset();
+            NVIC_SystemReset();
         }
     }
 
