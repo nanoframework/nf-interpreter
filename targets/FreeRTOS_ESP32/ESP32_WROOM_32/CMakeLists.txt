@@ -51,7 +51,6 @@ if(USE_NETWORKING_OPTION)
     add_library(NetworkLib STATIC ${NF_Networking_SOURCES}
                                   ${TARGET_ESP32_NETWORK_SOURCES}
                                   ${TARGET_LWIP_SOURCES}
-                                  ${mbedTLS_SOURCES}
     )
 endif()
 
