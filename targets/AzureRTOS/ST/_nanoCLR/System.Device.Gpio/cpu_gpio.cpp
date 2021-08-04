@@ -3,26 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stm32l4xx_hal.h>
+#include <hal.h>
 
 #include <tx_api.h>
 
 #include <targetPAL.h>
 #include "sys_dev_gpio_native_target.h"
-#include <ST_Hal_Gpio_Helpers.h>
 
 #define GPIO_MAX_PIN     256
 #define TOTAL_GPIO_PORTS ((GPIO_MAX_PIN + 15) / 16)
-
-// TODO
-//  move this to sys_dev_gpio_native_System_Device_Gpio_GpioPin when Windows.Devices.Gpio is removed
-void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void *pArg)
-{
-    (void)pArg;
-
-    // if handle registered then post a managed event with the current pin reading
-    PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
-}
 
 // Double linkedlist to hold the state of each Input pin
 struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
@@ -40,13 +29,31 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     // Param to user isr call
     void *param;
     // Expected state for debounce handler
-    GPIO_PinState expected;
+    bool expected;
     // True if waiting for debounce timer to complete
     bool waitingDebounce;
 };
 
 static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Double Linked list for GPIO input status
 static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit per pin
+
+//  move this to sys_dev_gpio_native_System_Device_Gpio_GpioPin when Windows.Devices.Gpio is removed
+void Gpio_Interupt_ISR(GPIO_PIN pinNumber, bool pinState, void *pArg)
+{
+    (void)pArg;
+
+    // if handle registered then post a managed event with the current pin reading
+    PostManagedEvent(EVENT_GPIO, 0, (uint16_t)pinNumber, (uint32_t)pinState);
+}
+
+// this is an utility function to get a ChibiOS PAL IoLine from our "encoded" pin number
+static ioline_t GetIoLine(int16_t pinNumber)
+{
+    stm32_gpio_t *port = GPIO_PORT(pinNumber);
+    int16_t pad = pinNumber % 16;
+
+    return PAL_LINE(port, pad);
+}
 
 bool IsValidGpioPin(GPIO_PIN pinNumber)
 {
@@ -74,10 +81,9 @@ gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
 static void DebounceTimerCallback(uint32_t id)
 {
     gpio_input_state *pState = (gpio_input_state *)id;
-    GPIO_TypeDef *port = GPIO_PORT(pState->pinNumber);
 
     // get current pin state
-    bool actual = HAL_GPIO_ReadPin(port, GPIO_PIN(pState->pinNumber));
+    bool actual = palReadLine(GetIoLine(pState->pinNumber));
 
     if (actual == pState->expected)
     {
@@ -86,14 +92,14 @@ static void DebounceTimerCallback(uint32_t id)
         {
             // both edges
             // update expected state
-            pState->expected = (GPIO_PinState)(pState->expected ^ GPIO_PIN_SET);
+            pState->expected ^= 1;
         }
     }
 
     pState->waitingDebounce = false;
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t gpioPin)
+void GpioEventCallback(void *arg)
 {
     NATIVE_INTERRUPT_START
 
@@ -101,10 +107,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t gpioPin)
 
     TX_DISABLE
 
-    // find pin number for this PIN
-    // ST GPIO allows only one INT per GPIO pin (16 channels)
-    // find which is our pin that corresponds to the GPIO that fired the interrupt
-    gpio_input_state *pGpio = GetGpioWithInterrupt(gpioPin);
+    gpio_input_state *pGpio = (gpio_input_state *)arg;
 
     if (pGpio != NULL)
     {
@@ -124,11 +127,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t gpioPin)
             }
             else
             {
+                // get IoLine from pin number
+                ioline_t ioLine = GetIoLine(pGpio->pinNumber);
+
                 TX_RESTORE
 
                 pGpio->isrPtr(
                     pGpio->pinNumber,
-                    HAL_GPIO_ReadPin(GPIO_PORT(pGpio->pinNumber), GPIO_PIN(pGpio->pinNumber)),
+                    palReadLine(ioLine),
                     pGpio->param);
 
                 TX_DISABLE
@@ -146,12 +152,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t gpioPin)
 gpio_input_state *GetInputState(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
+
     while (ptr->Next() != NULL)
     {
         if (ptr->pinNumber == pinNumber)
+        {
             return ptr;
+        }
+
         ptr = ptr->Next();
     }
+
     return NULL;
 }
 
@@ -191,18 +202,9 @@ void UnlinkInputState(gpio_input_state *pState)
 {
     tx_timer_delete(&pState->debounceTimer);
 
-    // get port & pin
-    GPIO_TypeDef *port = GPIO_PORT(pState->pinNumber);
-
-    GPIO_InitTypeDef gpio_init_structure;
-    gpio_init_structure.Pin = GPIO_PIN(pState->pinNumber);
-
-    HAL_GPIO_GetConfig(port, &gpio_init_structure);
-
-    // disable interrupt associated with the pin
+    // disable the EXT interrupt channel
     // it's OK to do always this, no matter if it's enabled or not
-    gpio_init_structure.Mode &= ~GPIO_MODE_IT_RISING_FALLING;
-    HAL_GPIO_SetConfig(port, &gpio_init_structure);
+    palDisableLineEvent(GetIoLine(pState->pinNumber));
 
     pState->Unlink();
 
@@ -297,24 +299,18 @@ int32_t CPU_GPIO_GetPinCount()
 // Get current state of pin
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pin)
 {
-    GPIO_TypeDef *port = GPIO_PORT(pin);
-
-    return (GpioPinValue)HAL_GPIO_ReadPin(port, GPIO_PIN(pin));
+    return (GpioPinValue)palReadLine(GetIoLine(pin));
 }
 
 // Set Pin state
 void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue pinState)
 {
-    GPIO_TypeDef *port = GPIO_PORT(pin);
-
-    HAL_GPIO_WritePin(port, GPIO_PIN(pin), (GPIO_PinState)pinState);
+    palWriteLine(GetIoLine(pin), (int)pinState);
 }
 
-void CPU_GPIO_TogglePinState(GPIO_PIN pin)
+void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 {
-    GPIO_TypeDef *port = GPIO_PORT(pin);
-
-    HAL_GPIO_TogglePin(port, GPIO_PIN(pin));
+    palToggleLine(GetIoLine(pinNumber));
 }
 
 bool CPU_GPIO_EnableInputPin(
@@ -333,65 +329,6 @@ bool CPU_GPIO_EnableInputPin(
         return false;
     }
 
-    // enable clock
-    GPIO_TypeDef *port = GPIO_PORT(pinNumber);
-
-#ifdef GPIOA
-    if (port == GPIOA)
-    {
-        __HAL_RCC_GPIOA_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOB
-    if (port == GPIOB)
-    {
-        __HAL_RCC_GPIOB_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOC
-    if (port == GPIOC)
-    {
-        __HAL_RCC_GPIOC_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOD
-    if (port == GPIOD)
-    {
-        __HAL_RCC_GPIOD_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOE
-    if (port == GPIOE)
-    {
-        __HAL_RCC_GPIOE_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOF
-    if (port == GPIOF)
-    {
-        __HAL_RCC_GPIOF_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOG
-    if (port == GPIOG)
-    {
-        __HAL_RCC_GPIOG_CLK_ENABLE();
-    }
-#endif
-
-#ifdef GPIOH
-    if (port == GPIOH)
-    {
-        __HAL_RCC_GPIOH_CLK_ENABLE();
-    }
-#endif
-
     // Set as Input GPIO_INT_EDGE intEdge, GPIO_RESISTOR ResistorState
     if (!CPU_GPIO_SetDriveMode(pinNumber, driveMode))
     {
@@ -400,11 +337,6 @@ bool CPU_GPIO_EnableInputPin(
 
     pState = AllocateGpioInputState(pinNumber);
 
-    GPIO_InitTypeDef gpio_init_structure;
-    gpio_init_structure.Pin = GPIO_PIN(pinNumber);
-
-    HAL_GPIO_GetConfig(port, &gpio_init_structure);
-
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
     if (pinISR != NULL && (pState->isrPtr == NULL))
@@ -412,18 +344,11 @@ bool CPU_GPIO_EnableInputPin(
         // there are callbacks registered and...
         // the drive mode is input so need to setup the interrupt
 
-        // sanity check for a GPIO pin already associated to this channel
-        gpio_input_state *pGpio = GetGpioWithInterrupt(gpio_init_structure.Pin);
-        if (pGpio != NULL)
-        {
-            // there is already one!
-            CPU_GPIO_DisablePin(pinNumber, driveMode, 0);
+        // get IoLine from pin number
+        ioline_t ioLine = GetIoLine(pinNumber);
 
-            return false;
-        }
-
-        gpio_init_structure.Mode = GPIO_MODE_IT_RISING_FALLING;
-        HAL_GPIO_SetConfig(port, &gpio_init_structure);
+        palEnableLineEvent(ioLine, PAL_EVENT_MODE_BOTH_EDGES);
+        palSetLineCallback(ioLine, GpioEventCallback, pState);
 
         // store parameters & configs
         pState->isrPtr = pinISR;
@@ -435,17 +360,16 @@ bool CPU_GPIO_EnableInputPin(
         {
             case GPIO_INT_EDGE_LOW:
             case GPIO_INT_LEVEL_LOW:
-                pState->expected = GPIO_PIN_RESET;
+                pState->expected = PAL_LOW;
                 break;
 
             case GPIO_INT_EDGE_HIGH:
             case GPIO_INT_LEVEL_HIGH:
-                pState->expected = GPIO_PIN_SET;
+                pState->expected = PAL_HIGH;
                 break;
 
             case GPIO_INT_EDGE_BOTH:
-                // expected NOT current state
-                pState->expected = (GPIO_PinState)!CPU_GPIO_GetPinState(pinNumber);
+                pState->expected = !CPU_GPIO_GetPinState(pinNumber); // expected NOT current state
                 break;
 
             default:
@@ -455,11 +379,10 @@ bool CPU_GPIO_EnableInputPin(
     else if (pinISR == NULL && (pState->isrPtr != NULL))
     {
         // there is no managed handler setup anymore
-        // need to clear pin, which includes interrupts
-        HAL_GPIO_DeInit(port, gpio_init_structure.Pin);
 
-        // call again
-        CPU_GPIO_SetDriveMode(pinNumber, driveMode);
+        // disable the EXT interrupt channel
+        // it's OK to do always this, no matter if it's enabled or not
+        palDisableLineEvent(GetIoLine(pState->pinNumber));
 
         // clear parameters & configs
         pState->isrPtr = NULL;
@@ -505,28 +428,11 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 
     GLOBAL_LOCK();
 
-    GPIO_TypeDef *port = GPIO_PORT(pinNumber);
-    uint32_t pin = GPIO_PIN(pinNumber);
-
-    GPIO_InitTypeDef gpio_init_structure;
-    gpio_init_structure.Pin = pin;
-
-    // deinit pin
-    HAL_GPIO_DeInit(port, pin);
-
-    // set drive mode
     CPU_GPIO_SetDriveMode(pinNumber, driveMode);
 
-    // set AF, if different than 0
-    if (alternateFunction)
-    {
-        HAL_GPIO_GetConfig(port, &gpio_init_structure);
-
-        // change AF
-        gpio_init_structure.Alternate = alternateFunction;
-
-        HAL_GPIO_SetConfig(port, &gpio_init_structure);
-    }
+    // get IoLine from pin number
+    ioline_t ioLine = GetIoLine(pinNumber);
+    palSetLineMode(ioLine, PAL_MODE_ALTERNATE(alternateFunction));
 
     GLOBAL_UNLOCK();
 
@@ -537,50 +443,35 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 // return true if ok
 bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 {
-    GPIO_InitTypeDef gpio_init_structure;
-    GPIO_TypeDef *port = GPIO_PORT(pinNumber);
-    gpio_init_structure.Pin = GPIO_PIN(pinNumber);
-
-    HAL_GPIO_GetConfig(port, &gpio_init_structure);
-
-    // clear AF
-    gpio_init_structure.Alternate = 0;
-    // default speed
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    // get IoLine from pin number
+    ioline_t ioLine = GetIoLine(pinNumber);
 
     switch (driveMode)
     {
         case GpioPinDriveMode_Input:
-            gpio_init_structure.Mode = GPIO_MODE_INPUT;
-            gpio_init_structure.Pull = GPIO_NOPULL;
+            palSetLineMode(ioLine, PAL_MODE_INPUT);
             break;
 
         case GpioPinDriveMode_InputPullDown:
-            gpio_init_structure.Mode = GPIO_MODE_INPUT;
-            gpio_init_structure.Pull = GPIO_PULLDOWN;
+            palSetLineMode(ioLine, PAL_MODE_INPUT_PULLDOWN);
             break;
 
         case GpioPinDriveMode_InputPullUp:
-            gpio_init_structure.Mode = GPIO_MODE_INPUT;
-            gpio_init_structure.Pull = GPIO_PULLUP;
+            palSetLineMode(ioLine, PAL_MODE_INPUT_PULLUP);
             break;
 
         case GpioPinDriveMode_Output:
-            gpio_init_structure.Mode = GPIO_MODE_OUTPUT_PP;
-            gpio_init_structure.Pull = GPIO_NOPULL;
+            palSetLineMode(ioLine, PAL_MODE_OUTPUT_PUSHPULL);
             break;
 
         case GpioPinDriveMode_OutputOpenDrain:
-            gpio_init_structure.Mode = GPIO_MODE_OUTPUT_OD;
-            gpio_init_structure.Pull = GPIO_NOPULL;
+            palSetLineMode(ioLine, PAL_MODE_OUTPUT_OPENDRAIN);
             break;
 
         default:
             // all other modes are NOT supported
             return false;
     }
-
-    HAL_GPIO_SetConfig(port, &gpio_init_structure);
 
     return true;
 }
@@ -605,6 +496,7 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
+
     if (ptr)
     {
         return ptr->debounceMs;
@@ -616,10 +508,12 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
 bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
+
     if (ptr)
     {
         ptr->debounceMs = (uint32_t)(debounceTimeMilliseconds);
         return true;
     }
+
     return false;
 }

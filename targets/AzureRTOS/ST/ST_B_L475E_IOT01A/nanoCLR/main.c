@@ -3,9 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoCLR_Headers.h>
-#include <stm32l4xx_hal.h>
-#include <stm32l475e_iot01.h>
+#include <hal.h>
+#include <hal_nf_community.h>
 
 #include <cmsis_utils.h>
 #include <tx_api.h>
@@ -16,8 +15,6 @@
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
-
-void BoardInit(bool initSensors, bool initGpios);
 
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 extern CLR_SETTINGS clrSettings;
@@ -52,19 +49,19 @@ void tx_application_define(void *first_unused_memory)
 
     systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
 
+    // start watchdog
+    Watchdog_Init();
+
+#if (HAL_NF_USE_STM32_CRC == TRUE)
+    // startup crc
+    crcStart(NULL);
+#endif
+
+    // Starting EFL driver
+    eflStart(&EFLD1, NULL);
+
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
-
-    // initialize block storage list and devices
-    // in CLR this is called in nanoHAL_Initialize()
-    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    BlockStorageList_Initialize();
-    BlockStorage_AddDevices();
-
-    // initialize configuration manager
-    // in CLR this is called in nanoHAL_Initialize()
-    // for nanoBooter we have to init it here to have access to network configuration blocks
-    ConfigurationManager_Initialize();
 
     // Create receiver thread
     status = tx_thread_create(
@@ -112,22 +109,12 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
-
-    // create UART event group
-    status = tx_event_flags_create(&wpUartEvent, "wpUart event");
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
 }
 
 //  Application entry point.
 int main(void)
 {
-    // init board WITH sensors and WITHOUT GPIOs
-    BoardInit(false, false);
+    halInit();
 
     // init boot clipboard
     InitBootClipboard();

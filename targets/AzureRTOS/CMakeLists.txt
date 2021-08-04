@@ -85,6 +85,10 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
 
+    if(CHIBIOS_HAL_REQUIRED)
+        set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+    endif()
+
     add_subdirectory(ST)
 
     # add TARGET board directory
@@ -171,6 +175,10 @@ else()
 
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
+
+        if(CHIBIOS_HAL_REQUIRED)
+            set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+        endif()
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 

@@ -3,40 +3,32 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stm32l4xx_hal.h>
+#include <hal.h>
 
-#include <tx_api.h>
-
-#include <targetHAL.h>
 #include <nanoHAL_v2.h>
-#include <platform_UARTDriver.h>
-#include <WireProtocol_Message.h>
 #include <WireProtocol.h>
-#include <platform.h>
+#include <WireProtocol_Message.h>
 
-extern UART_HandleTypeDef WProtocolUart;
-
-TX_EVENT_FLAGS_GROUP wpUartEvent;
-
-uint32_t receivedBytes;
+#include <serialcfg.h>
 
 uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 {
+    volatile uint32_t read;
+
     // save for later comparison
     uint32_t requestedSize = *size;
-
-    volatile uint32_t read;
+    (void)requestedSize;
 
     // check for request with 0 size
     if (*size)
     {
-        // read from serial stream with 20ms timeout
-        read = nano_HAL_UART_ReadTimeout(ptr, requestedSize, 20);
+        // non blocking read from serial port with 20ms timeout
+        read = chnReadTimeout(&SERIAL_DRIVER, ptr, requestedSize, OSAL_MS2I(20));
 
-        TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
+        TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         // check if any bytes where read
-        if(read == 0)
+        if (read == 0)
         {
             return false;
         }
@@ -50,8 +42,8 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
-    uint32_t txBytes;
-    uint8_t success = false;
+    uint32_t writeResult;
+    bool operationResult = false;
 
     TRACE(
         TRACE_HEADERS,
@@ -60,26 +52,30 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         message->m_header.m_flags,
         message->m_header.m_size);
 
-    // write header with 10ms timeout
-    txBytes = nano_HAL_UART_SendTimeout((uint8_t *)&message->m_header, sizeof(message->m_header), 10);
+    // write header to output stream
+    writeResult =
+        chnWriteTimeout(&SERIAL_DRIVER, (const uint8_t *)&message->m_header, sizeof(message->m_header), OSAL_MS2I(10));
 
-    if(txBytes == sizeof(message->m_header))
+    if (writeResult == sizeof(message->m_header))
     {
-        // if there is anything on the payload, send it to the output stream
+        operationResult = true;
+
+        // if there is anything on the payload send it to the output stream
         if (message->m_header.m_size && message->m_payload)
         {
-            txBytes = nano_HAL_UART_SendTimeout((uint8_t *)message->m_payload, message->m_header.m_size, 250);
-            
-            if (txBytes == message->m_header.m_size)
+            // reset flag
+            operationResult = false;
+
+            writeResult = chnWriteTimeout(&SERIAL_DRIVER, message->m_payload, message->m_header.m_size, OSAL_MS2I(50));
+
+            if (writeResult == message->m_header.m_size)
             {
-                success = true;    
+                operationResult = true;
+
+                TRACE0(TRACE_ERRORS, "TXMSG: OK\n");
             }
         }
     }
-    else
-    {
-        success = true;
-    }
-    
-    return success;
+
+    return operationResult;
 }
