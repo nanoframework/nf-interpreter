@@ -323,7 +323,10 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
-            if (assm->m_iStaticFields > 0)
+            CLR_RT_MethodDef_Index idx;
+            idx.Set(assm->m_idx, 0);
+
+            if (assm->FindNextStaticConstructor(idx))
             {
                 // need to execute static constructors
                 g_CLR_RT_ExecutionEngine.SpawnStaticConstructor(g_CLR_RT_ExecutionEngine.m_cctorThread);
