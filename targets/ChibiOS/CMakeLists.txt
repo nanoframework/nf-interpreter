@@ -313,6 +313,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
+    set(CHIBIOS_BOARD_DEFINITIONS_PATH ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
 else()
     # board NOT found in ChibiOS 'overlay'
 
@@ -324,6 +325,7 @@ else()
             EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD}/board.h)
             # definition files found
             set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from target folder" CACHE INTERNAL "Location of board definition files")
+            set(CHIBIOS_BOARD_DEFINITIONS_PATH ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
 
         else()
             # board.c and board.h are NOT in the target folder, try to find them in the official distribution
@@ -332,6 +334,7 @@ else()
                 # board found
                 # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
                 set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
+                set(CHIBIOS_BOARD_DEFINITIONS_PATH ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
 
             else()
                 # board NOT found in official distribution

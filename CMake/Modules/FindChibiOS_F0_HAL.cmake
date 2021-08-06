@@ -6,9 +6,8 @@
 include(FetchContent)
 FetchContent_GetProperties(chibios)
 
-include(binutils.ChibiOS)
-
 # set include directories for ChibiOS HAL
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F0xx)
@@ -119,6 +118,8 @@ set(CHIBIOS_HAL_SRCS
 
     # OSAL 
     osal.c
+
+    board.c
 )
 
 foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
@@ -154,6 +155,8 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
             ${OSHAL_PATH}
 
+            ${CHIBIOS_BOARD_DEFINITIONS_PATH}
+
         CMAKE_FIND_ROOT_PATH_BOTH
     )
 
@@ -165,8 +168,6 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
-NF_ADD_BOARD_CONFIG_FILE()
-
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_F0_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS_F0_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
