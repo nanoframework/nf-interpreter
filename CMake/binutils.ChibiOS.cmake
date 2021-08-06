@@ -140,8 +140,8 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
 
     target_include_directories(${TARGET}.elf PUBLIC
 
-        ${CHIBIOS_INCLUDE_DIRS}
         ${CHIBIOS_HAL_INCLUDE_DIRS}
+        ${CHIBIOS_INCLUDE_DIRS}
         ${ChibiOSnfOverlay_INCLUDE_DIRS}
         ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
@@ -191,8 +191,8 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_SOURCES}
 
-        ${CHIBIOS_SOURCES}
         ${CHIBIOS_HAL_SOURCES}
+        ${CHIBIOS_SOURCES}
         ${ChibiOSnfOverlay_SOURCES}
     )
 
@@ -237,62 +237,5 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
     endif()
-
-endmacro()
-
-# Add board.c file and path for board.h to ChibiOS HAL
-# To be called from target series HAL CMake module
-macro(NF_ADD_BOARD_CONFIG_FILE)
-
-    # adjust search path here
-    if(RTOS_CHIBIOS_CHECK)
-
-        set(RTOS_PATH ${CMAKE_SOURCE_DIR}/targets/ChibiOS)
-        set(RTOS_COMMUNITY_PATH ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS)
-
-    elseif(RTOS_AZURERTOS_CHECK)
-
-        set(RTOS_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST)
-        set(RTOS_COMMUNITY_PATH ${CMAKE_SOURCE_DIR}/targets-community/AzureRTOS/ST)
-
-    else()
-        message(FATAL_ERROR "Unsuported RTOS using ChibiOS HAL")
-    endif()
-
-    set(CHIBIOS_SRC_FILE SRC_FILE -NOTFOUND)
-
-    find_file(CHIBIOS_SRC_FILE board.c
-        PATHS 
-
-            # the following hint order is for the board.c file, it has to match the search order of the main CMake otherwise we'll pick one that is the pair
-            # this path hint is for OEM boards for which the board file(s) are probably located directly in the "target" folder along with remaining files
-            ${RTOS_PATH}/${TARGET_BOARD}
-        
-            # this path hint is for the alternative boards folder in the nanoFramework ChibiOS 'overlay'
-            ${RTOS_PATH}/_nf-overlay/os/hal/boards/${TARGET_BOARD}
-            
-            # this path hint is for the usual location of the board.c file
-            ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
-
-            # this path hint is for the alternative boards folder in the nanoFramework ChibiOS 'overlay' provideded by the community
-            ${RTOS_COMMUNITY_PATH}/_nf-overlay/os/hal/boards/${TARGET_BOARD}
-
-            # this path hint is for Community provided boards that are located directly in the "targets-community" folder
-            ${RTOS_COMMUNITY_PATH}/${TARGET_BOARD}
-
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-
-    if (BUILD_VERBOSE)
-        message("board.c >> ${CHIBIOS_SRC_FILE}")
-    endif()
-
-    # get path to board.h file
-    string(REPLACE "/board.c" "" BOARD_HEADER_PATH "${CHIBIOS_SRC_FILE}")
-    
-    # include path for board.h
-    list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${BOARD_HEADER_PATH})
-
-    list(APPEND CHIBIOS_HAL_SOURCES ${CHIBIOS_SRC_FILE})
 
 endmacro()

@@ -7,6 +7,7 @@ include(FetchContent)
 FetchContent_GetProperties(chibios)
 
 # set include directories for ChibiOS HAL
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32L4xx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
@@ -133,6 +134,8 @@ set(CHIBIOS_HAL_SRCS
 
     # OSAL 
     osal.c
+
+    board.c
 )
 
 foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
@@ -171,8 +174,9 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
-
             ${OSHAL_PATH}
+            
+            ${CHIBIOS_BOARD_DEFINITIONS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -185,8 +189,6 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
-NF_ADD_BOARD_CONFIG_FILE()
-
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_L4_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS_L4_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
