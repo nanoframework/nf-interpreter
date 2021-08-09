@@ -587,13 +587,12 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
 #endif
             switch (range.RangeType)
             {
-                case BlockRange_BLOCKTYPE_CONFIG:     // fall through
-                case BlockRange_BLOCKTYPE_BOOTSTRAP:  // fall through
-                case BlockRange_BLOCKTYPE_CODE:       // fall through
-                case BlockRange_BLOCKTYPE_DIRTYBIT:   // fall through
-                case BlockRange_BLOCKTYPE_DEPLOYMENT: // fall through
-                case BlockRange_BLOCKTYPE_FILESYSTEM: // fall through
-                case BlockRange_BLOCKTYPE_STORAGE_A:  // fall through
+                // fall through
+                case BlockRange_BLOCKTYPE_CONFIG:
+                case BlockRange_BLOCKTYPE_BOOTSTRAP:
+                case BlockRange_BLOCKTYPE_DIRTYBIT:
+                case BlockRange_BLOCKTYPE_FILESYSTEM:
+                case BlockRange_BLOCKTYPE_STORAGE_A:
                 case BlockRange_BLOCKTYPE_STORAGE_B:
                 case BlockRange_BLOCKTYPE_SIMPLE_A:
                 case BlockRange_BLOCKTYPE_SIMPLE_B:
