@@ -205,7 +205,7 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
         FLASH_WaitForLastOperation(0);
 
         error = FLASH_CheckErrors();
-
+        
         if (error != FLASH_NO_ERROR)
         {
             break;
