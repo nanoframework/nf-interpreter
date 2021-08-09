@@ -44,6 +44,7 @@ if(USE_RNG)
     
     # append random implementation for all series, except F0
     if( ${TARGET_SERIES} STREQUAL "STM32L0xx" OR
+        ${TARGET_SERIES} STREQUAL "STM32L4xx" OR
         ${TARGET_SERIES} STREQUAL "STM32F4xx" OR 
         ${TARGET_SERIES} STREQUAL "STM32F7xx" OR
         ${TARGET_SERIES} STREQUAL "STM32H7xx")
