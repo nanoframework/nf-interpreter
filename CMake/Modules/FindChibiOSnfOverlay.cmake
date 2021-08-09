@@ -64,6 +64,5 @@ list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-ove
 # list(APPEND ChibiOSnfOverlay_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
 #########################################################################################################################
 
-
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOSnfOverlay DEFAULT_MSG ChibiOSnfOverlay_INCLUDE_DIRS ChibiOSnfOverlay_SOURCES)
