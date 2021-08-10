@@ -5,13 +5,13 @@
 
 using hhdvspkit;
 
-namespace nanoFramework.nanoCLR.VirtualCom
+namespace nanoFramework.nanoCLR.VirtualBridge
 {
-    public class PortPair
+    public class VirtualBridge
     {
         public IBridgePortDevice PortA { get; set; }
         public IBridgePortDevice PortB { get; set; }
 
-        public override string ToString() => $"COM{PortA.port}:COM{PortB.port}";
+        public override string ToString() => $"COM{PortA.port}<->COM{PortB.port}";
     }
 }

@@ -22,8 +22,8 @@ namespace nanoFramework.nanoCLR.CLI
         [Option('d', "debug", Required = false, HelpText = "Set COM port for debug")]
         public string DebugSerialPort { get; set; }
 
-        [Option('v', "virtual-pair", Required = false, HelpText = "Use virtual COM port pair for debug")]
-        public string DebugVirtualPortPair { get; set; }
+        [Option('v', "virtualbridge", Required = false, HelpText = "Use virtual Bridge for debug")]
+        public string DebugVirtualBridge { get; set; }
 
         [Option('p', "port", Required = false, HelpText = "Set TCP/IP port for incoming debug connection")]
         public int? DebugTcpIpPort { get; set; }
@@ -36,5 +36,21 @@ namespace nanoFramework.nanoCLR.CLI
 
         [Option('r', "resolve", Required = false, HelpText = "Tries to resolve cross-assembly references")]
         public bool TryResolve { get; set; }
+
+        /// <summary>
+        /// Allowed values:
+        /// q[uiet]
+        /// m[inimal]
+        /// n[ormal]
+        /// d[etailed]
+        /// diag[nostic]
+        /// </summary>
+        [Option(
+            'v',
+            "verbosity",
+            Required = false,
+            Default = "d",
+            HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
+        public string Verbosity { get; set; }
     }
 }
