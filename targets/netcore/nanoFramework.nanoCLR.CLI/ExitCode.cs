@@ -22,8 +22,29 @@ namespace nanoFramework.nanoCLR.CLI
         /// <summary>
         /// Virtual Serial Port Tools software not installed.
         /// </summary>
-        [Display(Name = "Virtual Serial Port Tools software not installed. Make sure it's connected and has booted in DFU mode")]
+        [Display(Name = "Virtual Serial Port Tools software not installed.")]
         E1000 = 1000,
 
+        /// <summary>
+        /// Failed to create Virtual Bridge.
+        /// </summary>
+        [Display(Name = "Failed to create Virtual Bridge")]
+        E1001 = 1001,
+
+        /// <summary>
+        /// Failed to delete Virtual Bridge.
+        /// </summary>
+        [Display(Name = "Failed to delete Virtual Bridge")]
+        E1002 = 1002,
+
+        ////////////////////////////////
+        // Application general Errors //
+        ////////////////////////////////
+
+        /// <summary>
+        /// Error parsing arguments.
+        /// </summary>
+        [Display(Name = "Invalid or missing arguments.")]
+        E9000 = 9000,
     }
 }

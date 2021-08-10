@@ -6,22 +6,22 @@
 using System;
 using System.Linq;
 using nanoFramework.nanoCLR.Host;
-using nanoFramework.nanoCLR.VirtualCom;
+using nanoFramework.nanoCLR.VirtualBridge;
 
 namespace nanoFramework.nanoCLR.CLI
 {
     public class RunCommandProcessor
     {
         public static int ProcessVerb(RunCommandLineOptions options, NanoClrHostBuilder hostBuilder,
-            VirtualComManager virtualComManager)
+            VirtualBridgeManager virtualBridgeManager)
         {
-            if (options.DebugVirtualPortPair != null)
+            if (options.DebugVirtualBridge != null)
             {
-                if (VirtualComCommandProcessor.CheckIfSupported(virtualComManager))
+                if (VirtualBridgeCommandProcessor.CheckIfSupported(virtualBridgeManager))
                 {
                     var (comA, _) =
-                        VirtualComCommandProcessor.CreateVirtualPortPairIfNotExists(virtualComManager,
-                            options.DebugVirtualPortPair);
+                        VirtualBridgeCommandProcessor.CreateVirtualBridge(virtualBridgeManager,
+                            options.DebugVirtualBridge);
 
                     hostBuilder.WaitForDebugger = true;
                     hostBuilder.EnterDebuggerLoopAfterExit = true;

@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,8 @@ using System.Reflection;
 using CommandLine;
 using CommandLine.Text;
 using nanoFramework.nanoCLR.Host;
-using nanoFramework.nanoCLR.VirtualCom;
+using nanoFramework.nanoCLR.VirtualBridge;
+using nanoFramework.nanoCLR.VirtualBridge;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -69,25 +71,33 @@ namespace nanoFramework.nanoCLR.CLI
 
             LogErrors(() =>
             {
-                VirtualComManager virtualComManager = new VirtualComManager();
-                virtualComManager.Initialize();
+                VirtualBridgeManager virtualBridgeManager = new();
+                virtualBridgeManager.Initialize();
 
                 NanoClrHostBuilder hostBuilder = NanoClrHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
-                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualComCommandLineOptions>(args)
-                    .MapResult(
+                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualBridgeCommandLineOptions>(args);
+
+                parsedArguments.MapResult(
                         (RunCommandLineOptions opts) =>
-                            RunCommandProcessor.ProcessVerb(opts, hostBuilder, virtualComManager),
-                        (VirtualComCommandLineOptions opts) =>
-                            VirtualComCommandProcessor.ProcessVerb(opts, virtualComManager),
-                        errs => 1);
+                            RunCommandProcessor.ProcessVerb(opts, hostBuilder, virtualBridgeManager),
+                        (VirtualBridgeCommandLineOptions opts) =>
+                            VirtualBridgeCommandProcessor.ProcessVerb(opts, virtualBridgeManager),
+                        (IEnumerable<Error> errors) => HandleErrors(errors));
             });
 
             if (_verbosityLevel > VerbosityLevel.Quiet)
             {
                 OutputError(_exitCode, _verbosityLevel > VerbosityLevel.Normal, _extraMessage);
             }
+
+            return (int)_exitCode;
+        }
+
+        private static int HandleErrors(IEnumerable<Error> errors)
+        {
+            _exitCode = ExitCode.E9000;
 
             return (int)_exitCode;
         }
