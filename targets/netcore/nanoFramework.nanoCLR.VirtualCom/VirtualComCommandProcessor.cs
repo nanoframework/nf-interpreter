@@ -59,12 +59,12 @@ namespace nanoFramework.nanoCLR.VirtualCom
             PortPair pair = virtualComManager.GetPairByName(name);
             if (pair == null)
             {
-                Console.WriteLine($"Creating virtual com pair - {name} ...");
+                Console.WriteLine($"Creating virtual COM Pair - {name} ...");
                 RequireElevated(() => virtualComManager.CreatePair(name), $"com -c {name}");
             }
             else
             {
-                Console.WriteLine($"Using existing virtual com pair - {name}");
+                Console.WriteLine($"Using existing virtual COM Pair - {name}");
             }
 
             return virtualComManager.ParsePair(name);
