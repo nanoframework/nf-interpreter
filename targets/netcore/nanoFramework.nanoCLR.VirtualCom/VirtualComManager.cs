@@ -13,7 +13,11 @@ namespace nanoFramework.nanoCLR.VirtualCom
         private const string LicenseResourceName = "nanoFramework.nanoCLR.VirtualCom.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
-        public bool IsSupported { get; private set; }
+        /// <summary>
+        /// If Virtual Serial Port Tools are installed this property is <see langword="true"/>, otherwise <see langword="false"/>.
+        /// </summary>
+        public bool IsInstalled { get; private set; }
+        
         private SerialPortLibrary _serialPortLibrary = null;
 
         public VirtualComManager()
@@ -26,11 +30,11 @@ namespace nanoFramework.nanoCLR.VirtualCom
             {
                 _serialPortLibrary = new SerialPortLibrary();
                 InstallLicense();
-                IsSupported = true;
+                IsInstalled = true;
             }
             catch (Exception e)
             {
-                IsSupported = false;
+                IsInstalled = false;
                 return false;
             }
 

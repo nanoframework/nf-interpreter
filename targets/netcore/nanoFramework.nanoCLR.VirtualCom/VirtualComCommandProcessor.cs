@@ -39,13 +39,21 @@ namespace nanoFramework.nanoCLR.VirtualCom
 
         public static bool CheckIfSupported(VirtualComManager virtualComManager)
         {
-            if (!virtualComManager.IsSupported)
+            if (!virtualComManager.IsInstalled)
             {
-                Console.WriteLine("Virtual Com Port Management Software not installed.");
-                return true;
+                Console.ForegroundColor = ConsoleColor.Red;
+
+                Console.WriteLine("*** Virtual Serial Port Tools are not installed ***");
+
+                Console.WriteLine("To run nanoCLR with virtual COM port Virtual Serial Port Tools from HHD Software needs to be installed.");
+                Console.WriteLine("Please donwload and install from https://www.hhdsoftware.com/virtual-serial-port-tools/extra-info.");
+
+                Console.ForegroundColor = ConsoleColor.White;
+
+                return false;
             }
 
-            return false;
+            return true;
         }
 
         public static void DeleteVirtualPortPair(VirtualComManager virtualComManager, string name)
