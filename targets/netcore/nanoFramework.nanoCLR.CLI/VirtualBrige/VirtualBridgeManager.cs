@@ -1,10 +1,15 @@
-﻿using System;
+﻿//
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
+//
+
+using hhdvspkit;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using hhdvspkit;
 
 namespace nanoFramework.nanoCLR.VirtualBridge
 {
