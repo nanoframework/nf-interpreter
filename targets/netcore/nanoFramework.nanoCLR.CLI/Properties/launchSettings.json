@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "nanoCLR.CLI": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "commandLineArgs": "run -v com8:com9"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <Platforms>x86</Platforms>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CommandLineParser" Version="2.8.0" />
+      <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="hhdvspkit.interop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>Vendor\hhdvspkit.interop.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="License" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="License\vspt.vsptlic" />
+      <EmbeddedResource Include="License\vspt.vsptlic" />
+    </ItemGroup>
+</Project>
