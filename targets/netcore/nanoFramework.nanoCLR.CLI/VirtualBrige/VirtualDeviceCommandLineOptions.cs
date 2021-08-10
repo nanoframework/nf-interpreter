@@ -5,19 +5,19 @@
 
 using CommandLine;
 
-namespace nanoFramework.nanoCLR.VirtualBridge
+namespace nanoFramework.nanoCLR.CLI
 {
-    [Verb(VirtualBridgeManager.VirtualBridgeVerb, HelpText = "Manage Virtual Bridges.")]
-    public class VirtualBridgeCommandLineOptions
+    [Verb(VirtualDeviceManager.VirtualDeviceVerb, HelpText = "Manage Virtual Devices.")]
+    public class VirtualDeviceCommandLineOptions
     {
         [Option('l', "list", Required = false, HelpText = "List existing Virtual Bridges")]
         public bool List { get; set; }
 
-        [Option('c', "create", Required = false, HelpText = "Create new Virtual Bridge")]
-        public string CreateVirtualBridge { get; set; }
+        [Option('c', VirtualDeviceManager.CreateOption, Required = false, HelpText = "Create Virtual Serial Device")]
+        public string CreateVirtualSerialDevice { get; set; }
 
-        [Option('d', "delete", Required = false, HelpText = "Delete Virtual Bridge")]
-        public string DeleteVirtualBridge { get; set; }
+        [Option('d', VirtualDeviceManager.DeleteOption, Required = false, HelpText = "Delete Virtual Serial Device")]
+        public string DeleteVirtualSerialDevice { get; set; }
 
         /// <summary>
         /// Allowed values:
