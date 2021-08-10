@@ -3,17 +3,16 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using CommandLine;
+using CommandLine.Text;
+using nanoFramework.nanoCLR.Host;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using CommandLine;
-using CommandLine.Text;
-using nanoFramework.nanoCLR.Host;
-using nanoFramework.nanoCLR.VirtualBridge;
-using nanoFramework.nanoCLR.VirtualBridge;
+using System.Runtime.Versioning;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -27,6 +26,9 @@ namespace nanoFramework.nanoCLR.CLI
         private static CopyrightInfo _copyrightInfo;
         internal static string ExecutingPath;
 
+        public static VerbosityLevel VerbosityLevel => _verbosityLevel;
+
+        [SupportedOSPlatform("windows")]
         static int Main(string[] args)
         {
             // take care of static fields
@@ -37,7 +39,7 @@ namespace nanoFramework.nanoCLR.CLI
 
             _headerInfo = $".NET nanoFramework CLR CLI v{_informationalVersionAttribute.InformationalVersion}";
 
-            _copyrightInfo = new CopyrightInfo(true, $".NET Foundation and nanoFramework project contributors", 2019);
+            _copyrightInfo = new CopyrightInfo(true, $".NET Foundation and nanoFramework project contributors", 2021);
 
             // need this to be able to use ProcessStart at the location where the .NET Core CLI tool is running from
             string codeBase = Assembly.GetExecutingAssembly().Location;
@@ -53,7 +55,7 @@ namespace nanoFramework.nanoCLR.CLI
                 // because of short-comings in CommandLine parsing 
                 // need to customize the output to provide a consistent output
                 var parser = new Parser(config => config.HelpWriter = null);
-                var result = parser.ParseArguments<RunCommandLineOptions>(new[] { "", "" });
+                var result = parser.ParseArguments<RunCommandLineOptions, VirtualDeviceCommandLineOptions>(new[] { "", "" });
 
                 var helpText = new HelpText(
                     new HeadingInfo(_headerInfo),
@@ -71,28 +73,68 @@ namespace nanoFramework.nanoCLR.CLI
 
             LogErrors(() =>
             {
-                VirtualBridgeManager virtualBridgeManager = new();
+                VirtualDeviceManager virtualBridgeManager = new();
                 virtualBridgeManager.Initialize();
 
                 NanoClrHostBuilder hostBuilder = NanoClrHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
-                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualBridgeCommandLineOptions>(args);
+                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualDeviceCommandLineOptions>(args);
+
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.WriteLine(_headerInfo);
+                Console.WriteLine(_copyrightInfo);
+                Console.WriteLine();
+
+                // perform version check
+                //CheckVersion();
+                Console.WriteLine();
+
+                Console.ForegroundColor = ConsoleColor.White;
 
                 parsedArguments.MapResult(
                         (RunCommandLineOptions opts) =>
-                            RunCommandProcessor.ProcessVerb(opts, hostBuilder, virtualBridgeManager),
-                        (VirtualBridgeCommandLineOptions opts) =>
-                            VirtualBridgeCommandProcessor.ProcessVerb(opts, virtualBridgeManager),
+                            RunCommandProcessor.ProcessVerb(
+                                opts,
+                                hostBuilder,
+                                virtualBridgeManager),
+                        (VirtualDeviceCommandLineOptions opts) =>
+                            VirtualDeviceCommandProcessor.ProcessVerb(
+                                opts,
+                                virtualBridgeManager),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
             });
 
             if (_verbosityLevel > VerbosityLevel.Quiet)
             {
-                OutputError(_exitCode, _verbosityLevel > VerbosityLevel.Normal, _extraMessage);
+                OutputError(_exitCode, _verbosityLevel > VerbosityLevel.Quiet, _extraMessage);
             }
 
             return (int)_exitCode;
+        }
+
+        internal static void ProcessVerbosityOptions(string verbosityLevel)
+        {
+            _verbosityLevel = verbosityLevel switch
+            {
+                // quiet
+                "q" or "quiet" => VerbosityLevel.Quiet,
+
+                // minimal
+                "m" or "minimal" => VerbosityLevel.Minimal,
+
+                // normal
+                "n" or "normal" => VerbosityLevel.Normal,
+
+                // detailed
+                "d" or "detailed" => VerbosityLevel.Detailed,
+
+                // diagnostic
+                "diag" or "diagnostic" => VerbosityLevel.Diagnostic,
+
+                _ => throw new ArgumentException("Invalid option for Verbosity"),
+            };
         }
 
         private static int HandleErrors(IEnumerable<Error> errors)
@@ -102,7 +144,10 @@ namespace nanoFramework.nanoCLR.CLI
             return (int)_exitCode;
         }
 
-        private static void OutputError(ExitCode errorCode, bool outputMessage, string extraMessage = null)
+        private static void OutputError(
+            ExitCode errorCode,
+            bool outputMessage,
+            string extraMessage = null)
         {
             if (errorCode == ExitCode.OK)
             {
@@ -146,6 +191,11 @@ namespace nanoFramework.nanoCLR.CLI
             try
             {
                 scope();
+            }
+            catch(CLIException e)
+            {
+                _exitCode = e.ExecutionError;
+                _extraMessage = e.ExecutionErrorMessage;
             }
             catch (Exception e)
             {

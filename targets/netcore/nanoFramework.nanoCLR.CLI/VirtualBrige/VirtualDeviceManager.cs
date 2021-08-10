@@ -11,23 +11,26 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace nanoFramework.nanoCLR.VirtualBridge
+namespace nanoFramework.nanoCLR.CLI
 {
-    public class VirtualBridgeManager
+    public class VirtualDeviceManager
     {
         private const string LicenseResourceName = "nanoFramework.nanoCLR.CLI.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
-        internal const string VirtualBridgeVerb = "virtualbridge";
+        // verbs and options for virtual device
+        internal const string VirtualDeviceVerb = "virtualdevice";
+        internal const string CreateOption = "create";
+        internal const string DeleteOption = "delete";
 
         /// <summary>
-        /// If Virtual Serial Port Tools are installed this property is <see langword="true"/>, otherwise <see langword="false"/>.
+        /// If Virtual Serial Port Tools are installed and functional this property is <see langword="true"/>, otherwise <see langword="false"/>.
         /// </summary>
-        public bool IsInstalled { get; private set; }
+        public bool IsFunctional { get; private set; }
         
-        private SerialPortLibrary _serialPortLibrary = null;
+        internal SerialPortLibrary _serialPortLibrary = null;
 
-        public VirtualBridgeManager()
+        public VirtualDeviceManager()
         {
         }
 
@@ -37,45 +40,66 @@ namespace nanoFramework.nanoCLR.VirtualBridge
             {
                 _serialPortLibrary = new SerialPortLibrary();
                 InstallLicense();
-                IsInstalled = true;
+                IsFunctional = true;
             }
             catch (Exception e)
             {
-                IsInstalled = false;
+                IsFunctional = false;
                 return false;
             }
 
             return true;
         }
 
-        private IBridgePortDevice[] GetVirtualBridges() =>
+        private IBridgePortDevice[] GetVirtualPortDevices() =>
             _serialPortLibrary.getPorts(SerialPortType.Bridge).Cast<IBridgePortDevice>().ToArray();
 
-        private IBridgePortDevice GetBridgeContainingPort(int port) => GetVirtualBridges().FirstOrDefault(p => p.port == port);
+        internal IBridgePortDevice GetVirtualPortDevice(int port) => GetVirtualPortDevices().FirstOrDefault(p => p.port == port);
 
         public IEnumerable<VirtualBridge> GetAvailableVirtualBridges()
         {
-            IBridgePortDevice[] bridgePorts = GetVirtualBridges();
+            IBridgePortDevice[] bridgePorts = GetVirtualPortDevices();
 
-            var pairs = new List<VirtualBridge>();
+            var bridges = new List<VirtualBridge>();
 
             foreach (var port in bridgePorts)
             {
-                if (port.bridgePort > 0 && pairs.All(b => b.PortA.port != port.bridgePort))
+                if (port.bridgePort > 0 && bridges.All(b => b.PortA.port != port.bridgePort))
                 {
-                    pairs.Add(new VirtualBridge {PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort)});
+                    bridges.Add(new VirtualBridge {PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort)});
                 }
             }
 
-            return pairs;
+            return bridges;
+        }
+
+        internal VirtualBridge GetVirtualBridgeContainingPort(string port)
+        {
+            int portIndex = Utilities.GetPortIndex(port);
+
+            // get all virtual bridges
+            var bridges = GetAvailableVirtualBridges();
+
+            // try to find this port index on any of the available virtual bridges
+            foreach(var b in bridges)
+            {
+                if(b.PortAIndex == portIndex || b.PortBIndex == portIndex)
+                {
+                    // done here
+                    return b;
+                }
+            }
+
+            // couldn't find a bridge containing this port
+            return null;
         }
 
         public VirtualBridge CreateVirtualBridge(int comA, int comB)
         {
             try
             {
-                IBridgePortDevice portA = GetBridgeContainingPort(comA) ?? _serialPortLibrary.createBridgePort(comA);
-                IBridgePortDevice portB = GetBridgeContainingPort(comB) ?? _serialPortLibrary.createBridgePort(comB);
+                IBridgePortDevice portA = GetVirtualPortDevice(comA) ?? _serialPortLibrary.createBridgePort(comA);
+                IBridgePortDevice portB = GetVirtualPortDevice(comB) ?? _serialPortLibrary.createBridgePort(comB);
 
                 portA.bridgePort = portB.port;
                 portB.bridgePort = portA.port;
@@ -92,16 +116,17 @@ namespace nanoFramework.nanoCLR.VirtualBridge
         {
             var (comA, comB) = ParseVirtualBridge(bridgeName);
 
-            Console.WriteLine($"Creating Virtual Bridge: {comA}<->{comB} ...");
-
             return CreateVirtualBridge(comA, comB);
         }
 
-        public void DeleteVirtualBridge(VirtualBridge bridge)
+        public static void DeleteVirtualBridge(VirtualBridge bridge)
         {
             //Not working due to interop issues between 0x86/0x64 code. Error: 0xE0000235. Vendor issue?
             try
             {
+                bridge.PortA.bridgePort = 0;
+                bridge.PortB.bridgePort = 0;
+
                 bridge.PortA.deleteDevice();
                 bridge.PortB.deleteDevice();
             }
@@ -123,7 +148,7 @@ namespace nanoFramework.nanoCLR.VirtualBridge
             DeleteVirtualBridge(pair);
         }
 
-        public (int comA, int comB) ParseVirtualBridge(string bridgeName)
+        public static (int comA, int comB) ParseVirtualBridge(string bridgeName)
         {
             Match match = s_PairRegex.Match(bridgeName);
 
@@ -143,8 +168,8 @@ namespace nanoFramework.nanoCLR.VirtualBridge
         {
             var (comA, comB) = ParseVirtualBridge(bridgeName);
 
-            IBridgePortDevice portA = GetBridgeContainingPort(comA);
-            IBridgePortDevice portB = GetBridgeContainingPort(comB);
+            IBridgePortDevice portA = GetVirtualPortDevice(comA);
+            IBridgePortDevice portB = GetVirtualPortDevice(comB);
 
             if (portA == null || portB == null)
             {
@@ -156,7 +181,7 @@ namespace nanoFramework.nanoCLR.VirtualBridge
 
         private void InstallLicense()
         {
-            var assembly = typeof(VirtualBridgeManager).GetTypeInfo().Assembly;
+            var assembly = typeof(VirtualDeviceManager).GetTypeInfo().Assembly;
 
             Stream resource = assembly.GetManifestResourceStream(LicenseResourceName);
             MemoryStream memoryStream = new MemoryStream();
