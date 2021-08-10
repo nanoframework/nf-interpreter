@@ -5,27 +5,57 @@
 
 using System;
 using System.Linq;
+using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 using nanoFramework.nanoCLR.Host;
-using nanoFramework.nanoCLR.VirtualBridge;
 
 namespace nanoFramework.nanoCLR.CLI
 {
     public class RunCommandProcessor
     {
-        public static int ProcessVerb(RunCommandLineOptions options, NanoClrHostBuilder hostBuilder,
-            VirtualBridgeManager virtualBridgeManager)
+        [SupportedOSPlatform("windows")]
+        public static int ProcessVerb(
+            RunCommandLineOptions options,
+            NanoClrHostBuilder hostBuilder,
+            VirtualDeviceManager virtualBridgeManager)
         {
-            if (options.DebugVirtualBridge != null)
+            Program.ProcessVerbosityOptions(options.Verbosity);
+
+            if (options.DebugSerialPort != null)
             {
-                if (VirtualBridgeCommandProcessor.CheckIfSupported(virtualBridgeManager))
+                // a serial port was requested 
+
+                // validate serial port
+                Utilities.ValidateComPortName(options.DebugSerialPort);
+
+                // check if Virtual Serial Port Tools are available 
+                if (VirtualDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
                 {
-                    var (comA, _) =
-                        VirtualBridgeCommandProcessor.CreateVirtualBridge(virtualBridgeManager,
-                            options.DebugVirtualBridge);
+                    VirtualBridge bridge;
+
+                    // check if the requested port it's a valid Virtual Device
+                    if (VirtualDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.DebugSerialPort))
+                    {
+                        // get the virtual bridge that contains the request port
+                        bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.DebugSerialPort);
+                    }
+                    else
+                    {
+                        // no Virtual Device for that index, create a new virtual bridge
+                        bridge = VirtualDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.DebugSerialPort);
+                    }
+
+                    if (bridge == null)
+                    {
+                        throw new CLIException(ExitCode.E1003);
+                    }
+
+                    // need to set debugger serial port to the _other_ port so it shows at the expected end
+                    options.DebugSerialPort = $"COM{bridge.GetOtherPort(options.DebugSerialPort)}";
 
                     hostBuilder.WaitForDebugger = true;
                     hostBuilder.EnterDebuggerLoopAfterExit = true;
-                    hostBuilder.UseSerialPortWireProtocol($"COM{comA}");
+                    hostBuilder.UseSerialPortWireProtocol(options.DebugSerialPort);
                 }
                 else
                 {
@@ -38,10 +68,10 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.LoadAssemblies(options.Assemblies);
             }
 
-            if (options.AssembliesSet != null)
-            {
-                hostBuilder.LoadAssembliesSet(options.AssembliesSet);
-            }
+            //if (options.AssembliesSet != null)
+            //{
+            //    hostBuilder.LoadAssembliesSet(options.AssembliesSet);
+            //}
 
             if (options.TryResolve)
             {
