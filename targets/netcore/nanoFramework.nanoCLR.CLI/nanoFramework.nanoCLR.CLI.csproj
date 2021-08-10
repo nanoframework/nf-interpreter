@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,12 +10,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="License\vspt.vsptlic" />
+    <EmbeddedResource Include="License\vspt.vsptlic" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\nanoFramework.nanoCLR.Host\nanoFramework.nanoCLR.Host.csproj" />
-    <ProjectReference Include="..\nanoFramework.nanoCLR.VirtualCom\nanoFramework.nanoCLR.VirtualCom.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="hhdvspkit.interop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>Vendor\hhdvspkit.interop.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
