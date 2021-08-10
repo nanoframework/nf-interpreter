@@ -19,16 +19,18 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 if (VirtualComCommandProcessor.CheckIfSupported(virtualComManager))
                 {
+                    var (comA, _) =
+                        VirtualComCommandProcessor.CreateVirtualPortPairIfNotExists(virtualComManager,
+                            options.DebugVirtualPortPair);
+
+                    hostBuilder.WaitForDebugger = true;
+                    hostBuilder.EnterDebuggerLoopAfterExit = true;
+                    hostBuilder.UseSerialPortWireProtocol($"COM{comA}");
+                }
+                else
+                {
                     return -1;
                 }
-
-                var (comA, _) =
-                    VirtualComCommandProcessor.CreateVirtualPortPairIfNotExists(virtualComManager,
-                        options.DebugVirtualPortPair);
-
-                hostBuilder.WaitForDebugger = true;
-                hostBuilder.EnterDebuggerLoopAfterExit = true;
-                hostBuilder.UseSerialPortWireProtocol($"COM{comA}");
             }
 
             if (options.Assemblies.Any())
