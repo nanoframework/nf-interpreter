@@ -73,7 +73,9 @@ namespace nanoFramework.nanoCLR.VirtualCom
         public static void ListVirtualPortPairs(VirtualComManager virtualComManager)
         {
             IEnumerable<PortPair> bridges = virtualComManager.GetPortPairs();
+
             Console.WriteLine("Existing virtual port pairs:");
+
             foreach (var comBridge in bridges)
             {
                 Console.WriteLine(comBridge);

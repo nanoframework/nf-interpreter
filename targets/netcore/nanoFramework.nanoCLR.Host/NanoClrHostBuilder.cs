@@ -97,15 +97,18 @@ namespace nanoFramework.nanoCLR.Host
             }
 
             s_nanoClrHost = new NanoClrHost();
+
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;
             s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
             s_nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
+
             s_nanoClrHost.NanoClrSettings = new NanoClrSettings
             {
                 MaxContextSwitches = (ushort) MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,
                 EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit
             };
+
             return s_nanoClrHost;
         }
     }

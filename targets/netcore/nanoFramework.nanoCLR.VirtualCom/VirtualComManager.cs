@@ -64,8 +64,10 @@ namespace nanoFramework.nanoCLR.VirtualCom
             {
                 IBridgePortDevice portA = GetBridgePort(comA) ?? _serialPortLibrary.createBridgePort(comA);
                 IBridgePortDevice portB = GetBridgePort(comB) ?? _serialPortLibrary.createBridgePort(comB);
+
                 portA.bridgePort = portB.port;
                 portB.bridgePort = portA.port;
+
                 return new PortPair { PortA = portA, PortB = portB };
             }
             catch (Exception e)
@@ -77,6 +79,7 @@ namespace nanoFramework.nanoCLR.VirtualCom
         public PortPair CreatePair(string pair)
         {
             var (comA, comB) = ParsePair(pair);
+
             return CreatePair(comA, comB);
         }
 
@@ -97,8 +100,11 @@ namespace nanoFramework.nanoCLR.VirtualCom
         public void DeletePair(string name)
         {
             PortPair pair = GetPairByName(name);
-            if(pair == null)
-                throw new ArgumentException($"Virtual Com Pair {name.ToUpper()} not found.");
+
+            if (pair == null)
+            {
+                throw new ArgumentException($"Virtual COM Pair {name.ToUpper()} not found.");
+            }
 
             DeletePair(pair);
         }
@@ -106,12 +112,16 @@ namespace nanoFramework.nanoCLR.VirtualCom
         public (int comA, int comB) ParsePair(string pair)
         {
             Match match = s_PairRegex.Match(pair);
+
             if (!match.Success)
+            {
                 throw new ArgumentException(
-                    $"Incorrect Virtual Com Pair name {pair.ToUpper()}. Correct example COM5:COM6");
+                    $"Incorrect Virtual COM Pair name {pair.ToUpper()}. Correct example COM5:COM6");
+            }
 
             var comA = int.Parse(match.Groups[1].Value);
             var comB = int.Parse(match.Groups[2].Value);
+
             return (comA, comB);
         }
 
@@ -133,10 +143,13 @@ namespace nanoFramework.nanoCLR.VirtualCom
         private void InstallLicense()
         {
             var assembly = typeof(VirtualComManager).GetTypeInfo().Assembly;
+
             Stream resource = assembly.GetManifestResourceStream(LicenseResourceName);
             MemoryStream memoryStream = new MemoryStream();
+
             resource.CopyTo(memoryStream);
             var bytes = memoryStream.ToArray();
+
             if (bytes.Length > 0)
             {
                 _serialPortLibrary.installLicenseInMemory(bytes);
