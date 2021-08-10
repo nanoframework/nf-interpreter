@@ -12,10 +12,10 @@ namespace nanoFramework.nanoCLR.CLI
 {
     public class RunCommandProcessor
     {
-        public static int ProcessVerb(RunCommandLineOptions opts, NanoClrHostBuilder hostBuilder,
+        public static int ProcessVerb(RunCommandLineOptions options, NanoClrHostBuilder hostBuilder,
             VirtualComManager virtualComManager)
         {
-            if (opts.DebugVirtualPortPair != null)
+            if (options.DebugVirtualPortPair != null)
             {
                 if (VirtualComCommandProcessor.CheckIfSupported(virtualComManager))
                 {
@@ -24,49 +24,50 @@ namespace nanoFramework.nanoCLR.CLI
 
                 var (comA, _) =
                     VirtualComCommandProcessor.CreateVirtualPortPairIfNotExists(virtualComManager,
-                        opts.DebugVirtualPortPair);
+                        options.DebugVirtualPortPair);
+
                 hostBuilder.WaitForDebugger = true;
                 hostBuilder.EnterDebuggerLoopAfterExit = true;
                 hostBuilder.UseSerialPortWireProtocol($"COM{comA}");
             }
 
-            if (opts.Assemblies.Any())
+            if (options.Assemblies.Any())
             {
-                hostBuilder.LoadAssemblies(opts.Assemblies);
+                hostBuilder.LoadAssemblies(options.Assemblies);
             }
 
-            if (opts.AssembliesSet != null)
+            if (options.AssembliesSet != null)
             {
-                hostBuilder.LoadAssembliesSet(opts.AssembliesSet);
+                hostBuilder.LoadAssembliesSet(options.AssembliesSet);
             }
 
-            if (opts.TryResolve)
+            if (options.TryResolve)
             {
                 hostBuilder.TryResolve();
             }
 
-            if (opts.DebugSerialPort != null || opts.DebugTcpIpPort != null || opts.DebugNamedPipe != null)
+            if (options.DebugSerialPort != null || options.DebugTcpIpPort != null || options.DebugNamedPipe != null)
             {
                 hostBuilder.WaitForDebugger = true;
                 hostBuilder.EnterDebuggerLoopAfterExit = true;
             }
 
-            if (opts.DebugSerialPort != null)
+            if (options.DebugSerialPort != null)
             {
-                hostBuilder.UseSerialPortWireProtocol(opts.DebugSerialPort);
+                hostBuilder.UseSerialPortWireProtocol(options.DebugSerialPort);
             }
 
-            if (opts.DebugTcpIpPort != null)
+            if (options.DebugTcpIpPort != null)
             {
-                hostBuilder.UseTcpIpPortWireProtocol(opts.DebugTcpIpPort.Value);
+                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpPort.Value);
             }
 
-            if (opts.DebugNamedPipe != null)
+            if (options.DebugNamedPipe != null)
             {
-                hostBuilder.UseNamedPipeWireProtocol(opts.DebugNamedPipe);
+                hostBuilder.UseNamedPipeWireProtocol(options.DebugNamedPipe);
             }
 
-            if (opts.TraceWire)
+            if (options.TraceWire)
             {
                 hostBuilder.UsePortTrace();
             }
