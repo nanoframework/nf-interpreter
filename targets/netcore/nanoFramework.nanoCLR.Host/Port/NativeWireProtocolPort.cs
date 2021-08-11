@@ -12,12 +12,12 @@ namespace nanoFramework.nanoCLR.Host.Port
     {
         public PortStatus Status { get; private set; }
 
-        public int BytesAvailable => Native.NanoClr_WireBytesAvailable();
+        public int BytesAvailable => Interop.nanoCLR.nanoCLR_WireBytesAvailable();
 
         public byte[] ReceiveData()
         {
             var bytes = new byte[BytesAvailable];
-            var received = Native.NanoClr_WireReceive(bytes, bytes.Length);
+            var received = Interop.nanoCLR.nanoCLR_WireReceive(bytes, bytes.Length);
             return bytes.Take(received).ToArray();
         }
 
@@ -25,21 +25,21 @@ namespace nanoFramework.nanoCLR.Host.Port
         {
             if (data.Length > 0)
             {
-                Native.NanoClr_WireTransmit(data, data.Length);
+                Interop.nanoCLR.nanoCLR_WireTransmit(data, data.Length);
             }
         }
 
-        public void Process() => Native.NanoClr_WireProcess();
+        public void Process() => Interop.nanoCLR.nanoCLR_WireProcess();
 
         public void Open()
         {
-            Native.NanoClr_WireOpen();
+            Interop.nanoCLR.nanoCLR_WireOpen();
             Status = PortStatus.Opened;
         }
 
         public void Close()
         {
-            Native.NanoClr_WireOpen();
+            Interop.nanoCLR.nanoCLR_WireOpen();
             Status = PortStatus.Closed;
         }
     }

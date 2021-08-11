@@ -10,17 +10,17 @@ using nanoFramework.nanoCLR.Host.Port;
 
 namespace nanoFramework.nanoCLR.Host
 {
-    public class NanoClrHost
+    public class nanoCLRHost
     {
         private bool _isRunning = false;
         private IChannel _wireProtocolChannel;
 
         internal List<Action> PreInitConfigureSteps { get; } = new();
         internal List<Action> ConfigureSteps { get; } = new();
-        internal NanoClrSettings NanoClrSettings { get; set; } = NanoClrSettings.Default;
+        internal nanoCLRSettings nanoCLRSettings { get; set; } = nanoCLRSettings.Default;
         internal IPort WireProtocolPort { get; set; }
 
-        internal NanoClrHost()
+        internal nanoCLRHost()
         {
         }
 
@@ -33,7 +33,7 @@ namespace nanoFramework.nanoCLR.Host
 
             _isRunning = true;
 
-            Native.NanoClr_SetConfigureCallback(ConfigureRuntime);
+            Interop.nanoCLR.nanoCLR_SetConfigureCallback(this.ConfigureRuntime);
 
             if (WireProtocolPort != null)
             {
@@ -41,7 +41,7 @@ namespace nanoFramework.nanoCLR.Host
             }
 
             PreInitConfigureRuntime();
-            Native.NanoClr_Run(NanoClrSettings);
+            Interop.nanoCLR.nanoCLR_Run(nanoCLRSettings);
 
             Cleanup();
         }
@@ -63,9 +63,9 @@ namespace nanoFramework.nanoCLR.Host
         private uint ConfigureRuntime()
         {
             ConfigureSteps.ForEach(s => s());
-            return Native.ClrOk;
+            return Interop.nanoCLR.ClrOk;
         }
 
-        public static NanoClrHostBuilder CreateBuilder() => new NanoClrHostBuilder { };
+        public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder { };
     }
 }
