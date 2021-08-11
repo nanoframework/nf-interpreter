@@ -34,6 +34,9 @@ namespace nanoFramework.nanoCLR.CLI
         [Option('r', "resolve", Required = false, HelpText = "Tries to resolve cross-assembly references")]
         public bool TryResolve { get; set; }
 
+        [Option("clrversion", Required = false, HelpText = "Get nanoCLR version running on the virtual device")]
+        public bool CLRVersion { get; set; }
+
         /// <summary>
         /// Allowed values:
         /// q[uiet]
