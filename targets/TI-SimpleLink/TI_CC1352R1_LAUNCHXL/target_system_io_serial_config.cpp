@@ -17,6 +17,6 @@ __attribute__((aligned(32)))
 uint8_t Uart1_TxBuffer[UART1_TX_SIZE];
 
 #if defined(__GNUC__)
-__attribute__((aligned (32)))
+__attribute__((aligned(32)))
 #endif
 uint8_t Uart1_RxBuffer[UART1_RX_SIZE];
