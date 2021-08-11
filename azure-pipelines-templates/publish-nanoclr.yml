@@ -39,20 +39,21 @@ steps:
 
   - task: PowerShell@2
     condition: or( eq(variables['ForceUpload'], true), and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], ''), contains(variables['Build.SourceBranchName'], 'release') ) ) )
-    displayName: Upload WIN32 nanoCLR to Cloudsmith
+    displayName: Upload nanoCLR to Cloudsmith
     inputs:
       targetType: 'inline'
       script: |
-
-          # update pip (until the build agent image is updated)
-          python -m pip install --upgrade pip
 
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli
 
           Write-Host "Uploading nanoFramework.nanoCLR.exe v$(PACKAGE_VERSION)"
 
-          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\WIN32_nanoCLR\nanoFramework.nanoCLR.exe --name WIN32_nanoCLR --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
+
+          Write-Host "Uploading nanoFramework.nanoCLR.dll v$(PACKAGE_VERSION)"
+
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\netcore_nanoCLR\nanoFramework.nanoCLR.dll --name netcore_nanoCLR --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: 'stop'
       failOnStderr: 'false'
