@@ -6,6 +6,7 @@
 #include "stdafx.h"
 
 #include <nanoCLR_Application.h>
+#include <target_common.h>
 #include <iostream>
 
 //
