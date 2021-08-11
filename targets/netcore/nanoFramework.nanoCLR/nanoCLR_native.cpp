@@ -81,6 +81,8 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
+    CLR_Debug::Printf("Running .NET nanoFramework nanoCLR v%s\r\n\r\n", VERSION_STRING);
+
     // initialize nanoHAL
     nanoHAL_Initialize();
 
