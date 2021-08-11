@@ -63,6 +63,13 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
+            if (options.CLRVersion)
+            {
+                Console.WriteLine($"nanoCLR version: {hostBuilder.GetCLRVersion()}");
+
+                return (int)ExitCode.OK;
+            }
+
             if (options.Assemblies.Any())
             {
                 hostBuilder.LoadAssemblies(options.Assemblies);

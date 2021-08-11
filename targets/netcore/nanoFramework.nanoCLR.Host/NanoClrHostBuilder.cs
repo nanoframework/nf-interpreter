@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using nanoFramework.nanoCLR.Host.Interop;
 using nanoFramework.nanoCLR.Host.Port;
@@ -75,6 +76,14 @@ namespace nanoFramework.nanoCLR.Host
         {
             _wireProtocolPort = port;
             return this;
+        }
+
+        public string GetCLRVersion()
+        {
+            byte[] data =  new byte[100];
+            int dataLength = Interop.nanoCLR.nanoCLR_GetVersion(data);
+
+            return Encoding.UTF8.GetString(data, 0, dataLength);
         }
 
         public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>

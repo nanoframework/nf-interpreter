@@ -136,3 +136,9 @@ void nanoCLR_WireOpen()
 void nanoCLR_WireClose()
 {
 }
+
+size_t nanoCLR_GetVersion(CLR_UINT8* data)
+{
+    std::memcpy(data, VERSION_STRING, sizeof(VERSION_STRING));
+    return sizeof(VERSION_STRING);
+}
