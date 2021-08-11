@@ -78,13 +78,8 @@ namespace nanoFramework.nanoCLR.Host
             return this;
         }
 
-        public string GetCLRVersion()
-        {
-            byte[] data =  new byte[100];
-            int dataLength = Interop.nanoCLR.nanoCLR_GetVersion(data);
-
-            return Encoding.UTF8.GetString(data, 0, dataLength);
-        }
+        public string GetCLRVersion() =>
+            Interop.nanoCLR.nanoCLR_GetVersion();
 
         public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>
             UseWireProtocolPort(new SerialPort(comPort));
