@@ -19,10 +19,14 @@ typedef struct
     UART2_Params UartParams;
     uint8_t UartNum;
 
+    Task_Handle WorkingTask;
+
     HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
+    HAL_RingBuffer<uint8_t> RxRingBuffer;
+    uint8_t *RxBuffer;
     uint16_t RxBytesToRead;
 
     bool IsLongRunning;
@@ -37,12 +41,7 @@ typedef struct
 extern NF_PAL_UART Uart1_PAL;
 #endif
 
-/////////////////////////////////////
-// UART Tx buffers                 //
-// these live in the target folder //
-/////////////////////////////////////
-extern uint8_t Uart1_TxBuffer[];
-
 #define UART_TX_BUFFER_SIZE(num) UART##num##_TX_SIZE
+#define UART_RX_BUFFER_SIZE(num) UART##num##_RX_SIZE
 
 #endif //_SYS_IO_SER_NATIVE_TARGET_H_
