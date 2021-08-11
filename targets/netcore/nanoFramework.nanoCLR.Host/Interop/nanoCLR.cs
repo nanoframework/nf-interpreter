@@ -68,6 +68,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal static extern void nanoCLR_WireProcess();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int nanoCLR_GetVersion(byte[] data);
+        [return: MarshalAs(UnmanagedType.LPStr)]
+        internal static extern string nanoCLR_GetVersion();
     }
 }
