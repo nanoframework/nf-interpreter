@@ -11,7 +11,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
     {
         internal const uint ClrOk = 0;
         internal const uint ClrErrorFail = 0xFF000000;
-        private const string NativeLibraryName = "nanoFramework.nanoCLR.Native";
+        private const string NativeLibraryName = "nanoFramework.nanoCLR";
 
         internal delegate uint ConfigureDelegate();
 

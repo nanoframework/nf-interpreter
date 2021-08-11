@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanoFramework.nanoCLR.Native", "nanoFramework.nanoCLR.Native\nanoFramework.nanoCLR.Native.vcxproj", "{06700522-0275-4149-AC58-93445ADD1D32}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nanoFramework.nanoCLR", "nanoFramework.nanoCLR\nanoFramework.nanoCLR.vcxproj", "{06700522-0275-4149-AC58-93445ADD1D32}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", "{E91B7D05-94FA-4E24-8981-411E6A60092E}"
 EndProject
