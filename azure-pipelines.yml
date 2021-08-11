@@ -516,6 +516,14 @@ jobs:
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
+  - task: VSBuild@1
+    displayName: Build .NET Core target
+    inputs:
+      solution: 'targets\netcore\nanoCLR.sln'
+      platform: 'x86'
+      msbuildArgs: '/p:PublicRelease=true'
+      configuration: 'Release'
+
   - task: DotNetCoreCLI@2
     displayName: Pack nanoCLR CLI dotnet tool 
     inputs:
