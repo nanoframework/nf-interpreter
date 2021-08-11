@@ -72,7 +72,14 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
     return true; // alternatively, return false if you didn't initialize the releaseInfo structure.
 }
 
-void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following functions are exposed in the DLL and 
+// meant to be called by the C# host application.
+// Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
+// and the declarations @ nanoCLR_native.h
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
     // initialize nanoHAL
     nanoHAL_Initialize();
@@ -91,12 +98,12 @@ void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings)
 #endif
 }
 
-void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
+void nanoCLR_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
 {
     gDebugPrintCallback = debugPrintCallback;
 }
 
-size_t NanoClr_WireReceive(CLR_UINT8 *data, size_t size)
+size_t nanoCLR_WireReceive(CLR_UINT8 *data, size_t size)
 {
     const auto toRead = size > gWireTransmitBuffer.size() ? gWireTransmitBuffer.size() : size;
     std::memcpy(data, gWireTransmitBuffer.data(), toRead);
@@ -104,26 +111,26 @@ size_t NanoClr_WireReceive(CLR_UINT8 *data, size_t size)
     return toRead;
 }
 
-void NanoClr_WireTransmit(const CLR_UINT8 *data, size_t size)
+void nanoCLR_WireTransmit(const CLR_UINT8 *data, size_t size)
 {
     gWireReceiveBuffer.insert(gWireReceiveBuffer.end(), data, data + size);
 }
 
-size_t NanoClr_WireBytesAvailable()
+size_t nanoCLR_WireBytesAvailable()
 {
     return gWireTransmitBuffer.size();
 }
 
-void NanoClr_WireProcess()
+void nanoCLR_WireProcess()
 {
     WP_Message_Process();
 }
 
-void NanoClr_WireOpen()
+void nanoCLR_WireOpen()
 {
     WP_Message_PrepareReception();
 }
 
-void NanoClr_WireClose()
+void nanoCLR_WireClose()
 {
 }

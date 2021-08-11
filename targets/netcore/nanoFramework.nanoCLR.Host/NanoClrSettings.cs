@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 namespace nanoFramework.nanoCLR.Host
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct NanoClrSettings
+    internal struct nanoCLRSettings
     {
         public ushort MaxContextSwitches { get; set; }
 
@@ -16,7 +16,7 @@ namespace nanoFramework.nanoCLR.Host
 
         public bool EnterDebuggerLoopAfterExit { get; set; }
 
-        public static NanoClrSettings Default = new()
+        public static nanoCLRSettings Default = new()
         {
             MaxContextSwitches = 50,
             WaitForDebugger = false,

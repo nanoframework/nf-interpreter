@@ -16,9 +16,9 @@ using nanoFramework.nanoCLR.Host.Port.TcpIp;
 
 namespace nanoFramework.nanoCLR.Host
 {
-    public class NanoClrHostBuilder
+    public class nanoCLRHostBuilder
     {
-        private static NanoClrHost s_nanoClrHost = null;
+        private static nanoCLRHost s_nanoClrHost = null;
         private readonly List<Action> _configureSteps = new();
         private readonly List<Action> _preInitConfigureSteps = new();
         private IPort _wireProtocolPort;
@@ -27,82 +27,82 @@ namespace nanoFramework.nanoCLR.Host
         public bool WaitForDebugger { get; set; } = false;
         public bool EnterDebuggerLoopAfterExit { get; set; } = false;
 
-        public NanoClrHostBuilder LoadAssembly(string name, byte[] data)
+        public nanoCLRHostBuilder LoadAssembly(string name, byte[] data)
         {
-            _configureSteps.Add(() => Native.NanoClr_LoadAssembly(name, data, data.Length));
+            _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_LoadAssembly(name, data, data.Length));
             return this;
         }
 
-        public NanoClrHostBuilder LoadAssembly(string fileName)
+        public nanoCLRHostBuilder LoadAssembly(string fileName)
         {
             LoadAssembly(Path.GetFileName(fileName), File.ReadAllBytes(fileName));
             return this;
         }
 
-        public NanoClrHostBuilder LoadAssemblies(IEnumerable<string> fileNames)
+        public nanoCLRHostBuilder LoadAssemblies(IEnumerable<string> fileNames)
         {
             fileNames.ToList().ForEach(f => LoadAssembly(f));
             return this;
         }
 
-        public NanoClrHostBuilder LoadAssembliesSet(byte[] data)
+        public nanoCLRHostBuilder LoadAssembliesSet(byte[] data)
         {
-            _configureSteps.Add(() => Native.NanoClr_LoadAssembliesSet(data, data.Length));
+            _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_LoadAssembliesSet(data, data.Length));
             return this;
         }
 
-        public NanoClrHostBuilder LoadAssembliesSet(string fileName)
+        public nanoCLRHostBuilder LoadAssembliesSet(string fileName)
         {
             LoadAssembliesSet(File.ReadAllBytes(fileName));
             return this;
         }
 
-        public NanoClrHostBuilder UseDebugPrintCallback(Action<string> debugPrint)
+        public nanoCLRHostBuilder UseDebugPrintCallback(Action<string> debugPrint)
         {
-            _preInitConfigureSteps.Add(() => Native.NanoClr_SetDebugPrintCallback((msg) => debugPrint(msg)));
+            _preInitConfigureSteps.Add(() => Interop.nanoCLR.nanoCLR_SetDebugPrintCallback((msg) => debugPrint(msg)));
             return this;
         }
 
-        public NanoClrHostBuilder UseConsoleDebugPrint() => UseDebugPrintCallback(Console.Write);
+        public nanoCLRHostBuilder UseConsoleDebugPrint() => UseDebugPrintCallback(Console.Write);
 
-        public NanoClrHostBuilder TryResolve()
+        public nanoCLRHostBuilder TryResolve()
         {
-            _preInitConfigureSteps.Add(() => Native.NanoClr_Resolve());
+            _preInitConfigureSteps.Add(() => Interop.nanoCLR.nanoCLR_Resolve());
             return this;
         }
 
-        public NanoClrHostBuilder UseWireProtocolPort(IPort port)
+        public nanoCLRHostBuilder UseWireProtocolPort(IPort port)
         {
             _wireProtocolPort = port;
             return this;
         }
 
-        public NanoClrHostBuilder UseSerialPortWireProtocol(string comPort) =>
+        public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>
             UseWireProtocolPort(new SerialPort(comPort));
 
-        public NanoClrHostBuilder UseTcpIpPortWireProtocol(int port) =>
+        public nanoCLRHostBuilder UseTcpIpPortWireProtocol(int port) =>
             UseWireProtocolPort(new TcpIpListeningPort(port));
 
-        public NanoClrHostBuilder UseNamedPipeWireProtocol(string name) =>
+        public nanoCLRHostBuilder UseNamedPipeWireProtocol(string name) =>
             UseWireProtocolPort(new NamedPipeServerPort(name));
 
-        public NanoClrHostBuilder UsePortTrace() =>
+        public nanoCLRHostBuilder UsePortTrace() =>
             UseWireProtocolPort(new TraceDataPort(_wireProtocolPort));
 
-        public NanoClrHost Build()
+        public nanoCLRHost Build()
         {
             if (s_nanoClrHost != null)
             {
-                throw new InvalidOperationException("Cannot build two NanoClr runtime hosts");
+                throw new InvalidOperationException("Cannot build two nanoCLR runtime hosts");
             }
 
-            s_nanoClrHost = new NanoClrHost();
+            s_nanoClrHost = new nanoCLRHost();
 
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;
             s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
             s_nanoClrHost.PreInitConfigureSteps.AddRange(_preInitConfigureSteps);
 
-            s_nanoClrHost.NanoClrSettings = new NanoClrSettings
+            s_nanoClrHost.nanoCLRSettings = new nanoCLRSettings
             {
                 MaxContextSwitches = (ushort) MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,

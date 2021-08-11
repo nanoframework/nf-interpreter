@@ -76,7 +76,7 @@ namespace nanoFramework.nanoCLR.CLI
                 VirtualDeviceManager virtualBridgeManager = new();
                 virtualBridgeManager.Initialize();
 
-                NanoClrHostBuilder hostBuilder = NanoClrHost.CreateBuilder();
+                nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
                 var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualDeviceCommandLineOptions>(args);

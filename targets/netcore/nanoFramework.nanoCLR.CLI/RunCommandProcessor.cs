@@ -16,7 +16,7 @@ namespace nanoFramework.nanoCLR.CLI
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
             RunCommandLineOptions options,
-            NanoClrHostBuilder hostBuilder,
+            nanoCLRHostBuilder hostBuilder,
             VirtualDeviceManager virtualBridgeManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);

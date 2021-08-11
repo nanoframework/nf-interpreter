@@ -566,22 +566,22 @@ static Settings s_ClrSettings;
 //--//
 
 #if defined(_WIN32)
-HRESULT NanoClr_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size)
+HRESULT nanoCLR_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size)
 {
     return s_ClrSettings.LoadAssembly(name, data, size);
 }
 
-HRESULT NanoClr_LoadAssembliesSet(const CLR_UINT8 *data, size_t size)
+HRESULT nanoCLR_LoadAssembliesSet(const CLR_UINT8 *data, size_t size)
 {
     return s_ClrSettings.LoadAssembliesSet(data, size);
 }
 
-HRESULT NanoClr_Resolve()
+HRESULT nanoCLR_Resolve()
 {
     return s_ClrSettings.Resolve();
 }
 
-void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback)
+void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback)
 {
     s_ClrSettings.m_configureRuntimeCallback = configureRuntimeCallback;
 }
