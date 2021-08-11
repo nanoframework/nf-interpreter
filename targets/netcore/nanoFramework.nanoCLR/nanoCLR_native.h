@@ -37,7 +37,7 @@ extern CLR_RT_Buffer gWireReceiveBuffer;
 extern CLR_RT_Buffer gWireTransmitBuffer;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// The following functions are exposed in the DLL and 
+// The following functions are exposed in the DLL and
 // meant to be called by the C# host application.
 // Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
 // and the code @ nanoCLR_native.c
@@ -58,4 +58,4 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_WireTransmit(const CLR_UINT8 *data, si
 extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireBytesAvailable();
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProcess();
 
-extern "C" NANOCLRNATIVE_API char * nanoCLR_GetVersion();
+extern "C" NANOCLRNATIVE_API char *nanoCLR_GetVersion();
