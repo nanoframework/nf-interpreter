@@ -137,8 +137,9 @@ void nanoCLR_WireClose()
 {
 }
 
-size_t nanoCLR_GetVersion(CLR_UINT8* data)
+char* nanoCLR_GetVersion()
 {
-    std::memcpy(data, VERSION_STRING, sizeof(VERSION_STRING));
-    return sizeof(VERSION_STRING);
+    char *pszVersion = (char *)CoTaskMemAlloc(sizeof(VERSION_STRING));
+    std::memcpy(pszVersion, VERSION_STRING, sizeof(VERSION_STRING));
+    return pszVersion;
 }

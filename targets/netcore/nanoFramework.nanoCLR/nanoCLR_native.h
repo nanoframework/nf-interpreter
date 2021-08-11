@@ -58,4 +58,4 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_WireTransmit(const CLR_UINT8 *data, si
 extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireBytesAvailable();
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProcess();
 
-extern "C" NANOCLRNATIVE_API size_t nanoCLR_GetVersion(CLR_UINT8 * data);
+extern "C" NANOCLRNATIVE_API char * nanoCLR_GetVersion();
