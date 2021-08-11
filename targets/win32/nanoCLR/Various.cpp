@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "stdafx.h"
-
+#include <target_common.h>
 #include "platform_selector.h"
 #include <iostream>
 
