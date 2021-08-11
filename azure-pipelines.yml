@@ -529,6 +529,7 @@ jobs:
     inputs:
       command: pack
       verbosityPack: minimal
+      configuration: 'Release'
       packagesToPack: targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj
 
   - task: DotNetCoreCLI@2
