@@ -11,6 +11,7 @@
 #include <WireProtocol_MonitorCommands.h>
 #include "Debugger.h"
 #include <corlib_native.h>
+#include <target_common.h>
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
