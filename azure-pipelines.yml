@@ -505,8 +505,8 @@ jobs:
       command: restore
       verbosityRestore: minimal
       projects: targets\netcore\nanoCLR.sln
-      feedsToUse: config
-      nugetConfigPath: NuGet.Config
+      feedsToUse: select
+      includeNuGetOrg: true
 
   - task: VSBuild@1
     displayName: Build WIN32 target
