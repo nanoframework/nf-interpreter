@@ -21,6 +21,15 @@ NF_PAL_UART Uart1_PAL;
 // UART number 0, 1 (..) to the port index 1, 2, etc
 #define UART_NUM_TO_PORT_INDEX(uartNum) ((uartNum) + 1)
 
+// UART RX operation timeout
+#define UART_TX_TIMEOUT_MILLISECONDS 5000
+
+// Stack size in bytes
+#define SERIAL_TASKSTACKSIZE 1024
+// better declare the task stack statically to check allocation
+uint8_t SerialRxHandlerStack[SERIAL_TASKSTACKSIZE];
+Task_Struct SerialRxTaskStruct;
+
 NF_PAL_UART *GetPalUartFromUartNum(int uart_num)
 {
     NF_PAL_UART *palUart = NULL;
@@ -45,14 +54,23 @@ void UnitializePalUart(NF_PAL_UART *palUart)
 {
     if (palUart && palUart->UartDriver)
     {
+        // destroy task UART task
+        if (palUart->WorkingTask != NULL)
+        {
+            Task_destruct(&SerialRxTaskStruct);
+        }
+
         UART2_close(palUart->UartDriver);
 
-        // free buffers meory
+        // free buffers memory
         platform_free(palUart->TxBuffer);
+        platform_free(palUart->RxBuffer);
 
         // null all pointers
         palUart->TxBuffer = NULL;
+        palUart->RxBuffer = NULL;
         palUart->UartDriver = NULL;
+        palUart->WorkingTask = NULL;
         palUart->WatchChar = 0;
     }
 }
@@ -107,69 +125,72 @@ static void TxCallback(UART2_Handle handle, void *buf, size_t count, void *userA
     NATIVE_INTERRUPT_END
 }
 
-// This callback is invoked when a character is received but the application was not ready to receive it, the character
-// is passed as parameter.
-static void RxCallback(UART2_Handle handle, void *buf, size_t count, void *userArg, int_fast16_t status)
+void SerialRxTask(UArg a0, UArg a1)
 {
-    NATIVE_INTERRUPT_START
-
+    (void)a1;
     size_t bufferIndex = 0;
-    uint8_t *bufferCursor = (uint8_t *)buf;
+    uint8_t input;
+    size_t bytesRead;
     bool watchCharFound = false;
+    int_fast16_t status = 1;
 
-    NF_PAL_UART *palUart = (NF_PAL_UART *)userArg;
+    NF_PAL_UART *palUart = GetPalUartFromUartNum((int)a0);
 
-    if (status == UART2_STATUS_SUCCESS)
+    while (1)
     {
-        // store this into the UART Rx buffer
 
-        // // push char to ring buffer
-        // // don't care about the success of the operation, if it's full we are droping the char anyway
-        // palUart->RxRingBuffer.Push((uint8_t *)buf, count);
+        status = UART2_read(palUart->UartDriver, &input, 1, &bytesRead);
 
-        if (palUart->WatchChar != 0)
+        if (status == UART2_STATUS_SUCCESS)
         {
-            while (bufferIndex < count)
-            {
-                if (*bufferCursor == palUart->WatchChar)
-                {
-                    watchCharFound = true;
+            // store this into the UART Rx buffer
 
-                    break;
+            // push char to ring buffer
+            // don't care about the success of the operation, if it's full we are droping the char anyway
+            palUart->RxRingBuffer.Push((uint8_t)input);
+
+            if (palUart->WatchChar != 0)
+            {
+                while (bufferIndex < bytesRead)
+                {
+                    if (input == palUart->WatchChar)
+                    {
+                        watchCharFound = true;
+
+                        break;
+                    }
                 }
             }
-        }
 
-        // is there a read operation going on?
-        if (palUart->RxBytesToRead > 0)
-        {
-            // yes
-            // check if the requested bytes are available in the buffer...
-            //... or if the watch char was received
-            // if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead || watchCharFound)
+            // is there a read operation going on?
+            if (palUart->RxBytesToRead > 0)
             {
-                // reset Rx bytes to read count
-                palUart->RxBytesToRead = 0;
+                // yes
+                // check if the requested bytes are available in the buffer...
+                //... or if the watch char was received
+                if (palUart->RxRingBuffer.Length() >= palUart->RxBytesToRead || watchCharFound)
+                {
+                    // reset Rx bytes to read count
+                    palUart->RxBytesToRead = 0;
 
-                // fire event for Rx buffer complete
-                Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+                    // fire event for Rx buffer complete
+                    Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+                }
+            }
+            else
+            {
+                // no read operation ongoing, so fire an event
+
+                // post a managed event with the port index and event code (check if this is the watch char or just
+                // another another)
+                PostManagedEvent(
+                    EVENT_SERIAL,
+                    0,
+                    UART_NUM_TO_PORT_INDEX(palUart->UartNum),
+                    watchCharFound ? SerialData_WatchChar : SerialData_Chars);
             }
         }
-        else
-        {
-            // no read operation ongoing, so fire an event
-
-            // post a managed event with the port index and event code (check if this is the watch char or just another
-            // another)
-            PostManagedEvent(
-                EVENT_SERIAL,
-                0,
-                UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                watchCharFound ? SerialData_WatchChar : SerialData_Chars);
-        }
     }
-
-    NATIVE_INTERRUPT_END
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
@@ -193,7 +214,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     }
 
     // get length of Rx ring buffer
-    stack.SetResult_U4(UART2_getRxCount(palUart->UartDriver));
+    stack.SetResult_U4(palUart->RxRingBuffer.Length());
 
     NANOCLR_NOCLEANUP();
 }
@@ -247,18 +268,30 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         }
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-        // alloc buffer memory
-        palUart->TxBuffer = (uint8_t *)Uart1_TxBuffer;
+        // assign buffers, if not already done
+        if (palUart->TxBuffer == NULL && palUart->RxBuffer == NULL)
+        {
+            palUart->TxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
+            palUart->RxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
 
-        // init buffer
-        palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
+            // check allocation
+            if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // init buffers
+            palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
+            palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
+        }
 #else
 #error "UART1 NOT CONFIGURED. Check TI SYSCONFIG."
 #endif
 
         // all the rest
-        palUart->UartNum = uartNum;
         palUart->WatchChar = 0;
+        palUart->RxBytesToRead = 0;
+        palUart->TxOngoingCount = 0;
     }
     NANOCLR_NOCLEANUP();
 }
@@ -283,6 +316,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    // store UART index
+    palUart->UartNum = uartNum;
+
     // setup configuration
 
     // Check RS485 mode is not selected as currently not supported
@@ -296,15 +332,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
 
     // set R/W mode with callbacks
     palUart->UartParams.writeMode = UART2_Mode_CALLBACK;
-    palUart->UartParams.readMode = UART2_Mode_CALLBACK;
+    palUart->UartParams.readMode = UART2_Mode_BLOCKING;
 
     // store pointer to PAL UART
     palUart->UartParams.userArg = palUart;
 
-    palUart->UartParams.readCallback = RxCallback;
+    // palUart->UartParams.readCallback = RxCallback;
     palUart->UartParams.writeCallback = TxCallback;
 
-    palUart->UartParams.readReturnMode = UART2_ReadReturnMode_PARTIAL;
+    palUart->UartParams.readReturnMode = UART2_ReadReturnMode_FULL;
     palUart->UartParams.baudRate = (int)pThis[FIELD___baudRate].NumericByRef().s4;
 
     // UART2_DataLen goes from 5->0 to 8->3 bits.
@@ -337,17 +373,42 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     {
         // stop UART before changing configuration, just in case
         UART2_close(palUart->UartDriver);
+
+        // destroy task UART task, if it's running
+        if (palUart->WorkingTask != NULL)
+        {
+            Task_destruct(&SerialRxTaskStruct);
+
+            // null pointer
+            palUart->WorkingTask = NULL;
+        }
     }
 
     palUart->UartDriver = UART2_open(uartNum, &palUart->UartParams);
-
-    UART2_rxEnable(palUart->UartDriver);
 
     // check if UART was opened
     if (palUart->UartDriver == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
+
+    // OK to enable RX on UART now
+    UART2_rxEnable(palUart->UartDriver);
+
+    // create RX task
+    // this can be replaced with an RX handler when TI decides to add a decent RX event to their API
+    Task_Params taskParams;
+    Task_Params_init(&taskParams);
+    taskParams.stackSize = SERIAL_TASKSTACKSIZE;
+    taskParams.priority = 4;
+    taskParams.stack = &SerialRxHandlerStack;
+    taskParams.arg0 = (UArg)palUart->UartNum;
+
+    // construct task
+    Task_construct(&SerialRxTaskStruct, (Task_FuncPtr)SerialRxTask, &taskParams, NULL);
+
+    // store pointer to task
+    palUart->WorkingTask = Task_handle(&SerialRxTaskStruct);
 
     NANOCLR_NOCLEANUP();
 }
@@ -628,7 +689,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // figure out what's available in the Rx ring buffer
-    if (UART2_getRxCount(palUart->UartDriver) >= count)
+    if (palUart->RxRingBuffer.Length() >= count)
     {
         // read from Rx ring buffer
         bytesToRead = count;
@@ -680,14 +741,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
             if (!eventResult)
             {
                 // event timeout
-
-                bytesToRead = count;
-
-                if (count > UART2_getRxCount(palUart->UartDriver))
-                {
-                    // need to adjust because there aren't enough bytes available
-                    bytesToRead = UART2_getRxCount(palUart->UartDriver);
-                }
+                NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             }
         }
     }
@@ -695,7 +749,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     if (bytesToRead > 0)
     {
         // pop the requested bytes from the ring buffer
-        UART2_read(palUart->UartDriver, data, bytesToRead, &bytesRead);
+        bytesRead = palUart->RxRingBuffer.Pop(data, bytesToRead);
     }
 
     // pop timeout heap block from stack

@@ -12,3 +12,4 @@
 
 // buffers size
 #define UART1_TX_SIZE 256
+#define UART1_RX_SIZE 256
