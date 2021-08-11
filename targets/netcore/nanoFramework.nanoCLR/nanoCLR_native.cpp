@@ -73,7 +73,7 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// The following functions are exposed in the DLL and 
+// The following functions are exposed in the DLL and
 // meant to be called by the C# host application.
 // Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
 // and the declarations @ nanoCLR_native.h
@@ -137,7 +137,7 @@ void nanoCLR_WireClose()
 {
 }
 
-char* nanoCLR_GetVersion()
+char *nanoCLR_GetVersion()
 {
     char *pszVersion = (char *)CoTaskMemAlloc(sizeof(VERSION_STRING));
     std::memcpy(pszVersion, VERSION_STRING, sizeof(VERSION_STRING));
