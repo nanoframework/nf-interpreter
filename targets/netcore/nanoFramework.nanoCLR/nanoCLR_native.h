@@ -36,17 +36,24 @@ extern DebugPrintCallback gDebugPrintCallback;
 extern CLR_RT_Buffer gWireReceiveBuffer;
 extern CLR_RT_Buffer gWireTransmitBuffer;
 
-extern "C" NANOCLRNATIVE_API void NanoClr_Run(NANO_CLR_SETTINGS nanoClrSettings);
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_LoadAssembliesSet(const CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API HRESULT NanoClr_Resolve();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// The following functions are exposed in the DLL and 
+// meant to be called by the C# host application.
+// Keep their names in sync with the managed code declaration @ nanoFramework.nanoCLR.Host\Interop\Native.cs
+// and the code @ nanoCLR_native.c
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" NANOCLRNATIVE_API void NanoClr_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);
-extern "C" NANOCLRNATIVE_API void NanoClr_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback);
+extern "C" NANOCLRNATIVE_API void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings);
+extern "C" NANOCLRNATIVE_API HRESULT nanoCLR_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT nanoCLR_LoadAssembliesSet(const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API HRESULT nanoCLR_Resolve();
 
-extern "C" NANOCLRNATIVE_API void NanoClr_WireOpen();
-extern "C" NANOCLRNATIVE_API void NanoClr_WireClose();
-extern "C" NANOCLRNATIVE_API size_t NanoClr_WireReceive(CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API void NanoClr_WireTransmit(const CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API size_t NanoClr_WireBytesAvailable();
-extern "C" NANOCLRNATIVE_API void NanoClr_WireProcess();
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetConfigureCallback(ConfigureRuntimeCallback configureRuntimeCallback);
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback);
+
+extern "C" NANOCLRNATIVE_API void nanoCLR_WireOpen();
+extern "C" NANOCLRNATIVE_API void nanoCLR_WireClose();
+extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireReceive(CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API void nanoCLR_WireTransmit(const CLR_UINT8 *data, size_t size);
+extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireBytesAvailable();
+extern "C" NANOCLRNATIVE_API void nanoCLR_WireProcess();
