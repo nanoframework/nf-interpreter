@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System.Collections.Generic;
 using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI

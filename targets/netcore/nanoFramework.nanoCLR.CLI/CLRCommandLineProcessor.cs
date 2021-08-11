@@ -3,11 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Text.RegularExpressions;
 using nanoFramework.nanoCLR.Host;
+using System;
 
 namespace nanoFramework.nanoCLR.CLI
 {
