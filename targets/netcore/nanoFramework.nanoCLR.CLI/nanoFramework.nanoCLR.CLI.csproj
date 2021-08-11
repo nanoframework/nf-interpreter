@@ -10,6 +10,45 @@
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
   </PropertyGroup>
 
+  <!-- NuGet package stuff -->
+  <PropertyGroup>
+    <PackageId>nanoFramework.nanoCLR.CLI</PackageId>
+    <Authors>.NET nanoFramework project contributors</Authors>
+    <Product>.NET nanoFramework CLR CLI</Product>
+    <Copyright>Copyright (c) .NET Foundation and Contributors</Copyright>
+    <Company>.NET nanoFramework</Company>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/nanoframework/nf-interpreter</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/nanoframework/nf-interpreter</PackageProjectUrl>
+    <Description>.NET nanoFramework CLI that runs the nanoCLR as a virtual device.</Description>
+    <!-- disable NuGet warning for DLLs outside the lib folder and for SemVer 2 package reference -->
+    <NoWarn>$(NoWarn);NU5100;NU5105</NoWarn>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIcon>images\nf-logo.png</PackageIcon>
+    <PackageTags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, .net</PackageTags>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <!-- NuGet package files -->
+  <ItemGroup>
+    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.Host.dll">
+      <Pack>True</Pack>
+      <PackagePath>lib\net5.0</PackagePath>
+    </None>
+    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll">
+      <Pack>True</Pack>
+      <PackagePath>lib\net5.0</PackagePath>
+    </None>
+    <None Include="..\..\..\assets\nf-logo.png">
+      <Pack>True</Pack>
+      <PackagePath>images</PackagePath>
+    </None>
+    <None Include="..\..\..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <None Remove="License\vspt.vsptlic" />
     <EmbeddedResource Include="License\vspt.vsptlic" />
@@ -27,6 +66,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.231" PrivateAssets="All" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
 

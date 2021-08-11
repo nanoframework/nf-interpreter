@@ -493,13 +493,36 @@ jobs:
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
-  - task: VSBuild@1
+  - task: UseDotNet@2
+    displayName: Install .NET SDK
     inputs:
-      solution: 'targets\*\nanoCLR.sln'
+      packageType: sdk
+      version: 5.0.300
+
+  - task: DotNetCoreCLI@2
+    displayName: Restore NuGet packages
+    inputs:
+      command: restore
+      verbosityRestore: minimal
+      projects: targets\netcore\nanoCLR.sln
+      feedsToUse: config
+      nugetConfigPath: NuGet.Config
+
+  - task: VSBuild@1
+    displayName: Build WIN32 target
+    inputs:
+      solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
-      
+
+  - task: DotNetCoreCLI@2
+    displayName: Pack nanoCLR CLI dotnet tool 
+    inputs:
+      command: pack
+      verbosityPack: minimal
+      packagesToPack: targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj
+
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
