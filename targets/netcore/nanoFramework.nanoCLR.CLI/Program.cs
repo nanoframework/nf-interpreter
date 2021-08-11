@@ -99,6 +99,10 @@ namespace nanoFramework.nanoCLR.CLI
                                 opts,
                                 hostBuilder,
                                 virtualBridgeManager),
+                        (CLRCommandLineOptions opts) =>
+                            CLRCommandLineProcessor.ProcessVerb(
+                                opts,
+                                hostBuilder),
                         (VirtualDeviceCommandLineOptions opts) =>
                             VirtualDeviceCommandProcessor.ProcessVerb(
                                 opts,
