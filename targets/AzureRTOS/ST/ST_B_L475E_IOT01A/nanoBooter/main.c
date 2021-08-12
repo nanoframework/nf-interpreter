@@ -6,7 +6,6 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 
-#include <cmsis_utils.h>
 #include <tx_api.h>
 
 #include <serialcfg.h>
@@ -52,8 +51,6 @@ void tx_application_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
     uint16_t status;
-
-    systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
     
     // Starting EFL driver
     eflStart(&EFLD1, NULL);
