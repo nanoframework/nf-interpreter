@@ -47,6 +47,9 @@ void tx_application_define(void *first_unused_memory)
     (void)first_unused_memory;
     uint16_t status;
 
+    // Create a byte memory pool from which to allocate the thread stacks.
+    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
+
     // start watchdog
     Watchdog_Init();
 
@@ -57,9 +60,6 @@ void tx_application_define(void *first_unused_memory)
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
-
-    // Create a byte memory pool from which to allocate the thread stacks.
-    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
     // Create receiver thread
     status = tx_thread_create(
