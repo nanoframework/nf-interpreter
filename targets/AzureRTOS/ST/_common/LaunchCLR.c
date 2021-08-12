@@ -3,8 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <stm32l4xx_hal.h>
-
+#include <hal.h>
 #include <nanoCLR_Headers.h>
 #include <target_common.h>
 #include <vectors.h>
@@ -12,7 +11,6 @@
 
 void LaunchCLR(uint32_t address)
 {
-    (void)address;
     // function pointer to load nanoCLR ResetHandler address
     irq_vector_t JumpToNanoCLR;
 
@@ -23,7 +21,7 @@ void LaunchCLR(uint32_t address)
     JumpToNanoCLR = nanoCLRVectorTable->ResetHandler;
 
     // disable all interrupts 
-    // TODO
+    osalSysDisable();
 
     // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
     SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
@@ -87,7 +85,7 @@ bool CheckValidCLRImage(uint32_t address)
     opCodeAddress -= 1;
 
     uint32_t opCode = *((uint32_t*)opCodeAddress);
-    if((uint16_t)opCode == 0xF8DF)
+    if((uint16_t)opCode == 0xE002)
     {
         // check, there seems to be a valid CLR image
         return true;
