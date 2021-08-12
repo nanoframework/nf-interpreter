@@ -99,7 +99,9 @@
    enabled. If the application does not use preemption-threshold, it may be disabled to reduce
    code size and improve performance.  */
 
+/*
 #define TX_DISABLE_PREEMPTION_THRESHOLD
+*/
 
 /* Determine if global ThreadX variables should be cleared. If the compiler startup code clears 
    the .bss section prior to ThreadX running, the define can be used to eliminate unnecessary
@@ -141,8 +143,9 @@
 /* Determine if the internal ThreadX code is non-interruptable. This results in smaller code 
    size and less processing overhead, but increases the interrupt lockout time.  */
 
+/*
 #define TX_NOT_INTERRUPTABLE
-
+*/
 
 /* Determine if the trace event logging code should be enabled. This causes slight increases in 
    code size and overhead, but provides the ability to generate system trace information which 
