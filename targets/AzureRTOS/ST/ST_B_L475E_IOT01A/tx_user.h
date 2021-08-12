@@ -11,7 +11,6 @@
 #ifndef TX_USER_H
 #define TX_USER_H
 
-#define TX_ENABLE_FPU_SUPPORT
 #define TX_TIMER_TICKS_PER_SECOND 1000
 
 /* Define various build options for the ThreadX port.  The application should either make changes
