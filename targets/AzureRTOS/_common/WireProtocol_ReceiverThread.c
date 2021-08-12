@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <targetHAL.h>
 #include <WireProtocol_Message.h>
 
 __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
@@ -14,12 +15,12 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
     WP_Message_PrepareReception();
 
     // loop until thread receives a request to terminate
-    while (1) 
+    while (1)
     {
         WP_Message_Process();
 
         // pass control to the OS
-        tx_thread_relinquish();
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(100));
     }
 
     // this function never returns
