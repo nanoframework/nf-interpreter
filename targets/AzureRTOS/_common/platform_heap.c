@@ -15,14 +15,24 @@ void *platform_malloc(size_t size)
     uint8_t *pointer = TX_NULL;
 
     /* Allocate the stack for thread 0.  */
-    tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT);
+    if(tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT) != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 
     return pointer;
 }
 
 void platform_free(void *ptr)
 {
-    tx_byte_release(ptr);
+    if(tx_byte_release(ptr) != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 }
 
 void *platform_realloc(void *ptr, size_t size)
