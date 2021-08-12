@@ -3,8 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoCLR_Headers.h>
-
+#include <nanoHAL_v2.h>
 #include <tx_api.h>
 
 // the byte pool for memory allocation is defined in main()
@@ -14,25 +13,16 @@ void *platform_malloc(size_t size)
 {
     uint8_t *pointer = TX_NULL;
 
-    /* Allocate the stack for thread 0.  */
-    if(tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT) != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
+    uint32_t allocStatus = tx_byte_allocate(&byte_pool_0, (VOID **)&pointer, size, TX_NO_WAIT);
+    ASSERT(allocStatus == TX_SUCCESS);
 
     return pointer;
 }
 
 void platform_free(void *ptr)
 {
-    if(tx_byte_release(ptr) != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
+    uint32_t freeStatus = tx_byte_release(ptr);
+    ASSERT(freeStatus == TX_SUCCESS);
 }
 
 void *platform_realloc(void *ptr, size_t size)

@@ -52,6 +52,9 @@ void tx_application_define(void *first_unused_memory)
     (void)first_unused_memory;
     uint16_t status;
 
+    // Create a byte memory pool from which to allocate the thread stacks.
+    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
+
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
 
@@ -70,9 +73,6 @@ void tx_application_define(void *first_unused_memory)
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it here to have access to network configuration blocks
     ConfigurationManager_Initialize();
-
-    // Create a byte memory pool from which to allocate the thread stacks.
-    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
     // Create blink thread
     status = tx_thread_create(
