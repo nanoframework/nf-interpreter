@@ -148,7 +148,6 @@
 #define TX_NOT_INTERRUPTABLE
 */
 
-
 /* Determine if the trace event logging code should be enabled. This causes slight increases in 
    code size and overhead, but provides the ability to generate system trace information which 
    is available for viewing in TraceX.  */
