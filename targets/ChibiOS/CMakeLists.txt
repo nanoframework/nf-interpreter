@@ -345,10 +345,15 @@ else()
         endif()
 
     else()
+
         # try to find board in the Community targets folder
         if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # set flag for this being a community board
             set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+
+            set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from Community Targets" CACHE INTERNAL "Location of board definition files")
+            set(CHIBIOS_BOARD_DEFINITIONS_PATH ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+
         else()
             # board NOT found in official distribution
             # quit now as there is no were else to search for these

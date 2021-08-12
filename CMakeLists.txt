@@ -51,6 +51,12 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 ######################################################
 
 #######################
+# check for TARGET_BOARD definition
+if(NOT TARGET_BOARD OR TARGET_BOARD STREQUAL "")
+    message(FATAL_ERROR "Missing build option 'TARGET_BOARD'.")
+endif()
+
+#######################
 # handle RTOSes choice
 
 if(${RTOS} STREQUAL "")
@@ -771,7 +777,6 @@ if(RTOS_CHIBIOS_CHECK)
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
-        message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
         # add TARGET board directory
         add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
@@ -782,7 +787,6 @@ if(RTOS_CHIBIOS_CHECK)
         if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-            message(STATUS "${CHIBIOS_BOARD_DEFINITIONS_LOCATION}")
 
             # add TARGET board directory from Community
             add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
