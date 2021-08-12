@@ -9,6 +9,7 @@
 #include <cmsis_utils.h>
 #include <tx_api.h>
 
+#include <serialcfg.h>
 #include <LaunchCLR.h>
 #include <targetHAL.h>
 #include <nanoPAL_BlockStorage.h>
@@ -59,6 +60,9 @@ void tx_application_define(void *first_unused_memory)
 
     // Starting EFL driver
     eflStart(&EFLD1, NULL);
+
+    // starts the serial driver
+    sdStart(&SERIAL_DRIVER, NULL);
 
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
