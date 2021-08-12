@@ -26,9 +26,6 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
     # - use LL drivers
     target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DUSE_FULL_LL_DRIVER )
 
-    # set Azure RTOS ticks
-    target_compile_definitions(${TARGET} PUBLIC -DTX_TIMER_TICKS_PER_SECOND=10000) 
-
 endfunction()
 
 
