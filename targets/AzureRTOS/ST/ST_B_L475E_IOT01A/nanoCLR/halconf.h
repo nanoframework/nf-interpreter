@@ -66,7 +66,7 @@
  * @brief   Enables the EFlash subsystem.
  */
 #if !defined(HAL_USE_EFL) || defined(__DOXYGEN__)
-#define HAL_USE_EFL                         TRUE
+#define HAL_USE_EFL                         FALSE
 #endif
 
 /**

@@ -51,9 +51,6 @@ void tx_application_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
     uint16_t status;
-    
-    // Starting EFL driver
-    eflStart(&EFLD1, NULL);
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
