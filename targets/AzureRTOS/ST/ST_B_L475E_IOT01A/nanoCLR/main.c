@@ -55,9 +55,6 @@ void tx_application_define(void *first_unused_memory)
     crcStart(NULL);
 #endif
 
-    // Starting EFL driver
-    eflStart(&EFLD1, NULL);
-
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
 

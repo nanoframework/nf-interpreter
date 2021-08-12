@@ -6,7 +6,9 @@
 #ifndef _TARGET_STM32FLASH_DRIVER_H_
 #define _TARGET_STM32FLASH_DRIVER_H_
 
+#include <hal.h>
 #include <nanoPAL_BlockStorage.h>
+#include <hal_nf_community.h>
 
 #ifdef __cplusplus
 extern "C" {
