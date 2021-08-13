@@ -15,7 +15,7 @@ set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,-
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options coming from any extra args?
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -mfpu=fpv4-sp-d16 -mfloat-abi=soft -Wa,-mimplicit-it=thumb -Wall -Wextra -Werror -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fcheck-new )
+    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -mfpu=fpv4-sp-d16 -mfloat-abi=soft -Wa,-mimplicit-it=thumb -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fcheck-new )
 
     # this series has FPU 
     target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DTARGET=MAX78000 -DTARGET_REV=0x4131 -DFTHR_RevA ) 
