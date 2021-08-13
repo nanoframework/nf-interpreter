@@ -427,24 +427,24 @@ static THD_FUNCTION(lwip_thread, p)
 
         if (mask & FRAME_RECEIVED_ID)
         {
-            struct pbuf *p;
-            while (low_level_input(&thisif, &p))
+            struct pbuf *workBuffer;
+            while (low_level_input(&thisif, &workBuffer))
             {
-                if (p != NULL)
+                if (workBuffer != NULL)
                 {
-                    struct eth_hdr *ethhdr = p->payload;
+                    struct eth_hdr *ethhdr = workBuffer->payload;
                     switch (htons(ethhdr->type))
                     {
                         /* IP or ARP packet? */
                         case ETHTYPE_IP:
                         case ETHTYPE_ARP:
                             /* full packet send to tcpip_thread to process */
-                            if (thisif.input(p, &thisif) == ERR_OK)
+                            if (thisif.input(workBuffer, &thisif) == ERR_OK)
                                 break;
                             LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
                             /* Falls through */
                         default:
-                            pbuf_free(p);
+                            pbuf_free(workBuffer);
                     }
                 }
             }

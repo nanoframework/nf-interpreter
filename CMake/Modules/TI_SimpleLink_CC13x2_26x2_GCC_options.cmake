@@ -20,7 +20,7 @@ set(CMAKE_EXE_LINKER_FLAGS " -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sectio
 function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # include any extra options coming from any extra args?
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -gstrict-dwarf -nostdlib -Wall -Wextra -Werror -Wundef -w -static -ffunction-sections -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+    target_compile_options(${TARGET} PUBLIC  ${ARGN} -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs -gstrict-dwarf -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -w -static -ffunction-sections -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
   
     # this series has FPU 
     target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 

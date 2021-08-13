@@ -20,15 +20,15 @@ struct HAL_CALLBACK
     void *Argument;
 
   public:
-    void Initialize(HAL_CALLBACK_FPN EntryPoint, void *Argument)
+    void Initialize(HAL_CALLBACK_FPN entryPoint, void *arg)
     {
-        this->EntryPoint = EntryPoint;
-        this->Argument = Argument;
+        this->EntryPoint = entryPoint;
+        this->Argument = arg;
     }
 
-    void SetArgument(void *Argument)
+    void SetArgument(void *arg)
     {
-        this->Argument = Argument;
+        this->Argument = arg;
     }
 
     HAL_CALLBACK_FPN GetEntryPoint() const
@@ -42,12 +42,12 @@ struct HAL_CALLBACK
 
     void Execute() const
     {
-        HAL_CALLBACK_FPN EntryPoint = this->EntryPoint;
-        void *Argument = this->Argument;
+        HAL_CALLBACK_FPN entryPoint = this->EntryPoint;
+        void *arg = this->Argument;
 
-        if (EntryPoint)
+        if (entryPoint)
         {
-            EntryPoint(Argument);
+            EntryPoint(arg);
         }
     }
 };

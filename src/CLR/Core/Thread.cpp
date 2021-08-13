@@ -1181,18 +1181,18 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             // false and continue looking for a handler for the old exception
             m_nestedExceptionsPos--;
 
-            UnwindStack &us = m_nestedExceptions[m_nestedExceptionsPos - 1];
+            UnwindStack &otherUnwindStack = m_nestedExceptions[m_nestedExceptionsPos - 1];
 
             // Since there are no applicable handlers for this IP inside this filter block, and all finally's nested
             // below the filter have executed, we should pop off our pseudoframe and try to find another catch block.
 
             // Copy the arguments and locals back to the original stack frame.
-            ProcessException_FilterPseudoFrameCopyVars(us.m_handlerStack, iterStack);
+            ProcessException_FilterPseudoFrameCopyVars(otherUnwindStack.m_handlerStack, iterStack);
 
             // Set IP so we can resume looking for the next filter.
-            us.m_ip = us.m_currentBlockStart;
+            otherUnwindStack.m_ip = otherUnwindStack.m_currentBlockStart;
 
-            us.m_stack = NULL; // Prevent Pop from taking this handler off the stack.
+            otherUnwindStack.m_stack = NULL; // Prevent Pop from taking this handler off the stack.
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             // We don't want to send any breakpoints until after we set the IP appropriately
@@ -1209,11 +1209,11 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             }
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-            m_currentException.SetObjectReference(us.m_exception); // Drop current exception, use old one.
+            m_currentException.SetObjectReference(otherUnwindStack.m_exception); // Drop current exception, use old one.
 
             // Set the continue flag, and leave with S_OK to loop around and get Phase1 called again via
             // ProcessException
-            us.m_flags |= UnwindStack::c_ContinueExceptionHandler;
+            otherUnwindStack.m_flags |= UnwindStack::c_ContinueExceptionHandler;
 
             // We are not ready to execute IL yet so do NOT clear m_currentException flag.
             // There still remains hope for this thread so return S_OK so ProcessException can get called again via

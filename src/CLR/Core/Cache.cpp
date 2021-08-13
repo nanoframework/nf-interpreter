@@ -456,7 +456,7 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
 CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Node *ptr;
+    CLR_RT_HeapBlock_Node *node;
     CLR_RT_HeapBlock_Node *best = NULL;
     CLR_UINT32 bestSize = 0;
 
@@ -483,18 +483,18 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_
     }
     NANOCLR_FOREACH_NODE_END();
 
-    ptr = best;
+    node = best;
 
-    if (ptr)
+    if (node)
     {
         //
         // Did we select a block bigger than requested? Requeue the tail.
         //
         if (bestSize > blocks)
         {
-            CLR_RT_HeapBlock_Node *next = &ptr[blocks];
+            CLR_RT_HeapBlock_Node *next = &node[blocks];
 
-            ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(
+            node->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(
                 DATATYPE_CACHEDBLOCK,
                 (CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event),
                 blocks));
@@ -507,25 +507,25 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_
             Append_Node(next);
         }
 
-        ptr->Unlink();
+        node->Unlink();
 
-        ptr->ChangeDataType(dataType);
-        ptr->ChangeDataFlags(CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event);
+        node->ChangeDataType(dataType);
+        node->ChangeDataFlags(CLR_RT_HeapBlock::HB_Alive | CLR_RT_HeapBlock::HB_Event);
 
         if (flags & CLR_RT_HeapBlock::HB_InitializeToZero)
         {
-            ptr->InitializeToZero();
+            node->InitializeToZero();
         }
         else
         {
-            ptr->Debug_ClearBlock(0xAD);
+            node->Debug_ClearBlock(0xAD);
         }
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-        g_CLR_PRF_Profiler.TrackObjectCreation(ptr);
+        g_CLR_PRF_Profiler.TrackObjectCreation(node);
 #endif
 
-        return ptr;
+        return node;
     }
 
     return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
