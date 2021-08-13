@@ -23,8 +23,7 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
 
     # enable:
     # - FPU 
-    # - use LL drivers
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DUSE_FULL_LL_DRIVER )
+    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE)
 
 endfunction()
 
