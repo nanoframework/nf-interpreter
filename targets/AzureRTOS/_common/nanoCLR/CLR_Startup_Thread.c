@@ -10,8 +10,6 @@
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
-CLR_SETTINGS clrSettings;
-
 void AssertBlockStorage()
 {
     // if the target Device_BlockStorageConfig (and collections) and the linker file have an address mismatch
