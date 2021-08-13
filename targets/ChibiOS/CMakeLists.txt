@@ -351,8 +351,32 @@ else()
             # set flag for this being a community board
             set(CHIBIOS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
 
-            set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from Community Targets" CACHE INTERNAL "Location of board definition files")
-            set(CHIBIOS_BOARD_DEFINITIONS_PATH ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+
+            # check if the board definition files are available at the target folder
+            if( EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/board.c AND
+                EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/board.h)
+
+                # definition files found
+                set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from Community Targets" CACHE INTERNAL "Location of board definition files")
+                set(CHIBIOS_BOARD_DEFINITIONS_PATH ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+
+            else()
+
+                # board.c and board.h are NOT in the target folder, try to find them in the official distribution
+                if(EXISTS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+                    # board found
+                    # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
+                    set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
+                    set(CHIBIOS_BOARD_DEFINITIONS_PATH ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+
+                else()
+                    # board NOT found in official distribution
+                    # quit now as there is no were else to search for these
+                    message(FATAL_ERROR "\n\nSorry but couldn't find definition files for ${TARGET_BOARD} in the available list of ChibiOS supported boards...\n\n")
+
+                endif()
+
+            endif()
 
         else()
             # board NOT found in official distribution
