@@ -47,7 +47,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C();
 
-            osalSysDisable();
+            __disable_irq();
 
             /////////////////////////////////////////////////////////////////////////
             // stop the idependent watchdog, for series where the option is available

@@ -20,8 +20,8 @@ void LaunchCLR(uint32_t address)
     // load the jump address with the nanoCLR ResetHandler address
     JumpToNanoCLR = nanoCLRVectorTable->ResetHandler;
 
-    // disable all interrupts 
-    osalSysDisable();
+    // disable all interrupts
+    __disable_irq();
 
     // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
     SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
