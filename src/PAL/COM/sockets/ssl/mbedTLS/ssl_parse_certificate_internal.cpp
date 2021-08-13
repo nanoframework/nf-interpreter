@@ -46,6 +46,7 @@ bool ssl_parse_certificate_internal(
         size);
     if(ret < 0)
     {
+        mbedtls_x509_crt_free(&cacert);
         return false;
     }
  
@@ -66,6 +67,8 @@ bool ssl_parse_certificate_internal(
     SSL_GetCertDateTime_internal(
         &x509->ExpirationDate,
         &cacert.valid_to );
+    
+    mbedtls_x509_crt_free(&cacert);
 
     return true;
 }
