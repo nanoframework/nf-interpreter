@@ -10,6 +10,8 @@
 #include <nanoCLR_Application.h>
 #include <nanoPAL_BlockStorage.h>
 
+CLR_SETTINGS clrSettings;
+
 void AssertBlockStorage()
 {
     // if the target Device_BlockStorageConfig (and collections) and the linker file have an address mismatch
@@ -38,8 +40,6 @@ void AssertBlockStorage()
 
 __attribute__((noreturn)) void ClrStartupThread_entry(uint32_t parameter)
 {
-    CLR_SETTINGS *clrSettings = (CLR_SETTINGS *)parameter;
-
     // #if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
     //     // startup 1-Wire driver
     //     oneWireStart();
@@ -55,7 +55,7 @@ __attribute__((noreturn)) void ClrStartupThread_entry(uint32_t parameter)
 #endif
     ///////////////////////////////////////////
 
-    ClrStartup(*clrSettings);
+    ClrStartup(*(CLR_SETTINGS *)parameter);
 
     // this function never returns
     while (1)

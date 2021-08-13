@@ -82,7 +82,7 @@ void tx_application_define(void *first_unused_memory)
     }
 
     // CLR settings to launch CLR thread
-    (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+    memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
     clrSettings.MaxContextSwitches = 50;
     clrSettings.WaitForDebugger = false;
