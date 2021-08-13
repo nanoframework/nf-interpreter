@@ -37,6 +37,7 @@ bool ssl_parse_certificate_internal(void *certificate, size_t size, void *pwd, v
     ret = mbedtls_x509_crt_parse(&cacert, (const unsigned char *)certificate, size);
     if (ret < 0)
     {
+        mbedtls_x509_crt_free(&cacert);
         return false;
     }
 
@@ -47,6 +48,8 @@ bool ssl_parse_certificate_internal(void *certificate, size_t size, void *pwd, v
     SSL_GetCertDateTime_internal(&x509->EffectiveDate, &cacert.valid_from);
 
     SSL_GetCertDateTime_internal(&x509->ExpirationDate, &cacert.valid_to);
+
+    mbedtls_x509_crt_free(&cacert);
 
     return true;
 }
