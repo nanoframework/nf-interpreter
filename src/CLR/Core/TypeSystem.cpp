@@ -2120,7 +2120,7 @@ void CLR_RT_Assembly::Resolve_Link()
         {
             CLR_RT_MethodDef_CrossReference *md = &m_pCrossReference_MethodDef[src->methods_First];
 
-            int num = src->vMethods_Num + src->iMethods_Num + src->sMethods_Num;
+            num = src->vMethods_Num + src->iMethods_Num + src->sMethods_Num;
 
             for (; num; num--, md++)
             {
@@ -2913,7 +2913,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
         idx.Set(m_idx, i);
 
         // Check for wellKnownMethods
-        for (size_t i = 0; i < ARRAYSIZE(c_MethodIndexLookup); i++, mil++)
+        for (size_t m = 0; m < ARRAYSIZE(c_MethodIndexLookup); m++, mil++)
         {
             CLR_RT_TypeDef_Index &idxType = *mil->type;
             CLR_RT_MethodDef_Index &idxMethod = *mil->method;

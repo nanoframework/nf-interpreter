@@ -284,7 +284,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     CLR_RT_Assembly *assm = NULL;
     CLR_RT_HeapBlock *hbObj;
     CLR_RECORD_ASSEMBLY *header;
-    CLR_RT_Assembly_Index idx;
+    CLR_RT_Assembly_Index assemblyIndex;
     CLR_RT_HeapBlock hbTimeout;
 
     CLR_INT64 *timeoutTicks;
@@ -350,9 +350,9 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     }
 
     // get assembly index from the eval stack
-    idx.Set(stack.m_evalStack[1].NumericByRef().u4);
+    assemblyIndex.Set(stack.m_evalStack[1].NumericByRef().u4);
 
-    assm = g_CLR_RT_TypeSystem.m_assemblies[idx.Assembly() - 1];
+    assm = g_CLR_RT_TypeSystem.m_assemblies[assemblyIndex.Assembly() - 1];
 
     while (eventResult)
     {
@@ -384,7 +384,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.m_Assembly));
 
     hbObj = stack.TopValue().Dereference();
-    hbObj->SetReflection(idx);
+    hbObj->SetReflection(assemblyIndex);
 
     NANOCLR_CLEANUP();
 
