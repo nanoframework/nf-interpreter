@@ -245,7 +245,7 @@ msg_t osalThreadSuspendS(thread_reference_t *trp)
 msg_t osalThreadSuspendTimeoutS(thread_reference_t *trp, sysinterval_t timeout)
 {
     TX_TIMER timer;
-     msg_t msg;
+    msg_t msg;
 
     osalDbgCheck(trp != NULL);
 
