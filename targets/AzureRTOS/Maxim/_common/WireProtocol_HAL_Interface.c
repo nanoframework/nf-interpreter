@@ -41,7 +41,7 @@ void UART_TxCallback(mxc_uart_req_t *req, int error)
     }
 }
 
-uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
+void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // save for later comparison
     uint32_t requestedSize = *size;
@@ -58,7 +58,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
         NanoUART_InitRequest(&rxRequest);
 
         rxRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
-        rxRequest.rxData = ptr;
+        rxRequest.rxData = *ptr;
         rxRequest.rxLen = requestedSize;
         rxRequest.callback = UART_RxCallback;
 
@@ -80,23 +80,20 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
             goto abort_rx;
         }
 
-        ptr += receivedBytes;
+        *ptr += receivedBytes;
         *size -= receivedBytes;
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
-
-        // check if any bytes where read
-        return receivedBytes > 0;
     }
 
-    return true;
+    return;
 
 abort_rx:
     // abort any ongoing UART operation
     NanoUART_AbortAsync(MXC_UART_GET_UART(WIRE_PROTOCOL_UART));
 
     // done here
-    return false;
+    return;
 }
 
 uint8_t WP_TransmitMessage(WP_Message *message)
