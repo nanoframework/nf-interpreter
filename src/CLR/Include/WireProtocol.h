@@ -58,13 +58,13 @@ typedef enum WP_Flags
 // enum with machine states for Wire Procotol receiver
 typedef enum ReceiveState
 {
-    ReceiveState_Idle             = 1,
-    ReceiveState_Initialize       = 2,
-    ReceiveState_WaitingForHeader = 3,
-    ReceiveState_ReadingHeader    = 4,
-    ReceiveState_CompleteHeader   = 5,
-    ReceiveState_ReadingPayload   = 6,
-    ReceiveState_CompletePayload  = 7,
+    ReceiveState_Idle             = (uint8_t)1,
+    ReceiveState_Initialize       = (uint8_t)2,
+    ReceiveState_WaitingForHeader = (uint8_t)3,
+    ReceiveState_ReadingHeader    = (uint8_t)4,
+    ReceiveState_CompleteHeader   = (uint8_t)5,
+    ReceiveState_ReadingPayload   = (uint8_t)6,
+    ReceiveState_CompletePayload  = (uint8_t)7,
 }ReceiveState;
 
 // enum with CLR monitor commands
