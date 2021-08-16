@@ -194,6 +194,15 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(LINK_OPTIONS)
     #################################################################
 
+    #################################################################
+    # clear other options and definitions that we want to set
+    unset(COMPILE_OPTIONS)
+    unset(C_COMPILE_OPTIONS)
+    unset(CXX_COMPILE_OPTIONS)
+    unset(COMPILE_DEFINITIONS)
+    unset(LINK_OPTIONS)
+    #################################################################
+
 endif()
 
 #################################################################################
@@ -820,39 +829,64 @@ elseif(RTOS_FREERTOS_CHECK)
 # FreeRTOS ESP32
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
-    if(${TARGET_SERIES} STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD} variant: ${TARGET_VARIANT}")
+    # Define base path for the class libraries
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
 
-        if (NOT TARGET_VARIANT)
-            set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
-        endif()
+        
+    #     if (NOT TARGET_VARIANT)
+    #     set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
+    # endif()
 
-        # Only used by ESP32 at the moment
-        if(API_nanoFramework.Hardware.Esp32.Ble)
-            set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
-            message(STATUS "Support for BLE enabled")
-        else()
-            set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
-            message(STATUS "Support for BLE disabled")
-        endif()
+    # # Only used by ESP32 at the moment
+    # if(API_nanoFramework.Hardware.Esp32.Ble)
+    #     set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+    #     message(STATUS "Support for BLE enabled")
+    # else()
+    #     set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+    #     message(STATUS "Support for BLE disabled")
+    # endif()
 
-        # check watchdog feature
-        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
-        # becuase the build system can't honour that preference
-        if(NOT NF_FEATURE_WATCHDOG)
+    # check watchdog feature
+    # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
+    # because the build system can't honour that preference
+    if(NOT NF_FEATURE_WATCHDOG)
         message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
-        endif()
+    endif()
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
+
+        # set target base location
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
 
         # Define base path for the class libraries
         nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
 
-        add_subdirectory(targets/FreeRTOS_ESP32)
+    else()
 
-        # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
- 		add_subdirectory(targets/FreeRTOS_ESP32/${TARGET_BOARD})
+        # try to find board in the Community targets folder
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/FreeRTOS_ESP32/${TARGET_BOARD})
+
+            # set target base location
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/FreeRTOS_ESP32/${TARGET_BOARD})
+        
+            # board found
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
+            message(STATUS "${TARGET_BASE_LOCATION}")
+
+        else()
+        # board NOT found in targets folder
+            # board NOT found in targets folder
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+        endif()
 
     endif()
+    
+    # add common directory for SimpleLink
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32)
+    # add TARGET board directory
+    add_subdirectory(${TARGET_BASE_LOCATION})
 
 #######################
 # TI_SIMPLELINK

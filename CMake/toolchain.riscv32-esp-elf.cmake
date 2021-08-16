@@ -13,11 +13,11 @@ set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
 set(CMAKE_SYSTEM_NAME Generic)
 
 # name of the CPU CMake is building for
-set(CMAKE_SYSTEM_PROCESSOR xtensa-esp32)
+set(CMAKE_SYSTEM_PROCESSOR riscv32-esp)
 
 # macro to setup compilers
 macro(SET_COMPILER_VAR var name)
-   find_program(CMAKE_${var} xtensa-esp32-elf-${name} HINTS ${TOOLCHAIN_BIN_DIR} DOC "${name} tool")
+   find_program(CMAKE_${var} riscv32-esp-elf-${name} HINTS ${TOOLCHAIN_BIN_DIR} DOC "${name} tool")
 endmacro()
 
 # setup C compiler
@@ -38,10 +38,10 @@ if(NOT CMAKE_ASM_COMPILER)
 endif()
  
 # other toolchain configurations  
-set(CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-objcopy CACHE INTERNAL "objcopy tool")
-set(CMAKE_OBJDUMP ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-objdump CACHE INTERNAL "objdump tool")
-set(CMAKE_SIZE ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-size CACHE INTERNAL "size tool")
-set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gdb CACHE INTERNAL "debuger")
+set(CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/riscv32-esp-elf-objcopy CACHE INTERNAL "objcopy tool")
+set(CMAKE_OBJDUMP ${TOOLCHAIN_BIN_DIR}/riscv32-esp-elf-objdump CACHE INTERNAL "objdump tool")
+set(CMAKE_SIZE ${TOOLCHAIN_BIN_DIR}/riscv32-esp-elf-size CACHE INTERNAL "size tool")
+set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/riscv32-esp-elf-gdb CACHE INTERNAL "debuger")
 
 # set(GCC_ESP32_LINKER_FLAGS, " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static -Wl,--start-group -Wl,--print-memory-usage " CACHE INTERNAL "Gcc esp32 liker flags" )
 # set(GCC_ESP32_LINKER_LIBS, " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ${ESP32_IDF_PATH}/components/esp32/libhal.a -L${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lmesh -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy -lgcc -lstdc++ "  CACHE INTERNAL "Gcc esp32 liker libs")
@@ -74,7 +74,7 @@ set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gdb CACHE INTERNAL "debu
 # set( CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_CXX_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 
 # root paths to search on the filesystem for cross-compiling
-set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf ${EXTRA_FIND_PATH})
+set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_PREFIX}/riscv32-esp-elf ${EXTRA_FIND_PATH})
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
