@@ -11,7 +11,7 @@
 
 #include <serialcfg.h>
 
-uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
+void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     volatile uint32_t read;
 
@@ -23,7 +23,7 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
     if (*size)
     {
         // non blocking read from serial port with 20ms timeout
-        read = chnReadTimeout(&SERIAL_DRIVER, ptr, requestedSize, OSAL_MS2I(20));
+        read = chnReadTimeout(&SERIAL_DRIVER, *ptr, requestedSize, OSAL_MS2I(20));
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
@@ -33,11 +33,9 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
             return false;
         }
 
-        ptr += read;
+        *ptr += read;
         *size -= read;
     }
-
-    return true;
 }
 
 uint8_t WP_TransmitMessage(WP_Message *message)
