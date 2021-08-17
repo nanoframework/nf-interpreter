@@ -11,6 +11,7 @@
 #include <WireProtocol_MonitorCommands.h>
 #include "Debugger.h"
 #include <corlib_native.h>
+#include <target_common.h>
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
@@ -3283,39 +3284,58 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply *cmdReply;
+
     CLR_DBG_Commands::Debugging_Resolve_Assembly *cmd = (CLR_DBG_Commands::Debugging_Resolve_Assembly *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply cmdReply;
     CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_idx.Assembly());
 
-    if (assm)
-    {
-#if defined(_WIN32)
-        // append path
-        if (assm->m_strPath != NULL)
-        {
-            sprintf_s(
-                cmdReply.m_szName,
-                ARRAYSIZE(cmdReply.m_szName),
-                "%s,%s",
-                assm->m_szName,
-                assm->m_strPath->c_str());
-        }
-        else
+#ifdef TARGET_RAM_CONSTRAINED
+    // try allocating memory for reply struct
+    cmdReply = (CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply *)platform_malloc(
+        sizeof(CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply));
+#else
+    CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply reply;
+    cmdReply = &reply;
 #endif
+
+    // sanity check
+    if (cmdReply != NULL)
+    {
+        if (assm)
         {
-            hal_strncpy_s(
-                cmdReply.m_szName,
-                ARRAYSIZE(cmdReply.m_szName),
-                assm->m_szName,
-                MAXSTRLEN(cmdReply.m_szName));
+#if defined(_WIN32)
+            // append path
+            if (assm->m_strPath != NULL)
+            {
+                sprintf_s(
+                    cmdReply->m_szName,
+                    ARRAYSIZE(cmdReply->m_szName),
+                    "%s,%s",
+                    assm->m_szName,
+                    assm->m_strPath->c_str());
+            }
+            else
+#endif
+            {
+                hal_strncpy_s(
+                    cmdReply->m_szName,
+                    ARRAYSIZE(cmdReply->m_szName),
+                    assm->m_szName,
+                    MAXSTRLEN(cmdReply->m_szName));
+            }
+
+            cmdReply->m_flags = assm->m_flags;
+            cmdReply->m_version = assm->m_header->version;
+
+            WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply));
+
+#ifdef TARGET_RAM_CONSTRAINED
+            // free memory
+            platform_free(cmdReply);
+#endif
+
+            return true;
         }
-
-        cmdReply.m_flags = assm->m_flags;
-        cmdReply.m_version = assm->m_header->version;
-
-        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
-
-        return true;
     }
 
     WP_ReplyToCommand(msg, false, false, NULL, 0);
@@ -3327,20 +3347,39 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Type(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Resolve_Type *cmd = (CLR_DBG_Commands::Debugging_Resolve_Type *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_Type::Reply cmdReply;
     CLR_RT_TypeDef_Instance inst;
+    CLR_DBG_Commands::Debugging_Resolve_Type::Reply *cmdReply;
 
-    if (g_CLR_DBG_Debugger->CheckTypeDef(cmd->m_td, inst))
+    CLR_DBG_Commands::Debugging_Resolve_Type *cmd = (CLR_DBG_Commands::Debugging_Resolve_Type *)msg->m_payload;
+
+#ifdef TARGET_RAM_CONSTRAINED
+    // try allocating memory for reply struct
+    cmdReply = (CLR_DBG_Commands::Debugging_Resolve_Type::Reply *)platform_malloc(
+        sizeof(CLR_DBG_Commands::Debugging_Resolve_Type::Reply));
+#else
+    CLR_DBG_Commands::Debugging_Resolve_Type::Reply reply;
+    cmdReply = &reply;
+#endif
+
+    // sanity check
+    if (cmdReply != NULL)
     {
-        char *szBuffer = cmdReply.m_type;
-        size_t iBuffer = MAXSTRLEN(cmdReply.m_type);
-
-        if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer)))
+        if (g_CLR_DBG_Debugger->CheckTypeDef(cmd->m_td, inst))
         {
-            WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+            char *szBuffer = cmdReply->m_type;
+            size_t iBuffer = MAXSTRLEN(cmdReply->m_type);
 
-            return true;
+            if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer)))
+            {
+                WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Type::Reply));
+
+#ifdef TARGET_RAM_CONSTRAINED
+                // free memory
+                platform_free(cmdReply);
+#endif
+
+                return true;
+            }
         }
     }
 
@@ -3353,26 +3392,46 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Resolve_Field *cmd = (CLR_DBG_Commands::Debugging_Resolve_Field *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_Field::Reply cmdReply;
+    CLR_DBG_Commands::Debugging_Resolve_Field::Reply *cmdReply;
     CLR_RT_FieldDef_Instance inst;
 
-    if (g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
+    CLR_DBG_Commands::Debugging_Resolve_Field *cmd = (CLR_DBG_Commands::Debugging_Resolve_Field *)msg->m_payload;
+
+#ifdef TARGET_RAM_CONSTRAINED
+    // try allocating memory for reply struct
+    cmdReply = (CLR_DBG_Commands::Debugging_Resolve_Field::Reply *)platform_malloc(
+        sizeof(CLR_DBG_Commands::Debugging_Resolve_Field::Reply));
+#else
+    CLR_DBG_Commands::Debugging_Resolve_Field::Reply reply;
+    cmdReply = &reply;
+#endif
+
+    // sanity check
+    if (cmdReply != NULL)
     {
-        char *szBuffer = cmdReply.m_name;
-        size_t iBuffer = MAXSTRLEN(cmdReply.m_name);
 
-        if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildFieldName(inst, szBuffer, iBuffer)))
+        if (g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
         {
-            CLR_RT_TypeDef_Instance instClass;
-            instClass.InitializeFromField(inst);
+            char *szBuffer = cmdReply->m_name;
+            size_t iBuffer = MAXSTRLEN(cmdReply->m_name);
 
-            cmdReply.m_td = instClass;
-            cmdReply.m_index = inst.CrossReference().m_offset;
+            if (SUCCEEDED(g_CLR_RT_TypeSystem.BuildFieldName(inst, szBuffer, iBuffer)))
+            {
+                CLR_RT_TypeDef_Instance instClass;
+                instClass.InitializeFromField(inst);
 
-            WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+                cmdReply->m_td = instClass;
+                cmdReply->m_index = inst.CrossReference().m_offset;
 
-            return true;
+                WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Field::Reply));
+
+#ifdef TARGET_RAM_CONSTRAINED
+                // free memory
+                platform_free(cmdReply);
+#endif
+
+                return true;
+            }
         }
     }
 
@@ -3385,23 +3444,42 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Resolve_Method *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Resolve_Method::Reply cmdReply;
+    CLR_DBG_Commands::Debugging_Resolve_Method::Reply *cmdReply;
     CLR_RT_MethodDef_Instance inst;
     CLR_RT_TypeDef_Instance instOwner;
 
-    if (g_CLR_DBG_Debugger->CheckMethodDef(cmd->m_md, inst) && instOwner.InitializeFromMethod(inst))
+    CLR_DBG_Commands::Debugging_Resolve_Method *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
+
+#ifdef TARGET_RAM_CONSTRAINED
+    // try allocating memory for reply struct
+    cmdReply = (CLR_DBG_Commands::Debugging_Resolve_Method::Reply *)platform_malloc(
+        sizeof(CLR_DBG_Commands::Debugging_Resolve_Method::Reply));
+#else
+    CLR_DBG_Commands::Debugging_Resolve_Method::Reply reply;
+    cmdReply = &reply;
+#endif
+
+    // sanity check
+    if (cmdReply != NULL)
     {
-        char *szBuffer = cmdReply.m_method;
-        size_t iBuffer = MAXSTRLEN(cmdReply.m_method);
 
-        cmdReply.m_td = instOwner;
+        if (g_CLR_DBG_Debugger->CheckMethodDef(cmd->m_md, inst) && instOwner.InitializeFromMethod(inst))
+        {
+            char *szBuffer = cmdReply->m_method;
+            size_t iBuffer = MAXSTRLEN(cmdReply->m_method);
 
-        CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
+            cmdReply->m_td = instOwner;
 
-        WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
+            CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
 
-        return true;
+            WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Method::Reply));
+
+#ifdef TARGET_RAM_CONSTRAINED
+            // free memory
+            platform_free(cmdReply);
+#endif
+            return true;
+        }
     }
 
     WP_ReplyToCommand(msg, false, false, NULL, 0);

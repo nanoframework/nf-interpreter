@@ -33,12 +33,17 @@
 // set Wire Protocol packet size
 // valid sizes are 1024, 512, 256, 128
 // check Monitor_Ping_Source_Flags enum
-#define WP_PACKET_SIZE                  256U
+#define WP_PACKET_SIZE                  512U
 //////////////////////////////////////////////
 
 //////////////////////////////////////////////
 #define TARGETNAMESTRING "@TARGET_NAME@"
 #define PLATFORMNAMESTRING "STM32F0"
+//////////////////////////////////////////////
+
+//////////////////////////////////////////////
+// set define to signal build system that this target is RAM constrained
+#define TARGET_RAM_CONSTRAINED
 //////////////////////////////////////////////
 
 /////////////////////////////////////
