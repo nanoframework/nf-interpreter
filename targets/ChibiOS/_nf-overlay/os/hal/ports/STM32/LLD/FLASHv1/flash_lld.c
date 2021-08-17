@@ -117,6 +117,7 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
 
     __IO uint8_t *cursor = (__IO uint8_t *)startAddress;
     __IO uint8_t *endAddress = (__IO uint8_t *)(startAddress + length);
+    uint16_t data;
 
     // unlock the FLASH
     if (HAL_FLASH_Unlock())
@@ -124,42 +125,42 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
         // Clear pending flags (if any)
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 
+        // proceed to program the flash by setting the PG Bit
+        SET_BIT(FLASH->CR, FLASH_CR_PG);
+
         while (cursor < endAddress)
         {
-            // proceed to program the flash by setting the PG Bit
-            SET_BIT(FLASH->CR, FLASH_CR_PG);
-
             // if buffer has enough data, program half-words (16 bits) in a single operation to speed up things
             // NOTE: assuming that the supply voltage is able to cope with half-word programming
             if ((endAddress - cursor) >= 2)
             {
-                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
-                __DSB();
+                data = *((uint16_t *)buffer);
 
-                *(__IO uint16_t *)cursor = *((uint16_t *)buffer);
-
-                // update flash and buffer pointers by the 'extra' byte that was programmed
-                cursor += 2;
                 buffer += 2;
             }
             else
             {
-                // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
-                __DSB();
-
                 // program single byte
-                *(__IO uint8_t *)cursor = *buffer;
-                // update flash pointer by the 'extra' byte that was programmed
-                cursor += 2;
+                data = *((uint8_t *)buffer);
+                data = __builtin_bswap16(data);
+
+                data |= 0x0000FFFF;
+
+                // no need to increase buffer pointer
             }
+
+            *(__IO uint16_t *)cursor = data;
+
+            // Data synchronous Barrier, forcing the CPU to respect the sequence of instruction without optimization
+            __DSB();
+
+            // update flash pointer
+            cursor += 2;
 
             // wait for any flash operation to be completed
             // timeout set to 0 on purpose
             // watchdog will quick-in if execution gets stuck
             success = FLASH_WaitForLastOperation(0);
-
-            // after each program operation disable the PG Bit
-            CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
 
             if (!success)
             {
@@ -167,6 +168,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
                 break;
             }
         }
+
+        // after each program operation disable the PG Bit
+        CLEAR_BIT(FLASH->CR, FLASH_CR_PG);
 
         // lock the FLASH
         HAL_FLASH_Lock();
