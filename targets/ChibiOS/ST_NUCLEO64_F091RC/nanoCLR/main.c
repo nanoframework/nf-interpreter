@@ -29,7 +29,7 @@ __IO uint32_t vectorTable[48] __attribute__((section(".RAMVectorTable")));
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 512, "ReceiverThread");
 // declare CLRStartup thread here
-osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
+osThreadDef(CLRStartupThread, osPriorityNormal, 2048, "CLRStartupThread");
 
 //  Application entry point.
 int main(void)
