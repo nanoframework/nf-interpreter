@@ -149,7 +149,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
     # add header files with common OS definitions and board definitions 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${TARGET}.elf PUBLIC
@@ -183,7 +183,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         # add header files with common OS definitions and board definitions 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
 

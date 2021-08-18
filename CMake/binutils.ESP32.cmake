@@ -63,7 +63,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
 
     configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
                    ${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/ESP32_WROOM_32/target_os.h @ONLY)
