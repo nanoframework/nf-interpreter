@@ -847,14 +847,14 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/_nanoCLR)
+    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/_nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -863,10 +863,10 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
         
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
@@ -881,7 +881,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     endif()
     
     # add common directory for SimpleLink
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 

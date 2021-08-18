@@ -90,8 +90,8 @@
     * [ESP32_WROOM_32](targets/FreeRTOS_ESP32/ESP32_WROOM_32)
     * [NXP_MIMXRT1060_EVK](targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK)
   * TI SimpleLink 移植
-    * [TI CC1352R1_LAUNCHXL](targets/TI-SimpleLink/TI_CC1352R1_LAUNCHXL)
-    * [TI CC3220SF_LAUNCHXL](targets/TI-SimpleLink/TI_CC3220SF_LAUNCHXL)
+    * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)
+    * [TI CC3220SF_LAUNCHXL](targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL)
   * 其它系统移植
     * [Win32 OS (test project only at this time)](targets/os/win32)
   * [CMake 编译文件](CMake)
