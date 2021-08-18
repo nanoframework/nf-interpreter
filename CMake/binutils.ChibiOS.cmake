@@ -201,7 +201,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         # add header file for board definition
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
             
@@ -218,7 +218,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     if(${TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                    ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
 

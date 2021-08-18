@@ -26,6 +26,10 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
 
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
+
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
 

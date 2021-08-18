@@ -165,7 +165,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
 
         # add header files with common OS definitions and board definitions 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                    ${CMAKE_CURRENT_BINARY_DIR}/nanoBooter/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${TARGET}.elf PUBLIC
             
