@@ -7,7 +7,7 @@ ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"
-                "${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h" @ONLY)
+                "${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h" @ONLY)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
                 "${CMAKE_CURRENT_BINARY_DIR}/target_common.h" @ONLY)
  
