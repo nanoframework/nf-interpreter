@@ -443,7 +443,7 @@ if(NF_FEATURE_USE_SPIFFS)
 endif()
 
 # add target ChibiOS dirs
-add_subdirectory(_Include)
+add_subdirectory(_include)
 add_subdirectory(_common)
 add_subdirectory(_nanoBooter)
 add_subdirectory(_nanoCLR)

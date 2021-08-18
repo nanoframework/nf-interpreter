@@ -13,7 +13,7 @@ set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 # add target TI SimpleLink dirs
 add_subdirectory(_common)
-add_subdirectory(_Include)
+add_subdirectory(_include)
 add_subdirectory(_nanoCLR)
 
 ########################################
