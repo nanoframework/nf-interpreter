@@ -5,6 +5,7 @@
 
 # append include directory for target ChibiOS
 list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS})
 
 # make var global
 set(TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
@@ -13,7 +14,7 @@ set(TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS} CAC
 if(CHIBIOS_COMMUNITY_TARGET)
 
     configure_file(${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in
-                   ${CMAKE_BINARY_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/target_os.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/target_os.h @ONLY)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/swo.h.in
                    ${CMAKE_BINARY_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/swo.h @ONLY)
@@ -21,9 +22,9 @@ if(CHIBIOS_COMMUNITY_TARGET)
 else()
 
     configure_file(${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in
-                   ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/target_os.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/ChibiOS/target_os.h @ONLY)
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/swo.h.in
-                   ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/swo.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/swo.h @ONLY)
 
 endif()
