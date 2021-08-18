@@ -37,6 +37,10 @@ namespace nanoFramework.nanoCLR.CLI
         [Option("clrversion", Required = false, HelpText = "Get nanoCLR version running on the virtual device")]
         public bool CLRVersion { get; set; }
 
+        [Option('m', "monitorparentpid", Required = false, HelpText = "Parent process id to monitor - exit if the parent exits")]
+        public int? MonitorParentPid { get; set; }
+
+
         /// <summary>
         /// Allowed values:
         /// q[uiet]
