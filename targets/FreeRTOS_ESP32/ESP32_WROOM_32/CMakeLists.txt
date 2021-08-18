@@ -151,7 +151,7 @@ if(USE_NETWORKING_OPTION)
         ${TARGET_ESP32_IDF_INCLUDES}
     )
 
-    target_compile_definitions(NetworkLib PUBLIC "-DPLATFORM_ESP32 " )
+    target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
     set (EXTRA_LIBS ${EXTRA_LIBS} NetworkLib)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
@@ -174,15 +174,15 @@ endif()
 )
 
 # set platform for NanoClr
-target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DPLATFORM_ESP32 " )
+target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DPLATFORM_ESP32)
 
 # set platform for NanoApiLib
 # ESP32 has FPU
-target_compile_definitions(NanoApiLib PUBLIC "-DPLATFORM_ESP32 -DUSE_FPU=TRUE ")
+target_compile_definitions(NanoApiLib PUBLIC -DPLATFORM_ESP32 -DUSE_FPU=TRUE)
 
 # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
 if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+    target_compile_definitions(${NANOCLR_PROJECT_NAME}.elf PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 endif()
 
 # set compiler definition for using Application Domains feature

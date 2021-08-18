@@ -20,7 +20,7 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
     target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # this series has FPU 
-    target_compile_definitions(${TARGET} PUBLIC -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
+    target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
 
 endfunction()
 

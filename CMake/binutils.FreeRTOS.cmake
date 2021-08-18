@@ -37,13 +37,9 @@ endfunction()
 
 function(NF_SET_COMPILER_DEFINITIONS TARGET)
 
-    # definition for platform 
-    # (always ARM here)
-    target_compile_definitions(${TARGET} PUBLIC "-DPLATFORM_ARM")
-
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-        target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
+        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     endif()
 
     # set compiler definition for RTM build option
