@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -104,9 +105,29 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.UsePortTrace();
             }
 
+            if (options.MonitorParentPid != null)
+            {
+                try
+                {
+                    Process parentProcess = Process.GetProcessById((int)options.MonitorParentPid);
+                    parentProcess.EnableRaisingEvents = true;
+                    parentProcess.Exited += ParentProcess_Exited;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to find parent process with pid: {options.MonitorParentPid} message: {ex.Message}");
+                }
+            }
+
             hostBuilder.Build().Run();
 
             return 0;
+        }
+
+        private static void ParentProcess_Exited(object sender, EventArgs e)
+        {
+            Console.WriteLine("Exiting due to parent process ending");
+            Environment.Exit(0);        // force exit of this process since the parent has exited/died
         }
     }
 }
