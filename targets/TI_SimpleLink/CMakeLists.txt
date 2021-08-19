@@ -4,9 +4,9 @@
 #
 
 include(FetchContent)
+include(binutils.common)
 include(binutils.arm-none-eabi)
 include(binutils.TI_SimpleLink)
-include(NF_Utils)
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

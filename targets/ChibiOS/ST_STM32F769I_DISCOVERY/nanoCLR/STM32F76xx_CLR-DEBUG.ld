@@ -14,7 +14,7 @@
  *
  * Notes:
  * BSS is placed in DTCM RAM in order to simplify DMA buffers management.
- * When updating the flash0 address below make sure to update the address in NF_GENERATE_BIN_PACKAGE 
+ * When updating the flash0 address below make sure to update the address in nf_generate_bin_package 
  */
 MEMORY
 {

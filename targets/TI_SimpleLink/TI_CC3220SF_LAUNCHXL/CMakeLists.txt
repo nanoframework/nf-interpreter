@@ -13,7 +13,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
-find_package(BuildUtils REQUIRED)
 find_package(TI_SimpleLink REQUIRED)
 find_package(WireProtocol REQUIRED)
 find_package(nanoHALCore REQUIRED)

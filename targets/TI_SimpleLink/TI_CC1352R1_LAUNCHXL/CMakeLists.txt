@@ -9,8 +9,8 @@ include(binutils.TI_SimpleLink)
 ENABLE_LANGUAGE(ASM)
 
 # add packages
-NF_ADD_COMMON_PACKAGES()
-NF_ADD_PLATFORM_PACKAGES()
+nf_add_common_packages()
+nf_add_platform_packages()
 
 #######################################
 
@@ -19,7 +19,7 @@ add_subdirectory("nanoCLR")
 
 #######################################
 
-NF_ADD_PLATFORM_SYSCONFIG_STEPS(CC1352 CC13X2)
+nf_add_platform_sysconfig_steps(CC1352 CC13X2)
 
 #######################
 # nanoCLR executable
@@ -31,14 +31,14 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/CC1352R1_LAUNCHXL_fxns.c
 )
 
-NF_ADD_PLATFORM_DEPENDENCIES(${NANOCLR_PROJECT_NAME})
+nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 
-NF_ADD_COMMON_SOURCES(${NANOCLR_PROJECT_NAME})
-NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
+nf_add_common_sources(${NANOCLR_PROJECT_NAME})
+nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
 # include directories for nanoCLR
-NF_ADD_COMMON_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
-NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
+nf_add_common_include_directories(${NANOCLR_PROJECT_NAME})
+nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
 # set compiler options
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)

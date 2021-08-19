@@ -3,37 +3,39 @@
 # See LICENSE file in the project root for full license information.
 #
 
-function(NF_ADD_HEX_BIN_DUMP_TARGETS TARGET)
+include(binutils.common)
+
+function(nf_add_hex_bin_dump_targets target)
     if(EXECUTABLE_OUTPUT_PATH)
-        set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
+        set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${target}")
     else()
-        set(FILENAME "${TARGET}")
+        set(FILENAME "${target}")
     endif()
 
 	#get_filename_component(FNSHORT ${FILENAME} NAME_WE)
 	string(REGEX REPLACE "\\.[^.]*$" "" FNSHORT ${FILENAME})
 
     # add targets for HEX, BIN and S19 formats with no output so they will always be built
-    add_custom_target(${TARGET}.hex DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FNSHORT}.hex)
-    add_custom_target(${TARGET}.s19 DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FNSHORT}.s19)
-    add_custom_target(${TARGET}.bin DEPENDS ${TARGET} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FNSHORT}.bin)
-    add_custom_target(${TARGET}.dump DEPENDS ${TARGET} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FNSHORT}.dump)
+    add_custom_target(${target}.hex DEPENDS ${target} COMMAND ${CMAKE_OBJCOPY} -Oihex ${FILENAME} ${FNSHORT}.hex)
+    add_custom_target(${target}.s19 DEPENDS ${target} COMMAND ${CMAKE_OBJCOPY} -Osrec ${FILENAME} ${FNSHORT}.s19)
+    add_custom_target(${target}.bin DEPENDS ${target} COMMAND ${CMAKE_OBJCOPY} -Obinary ${FILENAME} ${FNSHORT}.bin)
+    add_custom_target(${target}.dump DEPENDS ${target} COMMAND ${CMAKE_OBJDUMP} -d -EL -S ${FILENAME} ${FNSHORT}.dump)
 endfunction()
 
 
-function(NF_PRINT_SIZE_OF_TARGETS TARGET)
+function(nf_print_target_size target)
     if(EXECUTABLE_OUTPUT_PATH)
-      set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${TARGET}")
+      set(FILENAME "${EXECUTABLE_OUTPUT_PATH}/${target}")
     else()
-      set(FILENAME "${TARGET}")
+      set(FILENAME "${target}")
     endif()
-    add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_SIZE} -A -x ${FILENAME})
+    add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_SIZE} -A -x ${FILENAME})
 endfunction()
 
 
-function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
+function(nf_set_linker_file target linker_file_name)
 
     # set linker file name
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-T${LINKER_FILE_NAME}")
+    set_target_properties(${target} PROPERTIES LINK_FLAGS "-T${linker_file_name}")
 
 endfunction()

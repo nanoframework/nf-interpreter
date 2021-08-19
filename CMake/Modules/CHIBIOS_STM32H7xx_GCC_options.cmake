@@ -14,7 +14,7 @@ set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m7 -x assembler-with-cpp" CACHE INTER
 set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
 
 
-function(NF_SET_COMPILER_OPTIONS TARGET)
+function(nf_set_compiler_options TARGET)
 
     # include any extra options coming from any extra args?
     # STMF7 cores have SP and DP, the default is SP. DP can be set if developer realy needs that.
@@ -26,7 +26,7 @@ function(NF_SET_COMPILER_OPTIONS TARGET)
 endfunction()
 
 
-function(NF_SET_LINKER_OPTIONS TARGET)
+function(nf_set_linker_options TARGET)
 
     # request specs from newlib nano
     set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs ")

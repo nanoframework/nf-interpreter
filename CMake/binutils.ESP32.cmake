@@ -8,7 +8,7 @@ include(binutils.common)
 # Add packages that are common to ESP32 platform builds
 # To be called from target CMakeList.txt
 # optional TARGET argument with target name
-macro(NF_ADD_PLATFORM_PACKAGES)
+macro(nf_add_platform_packages)
 
     # parse arguments
     cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
@@ -33,9 +33,9 @@ endmacro()
 
 # Add ESP32 platform include directories to a specific CMake target
 # To be called from target CMakeList.txt
-macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
+macro(nf_add_platform_include_directories target)
 
-    target_include_directories(${TARGET}.elf PUBLIC
+    target_include_directories(${target}.elf PUBLIC
                 
         # target path (both source and binary)
         ${CMAKE_CURRENT_BINARY_DIR}
@@ -44,8 +44,8 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         ${CMAKE_CURRENT_SOURCE_DIR}/common
 
         # path for CMake target (both source and binary)
-        ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}
-        ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}
+        ${CMAKE_CURRENT_BINARY_DIR}/${target}
+        ${CMAKE_CURRENT_SOURCE_DIR}/${target}
 
         ${NF_CoreCLR_INCLUDE_DIRS}
         ${NF_NativeAssemblies_INCLUDE_DIRS}
@@ -54,7 +54,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         ${nanoHALCore_INCLUDE_DIRS}
     )
 
-    target_include_directories(${TARGET}.elf PUBLIC
+    target_include_directories(${target}.elf PUBLIC
 
         # directories for nanoFramework libraries
         ${NF_CoreCLR_INCLUDE_DIRS}
@@ -75,7 +75,7 @@ endmacro()
 
 # Add ESP32 platform target sources to a specific CMake target
 # To be called from target CMakeList.txt
-macro(NF_ADD_PLATFORM_SOURCES TARGET)
+macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions specific for each image
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
@@ -87,7 +87,7 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
     configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
 
-    target_sources(${TARGET}.elf PUBLIC
+    target_sources(${target}.elf PUBLIC
 
         ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
         ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c

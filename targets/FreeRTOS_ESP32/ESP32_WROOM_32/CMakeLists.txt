@@ -9,8 +9,8 @@ include(binutils.ESP32)
 ENABLE_LANGUAGE(ASM)
 
 # add packages
-NF_ADD_COMMON_PACKAGES()
-NF_ADD_PLATFORM_PACKAGES()
+nf_add_common_packages()
+nf_add_platform_packages()
 
 # RTC (real time clock) (default is OFF so RTC is NOT included)
 option(NF_FEATURE_RTC "option to use hardware RTC")
@@ -40,11 +40,11 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 )
 
-NF_ADD_PLATFORM_PACKAGES(TARGET ${NANOCLR_PROJECT_NAME})
-NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
+nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
+nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
 # include directories for nanoCLR
-NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
+nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
