@@ -171,6 +171,7 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                     ${CHIBIOS_LWIP_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 EXTRA_COMPILER_DEFINITIONS -DHAL_USE_MAC=TRUE)
 
             add_dependencies(${target}.elf nano::NF_Network)

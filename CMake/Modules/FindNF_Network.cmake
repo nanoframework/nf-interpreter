@@ -158,8 +158,7 @@ macro(nf_add_lib_network)
 
     # parse arguments
     cmake_parse_arguments(_ "" "" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILER_DEFINITIONS;EXTRA_COMPILER_OPTIONS" ${ARGN})
-    message("---${__EXTRA_INCLUDES}")
-    message("---${mbedTLS_INCLUDE_DIRS}")
+
     # add this has a library
     set(LIB_NAME NF_Network)
 
