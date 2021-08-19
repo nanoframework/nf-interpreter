@@ -40,6 +40,7 @@ add_executable(
     ${NANOCLR_PROJECT_NAME}.elf
 )
 
+NF_ADD_PLATFORM_PACKAGES(TARGET ${NANOCLR_PROJECT_NAME})
 NF_ADD_PLATFORM_SOURCES(${NANOCLR_PROJECT_NAME})
 
 # include directories for nanoCLR
@@ -48,10 +49,17 @@ NF_ADD_PLATFORM_INCLUDE_DIRECTORIES(${NANOCLR_PROJECT_NAME})
 # Build the networking components as a separate library
 # This is done this way to stop "Createprocess: file no found" errors in linker when object input file is greater than 32k
 if(USE_NETWORKING_OPTION)
-    add_library(NetworkLib STATIC ${NF_Networking_SOURCES}
-                                  ${TARGET_ESP32_NETWORK_SOURCES}
-                                  ${TARGET_LWIP_SOURCES}
-    )
+
+    nf_add_lib_network(
+        EXTRA_SOURCES
+            ${TARGET_ESP32_NETWORK_SOURCES}
+            ${TARGET_LWIP_SOURCES}
+        EXTRA_INCLUDES
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/Include
+            ${TARGET_ESP32_IDF_INCLUDES}
+        EXTRA_COMPILER_OPTIONS -mfix-esp32-psram-cache-issue)
+
 endif()
 
 # Add Library for all NanoFramework Api
@@ -61,7 +69,7 @@ add_library(NanoApiLib STATIC ${NF_NativeAssemblies_SOURCES} )
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--start-group ")
 
 if(USE_SECURITY_MBEDTLS_OPTION)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf nano::NF_Network)
 endif()
 
 add_dependencies(${NANOCLR_PROJECT_NAME}.elf NanoApiLib)
@@ -88,9 +96,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
             set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libm-psram-workaround.a " )
             add_compile_options("-mfix-esp32-psram-cache-issue")
             target_compile_options(NanoApiLib PUBLIC "-mfix-esp32-psram-cache-issue")
-            if(USE_NETWORKING_OPTION)
-                target_compile_options(NetworkLib PUBLIC "-mfix-esp32-psram-cache-issue")
-            endif()
+
         else()    
             message("Build including normal newlib (no psram work arounds)")
             set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a " )
@@ -131,7 +137,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
 endforeach( IDF_libraries )
 
 if(USE_NETWORKING_OPTION)
-    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNetworkLib " )
+    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network " )
 endif()
 
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNanoApiLib -Wl,--no-whole-archive " )
@@ -140,24 +146,14 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 
 # Set Includes & compile definition for Network library
 if(USE_NETWORKING_OPTION)
-    target_include_directories(NetworkLib PUBLIC
-        ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
-        ${CMAKE_CURRENT_SOURCE_DIR}/Include
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${NF_CoreCLR_INCLUDE_DIRS}
-        ${NF_Networking_INCLUDE_DIRS}
-        ${mbedTLS_INCLUDE_DIRS}
-        ${TARGET_ESP32_IDF_INCLUDES}
-    )
 
-    target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
-    set (EXTRA_LIBS ${EXTRA_LIBS} NetworkLib)
+    # target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
+    set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
 
     # Inhibit warnings so we can compile 3rd party code (Lwip)
-    set_target_properties(NetworkLib PROPERTIES COMPILE_FLAGS " -w " )
+    set_target_properties(NF_Network PROPERTIES COMPILE_FLAGS " -w " )
 endif()
 
  target_include_directories(NanoApiLib PUBLIC
@@ -221,7 +217,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 
 # add dependency for networking
 if(USE_NETWORKING_OPTION)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
+    add_dependencies(${NANOCLR_PROJECT_NAME}.elf nano::NF_Network)
 endif()
 
 # need to tweak this in case this path variable is empty

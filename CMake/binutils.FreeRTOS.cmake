@@ -79,18 +79,39 @@ endfunction()
 
 # Add packages that are common to FreeRTOS platform builds
 # To be called from target CMakeList.txt
+# optional TARGET argument with target name
 macro(NF_ADD_PLATFORM_PACKAGES)
+
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
 
     find_package(FreeRTOS REQUIRED)
     find_package(CMSIS REQUIRED)
-
-    # nF feature: networking
-    if(USE_NETWORKING_OPTION)
-        find_package(LWIP REQUIRED)
-    endif()
-
+    
     if(USE_FILESYSTEM_OPTION)
         find_package(FATFS REQUIRED)
+    endif()
+
+    # packages specific for nanoBooter
+    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+        # no packages for booter
+    endif()
+
+    # packages specific for nanoCRL
+    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        if(USE_NETWORKING_OPTION)
+
+            find_package(NF_Network REQUIRED)
+            find_package(LWIP REQUIRED)
+
+            # security provider is mbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                find_package(mbedTLS REQUIRED)
+            endif()
+
+        endif()
+
     endif()
 
 endmacro()
@@ -98,6 +119,27 @@ endmacro()
 # Add FreeRTOS platform dependencies to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # dependencies specific to nanoCRL
+    if("${TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        if(USE_NETWORKING_OPTION)
+
+            nf_add_lib_network(
+                EXTRA_SOURCES 
+                    ${LWIP_SOURCES}
+                EXTRA_INCLUDES 
+                    ${FreeRTOS_INCLUDE_DIRS}
+                    ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+                    ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+                    ${LWIP_INCLUDE_DIRS}
+                    ${CMSIS_INCLUDE_DIRS})
+
+            add_dependencies(${TARGET}.elf nano::NF_Network)
+
+        endif()
+
+    endif()
 
 endmacro()
 
@@ -193,9 +235,13 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
             ${TARGET_NXP_NANOCLR_SOURCES}
 
             ${FATFS_SOURCES}
-            ${LWIP_SOURCES}
-
         )
+
+        if(USE_NETWORKING_OPTION)
+            target_link_libraries(${TARGET}.elf
+                nano::NF_Network
+            )
+        endif()
 
     endif()
 

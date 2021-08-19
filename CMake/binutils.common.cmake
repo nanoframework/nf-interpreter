@@ -35,16 +35,6 @@ macro(NF_ADD_COMMON_PACKAGES)
         find_package(NF_Diagnostics REQUIRED)
     endif()
 
-    # nF feature: networking
-    if(USE_NETWORKING_OPTION)
-        find_package(NF_Networking REQUIRED)
-    endif()
-
-    # security provider is mbedTLS
-    if(USE_SECURITY_MBEDTLS_OPTION)
-            find_package(mbedTLS REQUIRED)
-    endif()
-
 endmacro()
 
 # Add common include directories to a specific CMake target
@@ -79,10 +69,6 @@ macro(NF_ADD_COMMON_INCLUDE_DIRECTORIES TARGET)
             ${NF_CoreCLR_INCLUDE_DIRS}
             ${NF_Debugger_INCLUDE_DIRS}
             ${NF_Diagnostics_INCLUDE_DIRS}
-
-            ${NF_Networking_INCLUDE_DIRS}
-            ${mbedTLS_INCLUDE_DIRS}
-        
             ${Graphics_Includes}
         )
 
@@ -128,7 +114,7 @@ macro(NF_ADD_COMMON_SOURCES TARGET)
             ${NF_Debugger_SOURCES}
             ${NF_Diagnostics_SOURCES}
 
-            ${NF_Networking_SOURCES}
+            # ${NF_Network_SOURCES}
             ${mbedTLS_SOURCES}
 
             # sources for nanoFramework APIs

@@ -94,10 +94,15 @@ function(NF_SET_STM32_TARGET_SERIES)
 
 endfunction()
 
-# Add packages that are common to ChibiOS platform builds
+# Add platform packages specific to ChibiOS
 # To be called from target CMakeList.txt
+# optional TARGET argument with target name
 macro(NF_ADD_PLATFORM_PACKAGES)
 
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+   
+    # packages common to all targets
     find_package(ChibiOS REQUIRED)
     find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED)
     find_package(ChibiOSnfOverlay REQUIRED)
@@ -105,11 +110,6 @@ macro(NF_ADD_PLATFORM_PACKAGES)
     # ChibiOS contrib repo
     if(CHIBIOS_CONTRIB_REQUIRED)
         find_package(ChibiOS-Contrib REQUIRED)
-    endif()
-
-    # nF feature: networking
-    if(USE_NETWORKING_OPTION)
-        find_package(CHIBIOS_LWIP REQUIRED)
     endif()
 
     if(USE_FILESYSTEM_OPTION)
@@ -125,12 +125,59 @@ macro(NF_ADD_PLATFORM_PACKAGES)
     if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED)
     endif()
-     
+    
+    # packages specific for nanoBooter
+    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+        # no packages for booter
+    endif()
+
+    # packages specific for nanoCRL
+    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        if(USE_NETWORKING_OPTION)
+
+            find_package(NF_Network REQUIRED)
+            find_package(CHIBIOS_LWIP REQUIRED)
+
+            # security provider is mbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                find_package(mbedTLS REQUIRED)
+            endif()
+
+        endif()
+
+    endif()
+ 
 endmacro()
 
 # Add ChibiOS platform dependencies to a specific CMake target
 # To be called from target CMakeList.txt
 macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
+
+    # dependencies specific to nanoCRL
+    if("${TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        # nF feature: networking
+        if(USE_NETWORKING_OPTION)
+
+            nf_add_lib_network(
+                EXTRA_SOURCES 
+                    ${TARGET_LWIP_SOURCES}
+                    ${CHIBIOS_LWIP_SOURCES}
+                EXTRA_INCLUDES 
+                    ${CHIBIOS_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                    ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                EXTRA_COMPILER_DEFINITIONS -DHAL_USE_MAC=TRUE)
+
+            add_dependencies(${TARGET}.elf nano::NF_Network)
+
+        endif()
+
+    endif()
 
 endmacro()
 
@@ -172,7 +219,6 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         )
 
     endif()
-
 
 endmacro()
 
@@ -225,9 +271,14 @@ macro(NF_ADD_PLATFORM_SOURCES TARGET)
             ${TARGET_CHIBIOS_NANOCLR_SOURCES}
             ${CHIBIOS_CONTRIB_SOURCES}
             ${CHIBIOS_FATFS_SOURCES}
-            ${CHIBIOS_LWIP_SOURCES}
             ${SPIFFS_SOURCES}
         )
+
+        if(USE_NETWORKING_OPTION)
+            target_link_libraries(${TARGET}.elf
+                nano::NF_Network
+            )
+        endif()
 
     endif()
 

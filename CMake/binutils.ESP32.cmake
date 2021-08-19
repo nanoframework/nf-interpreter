@@ -7,8 +7,28 @@ include(binutils.common)
 
 # Add packages that are common to ESP32 platform builds
 # To be called from target CMakeList.txt
+# optional TARGET argument with target name
 macro(NF_ADD_PLATFORM_PACKAGES)
 
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+
+    # packages specific for nanoCRL
+    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        if(USE_NETWORKING_OPTION)
+
+            find_package(NF_Network REQUIRED)
+
+            # security provider is mbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                find_package(mbedTLS REQUIRED)
+            endif()
+
+        endif()
+
+    endif()
+    
 endmacro()
 
 # Add ESP32 platform include directories to a specific CMake target
@@ -41,8 +61,7 @@ macro(NF_ADD_PLATFORM_INCLUDE_DIRECTORIES TARGET)
         ${NF_Debugger_INCLUDE_DIRS}
         ${NF_Diagnostics_INCLUDE_DIRS}
         
-        ${NF_Networking_INCLUDE_DIRS}
-        ${mbedTLS_INCLUDE_DIRS}
+        ${NF_Network_INCLUDE_DIRS}
 
         ${Graphics_Includes}
 

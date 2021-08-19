@@ -24,6 +24,7 @@ if(RTOS_FREERTOS_ESP32_CHECK)
  
 else()
 
+    list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR})
     list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
 
 endif()
