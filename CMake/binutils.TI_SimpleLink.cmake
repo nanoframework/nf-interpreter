@@ -119,7 +119,9 @@ endmacro()
 # Add TI SimpleLink platform dependencies to a specific CMake target
 # To be called from target CMakeList.txt
 macro(nf_add_platform_dependencies target)
-      
+    
+    nf_add_common_dependencies(${target})
+
     # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)

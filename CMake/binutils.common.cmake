@@ -36,6 +36,29 @@ macro(nf_add_common_packages)
 
 endmacro()
 
+# Add common dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(nf_add_common_dependencies target)
+
+    # dependencies common to all targets
+    nf_add_lib_halcore(
+        TARGET ${target}
+    )
+
+    add_dependencies(${target}.elf NF_HALCore_${target})
+
+    # dependencies specific to nanoBooter
+    if("${target}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+
+    endif()
+    
+    # dependencies specific to nanoCRL
+    if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+    endif()
+
+endmacro()
+
 # Add common include directories to a specific CMake target
 # To be called from target CMakeList.txt
 macro(nf_add_common_include_directories target)

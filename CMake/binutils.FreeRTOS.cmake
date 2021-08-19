@@ -120,6 +120,8 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_platform_dependencies target)
 
+    nf_add_common_dependencies(${target})
+
     # dependencies specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
