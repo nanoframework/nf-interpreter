@@ -41,6 +41,7 @@ add_executable(
 )
 
 nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
+nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
 # include directories for nanoCLR

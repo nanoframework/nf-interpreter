@@ -31,6 +31,14 @@ macro(nf_add_platform_packages)
     
 endmacro()
 
+# Add ESP32  platform dependencies to a specific CMake target
+# To be called from target CMakeList.txt
+macro(nf_add_platform_dependencies target)
+
+    nf_add_common_dependencies(${target})
+
+endmacro()
+
 # Add ESP32 platform include directories to a specific CMake target
 # To be called from target CMakeList.txt
 macro(nf_add_platform_include_directories target)
@@ -105,10 +113,6 @@ macro(nf_add_platform_sources target)
         ${TARGET_ESP32_NANOCLR_SOURCES}
 
         ${Graphics_Sources}
-    )
-    
-    target_link_libraries(${target}.elf
-        nano::NF_HALCore_${target}
     )
 
     # mbed TLS requires a config file
