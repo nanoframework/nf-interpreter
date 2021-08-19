@@ -51,7 +51,6 @@ macro(nf_add_platform_include_directories target)
         ${NF_NativeAssemblies_INCLUDE_DIRS}
 
         ${WireProtocol_INCLUDE_DIRS}
-        ${nanoHALCore_INCLUDE_DIRS}
     )
 
     target_include_directories(${target}.elf PUBLIC
@@ -94,7 +93,6 @@ macro(nf_add_platform_sources target)
 
         ${COMMON_PROJECT_SOURCES}
         ${WireProtocol_SOURCES}
-        ${nanoHALCore_SOURCES}    
 
         ${NANOCLR_PROJECT_SOURCES}
 
@@ -107,6 +105,10 @@ macro(nf_add_platform_sources target)
         ${TARGET_ESP32_NANOCLR_SOURCES}
 
         ${Graphics_Sources}
+    )
+    
+    target_link_libraries(${target}.elf
+        nano::NF_HALCore_${target}
     )
 
     # mbed TLS requires a config file

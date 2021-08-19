@@ -27,7 +27,7 @@ macro(nf_add_common_packages)
     find_package(WireProtocol REQUIRED)
     find_package(NF_NativeAssemblies)
     find_package(NF_CoreCLR REQUIRED)
-    find_package(nanoHALCore REQUIRED)
+    find_package(NF_HALCore REQUIRED)
 
     if(NF_FEATURE_DEBUGGER)
         find_package(NF_Debugger REQUIRED)
@@ -56,7 +56,6 @@ macro(nf_add_common_include_directories target)
         ${NF_NativeAssemblies_INCLUDE_DIRS}
 
         ${WireProtocol_INCLUDE_DIRS}
-        ${nanoHALCore_INCLUDE_DIRS}
     )
 
     # includes specific to nanoCRL
@@ -86,7 +85,10 @@ macro(nf_add_common_sources target)
 
         ${COMMON_PROJECT_SOURCES}
         ${WireProtocol_SOURCES}
-        ${nanoHALCore_SOURCES}    
+    )
+
+    target_link_libraries(${target}.elf
+        NF_HALCore_${target}
     )
 
     # sources specific to nanoBooter
