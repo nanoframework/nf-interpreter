@@ -17,7 +17,7 @@
 #define TRACE_STATE   4
 #define TRACE_NODATA  8
 
-#if TRACE_MASK != 0
+#if defined(TRACE_MASK) && TRACE_MASK != 0
 #define TRACE0(f, msg)                                                                                                 \
     if ((f)&TRACE_MASK)                                                                                                \
     debug_printf(msg)
