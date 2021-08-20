@@ -44,6 +44,9 @@ macro(nf_set_linker_options)
         set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -flto -fuse-linker-plugin -Os ")
     endif()
 
+    # include libraries in build
+    nf_include_libraries_in_build(${__TARGET})
+
     # set extra linker flags
     set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${__EXTRA_LINK_FLAGS} ")
       

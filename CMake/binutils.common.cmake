@@ -370,3 +370,21 @@ macro(nf_set_link_map)
     set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map${__EXTRA_LINKMAP_PROPERTIES}")
 
 endmacro()
+
+# macro to include libraries in build
+# to be called from the various gcc_options modules
+# TARGET parameter with target building 
+macro(nf_include_libraries_in_build target)
+    
+    # find out which build target
+    string(FIND ${target} ${NANOBOOTER_PROJECT_NAME} BOOTER_INDEX)
+    string(FIND ${target} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
+    
+    if(${BOOTER_INDEX} EQUAL 0)
+        # no libs in nanoBooter
+    elseif(${CLR_INDEX} EQUAL 0)
+        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_CoreCLR -Wl,--no-whole-archive ")
+        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive ")
+    endif()
+
+endmacro()
