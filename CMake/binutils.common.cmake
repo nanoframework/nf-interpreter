@@ -87,14 +87,6 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_common_dependencies target)
 
-    # dependencies common to all targets
-    nf_add_lib_halcore(TARGET ${target})
-
-    add_dependencies(${target}.elf 
-        NF_HALCore_${target}
-        nano::NF_CoreCLR
-    )
-
     # dependencies specific to nanoBooter
     if("${target}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
 
@@ -155,11 +147,6 @@ macro(nf_add_common_sources target)
 
         ${COMMON_PROJECT_SOURCES}
         ${WireProtocol_SOURCES}
-    )
-
-    target_link_libraries(${target}.elf
-        NF_HALCore_${target}
-        nano::NF_CoreCLR
     )
 
     # sources specific to nanoBooter
