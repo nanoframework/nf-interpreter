@@ -76,8 +76,8 @@ else()
 endif()
 
 # set linker options
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf SET_LINKMAP)
+nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf SET_LINKMAP)
 
 # add other linker flags
 ###########################################################

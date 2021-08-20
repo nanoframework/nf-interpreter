@@ -185,7 +185,7 @@ else()
 endif()
 
 # set linker options
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf -Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/configPkg/linker.cmd)
+nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_LINK_FLAGS "-Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/configPkg/linker.cmd")
 
 # add other linker flags
 ###########################################################

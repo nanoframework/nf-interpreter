@@ -285,8 +285,7 @@ macro(nf_add_lib_coreclr)
     if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_halcore()")
     endif()
-    message("EXTRA_INCLUDES  ${__EXTRA_INCLUDES}")
-    message("CLR includes  ${NF_CoreCLR_INCLUDE_DIRS}")
+
     # add this has a library
     set(LIB_NAME NF_CoreCLR)
 
@@ -315,6 +314,7 @@ macro(nf_add_lib_coreclr)
     else() 
         nf_set_compile_options(${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+        nf_set_linker_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

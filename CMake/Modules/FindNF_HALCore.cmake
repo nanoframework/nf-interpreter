@@ -125,6 +125,7 @@ macro(nf_add_lib_halcore)
     else()  
         nf_set_compile_options(${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+        nf_set_linker_options(TARGET ${LIB_NAME})
     endif()
     
     # add alias

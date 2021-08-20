@@ -77,8 +77,8 @@ nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
-nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
+nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf SET_LINKMAP)
+nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf SET_LINKMAP)
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
