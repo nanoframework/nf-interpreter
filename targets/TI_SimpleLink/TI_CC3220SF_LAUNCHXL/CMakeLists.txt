@@ -168,8 +168,8 @@ target_include_directories(${NANOCLR_PROJECT_NAME}.elf PUBLIC
     ${TARGET_NANO_APIS_INCLUDES}
 )
 
-# set compiler options
-nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
+# set compile options
+nf_set_compile_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compile definitions
 ###############################################

@@ -58,9 +58,9 @@ nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 nf_add_common_include_directories(${NANOCLR_PROJECT_NAME})
 nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
-# set compiler options
-nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
-nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
+# set compile options
+nf_set_compile_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
+nf_set_compile_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 target_compile_definitions(NF_Network PUBLIC -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 
 # set linker files

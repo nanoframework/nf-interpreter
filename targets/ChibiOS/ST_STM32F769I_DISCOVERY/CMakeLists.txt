@@ -60,9 +60,9 @@ nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 nf_add_common_include_directories(${NANOCLR_PROJECT_NAME})
 nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
-# set compiler options
-nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
+# set compile options
+nf_set_compile_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compile_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compile definitions
 nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)

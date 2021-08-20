@@ -14,7 +14,7 @@ set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m0 -mfloat-abi=soft -mabi=aapcs -x as
 set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -mthumb -mcpu=cortex-m0 -mfloat-abi=soft -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
 
 
-function(nf_set_compiler_options TARGET)
+function(nf_set_compile_options TARGET)
 
     # include any extra options coming from any extra args?
     target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m0 -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )

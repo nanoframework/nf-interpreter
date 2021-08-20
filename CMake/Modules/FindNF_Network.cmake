@@ -154,11 +154,11 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Network DEFAULT_MSG NF_Network_INCLUDE_DIRS
 # optional EXTRA_SOURCES with source files to be added to the library
 # optional EXTRA_INCLUDES with include paths to be added to the library
 # optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
-# optional EXTRA_COMPILER_OPTIONS with compiler options to be added to the library
+# optional EXTRA_COMPILE_OPTIONS with compile options to be added to the library
 macro(nf_add_lib_network)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET;EXTRA_COMPILE_DEFINITIONS" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILER_OPTIONS" ${ARGN})
+    cmake_parse_arguments(_ "" "TARGET;EXTRA_COMPILE_DEFINITIONS" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILE_OPTIONS" ${ARGN})
 
     if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_network()")
@@ -181,10 +181,10 @@ macro(nf_add_lib_network)
             ${mbedTLS_INCLUDE_DIRS}
             ${__EXTRA_INCLUDES})
 
-    nf_set_compiler_options(${LIB_NAME})
+    nf_set_compile_options(${LIB_NAME})
     nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
 
-    target_compile_options(${LIB_NAME} PUBLIC ${__EXTRA_COMPILER_OPTIONS})
+    target_compile_options(${LIB_NAME} PUBLIC ${__EXTRA_COMPILE_OPTIONS})
 
     # add alias
     add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})

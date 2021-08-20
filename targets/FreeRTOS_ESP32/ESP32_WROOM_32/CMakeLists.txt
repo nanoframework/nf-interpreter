@@ -61,7 +61,7 @@ if(USE_NETWORKING_OPTION)
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${TARGET_ESP32_IDF_INCLUDES}
-        EXTRA_COMPILER_OPTIONS -mfix-esp32-psram-cache-issue)
+        EXTRA_COMPILE_OPTIONS -mfix-esp32-psram-cache-issue)
 
 endif()
 
