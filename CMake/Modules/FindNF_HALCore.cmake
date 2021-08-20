@@ -58,9 +58,6 @@ foreach(SRC_FILE ${NF_HALCore_SRCS})
     
 endforeach()
 
-set_source_files_properties(${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_Capabilites.c PROPERTIES COMPILE_FLAGS "-fno-inline-functions -fno-inline-small-functions -fno-inline-functions-called-once")
-set_source_files_properties(${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_Boot.c PROPERTIES COMPILE_FLAGS "-fno-inline-functions -fno-inline-small-functions -fno-inline-functions-called-once")
-
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_HALCore DEFAULT_MSG NF_HALCore_INCLUDE_DIRS NF_HALCore_SOURCES)
@@ -91,24 +88,6 @@ macro(nf_add_lib_halcore)
         PUBLIC 
             ${NF_HALCore_INCLUDE_DIRS}
             ${__EXTRA_INCLUDES})
-    
-    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
-
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DI_AM_NANOBOOTER
-        )
-
-    endif()
-
-    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DI_AM_NANOCLR
-        )
-
-    endif()
 
     # TODO can be removed later
     if(RTOS_FREERTOS_ESP32_CHECK)
