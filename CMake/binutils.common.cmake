@@ -3,19 +3,66 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# set compiler definitions that are common to all builds/targets
-macro(nf_common_compiler_definitions target) 
+# set compile definitions that are common to all builds/targets
+# TARGET target name to set compiler definitions 
+# BUILD_TARGET target name building (either nanoBooter or nanoCLR)
+# if BUILD_TARGET is not provided, TARGET will be used
+macro(nf_common_compiler_definitions) 
+
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET;BUILD_TARGET" "" ${ARGN})
+
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+         message(FATAL_ERROR "Need to set TARGET argument when calling nf_common_compiler_definitions()")
+    endif()
+
+    if(NOT __BUILD_TARGET OR "${__BUILD_TARGET}" STREQUAL "")
+        set(__BUILD_TARGET ${__TARGET})
+    endif()
 
     # set define according to target
-    string(FIND ${target} ${NANOBOOTER_PROJECT_NAME} BOOTER_INDEX)
-    string(FIND ${target} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
+    string(FIND ${__BUILD_TARGET} ${NANOBOOTER_PROJECT_NAME} BOOTER_INDEX)
+    string(FIND ${__BUILD_TARGET} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
     
     if(${BOOTER_INDEX} EQUAL 0)
-        target_compile_definitions(${target} PUBLIC -DI_AM_NANOBOOTER)
+        target_compile_definitions(${__TARGET} PUBLIC -DI_AM_NANOBOOTER)
     elseif(${CLR_INDEX} EQUAL 0)
-        target_compile_definitions(${target} PUBLIC -DI_AM_NANOCLR)
+        target_compile_definitions(${__TARGET} PUBLIC -DI_AM_NANOCLR)
     else()
-        message(FATAL_ERROR "\n\n Target name is not any of the expected ones: '${NANOBOOTER_PROJECT_NAME}' or '${NANOCLR_PROJECT_NAME}'")
+        message(FATAL_ERROR "\n\n Build target name '${__BUILD_TARGET}' is not any of the expected ones: '${NANOBOOTER_PROJECT_NAME}' or '${NANOCLR_PROJECT_NAME}'")
+    endif()
+
+    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
+    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
+        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+    endif()
+
+    # set compiler definition for RTM build option
+    if(NF_BUILD_RTM)
+        target_compile_definitions(${__TARGET} PUBLIC -DBUILD_RTM)
+    endif()
+
+    # set compiler definition for using Application Domains feature
+    if(NF_FEATURE_USE_APPDOMAINS)
+        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
+    endif()
+
+    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
+    if(NF_WP_IMPLEMENTS_CRC32)
+        target_compile_definitions(${__TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
+    endif()
+
+    # set definition for Wire Protocol trace mask
+    target_compile_definitions(${__TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
+
+    # set compiler definition regarding inclusion of trace messages and checks on CLR
+    if(NF_PLATFORM_NO_CLR_TRACE)
+        target_compile_definitions(${__TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+    endif()
+
+    # set compiler definition regarding CLR IL inlining
+    if(NF_CLR_NO_IL_INLINE)
+        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
 endmacro()
@@ -41,11 +88,12 @@ endmacro()
 macro(nf_add_common_dependencies target)
 
     # dependencies common to all targets
-    nf_add_lib_halcore(
-        TARGET ${target}
-    )
+    nf_add_lib_halcore(TARGET ${target})
 
-    add_dependencies(${target}.elf NF_HALCore_${target})
+    add_dependencies(${target}.elf 
+        NF_HALCore_${target}
+        nano::NF_CoreCLR
+    )
 
     # dependencies specific to nanoBooter
     if("${target}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
@@ -87,7 +135,6 @@ macro(nf_add_common_include_directories target)
         target_include_directories(${target}.elf PUBLIC
 
             # directories for nanoFramework libraries
-            ${NF_CoreCLR_INCLUDE_DIRS}
             ${NF_Debugger_INCLUDE_DIRS}
             ${NF_Diagnostics_INCLUDE_DIRS}
             ${Graphics_Includes}
@@ -112,6 +159,7 @@ macro(nf_add_common_sources target)
 
     target_link_libraries(${target}.elf
         NF_HALCore_${target}
+        nano::NF_CoreCLR
     )
 
     # sources specific to nanoBooter
@@ -134,7 +182,6 @@ macro(nf_add_common_sources target)
             ${NANOCLR_PROJECT_SOURCES}
 
             # sources for nanoFramework libraries
-            ${NF_CoreCLR_SOURCES}
             ${NF_Debugger_SOURCES}
             ${NF_Diagnostics_SOURCES}
 

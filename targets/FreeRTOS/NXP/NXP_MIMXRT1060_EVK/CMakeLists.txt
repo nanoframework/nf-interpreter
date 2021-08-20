@@ -72,9 +72,9 @@ else()
     nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/MIMXRT10xx.ld)
 endif()
 
-# set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+# set compile definitions
+nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
 nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)

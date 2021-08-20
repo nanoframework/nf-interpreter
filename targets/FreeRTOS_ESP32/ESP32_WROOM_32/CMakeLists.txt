@@ -52,6 +52,8 @@ nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 if(USE_NETWORKING_OPTION)
 
     nf_add_lib_network(
+        TARGET
+            ${target}
         EXTRA_SOURCES
             ${TARGET_ESP32_NETWORK_SOURCES}
             ${TARGET_LWIP_SOURCES}

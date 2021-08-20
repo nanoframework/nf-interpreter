@@ -71,9 +71,9 @@ if(USE_SECURITY_MBEDTLS_OPTION)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
 endif()
 
-# set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DUSBH_DEBUG_MULTI_HOST=0)
+# set compile definitions
+nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS -DUSBH_DEBUG_MULTI_HOST=0)
+nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS -DUSBH_DEBUG_MULTI_HOST=0)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

@@ -67,13 +67,13 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_HALCore DEFAULT_MSG NF_HALCore_INCLUDE_DIRS
 
 
 # macro to be called from binutils to add network library
-# optional EXTRA_INCLUDES with include paths to be added to the library
-# optional EXTRA_COMPILER_DEFINITIONS with compiler definitions to be added to the library
 # TARGET parameter to set the target it's building
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 macro(nf_add_lib_halcore)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "EXTRA_INCLUDES;EXTRA_COMPILER_DEFINITIONS" ${ARGN})
+    cmake_parse_arguments(_ "" "TARGET" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
 
     if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_halcore()")
@@ -110,27 +110,9 @@ macro(nf_add_lib_halcore)
 
     endif()
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
-
-        # this is the only one different
-        target_compile_definitions(
-                ${LIB_NAME} PUBLIC
-                -DPLATFORM_ESP32
-            )
-
-    else()
-        # use the general ones for the target
-        # TODO OK to move outside of this IF() afterwards
-        nf_set_compiler_options(${LIB_NAME})
-
-        # all the others are ARM
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DPLATFORM_ARM
-        )
-
-    endif()
-
+    nf_set_compiler_options(${LIB_NAME})
+    nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+    
     # add alias
     add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
     

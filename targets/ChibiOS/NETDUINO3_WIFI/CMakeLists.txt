@@ -56,9 +56,9 @@ nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 nf_set_compiler_options(${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
-# set compiler definitions
-nf_set_compiler_definitions(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf)
+# set compile definitions
+nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

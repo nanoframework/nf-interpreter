@@ -43,8 +43,8 @@ nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 # set compiler options
 nf_set_compiler_options(${NANOCLR_PROJECT_NAME}.elf)
 
-# set compiler definitions
-nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf -DDeviceFamily_CC13X2 )
+# set compile definitions
+nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS -DDeviceFamily_CC13X2 )
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

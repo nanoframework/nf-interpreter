@@ -39,51 +39,28 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
+# setting compile definitions for a target based on general build options
+# TARGET parameter to set the target that's setting them for
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+# optional BUILD_TARGET when target it's a library pass here the name ot the target that's building for (either nanoBooter or nanoCLR)
+macro(nf_set_compile_definitions)
 
-function(nf_set_compiler_definitions target)
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
+
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
+    endif()
 
     # definitions required for SimpleLink SDK
-    target_compile_definitions(${target} PUBLIC -Dgcc)
+    target_compile_definitions(${__TARGET} PUBLIC -Dgcc)
 
-    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-        target_compile_definitions(${target} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-    endif()
+    nf_common_compiler_definitions(TARGET ${__TARGET} BUILD_TARGET ${__BUILD_TARGET})
 
-    # set compiler definition for RTM build option
-    if(NF_BUILD_RTM)
-        target_compile_definitions(${target} PUBLIC -DBUILD_RTM)
-    endif()
+    # include extra compiler definitions
+    target_compile_definitions(${__TARGET} PUBLIC ${__EXTRA_COMPILE_DEFINITIONS})
 
-    # set compiler definition for using Application Domains feature
-    if(NF_FEATURE_USE_APPDOMAINS)
-        target_compile_definitions(${target} PUBLIC -DNANOCLR_USE_APPDOMAINS)
-    endif()
-
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${target} PUBLIC -DWP_IMPLEMENTS_CRC32)
-    endif()
-
-    # set definition for Wire Protocol trace mask
-    target_compile_definitions(${target} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
-
-    # set compiler definition regarding inclusion of trace messages and checks on CLR
-    if(NF_PLATFORM_NO_CLR_TRACE)
-        target_compile_definitions(${target} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
-    endif()
-
-    # set compiler definition regarding CLR IL inlining
-    if(NF_CLR_NO_IL_INLINE)
-        target_compile_definitions(${target} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
-    endif()
-
-    nf_common_compiler_definitions(${target})
-
-    # include any extra compiler definitions coming from extra args
-    target_compile_definitions(${target} PUBLIC ${ARGN})
-
-endfunction()
+endmacro()
 
 # check valid frequency and if configuration file exists 
 function(nf_check_radio_frequency)

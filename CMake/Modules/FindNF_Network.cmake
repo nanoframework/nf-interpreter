@@ -150,14 +150,19 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Network DEFAULT_MSG NF_Network_INCLUDE_DIRS NF_Network_SOURCES)
 
 # macro to be called from binutils to add network library
+# TARGET parameter to set the target it's building
 # optional EXTRA_SOURCES with source files to be added to the library
 # optional EXTRA_INCLUDES with include paths to be added to the library
-# optional EXTRA_COMPILER_DEFINITIONS with compiler definitions to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 # optional EXTRA_COMPILER_OPTIONS with compiler options to be added to the library
 macro(nf_add_lib_network)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILER_DEFINITIONS;EXTRA_COMPILER_OPTIONS" ${ARGN})
+    cmake_parse_arguments(_ "" "TARGET;EXTRA_COMPILE_DEFINITIONS" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILER_OPTIONS" ${ARGN})
+
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_network()")
+    endif()
 
     # add this has a library
     set(LIB_NAME NF_Network)
@@ -175,34 +180,11 @@ macro(nf_add_lib_network)
             ${NF_CoreCLR_INCLUDE_DIRS}
             ${mbedTLS_INCLUDE_DIRS}
             ${__EXTRA_INCLUDES})
-        
-    if(RTOS_FREERTOS_ESP32_CHECK)
 
-        # this is the only one different
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DPLATFORM_ESP32
-            ${__EXTRA_COMPILER_DEFINITIONS}
-        )
+    nf_set_compiler_options(${LIB_NAME})
+    nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
 
-    else()
-        # use the general ones for the target
-        # TODO OK to move outside of this IF() afterwards
-        nf_set_compiler_options(${LIB_NAME})
-
-        # all the others are ARM
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DPLATFORM_ARM
-            ${__EXTRA_COMPILER_DEFINITIONS}
-        )
-
-    endif()
-
-    target_compile_options(
-        ${LIB_NAME} PUBLIC
-        ${__EXTRA_COMPILER_OPTIONS}
-    )
+    target_compile_options(${LIB_NAME} PUBLIC ${__EXTRA_COMPILER_OPTIONS})
 
     # add alias
     add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
