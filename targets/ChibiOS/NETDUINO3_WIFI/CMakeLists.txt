@@ -70,17 +70,25 @@ else()
 endif()
 
 # set linker options
-nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf SET_LINKMAP)
-nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf SET_LINKMAP)
+nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
-# add other linker flags
+# set link maps
 ###########################################################
 # the sizes of CRT heap and ChibiOS stacks are defined here
 ############################################################################
 # CRT heap is assigned to RAM4 region @ CCM SRAM so we are OK to use it all
 ############################################################################
-set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x10000")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x10000")
+nf_set_link_map(
+    TARGET 
+        ${NANOBOOTER_PROJECT_NAME}.elf
+    EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x10000")
+nf_set_link_map(
+    TARGET 
+        ${NANOCLR_PROJECT_NAME}.elf
+    EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x400,--defsym=__process_stack_size__=0x800,--defsym=__crt_heap_size__=0x10000")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)

@@ -54,13 +54,18 @@ else()
 endif()
 
 # set linker options
-nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_LINK_FLAGS "-Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/configPkg/linker.cmd")
+nf_set_linker_options(
+    TARGET 
+        ${NANOCLR_PROJECT_NAME}.elf
+    EXTRA_LINK_FLAGS 
+        "-Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/configPkg/linker.cmd")
 
-# add other linker flags
-###########################################################
-# the size of CRT heap stacks is defined here
-# set_property(TARGET ${NANOBOOTER_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__crt_heap_size__=0x0")
-set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf APPEND_STRING PROPERTY LINK_FLAGS ",--defsym=__crt_heap_size__=0x0")
+# set link maps
+nf_set_link_map(
+    TARGET 
+        ${NANOCLR_PROJECT_NAME}.elf
+    EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/common,--defsym=__crt_heap_size__=0x0")
 
 # generate output files
 # nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)

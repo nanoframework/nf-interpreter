@@ -350,3 +350,23 @@ endmacro()
 macro(nf_set_base_path_for_libraries_modules path)
     set(BASE_PATH_FOR_CLASS_LIBRARIES_MODULES ${path})
 endmacro()
+
+# TARGET parameter to set the target that's setting them for
+# optional EXTRA_LINKMAP_PROPERTIES with extra properties to add to the link map
+macro(nf_set_link_map)
+
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET;EXTRA_LINKMAP_PROPERTIES" "" ${ARGN})
+    
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_link_map()")
+    endif()
+
+    # need to remove the .elf suffix from target name
+    string(FIND ${__TARGET} "." TARGET_EXTENSION_DOT_INDEX)
+    string(SUBSTRING ${__TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
+    
+    # add linker flags to generate map file
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map${__EXTRA_LINKMAP_PROPERTIES}")
+
+endmacro()

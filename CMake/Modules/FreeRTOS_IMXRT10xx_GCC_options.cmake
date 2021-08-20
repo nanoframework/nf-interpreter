@@ -27,12 +27,11 @@ endfunction()
 
 
 # TARGET parameter to set the target that's setting them for
-# optional SET_LINKMAP to set link map on the target
 # optional EXTRA_LINK_FLAGS with link flags to be added
 macro(nf_set_linker_options)
 
     # parse arguments
-    cmake_parse_arguments(_ "SET_LINKMAP" "TARGET;EXTRA_LINK_FLAGS" "" ${ARGN})
+    cmake_parse_arguments(_ "" "TARGET;EXTRA_LINK_FLAGS" "" ${ARGN})
     
     if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
@@ -51,10 +50,5 @@ macro(nf_set_linker_options)
        
     # set optimization flags
     nf_set_optimization_options(${__TARGET})
-    
-    # set link map, if requested
-    if(${__SET_LINKMAP})
-        nf_set_link_map(${__TARGET})
-    endif()
 
 endmacro()

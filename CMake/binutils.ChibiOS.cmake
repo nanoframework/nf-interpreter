@@ -17,18 +17,6 @@ function(nf_set_optimization_options target)
 endfunction()
 
 
-function(nf_set_link_map target) 
-
-    # need to remove the .elf suffix from target name
-    string(FIND ${target} "." TARGET_EXTENSION_DOT_INDEX)
-    string(SUBSTRING ${target} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
-    
-    # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common")
-
-endfunction()
-
-
 function(nf_set_linker_file target linker_file_name)
 
     # set linker file name

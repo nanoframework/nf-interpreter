@@ -77,8 +77,20 @@ nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
 nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
-nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf SET_LINKMAP)
-nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf SET_LINKMAP)
+nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf)
+
+# set link maps
+nf_set_link_map(
+    TARGET 
+        ${NANOBOOTER_PROJECT_NAME}.elf
+    EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/common,--defsym=__crt_heap_size__=0x0")
+nf_set_link_map(
+    TARGET 
+        ${NANOCLR_PROJECT_NAME}.elf
+    EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/common,--defsym=__crt_heap_size__=0x0")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
