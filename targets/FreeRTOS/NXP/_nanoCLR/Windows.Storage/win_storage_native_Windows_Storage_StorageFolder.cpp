@@ -577,7 +577,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     NANOCLR_CLEANUP_END();
 }
 
-struct FileOperation
+struct StorageFolderFileOperation
 {
     const char *FilePath;
     uint8_t mode;
@@ -591,7 +591,7 @@ static volatile FRESULT threadOperationResult;
 static void CreateFileWorkingThread(void *arg)
 {
 
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(arg);
+    StorageFolderFileOperation *fileIoOperation = reinterpret_cast<StorageFolderFileOperation *>(arg);
 
     // create file struct
     FIL file;
@@ -713,7 +713,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         }
 
         // setup File operation
-        FileOperation *fileOperation = reinterpret_cast<FileOperation *>(malloc(sizeof(FileOperation)));
+        StorageFolderFileOperation *fileOperation =
+            reinterpret_cast<StorageFolderFileOperation *>(malloc(sizeof(StorageFolderFileOperation)));
 
         fileOperation->FilePath = filePath;
         fileOperation->mode = modeFlags;
