@@ -208,6 +208,8 @@ macro(nf_add_platform_sources target)
 
         target_sources(${target}.elf PUBLIC
 
+            ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
+
             ${TARGET_FREERTOS_COMMON_SOURCES}
             ${TARGET_FREERTOS_NANOCLR_SOURCES}
             ${TARGET_NXP_COMMON_SOURCES}

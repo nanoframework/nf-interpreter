@@ -254,7 +254,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/PAL/Profiler
 
             # target
-            "${TARGET_BASE_LOCATION}"
+            ${TARGET_BASE_LOCATION}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
