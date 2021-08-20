@@ -103,6 +103,16 @@ macro(nf_add_platform_dependencies target)
     # dependencies specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
+        nf_add_lib_coreclr(
+            TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${CMSIS_INCLUDE_DIRS}
+                ${FreeRTOS_INCLUDE_DIRS}
+                ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS})
+
         if(USE_NETWORKING_OPTION)
 
             nf_add_lib_network(

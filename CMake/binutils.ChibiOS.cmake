@@ -135,6 +135,15 @@ macro(nf_add_platform_dependencies target)
     # dependencies specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
+        nf_add_lib_coreclr(
+            TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS})
+
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 

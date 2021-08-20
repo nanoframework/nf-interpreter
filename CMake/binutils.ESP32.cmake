@@ -37,6 +37,17 @@ macro(nf_add_platform_dependencies target)
 
     nf_add_common_dependencies(${target})
 
+    nf_add_lib_coreclr(
+        TARGET
+            ${target}
+        EXTRA_INCLUDES
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}/${target}
+            ${CMAKE_CURRENT_SOURCE_DIR}/${target}
+            ${CMAKE_CURRENT_SOURCE_DIR}/Include
+            ${CMAKE_CURRENT_SOURCE_DIR}/Network
+            ${TARGET_ESP32_IDF_INCLUDES})
+
 endmacro()
 
 # Add ESP32 platform include directories to a specific CMake target

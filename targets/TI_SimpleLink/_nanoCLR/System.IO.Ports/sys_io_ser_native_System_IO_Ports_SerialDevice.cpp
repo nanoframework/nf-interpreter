@@ -284,8 +284,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
             palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
         }
-#else
-#error "UART1 NOT CONFIGURED. Check TI SYSCONFIG."
 #endif
 
         // all the rest

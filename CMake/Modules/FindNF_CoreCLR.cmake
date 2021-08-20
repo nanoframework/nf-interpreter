@@ -25,7 +25,9 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprin
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
@@ -269,3 +271,53 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_CoreCLR DEFAULT_MSG NF_CoreCLR_INCLUDE_DIRS NF_CoreCLR_SOURCES)
+
+
+# macro to be called from binutils to add Core CLR library
+# TARGET parameter to set the target it's building
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+macro(nf_add_lib_coreclr)
+
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_halcore()")
+    endif()
+    message("EXTRA_INCLUDES  ${__EXTRA_INCLUDES}")
+    message("CLR includes  ${NF_CoreCLR_INCLUDE_DIRS}")
+    # add this has a library
+    set(LIB_NAME NF_CoreCLR)
+
+    add_library(
+        ${LIB_NAME} STATIC 
+            ${NF_CoreCLR_SOURCES})   
+
+    target_include_directories(
+        ${LIB_NAME} 
+        PUBLIC 
+            ${NF_CoreCLR_INCLUDE_DIRS}
+            ${__EXTRA_INCLUDES})   
+
+    # TODO can be removed later
+    if(RTOS_FREERTOS_ESP32_CHECK)
+
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET})
+
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${__EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else() 
+        nf_set_compile_options(${LIB_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+    endif()
+
+    # add alias
+    add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
+    
+endmacro()

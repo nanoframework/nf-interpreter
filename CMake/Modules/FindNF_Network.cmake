@@ -181,10 +181,22 @@ macro(nf_add_lib_network)
             ${mbedTLS_INCLUDE_DIRS}
             ${__EXTRA_INCLUDES})
 
-    nf_set_compile_options(${LIB_NAME})
-    nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+    # TODO can be removed later
+    if(RTOS_FREERTOS_ESP32_CHECK)
+       
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET})
 
-    target_compile_options(${LIB_NAME} PUBLIC ${__EXTRA_COMPILE_OPTIONS})
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${__EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else()    
+        nf_set_compile_options(${LIB_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+    endif()
 
     # add alias
     add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})

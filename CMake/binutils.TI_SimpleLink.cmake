@@ -99,6 +99,36 @@ macro(nf_add_platform_dependencies target)
     
     nf_add_common_dependencies(${target})
 
+    # dependencies specific to nanoCRL
+    if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+
+        nf_add_lib_coreclr(
+            TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${TI_SimpleLink_INCLUDE_DIRS}
+                ${TI_XDCTools_INCLUDE_DIR}
+                ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+                ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+
+        # nF feature: networking
+        if(USE_NETWORKING_OPTION)
+
+            nf_add_lib_network(
+                TARGET
+                    ${target}
+                EXTRA_INCLUDES 
+                    ${TI_SimpleLink_INCLUDE_DIRS}
+                    ${TI_XDCTools_INCLUDE_DIR}
+                    ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+                    ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+
+            add_dependencies(${target}.elf nano::NF_Network)
+
+        endif()
+
+    endif()
+
     # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
     add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)

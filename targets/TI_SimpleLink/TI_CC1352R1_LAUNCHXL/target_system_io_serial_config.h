@@ -8,7 +8,7 @@
 ///////////
 
 // enable UART1
-#define NF_SERIAL_COMM_TI_USE_UART1 TRUE
+#define NF_SERIAL_COMM_TI_USE_UART1 FALSE
 
 // buffers size
 #define UART1_TX_SIZE 256

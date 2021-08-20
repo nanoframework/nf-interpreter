@@ -53,7 +53,7 @@ if(USE_NETWORKING_OPTION)
 
     nf_add_lib_network(
         TARGET
-            ${target}
+            ${NANOCLR_PROJECT_NAME}
         EXTRA_SOURCES
             ${TARGET_ESP32_NETWORK_SOURCES}
             ${TARGET_LWIP_SOURCES}
@@ -151,7 +151,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 if(USE_NETWORKING_OPTION)
 
     # target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
-    set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network)
+    set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network nano::NF_HALCore_nanoCLR)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
 
