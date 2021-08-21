@@ -129,8 +129,11 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS})
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
 
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
