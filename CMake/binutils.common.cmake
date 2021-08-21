@@ -114,7 +114,8 @@ macro(nf_add_common_include_directories target)
         # path for CMake target (both source and binary)
         ${CMAKE_CURRENT_BINARY_DIR}/${target}
         ${CMAKE_CURRENT_SOURCE_DIR}/${target}
-
+        
+        ${NF_HALCore_INCLUDE_DIRS}
         ${NF_CoreCLR_INCLUDE_DIRS}
         ${NF_NativeAssemblies_INCLUDE_DIRS}
 
@@ -144,7 +145,9 @@ macro(nf_add_common_sources target)
     target_sources(${target}.elf PUBLIC
     
         ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
-
+        ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
+        ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
+        ${NF_HALCore_SOURCES}
         ${COMMON_PROJECT_SOURCES}
         ${WireProtocol_SOURCES}
     )
@@ -153,16 +156,29 @@ macro(nf_add_common_sources target)
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_sources(${target}.elf PUBLIC
-            
-            ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
+            ${NANOBOOTER_PROJECT_SOURCES})
 
-            ${NANOBOOTER_PROJECT_SOURCES}
-        )
+        # include configuration manager file
+        if(NF_FEATURE_HAS_CONFIG_BLOCK)
+            # feature enabled, full support
+            target_sources(${target}.elf PUBLIC
+                ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c)
+
+        else()
+            # feature disabled, stubs only
+            target_sources(${target}.elf PUBLIC
+                ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c)
+
+        endif()
 
     endif()
 
     # sources specific to nanoCRL
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
+
+        target_link_libraries(${target}.elf
+            nano::NF_CoreCLR
+        )
 
         target_sources(${target}.elf PUBLIC
 
@@ -171,9 +187,6 @@ macro(nf_add_common_sources target)
             # sources for nanoFramework libraries
             ${NF_Debugger_SOURCES}
             ${NF_Diagnostics_SOURCES}
-
-            # ${NF_Network_SOURCES}
-            ${mbedTLS_SOURCES}
 
             # sources for nanoFramework APIs
             ${NF_NativeAssemblies_SOURCES}
@@ -370,8 +383,13 @@ macro(nf_include_libraries_in_build target)
     if(${BOOTER_INDEX} EQUAL 0)
         # no libs in nanoBooter
     elseif(${CLR_INDEX} EQUAL 0)
+
         set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_CoreCLR -Wl,--no-whole-archive ")
-        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive ")
+        
+        if(USE_NETWORKING_OPTION)
+            set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive ")
+        endif()
+
     endif()
 
 endmacro()

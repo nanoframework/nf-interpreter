@@ -38,10 +38,7 @@ macro(nf_set_linker_options)
     endif()
 
     # request specs from newlib nano
-    set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs -Xlinker --gc-sections -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
-
-    # set extra linker flags
-    set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${__EXTRA_LINK_FLAGS}")
+    set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs -Wl,--start-group -Xlinker --gc-sections -Xlinker --sort-section=alignment -Xlinker -print-memory-usage")
 
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")

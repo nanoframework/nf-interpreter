@@ -151,7 +151,7 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 if(USE_NETWORKING_OPTION)
 
     # target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
-    set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network nano::NF_HALCore_nanoCLR)
+    set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
 

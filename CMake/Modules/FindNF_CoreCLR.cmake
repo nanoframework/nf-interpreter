@@ -124,9 +124,6 @@ set(NF_CoreCLR_SRCS
     # CLR startup
     CLRStartup.cpp
 
-    # Messaging
-    Messaging.cpp
-
     # Runtime.Native
     nf_rt_native.cpp
     nf_rt_native_nanoFramework_Runtime_Hardware_SystemInfo.cpp
@@ -156,7 +153,6 @@ set(NF_CoreCLR_SRCS
     nanoHAL_SystemEvents.c
     
     # PAL
-    nanoPAL_BlockStorage.c
     nanoPAL_Events.cpp
     nanoPAL_NativeDouble.cpp
     nanoPAL_Network_stubs.cpp
@@ -166,9 +162,6 @@ set(NF_CoreCLR_SRCS
     Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
-
-    # target specifics
-    target_BlockStorage.c
 )
 
 # include System.Reflection API files depending on build option

@@ -109,12 +109,14 @@ macro(nf_add_platform_sources target)
 
         ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
         ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
+        ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
 
         ${COMMON_PROJECT_SOURCES}
         ${WireProtocol_SOURCES}
 
         ${NANOCLR_PROJECT_SOURCES}
 
+        ${NF_HALCore_SOURCES}
         ${NF_CoreCLR_SOURCES}
         ${NF_Debugger_SOURCES}
         ${NF_Diagnostics_SOURCES}

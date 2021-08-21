@@ -24,9 +24,6 @@ add_subdirectory("nanoCLR")
 add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
-
-    # need to add configuration manager to allow get/store configuration blocks
-    ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
 )
 
 nf_add_platform_packages(TARGET ${NANOBOOTER_PROJECT_NAME})

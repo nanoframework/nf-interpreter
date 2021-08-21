@@ -23,9 +23,6 @@ add_subdirectory("nanoCLR")
 add_executable(
     # executables for project, project sources
     ${NANOBOOTER_PROJECT_NAME}.elf
-
-    # need to add configuration manager to allow get/store configuration blocks
-    ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c
 )
 
 nf_add_platform_packages(TARGET ${NANOBOOTER_PROJECT_NAME})
@@ -78,7 +75,11 @@ nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf)
 
 # set linker options
 nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf)
+nf_set_linker_options(
+    TARGET 
+        ${NANOCLR_PROJECT_NAME}.elf
+    EXTRA_LINK_FLAGS
+        " -Wl,--whole-archive -lgcc -Wl,--no-whole-archive ")
 
 # set link maps
 nf_set_link_map(

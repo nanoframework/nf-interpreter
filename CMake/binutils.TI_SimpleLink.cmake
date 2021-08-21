@@ -171,11 +171,7 @@ macro(nf_add_platform_sources target)
 
         target_sources(${target}.elf PUBLIC
 
-            ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c
-
-            ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
             ${CMAKE_CURRENT_SOURCE_DIR}/target_Power.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
 
             ${TARGET_TI_SimpleLink_COMMON_SOURCES}
             ${TARGET_TI_SimpleLink_NANOCLR_SOURCES}

@@ -230,10 +230,6 @@ macro(nf_add_platform_sources target)
         target_sources(${target}.elf PUBLIC
             
             ${TARGET_CHIBIOS_NANOBOOTER_SOURCES}
-            ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
-           
-            # need to add configuration manager to allow get/store configuration blocks
-            ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c
         )
 
     endif()
@@ -245,9 +241,6 @@ macro(nf_add_platform_sources target)
                        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
-
-            ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
-
             ${TARGET_CHIBIOS_NANOCLR_SOURCES}
             ${CHIBIOS_CONTRIB_SOURCES}
             ${CHIBIOS_FATFS_SOURCES}

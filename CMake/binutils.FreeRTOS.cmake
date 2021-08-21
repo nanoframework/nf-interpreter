@@ -189,12 +189,7 @@ macro(nf_add_platform_sources target)
                        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
-            
             ${TARGET_NXP_NANOBOOTER_SOURCES}
-            ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
-           
-            # need to add configuration manager to allow get/store configuration blocks
-            ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c
         )
 
     endif()
@@ -207,14 +202,10 @@ macro(nf_add_platform_sources target)
                        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
-
-            ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
-
             ${TARGET_FREERTOS_COMMON_SOURCES}
             ${TARGET_FREERTOS_NANOCLR_SOURCES}
             ${TARGET_NXP_COMMON_SOURCES}
             ${TARGET_NXP_NANOCLR_SOURCES}
-
             ${FATFS_SOURCES}
         )
 
