@@ -84,7 +84,7 @@ nf_set_link_map(
     TARGET 
         ${NANOCLR_PROJECT_NAME}.elf
     EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x2800")
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x2160")
 
 # generate output files
 nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
