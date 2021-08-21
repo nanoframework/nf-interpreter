@@ -53,15 +53,15 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # check for TARGET_BOARD definition
 if(NOT TARGET_BOARD OR TARGET_BOARD STREQUAL "")
-    message(FATAL_ERROR "Missing build option 'TARGET_BOARD'.")
+    message(FATAL_ERROR "\n\nMissing build option 'TARGET_BOARD'.")
 endif()
 
 #######################
 # handle RTOSes choice
 
-if(${RTOS} STREQUAL "")
-    # no RTOS selected, defaulting to ChibiOS
-    set(RTOS "CHIBIOS")
+if(NOT RTOS OR RTOS STREQUAL "")
+    # no RTOS selected, can't continue
+    message(FATAL_ERROR "\n\nMissing build option 'RTOS'.")
 endif()
 
 # list of supported RTOSes
