@@ -78,7 +78,7 @@ nf_set_linker_options(
     TARGET 
         ${NANOCLR_PROJECT_NAME}.elf
     EXTRA_LINK_FLAGS
-        " -Wl,--whole-archive -lgcc -Wl,--no-whole-archive ")
+        )
 
 # set link maps
 nf_set_link_map(
