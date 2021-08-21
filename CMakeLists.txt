@@ -135,7 +135,7 @@ endif()
 if(NOT BUILD_VERSION)
     set(BUILD_VERSION 0.0.0.0)
 endif()
-project(nanoFramework VERSION ${BUILD_VERSION})
+project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")

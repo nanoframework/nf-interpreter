@@ -3,7 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-ENABLE_LANGUAGE(ASM)
 
 # add header files with common OS definitions and board definitions specific for each image
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in"

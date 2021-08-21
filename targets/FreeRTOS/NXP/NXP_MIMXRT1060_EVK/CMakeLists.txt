@@ -6,7 +6,6 @@
 include(binutils.common)
 include(binutils.FreeRTOS)
 
-ENABLE_LANGUAGE(ASM)
 
 # add packages
 nf_add_common_packages()
