@@ -168,22 +168,30 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     # clear some CMake flavor flags that are being set as default
     # in the GNU compiler init
     # we want to control and fine tune these
-    set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
+    unset(CMAKE_C_FLAGS_DEBUG)
+    unset(CMAKE_C_FLAGS_MINSIZEREL)
+    unset(CMAKE_C_FLAGS_RELEASE)
+    unset(CMAKE_C_FLAGS_RELWITHDEBINFO)
+    unset(CMAKE_CXX_FLAGS_DEBUG)
+    unset(CMAKE_CXX_FLAGS_MINSIZEREL)
+    unset(CMAKE_CXX_FLAGS_RELEASE)
+    unset(CMAKE_CXX_FLAGS_RELWITHDEBINFO)
     #################################################################
 
 
     #################################################################
-    # clear default libraries that are set by CMake
-    # we want to control
-    set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
-    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
+    # clear default link libraries (C & C++) that are set by CMake
+    unset(CMAKE_C_IMPLICIT_LINK_LIBRARIES)
+    unset(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
+    #################################################################
+    
+    #################################################################
+    # clear other options and definitions that we want to set
+    unset(COMPILE_OPTIONS)
+    unset(C_COMPILE_OPTIONS)
+    unset(CXX_COMPILE_OPTIONS)
+    unset(COMPILE_DEFINITIONS)
+    unset(LINK_OPTIONS)
     #################################################################
 
 endif()
