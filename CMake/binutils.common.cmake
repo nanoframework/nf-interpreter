@@ -395,3 +395,7 @@ macro(nf_include_libraries_in_build target)
     endif()
 
 endmacro()
+
+# macro to setup the build for a target
+macro(nf_setup_target_build)
+endmacro()
