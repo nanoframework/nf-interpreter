@@ -144,6 +144,7 @@ macro(nf_add_platform_dependencies target)
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                ${SPIFFS_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
@@ -165,6 +166,7 @@ macro(nf_add_platform_dependencies target)
                     ${CHIBIOS_LWIP_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
 
             add_dependencies(${target}.elf nano::NF_Network)
