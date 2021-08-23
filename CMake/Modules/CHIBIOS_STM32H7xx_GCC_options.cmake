@@ -14,16 +14,26 @@ set(CMAKE_ASM_FLAGS " -mthumb -mcpu=cortex-m7 -x assembler-with-cpp" CACHE INTER
 set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,--print-memory-usage -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostartfiles " CACHE INTERNAL "executable linker flags")
 
 
-function(nf_set_compile_options TARGET)
+# TARGET parameter to set the target that's setting them for
+# optional EXTRA_COMPILE_OPTIONS with compile options to be added
+macro(nf_set_compile_options)
+
+    # parse arguments
+    cmake_parse_arguments(NFSCO "" "TARGET;EXTRA_COMPILE_OPTIONS" "" ${ARGN})
+    
+    if(NOT NFSCO_TARGET OR "${NFSCO_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_options()")
+    endif()
+
 
     # include any extra options coming from any extra args?
     # STMF7 cores have SP and DP, the default is SP. DP can be set if developer realy needs that.
-    target_compile_options(${TARGET} PUBLIC  ${ARGN} -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
+    target_compile_options(${NFSCO_TARGET} PUBLIC  ${__EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # this series has FPU 
-    target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
 
-endfunction()
+endmacro()
 
 
 # TARGET parameter to set the target that's setting them for
