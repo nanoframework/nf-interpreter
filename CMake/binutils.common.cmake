@@ -120,7 +120,6 @@ macro(nf_add_common_include_directories target)
         
         ${NF_HALCore_INCLUDE_DIRS}
         ${NF_CoreCLR_INCLUDE_DIRS}
-        ${NF_NativeAssemblies_INCLUDE_DIRS}
 
         ${WireProtocol_INCLUDE_DIRS}
     )
@@ -181,6 +180,7 @@ macro(nf_add_common_sources target)
 
         target_link_libraries(${target}.elf
             nano::NF_CoreCLR
+            nano::NF_NativeAssemblies
         )
 
         target_sources(${target}.elf PUBLIC
@@ -191,11 +191,7 @@ macro(nf_add_common_sources target)
             ${NF_Debugger_SOURCES}
             ${NF_Diagnostics_SOURCES}
 
-            # sources for nanoFramework APIs
-            ${NF_NativeAssemblies_SOURCES}
-
             ${Graphics_Sources}
-
         )
 
     endif()
@@ -387,12 +383,16 @@ macro(nf_include_libraries_in_build target)
         # no libs in nanoBooter
     elseif(${CLR_INDEX} EQUAL 0)
 
+        # these are always present
         set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_CoreCLR -Wl,--no-whole-archive ")
+        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_NativeAssemblies -Wl,--no-whole-archive ")
         
+        # these are dependent on the feature being enabled
         if(USE_NETWORKING_OPTION)
             set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive ")
         endif()
 
+        # this one has to be at the very end of the list to keep the linker happy
         set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -lgcc -Wl,--no-whole-archive ")
 
     endif()

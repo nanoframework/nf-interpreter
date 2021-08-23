@@ -47,7 +47,6 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
 option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
 
-
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -399,3 +398,53 @@ endif()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
+
+# macro to be called from binutils to add Core CLR library
+# TARGET parameter to set the target it's building
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+macro(nf_add_lib_native_assemblies)
+
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+
+    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_halcore()")
+    endif()
+
+    # add this has a library
+    set(LIB_NAME NF_NativeAssemblies)
+
+    add_library(
+        ${LIB_NAME} STATIC 
+            ${NF_NativeAssemblies_SOURCES})   
+
+    target_include_directories(
+        ${LIB_NAME} 
+        PUBLIC 
+            ${NF_NativeAssemblies_INCLUDE_DIRS}
+            ${NF_CoreCLR_INCLUDE_DIRS}
+            ${__EXTRA_INCLUDES})   
+
+    # TODO can be removed later
+    if(RTOS_FREERTOS_ESP32_CHECK)
+
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET})
+
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${__EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else() 
+        nf_set_compile_options(${LIB_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+        nf_set_linker_options(TARGET ${LIB_NAME})
+    endif()
+
+    # add alias
+    add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
+    
+endmacro()

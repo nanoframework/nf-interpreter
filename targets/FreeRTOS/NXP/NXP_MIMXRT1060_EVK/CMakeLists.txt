@@ -56,6 +56,7 @@ nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 nf_set_compile_options(${NANOBOOTER_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 nf_set_compile_options(${NANOCLR_PROJECT_NAME}.elf -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 target_compile_definitions(NF_Network PUBLIC -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
+target_compile_definitions(NF_NativeAssemblies PUBLIC -DCPU_MIMXRT1062CVL5A -DCPU_MIMXRT1062CVL5A_cm7)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

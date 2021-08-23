@@ -100,6 +100,22 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS})
 
+        nf_add_lib_native_assemblies(
+            TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${CMSIS_INCLUDE_DIRS}
+                ${FreeRTOS_INCLUDE_DIRS}
+                ${LWIP_INCLUDE_DIRS}
+                ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+                ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
+                ${FATFS_INCLUDE_DIRS}
+                ${CMAKE_CURRENT_BINARY_DIR}
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_fatfs
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
+                
         if(USE_NETWORKING_OPTION)
 
             nf_add_lib_network(
@@ -154,8 +170,7 @@ macro(nf_add_platform_include_directories target)
             ${NANOCLR_PROJECT_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
             ${LWIP_INCLUDE_DIRS}
-            ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/_fatfs
-            ${FATFS_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_BINARY_DIR}
 
         )
 
