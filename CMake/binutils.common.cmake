@@ -399,5 +399,154 @@ macro(nf_include_libraries_in_build target)
 endmacro()
 
 # macro to setup the build for a target
-macro(nf_setup_target_build)
+# optional HAS_NANOBOOTER specifing if the target implements nanoBooter
+# BOOTER_LINKER_FILE with the path to the linker file for nanoBooter (if the target has it)
+# mandatory CLR_LINKER_FILE with the path to the linker file for nanoCLR
+# optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+# optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+# optional BOOTER_EXTRA_COMPILE_DEFINITIONS extra nanoBooter compile definitions to pass to nf_set_compile_definitions() 
+# optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
+# optional BOOTER_EXTRA_COMPILE_OPTIONS extra nanoBooter compile options to pass to nf_set_compile_options() 
+# optional CLR_EXTRA_COMPILE_OPTIONS extra nanoCLR compile options to pass to nf_set_compile_options() 
+# optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+macro(nf_setup_target_build_common)
+
+    # parse arguments
+    cmake_parse_arguments(
+        NFSTBC 
+        "HAS_NANOBOOTER" 
+        "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES;BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS" 
+        "BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES" 
+        ${ARGN})
+
+    if(NOT NFSTBC_HAS_NANOBOOTER 
+        AND (BOOTER_EXTRA_SOURCE_FILES OR BOOTER_EXTRA_COMPILE_DEFINITIONS OR BOOTER_EXTRA_LINKMAP_PROPERTIES))
+        message(FATAL_ERROR "Add files/options for booter without setting HAS_NANOBOOTER argument when calling nf_setup_target_build()")
+    endif()
+
+    if(NFSTBC_HAS_NANOBOOTER AND (NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL ""))
+        message(FATAL_ERROR "Need to provide BOOTER_LINKER_FILE argument when target has HAS_NANOBOOTER defined")
+    endif()
+    
+    if(NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL "")
+        message(FATAL_ERROR "Need to provide CLR_LINKER_FILE argument")
+    endif()
+
+    #######################################
+    # now the actual calls for building a target
+
+    # add packages
+    nf_add_common_packages()
+    nf_add_platform_packages()
+
+    #######################################
+
+    add_subdirectory("common")
+
+    if(NFSTBC_HAS_NANOBOOTER)
+        add_subdirectory("nanoBooter")
+    endif()
+
+    add_subdirectory("nanoCLR")
+
+    #######################
+    # nanoBooter executable
+    if(NFSTBC_HAS_NANOBOOTER)
+
+        add_executable(
+            # executables for project, project sources
+            ${NANOBOOTER_PROJECT_NAME}.elf
+
+            # extra build files 
+            ${NFSTBC_BOOTER_EXTRA_SOURCE_FILES}
+        )
+
+        nf_add_platform_packages(TARGET ${NANOBOOTER_PROJECT_NAME})
+        nf_add_platform_dependencies(${NANOBOOTER_PROJECT_NAME})
+
+        nf_add_common_sources(${NANOBOOTER_PROJECT_NAME})
+        nf_add_platform_sources(${NANOBOOTER_PROJECT_NAME})
+
+        # include directories for nanoBooter
+        nf_add_common_include_directories(${NANOBOOTER_PROJECT_NAME})
+        nf_add_platform_include_directories(${NANOBOOTER_PROJECT_NAME})
+
+        # set compile options
+        nf_set_compile_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_OPTIONS})
+        
+        # set compile definitions
+        nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOBOOTER_PROJECT_NAME})
+
+        # set linker files
+        if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+            nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/${NFSTBC_BOOTER_LINKER_FILE}-DEBUG.ld)
+        else()
+            nf_set_linker_file(${NANOBOOTER_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/${NFSTBC_BOOTER_LINKER_FILE}.ld)
+        endif()
+
+        # set linker options
+        nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+
+        # set link maps
+        ###########################################################
+        # the sizes of CRT heap and ChibiOS stacks are defined here
+        nf_set_link_map(
+            TARGET 
+                ${NANOBOOTER_PROJECT_NAME}.elf
+            EXTRA_LINKMAP_PROPERTIES ${NFSTBC_BOOTER_EXTRA_LINKMAP_PROPERTIES})
+
+    endif()
+
+    #######################
+    # nanoCLR executable
+    add_executable(
+        # executables for project, project sources
+        ${NANOCLR_PROJECT_NAME}.elf
+
+        # extra build files 
+        ${NFSTBC_CLR_EXTRA_SOURCE_FILES}
+    )
+
+    nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
+    nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
+
+    nf_add_common_sources(${NANOCLR_PROJECT_NAME})
+    nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
+
+    # include directories for nanoCLR
+    nf_add_common_include_directories(${NANOCLR_PROJECT_NAME})
+    nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
+
+    # set compile options
+    nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_OPTIONS})
+
+    # set compile definitions
+    nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_CLR_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME} )
+
+    # set linker files
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/${NFSTBC_CLR_LINKER_FILE}-DEBUG.ld)
+    else()
+        nf_set_linker_file(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/${NFSTBC_CLR_LINKER_FILE}.ld)
+    endif()
+
+    # set linker options
+    nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf)
+
+    # set link maps
+    ###########################################################
+    # the sizes of CRT heap and ChibiOS stacks are defined here
+    nf_set_link_map(
+        TARGET 
+            ${NANOCLR_PROJECT_NAME}.elf
+        EXTRA_LINKMAP_PROPERTIES ${NFSTBC_CLR_EXTRA_LINKMAP_PROPERTIES})
+
+    # generate output files
+    if(NFSTBC_HAS_NANOBOOTER)
+        nf_generate_build_output_files(${NANOBOOTER_PROJECT_NAME}.elf)
+    endif()
+
+    nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+
 endmacro()

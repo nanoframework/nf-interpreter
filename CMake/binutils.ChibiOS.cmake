@@ -281,3 +281,20 @@ macro(nf_add_platform_sources target)
     endif()
 
 endmacro()
+
+# macro to setup the build for a target
+# mandatory HAS_NANOBOOTER specifing if the target implements nanoBooter
+# BOOTER_LINKER_FILE with the path to the linker file for nanoBooter (if the target has it)
+# mandatory CLR_LINKER_FILE with the path to the linker file for nanoCLR
+# optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+# optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+# optional BOOTER_EXTRA_COMPILE_DEFINITIONS extra nanoBooter compile definitions to pass to nf_set_compile_definitions() 
+# optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
+# optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+macro(nf_setup_target_build)
+
+    # OK to pass ARGN, to have it perform it's parsings and validation 
+    nf_setup_target_build_common(${ARGN})
+
+endmacro()

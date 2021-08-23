@@ -122,12 +122,12 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
         
-        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
-        
         # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
         add_dependencies(COPY_TIRTOS_CONFIG SYSCONFIG_TASKS)
         add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
         add_dependencies(NF_NativeAssemblies TIRTOS_CONFIG)
+        
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
 
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
@@ -315,4 +315,21 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
             COMMENT "Generate TI-RTOS configuration" 
         )
     endif()
+endmacro()
+
+# macro to setup the build for a target
+# mandatory HAS_NANOBOOTER specifing if the target implements nanoBooter
+# BOOTER_LINKER_FILE with the path to the linker file for nanoBooter (if the target has it)
+# mandatory CLR_LINKER_FILE with the path to the linker file for nanoCLR
+# optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+# optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+# optional BOOTER_EXTRA_COMPILE_DEFINITIONS extra nanoBooter compile definitions to pass to nf_set_compile_definitions() 
+# optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
+# optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+macro(nf_setup_target_build)
+
+    # OK to pass ARGN, to have it perform it's parsings and validation 
+    nf_setup_target_build_common(${ARGN})
+
 endmacro()

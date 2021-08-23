@@ -40,7 +40,7 @@ add_executable(
 )
 
 nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
-nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
+nf_add_platform_dependencies(TARGET ${NANOCLR_PROJECT_NAME})
 nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
 # include directories for nanoCLR
@@ -51,7 +51,7 @@ nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 if(USE_NETWORKING_OPTION)
 
     nf_add_lib_network(
-        TARGET
+        BUILD_TARGET
             ${NANOCLR_PROJECT_NAME}
         EXTRA_SOURCES
             ${TARGET_ESP32_NETWORK_SOURCES}
@@ -195,12 +195,12 @@ endif()
 
 # set compiler definition regarding inclusion of trace messages and checks on CLR
 if(NF_PLATFORM_NO_CLR_TRACE)
-    target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
 endif()
 
 # set compiler definition regarding CLR IL inlining
 if(NF_CLR_NO_IL_INLINE)
-    target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+    target_compile_definitions(${NANOCLR_PROJECT_NAME} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
 endif()
 
 # set extra linker flags for DEBUG
