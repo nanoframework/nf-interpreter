@@ -4,65 +4,64 @@
 #
 
 # set compile definitions that are common to all builds/targets
-# TARGET target name to set compiler definitions 
 # BUILD_TARGET target name building (either nanoBooter or nanoCLR)
-# if BUILD_TARGET is not provided, TARGET will be used
+# optional TARGET target name to set compiler definitions 
 macro(nf_common_compiler_definitions) 
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET;BUILD_TARGET" "" ${ARGN})
+    cmake_parse_arguments(NFCCF "" "BUILD_TARGET;TARGET" "" ${ARGN})
 
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
-         message(FATAL_ERROR "Need to set TARGET argument when calling nf_common_compiler_definitions()")
+    if(NOT NFCCF_BUILD_TARGET OR "${NFCCF_BUILD_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set BUILD_TARGET argument when calling nf_common_compiler_definitions()")
     endif()
-
-    if(NOT __BUILD_TARGET OR "${__BUILD_TARGET}" STREQUAL "")
-        set(__BUILD_TARGET ${__TARGET})
+   
+    if(NOT NFCCF_TARGET OR "${NFCCF_TARGET}" STREQUAL "")
+        set(NFCCF_TARGET ${NFCCF_BUILD_TARGET})
     endif()
 
     # set define according to target
-    string(FIND ${__BUILD_TARGET} ${NANOBOOTER_PROJECT_NAME} BOOTER_INDEX)
-    string(FIND ${__BUILD_TARGET} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
+    string(FIND ${NFCCF_BUILD_TARGET} ${NANOBOOTER_PROJECT_NAME} BOOTER_INDEX)
+    string(FIND ${NFCCF_BUILD_TARGET} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
     
     if(${BOOTER_INDEX} EQUAL 0)
-        target_compile_definitions(${__TARGET} PUBLIC -DI_AM_NANOBOOTER)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DI_AM_NANOBOOTER)
     elseif(${CLR_INDEX} EQUAL 0)
-        target_compile_definitions(${__TARGET} PUBLIC -DI_AM_NANOCLR)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DI_AM_NANOCLR)
     else()
-        message(FATAL_ERROR "\n\n Build target name '${__BUILD_TARGET}' is not any of the expected ones: '${NANOBOOTER_PROJECT_NAME}' or '${NANOCLR_PROJECT_NAME}'")
+        message(FATAL_ERROR "\n\n Build target name '${NFCCF_BUILD_TARGET}' is not any of the expected ones: '${NANOBOOTER_PROJECT_NAME}' or '${NANOCLR_PROJECT_NAME}'")
     endif()
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     endif()
 
     # set compiler definition for RTM build option
     if(NF_BUILD_RTM)
-        target_compile_definitions(${__TARGET} PUBLIC -DBUILD_RTM)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DBUILD_RTM)
     endif()
 
     # set compiler definition for using Application Domains feature
     if(NF_FEATURE_USE_APPDOMAINS)
-        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
     endif()
 
     # set compiler definition for implementing (or not) CRC32 in Wire Protocol
     if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${__TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
     endif()
 
     # set definition for Wire Protocol trace mask
-    target_compile_definitions(${__TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
+    target_compile_definitions(${NFCCF_TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
 
     # set compiler definition regarding inclusion of trace messages and checks on CLR
     if(NF_PLATFORM_NO_CLR_TRACE)
-        target_compile_definitions(${__TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
     endif()
 
     # set compiler definition regarding CLR IL inlining
     if(NF_CLR_NO_IL_INLINE)
-        target_compile_definitions(${__TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
 endmacro()
@@ -355,18 +354,18 @@ endmacro()
 macro(nf_set_link_map)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET;EXTRA_LINKMAP_PROPERTIES" "" ${ARGN})
+    cmake_parse_arguments(NFSLM "" "TARGET;EXTRA_LINKMAP_PROPERTIES" "" ${ARGN})
     
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+    if(NOT NFSLM_TARGET OR "${NFSLM_TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_link_map()")
     endif()
 
     # need to remove the .elf suffix from target name
-    string(FIND ${__TARGET} "." TARGET_EXTENSION_DOT_INDEX)
-    string(SUBSTRING ${__TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
+    string(FIND ${NFSLM_TARGET} "." TARGET_EXTENSION_DOT_INDEX)
+    string(SUBSTRING ${NFSLM_TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
     
     # add linker flags to generate map file
-    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map${__EXTRA_LINKMAP_PROPERTIES}")
+    set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map${NFSLM_EXTRA_LINKMAP_PROPERTIES}")
 
 endmacro()
 

@@ -11,10 +11,10 @@ include(binutils.common)
 macro(nf_add_platform_packages)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+    cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
 
     # packages specific for nanoCRL
-    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+    if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
 

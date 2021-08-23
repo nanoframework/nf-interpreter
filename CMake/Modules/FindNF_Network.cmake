@@ -150,7 +150,7 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Network DEFAULT_MSG NF_Network_INCLUDE_DIRS NF_Network_SOURCES)
 
 # macro to be called from binutils to add network library
-# TARGET parameter to set the target it's building
+# BUILD_TARGET parameter to set the target it's building
 # optional EXTRA_SOURCES with source files to be added to the library
 # optional EXTRA_INCLUDES with include paths to be added to the library
 # optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
@@ -158,10 +158,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_Network DEFAULT_MSG NF_Network_INCLUDE_DIRS
 macro(nf_add_lib_network)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET;EXTRA_COMPILE_DEFINITIONS" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILE_OPTIONS" ${ARGN})
+    cmake_parse_arguments(NFALN "" "BUILD_TARGET;EXTRA_COMPILE_OPTIONS" "EXTRA_SOURCES;EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
 
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
-        message(FATAL_ERROR "Need to set TARGET argument when calling nf_add_lib_network()")
+    if(NOT NFALN_BUILD_TARGET OR "${NFALN_BUILD_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set BUILD_TARGET argument when calling nf_add_lib_network()")
     endif()
 
     # add this has a library
@@ -171,7 +171,7 @@ macro(nf_add_lib_network)
         ${LIB_NAME} STATIC 
             ${NF_Network_SOURCES}
             ${mbedTLS_SOURCES}
-            ${__EXTRA_SOURCES})
+            ${NFALN_EXTRA_SOURCES})
 
     target_include_directories(
         ${LIB_NAME} 
@@ -179,23 +179,23 @@ macro(nf_add_lib_network)
             ${NF_Network_INCLUDE_DIRS}
             ${NF_CoreCLR_INCLUDE_DIRS}
             ${mbedTLS_INCLUDE_DIRS}
-            ${__EXTRA_INCLUDES})
+            ${NFALN_EXTRA_INCLUDES})
 
     # TODO can be removed later
     if(RTOS_FREERTOS_ESP32_CHECK)
        
-        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET})
+        # nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NFALN_TARGET})
 
         # this is the only one different
         target_compile_definitions(
             ${LIB_NAME} PUBLIC
             -DPLATFORM_ESP32
-            ${__EXTRA_COMPILER_DEFINITIONS}
+            ${NFALN_EXTRA_COMPILER_DEFINITIONS}
         )
 
     else()    
-        nf_set_compile_options(${LIB_NAME})
-        nf_set_compile_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${__TARGET} EXTRA_COMPILE_DEFINITIONS ${__EXTRA_COMPILE_DEFINITIONS})
+        nf_set_compile_options(TARGET ${LIB_NAME} EXTRA_COMPILE_OPTIONS ${NFALN_EXTRA_COMPILE_OPTIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALN_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
         nf_set_linker_options(TARGET ${LIB_NAME})
     endif()
 

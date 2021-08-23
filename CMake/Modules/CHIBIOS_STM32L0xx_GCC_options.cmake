@@ -23,7 +23,7 @@ set(CMAKE_EXE_LINKER_FLAGS " -Wl,--gc-sections -Wl,--no-wchar-size-warning -Wl,-
 macro(nf_set_compile_options)
 
     # parse arguments
-    cmake_parse_arguments(NFSCO "" "TARGET;EXTRA_COMPILE_OPTIONS" "" ${ARGN})
+    cmake_parse_arguments(NFSCO "" "TARGET" "EXTRA_COMPILE_OPTIONS" ${ARGN})
     
     if(NOT NFSCO_TARGET OR "${NFSCO_TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_options()")
@@ -44,27 +44,27 @@ endmacro()
 macro(nf_set_linker_options)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET;EXTRA_LINK_FLAGS" "" ${ARGN})
+    cmake_parse_arguments(NFSLO "" "TARGET;EXTRA_LINK_FLAGS" "" ${ARGN})
     
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
-        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
+    if(NOT NFSLO_TARGET OR "${NFSLO_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_linker_options()")
     endif()
 
     # request specs from newlib nano
-    set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs ")
 
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -flto -Os -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -flto -Os -fstrict-aliasing -fomit-frame-pointer -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fno-default-inline -finline-functions-called-once -fno-defer-pop ")
     endif()
 
     # include libraries in build
-    nf_include_libraries_in_build(${__TARGET})
+    nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${__TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${__EXTRA_LINK_FLAGS} ")
 
     # set optimization flags
-    nf_set_optimization_options(${__TARGET})
+    nf_set_optimization_options(${NFSLO_TARGET})
 
 endmacro()

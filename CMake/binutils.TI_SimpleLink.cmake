@@ -29,24 +29,24 @@ endfunction()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
-# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 # optional BUILD_TARGET when target it's a library pass here the name ot the target that's building for (either nanoBooter or nanoCLR)
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
 macro(nf_set_compile_definitions)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
+    cmake_parse_arguments(NFSCD "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
 
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+    if(NOT NFSCD_TARGET OR "${NFSCD_TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
     endif()
 
     # definitions required for SimpleLink SDK
-    target_compile_definitions(${__TARGET} PUBLIC -Dgcc)
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC -Dgcc)
 
-    nf_common_compiler_definitions(TARGET ${__TARGET} BUILD_TARGET ${__BUILD_TARGET})
+    nf_common_compiler_definitions(TARGET ${NFSCD_TARGET} BUILD_TARGET ${NFSCD_BUILD_TARGET})
 
     # include extra compiler definitions
-    target_compile_definitions(${__TARGET} PUBLIC ${__EXTRA_COMPILE_DEFINITIONS})
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC ${NFSCD_EXTRA_COMPILE_DEFINITIONS})
 
 endmacro()
 
@@ -80,17 +80,17 @@ endfunction()
 macro(nf_add_platform_packages)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+    cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
 
     find_package(TI_SimpleLink REQUIRED)
 
     # packages specific for nanoBooter
-    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+    if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
         # no packages for booter
     endif()
 
     # packages specific for nanoCRL
-    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+    if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
         # no packages for nanoCRL
     endif()
 
@@ -106,38 +106,34 @@ macro(nf_add_platform_dependencies target)
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
-            TARGET
-                ${target}
             EXTRA_INCLUDES
                 ${TI_SimpleLink_INCLUDE_DIRS}
                 ${TI_XDCTools_INCLUDE_DIR}
                 ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                 ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+        
+        add_dependencies(${target}.elf nano::NF_CoreCLR)
 
         nf_add_lib_native_assemblies(
-                TARGET
-                    ${target}
-                    
                 EXTRA_INCLUDES
                     ${CMAKE_CURRENT_BINARY_DIR}/syscfg
                     ${TI_SimpleLink_INCLUDE_DIRS}
                     ${TI_XDCTools_INCLUDE_DIR}
                     ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
-
-
+        
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
+        
         # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
         add_dependencies(COPY_TIRTOS_CONFIG SYSCONFIG_TASKS)
         add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
         add_dependencies(NF_NativeAssemblies TIRTOS_CONFIG)
-        
-        add_dependencies(${NANOCLR_PROJECT_NAME}.elf NF_NativeAssemblies)
-                
+
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
             nf_add_lib_network(
-                TARGET
+                BUILD_TARGET
                     ${target}
                 EXTRA_INCLUDES 
                     ${TI_SimpleLink_INCLUDE_DIRS}
@@ -145,7 +141,7 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
 
-            add_dependencies(${target}.elf nano::NF_Network)
+        add_dependencies(${target}.elf nano::NF_Network)
 
         endif()
 

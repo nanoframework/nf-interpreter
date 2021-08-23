@@ -31,20 +31,20 @@ endfunction()
 macro(nf_set_compile_definitions)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
+    cmake_parse_arguments(NFSCD "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
 
-    if(NOT __TARGET OR "${__TARGET}" STREQUAL "")
+    if(NOT NFSCD_TARGET OR "${NFSCD_TARGET}" STREQUAL "")
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
     endif()
 
     # definition for platform 
     # ChibiOS HAL community always include (nanoFramework overlay and official community contributions optionally)
-    target_compile_definitions(${__TARGET} PUBLIC -DHAL_USE_COMMUNITY )
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC -DHAL_USE_COMMUNITY )
 
-    nf_common_compiler_definitions(TARGET ${__TARGET} BUILD_TARGET ${__BUILD_TARGET})
+    nf_common_compiler_definitions(TARGET ${NFSCD_TARGET} BUILD_TARGET ${NFSCD_BUILD_TARGET})
 
     # include extra compiler definitions
-    target_compile_definitions(${__TARGET} PUBLIC ${__EXTRA_COMPILE_DEFINITIONS})
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC ${NFSCD_EXTRA_COMPILE_DEFINITIONS})
 
 endmacro()
 
@@ -64,7 +64,7 @@ endfunction()
 macro(nf_add_platform_packages)
 
     # parse arguments
-    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+    cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
    
     # packages common to all targets
     find_package(ChibiOS REQUIRED)
@@ -91,12 +91,12 @@ macro(nf_add_platform_packages)
     endif()
     
     # packages specific for nanoBooter
-    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+    if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
         # no packages for booter
     endif()
 
     # packages specific for nanoCRL
-    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+    if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
 
@@ -124,8 +124,6 @@ macro(nf_add_platform_dependencies target)
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
-            TARGET
-                ${target}
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
@@ -134,10 +132,10 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+        
+        add_dependencies(${target}.elf nano::NF_CoreCLR)
 
         nf_add_lib_native_assemblies(
-            TARGET
-                ${target}
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
@@ -148,12 +146,14 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
         
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
             nf_add_lib_network(
-                TARGET
+                BUILD_TARGET
                     ${target}
                 EXTRA_SOURCES 
                     ${TARGET_LWIP_SOURCES}
