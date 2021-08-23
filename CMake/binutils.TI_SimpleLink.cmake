@@ -75,9 +75,24 @@ endfunction()
 
 # Add packages that are common to TI SimpleLink platform builds
 # To be called from target CMakeList.txt
+# To be called from target CMakeList.txt
+# optional TARGET argument with target name
 macro(nf_add_platform_packages)
 
+    # parse arguments
+    cmake_parse_arguments(_ "" "TARGET" "" ${ARGN})
+
     find_package(TI_SimpleLink REQUIRED)
+
+    # packages specific for nanoBooter
+    if("${__TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+        # no packages for booter
+    endif()
+
+    # packages specific for nanoCRL
+    if("${__TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+        # no packages for nanoCRL
+    endif()
 
 endmacro()
 
@@ -99,6 +114,25 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                 ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
 
+        nf_add_lib_native_assemblies(
+                TARGET
+                    ${target}
+                    
+                EXTRA_INCLUDES
+                    ${CMAKE_CURRENT_BINARY_DIR}/syscfg
+                    ${TI_SimpleLink_INCLUDE_DIRS}
+                    ${TI_XDCTools_INCLUDE_DIR}
+                    ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+                    ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+
+
+        # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
+        add_dependencies(COPY_TIRTOS_CONFIG SYSCONFIG_TASKS)
+        add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
+        add_dependencies(NF_NativeAssemblies TIRTOS_CONFIG)
+        
+        add_dependencies(${NANOCLR_PROJECT_NAME}.elf NF_NativeAssemblies)
+                
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
@@ -116,11 +150,6 @@ macro(nf_add_platform_dependencies target)
         endif()
 
     endif()
-
-    # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf COPY_TIRTOS_CONFIG)
-    add_dependencies(${NANOCLR_PROJECT_NAME}.elf TIRTOS_CONFIG)
-    add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
  
 endmacro()
 
@@ -181,7 +210,6 @@ macro(nf_add_platform_sources target)
             ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
             ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
             ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
-        
         )
 
     endif()
@@ -191,6 +219,9 @@ endmacro()
 # Add TI SimpleLink sys config steps
 # To be called from target CMakeList.txt
 macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
+
+    # setup target to take care of generating SimpleLink SysConfig files
+    add_custom_target(SYSCONFIG_TASKS ALL)
 
     set(TI_DEVICE_FAMILIES_WITH_RADIO_FREQUENCY "CC13x2_26x2")
 
@@ -210,8 +241,12 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
 
     # copy Sys Config file to build directory
     add_custom_command(
-        OUTPUT
-        ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+        TARGET
+            SYSCONFIG_TASKS PRE_BUILD
+        
+        BYPRODUCTS
+            ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_SOURCE_DIR}/${SYS_CONFIG_FILENAME}
                 ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
@@ -221,14 +256,14 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
     # execute Sys Config with configuration file
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
         add_custom_command(
-            OUTPUT 
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+            TARGET
+                SYSCONFIG_TASKS PRE_BUILD
 
-            DEPENDS
-            ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+            BYPRODUCTS
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
             COMMAND ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.bat --product "${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/.metadata/product.json" --script ${SYS_CONFIG_FILENAME} -o "syscfg" --compiler gcc 
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -236,14 +271,14 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
         )
     else()
         add_custom_command(
-            OUTPUT 
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
-            ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
+            TARGET
+                SYSCONFIG_TASKS PRE_BUILD
 
-            DEPENDS
-            ${CMAKE_CURRENT_BINARY_DIR}/${SYS_CONFIG_FILENAME}
+            BYPRODUCTS
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_devices_config.c 
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_drivers_config.c
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_easylink_config.c
+                ${CMAKE_CURRENT_BINARY_DIR}/syscfg/ti_radio_config.c
 
             COMMAND ${ti_sysconfig_SOURCE_DIR}/sysconfig_cli.sh --product "${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/.metadata/product.json" --script ${SYS_CONFIG_FILENAME} -o "syscfg" --compiler gcc
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} 

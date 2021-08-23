@@ -30,6 +30,7 @@ add_executable(
     ${CMAKE_CURRENT_SOURCE_DIR}/CC1352R1_LAUNCHXL_fxns.c
 )
 
+nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
 nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 
 nf_add_common_sources(${NANOCLR_PROJECT_NAME})
@@ -44,6 +45,7 @@ nf_set_compile_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # set compile definitions
 nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS -DDeviceFamily_CC13X2 )
+target_compile_definitions(NF_NativeAssemblies PUBLIC -DDeviceFamily_CC13X2)
 
 # set linker files
 if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
