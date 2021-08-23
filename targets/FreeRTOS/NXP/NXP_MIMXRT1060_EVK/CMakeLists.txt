@@ -39,9 +39,7 @@ nf_add_platform_include_directories(${NANOBOOTER_PROJECT_NAME})
 
 add_executable(
     # executables for project, project sources
-    ${NANOCLR_PROJECT_NAME}.elf  
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
+    ${NANOCLR_PROJECT_NAME}.elf
 )
 
 nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})

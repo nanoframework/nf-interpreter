@@ -11,8 +11,6 @@
 #ifndef _TARGET_COMMON_H_
 #define _TARGET_COMMON_H_
 
-#include <target_os.h>
-
 #define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with TI SL CC32xx SDK v3.10.00.04"
 
 /////////////////////////////////////////////////////////////////////////////////////////

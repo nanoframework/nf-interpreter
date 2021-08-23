@@ -5,11 +5,9 @@
 
 
 # set include directories
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include/lwip)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND nanoFramework.Networking.Sntp_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
-
 
 # source files
 set(nanoFramework.Networking.Sntp_SRCS
