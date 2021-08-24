@@ -16,11 +16,6 @@
 #define HAL_NF_USE_FSMC                TRUE
 #endif
 
-// enables STM32 Can driver
-#if !defined(HAL_NF_USE_STM32_CAN) 
-#define HAL_NF_USE_STM32_CAN           TRUE
-#endif
-
 // enables STM32 QSPI driver
 #if !defined(HAL_NF_USE_STM32_QSPI)
 #define HAL_NF_USE_STM32_QSPI          FALSE

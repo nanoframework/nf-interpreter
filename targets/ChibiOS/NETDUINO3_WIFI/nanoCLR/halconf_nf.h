@@ -11,9 +11,4 @@
 #define HAL_NF_USE_STM32_FLASH         TRUE
 #endif
 
-// enables STM32 Can driver
-#if !defined(HAL_NF_USE_STM32_CAN) 
-#define HAL_NF_USE_STM32_CAN       TRUE
-#endif
-
 #endif // HALCONF_NF_H
