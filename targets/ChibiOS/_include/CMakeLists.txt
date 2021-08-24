@@ -11,7 +11,7 @@ list(APPEND TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTO
 set(TARGET_CHIBIOS_COMMON_INCLUDE_DIRS ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
 
 # add headers with target platform definitions and SWO
-if(CHIBIOS_COMMUNITY_TARGET)
+if(IS_COMMUNITY_TARGET)
 
     configure_file(${CMAKE_SOURCE_DIR}/CMake/ChibiOS_target_os.h.in
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
