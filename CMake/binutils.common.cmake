@@ -95,7 +95,7 @@ macro(nf_add_common_dependencies target)
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
     
         configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
-                       ${CMAKE_CURRENT_BINARY_DIR}/target_platform.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_platform.h @ONLY)
 
     endif()
 
