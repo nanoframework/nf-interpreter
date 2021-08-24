@@ -111,6 +111,13 @@ macro(nf_add_platform_dependencies target)
                 ${TI_XDCTools_INCLUDE_DIR}
                 ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                 ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+
+        if(IS_COMMUNITY_TARGET)
+            target_include_directories(NF_CoreCLR PUBLIC
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}/nanoCLR)
+    
+        endif()
         
         add_dependencies(${target}.elf nano::NF_CoreCLR)
 
@@ -121,6 +128,13 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                 ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
         
+        if(IS_COMMUNITY_TARGET)
+            target_include_directories(WireProtocol PUBLIC
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}/nanoCLR)
+    
+        endif()
+
         add_dependencies(${target}.elf nano::WireProtocol)
 
         if(NF_FEATURE_DEBUGGER)
@@ -132,6 +146,13 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
             
             add_dependencies(${target}.elf nano::NF_Debugger)
+            
+            if(IS_COMMUNITY_TARGET)
+                target_include_directories(NF_Debugger PUBLIC
+                    ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}
+                    ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}/nanoCLR)
+    
+            endif()
 
         endif()
 
@@ -142,7 +163,14 @@ macro(nf_add_platform_dependencies target)
                     ${TI_XDCTools_INCLUDE_DIR}
                     ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
                     ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
-        
+
+        if(IS_COMMUNITY_TARGET)
+            target_include_directories(NF_NativeAssemblies PUBLIC
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}
+                ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}/nanoCLR)
+    
+        endif()
+
         # add dependency from SysConfig and TI RTOS configs (this is required to make sure that the intermediate artifacts are generated in the proper order)
         add_dependencies(COPY_TIRTOS_CONFIG SYSCONFIG_TASKS)
         add_dependencies(TIRTOS_CONFIG COPY_TIRTOS_CONFIG)
@@ -184,6 +212,13 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}
 
     )
+
+    if(IS_COMMUNITY_TARGET)
+        target_include_directories(${target}.elf PUBLIC
+            ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}
+            ${CMAKE_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD}/nanoCLR)
+
+    endif()
 
     target_link_libraries(
         ${NANOCLR_PROJECT_NAME}.elf

@@ -770,6 +770,9 @@ endif()
 
 #################################################################
 
+# assume no community board... until proven otherwise
+set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
+
 #######################
 # ChibiOS
 if(RTOS_CHIBIOS_CHECK)
@@ -872,6 +875,9 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
 
         # try to find board in the Community targets folder
         if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
+            
+            # set flag for this being a community board
+            set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
 
             # set target base location
             set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
