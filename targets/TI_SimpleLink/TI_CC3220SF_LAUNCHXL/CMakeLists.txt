@@ -12,22 +12,22 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in"
  
 set(NANOCLR_PROJECT_NAME "nanoCLR")
 
-find_package(TI_SimpleLink REQUIRED)
-find_package(WireProtocol REQUIRED)
-find_package(nanoHALCore REQUIRED)
+find_package(TI_SimpleLink REQUIRED QUIET)
+find_package(WireProtocol REQUIRED QUIET)
+find_package(nanoHALCore REQUIRED QUIET)
 
 # packages for nanoFramework libraries
 #######################################
 # mandatory 
-find_package(NF_CoreCLR REQUIRED)
+find_package(NF_CoreCLR REQUIRED QUIET)
 
 #######################################
 # optional
 
 # nF feature: debugger
 if(NF_FEATURE_DEBUGGER)
-    find_package(NF_Debugger REQUIRED)
-    find_package(NF_Diagnostics REQUIRED)
+    find_package(NF_Debugger REQUIRED QUIET)
+    find_package(NF_Diagnostics REQUIRED QUIET)
 endif()
 
 #######################################

@@ -50,11 +50,11 @@ macro(nf_add_platform_packages)
     # parse arguments
     cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
 
-    find_package(FreeRTOS REQUIRED)
-    find_package(CMSIS REQUIRED)
+    find_package(FreeRTOS REQUIRED QUIET)
+    find_package(CMSIS REQUIRED QUIET)
     
     if(USE_FILESYSTEM_OPTION)
-        find_package(FATFS REQUIRED)
+        find_package(FATFS REQUIRED QUIET)
     endif()
 
     # packages specific for nanoBooter
@@ -67,12 +67,12 @@ macro(nf_add_platform_packages)
 
         if(USE_NETWORKING_OPTION)
 
-            find_package(NF_Network REQUIRED)
-            find_package(LWIP REQUIRED)
+            find_package(NF_Network REQUIRED QUIET)
+            find_package(LWIP REQUIRED QUIET)
 
             # security provider is mbedTLS
             if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED)
+                find_package(mbedTLS REQUIRED QUIET)
             endif()
 
         endif()

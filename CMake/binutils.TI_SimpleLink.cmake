@@ -82,7 +82,7 @@ macro(nf_add_platform_packages)
     # parse arguments
     cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
 
-    find_package(TI_SimpleLink REQUIRED)
+    find_package(TI_SimpleLink REQUIRED QUIET)
 
     # packages specific for nanoBooter
     if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")

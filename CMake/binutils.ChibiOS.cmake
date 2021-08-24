@@ -67,27 +67,27 @@ macro(nf_add_platform_packages)
     cmake_parse_arguments(NFAPP "" "TARGET" "" ${ARGN})
    
     # packages common to all targets
-    find_package(ChibiOS REQUIRED)
-    find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED)
-    find_package(ChibiOSnfOverlay REQUIRED)
+    find_package(ChibiOS REQUIRED QUIET)
+    find_package(ChibiOS_${TARGET_SERIES_SHORT}_HAL REQUIRED QUIET)
+    find_package(ChibiOSnfOverlay REQUIRED QUIET)
 
     # ChibiOS contrib repo
-    if(CHIBIOS_CONTRIB_REQUIRED)
-        find_package(ChibiOS-Contrib REQUIRED)
+    if(CHIBIOS_CONTRIB_REQUIRED QUIET)
+        find_package(ChibiOS-Contrib REQUIRED QUIET)
     endif()
 
     if(USE_FILESYSTEM_OPTION)
-        find_package(CHIBIOS_FATFS REQUIRED)
+        find_package(CHIBIOS_FATFS REQUIRED QUIET)
     endif()
 
     # SPIFFS
     if(NF_FEATURE_USE_SPIFFS)
-        find_package(STM32F7_CubePackage REQUIRED)
-        find_package(SPIFFS REQUIRED)
+        find_package(STM32F7_CubePackage REQUIRED QUIET)
+        find_package(SPIFFS REQUIRED QUIET)
     endif()
 
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED)
+    if(STM32_CUBE_PACKAGE_REQUIRED QUIET)
+        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
     endif()
     
     # packages specific for nanoBooter
@@ -100,12 +100,12 @@ macro(nf_add_platform_packages)
 
         if(USE_NETWORKING_OPTION)
 
-            find_package(NF_Network REQUIRED)
-            find_package(CHIBIOS_LWIP REQUIRED)
+            find_package(NF_Network REQUIRED QUIET)
+            find_package(CHIBIOS_LWIP REQUIRED QUIET)
 
             # security provider is mbedTLS
             if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED)
+                find_package(mbedTLS REQUIRED QUIET)
             endif()
 
         endif()

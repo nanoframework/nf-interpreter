@@ -70,14 +70,14 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_common_packages)
 
-    find_package(WireProtocol REQUIRED)
-    find_package(NF_NativeAssemblies)
-    find_package(NF_CoreCLR REQUIRED)
-    find_package(NF_HALCore REQUIRED)
+    find_package(WireProtocol REQUIRED QUIET)
+    find_package(NF_NativeAssemblies REQUIRED QUIET)
+    find_package(NF_CoreCLR REQUIRED QUIET)
+    find_package(NF_HALCore REQUIRED QUIET)
 
     if(NF_FEATURE_DEBUGGER)
-        find_package(NF_Debugger REQUIRED)
-        find_package(NF_Diagnostics REQUIRED)
+        find_package(NF_Debugger REQUIRED QUIET)
+        find_package(NF_Diagnostics REQUIRED QUIET)
     endif()
 
 endmacro()

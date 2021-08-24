@@ -64,7 +64,7 @@ macro(PerformSettingsForApiEntry apiNamespace)
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${apiNamespaceWithoutDots},")
 
     # find the module
-    find_package(${apiNamespace} REQUIRED)
+    find_package(${apiNamespace} REQUIRED QUIET)
 
     # append include directories to list with includes for all the APIs
     list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${apiNamespace}_INCLUDE_DIRS}")
@@ -94,7 +94,7 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
 
     # find the module
-    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
+    find_package("INTEROP-${interopAssemblyName}" REQUIRED QUIET)
 
     #########
     # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
