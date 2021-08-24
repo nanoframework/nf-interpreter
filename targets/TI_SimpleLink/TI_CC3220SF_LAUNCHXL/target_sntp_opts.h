@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_SNTP_OPTS_H_
-#define _TARGET_SNTP_OPTS_H_ 1
+#ifndef TARGET_SNTP_OPTS_H
+#define TARGET_SNTP_OPTS_H
 
 #define SNTP_SERVER0_DEFAULT_ADDRESS "0.pool.ntp.org"
 #define SNTP_SERVER1_DEFAULT_ADDRESS "1.pool.ntp.org"
@@ -22,4 +22,4 @@
 // value in seconds
 #define SNTP_RETRY_TIMEOUT (10)
 
-#endif // _TARGET_SNTP_OPTS_H_
+#endif // TARGET_SNTP_OPTS_H

@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_PAL_TIME_H_
-#define _TARGET_PAL_TIME_H_ 1
+#ifndef TARGET_PAL_TIME_H
+#define TARGET_PAL_TIME_H
 
-#endif //_TARGET_PAL_TIME_H_
+#endif //TARGET_PAL_TIME_H

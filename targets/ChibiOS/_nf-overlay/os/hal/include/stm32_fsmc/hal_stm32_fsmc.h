@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_NF_FSMC_H_
-#define HAL_NF_FSMC_H_
+#ifndef HAL_NF_FSMC_H
+#define HAL_NF_FSMC_H
 
 #if (HAL_NF_USE_FSMC == TRUE)
 
@@ -363,6 +363,6 @@ extern "C"
 #define STM32_USE_FSMC_SDRAM FALSE
 #define STM32_USE_FSMC_SRAM  FALSE
 
-#endif /* HAL_NF_USE_FSMC */
+#endif // HAL_NF_USE_FSMC
 
-#endif /* HAL_NF_FSMC_H_ */
+#endif // HAL_NF_FSMC_H

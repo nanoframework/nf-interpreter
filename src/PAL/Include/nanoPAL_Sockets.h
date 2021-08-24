@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DRIVERS_SOCKETS_DECL_H_
-#define _DRIVERS_SOCKETS_DECL_H_ 1
+#ifndef DRIVERS_SOCKETS_DECL_H
+#define DRIVERS_SOCKETS_DECL_H
 
 #if defined(_WIN32)
 #define GLOBAL_LOCK_SOCKETS(x)
@@ -742,4 +742,4 @@ void HAL_SOCK_EventsSet(uint32_t events);
 
 //--//
 
-#endif // _DRIVERS_SOCKETS_DECL_H_
+#endif // DRIVERS_SOCKETS_DECL_H

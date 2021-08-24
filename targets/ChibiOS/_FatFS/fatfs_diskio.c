@@ -202,7 +202,7 @@ DRESULT disk_write(
     }
     return RES_PARERR;
 }
-#endif /* _FS_READONLY */
+#endif // FS_READONLY
 
 /*-----------------------------------------------------------------------*/
 /* Miscellaneous Functions                                               */

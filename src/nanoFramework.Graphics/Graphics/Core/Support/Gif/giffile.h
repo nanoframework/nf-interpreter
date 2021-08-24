@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _GIFFILE_H_
-#define _GIFFILE_H_
+#ifndef GIFFILE_H
+#define GIFFILE_H
 
 /**************************************************************************\
 *
@@ -90,4 +90,4 @@ struct GifGraphicControlExtension // 6 bytes
     CLR_UINT8 transparentcolorindex;
 } __attribute__((packed));
 
-#endif
+#endif // GIFFILE_H

@@ -6,8 +6,8 @@
 
 // For a  FT6206 by Focal Tech. ( Originally developed for the STM32F79iDiscovery board
 
-#ifndef _ft6x06_H_
-#define _ft6x06_H_ 1
+#ifndef ft6x06_H
+#define ft6x06_H
 
 #include "TouchDevice.h"
 #include "TouchInterface.h"
@@ -96,5 +96,5 @@ TouchPointDevice TouchDevice::GetPoint()
 }
 
 
-#endif // _ft6x06_H_
+#endif // ft6x06_H
 

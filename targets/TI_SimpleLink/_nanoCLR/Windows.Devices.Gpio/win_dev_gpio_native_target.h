@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_GPIO_NATIVE_TARGET_H_
-#define _WIN_DEV_GPIO_NATIVE_TARGET_H_
+#ifndef WIN_DEV_GPIO_NATIVE_TARGET_H
+#define WIN_DEV_GPIO_NATIVE_TARGET_H
 
 #include <win_dev_gpio_native.h>
 #include <target_windows_devices_gpio.h>
@@ -19,4 +19,4 @@
 #include <interrupt.h>
 #include <dpl/HwiP.h>
 
-#endif //_WIN_DEV_GPIO_NATIVE_TARGET_H_
+#endif //WIN_DEV_GPIO_NATIVE_TARGET_H

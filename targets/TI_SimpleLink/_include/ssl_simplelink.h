@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SSL_SIMPLELINK_H_
-#define _SSL_SIMPLELINK_H_ 1
+#ifndef SSL_SIMPLELINK_H
+#define SSL_SIMPLELINK_H
 
 #include <ti/net/slnetutils.h>
 
@@ -15,4 +15,4 @@ struct SlSSL_Context
     bool IsServer;
 };
 
-#endif //_SSL_SIMPLELINK_H_
+#endif //SSL_SIMPLELINK_H

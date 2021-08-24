@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_PLATFORM_H_
-#define _TARGET_PLATFORM_H_
+#ifndef TARGET_PLATFORM_H
+#define TARGET_PLATFORM_H
 
-#endif /* _TARGET_PLATFORM_H_ */
+#endif // TARGET_PLATFORM_H

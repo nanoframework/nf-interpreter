@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_FMC_SDRAM_H_
-#define HAL_FMC_SDRAM_H_
+#ifndef HAL_FMC_SDRAM_H
+#define HAL_FMC_SDRAM_H
 
 #include <stm32_registry.h>
 #include <hal_nf_community.h>
@@ -130,4 +130,4 @@ extern "C"
 #endif // STM32F427xx / STM32F429xx / STM32F437xx / STM32F439xx / STM32F469xx / STM32F479xx / STM32F745xx / STM32F746xx
        // STM32F756xx / STM32F767xx / STM32F769xx / STM32F777xx / STM32F779xx
 
-#endif // HAL_FMC_SDRAM_H_
+#endif // HAL_FMC_SDRAM_H

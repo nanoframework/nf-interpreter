@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
-#define _NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
+#ifndef NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
+#define NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
 
 #include <nf_devices_onewire_native.h>
 #include <hal.h>
@@ -25,4 +25,4 @@ struct OneWireFindStruct
     | PAL_MODE_INPUT_PULLUP | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_MODE_ALTERNATE); \
 }
 
-#endif  //_NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
+#endif // NF_DEVICES_ONEWIRE_NATIVE_TARGET_H

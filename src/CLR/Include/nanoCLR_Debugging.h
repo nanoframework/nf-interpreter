@@ -6,8 +6,8 @@
 
 // clang-format off
 
-#ifndef _NANOCLR_DEBUGGING_H_
-#define _NANOCLR_DEBUGGING_H_
+#ifndef NANOCLR_DEBUGGING_H
+#define NANOCLR_DEBUGGING_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1009,6 +1009,6 @@ extern const CLR_UINT32 c_Debugger_Lookup_Reply_count;
 
 //--//
 
-#endif // _NANOCLR_DEBUGGING_H_
+#endif // NANOCLR_DEBUGGING_H
 
 // clang-format on

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_NETWORK_H_
-#define _NANOHAL_NETWORK_H_ 1
+#ifndef NANOHAL_NETWORK_H
+#define NANOHAL_NETWORK_H
 
 #include <nanoCLR_Headers.h>
 
@@ -317,4 +317,4 @@ extern "C"
 }
 #endif
 
-#endif //_NANOHAL_NETWORK_H_
+#endif // NANOHAL_NETWORK_H

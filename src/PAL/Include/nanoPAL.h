@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOPAL_H_
-#define _NANOPAL_H_ 1
+#ifndef NANOPAL_H
+#define NANOPAL_H
 
 //#include <nanoHAL_Types.h>
 
@@ -252,4 +252,4 @@ int hal_vsnprintf( char* buffer, size_t len, const char* format, va_list arg );
 #define NATIVE_PROFILE_PAL_HEAP()
 #define NATIVE_PROFILE_PAL_CRT()
 
-#endif // _NANOPAL_H_
+#endif // NANOPAL_H

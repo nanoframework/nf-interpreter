@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_WINDOWS_DEVICES_GPIO_H_
-#define _TARGET_WINDOWS_DEVICES_GPIO_H_
+#ifndef TARGET_WINDOWS_DEVICES_GPIO_H
+#define TARGET_WINDOWS_DEVICES_GPIO_H
 
 // max number of GPIO pins
 #define GPIO_PINS_COUNT 32
 
-#endif // _TARGET_WINDOWS_DEVICES_GPIO_H_
+#endif // TARGET_WINDOWS_DEVICES_GPIO_H

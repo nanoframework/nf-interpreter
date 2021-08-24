@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_RT_EVENTS_NATIVE_H_
-#define _NF_RT_EVENTS_NATIVE_H_
+#ifndef NF_RT_EVENTS_NATIVE_H
+#define NF_RT_EVENTS_NATIVE_H
 
 // need this include here to use this in nanoCLR WIN32 project
 #include <stdafx.h>
@@ -106,4 +106,4 @@ extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtim
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Events;
 
-#endif //_NF_RT_EVENTS_NATIVE_H_
+#endif // NF_RT_EVENTS_NATIVE_H

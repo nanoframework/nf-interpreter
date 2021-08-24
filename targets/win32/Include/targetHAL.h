@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_HAL_H_
-#define _TARGET_HAL_H_
+#ifndef TARGET_HAL_H
+#define TARGET_HAL_H
 
 // #include <nanoHAL_Power.h>
 
@@ -98,4 +98,4 @@ inline uint64_t CPU_MillisecondsToTicks(UINT64 uSec)
     return uSec * 10 * 1000;
 }
 
-#endif //_TARGET_HAL_H_
+#endif //TARGET_HAL_H

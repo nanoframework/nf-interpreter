@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_NAND_LLD_H_
-#define HAL_NAND_LLD_H_
+#ifndef HAL_NAND_LLD_H
+#define HAL_NAND_LLD_H
 
 #include <stm32_registry.h>
 #include <hal_nf_community.h>
@@ -233,4 +233,4 @@ extern "C"
 
 #endif // STM32_USE_FSMC_NAND
 
-#endif // HAL_NAND_LLD_H_
+#endif // HAL_NAND_LLD_H

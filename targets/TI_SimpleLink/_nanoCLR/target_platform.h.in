@@ -8,8 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_PLATFORM_H_
-#define _TARGET_PLATFORM_H_ 1
+#ifndef TARGET_PLATFORM_H
+#define TARGET_PLATFORM_H
 
 #define NANOCLR_GRAPHICS    @NANOCLR_GRAPHICS@
 
@@ -19,4 +19,4 @@
 #define HAL_USE_SPI         @HAL_USE_SPI_OPTION@
 #define HAL_USE_EASYLINK    @API_nanoFramework.TI.EasyLink@
 
-#endif /* _TARGET_PLATFORM_H_ */
+#endif // TARGET_PLATFORM_H

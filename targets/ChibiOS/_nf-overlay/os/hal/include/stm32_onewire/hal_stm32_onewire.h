@@ -112,6 +112,6 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_NF_USE_STM32_ONEWIRE */
+#endif // HAL_NF_USE_STM32_ONEWIRE
 
-#endif /* HAL_NF_STM32_ONEWIRE_H_ */
+#endif // HAL_NF_STM32_ONEWIRE_H

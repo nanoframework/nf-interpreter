@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _MCUCONF_NF_H_
-#define _MCUCONF_NF_H_
+#ifndef MCUCONF_NF_H
+#define MCUCONF_NF_H
 
-#endif // _MCUCONF_NF_H_
+#endif // MCUCONF_NF_H
 

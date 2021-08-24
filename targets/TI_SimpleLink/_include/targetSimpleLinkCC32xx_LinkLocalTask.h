@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SIMPLELINK_CC32XX_LINKLOCAL_TASK_H_
-#define _SIMPLELINK_CC32XX_LINKLOCAL_TASK_H_
+#ifndef SIMPLELINK_CC32XX_LINKLOCAL_TASK_H
+#define SIMPLELINK_CC32XX_LINKLOCAL_TASK_H
 
 /* TI-DRIVERS Header files */
 #include <ti/drivers/net/wifi/simplelink.h>
@@ -236,4 +236,4 @@ uint32_t getDeviceType();
 //****************************************************************************
 void * linkLocalTask(void *pvParameters);
 
-#endif //_SIMPLELINK_CC32XX_LINKLOCAL_TASK_H_
+#endif //SIMPLELINK_CC32XX_LINKLOCAL_TASK_H

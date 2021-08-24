@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _XPT2046_H_
-#define _XPT2046_H_ 1
+#ifndef XPT2046_H
+#define XPT2046_H
 
 #include "TouchDevice.h"
 #include "TouchInterface.h"
@@ -44,4 +44,4 @@ TouchPointDevice TouchDevice::GetPoint()
 
     return TouchValue;
 }
-#endif // _XPT2046_H_
+#endif // XPT2046_H

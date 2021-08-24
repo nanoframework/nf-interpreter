@@ -11,8 +11,8 @@
     follows would be the public-facing nanoprintf.h.
 */
 
-#ifndef NANOPRINTF_H_INCLUDED
-#define NANOPRINTF_H_INCLUDED
+#ifndef NANOPRINTF_H
+#define NANOPRINTF_H
 
 #include <stdarg.h>
 #include <stddef.h>
@@ -242,4 +242,4 @@ typedef uintmax_t npf__uint_t;
 #define snprintf  npf_snprintf
 #define vsnprintf npf_vsnprintf
 
-#endif /* NANOPRINTF_H_INCLUDED */
+#endif // NANOPRINTF_H

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _LWIP_SOCKETS_H_
-#define _LWIP_SOCKETS_H_
+#ifndef LWIP_SOCKETS_H
+#define LWIP_SOCKETS_H
 
 #include <nanoHAL.h>
 #include <nanoHAL_ConfigurationManager.h>
@@ -128,4 +128,4 @@ struct LWIP_SOCKETS_Driver
 // SOCKET driver
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _LWIP_SOCKETS_H_ 1
+#endif // LWIP_SOCKETS_H

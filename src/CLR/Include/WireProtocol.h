@@ -6,8 +6,8 @@
 
 // clang-format off
 
-#ifndef _WIREPROTOCOL_H_
-#define _WIREPROTOCOL_H_
+#ifndef WIREPROTOCOL_H
+#define WIREPROTOCOL_H
 
 #include <nanoCLR_Headers.h>
 #include <nanoSupport.h>
@@ -213,6 +213,6 @@ struct WP_CompileCheck
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
 
-#endif // _WIREPROTOCOL_H_
+#endif // WIREPROTOCOL_H
 
 // clang-format on

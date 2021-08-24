@@ -6,8 +6,8 @@
 
 // CC3220 Board Specific APIs
 
-#ifndef __CC3220SF_LAUNCHXL_H
-#define __CC3220SF_LAUNCHXL_H
+#ifndef CC3220SF_LAUNCHXL_H
+#define CC3220SF_LAUNCHXL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -183,4 +183,4 @@ extern void CC3220SF_LAUNCHXL_initGeneral(void);
 }
 #endif
 
-#endif /* __CC3220SF_LAUNCHXL_H */
+#endif // _CC3220SF_LAUNCHXL_H */

@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _HAL_TYPES_H_
-#define _HAL_TYPES_H_ 1
+#ifndef HAL_TYPES_H
+#define HAL_TYPES_H
 
 #include <nf_errors_exceptions.h>
 
@@ -50,5 +50,5 @@ typedef struct SYSTEMTIME
 
 #endif // !(defined(_WIN32) || defined(WIN32))
 
-#endif  // _HAL_TYPES_H_
+#endif // HAL_TYPES_H
 

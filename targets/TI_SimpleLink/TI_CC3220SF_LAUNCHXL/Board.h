@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef __BOARD_H
-#define __BOARD_H
+#ifndef BOARD_H
+#define BOARD_H
 
 #define Board_CC3220SF_LAUNCHXL
 
@@ -81,4 +81,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __BOARD_H */
+#endif // _BOARD_H */

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOPAL_COM_H_
-#define _NANOPAL_COM_H_ 1
+#ifndef NANOPAL_COM_H
+#define NANOPAL_COM_H
 
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
@@ -53,4 +53,4 @@ bool DebuggerPort_IsUsingSsl( COM_HANDLE comPortNum );
 }
 #endif
 
-#endif // _NANOPAL_COMDECL_H_
+#endif // NANOPAL_COM_H

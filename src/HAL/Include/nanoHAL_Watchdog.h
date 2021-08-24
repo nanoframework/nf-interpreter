@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOHAL_WATCHDOG_H_
-#define _NANOHAL_WATCHDOG_H_ 1
+#ifndef NANOHAL_WATCHDOG_H
+#define NANOHAL_WATCHDOG_H
 
 #include <nanoWeak.h>   
 
@@ -18,4 +18,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif // NANOHAL_WATCHDOG_H

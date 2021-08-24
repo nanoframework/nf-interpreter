@@ -35,8 +35,8 @@
  *
  */
 
-#ifndef __CC_H__
-#define __CC_H__
+#ifndef CC_H
+#define CC_H
 
 #define LWIP_NO_INTTYPES_H 1
 
@@ -106,4 +106,4 @@ typedef u32_t          mem_ptr_t;
 #include "sys_arch.h"//FSL
 
 
-#endif /* __CC_H__ */
+#endif // CC_H

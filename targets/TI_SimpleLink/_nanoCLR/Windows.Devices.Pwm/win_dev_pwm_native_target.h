@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_PWM_NATIVE_TARGET_H_
-#define _WIN_DEV_PWM_NATIVE_TARGET_H_
+#ifndef WIN_DEV_PWM_NATIVE_TARGET_H
+#define WIN_DEV_PWM_NATIVE_TARGET_H
 
 #include "Board.h"
 #include <ti/drivers/PWM.h>
@@ -18,4 +18,4 @@
 /////////////////////////////////////
 extern PWM_Handle PwmPins[PWM_PIN_COUNT];
 
-#endif  //_WIN_DEV_PWM_NATIVE_TARGET_H_
+#endif // WIN_DEV_PWM_NATIVE_TARGET_H

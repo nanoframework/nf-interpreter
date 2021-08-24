@@ -3,11 +3,11 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_RECEIVERTHREAD_H_
-#define _WIREPROTOCOL_RECEIVERTHREAD_H_
+#ifndef WIREPROTOCOL_RECEIVERTHREAD_H
+#define WIREPROTOCOL_RECEIVERTHREAD_H
 
 // declaration of RTOS thread
 void ReceiverThread(void * argument);
 
-#endif //_WIREPROTOCOL_RECEIVERTHREAD_H_
+#endif //WIREPROTOCOL_RECEIVERTHREAD_H
 

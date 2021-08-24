@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_POWER_H_
-#define _NANOHAL_POWER_H_ 1
+#ifndef NANOHAL_POWER_H
+#define NANOHAL_POWER_H
 
 #include <nanoCLR_Headers.h>
 
@@ -33,4 +33,4 @@ extern "C"
 }
 #endif
 
-#endif //_NANOHAL_POWER_H_
+#endif //NANOHAL_POWER_H

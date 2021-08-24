@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_SNTP_H_
-#define _TARGET_SNTP_H_ 1
+#ifndef TARGET_SNTP_H
+#define TARGET_SNTP_H
 
 #include <nanoCLR_Headers.h>
 #include <target_sntp_opts.h>
@@ -152,4 +152,4 @@ extern "C"
 }
 #endif
 
-#endif //_TARGET_SNTP_H_
+#endif //TARGET_SNTP_H

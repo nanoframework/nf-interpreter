@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_PARSEOPTIONS_H_
-#define _NANOCLR_PARSEOPTIONS_H_
+#ifndef NANOCLR_PARSEOPTIONS_H
+#define NANOCLR_PARSEOPTIONS_H
 
 #include <nanoCLR_Runtime.h>
 
@@ -133,4 +133,4 @@ struct CLR_RT_ParseOptions
 
 #endif
 
-#endif // _NANOCLR_PARSEOPTIONS_H_
+#endif // NANOCLR_PARSEOPTIONS_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_I2C_NATIVE_TARGET_H_
-#define _SYS_DEV_I2C_NATIVE_TARGET_H_
+#ifndef SYS_DEV_I2C_NATIVE_TARGET_H
+#define SYS_DEV_I2C_NATIVE_TARGET_H
 
 #include <sys_dev_i2c_native.h>
 #include <string.h>
@@ -24,4 +24,4 @@ typedef struct
 ///////////////////////////////////////////
 extern NF_PAL_I2C I2C1_PAL;
 
-#endif //_SYS_DEV_I2C_NATIVE_TARGET_H_
+#endif //SYS_DEV_I2C_NATIVE_TARGET_H

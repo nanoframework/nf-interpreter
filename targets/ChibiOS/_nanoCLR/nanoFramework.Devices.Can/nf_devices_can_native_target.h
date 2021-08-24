@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_DEVICES_CAN_NATIVE_TARGET_H_
-#define _NF_DEVICES_CAN_NATIVE_TARGET_H_
+#ifndef NF_DEVICES_CAN_NATIVE_TARGET_H
+#define NF_DEVICES_CAN_NATIVE_TARGET_H
 
 #include <hal.h>
 #include "target_nf_devices_can_config.h"
@@ -82,4 +82,4 @@ void Init_Can1();
 void Init_Can2();
 void Init_Can3();
 
-#endif //_NF_DEVICES_CAN_NATIVE_TARGET_H_
+#endif //NF_DEVICES_CAN_NATIVE_TARGET_H

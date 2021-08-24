@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_FSMC_SRAM_H_
-#define HAL_FSMC_SRAM_H_
+#ifndef HAL_FSMC_SRAM_H
+#define HAL_FSMC_SRAM_H
 
 #include <stm32_registry.h>
 #include <hal_nf_community.h>
@@ -140,4 +140,4 @@ extern "C"
 
 #endif // STM32_USE_FSMC_SRAM
 
-#endif // HAL_FSMC_SRAM_H_
+#endif // HAL_FSMC_SRAM_H

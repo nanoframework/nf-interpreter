@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_COMMON_H_
-#define _TARGET_COMMON_H_ 1
+#ifndef TARGET_COMMON_H
+#define TARGET_COMMON_H
 
-#endif // _TARGET_COMMON_H_
+#endif // TARGET_COMMON_H

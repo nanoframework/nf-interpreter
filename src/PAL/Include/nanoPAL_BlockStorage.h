@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOPAL_BLOCKSTORAGE_H_
-#define _NANOPAL_BLOCKSTORAGE_H_ 1
+#ifndef NANOPAL_BLOCKSTORAGE_H
+#define NANOPAL_BLOCKSTORAGE_H
 
 #include <nanoHAL_v2.h>
 #include <target_BlockStorage.h>
@@ -702,4 +702,4 @@ extern "C"
 }
 #endif
 
-#endif // _NANOPAL_BLOCKSTORAGE_H_
+#endif // NANOPAL_BLOCKSTORAGE_H

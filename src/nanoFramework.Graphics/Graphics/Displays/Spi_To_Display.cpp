@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SPI_TO_DISPLAY_
-#define _SPI_TO_DISPLAY_ 1
+#ifndef SPI_TO_DISPLAY_
+#define SPI_TO_DISPLAY_
 
 #include "DisplayInterface.h"
 
@@ -166,4 +166,4 @@ void DisplayInterface::SendBytes(CLR_UINT8 *data, CLR_UINT32 length)
     return;
 }
 
-#endif // _SPI_TO_DISPLAY_
+#endif // SPI_TO_DISPLAY_

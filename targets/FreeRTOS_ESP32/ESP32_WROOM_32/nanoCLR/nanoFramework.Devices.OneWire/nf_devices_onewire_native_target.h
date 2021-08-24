@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
-#define _NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
+#ifndef NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
+#define NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
 
 #include <nf_devices_onewire_native.h>
 
@@ -35,4 +35,4 @@ typedef enum {
 #define SEARCH_ROM               0xF0    /* search ROM */
 #define COND_SEARCH_ROM          0xEC    /* conditional search ROM */
 
-#endif  //_NF_DEVICES_ONEWIRE_NATIVE_TARGET_H_
+#endif // NF_DEVICES_ONEWIRE_NATIVE_TARGET_H

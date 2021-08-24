@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_BOOT_H_
-#define _NANOHAL_BOOT_H_ 1
+#ifndef NANOHAL_BOOT_H
+#define NANOHAL_BOOT_H
 
-#endif // _NANOHAL_BOOT_H_
+#endif // NANOHAL_BOOT_H

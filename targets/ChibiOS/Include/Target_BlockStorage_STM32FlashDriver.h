@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_STM32FLASH_DRIVER_H_
-#define _TARGET_STM32FLASH_DRIVER_H_ 1
+#ifndef TARGET_STM32FLASH_DRIVER_H
+#define TARGET_STM32FLASH_DRIVER_H
 
 #include <ch.h>
 #include <hal.h>
@@ -33,4 +33,4 @@ extern "C"
 }
 #endif
 
-#endif //_TARGET_STM32FLASH_DRIVER_H_
+#endif //TARGET_STM32FLASH_DRIVER_H

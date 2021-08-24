@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_TYPES_H_
-#define _NANOCLR_TYPES_H_
+#ifndef NANOCLR_TYPES_H
+#define NANOCLR_TYPES_H
 
 #include <nanoCLR_PlatformDef.h>
 
@@ -1315,4 +1315,4 @@ struct CLR_RECORD_RESOURCE
 #pragma pack(pop, NANOCLR_TYPES_H)
 #endif
 
-#endif // _NANOCLR_TYPES_H_
+#endif // NANOCLR_TYPES_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_SYS_IO_FILESYSTEM_H_
-#define _NF_SYS_IO_FILESYSTEM_H_
+#ifndef NF_SYS_IO_FILESYSTEM_H
+#define NF_SYS_IO_FILESYSTEM_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -113,4 +113,4 @@ struct Library_nf_sys_io_filesystem_System_IO_Path
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
-#endif //_NF_SYS_IO_FILESYSTEM_H_
+#endif //NF_SYS_IO_FILESYSTEM_H

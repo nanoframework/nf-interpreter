@@ -5,8 +5,8 @@
 //
 
 
-#ifndef _WIN_DEV_GPIO_NATIVE_TARGET_H_
-#define _WIN_DEV_GPIO_NATIVE_TARGET_H_
+#ifndef WIN_DEV_GPIO_NATIVE_TARGET_H
+#define WIN_DEV_GPIO_NATIVE_TARGET_H
 
 #include <win_dev_gpio_native.h>
 
@@ -16,4 +16,4 @@
 #undef MIN
 #undef MAX
 
-#endif  //_WIN_DEV_GPIO_NATIVE_TARGET_H_
+#endif // WIN_DEV_GPIO_NATIVE_TARGET_H

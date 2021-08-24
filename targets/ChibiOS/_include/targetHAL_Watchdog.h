@@ -5,8 +5,8 @@
 #include <nanoHAL_Watchdog.h>
 #include <target_common.h>
 
-#ifndef _TARGETHAL_WATCHDOG_H_
-#define _TARGETHAL_WATCHDOG_H_ 1    
+#ifndef TARGETHAL_WATCHDOG_H
+#define TARGETHAL_WATCHDOG_H    
 
 #if (HAL_USE_WDG)
   #if (STM32_LSI_ENABLED == FALSE)

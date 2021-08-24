@@ -72,7 +72,7 @@ macro(nf_add_platform_packages)
     find_package(ChibiOSnfOverlay REQUIRED QUIET)
 
     # ChibiOS contrib repo
-    if(CHIBIOS_CONTRIB_REQUIRED QUIET)
+    if(CHIBIOS_CONTRIB_REQUIRED)
         find_package(ChibiOS-Contrib REQUIRED QUIET)
     endif()
 
@@ -86,7 +86,7 @@ macro(nf_add_platform_packages)
         find_package(SPIFFS REQUIRED QUIET)
     endif()
 
-    if(STM32_CUBE_PACKAGE_REQUIRED QUIET)
+    if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
     endif()
     

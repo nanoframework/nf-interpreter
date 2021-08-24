@@ -8,8 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_OS_H_
-#define _TARGET_OS_H_ 1
+#ifndef TARGET_OS_H
+#define TARGET_OS_H
 
 #define VERSION_MAJOR    @nanoFramework_VERSION_MAJOR@U
 #define VERSION_MINOR    @nanoFramework_VERSION_MINOR@U
@@ -24,4 +24,4 @@
 #define NANOCLR_SYSTEM_COLLECTIONS      @TARGET_SYSTEM_COLLECTIONS@
 #define TARGET_HAS_NANOBOOTER           FALSE
 
-#endif /* _TARGET_OS_H_ */
+#endif // TARGET_OS_H

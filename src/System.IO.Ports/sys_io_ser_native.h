@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_IO_SER_NATIVE_H_
-#define _SYS_IO_SER_NATIVE_H_
+#ifndef SYS_IO_SER_NATIVE_H
+#define SYS_IO_SER_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -123,4 +123,4 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialStream
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
 
-#endif //_SYS_IO_SER_NATIVE_H_
+#endif //SYS_IO_SER_NATIVE_H

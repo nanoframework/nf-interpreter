@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_I2C_NATIVE_H_
-#define _SYS_DEV_I2C_NATIVE_H_
+#ifndef SYS_DEV_I2C_NATIVE_H
+#define SYS_DEV_I2C_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -60,4 +60,4 @@ struct Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
 
-#endif //_SYS_DEV_I2C_NATIVE_H_
+#endif //SYS_DEV_I2C_NATIVE_H

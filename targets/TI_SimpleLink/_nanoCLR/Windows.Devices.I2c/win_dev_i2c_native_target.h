@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_I2C_NATIVE_TARGET_H_
-#define _WIN_DEV_I2C_NATIVE_TARGET_H_
+#ifndef WIN_DEV_I2C_NATIVE_TARGET_H
+#define WIN_DEV_I2C_NATIVE_TARGET_H
 
 #include <win_dev_i2c_native.h>
 #include "Board.h"
@@ -23,4 +23,4 @@ typedef struct
 ///////////////////////////////////////////
 extern NF_PAL_I2C I2C1_PAL;
 
-#endif //_WIN_DEV_I2C_NATIVE_TARGET_H_
+#endif //WIN_DEV_I2C_NATIVE_TARGET_H

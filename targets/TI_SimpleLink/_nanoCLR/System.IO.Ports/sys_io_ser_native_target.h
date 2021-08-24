@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_IO_SER_NATIVE_TARGET_H_
-#define _SYS_IO_SER_NATIVE_TARGET_H_
+#ifndef SYS_IO_SER_NATIVE_TARGET_H
+#define SYS_IO_SER_NATIVE_TARGET_H
 
 #include <target_system_io_serial_config.h>
 #include <sys_io_ser_native.h>
@@ -44,4 +44,4 @@ extern NF_PAL_UART Uart1_PAL;
 #define UART_TX_BUFFER_SIZE(num) UART##num##_TX_SIZE
 #define UART_RX_BUFFER_SIZE(num) UART##num##_RX_SIZE
 
-#endif //_SYS_IO_SER_NATIVE_TARGET_H_
+#endif //SYS_IO_SER_NATIVE_TARGET_H

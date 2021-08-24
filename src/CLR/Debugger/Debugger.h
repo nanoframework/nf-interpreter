@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DEBUGGER_H_
-#define _DEBUGGER_H_
+#ifndef DEBUGGER_H
+#define DEBUGGER_H
 
 // enum with CLR debugging commands
 // backwards compatible with .NETMF
@@ -98,4 +98,4 @@ typedef enum AccessMemoryErrorCodes
 
 }AccessMemoryErrorCodes;
 
-#endif //_DEBUGGER_H_
+#endif //DEBUGGER_H

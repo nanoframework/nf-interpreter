@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_INTEROP_H_
-#define _NANOCLR_INTEROP_H_
+#ifndef NANOCLR_INTEROP_H
+#define NANOCLR_INTEROP_H
 
 #include <nanoCLR_PlatformDef.h>
 #include <nanoCLR_Types.h>
@@ -468,6 +468,6 @@ void CLR_SoftReboot();
 
 void CLR_DebuggerBreak();
 
-#endif // _NANOCLR_INTEROP_H_
+#endif // NANOCLR_INTEROP_H
 
 

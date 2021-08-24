@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGETPAL_H_
-#define _TARGETPAL_H_
+#ifndef TARGETPAL_H
+#define TARGETPAL_H
 
 #include <hal.h>
 
@@ -19,4 +19,4 @@ extern stm32_gpio_t *gpioPort[];
 
 #endif
 
-#endif // _TARGETPAL_H_
+#endif // TARGETPAL_H

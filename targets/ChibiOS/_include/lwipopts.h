@@ -40,8 +40,8 @@
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
-#ifndef __LWIPOPT_H__
-#define __LWIPOPT_H__
+#ifndef LWIPOPTS_H
+#define LWIPOPTS_H
 
 #define _REENT_ONLY
 #define set_errno(err)
@@ -1046,4 +1046,4 @@
 // required as we are defining priority-aware mutexes
 #define LWIP_COMPAT_MUTEX_ALLOWED
 
-#endif /* __LWIPOPT_H__ */
+#endif // LWIPOPTS_H

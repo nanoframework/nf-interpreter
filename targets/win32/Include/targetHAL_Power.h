@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TARGET_HAL_POWER_H_
-#define _TARGET_HAL_POWER_H_ 1
+#ifndef TARGET_HAL_POWER_H
+#define TARGET_HAL_POWER_H
 
 inline void CPU_Reset()
 {
@@ -15,4 +15,4 @@ inline bool CPU_IsSoftRebootSupported()
     return true;
 };
 
-#endif //_TARGET_HAL_POWER_H_
+#endif //TARGET_HAL_POWER_H

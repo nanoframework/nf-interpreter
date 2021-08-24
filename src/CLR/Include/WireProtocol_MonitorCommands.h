@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_COMMANDS_H_
-#define _WIREPROTOCOL_COMMANDS_H_
+#ifndef WIREPROTOCOL_COMMANDS_H
+#define WIREPROTOCOL_COMMANDS_H
 
 #include <nanoHAL_v2.h>
 #include "WireProtocol.h"
@@ -211,4 +211,4 @@ extern "C"
 }
 #endif
 
-#endif //_WIREPROTOCOL_COMMANDS_H_
+#endif // WIREPROTOCOL_COMMANDS_H

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_MESSAGE_H_
-#define _WIREPROTOCOL_MESSAGE_H_
+#ifndef WIREPROTOCOL_MESSAGE_H
+#define WIREPROTOCOL_MESSAGE_H
 
 #include "WireProtocol.h"
 #include "WireProtocol_App_Interface.h"
@@ -77,4 +77,4 @@ extern "C"
 }
 #endif
 
-#endif // _WIREPROTOCOL_MESSAGE_H_
+#endif // WIREPROTOCOL_MESSAGE_H

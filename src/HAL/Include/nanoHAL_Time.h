@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_TIME_H_
-#define _NANOHAL_TIME_H_ 1
+#ifndef NANOHAL_TIME_H
+#define NANOHAL_TIME_H
 
 #include <nanoHAL_Types.h>
 #include <targetHAL_Time.h>
@@ -104,4 +104,4 @@ const char *HAL_Time_CurrentDateTimeToString();
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 
-#endif //_NANOHAL_TIME_H_
+#endif //NANOHAL_TIME_H

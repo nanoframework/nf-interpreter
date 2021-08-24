@@ -7,8 +7,8 @@
 //  Header file for ESP32 device pin mnapping
 //
 
-#ifndef _ESP32_DEVICEMAPPING_
-#define _ESP32_DEVICEMAPPING_
+#ifndef ESP32_DEVICEMAPPING_H
+#define ESP32_DEVICEMAPPING_H
 
 // Default I2C gpio pins
 #define I2C1_DATA  18
@@ -45,4 +45,4 @@ int Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction);
 void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction);
 void Esp32_SetMappedDevicePins(Esp32_MapDeviceType devType, int devNumber, int8_t pinIndex, int ioPinNumber);
 
-#endif //_ESP32_DEVICEMAPPING_
+#endif // ESP32_DEVICEMAPPING_H

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _GRAPHICS_H_
-#define _GRAPHICS_H_ 1
+#ifndef GRAPHICS_H
+#define GRAPHICS_H
 
 #include <string.h>
 
@@ -898,4 +898,5 @@ struct BmpOutputHelperParam
     const CLR_UINT8 *palette;
     CLR_UINT8 paletteDepth;
 };
-#endif // _GRAPHICS_H_
+
+#endif // GRAPHICS_H

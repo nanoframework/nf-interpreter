@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SIMPLELINK_SOCKETS_H_
-#define _SIMPLELINK_SOCKETS_H_
+#ifndef SIMPLELINK_SOCKETS_H
+#define SIMPLELINK_SOCKETS_H
 
 #include <nanoHAL.h>
 #include <nanoHAL_ConfigurationManager.h>
@@ -29,4 +29,4 @@ void Link_callback(bool linkUp);
 }
 #endif
 
-#endif // _SIMPLELINK_SOCKETS_H_ 1
+#endif // SIMPLELINK_SOCKETS_H

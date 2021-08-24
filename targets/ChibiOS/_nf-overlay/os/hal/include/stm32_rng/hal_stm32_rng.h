@@ -81,7 +81,7 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_NF_USE_STM32_RNG */
+#endif // HAL_NF_USE_STM32_RNG
 
-#endif /* HAL_NF_STM32_RNG_H_ */
+#endif // HAL_NF_STM32_RNG_H
 

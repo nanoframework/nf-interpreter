@@ -8,8 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef SWO_H_
-#define SWO_H_
+#ifndef SWO_H
+#define SWO_H
 
 
 #define SWO_OUTPUT @SWO_OUTPUT_OPTION@
@@ -32,4 +32,4 @@ extern "C" {
 #endif //(SWO_OUTPUT == TRUE)
 
 
-#endif  // SWO_H_
+#endif  // SWO_H

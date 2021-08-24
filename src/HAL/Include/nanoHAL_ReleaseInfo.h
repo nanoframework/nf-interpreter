@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOHAL_RELEASEINFO_H_
-#define _NANOHAL_RELEASEINFO_H_ 1
+#ifndef NANOHAL_RELEASEINFO_H
+#define NANOHAL_RELEASEINFO_H
 
 #include <nanoPackStruct.h>
 
@@ -86,4 +86,4 @@ bool Target_GetReleaseInfo(NFReleaseInfo &);
 
 //--//
 
-#endif // _NANOHAL_RELEASEINFO_H_
+#endif // NANOHAL_RELEASEINFO_H

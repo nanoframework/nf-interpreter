@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _PLATFORM_TARGET_CAPABILITIES_H_
-#define _PLATFORM_TARGET_CAPABILITIES_H_ 1
+#ifndef PLATFORM_TARGET_CAPABILITIES_H
+#define PLATFORM_TARGET_CAPABILITIES_H
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH nanoFramework.Tools.Debugger.Esp32.TargetCapabilities (in managed code) !!! //
@@ -22,4 +22,4 @@ extern "C" {
 }
 #endif
 
-#endif //_PLATFORM_TARGET_CAPABILITIES_H_
+#endif //PLATFORM_TARGET_CAPABILITIES_H

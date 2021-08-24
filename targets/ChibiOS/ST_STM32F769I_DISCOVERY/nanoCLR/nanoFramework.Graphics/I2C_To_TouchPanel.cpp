@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SPI_TO_TOUCHPANEL_H_
-#define _SPI_TO_TOUCHPANEL_H_ 1
+#ifndef I2C_TO_TOUCHPANEL_H
+#define I2C_TO_TOUCHPANEL_H
 
 #include "nanoCLR_Types.h"
 #include <nanoPAL.h>
@@ -54,6 +54,6 @@ CLR_UINT8* TouchInterface::Write_Read(CLR_UINT8* valuesToSend, CLR_UINT16 number
     return 0U;
 
 }
-#endif //_SPI_TO_TOUCHPANEL_H_
+#endif // I2C_TO_TOUCHPANEL_H
 
 

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_NET_NATIVE_H_
-#define _SYS_NET_NATIVE_H_
+#ifndef SYS_NET_NATIVE_H
+#define SYS_NET_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -421,4 +421,4 @@ struct Library_sys_net_native_System_Security_Cryptography_X509Certificates_X509
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net;
 
-#endif //_SYS_NET_NATIVE_H_
+#endif // SYS_NET_NATIVE_H

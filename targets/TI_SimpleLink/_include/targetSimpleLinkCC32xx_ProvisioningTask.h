@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SIMPLELINK_CC32XX_PROVISIONING_TASK_H_
-#define _SIMPLELINK_CC32XX_PROVISIONING_TASK_H_
+#ifndef SIMPLELINK_CC32XX_PROVISIONING_TASK_H
+#define SIMPLELINK_CC32XX_PROVISIONING_TASK_H
 
 #include <ti/drivers/net/wifi/simplelink.h>
 
@@ -139,4 +139,4 @@ int32_t provisioningStop(void);
 //****************************************************************************
 void *provisioningTask(void *pvParameters);
 
-#endif //_SIMPLELINK_CC32XX_PROVISIONING_TASK_H_
+#endif //SIMPLELINK_CC32XX_PROVISIONING_TASK_H

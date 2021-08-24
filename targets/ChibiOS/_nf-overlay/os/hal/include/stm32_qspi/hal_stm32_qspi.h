@@ -69,7 +69,7 @@ extern "C" {
 }
 #endif
 
-#endif /* HAL_NF_USE_STM32_QSPI */
+#endif // HAL_NF_USE_STM32_QSPI
 
-#endif /* HAL_NF_STM32_QSPI_H_ */
+#endif // HAL_NF_STM32_QSPI_H
 

@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_CHECKS_H_
-#define _NANOCLR_CHECKS_H_
+#ifndef NANOCLR_CHECKS_H
+#define NANOCLR_CHECKS_H
 
 #include <nanoCLR_Runtime.h>
 
@@ -65,4 +65,4 @@ struct CLR_Checks
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _NANOCLR_CHECKS_H_
+#endif // NANOCLR_CHECKS_H

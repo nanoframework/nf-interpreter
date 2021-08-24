@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_BOARD_H_
-#define _TARGET_BOARD_H_
+#ifndef TARGET_BOARD_H
+#define TARGET_BOARD_H
 
-#endif // _TARGET_BOARD_H_
+#endif // TARGET_BOARD_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_SPI_NATIVE_TARGET_H_
-#define _SYS_DEV_SPI_NATIVE_TARGET_H_
+#ifndef SYS_DEV_SPI_NATIVE_TARGET_H
+#define SYS_DEV_SPI_NATIVE_TARGET_H
 
 #include <sys_dev_spi_native.h>
 #include <hal.h>
@@ -71,4 +71,4 @@ void ConfigPins_SPI4();
 void ConfigPins_SPI5();
 void ConfigPins_SPI6();
 
-#endif //_SYS_DEV_SPI_NATIVE_TARGET_H_
+#endif //SYS_DEV_SPI_NATIVE_TARGET_H

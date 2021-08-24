@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_RUNTIME_H_
-#define _NANOCLR_RUNTIME_H_
+#ifndef NANOCLR_RUNTIME_H
+#define NANOCLR_RUNTIME_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3866,4 +3866,4 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
 #pragma pack(pop, NANOCLR_RUNTIME_H)
 #endif
 
-#endif // _NANOCLR_RUNTIME_H_
+#endif // NANOCLR_RUNTIME_H
