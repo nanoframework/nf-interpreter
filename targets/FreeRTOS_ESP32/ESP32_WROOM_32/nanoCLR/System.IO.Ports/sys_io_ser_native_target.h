@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_IO_SER_NATIVE_
-#define _SYS_IO_SER_NATIVE_
+#ifndef SYS_IO_SER_NATIVE_
+#define SYS_IO_SER_NATIVE_
 
 #include <sys_io_ser_native.h>
 
@@ -28,4 +28,4 @@ typedef struct
     bool IsLongRunning;
 } NF_PAL_UART;
 
-#endif //_SYS_IO_SER_NATIVE_
+#endif //SYS_IO_SER_NATIVE_

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_DAC_NATIVE_TARGET_H_
-#define _SYS_DEV_DAC_NATIVE_TARGET_H_
+#ifndef SYS_DEV_DAC_NATIVE_TARGET_H
+#define SYS_DEV_DAC_NATIVE_TARGET_H
 
 #include <hal.h>
 #include <sys_dev_dac_native.h>
@@ -58,4 +58,4 @@ extern NF_PAL_DAC Dac2_2_PAL;
 extern const NF_PAL_DAC_PORT_PIN_CHANNEL DacPortPinConfig[];
 extern const int DacChannelCount;
 
-#endif //_SYS_DEV_DAC_NATIVE_TARGET_H_
+#endif //SYS_DEV_DAC_NATIVE_TARGET_H

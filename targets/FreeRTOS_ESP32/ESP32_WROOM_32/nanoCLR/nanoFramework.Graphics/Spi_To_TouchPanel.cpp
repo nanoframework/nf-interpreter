@@ -5,8 +5,8 @@
 
 #define UNUSED(x)  (void)x
 
-#ifndef _SPI_TO_TOUCHPANEL_H_
-#define _SPI_TO_TOUCHPANEL_H_ 1
+#ifndef SPI_TO_TOUCHPANEL_H
+#define SPI_TO_TOUCHPANEL_H
 
 #include "nanoCLR_Types.h"
 #include <nanoPAL.h>
@@ -34,4 +34,4 @@ CLR_UINT8* TouchInterface::Write_Read(CLR_UINT8* valuesToSend, CLR_UINT16 number
 }
 
 
-#endif //_SPI_TO_TOUCHPANEL_H_
+#endif //SPI_TO_TOUCHPANEL_H

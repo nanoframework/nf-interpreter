@@ -6,6 +6,8 @@
 include(FetchContent)
 FetchContent_GetProperties(freertos)
 
+list(APPEND FreeRTOS_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+
 # List of the FreeRTOS generic iMXRTxx startup and CMSIS files.
 
 set(FreeRTOS_PORT_SRCS

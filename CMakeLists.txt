@@ -33,7 +33,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
-include(NF_Utils)
+include(binutils.common)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -53,21 +53,21 @@ string(TIMESTAMP BUILD_TIMESTAMP UTC)
 #######################
 # check for TARGET_BOARD definition
 if(NOT TARGET_BOARD OR TARGET_BOARD STREQUAL "")
-    message(FATAL_ERROR "Missing build option 'TARGET_BOARD'.")
+    message(FATAL_ERROR "\n\nMissing build option 'TARGET_BOARD'.")
 endif()
 
 #######################
 # handle RTOSes choice
 
-if(${RTOS} STREQUAL "")
-    # no RTOS selected, defaulting to ChibiOS
-    set(RTOS "CHIBIOS")
+if(NOT RTOS OR RTOS STREQUAL "")
+    # no RTOS selected, can't continue
+    message(FATAL_ERROR "\n\nMissing build option 'RTOS'.")
 endif()
 
 # list of supported RTOSes
 # when adding a new RTOS add the corresponding string below AND...
 # ... also on the compare block below
-set(RTOS_SUPPORTED "CHIBIOS" "FREERTOS" "FREERTOS_ESP32" "TI_SIMPLELINK" CACHE INTERNAL "supported RTOS options")
+set(RTOS_SUPPORTED "ChibiOS" "FreeRTOS" "FreeRTOS_ESP32" "TI_SimpleLink" CACHE INTERNAL "supported RTOS options")
 
 list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
 if(RTOS_INDEX EQUAL -1)
@@ -76,10 +76,10 @@ else()
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
 endif()
 
-string(COMPARE EQUAL "CHIBIOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FREERTOS" ${RTOS} RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "FREERTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
-string(COMPARE EQUAL "TI_SIMPLELINK" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
+string(COMPARE EQUAL "ChibiOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
+string(COMPARE EQUAL "FreeRTOS" ${RTOS} RTOS_FREERTOS_CHECK)
+string(COMPARE EQUAL "FreeRTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
+string(COMPARE EQUAL "TI_SimpleLink" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
 
 ##########################################################################
 
@@ -135,7 +135,7 @@ endif()
 if(NOT BUILD_VERSION)
     set(BUILD_VERSION 0.0.0.0)
 endif()
-project(nanoFramework VERSION ${BUILD_VERSION})
+project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
@@ -168,22 +168,30 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     # clear some CMake flavor flags that are being set as default
     # in the GNU compiler init
     # we want to control and fine tune these
-    set(CMAKE_C_FLAGS_DEBUG "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_RELEASE "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c compiler flags")
-    set(CMAKE_CXX_FLAGS_DEBUG "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "" CACHE INTERNAL "clear c++ compiler flags")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "" CACHE INTERNAL "clear c++ compiler flags")
+    unset(CMAKE_C_FLAGS_DEBUG)
+    unset(CMAKE_C_FLAGS_MINSIZEREL)
+    unset(CMAKE_C_FLAGS_RELEASE)
+    unset(CMAKE_C_FLAGS_RELWITHDEBINFO)
+    unset(CMAKE_CXX_FLAGS_DEBUG)
+    unset(CMAKE_CXX_FLAGS_MINSIZEREL)
+    unset(CMAKE_CXX_FLAGS_RELEASE)
+    unset(CMAKE_CXX_FLAGS_RELWITHDEBINFO)
     #################################################################
 
 
     #################################################################
-    # clear default libraries that are set by CMake
-    # we want to control
-    set(CMAKE_C_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c linker default libs")
-    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "" CACHE INTERNAL "clear c++ linker default libs")
+    # clear default link libraries (C & C++) that are set by CMake
+    unset(CMAKE_C_IMPLICIT_LINK_LIBRARIES)
+    unset(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
+    #################################################################
+    
+    #################################################################
+    # clear other options and definitions that we want to set
+    unset(COMPILE_OPTIONS)
+    unset(C_COMPILE_OPTIONS)
+    unset(CXX_COMPILE_OPTIONS)
+    unset(COMPILE_DEFINITIONS)
+    unset(LINK_OPTIONS)
     #################################################################
 
 endif()
@@ -767,7 +775,7 @@ endif()
 if(RTOS_CHIBIOS_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
     
     add_subdirectory(targets/ChibiOS)
 
@@ -832,7 +840,7 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
+        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
 
         add_subdirectory(targets/FreeRTOS_ESP32)
 
@@ -847,14 +855,14 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 elseif(RTOS_TI_SIMPLELINK_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/TI-SimpleLink/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/_nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -863,10 +871,10 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI-SimpleLink/${TARGET_BOARD})
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
         
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
@@ -881,7 +889,7 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     endif()
     
     # add common directory for SimpleLink
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI-SimpleLink)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 

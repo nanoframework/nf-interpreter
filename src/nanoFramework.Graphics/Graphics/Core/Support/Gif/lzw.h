@@ -4,9 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _LZW_H_
-
-#define _LZW_H_
+#ifndef LZW_H
+#define LZW_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -75,4 +74,4 @@ struct LZWState : protected LZW
     TokenIndex m_itokenLast;    // The last token to be allocated
 };
 
-#endif
+#endif // LZW_H

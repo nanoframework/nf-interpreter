@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_HAL_INTERFACE_H_
-#define _WIREPROTOCOL_HAL_INTERFACE_H_
+#ifndef WIREPROTOCOL_HAL_INTERFACE_H
+#define WIREPROTOCOL_HAL_INTERFACE_H
 
 #include "WireProtocol.h"
 
@@ -28,4 +28,4 @@ uint8_t WP_TransmitMessage(WP_Message *message);
 
 void WP_CheckAvailableIncomingData();
 
-#endif // _WIREPROTOCOL_HAL_INTERFACE_H_
+#endif // WIREPROTOCOL_HAL_INTERFACE_H

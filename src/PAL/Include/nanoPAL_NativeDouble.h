@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOPAL_DOUBLE_DECL_H_
-#define _NANOPAL_DOUBLE_DECL_H_
+#ifndef NANOPAL_DOUBLE_DECL_H
+#define NANOPAL_DOUBLE_DECL_H
 
 #include <nanoHAL.h>
 
@@ -64,4 +64,4 @@ namespace System
     };
 }
 
-#endif  //_NANOPAL_DOUBLE_DECL_H_
+#endif // NANOPAL_DOUBLE_DECL_H

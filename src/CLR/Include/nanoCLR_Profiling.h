@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_PROFILING_H_
-#define _NANOCLR_PROFILING_H_
+#ifndef NANOCLR_PROFILING_H
+#define NANOCLR_PROFILING_H
 
 #if defined(NANOCLR_PROFILE_NEW)
 
@@ -215,5 +215,5 @@ private:
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;
 
 #endif //defined(NANOCLR_PROFILE_NEW)
-#endif // _NANOCLR_PROFILING_H_
+#endif // NANOCLR_PROFILING_H
 

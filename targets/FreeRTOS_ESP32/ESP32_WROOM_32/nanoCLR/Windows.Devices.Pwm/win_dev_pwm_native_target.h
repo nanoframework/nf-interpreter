@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_PWM_NATIVE_TARGET_H_
-#define _WIN_DEV_PWM_NATIVE_TARGET_H_
+#ifndef WIN_DEV_PWM_NATIVE_TARGET_H
+#define WIN_DEV_PWM_NATIVE_TARGET_H
 
 #include <win_dev_pwm_native.h>
 
@@ -20,4 +20,4 @@ enum PwmPulsePolarity
         ActiveLow
 };
 
-#endif  //_WIN_DEV_PWM_NATIVE_TARGET_H_
+#endif // WIN_DEV_PWM_NATIVE_TARGET_H

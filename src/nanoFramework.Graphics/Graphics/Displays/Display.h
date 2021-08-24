@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the
 
-#ifndef _DISPLAY_H_
-#define _DISPLAY_H_ 1
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #include "nanoCLR_Types.h"
 
@@ -58,4 +58,4 @@ struct DisplayDriver
     CLR_UINT32 SizeInBytes();
 };
 
-#endif
+#endif // DISPLAY_H

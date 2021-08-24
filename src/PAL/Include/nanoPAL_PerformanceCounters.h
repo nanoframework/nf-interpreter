@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _PERFORMANCE_COUNTERS_H_
-#define _PERFORMANCE_COUNTERS_H_ 1
+#ifndef PERFORMANCE_COUNTERS_H
+#define PERFORMANCE_COUNTERS_H
 
 #include <nanoWeak.h>
 
@@ -20,4 +20,4 @@ uint32_t    PAL_PerformanceCounter();
 }
 #endif
 
-#endif //_PERFORMANCE_COUNTERS_H_
+#endif //PERFORMANCE_COUNTERS_H

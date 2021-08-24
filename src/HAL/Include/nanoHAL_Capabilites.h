@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_CAPABILITIES_H_
-#define _NANOHAL_CAPABILITIES_H_ 1
+#ifndef NANOHAL_CAPABILITIES_H
+#define NANOHAL_CAPABILITIES_H
 
 #include <nanoCLR_Headers.h>
 #include <target_os.h>
@@ -76,4 +76,4 @@ extern "C"
 }
 #endif
 
-#endif // _NANOHAL_CAPABILITIES_H_
+#endif // NANOHAL_CAPABILITIES_H

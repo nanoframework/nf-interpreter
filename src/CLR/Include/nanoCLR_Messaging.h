@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_MESSAGING_H_
-#define _NANOCLR_MESSAGING_H_
+#ifndef NANOCLR_MESSAGING_H
+#define NANOCLR_MESSAGING_H
 
 #include <nanoCLR_Types.h>
 #include <WireProtocol.h>
@@ -139,5 +139,5 @@ public:
 
 //--//
 
-#endif // _NANOCLR_MESSAGING_H_
+#endif // NANOCLR_MESSAGING_H
 

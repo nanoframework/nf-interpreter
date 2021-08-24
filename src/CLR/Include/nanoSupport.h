@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _SUPPORT_NANOSUPPORT_H_
-#define _SUPPORT_NANOSUPPORT_H_
+#ifndef SUPPORT_NANOSUPPORT_H
+#define SUPPORT_NANOSUPPORT_H
 
 #include <nanoCLR_Headers.h>
 
@@ -19,4 +19,4 @@ extern "C"
 }
 #endif
 
-#endif // _SUPPORT_NANOSUPPORT_H_
+#endif // SUPPORT_NANOSUPPORT_H

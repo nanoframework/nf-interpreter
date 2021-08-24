@@ -3,9 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_OS_H_
-#define _TARGET_OS_H_ 1
+#ifndef TARGET_OS_H
+#define TARGET_OS_H
 
 #define TARGET_HAS_NANOBOOTER FALSE
 
-#endif // _TARGET_OS_H_
+#endif // TARGET_OS_H

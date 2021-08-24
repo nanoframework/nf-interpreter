@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_SERIAL_NATIVE_TARGET_H_
-#define _WIN_DEV_SERIAL_NATIVE_TARGET_H_
+#ifndef WIN_DEV_SERIAL_NATIVE_TARGET_H
+#define WIN_DEV_SERIAL_NATIVE_TARGET_H
 
 #define UART_INTERRUPT_PRIO 4U
 
@@ -35,4 +35,4 @@ typedef struct {
 
 } NF_PAL_UART;
 
-#endif //_WIN_DEV_SERIAL_NATIVE_TARGET_H_
+#endif //WIN_DEV_SERIAL_NATIVE_TARGET_H

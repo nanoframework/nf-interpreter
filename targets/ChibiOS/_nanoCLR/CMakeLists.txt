@@ -3,12 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# include(NF_NativeAssemblies)
-
-# add header file with common target definitions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/target_platform.h @ONLY)
-
 # append nanoHAL
 list(APPEND TARGET_CHIBIOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp)
 

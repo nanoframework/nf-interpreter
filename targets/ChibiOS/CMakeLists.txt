@@ -4,13 +4,13 @@
 #
 
 include(FetchContent)
+include(binutils.common)
 include(binutils.arm-none-eabi)
 include(binutils.ChibiOS)
 include(STM32_CubePackage)
-include(NF_Utils)
 
 # Set target series
-NF_SET_STM32_TARGET_SERIES()
+nf_set_stm32_target_series()
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
@@ -443,7 +443,7 @@ if(NF_FEATURE_USE_SPIFFS)
 endif()
 
 # add target ChibiOS dirs
-add_subdirectory(_Include)
+add_subdirectory(_include)
 add_subdirectory(_common)
 add_subdirectory(_nanoBooter)
 add_subdirectory(_nanoCLR)

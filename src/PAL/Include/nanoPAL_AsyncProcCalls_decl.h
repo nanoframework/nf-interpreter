@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOPAL_ASYNCPROCCALLS_DECL_H_
-#define _NANOPAL_ASYNCPROCCALLS_DECL_H_ 1
+#ifndef NANOPAL_ASYNCPROCCALLS_DECL_H
+#define NANOPAL_ASYNCPROCCALLS_DECL_H
 
 #include <nanoWeak.h>
 
@@ -139,4 +139,4 @@ struct HAL_COMPLETION : public HAL_CONTINUATION
 
 //--//
 
-#endif //_NANOPAL_ASYNCPROCCALLS_DECL_H_
+#endif // NANOPAL_ASYNCPROCCALLS_DECL_H

@@ -423,4 +423,4 @@ int NanoBooter_GetReleaseInfo(ReleaseInfo *releaseInfo)
     return true;
 }
 
-#endif // _WIN32
+#endif // WIN32

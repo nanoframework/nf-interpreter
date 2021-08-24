@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef __BASE64_H__
-#define __BASE64_H__
+#ifndef BASE64_H
+#define BASE64_H
 
 #include <nanoHAL_v2.h>
 
@@ -44,4 +44,4 @@ extern "C"
 }
 #endif
 
-#endif //__BASE64_H__
+#endif //BASE64_H

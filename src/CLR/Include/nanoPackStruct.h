@@ -2,8 +2,8 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANO_PACKSTRUCT_H_
-#define _NANO_PACKSTRUCT_H_ 1
+#ifndef NANO_PACKSTRUCT_H
+#define NANO_PACKSTRUCT_H
 
 // definition of PACK attribute for structs
 #if defined(_MSC_VER)
@@ -18,4 +18,4 @@
 #error "Unknow platform. Please add definition for attribute to tell compiler to pack the struct."
 #endif
 
-#endif // _NANO_PACKSTRUCT_H_
+#endif // NANO_PACKSTRUCT_H

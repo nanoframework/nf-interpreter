@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H_
-#define _NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H_
+#ifndef NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H
+#define NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H
 
 #include <map>
 #include <vector>
@@ -107,4 +107,4 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt;
 
-#endif //_NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H_
+#endif //NANOFRAMEWORK_HARDWARE_ESP32_RMT_NATIVE_H

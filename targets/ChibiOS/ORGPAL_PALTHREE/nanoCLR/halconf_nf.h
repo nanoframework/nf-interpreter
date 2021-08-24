@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _HALCONF_NF_H_
-#define _HALCONF_NF_H_ 1
+#ifndef HALCONF_NF_H
+#define HALCONF_NF_H
 
 // Enables the ChibiOS community overlay.
 #if !defined(HAL_USE_COMMUNITY) 
@@ -31,4 +31,4 @@
 #define HAL_NF_USE_STM32_QSPI          TRUE
 #endif
 
-#endif // _HALCONF_NF_H_
+#endif // HALCONF_NF_H

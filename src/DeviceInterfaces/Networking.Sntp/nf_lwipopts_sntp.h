@@ -5,8 +5,8 @@
 
 // lwIP options related with SNTP
 
-#ifndef __NF_LWIPOPTS_SNTP_H__
-#define __NF_LWIPOPTS_SNTP_H__
+#ifndef NF_LWIPOPTS_SNTP_H
+#define NF_LWIPOPTS_SNTP_H
 
 #include <time.h>
 #include <nanoWeak.h>
@@ -36,4 +36,4 @@ extern "C"
 // need to declare this here to keep compiler happy
 __nfweak char *ctime(const time_t *timer);
 
-#endif // __NF_LWIPOPTS_SNTP_H__
+#endif // NF_LWIPOPTS_SNTP_H

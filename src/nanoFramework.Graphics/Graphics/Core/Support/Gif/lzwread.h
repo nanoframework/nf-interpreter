@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _LZWREAD_H_
-#define _LZWREAD_H_
+#ifndef LZWREAD_H
+#define LZWREAD_H
 
 #include "Graphics.h"
 #include "lzw.h"
@@ -168,4 +168,4 @@ struct LZWDecompressor : private LZWState, public LZWIO
     }
 };
 
-#endif
+#endif // LZWREAD_H

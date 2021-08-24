@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOPAL_TIME_H_
-#define _NANOPAL_TIME_H_ 1
+#ifndef NANOPAL_TIME_H
+#define NANOPAL_TIME_H
 
 #include <nanoWeak.h>
 #include <targetPAL_Time.h>
@@ -25,4 +25,4 @@ void       Time_SetCompare    ( uint64_t compareValueTicks );
 }
 #endif
 
-#endif //_NANOPAL_TIME_H_
+#endif //NANOPAL_TIME_H

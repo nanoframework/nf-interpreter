@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOCLR_APPLICATION_H_
-#define _NANOCLR_APPLICATION_H_
+#ifndef NANOCLR_APPLICATION_H
+#define NANOCLR_APPLICATION_H
 
 #include <stdbool.h>
 

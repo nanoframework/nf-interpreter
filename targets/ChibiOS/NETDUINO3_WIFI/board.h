@@ -888,6 +888,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _FROM_ASM_ */
+#endif // FROM_ASM_
 
-#endif /* BOARD_H */
+#endif // BOARD_H

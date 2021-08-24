@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TOUCHDEVICE_H_
-#define _TOUCHDEVICE_H_ 1
+#ifndef TOUCHDEVICE_H
+#define TOUCHDEVICE_H
 
 #include "nanoCLR_Types.h"
 #include "nanoPAL_AsyncProcCalls_decl.h"
@@ -31,5 +31,5 @@ struct TouchDevice
 
 };
 
-#endif //_TOUCHDEVICE_H_
+#endif // TOUCHDEVICE_H
 

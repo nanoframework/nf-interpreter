@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_SPI_NATIVE_TARGET_H_
-#define _WIN_DEV_SPI_NATIVE_TARGET_H_
+#ifndef WIN_DEV_SPI_NATIVE_TARGET_H
+#define WIN_DEV_SPI_NATIVE_TARGET_H
 
 #include <win_dev_spi_native.h>
 #include <hal.h>
@@ -70,4 +70,4 @@ void ConfigPins_SPI4();
 void ConfigPins_SPI5();
 void ConfigPins_SPI6();
 
-#endif //_WIN_DEV_SPI_NATIVE_TARGET_H_
+#endif // WIN_DEV_SPI_NATIVE_TARGET_H

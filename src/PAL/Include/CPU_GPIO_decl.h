@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DRIVERS_GPIO_DECL_H_
-#define _DRIVERS_GPIO_DECL_H_ 1
+#ifndef DRIVERS_GPIO_DECL_H
+#define DRIVERS_GPIO_DECL_H
 
 #if defined(__GNUC__)
 #define __int64 long long
@@ -177,4 +177,4 @@ bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
 // Retrieves the GPIO attributes of a specified pin. ( none=0, input=1, output=2, altA=4, altB=8 etc )
 // uint32_t CPU_GPIO_Attributes(GPIO_PIN Pin);
 
-#endif // _DRIVERS_GPIO_DECL_H_
+#endif // DRIVERS_GPIO_DECL_H

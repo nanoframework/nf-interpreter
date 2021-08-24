@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_IMXRTFLASH_DRIVER_H_
-#define _TARGET_IMXRTFLASH_DRIVER_H_ 1
+#ifndef TARGET_IMXRTFLASH_DRIVER_H
+#define TARGET_IMXRTFLASH_DRIVER_H
 
 #include <nanoPAL_BlockStorage.h>
 
@@ -25,4 +25,4 @@ void iMXRTFlexSPIDriver_SetPowerState(void*, unsigned int state);
 }
 #endif
 
-#endif  //_TARGET_IMXRTFLASH_DRIVER_H_
+#endif // TARGET_IMXRTFLASH_DRIVER_H

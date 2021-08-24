@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOFRAMEWORK_GRAPHICS_H_
-#define _NANOFRAMEWORK_GRAPHICS_H_
+#ifndef NANOFRAMEWORK_GRAPHICS_H
+#define NANOFRAMEWORK_GRAPHICS_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -1064,4 +1064,4 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchScreen
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics;
 
-#endif //_NANOFRAMEWORK_GRAPHICS_H_
+#endif // NANOFRAMEWORK_GRAPHICS_H

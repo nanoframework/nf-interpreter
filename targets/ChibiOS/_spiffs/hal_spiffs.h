@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef HAL_SPIFFS_H_
-#define HAL_SPIFFS_H_
+#ifndef HAL_SPIFFS_H
+#define HAL_SPIFFS_H
 
 #include <spiffs.h>
 
@@ -25,4 +25,4 @@ uint8_t hal_spiffs_config();
 }
 #endif
 
-#endif // HAL_SPIFFS_H_
+#endif // HAL_SPIFFS_H

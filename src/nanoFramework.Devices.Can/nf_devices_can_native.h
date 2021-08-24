@@ -4,8 +4,8 @@
 //
 
 
-#ifndef _NF_DEVICES_CAN_NATIVE_H_
-#define _NF_DEVICES_CAN_NATIVE_H_
+#ifndef NF_DEVICES_CAN_NATIVE_H
+#define NF_DEVICES_CAN_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -116,4 +116,4 @@ struct Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessageEvent
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Devices_Can;
 
-#endif  //_NF_DEVICES_CAN_NATIVE_H_
+#endif // NF_DEVICES_CAN_NATIVE_H

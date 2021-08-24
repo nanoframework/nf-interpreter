@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _TARGET_HAL_TIME_H_
-#define _TARGET_HAL_TIME_H_ 1
+#ifndef TARGET_HAL_TIME_H
+#define TARGET_HAL_TIME_H
 
 #define HAL_Time_CurrentSysTicks HAL_Time_CurrentSysTicks
 uint64_t HAL_Time_CurrentSysTicks();
@@ -65,4 +65,4 @@ uint64_t HAL_Time_CurrentSysTicks();
 // const char*     Time_DateTimeToString( const signed __int64& time);
 // const char*     Time_CurrentDateTimeToString();
 
-#endif //_TARGET_HAL_TIME_H_
+#endif //TARGET_HAL_TIME_H

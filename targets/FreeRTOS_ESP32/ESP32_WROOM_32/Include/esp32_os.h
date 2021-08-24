@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _ESP32_OS_H_
-#define _ESP32_OS_H_
+#ifndef ESP32_OS_H
+#define ESP32_OS_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -43,4 +43,4 @@
 // Uncomment to support Ethernet
 //#define ESP32_ETHERNET_SUPPORT
 
-#endif // _ESP32_OS_H_
+#endif // ESP32_OS_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_HAL_SPI_H_
-#define _TARGET_HAL_SPI_H_ 1
+#ifndef TARGET_HAL_SPI_H
+#define TARGET_HAL_SPI_H
 
 // # of buses
 #define NUM_SPI_BUSES 0
@@ -12,4 +12,4 @@
 // Maximum number of devices per SPI bus
 #define MAX_SPI_DEVICES 5
 
-#endif //_TARGET_HAL_SPI_H_
+#endif //TARGET_HAL_SPI_H

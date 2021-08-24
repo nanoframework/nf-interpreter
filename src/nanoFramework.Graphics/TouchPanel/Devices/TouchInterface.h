@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TOUCHINTERFACE_H_
-#define _TOUCHINTERFACE_H_ 1
+#ifndef TOUCHINTERFACE_H
+#define TOUCHINTERFACE_H
 
 #include "nanoCLR_Types.h"
 
@@ -16,6 +16,6 @@ public:
     CLR_UINT8* Write_Read(CLR_UINT8* valuesToSend, CLR_UINT16 numberOfValuesToSend, CLR_UINT16 numberValuesExpected);
 };
 
-#endif // _TOUCHINTERFACE_H_
+#endif // TOUCHINTERFACE_H
 
 

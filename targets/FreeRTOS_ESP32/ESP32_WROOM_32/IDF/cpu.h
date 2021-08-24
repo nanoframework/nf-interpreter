@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _SOC_CPU_H
-#define _SOC_CPU_H
+#ifndef SOC_CPU_H
+#define SOC_CPU_H
 
 #include <stdint.h>
 #include <stdbool.h>

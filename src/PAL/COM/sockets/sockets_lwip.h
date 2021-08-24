@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SOCKETS_H_
-#define _SOCKETS_H_ 1
+#ifndef SOCKETS_H
+#define SOCKETS_H
 
 //--//
 
@@ -183,5 +183,5 @@ private:
 
 extern Sockets_LWIP_Driver g_Sockets_LWIP_Driver;
 
-#endif //_SOCKETS_H_
+#endif // SOCKETS_H
 

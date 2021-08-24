@@ -8,9 +8,12 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_PLATFORM_H_
-#define _TARGET_PLATFORM_H_ 1
+#ifndef TARGET_PLATFORM_H
+#define TARGET_PLATFORM_H
 
-#define NANOCLR_GRAPHICS            @NANOCLR_GRAPHICS@
+#define NANOCLR_GRAPHICS @NANOCLR_GRAPHICS@
 
-#endif /* _TARGET_PLATFORM_H_ */
+// set preference to enable (or not) the RTC subsystem
+#define NXP_USE_RTC @HAL_USE_RTC_OPTION@
+
+#endif // TARGET_PLATFORM_H

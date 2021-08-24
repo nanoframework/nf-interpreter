@@ -427,7 +427,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::SpinWait___STATIC__VOID__
     // basically do nothing, except loop until reaching 0
     for (; iterations == 0; iterations--)
     {
-#ifndef _WIN32
+#ifndef WIN32
         __asm("nop");
 #endif
     }

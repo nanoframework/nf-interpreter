@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TOUCHPANEL_H_
-#define _TOUCHPANEL_H_ 1
+#ifndef TOUCHPANEL_H
+#define TOUCHPANEL_H
 
 #include "Graphics.h"
 
@@ -220,4 +220,4 @@ class TouchPanelDriver
     };
 };
 
-#endif // _TOUCHPANEL_H_
+#endif // TOUCHPANEL_H

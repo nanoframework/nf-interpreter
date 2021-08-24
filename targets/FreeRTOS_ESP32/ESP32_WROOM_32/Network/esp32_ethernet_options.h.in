@@ -8,11 +8,11 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _ESP32_ETHERNET_LAN8720_H_
-#define _ESP32_ETHERNET_LAN8720_H_
+#ifndef ESP32_ETHERNET_LAN8720_H
+#define ESP32_ETHERNET_LAN8720_H
 
 #cmakedefine ESP32_ETHERNET_SUPPORT
 #cmakedefine ESP32_CONFIG_PHY_CLOCK_MODE @ESP32_CONFIG_PHY_CLOCK_MODE@
 #cmakedefine ESP32_CONFIG_PIN_PHY_POWER  @ESP32_CONFIG_PIN_PHY_POWER@
 
-#endif // _ESP32_ETHERNET_LAN8720_H_
+#endif // ESP32_ETHERNET_LAN8720_H

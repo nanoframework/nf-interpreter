@@ -3,13 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _HALCONF_NF_H_
-#define _HALCONF_NF_H_
+#ifndef HALCONF_NF_H
+#define HALCONF_NF_H
 
 // enables STM32 Flash driver
 #if !defined(HAL_NF_USE_STM32_FLASH) 
 #define HAL_NF_USE_STM32_FLASH         TRUE
 #endif
 
-#endif // _HALCONF_NF_H_
+#endif // HALCONF_NF_H
 
