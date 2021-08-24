@@ -226,7 +226,14 @@ macro(nf_add_platform_dependencies target)
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
 
-            add_dependencies(${target}.elf nano::NF_Network)
+            if(CHIBIOS_COMMUNITY_TARGET)
+                target_include_directories(NF_Network PUBLIC
+                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
+                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
+        
+            endif()
+
+        add_dependencies(${target}.elf nano::NF_Network)
 
         endif()
 
