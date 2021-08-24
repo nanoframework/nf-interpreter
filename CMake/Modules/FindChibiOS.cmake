@@ -12,20 +12,12 @@ FetchContent_GetProperties(chibios)
 
 # check if the series name is supported 
 
-set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "TICC3200" "STM32L4xx" CACHE INTERNAL "supported STM series names for ChibiOS")
-set(CHIBIOS_TI_SUPPORTED_SERIES "TICC3200" CACHE INTERNAL "supported TI series names for ChibiOS")
+set(CHIBIOS_STM_SUPPORTED_SERIES "STM32F0xx" "STM32F4xx" "STM32F7xx" "STM32H7xx" "STM32L4xx" CACHE INTERNAL "supported STM series names for ChibiOS")
 
 list(FIND CHIBIOS_STM_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     # series is NOT supported by STM 
-    # try TI 
-    list(FIND CHIBIOS_TI_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
-    if(TARGET_SERIES_NAME_INDEX EQUAL -1)
-        message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-    else()
-        # series is supported by TI
-        set(TARGET_VENDOR "TI" CACHE INTERNAL "target vendor is TI")
-    endif()
+    message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
 else()
     # series is supported by STM
     set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
@@ -58,7 +50,6 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/inclu
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/ST/${TARGET_SERIES})
 
 #
-list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/common/ext/CMSIS/TI/${TARGET_SERIES})
 list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/common/startup/ARMCMx/devices/${TARGET_SERIES})
 
 
