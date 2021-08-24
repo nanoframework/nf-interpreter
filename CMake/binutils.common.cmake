@@ -118,10 +118,18 @@ macro(nf_add_common_include_directories target)
         ${CMAKE_CURRENT_SOURCE_DIR}/${target}
         
         ${NF_HALCore_INCLUDE_DIRS}
-        ${NF_CoreCLR_INCLUDE_DIRS}
-
-        ${WireProtocol_INCLUDE_DIRS}
     )
+
+    # includes specific to nanoBooter
+    if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+
+        target_include_directories(${target}.elf PUBLIC
+            ${WireProtocol_INCLUDE_DIRS}
+            ${CMAKE_SOURCE_DIR}/src/PAL/Include
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
+        )
+
+    endif()
 
     # includes specific to nanoCRL
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
@@ -148,16 +156,17 @@ macro(nf_add_common_sources target)
         ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
         ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
         ${CMAKE_SOURCE_DIR}/src/PAL/BlockStorage/nanoPAL_BlockStorage.c
-        ${NF_HALCore_SOURCES}
         ${COMMON_PROJECT_SOURCES}
-        ${WireProtocol_SOURCES}
+        ${NF_HALCore_SOURCES}
     )
 
     # sources specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_sources(${target}.elf PUBLIC
-            ${NANOBOOTER_PROJECT_SOURCES})
+            ${NANOBOOTER_PROJECT_SOURCES}
+            ${WireProtocol_SOURCES}
+        )
 
         # include configuration manager file
         if(NF_FEATURE_HAS_CONFIG_BLOCK)
