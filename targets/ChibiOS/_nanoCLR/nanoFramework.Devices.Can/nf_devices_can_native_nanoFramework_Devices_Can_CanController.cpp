@@ -26,14 +26,14 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
         controllerId = 1;
     }
 #endif
-#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
+#if defined(STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
     if (canp == &CAND2)
     {
         palCan = &Can2_PAL;
         controllerId = 2;
     }
 #endif
-#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
+#if defined(STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
     if (canp == &CAND3)
     {
         palCan = &Can3_PAL;
@@ -62,10 +62,10 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
 NF_PAL_CAN Can1_PAL;
 #endif
-#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
+#if defined(STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
 NF_PAL_CAN Can2_PAL;
 #endif
-#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
+#if defined(STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
 NF_PAL_CAN Can3_PAL;
 #endif
 
