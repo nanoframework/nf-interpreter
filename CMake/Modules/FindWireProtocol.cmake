@@ -68,3 +68,49 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(WireProtocol DEFAULT_MSG WireProtocol_INCLUDE_DIRS WireProtocol_SOURCES)
+
+
+# macro to be called from binutils to add Wire Protocol library
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+macro(nf_add_lib_wireprotocol)
+
+    # parse arguments
+    cmake_parse_arguments(NFAWP "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+
+    # add this has a library
+    set(LIB_NAME WireProtocol)
+
+    add_library(
+        ${LIB_NAME} STATIC 
+            ${WireProtocol_SOURCES})   
+
+    target_include_directories(
+        ${LIB_NAME} 
+        PUBLIC 
+            ${WireProtocol_INCLUDE_DIRS}
+            ${NF_CoreCLR_INCLUDE_DIRS}
+            ${NFAWP_EXTRA_INCLUDES})   
+
+    # TODO can be removed later
+    if(RTOS_FREERTOS_ESP32_CHECK)
+
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${NFAWP_EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else() 
+        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFAWP_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_linker_options(TARGET ${LIB_NAME})
+    endif()
+
+    # add alias
+    add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
+    
+endmacro()

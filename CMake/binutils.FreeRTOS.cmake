@@ -104,6 +104,30 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS})
 
         add_dependencies(${target}.elf nano::NF_CoreCLR)
+       
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${CMSIS_INCLUDE_DIRS}
+                ${FreeRTOS_INCLUDE_DIRS}
+                ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS})
+        
+        add_dependencies(${target}.elf nano::WireProtocol)
+
+        if(NF_FEATURE_DEBUGGER)
+
+            nf_add_lib_debugger(
+                EXTRA_INCLUDES
+                    ${CMSIS_INCLUDE_DIRS}
+                    ${FreeRTOS_INCLUDE_DIRS}
+                    ${TARGET_NXP_COMMON_INCLUDE_DIRS}
+                    ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
+                    ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS})
+            
+            add_dependencies(${target}.elf nano::NF_Debugger)
+
+        endif()
 
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES

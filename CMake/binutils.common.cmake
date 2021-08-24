@@ -125,6 +125,7 @@ macro(nf_add_common_include_directories target)
 
         target_include_directories(${target}.elf PUBLIC
             ${WireProtocol_INCLUDE_DIRS}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter
             ${CMAKE_SOURCE_DIR}/src/PAL/Include
             ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
         )
@@ -137,7 +138,6 @@ macro(nf_add_common_include_directories target)
         target_include_directories(${target}.elf PUBLIC
 
             # directories for nanoFramework libraries
-            ${NF_Debugger_INCLUDE_DIRS}
             ${NF_Diagnostics_INCLUDE_DIRS}
             ${Graphics_Includes}
         )
@@ -189,6 +189,8 @@ macro(nf_add_common_sources target)
         target_link_libraries(${target}.elf
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
+            nano::NF_Debugger
+            nano::WireProtocol
         )
 
         target_sources(${target}.elf PUBLIC
@@ -196,9 +198,7 @@ macro(nf_add_common_sources target)
             ${NANOCLR_PROJECT_SOURCES}
 
             # sources for nanoFramework libraries
-            ${NF_Debugger_SOURCES}
             ${NF_Diagnostics_SOURCES}
-
             ${Graphics_Sources}
         )
 
@@ -394,10 +394,15 @@ macro(nf_include_libraries_in_build target)
         # these are always present
         set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_CoreCLR -Wl,--no-whole-archive ")
         set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_NativeAssemblies -Wl,--no-whole-archive ")
+        set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lWireProtocol -Wl,--no-whole-archive ")
         
         # these are dependent on the feature being enabled
         if(USE_NETWORKING_OPTION)
             set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive ")
+        endif()
+
+        if(NF_FEATURE_DEBUGGER)
+            set_property(TARGET ${target} APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Debugger -Wl,--no-whole-archive ")
         endif()
 
         # this one has to be at the very end of the list to keep the linker happy

@@ -134,6 +134,34 @@ macro(nf_add_platform_dependencies target)
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
         
         add_dependencies(${target}.elf nano::NF_CoreCLR)
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+        
+        add_dependencies(${target}.elf nano::WireProtocol)
+
+        if(NF_FEATURE_DEBUGGER)
+
+            nf_add_lib_debugger(
+                EXTRA_INCLUDES
+                    ${CHIBIOS_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                    ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                    ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+            
+            add_dependencies(${target}.elf nano::NF_Debugger)
+
+        endif()
 
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES

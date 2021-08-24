@@ -114,6 +114,27 @@ macro(nf_add_platform_dependencies target)
         
         add_dependencies(${target}.elf nano::NF_CoreCLR)
 
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${TI_SimpleLink_INCLUDE_DIRS}
+                ${TI_XDCTools_INCLUDE_DIR}
+                ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+                ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+        
+        add_dependencies(${target}.elf nano::WireProtocol)
+
+        if(NF_FEATURE_DEBUGGER)
+
+            nf_add_lib_debugger(EXTRA_INCLUDES
+                ${TI_SimpleLink_INCLUDE_DIRS}
+                ${TI_XDCTools_INCLUDE_DIR}
+                ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS}
+                ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS})
+            
+            add_dependencies(${target}.elf nano::NF_Debugger)
+
+        endif()
+
         nf_add_lib_native_assemblies(
                 EXTRA_INCLUDES
                     ${CMAKE_CURRENT_BINARY_DIR}/syscfg
