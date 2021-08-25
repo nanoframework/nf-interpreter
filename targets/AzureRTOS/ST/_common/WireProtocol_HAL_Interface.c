@@ -27,12 +27,6 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
         TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
-        // check if any bytes where read
-        if (read == 0)
-        {
-            return false;
-        }
-
         *ptr += read;
         *size -= read;
     }
