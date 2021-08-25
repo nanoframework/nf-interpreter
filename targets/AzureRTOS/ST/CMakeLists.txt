@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-include(nf_utils)
+include(binutils.common)
 include(STM32_CubePackage)
 
 # Set target series
