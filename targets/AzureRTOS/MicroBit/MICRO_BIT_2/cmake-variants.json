@@ -28,7 +28,7 @@
           "BUILD_VERSION": "0.9.99.999",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
-          "RTOS": "AZURERTOS",
+          "RTOS": "AzureRTOS",
           "TARGET_SERIES": "MICROBIT",
           "TARGET_BOARD": "MICRO_BIT_2",
           "RTOS_SOURCE_FOLDER": "",

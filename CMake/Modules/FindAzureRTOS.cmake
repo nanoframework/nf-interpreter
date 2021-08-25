@@ -26,9 +26,6 @@ include(AZURERTOS_${TARGET_SERIES}_GCC_options)
 
 # message("AzureRTOS board series is ${TARGET_SERIES}") # debug helper
 
-# set include directories for AzureRTOS
-list(APPEND AZURERTOS_INCLUDE_DIRS ${PROJECT_BINARY_DIR}/AzureRTOS_Source/common/inc)
-
 # source files and GCC options according to target vendor and series
 
 # source files for AZURERTOS
