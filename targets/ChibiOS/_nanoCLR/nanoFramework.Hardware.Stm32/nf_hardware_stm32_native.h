@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_HARDWARE_STM32_NATIVE_H_
-#define _NF_HARDWARE_STM32_NATIVE_H_
+#ifndef NF_HARDWARE_STM32_NATIVE_H
+#define NF_HARDWARE_STM32_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -61,4 +61,4 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32;
 
-#endif  //_NF_HARDWARE_STM32_NATIVE_H_
+#endif // NF_HARDWARE_STM32_NATIVE_H

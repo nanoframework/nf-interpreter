@@ -602,11 +602,11 @@ HRESULT TouchPanelDriver::GetSetTouchInfo(CLR_UINT32 flags, CLR_INT32 *param1, C
         {
             CLR_UINT16 x = 0;
             CLR_UINT16 y = 0;
-            CLR_UINT32 flags =
+            CLR_UINT32 touchFlags =
                 GetTouchPointFlags_LatestPoint | GetTouchPointFlags_UseTime | GetTouchPointFlags_UseSource;
             CLR_UINT16 source = 0;
             CLR_INT64 time = 0;
-            GetTouchPoint(&flags, &source, &x, &y, &time);
+            GetTouchPoint(&touchFlags, &source, &x, &y, &time);
             *param1 = x;
             *param2 = y;
         }

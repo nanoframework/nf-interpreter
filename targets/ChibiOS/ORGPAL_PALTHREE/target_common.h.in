@@ -8,10 +8,9 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_COMMON_H_
-#define _TARGET_COMMON_H_
+#ifndef TARGET_COMMON_H
+#define TARGET_COMMON_H
 
-#include <target_os.h>
 #include <target_lwipopts.h>
 #include <nf_lwipopts_sntp.h>
 
@@ -44,4 +43,4 @@
 //#define EVENTS_HEART_BEAT       palToggleLine(GPIOG_LED2)
 /////////////////////////////////////
 
-#endif /* _TARGET_COMMON_H_ */
+#endif // TARGET_COMMON_H

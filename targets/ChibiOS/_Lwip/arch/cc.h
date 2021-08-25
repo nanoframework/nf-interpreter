@@ -5,8 +5,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef __CC_H__
-#define __CC_H__
+#ifndef CC_H
+#define CC_H
 
 #include <hal.h>
 
@@ -51,4 +51,4 @@ extern void debug_printf(const char *format, ...);
 #endif
 #define LWIP_NETIF_API 1
 
-#endif /* __CC_H__ */
+#endif // CC_H

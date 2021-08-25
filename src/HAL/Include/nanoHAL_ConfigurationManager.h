@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_CONFIG_MANAGER_H_
-#define _NANOHAL_CONFIG_MANAGER_H_ 1
+#ifndef NANOHAL_CONFIG_MANAGER_H
+#define NANOHAL_CONFIG_MANAGER_H
 
 #include <nanoCLR_Headers.h>
 #include <nanoHAL_Network.h>
@@ -196,4 +196,4 @@ extern "C"
 // declaration of Target configuration union as external, has to be provided at target level
 extern HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
-#endif //_NANOHAL_CONFIG_MANAGER_H_
+#endif //NANOHAL_CONFIG_MANAGER_H

@@ -8,6 +8,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
 #include <nf_rt_native.h>
+#include <target_platform.h>
 
 #if !defined(NXP_USE_RTC) 
     #error "Need the RTC to be enabled. Please set CMake option NF_FEATURE_RTC to ON."

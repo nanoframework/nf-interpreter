@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_RUNTIME__HEAPBLOCK_H_
-#define _NANOCLR_RUNTIME__HEAPBLOCK_H_
+#ifndef NANOCLR_RUNTIME__HEAPBLOCK_H
+#define NANOCLR_RUNTIME__HEAPBLOCK_H
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2872,4 +2872,4 @@ struct CLR_RT_HeapBlock_Stack : public CLR_RT_HeapBlock
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _NANOCLR_RUNTIME__HEAPBLOCK_H_
+#endif // NANOCLR_RUNTIME__HEAPBLOCK_H

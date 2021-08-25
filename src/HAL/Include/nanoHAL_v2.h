@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_V2_H_
-#define _NANOHAL_V2_H_ 1
+#ifndef NANOHAL_V2_H
+#define NANOHAL_V2_H
 
 #include <nanoCLR_Headers.h>
 
@@ -305,7 +305,7 @@ extern "C"
 #define ASSERT(i)
 #endif
 
-#ifndef _ASSERTE
+#ifndef ASSERTE
 #define _ASSERTE(expr) ASSERT(expr)
 #endif
 
@@ -384,4 +384,4 @@ extern "C"
 
 #include <nanoHAL_Windows_Storage.h>
 
-#endif // _NANOHAL_V2_H_
+#endif // NANOHAL_V2_H

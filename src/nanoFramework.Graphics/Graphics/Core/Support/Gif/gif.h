@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _GIF_H_
-#define _GIF_H_
+#ifndef GIF_H
+#define GIF_H
 
 #include "nanoCLR_Types.h"
 #include "nanoCLR_Runtime.h"
@@ -51,4 +51,4 @@ struct GifDecoder
     static bool DecodeUntilFlush(void *param);
 };
 
-#endif
+#endif // GIF_H

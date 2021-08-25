@@ -47,7 +47,6 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
 option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
 
-
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -65,7 +64,7 @@ macro(PerformSettingsForApiEntry apiNamespace)
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${apiNamespaceWithoutDots},")
 
     # find the module
-    find_package(${apiNamespace} REQUIRED)
+    find_package(${apiNamespace} REQUIRED QUIET)
 
     # append include directories to list with includes for all the APIs
     list(APPEND NF_NativeAssemblies_INCLUDE_DIRS "${${apiNamespace}_INCLUDE_DIRS}")
@@ -95,7 +94,7 @@ macro(PerformSettingsForInteropEntry interopAssemblyName)
     list(APPEND CLR_RT_NativeAssemblyDataTableEntriesList "&g_CLR_AssemblyNative_${interopAssemblyNameWithoutDots},")
 
     # find the module
-    find_package("INTEROP-${interopAssemblyName}" REQUIRED)
+    find_package("INTEROP-${interopAssemblyName}" REQUIRED QUIET)
 
     #########
     # because Interop assemblies are considered and treated as like any CLR assembly we add them to the same lists
@@ -396,6 +395,54 @@ else()
     message(STATUS " *** NO APIs included ***")    
 endif()
 
+list(APPEND NF_NativeAssemblies_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
+
+# macro to be called from binutils to add Core CLR library
+# optional EXTRA_INCLUDES with include paths to be added to the library
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+macro(nf_add_lib_native_assemblies)
+
+    # parse arguments
+    cmake_parse_arguments(NFALNA "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+
+    # add this has a library
+    set(LIB_NAME NF_NativeAssemblies)
+
+    add_library(
+        ${LIB_NAME} STATIC 
+            ${NF_NativeAssemblies_SOURCES})   
+
+    target_include_directories(
+        ${LIB_NAME} 
+        PUBLIC 
+            ${NF_NativeAssemblies_INCLUDE_DIRS}
+            ${NF_CoreCLR_INCLUDE_DIRS}
+
+            ${NFALNA_EXTRA_INCLUDES})   
+
+    # TODO can be removed later
+    if(RTOS_FREERTOS_ESP32_CHECK)
+
+        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        # this is the only one different
+        target_compile_definitions(
+            ${LIB_NAME} PUBLIC
+            -DPLATFORM_ESP32
+            ${NFALNA_EXTRA_COMPILER_DEFINITIONS}
+        )
+
+    else() 
+        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALNA_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_linker_options(TARGET ${LIB_NAME})
+    endif()
+
+    # add alias
+    add_library("nano::${LIB_NAME}" ALIAS ${LIB_NAME})
+    
+endmacro()

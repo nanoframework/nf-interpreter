@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_PLATFORM_H_
-#define _TARGET_PLATFORM_H_ 1
+#ifndef TARGET_PLATFORM_H
+#define TARGET_PLATFORM_H
 
 #define NANOCLR_GRAPHICS  @NANOCLR_GRAPHICS@
 #define HAL_USE_SPI       @HAL_USE_SPI_OPTION@
@@ -15,4 +15,4 @@
 #define SDC_MAX_OPEN_FILES 5
 #endif
 
-#endif /* _TARGET_PLATFORM_H_ */
+#endif // TARGET_PLATFORM_H

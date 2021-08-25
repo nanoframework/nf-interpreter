@@ -271,8 +271,6 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
     {
         UINT bytesRead;
 
-        FileOperation *fileIoOperation = (FileOperation *)arg;
-
         FRESULT operationResult =
             f_read(fileIoOperation->FatFile, fileIoOperation->Content, fileIoOperation->ContentLength, &bytesRead);
 

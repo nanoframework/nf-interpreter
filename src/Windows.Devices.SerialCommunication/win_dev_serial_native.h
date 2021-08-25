@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_SERIAL_NATIVE_H_
-#define _WIN_DEV_SERIAL_NATIVE_H_
+#ifndef WIN_DEV_SERIAL_NATIVE_H
+#define WIN_DEV_SERIAL_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -128,4 +128,4 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication;
 
-#endif //_WIN_DEV_SERIAL_NATIVE_H_
+#endif //WIN_DEV_SERIAL_NATIVE_H

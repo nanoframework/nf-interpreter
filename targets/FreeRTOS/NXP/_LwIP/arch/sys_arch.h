@@ -38,8 +38,8 @@
  */
  
 
-#ifndef __ARCH_SYS_ARCH_H__
-#define __ARCH_SYS_ARCH_H__
+#ifndef ARCH_SYS_ARCH_H
+#define ARCH_SYS_ARCH_H
 
 #include "fsl_debug_console.h"
 #include "lwip/opt.h"
@@ -97,4 +97,4 @@ void sys_assert( char *msg );
 }
 #endif /* __cplusplus */
 
-#endif /* __ARCH_SYS_ARCH_H__ */
+#endif // ARCH_SYS_ARCH_H

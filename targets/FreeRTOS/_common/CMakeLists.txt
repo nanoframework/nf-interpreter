@@ -5,11 +5,11 @@
 
 # FreeRTOS common includes
 list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
-list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/FreeRTOS)
+list(APPEND TARGET_FREERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
 
 # add header with target platform definitions
 configure_file(${CMAKE_SOURCE_DIR}/CMake/FreeRTOS_target_os.h.in
-               ${CMAKE_BINARY_DIR}/targets/FreeRTOS/target_os.h @ONLY)
+               ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
 
 # append common source files
 list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hardfault.c)

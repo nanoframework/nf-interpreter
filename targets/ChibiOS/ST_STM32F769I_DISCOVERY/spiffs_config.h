@@ -9,8 +9,8 @@
 // that's fitted in the STM32F769I-DISCO board
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef SPIFFS_CONFIG_H_
-#define SPIFFS_CONFIG_H_
+#ifndef SPIFFS_CONFIG_H
+#define SPIFFS_CONFIG_H
 
 #include <nanoHAL_v2.h>
 
@@ -367,4 +367,4 @@ typedef u16_t spiffs_obj_id;
 // i.e. (spiffs_file_system_size / log_page_size) - 1
 typedef u16_t spiffs_span_ix;
 
-#endif /* SPIFFS_CONFIG_H_ */
+#endif // SPIFFS_CONFIG_H

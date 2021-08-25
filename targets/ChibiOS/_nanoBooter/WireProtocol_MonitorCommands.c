@@ -37,11 +37,6 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return true;
 
         case AccessMemory_Read:
-            // use FLASH driver to perform read operation
-            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
-            stm32FlashReadBytes(location, lengthInBytes, buffer);
-            return true;
-
         default:
             // default return is FALSE
             return false;

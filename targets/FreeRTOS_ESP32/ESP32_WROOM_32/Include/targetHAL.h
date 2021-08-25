@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_HAL_H_
-#define _TARGET_HAL_H_
+#ifndef TARGET_HAL_H
+#define TARGET_HAL_H
 
 #include <target_board.h>
 #include <lwipopts.h>
@@ -59,4 +59,4 @@ extern portMUX_TYPE globalLockMutex;
 #endif // EVENTS_HEART_BEAT
 #endif
 
-#endif //_TARGET_HAL_H_
+#endif //TARGET_HAL_H

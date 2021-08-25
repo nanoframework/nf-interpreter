@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef __STM32F7xx_HAL_CONF_H
-#define __STM32F7xx_HAL_CONF_H
+#ifndef STM32F7xx_HAL_CONF_H
+#define STM32F7xx_HAL_CONF_H
 
 #define STM32F769xx
 
@@ -350,4 +350,4 @@ extern "C"
 }
 #endif
 
-#endif // __STM32F7xx_HAL_CONF_H
+#endif // STM32F7xx_HAL_CONF_H

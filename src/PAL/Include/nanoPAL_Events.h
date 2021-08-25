@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOPAL_EVENTS_H_
-#define _NANOPAL_EVENTS_H_ 1
+#ifndef NANOPAL_EVENTS_H
+#define NANOPAL_EVENTS_H
 
 #include <nanoHAL.h>
 #include <nanoWeak.h>
@@ -89,4 +89,4 @@ struct PalEventDriver
 
 extern PalEventDriver g_palEventDriver;
 
-#endif //_NANOPAL_EVENTS_H_
+#endif // NANOPAL_EVENTS_H

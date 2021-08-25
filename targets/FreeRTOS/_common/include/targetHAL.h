@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_HAL_H_
-#define _TARGET_HAL_H_
+#ifndef TARGET_HAL_H
+#define TARGET_HAL_H
 
 #include "FreeRTOS.h"
 #include <target_board.h>
@@ -89,4 +89,4 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
-#endif //_TARGET_HAL_H_
+#endif //TARGET_HAL_H

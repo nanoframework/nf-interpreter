@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _CORLIB_NATIVE_H_
-#define _CORLIB_NATIVE_H_
+#ifndef CORLIB_NATIVE_H
+#define CORLIB_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -1207,4 +1207,4 @@ struct Library_corlib_native_System_WeakReference
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
-#endif //_CORLIB_NATIVE_H_
+#endif //CORLIB_NATIVE_H

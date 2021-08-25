@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DRIVERS_SPI_DECL_H_
-#define _DRIVERS_SPI_DECL_H_ 1
+#ifndef DRIVERS_SPI_DECL_H
+#define DRIVERS_SPI_DECL_H
 
 #define SPI_CTRL_DEFAULT 0
 
@@ -142,4 +142,4 @@ uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus);
 // Number of SPI devices that can simultaneously be opened on a bus ( hardware restrictions)
 uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus);
 
-#endif // _DRIVERS_SPI_DECL_H_
+#endif // DRIVERS_SPI_DECL_H

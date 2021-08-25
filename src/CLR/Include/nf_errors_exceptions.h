@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef __NF_ERRORS_H__
-#define __NF_ERRORS_H__
+#ifndef NF_ERRORS_H
+#define NF_ERRORS_H
 
 #if !defined(WIN32) && !defined(_WIN32)
 
@@ -168,4 +168,4 @@ typedef int HRESULT;
 
 // clang-format off
 
-#endif  // __NF_ERRORS_H__
+#endif  // NF_ERRORS_H

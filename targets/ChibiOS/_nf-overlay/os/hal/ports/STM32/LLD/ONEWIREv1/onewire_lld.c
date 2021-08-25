@@ -248,7 +248,7 @@ bool oneWire_lld_TouchBit(bool sendbit)
 uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
 {
     uint8_t send_mask = 0x01, result = 0;
-    uint8_t i = 0;
+    uint32_t i = 0;
 
     // send byte
     while (send_mask)
@@ -289,7 +289,7 @@ uint8_t oneWire_lld_TouchByte(uint8_t sendbyte)
     // reset send mask to interpret the reply
     send_mask = 0x01;
 
-    for (uint32_t i = 0; i < 8; i++)
+    for (i = 0; i < 8; i++)
     {
         if (ONEWIRED1.RxBuffer[i] == 0xff)
         {

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_I2C_NATIVE_TARGET_H_
-#define _SYS_DEV_I2C_NATIVE_TARGET_H_
+#ifndef SYS_DEV_I2C_NATIVE_TARGET_H
+#define SYS_DEV_I2C_NATIVE_TARGET_H
 
 #include <ch.h>
 #include <hal.h>
@@ -69,4 +69,4 @@ void ConfigPins_I2C2();
 void ConfigPins_I2C3();
 void ConfigPins_I2C4();
 
-#endif //_SYS_DEV_I2C_NATIVE_TARGET_H_
+#endif //SYS_DEV_I2C_NATIVE_TARGET_H

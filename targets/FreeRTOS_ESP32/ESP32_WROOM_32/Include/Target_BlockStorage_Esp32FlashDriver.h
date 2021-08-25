@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_ESP32FLASH_DRIVER_H_
-#define _TARGET_ESP32FLASH_DRIVER_H_ 1
+#ifndef TARGET_ESP32FLASH_DRIVER_H
+#define TARGET_ESP32FLASH_DRIVER_H
 
 #include <esp32_os.h>
 #include <esp_partition.h>
@@ -43,4 +43,4 @@ bool Esp32FlashDriver_GetMemoryMappedAddress(
 extern const DRAM_ATTR esp_partition_t *g_pFlashDriver_partition;
 extern const void *g_esp32_flash_start_ptr;
 
-#endif //_TARGET_ESP32FLASH_DRIVER_H_
+#endif //TARGET_ESP32FLASH_DRIVER_H

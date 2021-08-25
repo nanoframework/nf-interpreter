@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_GRAPHICS_H_
-#define _NANOHAL_GRAPHICS_H_ 1
+#ifndef NANOHAL_GRAPHICS_H
+#define NANOHAL_GRAPHICS_H
 
 #include <target_platform.h>
 
@@ -25,4 +25,4 @@ extern TouchInterface g_TouchInterface;
 extern GraphicsMemoryHeap g_GraphicsMemoryHeap;
 #endif
 
-#endif
+#endif // NANOHAL_GRAPHICS_H

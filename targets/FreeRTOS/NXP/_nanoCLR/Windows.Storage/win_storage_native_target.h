@@ -4,8 +4,8 @@
 //
 
 
-#ifndef _WIN_STORAGE_NATIVE_TARGET_H_
-#define _WIN_STORAGE_NATIVE_TARGET_H_
+#ifndef WIN_STORAGE_NATIVE_TARGET_H
+#define WIN_STORAGE_NATIVE_TARGET_H
 
 #include <ff.h>
 #include <corlib_native.h>
@@ -13,4 +13,4 @@
 #include <nanoHAL_Windows_Storage.h>
 #include <Target_Windows_Storage.h>
 
-#endif  //_WIN_STORAGE_NATIVE_TARGET_H_
+#endif // WIN_STORAGE_NATIVE_TARGET_H

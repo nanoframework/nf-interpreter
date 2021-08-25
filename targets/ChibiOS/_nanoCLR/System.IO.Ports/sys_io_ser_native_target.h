@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIN_DEV_SERIAL_NATIVE_TARGET_H_
-#define _WIN_DEV_SERIAL_NATIVE_TARGET_H_
+#ifndef WIN_DEV_SERIAL_NATIVE_TARGET_H
+#define WIN_DEV_SERIAL_NATIVE_TARGET_H
 
 #include <target_windows_devices_serialcommunication_config.h>
 #include <sys_io_ser_native.h>
@@ -183,4 +183,4 @@ void UnInit_UART6();
 void UnInit_UART7();
 void UnInit_UART8();
 
-#endif //_WIN_DEV_SERIAL_NATIVE_TARGET_H_
+#endif //WIN_DEV_SERIAL_NATIVE_TARGET_H

@@ -9,8 +9,8 @@
 // enc28j60.h - device driver interface
 //
 
-#ifndef __ENC28J60_H__
-#define __ENC28J60_H__
+#ifndef ENC28J60_H
+#define ENC28J60_H
 
 #include <nanohal.h>
 #include <enc28j60_lwip_driver.h>
@@ -366,4 +366,4 @@ void enc28j60_lwip_setup_recv_buffer(struct netif *pNetIF, uint32_t spiHandle);
 #define ENC28J60_XMIT_CONTROL_PCRCEN_BIT    1
 #define ENC28J60_XMIT_CONTROL_POVERRIDE_BIT 0
 
-#endif /* #ifndef __ENC28J60_H__   */
+#endif // ENC28J60_H

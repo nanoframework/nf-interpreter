@@ -8,53 +8,91 @@ FetchContent_GetProperties(chibios)
 
 # set include directories for ChibiOS HAL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32L4xx)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32L4xx)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32L4xx)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARM-common)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ports/ARMv7-M)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/compilers/GCC)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/startup/ARMCMx/devices/STM32L4xx)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ARM/CMSIS/Core/Include)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/ST/STM32L4xx)
 
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv3)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv3)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2)
-#list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/MACv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
-list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/ADCv3)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CANv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/CRYPv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DACv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/DMAv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/EXTIv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/GPIOv3)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/I2Cv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/OTGv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/QUADSPIv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RCCv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RNGv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/RTCv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SDMMCv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SPIv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/SYSTICKv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/TIMv1)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USART)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
 
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
+
+# append dummy include directory when not using ChibiOS-Contrib
+if(NOT CHIBIOS_CONTRIB_REQUIRED)
+    list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes)
+endif()
+
+####################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
+####################################################################################
+# component STM32_FLASH
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv4)
+# component STM32_CRC
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
+# component STM32_RNG
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1) 
+
+###############################################################################################################################
+# Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
+# following the template below. 
+#
+# list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/<path-here>)
+###############################################################################################################################
+
+####################################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
+####################################################################################################
+# component STM32_FLASH
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv4/flash_lld.c)
+# component STM32_CRC
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
+# component STM32_RNG
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
+
+##########################################################################################################################
+# Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
+# overlay component that you are adding following the template below. 
+#
+# list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
+##########################################################################################################################
 
 # OSHAL sources need to be added for ChibiOS RT-NIL or Azure RTOS depending on build
 # adjust search path here
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH targets/AzureRTOS/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
 
 # set include path for OSHAL header
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${OSHAL_PATH})
-
 
 # source files for ChibiOS HAL
 set(CHIBIOS_HAL_SRCS
@@ -73,12 +111,14 @@ set(CHIBIOS_HAL_SRCS
     
     hal_buffers.c
     hal_queues.c
+    hal_flash.c
     hal_mmcsd.c
     
     hal_adc.c
     hal_can.c
     hal_crypto.c
     hal_dac.c
+    hal_efl.c
     hal_gpt.c
     hal_i2c.c
     hal_i2s.c
@@ -101,6 +141,7 @@ set(CHIBIOS_HAL_SRCS
 
     # LLD HAL files
     hal_lld.c
+    hal_efl_lld.c
 
     hal_adc_lld.c
     hal_can_lld.c
@@ -133,6 +174,8 @@ set(CHIBIOS_HAL_SRCS
 
     # OSAL 
     osal.c
+
+    board.c
 )
 
 foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
@@ -171,8 +214,9 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv2
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
-
             ${OSHAL_PATH}
+            
+            ${CHIBIOS_BOARD_DEFINITIONS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -185,7 +229,6 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
-
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS_L4_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)

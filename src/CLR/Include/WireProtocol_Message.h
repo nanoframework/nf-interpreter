@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_MESSAGE_H_
-#define _WIREPROTOCOL_MESSAGE_H_
+#ifndef WIREPROTOCOL_MESSAGE_H
+#define WIREPROTOCOL_MESSAGE_H
 
 #include "WireProtocol.h"
 #include "WireProtocol_App_Interface.h"
@@ -17,7 +17,7 @@
 #define TRACE_STATE   4
 #define TRACE_NODATA  8
 
-#if TRACE_MASK != 0
+#if defined(TRACE_MASK) && TRACE_MASK != 0
 #define TRACE0(f, msg)                                                                                                 \
     if ((f)&TRACE_MASK)                                                                                                \
     debug_printf(msg)
@@ -77,4 +77,4 @@ extern "C"
 }
 #endif
 
-#endif // _WIREPROTOCOL_MESSAGE_H_
+#endif // WIREPROTOCOL_MESSAGE_H

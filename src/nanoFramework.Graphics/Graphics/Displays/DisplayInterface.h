@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _DISPLAY_INTERFACE_H_
-#define _DISPLAY_INTERFACE_H_ 1
+#ifndef DISPLAY_INTERFACE_H
+#define DISPLAY_INTERFACE_H
 
 #include "nanoCLR_Types.h"
 
@@ -38,4 +38,4 @@ struct DisplayInterface
     void SetCommandMode(int mode);
 };
 
-#endif // _DISPLAY_INTERFACE_H_
+#endif // DISPLAY_INTERFACE_H

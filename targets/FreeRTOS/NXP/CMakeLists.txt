@@ -4,7 +4,8 @@
 #
 
 include(FetchContent)
-include(NF_Utils)
+include(binutils.common)
+
 
 # check if FATFS_SOURCE was specified or if it's empty (default is empty)
 set(NO_FATFS_SOURCE TRUE)

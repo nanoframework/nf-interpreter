@@ -11,7 +11,7 @@ typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
 
 //////////////////////////////////////////
 
-struct FileOperation
+struct FileIOFileOperation
 {
     const char *FileName;
     char *Content;
@@ -25,7 +25,7 @@ static volatile FRESULT threadOperationResult;
 static void ReadTextWorkingThread(void *arg)
 {
 
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(arg);
+    FileIOFileOperation *fileIoOperation = reinterpret_cast<FileIOFileOperation *>(arg);
 
     FIL file;
 
@@ -66,7 +66,7 @@ static void ReadTextWorkingThread(void *arg)
 static void WriteTextWorkingThread(void *arg)
 {
 
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(arg);
+    FileIOFileOperation *fileIoOperation = reinterpret_cast<FileIOFileOperation *>(arg);
 
     FIL file;
 
@@ -104,7 +104,7 @@ static void WriteBinaryWorkingThread(void *arg)
 {
     UINT bytesWritten;
 
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(arg);
+    FileIOFileOperation *fileIoOperation = reinterpret_cast<FileIOFileOperation *>(arg);
 
     FIL file;
 
@@ -141,7 +141,7 @@ static void WriteBinaryWorkingThread(void *arg)
 static void ReadBinaryWorkingThread(void *arg)
 {
 
-    FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(arg);
+    FileIOFileOperation *fileIoOperation = reinterpret_cast<FileIOFileOperation *>(arg);
 
     FIL file;
 
@@ -230,7 +230,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
         CLR_RT_ProtectFromGC gcContent(*bufferArray);
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
+        FileIOFileOperation *fileIoOperation =
+            reinterpret_cast<FileIOFileOperation *>(platform_malloc(sizeof(FileIOFileOperation)));
 
         // fileIoOperation->File = file;
         fileIoOperation->FileName = filePath;
@@ -329,7 +330,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
         CLR_RT_ProtectFromGC gcContent(*content);
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
+        FileIOFileOperation *fileIoOperation =
+            reinterpret_cast<FileIOFileOperation *>(platform_malloc(sizeof(FileIOFileOperation)));
 
         fileIoOperation->FileName = filePath;
         fileIoOperation->Content = (char *)content->StringText();
@@ -435,7 +437,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
         CLR_RT_HeapBlock_Array *bufferArray = buffer.DereferenceArray();
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = reinterpret_cast<FileOperation *>(platform_malloc(sizeof(FileOperation)));
+        FileIOFileOperation *fileIoOperation =
+            reinterpret_cast<FileIOFileOperation *>(platform_malloc(sizeof(FileIOFileOperation)));
 
         fileIoOperation->FileName = filePath;
         fileIoOperation->Content = (char *)bufferArray->GetFirstElement();
@@ -543,7 +546,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
         NANOCLR_CHECK_HRESULT(hbText.StoreToReference(stack.Arg1(), 0));
 
         // setup FileIO operation
-        FileOperation *fileIoOperation = (FileOperation *)platform_malloc(sizeof(FileOperation));
+        FileIOFileOperation *fileIoOperation = (FileIOFileOperation *)platform_malloc(sizeof(FileIOFileOperation));
 
         fileIoOperation->FileName = filePath;
         fileIoOperation->Content = (char *)textString->StringText();

@@ -6,8 +6,8 @@
 
 // clang-format off
 
-#ifndef _WIREPROTOCOL_H_
-#define _WIREPROTOCOL_H_
+#ifndef WIREPROTOCOL_H
+#define WIREPROTOCOL_H
 
 #include <nanoCLR_Headers.h>
 #include <nanoSupport.h>
@@ -58,13 +58,13 @@ typedef enum WP_Flags
 // enum with machine states for Wire Procotol receiver
 typedef enum ReceiveState
 {
-    ReceiveState_Idle             = 1,
-    ReceiveState_Initialize       = 2,
-    ReceiveState_WaitingForHeader = 3,
-    ReceiveState_ReadingHeader    = 4,
-    ReceiveState_CompleteHeader   = 5,
-    ReceiveState_ReadingPayload   = 6,
-    ReceiveState_CompletePayload  = 7,
+    ReceiveState_Idle             = (uint8_t)1,
+    ReceiveState_Initialize       = (uint8_t)2,
+    ReceiveState_WaitingForHeader = (uint8_t)3,
+    ReceiveState_ReadingHeader    = (uint8_t)4,
+    ReceiveState_CompleteHeader   = (uint8_t)5,
+    ReceiveState_ReadingPayload   = (uint8_t)6,
+    ReceiveState_CompletePayload  = (uint8_t)7,
 }ReceiveState;
 
 // enum with CLR monitor commands
@@ -213,6 +213,6 @@ struct WP_CompileCheck
     char buf1[ sizeof(WP_Packet) == 8 * 4 ? 1 : -1 ];
 };
 
-#endif // _WIREPROTOCOL_H_
+#endif // WIREPROTOCOL_H
 
 // clang-format on

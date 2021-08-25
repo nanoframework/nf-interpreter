@@ -9,7 +9,6 @@ FetchContent_GetProperties(chibios)
 # set include directories for ChibiOS HAL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/common/ARMCMx)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/include)
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/STM32F4xx)
 
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/portability/GCC)
@@ -41,12 +40,67 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/USARTv1)
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1)
 
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
+
+# append dummy include directory when not using ChibiOS-Contrib
+if(NOT CHIBIOS_CONTRIB_REQUIRED)
+    list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes)
+endif()
+
+####################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
+####################################################################################
+# component STM32_FLASH
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
+# component STM32_CRC
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
+# component STM32_RNG
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1) 
+# component STM32_FSMC (Flexible Memory Controller)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1)
+# component STM32_ONEWIRE (One Wire driver)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1)
+# component STM32_QSPI (Quad-SPI)
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/QSPIv1)
+
+###############################################################################################################################
+# Add above the required include directory(ies) for a new nanoFramework overlay component that you are adding
+# following the template below. 
+#
+# list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/<path-here>)
+###############################################################################################################################
+
+####################################################################################################
+# WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
+####################################################################################################
+# component STM32_FLASH
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
+# component STM32_CRC
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
+# component STM32_RNG
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/RNGv1/rng_lld.c)
+# component STM32_FSMC (Flexible Memory Controller)
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_nand_lld.c)
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sdram_lld.c)
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FSMCv1/fsmc_sram_lld.c)
+# component STM32_ONEWIRE
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/ONEWIREv1/onewire_lld.c)
+# component STM32_QSPI (Quad-SPI)
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/QSPIv1/qspi_lld.c)
+
+##########################################################################################################################
+# Add above ALL the source code file(s) low level driver specif for a series required for a new nanoFramework 
+# overlay component that you are adding following the template below. 
+#
+# list(APPEND CHIBIOS_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/src/<path-here>)
+##########################################################################################################################
+
 # OSHAL sources need to be added for ChibiOS RT-NIL or Azure RTOS depending on build
 # adjust search path here
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH targets/AzureRTOS/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS/HAL)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
@@ -131,6 +185,8 @@ set(CHIBIOS_HAL_SRCS
 
     # OSAL 
     osal.c
+
+    board.c
 )
 
 foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
@@ -170,6 +226,8 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
             ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LLD/xWDGv1
 
             ${OSHAL_PATH}
+            
+            ${CHIBIOS_BOARD_DEFINITIONS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -182,7 +240,6 @@ foreach(SRC_FILE ${CHIBIOS_HAL_SRCS})
 
 endforeach()
 
-
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS_F4_HAL DEFAULT_MSG CHIBIOS_HAL_INCLUDE_DIRS CHIBIOS_HAL_SOURCES)

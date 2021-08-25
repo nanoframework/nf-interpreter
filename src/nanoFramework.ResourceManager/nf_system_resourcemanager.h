@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_SYSTEM_RESOURCEMANAGER_H_
-#define _NF_SYSTEM_RESOURCEMANAGER_H_
+#ifndef NF_SYSTEM_RESOURCEMANAGER_H
+#define NF_SYSTEM_RESOURCEMANAGER_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -42,4 +42,4 @@ struct Library_nf_system_resourcemanager_nanoFramework_Runtime_Native_ResourceUt
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_ResourceManager;
 
-#endif  //_NF_SYSTEM_RESOURCEMANAGER_H_
+#endif // NF_SYSTEM_RESOURCEMANAGER_H

@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_CAPABILITIES_H_
-#define _NANOHAL_CAPABILITIES_H_ 1
+#ifndef NANOHAL_CAPABILITIES_H
+#define NANOHAL_CAPABILITIES_H
 
-#endif // _NANOHAL_CAPABILITIES_H_
+#endif // NANOHAL_CAPABILITIES_H

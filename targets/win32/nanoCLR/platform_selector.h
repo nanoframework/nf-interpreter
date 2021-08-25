@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _PLATFORM_WINDOWS_SELECTOR_H_
-#define _PLATFORM_WINDOWS_SELECTOR_H_ 1
+#ifndef PLATFORM_WINDOWS_SELECTOR_H
+#define PLATFORM_WINDOWS_SELECTOR_H
 
 #define PLATFORM_WINDOWS_EMULATOR 1
 
@@ -65,4 +65,4 @@
 
 //#include <processor_selector.h>
 
-#endif // _PLATFORM_WINDOWS_SELECTOR_H_ 1
+#endif // PLATFORM_WINDOWS_SELECTOR_H

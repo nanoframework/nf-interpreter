@@ -5,10 +5,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef __PERF_H__
-#define __PERF_H__
+#ifndef PERF_H
+#define PERF_H
 
 #define PERF_START
 #define PERF_STOP(x)
 
-#endif /* __PERF_H__ */
+#endif // PERF_H

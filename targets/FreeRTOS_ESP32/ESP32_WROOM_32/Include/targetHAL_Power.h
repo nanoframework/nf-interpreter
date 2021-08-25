@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _TARGET_HAL_POWER_H_
-#define _TARGET_HAL_POWER_H_ 1
+#ifndef TARGET_HAL_POWER_H
+#define TARGET_HAL_POWER_H
 
 #include <esp32_os.h>
 #include <nanoHAL_v2.h>
@@ -18,4 +18,4 @@ extern "C" {
 }
 #endif
 
-#endif //_TARGET_HAL_POWER_H_
+#endif //TARGET_HAL_POWER_H

@@ -7,8 +7,8 @@
 
 #include <hal.h>
 
-#ifndef __SYS_ARCH_H__
-#define __SYS_ARCH_H__
+#ifndef SYS_ARCH_H
+#define SYS_ARCH_H
 
 typedef semaphore_t *sys_sem_t;
 typedef mailbox_t *sys_mbox_t;
@@ -22,4 +22,4 @@ typedef syssts_t sys_prot_t;
 /* let sys.h use binary semaphores for mutexes */
 #define LWIP_COMPAT_MUTEX 1
 
-#endif /* __SYS_ARCH_H__ */
+#endif // SYS_ARCH_H

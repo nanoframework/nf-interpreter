@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _GRAPHICS_MEMORY_SETUP_
-#define _GRAPHICS_MEMORY_SETUP_ 1
+#ifndef GRAPHICS_MEMORY_SETUP_
+#define GRAPHICS_MEMORY_SETUP_
 
 #include "nanoCLR_Types.h"
 #include "GraphicsMemoryHeap.h"
@@ -19,4 +19,4 @@ bool GraphicsMemory::GraphicsHeapLocation( CLR_UINT8*&graphicsStartingAddress, C
     graphicsEndingAddress = (CLR_UINT8*)&GraphicsHeapEnd;
     return true;
 }
-#endif  // _GRAPHICS_MEMORY_SETUP_
+#endif  // GRAPHICS_MEMORY_SETUP

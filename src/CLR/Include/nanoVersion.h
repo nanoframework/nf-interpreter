@@ -2,8 +2,8 @@
 // Copyright (c) .NET Foundation and Contributors
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANO_VERSION_H_
-#define _NANO_VERSION_H_ 1
+#ifndef NANO_VERSION_H
+#define NANO_VERSION_H
 
 // structure to hold 'standard' version information
 typedef struct VersionInfo
@@ -15,4 +15,4 @@ typedef struct VersionInfo
 
 } VersionInfo;
 
-#endif // _NANO_VERSION_H_
+#endif // NANO_VERSION_H

@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOCLR_HEADERS_H_
-#define _NANOCLR_HEADERS_H_ 1
+#ifndef NANOCLR_HEADERS_H
+#define NANOCLR_HEADERS_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -28,4 +28,4 @@
 #define TRUE 1
 #endif
 
-#endif // _NANOCLR_HEADERS_H_
+#endif // NANOCLR_HEADERS_H

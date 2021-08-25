@@ -1,6 +1,6 @@
 # ESP32 WROOM-32
 
-The current image is built with mbedTLS v2.16.2.
+The current image is built with mbedTLS included in IDF v3.3.5 (v2.16.7).
 
 This reference target _fits_ all EPS32 boards carrying an ESP32-WROOM-32 module.
 

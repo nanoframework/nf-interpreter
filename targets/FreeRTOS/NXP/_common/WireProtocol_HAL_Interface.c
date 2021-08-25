@@ -46,7 +46,7 @@ bool WP_Initialise()
     return WP_Port_Intitialised;
 }
 
-uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
+void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // TODO: Initialise Port if not already done, Wire Protocol should be calling this directly at startup
     if (!WP_Port_Intitialised)
@@ -61,19 +61,11 @@ uint8_t WP_ReceiveBytes(uint8_t *ptr, uint32_t *size)
     if (*size)
     {
         size_t read = 0;
-        LPUART_RTOS_Receive(&handle, ptr, requestedSize, &read);
+        LPUART_RTOS_Receive(&handle, *ptr, requestedSize, &read);
 
-        // check if any bytes where read
-        if (read == 0)
-        {
-            return false;
-        }
-
-        ptr += read;
+        *ptr += read;
         *size -= read;
     }
-
-    return true;
 }
 
 uint8_t WP_TransmitMessage(WP_Message *message)

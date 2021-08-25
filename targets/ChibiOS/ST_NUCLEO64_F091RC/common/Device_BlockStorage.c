@@ -12,10 +12,10 @@ const BlockRange BlockRange1[] = {
     {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 4},
 
     // 0x08002800 nanoCLR
-    {BlockRange_BLOCKTYPE_CODE, 5, 83},
+    {BlockRange_BLOCKTYPE_CODE, 5, 84},
 
-    // 0x0802A000 deployment
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 84, 127}};
+    // 0x0802A800 deployment
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 85, 127}};
 
 const BlockRegionInfo BlockRegions[] = {
     {

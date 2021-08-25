@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_CORE_H_
-#define _NANOCLR_CORE_H_
+#ifndef NANOCLR_CORE_H
+#define NANOCLR_CORE_H
 
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
@@ -21,4 +21,4 @@
 //#include <SPOT_hardware_native.h>
 #include <nanoCLR_Runtime__HeapBlock.h>
 
-#endif // _NANOCLR_CORE_H_
+#endif // NANOCLR_CORE_H

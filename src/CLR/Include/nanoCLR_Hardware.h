@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_HARDWARE_H_
-#define _NANOCLR_HARDWARE_H_
+#ifndef NANOCLR_HARDWARE_H
+#define NANOCLR_HARDWARE_H
 
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Runtime.h>
@@ -98,4 +98,4 @@ CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
 
 //--//
 
-#endif // _NANOCLR_HARDWARE_H_
+#endif // NANOCLR_HARDWARE_H

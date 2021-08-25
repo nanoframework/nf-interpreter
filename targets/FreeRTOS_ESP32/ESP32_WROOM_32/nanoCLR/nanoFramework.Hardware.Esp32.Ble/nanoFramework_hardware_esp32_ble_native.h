@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOFRAMEWORK_HARDWARE_ESP32_NATIVE_H_
-#define _NANOFRAMEWORK_HARDWARE_ESP32_NATIVE_H_
+#ifndef NANOFRAMEWORK_HARDWARE_ESP32_BLE_NATIVE_H
+#define NANOFRAMEWORK_HARDWARE_ESP32_BLE_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -16,4 +16,4 @@
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Ble;
 
-#endif  //_NANOFRAMEWORK_HARDWARE_ESP32_BLE_NATIVE_H_
+#endif // NANOFRAMEWORK_HARDWARE_ESP32_BLE_NATIVE_H

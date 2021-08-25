@@ -15,12 +15,10 @@
 
 static uint16_t _lastOutboundMessage = 65535;
 static uint64_t _receiveExpiryTicks;
-static uint8_t *_marker;
+static uint8_t _rxState;
 static uint8_t *_pos;
 static uint32_t _size;
-static uint8_t _rxState;
 static WP_Message _inboundMessage;
-static uint8_t *buf = (uint8_t *)&(_inboundMessage.m_header);
 
 #ifdef DEBUG
 volatile uint8_t _rxStatePrev;
@@ -111,10 +109,7 @@ void WP_Message_PrepareRequest(
     uint32_t payloadSize,
     uint8_t *payload)
 {
-    memcpy(
-        &message->m_header.m_signature,
-        _marker ? _marker : (uint8_t *)MARKER_PACKET_V1,
-        sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, (uint8_t *)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
 #if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcData = SUPPORT_ComputeCRC(payload, payloadSize, 0);
@@ -144,10 +139,7 @@ void WP_Message_PrepareReply(
     uint32_t payloadSize,
     uint8_t *payload)
 {
-    memcpy(
-        &message->m_header.m_signature,
-        _marker ? _marker : (uint8_t *)MARKER_PACKET_V1,
-        sizeof(message->m_header.m_signature));
+    memcpy(&message->m_header.m_signature, (uint8_t *)MARKER_PACKET_V1, sizeof(message->m_header.m_signature));
 
 #if defined(WP_IMPLEMENTS_CRC32)
     message->m_header.m_crcData = SUPPORT_ComputeCRC(payload, payloadSize, 0);
@@ -256,20 +248,14 @@ void WP_Message_Process()
             case ReceiveState_WaitingForHeader:
                 TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
 
-                if (!WP_ReceiveBytes(_pos, &_size))
-                {
-                    // didn't receive the expected amount of bytes, returning false
-                    TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
-
-                    return;
-                }
+                WP_ReceiveBytes(&_pos, &_size);
 
                 // Synch to the start of a message by looking for a valid MARKER
                 while (true)
                 {
                     len = sizeof(_inboundMessage.m_header) - _size;
 
-                    if (len == 0)
+                    if (len <= 0)
                     {
                         break;
                     }
@@ -285,18 +271,17 @@ void WP_Message_Process()
                         break;
                     }
 
-                    memmove(&buf[0], &buf[1], len - 1);
+                    // move buffer 1 position down
+                    memmove(
+                        (uint8_t *)&(_inboundMessage.m_header),
+                        ((uint8_t *)&(_inboundMessage.m_header) + 1),
+                        len - 1);
 
                     _pos--;
                     _size++;
                 }
 
-                if (_size == 0)
-                {
-                    // header reception completed
-                    _rxState = ReceiveState_CompleteHeader;
-                }
-                else if (len >= sizeof(_inboundMessage.m_header.m_signature))
+                if (len >= sizeof(_inboundMessage.m_header.m_signature))
                 {
                     // still missing some bytes for the header
                     _rxState = ReceiveState_ReadingHeader;
@@ -315,12 +300,7 @@ void WP_Message_Process()
 
                 if (_receiveExpiryTicks > now)
                 {
-                    if (!WP_ReceiveBytes(_pos, &_size))
-                    {
-                        // didn't receive the expected amount of bytes, returning false
-                        TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
-                        return;
-                    }
+                    WP_ReceiveBytes(&_pos, &_size);
 
                     if (_size == 0)
                     {
@@ -393,12 +373,7 @@ void WP_Message_Process()
 
                 if (_receiveExpiryTicks > now)
                 {
-                    if (!WP_ReceiveBytes(_pos, &_size))
-                    {
-                        // didn't receive the expected amount of bytes, returning false
-                        TRACE0(TRACE_NODATA, "ReceiveBytes returned false - bailing out\n");
-                        return;
-                    }
+                    WP_ReceiveBytes(&_pos, &_size);
 
                     if (_size == 0)
                     {

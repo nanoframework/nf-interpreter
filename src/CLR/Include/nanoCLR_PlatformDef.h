@@ -3,8 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-#ifndef _NANOCLR_PLATFORMDEF_H_
-#define _NANOCLR_PLATFORMDEF_H_
+#ifndef NANOCLR_PLATFORMDEF_H
+#define NANOCLR_PLATFORMDEF_H
 
 //#include <CLR_Defines.h>
 
@@ -241,4 +241,4 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif // _NANOCLR_PLATFORMDEF_H_
+#endif // NANOCLR_PLATFORMDEF_H

@@ -8,8 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_PLATFORM_H_
-#define _TARGET_PLATFORM_H_
+#ifndef TARGET_PLATFORM_H
+#define TARGET_PLATFORM_H
 
 #define NANOCLR_GRAPHICS            @NANOCLR_GRAPHICS@
 #define NF_FEATURE_USE_SPIFFS       @NF_FEATURE_USE_SPIFFS_OPTION@
@@ -30,4 +30,4 @@
 #define HAL_NF_USE_STM32_ONEWIRE    @HAL_USE_STM32_ONEWIRE_OPTION@
 #define HAL_USBH_USE_MSD            @HAL_USBH_USE_MSD_OPTION@
 
-#endif /* _TARGET_PLATFORM_H_ */
+#endif // TARGET_PLATFORM_H

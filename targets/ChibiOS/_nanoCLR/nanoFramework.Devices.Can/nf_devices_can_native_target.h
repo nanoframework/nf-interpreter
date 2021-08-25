@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_DEVICES_CAN_NATIVE_TARGET_H_
-#define _NF_DEVICES_CAN_NATIVE_TARGET_H_
+#ifndef NF_DEVICES_CAN_NATIVE_TARGET_H
+#define NF_DEVICES_CAN_NATIVE_TARGET_H
 
 #include <hal.h>
 #include "target_nf_devices_can_config.h"
@@ -27,10 +27,10 @@ typedef struct
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
 extern NF_PAL_CAN Can1_PAL;
 #endif
-#if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
+#if defined(STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
 extern NF_PAL_CAN Can2_PAL;
 #endif
-#if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
+#if defined(STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
 extern NF_PAL_CAN Can3_PAL;
 #endif
 
@@ -82,4 +82,4 @@ void Init_Can1();
 void Init_Can2();
 void Init_Can3();
 
-#endif //_NF_DEVICES_CAN_NATIVE_TARGET_H_
+#endif //NF_DEVICES_CAN_NATIVE_TARGET_H

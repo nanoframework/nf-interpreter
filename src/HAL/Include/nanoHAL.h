@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_H_
-#define _NANOHAL_H_ 1
+#ifndef NANOHAL_H
+#define NANOHAL_H
 
 #include <nanoCLR_Headers.h>
 #include <nanoHAL_v2.h>
@@ -890,4 +890,4 @@ extern bool g_fDoNotUninitializeDebuggerPort;
 #error Unsupported platform
 #endif
 
-#endif // _NANOHAL_H_
+#endif // NANOHAL_H

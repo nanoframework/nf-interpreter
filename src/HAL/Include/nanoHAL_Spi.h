@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NANOHAL_SPI_H_
-#define _NANOHAL_SPI_H_ 1
+#ifndef NANOHAL_SPI_H
+#define NANOHAL_SPI_H
 
 #include "TargetHAL_Spi.h"
 
@@ -83,4 +83,4 @@ HRESULT nanoSPI_start_nWrite_nRead(
     uint8_t *readData,
     int32_t readSize);
 
-#endif // _NANOHAL_SPI_H_
+#endif // NANOHAL_SPI_H

@@ -4,8 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NETWORK_DECL_H_
-#define _NETWORK_DECL_H_ 1
+#ifndef NETWORK_DECL_H
+#define NETWORK_DECL_H
 
 #ifdef PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT
 #define SOCKETS_MAX_COUNT PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT
@@ -25,4 +25,4 @@
 #define DEBGGER_NETWORK_INTERFACE_INDEX 0
 #endif
 
-#endif //_NETWORK_DECL_H_
+#endif //NETWORK_DECL_H

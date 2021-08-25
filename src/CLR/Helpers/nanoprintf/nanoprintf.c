@@ -475,6 +475,7 @@ int npf__dtoa_rev(char *buf, double d, unsigned base, npf__format_spec_conversio
         *buf++ = (char)('N' + case_c);
         return -3;
     }
+
     if (d == INFINITY)
     {
         *buf++ = (char)('F' + case_c);
@@ -485,6 +486,7 @@ int npf__dtoa_rev(char *buf, double d, unsigned base, npf__format_spec_conversio
 
     uint64_t int_part, frac_part;
     int frac_base10_neg_exp;
+
     if (npf__dsplit_abs(d, &int_part, &frac_part, &frac_base10_neg_exp) == 0)
     {
         *buf++ = (char)('R' + case_c);
@@ -499,18 +501,22 @@ int npf__dtoa_rev(char *buf, double d, unsigned base, npf__format_spec_conversio
     // write the fractional digits
     while (frac_part)
     {
-        unsigned const d = (unsigned)(frac_part % base);
+        unsigned const digit = (unsigned)(frac_part % base);
         frac_part /= base;
-        *dst++ = (d < 10) ? (char)('0' + d) : (char)(base_c + (d - 10));
+        *dst++ = (digit < 10) ? (char)('0' + digit) : (char)(base_c + (digit - 10));
     }
+
     // write the 0 digits between the . and the first fractional digit
     while (frac_base10_neg_exp-- > 0)
     {
         *dst++ = '0';
     }
+
     *out_frac_chars = (int)(dst - buf);
+
     // write the decimal point
     *dst++ = '.';
+
     // write the integer digits
     if (int_part == 0)
     {
@@ -520,11 +526,12 @@ int npf__dtoa_rev(char *buf, double d, unsigned base, npf__format_spec_conversio
     {
         while (int_part)
         {
-            unsigned const d = (unsigned)(int_part % base);
+            unsigned const digit = (unsigned)(int_part % base);
             int_part /= base;
-            *dst++ = (d < 10) ? (char)('0' + d) : (char)(base_c + (d - 10));
+            *dst++ = (digit < 10) ? (char)('0' + digit) : (char)(base_c + (digit - 10));
         }
     }
+
     return (int)(dst - buf);
 }
 #endif
@@ -810,7 +817,8 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                             if (frac_chars > fs.precision)
                             {
                                 int isPropagating = 0;
-                                for (int i = 0; i < cbuf_len; i++)
+
+                                for (i = 0; i < cbuf_len; i++)
                                 {
                                     int inLosingPart = (i <= (frac_chars - fs.precision - 1));
 
@@ -828,15 +836,20 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
                                                 isPropagating = 0;
                                             }
                                         }
+
                                         if (inLosingPart && cbuf[i] > '5')
                                         {
                                             isPropagating = 1;
                                             cbuf[i] = '0';
                                         }
                                     }
+
                                     if (!isPropagating && !inLosingPart)
+                                    {
                                         break;
+                                    }
                                 }
+
                                 if (isPropagating)
                                 {
                                     cbuf[cbuf_len] = '1';

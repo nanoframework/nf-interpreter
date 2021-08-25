@@ -4,8 +4,8 @@
 //
 
 
-#ifndef _WIN_STORAGE_NATIVE_H_
-#define _WIN_STORAGE_NATIVE_H_
+#ifndef WIN_STORAGE_NATIVE_H
+#define WIN_STORAGE_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -107,4 +107,4 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
 
-#endif  //_WIN_STORAGE_NATIVE_H_
+#endif // WIN_STORAGE_NATIVE_H

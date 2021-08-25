@@ -38,8 +38,6 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
             return true;
 
         case AccessMemory_Read:
-            return iMXRTFlexSPIDriver_Read(NULL, location, lengthInBytes, buffer);
-
         default:
             // default return is FALSE
             return false;

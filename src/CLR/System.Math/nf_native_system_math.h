@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _NF_NATIVE_SYSTEM_MATH_H_
-#define _NF_NATIVE_SYSTEM_MATH_H_
+#ifndef NF_NATIVE_SYSTEM_MATH_H
+#define NF_NATIVE_SYSTEM_MATH_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -43,4 +43,4 @@ struct Library_nf_native_system_math_System_Math
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math;
 
-#endif //_NF_NATIVE_SYSTEM_MATH_H_
+#endif // NF_NATIVE_SYSTEM_MATH_H

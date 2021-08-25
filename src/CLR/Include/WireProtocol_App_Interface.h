@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _WIREPROTOCOL_APP_INTERFACE_H_
-#define _WIREPROTOCOL_APP_INTERFACE_H_
+#ifndef WIREPROTOCOL_APP_INTERFACE_H
+#define WIREPROTOCOL_APP_INTERFACE_H
 
 #include "WireProtocol.h"
 
@@ -35,4 +35,4 @@ extern "C"
 }
 #endif
 
-#endif // _WIREPROTOCOL_APP_INTERFACE_H_
+#endif // WIREPROTOCOL_APP_INTERFACE_H
