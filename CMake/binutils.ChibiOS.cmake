@@ -132,13 +132,6 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
-        
-        if(IS_COMMUNITY_TARGET)
-            target_include_directories(NF_CoreCLR PUBLIC
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-    
-        endif()
 
         add_dependencies(${target}.elf nano::NF_CoreCLR)
 
@@ -151,13 +144,6 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
-
-        if(IS_COMMUNITY_TARGET)
-            target_include_directories(WireProtocol PUBLIC
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-    
-        endif()
 
         add_dependencies(${target}.elf nano::WireProtocol)
 
@@ -173,13 +159,6 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                     ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                     ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
-            
-            if(IS_COMMUNITY_TARGET)
-                target_include_directories(NF_Debugger PUBLIC
-                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-        
-            endif()
 
             add_dependencies(${target}.elf nano::NF_Debugger)
 
@@ -196,13 +175,6 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
                 ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
-
-        if(IS_COMMUNITY_TARGET)
-            target_include_directories(NF_NativeAssemblies PUBLIC
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-                ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-    
-        endif()
         
         add_dependencies(${target}.elf nano::NF_NativeAssemblies)
         
@@ -225,13 +197,6 @@ macro(nf_add_platform_dependencies target)
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
-
-            if(IS_COMMUNITY_TARGET)
-                target_include_directories(NF_Network PUBLIC
-                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-                    ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-        
-            endif()
 
         add_dependencies(${target}.elf nano::NF_Network)
 
@@ -257,13 +222,6 @@ macro(nf_add_platform_include_directories target)
         ${CHIBIOS_LWIP_INCLUDE_DIRS}
         ${SPIFFS_INCLUDE_DIRS}
     )
-
-    if(IS_COMMUNITY_TARGET)
-        target_include_directories(${target}.elf PUBLIC
-            ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}
-            ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD}/nanoCLR)
-
-    endif()
     
     # includes specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})

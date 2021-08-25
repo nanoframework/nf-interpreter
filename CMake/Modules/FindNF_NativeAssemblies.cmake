@@ -395,6 +395,8 @@ else()
     message(STATUS " *** NO APIs included ***")    
 endif()
 
+list(APPEND NF_NativeAssemblies_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
+
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_NativeAssemblies DEFAULT_MSG NF_NativeAssemblies_INCLUDE_DIRS NF_NativeAssemblies_SOURCES)
@@ -419,6 +421,7 @@ macro(nf_add_lib_native_assemblies)
         PUBLIC 
             ${NF_NativeAssemblies_INCLUDE_DIRS}
             ${NF_CoreCLR_INCLUDE_DIRS}
+
             ${NFALNA_EXTRA_INCLUDES})   
 
     # TODO can be removed later
