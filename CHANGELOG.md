@@ -1,11 +1,17 @@
 # Changelog
 
-## [v1.6.5.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.5.3) (2021-07-24)
+## [v1.7.0.2](https://github.com/nanoframework/nf-interpreter/tree/v1.7.0.2) (2021-08-25)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.5...v1.6.5.3)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.5.3...v1.7.0.2)
 
 **Implemented enhancements:**
 
+- Add compiler definition to use memory allocation for larger debugger vars [\#2015](https://github.com/nanoframework/nf-interpreter/pull/2015)
+- Remove serial configuration from ST\_NUCLEO64\_F091RC [\#2013](https://github.com/nanoframework/nf-interpreter/pull/2013)
+- Fix RX in TI SimpleLink [\#2008](https://github.com/nanoframework/nf-interpreter/pull/2008)
+- Remove read access to memory [\#2005](https://github.com/nanoframework/nf-interpreter/pull/2005)
+- Add support for STM32L4 series [\#2004](https://github.com/nanoframework/nf-interpreter/pull/2004)
+- Add Flash driver for STM32L4 [\#2002](https://github.com/nanoframework/nf-interpreter/pull/2002)
 - Refactor repeated code in WireProtocol [\#1970](https://github.com/nanoframework/nf-interpreter/pull/1970)
 - Update EasyLink code for SDK [\#1967](https://github.com/nanoframework/nf-interpreter/pull/1967)
 - Increase priority of network threads for STM32 targets [\#1965](https://github.com/nanoframework/nf-interpreter/pull/1965)
@@ -351,6 +357,11 @@
 
 **Fixed bugs:**
 
+- Rework write operation on ST32 nanoHAL Flash v1 [\#2014](https://github.com/nanoframework/nf-interpreter/pull/2014)
+- Fix WireProtocol Receive processing [\#2012](https://github.com/nanoframework/nf-interpreter/pull/2012)
+- Fix memory leak when parsing X509 certs [\#2010](https://github.com/nanoframework/nf-interpreter/pull/2010)
+- Resolve Certifcate Trust error with Mqtt connect [\#1996](https://github.com/nanoframework/nf-interpreter/pull/1996)
+- Fix assembly load [\#1995](https://github.com/nanoframework/nf-interpreter/pull/1995)
 - Disable Bluetooth test code to allow debugging [\#1990](https://github.com/nanoframework/nf-interpreter/pull/1990)
 - Make available enough memory for SSL [\#1986](https://github.com/nanoframework/nf-interpreter/pull/1986)
 - Corrected some position combinations when R/W to backup memory [\#1978](https://github.com/nanoframework/nf-interpreter/pull/1978)
@@ -633,6 +644,7 @@
 
 **Documentation and other chores:**
 
+- Update README.md [\#2000](https://github.com/nanoframework/nf-interpreter/pull/2000)
 - Update ChibiOS to v21.6 [\#1982](https://github.com/nanoframework/nf-interpreter/pull/1982)
 - Update for new ESP32 targets [\#1980](https://github.com/nanoframework/nf-interpreter/pull/1980)
 - Update for new ESP32 targets [\#1979](https://github.com/nanoframework/nf-interpreter/pull/1979)
@@ -897,6 +909,10 @@
 - Update corlib\_native\_System\_Number.cpp [\#550](https://github.com/nanoframework/nf-interpreter/pull/550)
 - Update corlib\_native\_System\_Number.cpp [\#549](https://github.com/nanoframework/nf-interpreter/pull/549)
 - Update targetHAL\_Time.cpp [\#548](https://github.com/nanoframework/nf-interpreter/pull/548)
+
+## [v1.6.5.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.5.3) (2021-07-24)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.4.5...v1.6.5.3)
 
 ## [v1.6.4.5](https://github.com/nanoframework/nf-interpreter/tree/v1.6.4.5) (2021-05-07)
 
