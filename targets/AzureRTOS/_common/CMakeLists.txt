@@ -4,7 +4,6 @@
 #
 
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
-list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/AzureRTOS_Source/common/inc)
 
 # add header with target platform definitions
 if(AZURERTOS_COMMUNITY_TARGET)
