@@ -29,7 +29,7 @@
           "BUILD_VERBOSE" : "OFF",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
-          "RTOS": "AZURERTOS",
+          "RTOS": "AzureRTOS",
           "TARGET_SERIES": "MAX78000",
           "TARGET_BOARD": "MAX78000_FTHR",
           "RTOS_SOURCE_FOLDER": "",

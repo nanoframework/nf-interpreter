@@ -28,7 +28,7 @@
           "BUILD_VERSION": "0.9.99.999",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
-          "RTOS": "AZURERTOS",
+          "RTOS": "AzureRTOS",
           "TARGET_SERIES": "STM32L4xx",
           "TARGET_BOARD": "ST_B_L475E_IOT01A",
           "RTOS_SOURCE_FOLDER": "",
