@@ -4,9 +4,9 @@
 #
 
 include(FetchContent)
+include(binutils.common)
 include(binutils.arm-none-eabi)
 include(binutils.AzureRTOS)
-include(nf_utils)
 
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
@@ -80,7 +80,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
@@ -101,7 +101,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
@@ -118,7 +118,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
@@ -135,7 +135,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
@@ -152,7 +152,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/_nanoCLR)
 
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
@@ -171,7 +171,7 @@ else()
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
+        nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
@@ -192,7 +192,7 @@ else()
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        SET_BASE_PATH_FOR_LIBRARIES_MODULES(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+        nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
 
         # set target base location
         set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
