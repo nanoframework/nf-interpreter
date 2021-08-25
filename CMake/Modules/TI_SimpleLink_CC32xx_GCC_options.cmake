@@ -28,7 +28,7 @@ macro(nf_set_compile_options)
 
 
     # include any extra options coming from any extra args?
-    target_compile_options(${NFSCO_TARGET} PUBLIC  ${__EXTRA_COMPILE_OPTIONS} -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -mabi=aapcs -gstrict-dwarf -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -w -static -ffunction-sections -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
+    target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO__EXTRA_COMPILE_OPTIONS} -march=armv7e-m -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -mabi=aapcs -gstrict-dwarf -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -w -static -ffunction-sections -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fsingle-precision-constant -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -ffast-math -ftree-vectorize -fcheck-new -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics)
   
     # this series has FPU 
     target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE) 
@@ -59,7 +59,7 @@ macro(nf_set_linker_options)
     nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO__EXTRA_LINK_FLAGS} ")
       
     # set optimization flags
     nf_set_optimization_options(${NFSLO_TARGET})
