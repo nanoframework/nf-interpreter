@@ -130,10 +130,6 @@ bool CPU_GPIO_Initialize()
     // Make sure all pins are not reserved
     memset(pinReserved, 0, sizeof(pinReserved));
 
-    // Reserve Pins 6-11 as used by Spi flash
-    for (int pinNumber = 6; pinNumber <= 11; pinNumber++)
-        CPU_GPIO_ReservePin(pinNumber, true);
-
     // Install ISR service for GPIO
     esp_err_t ret = gpio_install_isr_service(0);
     if (ret != ESP_OK)
