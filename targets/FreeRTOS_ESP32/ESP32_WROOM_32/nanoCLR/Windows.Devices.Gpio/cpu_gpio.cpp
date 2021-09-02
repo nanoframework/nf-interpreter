@@ -131,7 +131,7 @@ bool CPU_GPIO_Initialize()
     memset(pinReserved, 0, sizeof(pinReserved));
 
     // check if PSRAM it's available (querying available HEAP with SPIRAM capabilities)
-    if(heap_caps_get_total_size(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM))
+    if (heap_caps_get_total_size(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM))
     {
         // Reserve Pins 6-11 as used by Spi flash
         for (int pinNumber = 6; pinNumber <= 11; pinNumber++)
