@@ -60,7 +60,11 @@ if(USE_NETWORKING_OPTION)
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${TARGET_ESP32_IDF_INCLUDES}
-        EXTRA_COMPILE_OPTIONS -mfix-esp32-psram-cache-issue)
+    )
+
+    if(USE_PSRAM_FIX)
+        target_compile_options(NF_Network PUBLIC "-mfix-esp32-psram-cache-issue")
+    endif()
 
 endif()
 
@@ -139,7 +143,7 @@ foreach( IDF_libraries ${PROJECT_LINK_LIBS} )
 endforeach( IDF_libraries )
 
 if(USE_NETWORKING_OPTION)
-    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network " )
+    set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNF_Network -Wl,--no-whole-archive " )
 endif()
 
 set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--whole-archive -L${CMAKE_CURRENT_BINARY_DIR} -lNanoApiLib -Wl,--no-whole-archive " )
@@ -149,7 +153,6 @@ set_property(TARGET ${NANOCLR_PROJECT_NAME}.elf    APPEND_STRING PROPERTY LINK_F
 # Set Includes & compile definition for Network library
 if(USE_NETWORKING_OPTION)
 
-    # target_compile_definitions(NetworkLib PUBLIC -DPLATFORM_ESP32)
     set (EXTRA_LIBS ${EXTRA_LIBS} nano::NF_Network)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf ${EXTRA_LIBS})
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
@@ -158,7 +161,7 @@ if(USE_NETWORKING_OPTION)
     set_target_properties(NF_Network PROPERTIES COMPILE_FLAGS " -w " )
 endif()
 
- target_include_directories(NanoApiLib PUBLIC
+target_include_directories(NanoApiLib PUBLIC
     # directories for nanoFramework libraries
     ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR
     ${CMAKE_CURRENT_SOURCE_DIR}/Include
