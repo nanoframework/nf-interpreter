@@ -29,12 +29,12 @@ typedef struct NANO_CLR_SETTINGS
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();
 typedef void(__stdcall *DebugPrintCallback)(const char *szText);
-typedef void(__stdcall *WireTransmitCallback)(const CLR_UINT8 *data, size_t size);
+typedef int(__stdcall *WireTransmitCallback)(const CLR_UINT8 *data, size_t size);
+typedef int(__stdcall *WireReceiveCallback)(const CLR_UINT8 *data, size_t size);
 
 extern DebugPrintCallback gDebugPrintCallback;
-
-extern CLR_RT_Buffer gWireReceiveBuffer;
-extern CLR_RT_Buffer gWireTransmitBuffer;
+extern WireTransmitCallback gWireTransmitCallback;
+extern WireReceiveCallback gWireReceiveCallback;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The following functions are exposed in the DLL and
@@ -53,9 +53,10 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_SetDebugPrintCallback(DebugPrintCallba
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireOpen();
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireClose();
-extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireReceive(CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API void nanoCLR_WireTransmit(const CLR_UINT8 *data, size_t size);
-extern "C" NANOCLRNATIVE_API size_t nanoCLR_WireBytesAvailable();
+
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireReceiveCallback(WireReceiveCallback receiveCallback);
+extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireTransmitCallback(WireTransmitCallback transmitCallback);
+
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProcess();
 
 extern "C" NANOCLRNATIVE_API char *nanoCLR_GetVersion();

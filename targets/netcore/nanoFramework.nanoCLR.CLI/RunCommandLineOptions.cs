@@ -11,8 +11,6 @@ namespace nanoFramework.nanoCLR.CLI
     [Verb("run", HelpText = "Run nanoCLR assembly.")]
     public class RunCommandLineOptions
     {
-        public const string DefaultComPort = "COM3";
-
         [Option('l', "load", Required = false, HelpText = "Loads list of assemblies formatted for nanoCLR")]
         public IEnumerable<string> Assemblies { get; set; }
 
@@ -24,7 +22,13 @@ namespace nanoFramework.nanoCLR.CLI
 
         [Option('p', "networkport", Required = false, HelpText = "Set TCP/IP port for incoming debug connection")]
         public int? DebugTcpIpPort { get; set; }
-
+        
+        [Option('h', "host", Required = false, HelpText = "Set TCP/IP host address for incoming debug connection")]
+        public string DebugTcpIpHost { get; set; }
+        
+        [Option('b', "broadcast", Required = false, HelpText = "Set UDP broadcast port for device discovery")]
+        public int? DebugBroadcastPort { get; set; }
+        
         [Option('n', "namedpipe", Required = false, HelpText = "Set Pipe Name for incoming debug connection")]
         public string DebugNamedPipe { get; set; }
 

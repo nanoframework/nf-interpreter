@@ -84,8 +84,8 @@ namespace nanoFramework.nanoCLR.Host
         public nanoCLRHostBuilder UseSerialPortWireProtocol(string comPort) =>
             UseWireProtocolPort(new SerialPort(comPort));
 
-        public nanoCLRHostBuilder UseTcpIpPortWireProtocol(int port) =>
-            UseWireProtocolPort(new TcpIpListeningPort(port));
+        public nanoCLRHostBuilder UseTcpIpPortWireProtocol(string bindAddress, int port, int? discoveryPort) =>
+            UseWireProtocolPort(new TcpIpListeningPort(bindAddress, port, discoveryPort));
 
         public nanoCLRHostBuilder UseNamedPipeWireProtocol(string name) =>
             UseWireProtocolPort(new NamedPipeServerPort(name));

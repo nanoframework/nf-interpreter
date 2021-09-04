@@ -67,5 +67,10 @@ namespace nanoFramework.nanoCLR.Host
         }
 
         public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder { };
+
+        public void Shutdown()
+        {
+            Cleanup();
+        }
     }
 }

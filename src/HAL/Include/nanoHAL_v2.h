@@ -305,7 +305,7 @@ extern "C"
 #define ASSERT(i)
 #endif
 
-#ifndef ASSERTE
+#ifndef _ASSERTE
 #define _ASSERTE(expr) ASSERT(expr)
 #endif
 

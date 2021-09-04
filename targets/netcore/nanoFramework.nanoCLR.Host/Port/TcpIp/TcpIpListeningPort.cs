@@ -11,18 +11,33 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
 {
     public class TcpIpListeningPort : ListeningPortBase
     {
-        private readonly TcpListener _server;
-        private const string LocalHost = "127.0.0.1";
+        public const string Localhost = "127.0.0.1";
 
-        public TcpIpListeningPort(int port)
+        private readonly string _hostAddress;
+        private readonly int _port;
+        private readonly TcpListener _server;
+        private readonly NetworkWireDiscoveryService _discoveryService;
+
+        public TcpIpListeningPort(string hostAddress, int port, int? broadcastPort)
         {
-            var local = IPAddress.Parse(LocalHost);
-            _server = new TcpListener(local, port);
+            _hostAddress = hostAddress;
+            _port = port;
+            _server = new TcpListener(IPAddress.Parse(hostAddress), port);
+            if (broadcastPort != null)
+                _discoveryService = new NetworkWireDiscoveryService(broadcastPort.Value);
         }
 
-        protected override void OpenListener() => _server.Start();
+        protected override void OpenListener()
+        {
+            _server.Start();
+            _discoveryService?.NotifyListenerStart(_hostAddress, _port);
+        }
 
-        protected override void CloseListener() => _server.Stop();
+        protected override void CloseListener()
+        {
+            _discoveryService?.NotifyListenerStop(_hostAddress, _port);
+            _server.Stop();
+        }
 
         protected override IPort WaitForConnection()
         {
