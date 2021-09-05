@@ -423,15 +423,17 @@ endmacro()
 # optional BOOTER_EXTRA_COMPILE_OPTIONS extra nanoBooter compile options to pass to nf_set_compile_options() 
 # optional CLR_EXTRA_COMPILE_OPTIONS extra nanoCLR compile options to pass to nf_set_compile_options() 
 # optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
-# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map()
+# optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
+# optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build_common)
 
     # parse arguments
     cmake_parse_arguments(
         NFSTBC 
         "HAS_NANOBOOTER" 
-        "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES;BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS" 
         "BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES" 
+        "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES;BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS;BOOTER_EXTRA_LINK_FLAGS;CLR_EXTRA_LINK_FLAGS" 
         ${ARGN})
 
     if(NOT NFSTBC_HAS_NANOBOOTER 
@@ -500,7 +502,7 @@ macro(nf_setup_target_build_common)
         endif()
 
         # set linker options
-        nf_set_linker_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf)
+        nf_set_link_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_LINK_FLAGS ${NFSTBC_BOOTER_EXTRA_LINK_FLAGS})
 
         # set link maps
         ###########################################################
@@ -546,7 +548,7 @@ macro(nf_setup_target_build_common)
     endif()
 
     # set linker options
-    nf_set_linker_options(TARGET ${NANOCLR_PROJECT_NAME}.elf)
+    nf_set_link_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_LINK_FLAGS ${NFSTBC_CLR_EXTRA_LINK_FLAGS})
 
     # set link maps
     ###########################################################
