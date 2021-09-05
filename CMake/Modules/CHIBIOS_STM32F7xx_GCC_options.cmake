@@ -36,13 +36,13 @@ endmacro()
 
 # TARGET parameter to set the target that's setting them for
 # optional EXTRA_LINK_FLAGS with link flags to be added
-macro(nf_set_linker_options)
+macro(nf_set_link_options)
 
     # parse arguments
     cmake_parse_arguments(NFSLO "" "TARGET;EXTRA_LINK_FLAGS" "" ${ARGN})
 
     if(NOT NFSLO_TARGET OR "${NFSLO_TARGET}" STREQUAL "")
-        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_linker_options()")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_link_options()")
     endif()
 
     # request specs from newlib nano
@@ -57,7 +57,7 @@ macro(nf_set_linker_options)
     nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO_EXTRA_LINK_FLAGS} ")
        
     # set optimization flags
     nf_set_optimization_options(${NFSLO_TARGET})
