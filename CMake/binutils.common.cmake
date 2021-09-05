@@ -149,9 +149,19 @@ endmacro()
 
 # Add common target sources to a specific CMake target
 # To be called from target CMakeList.txt
-macro(nf_add_common_sources target)
+# mandatory TARGET parameter to set the target
+# optional EXTRA_LIBRARIES with extra libraries to be included in the target build
+macro(nf_add_common_sources)
 
-    target_sources(${target}.elf PUBLIC
+    # parse arguments
+    cmake_parse_arguments(
+        NFACS 
+        "" 
+        "TARGET" 
+        "EXTRA_LIBRARIES" 
+        ${ARGN})
+
+    target_sources(${NFACS_TARGET}.elf PUBLIC
     
         ${CMAKE_CURRENT_SOURCE_DIR}/target_common.c
         ${CMAKE_CURRENT_SOURCE_DIR}/target_BlockStorage.c
@@ -161,9 +171,9 @@ macro(nf_add_common_sources target)
     )
 
     # sources specific to nanoBooter
-    if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
+    if(${NFACS_TARGET} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
-        target_sources(${target}.elf PUBLIC
+        target_sources(${NFACS_TARGET}.elf PUBLIC
             ${NANOBOOTER_PROJECT_SOURCES}
             ${WireProtocol_SOURCES}
         )
@@ -171,12 +181,12 @@ macro(nf_add_common_sources target)
         # include configuration manager file
         if(NF_FEATURE_HAS_CONFIG_BLOCK)
             # feature enabled, full support
-            target_sources(${target}.elf PUBLIC
+            target_sources(${NFACS_TARGET}.elf PUBLIC
                 ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager.c)
 
         else()
             # feature disabled, stubs only
-            target_sources(${target}.elf PUBLIC
+            target_sources(${NFACS_TARGET}.elf PUBLIC
                 ${CMAKE_SOURCE_DIR}/src/HAL/nanoHAL_ConfigurationManager_stubs.c)
 
         endif()
@@ -184,21 +194,22 @@ macro(nf_add_common_sources target)
     endif()
 
     # sources specific to nanoCRL
-    if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
+    if(${NFACS_TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
-        target_link_libraries(${target}.elf
+        target_link_libraries(${NFACS_TARGET}.elf
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
             nano::NF_Debugger
             nano::WireProtocol
+            
+            ${NFACS_EXTRA_LIBRARIES}
         )
 
-        target_sources(${target}.elf PUBLIC
+        target_sources(${NFACS_TARGET}.elf PUBLIC
 
             ${NANOCLR_PROJECT_SOURCES}
 
             # sources for nanoFramework libraries
-            ${NF_Diagnostics_SOURCES}
             ${Graphics_Sources}
         )
 
@@ -432,8 +443,8 @@ macro(nf_setup_target_build_common)
     cmake_parse_arguments(
         NFSTBC 
         "HAS_NANOBOOTER" 
-        "BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES" 
         "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES;BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS;BOOTER_EXTRA_LINK_FLAGS;CLR_EXTRA_LINK_FLAGS" 
+        "BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES;BOOTER_EXTRA_LIBRARIES;CLR_EXTRA_LIBRARIES" 
         ${ARGN})
 
     if(NOT NFSTBC_HAS_NANOBOOTER 
@@ -481,7 +492,7 @@ macro(nf_setup_target_build_common)
         nf_add_platform_packages(TARGET ${NANOBOOTER_PROJECT_NAME})
         nf_add_platform_dependencies(${NANOBOOTER_PROJECT_NAME})
 
-        nf_add_common_sources(${NANOBOOTER_PROJECT_NAME})
+        nf_add_common_sources(TARGET ${NANOBOOTER_PROJECT_NAME})
         nf_add_platform_sources(${NANOBOOTER_PROJECT_NAME})
 
         # include directories for nanoBooter
@@ -527,7 +538,7 @@ macro(nf_setup_target_build_common)
     nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
     nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 
-    nf_add_common_sources(${NANOCLR_PROJECT_NAME})
+    nf_add_common_sources(TARGET ${NANOCLR_PROJECT_NAME} EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
     nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
 
     # include directories for nanoCLR
