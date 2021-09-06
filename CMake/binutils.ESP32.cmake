@@ -6,7 +6,7 @@
 include(binutils.common)
 
 # find a set of files on a list of possible locations
-macro(NF_FIND_ESP32_FILES_AT_LOCATION files locations)
+macro(nf_find_esp32_files_at_location files locations)
 
     foreach(SRC_FILE ${files})
 
@@ -30,7 +30,7 @@ macro(NF_FIND_ESP32_FILES_AT_LOCATION files locations)
 
 endmacro()
 
-function(NF_SET_OPTIMIZATION_OPTIONS TARGET) 
+function(nf_set_optimization_options TARGET) 
 
     # target_compile_options(${TARGET} PRIVATE
     #     $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
@@ -42,18 +42,8 @@ function(NF_SET_OPTIMIZATION_OPTIONS TARGET)
 endfunction()
 
 
-function(NF_SET_LINK_MAP TARGET) 
+function(nf_set_linker_file target linker_file_name)
 
-    # # need to remove the .elf suffix from target name
-    # string(FIND ${TARGET} "." TARGET_EXTENSION_DOT_INDEX)
-    # string(SUBSTRING ${TARGET} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
-    
-    # # add linker flags to generate map file
-    # set_property(TARGET ${TARGET_SHORT}.elf APPEND_STRING PROPERTY LINK_FLAGS " -Wl,-Map=${CMAKE_BINARY_DIR}/${TARGET_SHORT}.map,--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common")
-
-endfunction()
-
-function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
 
     # # set linker file name
     # set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "-T${LINKER_FILE_NAME}")
@@ -61,51 +51,28 @@ function(NF_SET_LINKER_FILE TARGET LINKER_FILE_NAME)
 endfunction()
 
 
-function(NF_SET_COMPILER_DEFINITIONS TARGET)
+# setting compile definitions for a target based on general build options
+# TARGET parameter to set the target that's setting them for
+# optional EXTRA_COMPILE_DEFINITIONS with compiler definitions to be added to the library
+# optional BUILD_TARGET when target it's a library pass here the name ot the target that's building for (either nanoBooter or nanoCLR)
+macro(nf_set_compile_definitions)
+
+    # parse arguments
+    cmake_parse_arguments(NFSCD "" "TARGET" "EXTRA_COMPILE_DEFINITIONS;BUILD_TARGET" ${ARGN})
+
+    if(NOT NFSCD_TARGET OR "${NFSCD_TARGET}" STREQUAL "")
+        message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_compile_definitions()")
+    endif()
 
     # definition for platform 
+    nf_common_compiler_definitions(TARGET ${NFSCD_TARGET} BUILD_TARGET ${NFSCD_BUILD_TARGET})
 
-    # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
-        target_compile_definitions(${TARGET} PUBLIC "-DNANOCLR_ENABLE_SOURCELEVELDEBUGGING ")
-    endif()
+    # include extra compiler definitions
+    target_compile_definitions(${NFSCD_TARGET} PUBLIC ${NFSCD_EXTRA_COMPILE_DEFINITIONS})
 
-    # set compiler definition for RTM build option
-    if(NF_BUILD_RTM)
-        target_compile_definitions(${TARGET} PUBLIC -DBUILD_RTM)
-    endif()
+endmacro()
 
-    # set compiler definition for using Application Domains feature
-    if(NF_FEATURE_USE_APPDOMAINS)
-        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_USE_APPDOMAINS)
-    endif()
-
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_WP_IMPLEMENTS_CRC32)
-        target_compile_definitions(${TARGET} PUBLIC -DWP_IMPLEMENTS_CRC32)
-    endif()
-
-    # set definition for Wire Protocol trace mask
-    target_compile_definitions(${TARGET} PUBLIC -DTRACE_MASK=${WP_TRACE_MASK})
-
-    # set compiler definition regarding inclusion of trace messages and checks on CLR
-    if(NF_PLATFORM_NO_CLR_TRACE)
-        target_compile_definitions(${TARGET} PUBLIC -DPLATFORM_NO_CLR_TRACE=1)
-    endif()
-
-    # set compiler definition regarding CLR IL inlining
-    if(NF_CLR_NO_IL_INLINE)
-        target_compile_definitions(${TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
-    endif()
-
-    NF_COMMON_COMPILER_DEFINITIONS(${TARGET})
-
-    # include any extra compiler definitions coming from extra args
-    target_compile_definitions(${TARGET} PUBLIC ${ARGN})
-
-endfunction()
-
-function(NF_SET_ESP32_TARGET_SERIES)
+function(nf_set_esp32_target_series)
 
     # process target series name to set it to lower case
     string(TOLOWER "${TARGET_SERIES}" TARGET_SERIES_1)
@@ -269,6 +236,25 @@ macro(nf_add_platform_sources target)
         SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
     endif()
+
+endmacro()
+
+# macro to setup the build for a target
+# mandatory HAS_NANOBOOTER specifing if the target implements nanoBooter
+# BOOTER_LINKER_FILE with the path to the linker file for nanoBooter (if the target has it)
+# mandatory CLR_LINKER_FILE with the path to the linker file for nanoCLR
+# optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+# optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+# optional BOOTER_EXTRA_COMPILE_DEFINITIONS extra nanoBooter compile definitions to pass to nf_set_compile_definitions() 
+# optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
+# optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
+# optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+# optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
+# optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
+macro(nf_setup_target_build)
+
+    # OK to pass ARGN, to have it perform it's parsings and validation 
+    nf_setup_target_build_common(${ARGN})
 
 endmacro()
 

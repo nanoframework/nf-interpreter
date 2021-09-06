@@ -6,9 +6,6 @@
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-# Set target series in lower case
-NF_SET_ESP32_TARGET_SERIES()
-
 # ESP32 targets use Espressif IDF and ESP32 FreeRTOS
 
 # check if ESP32_IDF_SOURCE was specified or if it's empty (default is empty)

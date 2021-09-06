@@ -35,7 +35,7 @@ macro(add_app_trace)
         ${esp32_idf_SOURCE_DIR}/components/app_trace/gcov
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${app_trace_srcs}" "${app_trace_locations}")
+    nf_find_esp32_files_at_location("${app_trace_srcs}" "${app_trace_locations}")
 
 endmacro()
 
@@ -50,7 +50,7 @@ macro(add_app_update)
         esp_app_desc.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${app_update_srcs}" "${esp32_idf_SOURCE_DIR}/components/app_update")
+    nf_find_esp32_files_at_location("${app_update_srcs}" "${esp32_idf_SOURCE_DIR}/components/app_update")
 
 endmacro()
 
@@ -87,7 +87,7 @@ macro(add_bootloader_support)
         ${esp32_idf_SOURCE_DIR}/components/bootloader_support/src/${TARGET_SERIES_SHORT}
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${bootloader_support_srcs}" "${bootloader_support_locations}")
+    nf_find_esp32_files_at_location("${bootloader_support_srcs}" "${bootloader_support_locations}")
 
 endmacro()
 
@@ -120,7 +120,7 @@ macro(add_driver)
         uart.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${driver_srcs}" "${esp32_idf_SOURCE_DIR}/components/driver")
+    nf_find_esp32_files_at_location("${driver_srcs}" "${esp32_idf_SOURCE_DIR}/components/driver")
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         # TODO
@@ -148,7 +148,7 @@ macro(add_driver)
             ${esp32_idf_SOURCE_DIR}/components/driver/${TARGET_SERIES_SHORT}
         )
         
-        NF_FIND_ESP32_FILES_AT_LOCATION("${driver_esp32s2_srcs}" "${driver_esp32s2_locations}")
+        nf_find_esp32_files_at_location("${driver_esp32s2_srcs}" "${driver_esp32s2_locations}")
 
     elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
         # TODO
@@ -177,7 +177,7 @@ macro(add_efuse)
         ${esp32_idf_SOURCE_DIR}/components/efuse/${TARGET_SERIES_SHORT}
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${efuse_srcs}" "${efuse_locations}")
+    nf_find_esp32_files_at_location("${efuse_srcs}" "${efuse_locations}")
 
 endmacro()
 
@@ -198,7 +198,7 @@ macro(add_esp_common)
         int_wdt.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_common_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_common/src")
+    nf_find_esp32_files_at_location("${esp_common_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_common/src")
 
     if(NOT ${TARGET_SERIES} STREQUAL "ESP32_C3")
         list(APPEND ESP32_IDF_SOURCES ${esp32_idf_SOURCE_DIR}/components/esp_common/src/dbg_stubs.c)
@@ -216,7 +216,7 @@ macro(add_esp_ipc)
         ipc.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_ipc_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_ipc")
+    nf_find_esp32_files_at_location("${esp_ipc_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_ipc")
 
 endmacro()
 
@@ -231,7 +231,7 @@ macro(add_esp_hw_support)
         clk_ctrl_os.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_hw_support_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_hw_support")
+    nf_find_esp32_files_at_location("${esp_hw_support_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_hw_support")
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         # TODO
@@ -252,7 +252,7 @@ macro(add_esp_hw_support)
             regi2c_ctrl.c
         )
 
-        NF_FIND_ESP32_FILES_AT_LOCATION("${esp_hw_support_esp32s2}" "${esp32_idf_SOURCE_DIR}/components/esp_hw_support/port/esp32s2")
+        nf_find_esp32_files_at_location("${esp_hw_support_esp32s2}" "${esp32_idf_SOURCE_DIR}/components/esp_hw_support/port/esp32s2")
 
     elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
         # TODO
@@ -272,7 +272,7 @@ macro(add_esp_pm)
         pm_impl.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_pm_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_pm")
+    nf_find_esp32_files_at_location("${esp_pm_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_pm")
 
 endmacro()
 
@@ -286,7 +286,7 @@ macro(add_esp_ringbuf)
         ringbuf.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_ringbuf_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_ringbuf")
+    nf_find_esp32_files_at_location("${esp_ringbuf_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_ringbuf")
 
 endmacro()
 
@@ -309,7 +309,7 @@ macro(add_esp_rom)
         list(APPEND sources "patches/esp_rom_longjmp.S")
     endif()
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_rom_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_rom/patches")
+    nf_find_esp32_files_at_location("${esp_rom_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_rom/patches")
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         # TODO
@@ -320,7 +320,7 @@ macro(add_esp_rom)
             usb_descriptors.c
         )
         
-        NF_FIND_ESP32_FILES_AT_LOCATION("${esp_rom_esp32s2_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32s2")
+        nf_find_esp32_files_at_location("${esp_rom_esp32s2_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32s2")
 
     elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
         # TODO
@@ -353,7 +353,7 @@ macro(add_esp_system)
         ${esp32_idf_SOURCE_DIR}/components/esp_system/port
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_system_srcs}" "${esp_system_locations}")
+    nf_find_esp32_files_at_location("${esp_system_srcs}" "${esp_system_locations}")
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         # TODO
@@ -376,7 +376,7 @@ macro(add_esp_system)
             ${esp32_idf_SOURCE_DIR}/components/esp_system/port/arch/xtensa
         )
         
-        NF_FIND_ESP32_FILES_AT_LOCATION("${esp_system_esp32s2_srcs}" "${esp_system_esp32s2_locations}")
+        nf_find_esp32_files_at_location("${esp_system_esp32s2_srcs}" "${esp_system_esp32s2_locations}")
 
     elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
         # TODO
@@ -400,7 +400,7 @@ macro(add_esp_timer)
         ets_timer_legacy.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${esp_timer_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_timer/src")
+    nf_find_esp32_files_at_location("${esp_timer_srcs}" "${esp32_idf_SOURCE_DIR}/components/esp_timer/src")
 
     # TODO check option
     if(CONFIG_ESP_TIMER_IMPL_FRC2)
@@ -428,7 +428,7 @@ macro(add_espcoredump)
         core_dump_binary.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${espcoredump_srcs}" "${esp32_idf_SOURCE_DIR}/components/espcoredump/src")
+    nf_find_esp32_files_at_location("${espcoredump_srcs}" "${esp32_idf_SOURCE_DIR}/components/espcoredump/src")
 
     # TODO check option
     if(CONFIG_IDF_TARGET_ARCH_XTENSA)
@@ -478,7 +478,7 @@ macro(add_hal)
         adc_hal.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${hal_srcs}" "${esp32_idf_SOURCE_DIR}/components/hal")
+    nf_find_esp32_files_at_location("${hal_srcs}" "${esp32_idf_SOURCE_DIR}/components/hal")
 
     if(${TARGET_SERIES} STREQUAL "ESP32")
         # TODO
@@ -510,7 +510,7 @@ macro(add_hal)
             ${esp32_idf_SOURCE_DIR}/components/hal/${TARGET_SERIES_SHORT}
         )
         
-        NF_FIND_ESP32_FILES_AT_LOCATION("${hal_esp32s2_srcs}" "${hal_esp32s2_locations}")
+        nf_find_esp32_files_at_location("${hal_esp32s2_srcs}" "${hal_esp32s2_locations}")
 
     elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
         # TODO
@@ -529,7 +529,7 @@ macro(add_log)
         log_buffers.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${log_srcs}" "${esp32_idf_SOURCE_DIR}/components/log")
+    nf_find_esp32_files_at_location("${log_srcs}" "${esp32_idf_SOURCE_DIR}/components/log")
 
 endmacro()
 
@@ -554,7 +554,7 @@ macro(add_nvs_flash)
         nvs_types.cpp
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${nvs_flash_srcs}" "${esp32_idf_SOURCE_DIR}/components/nvs_flash/src")
+    nf_find_esp32_files_at_location("${nvs_flash_srcs}" "${esp32_idf_SOURCE_DIR}/components/nvs_flash/src")
 
 endmacro()
 
@@ -570,7 +570,7 @@ macro(add_pthread)
         pthread_local_storage.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${pthread_srcs}" "${esp32_idf_SOURCE_DIR}/components/pthread")
+    nf_find_esp32_files_at_location("${pthread_srcs}" "${esp32_idf_SOURCE_DIR}/components/pthread")
 
     # TODO check option
     if(CONFIG_FREERTOS_ENABLE_STATIC_TASK_CLEAN_UP)
@@ -593,7 +593,7 @@ macro(add_soc)
         memory_layout_utils.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${soc_srcs}" "${esp32_idf_SOURCE_DIR}/components/soc")
+    nf_find_esp32_files_at_location("${soc_srcs}" "${esp32_idf_SOURCE_DIR}/components/soc")
 
 endmacro()
 
@@ -631,7 +631,7 @@ macro(add_spi_flash)
         ${esp32_idf_SOURCE_DIR}/components/spi_flash/${TARGET_SERIES_SHORT}
     )
     
-    NF_FIND_ESP32_FILES_AT_LOCATION("${spi_flash_srcs}" "${spi_flash_locations}")
+    nf_find_esp32_files_at_location("${spi_flash_srcs}" "${spi_flash_locations}")
 
 endmacro()
 
@@ -647,7 +647,7 @@ macro(add_vfs)
         vfs_semihost.c
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${vfs_srcs}" "${esp32_idf_SOURCE_DIR}/components/vfs")
+    nf_find_esp32_files_at_location("${vfs_srcs}" "${esp32_idf_SOURCE_DIR}/components/vfs")
 
     # TODO check option
     if(CONFIG_ESP_CONSOLE_USB_CDC)
@@ -685,6 +685,6 @@ macro(add_xtensa)
         ${esp32_idf_SOURCE_DIR}/components/xtensa/${TARGET_SERIES_SHORT}
     )
 
-    NF_FIND_ESP32_FILES_AT_LOCATION("${xtensa_srcs}" "${xtensa_locations}")
+    nf_find_esp32_files_at_location("${xtensa_srcs}" "${xtensa_locations}")
 
 endmacro()
