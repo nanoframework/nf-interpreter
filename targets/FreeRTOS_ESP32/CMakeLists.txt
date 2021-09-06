@@ -33,7 +33,7 @@ if(NO_ESP32_IDF_SOURCE)
 else()
     # ESP32 IDF source was specified
 
-    # sanity check is source path exists
+    # sanity check if source path exists
     if(EXISTS "${ESP32_IDF_SOURCE}/")
         message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_SOURCE}")
 
