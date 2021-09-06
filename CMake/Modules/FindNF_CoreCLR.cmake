@@ -279,7 +279,8 @@ macro(nf_add_lib_coreclr)
 
     add_library(
         ${LIB_NAME} STATIC 
-            ${NF_CoreCLR_SOURCES})   
+            ${NF_CoreCLR_SOURCES}
+            ${NF_Diagnostics_SOURCES})   
 
     target_include_directories(
         ${LIB_NAME} 
