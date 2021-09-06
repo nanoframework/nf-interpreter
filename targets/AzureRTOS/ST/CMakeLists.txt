@@ -7,7 +7,7 @@ include(binutils.common)
 include(STM32_CubePackage)
 
 # Set target series
-NF_SET_STM32_TARGET_SERIES()
+nf_set_stm32_target_series()
 
 # (default is OFF so STM Cube package is NOT included)
 option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube package in the build")
