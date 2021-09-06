@@ -4,7 +4,7 @@
 #
 
 include(FetchContent)
-include(nf_utils)
+include(binutils.common)
 
 set(MAXIM_MICROS_SDK_REQUIRED TRUE PARENT_SCOPE)
 
