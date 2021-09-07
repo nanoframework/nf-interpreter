@@ -328,7 +328,7 @@ void WP_Message_Process()
                         "RXMSG: 0x%08X, 0x%08X, 0x%08X\n",
                         _inboundMessage.m_header.m_cmd,
                         _inboundMessage.m_header.m_flags,
-                        _inboundMessage.m_header._size);
+                        _inboundMessage.m_header.m_size);
 
                     if (WP_App_ProcessHeader(&_inboundMessage))
                     {
@@ -364,7 +364,7 @@ void WP_Message_Process()
 
             case ReceiveState_ReadingPayload:
 
-                TRACE(TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", message->_size);
+                TRACE(TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", _inboundMessage.m_header.m_size);
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to sync with the next header.
@@ -416,7 +416,7 @@ void WP_SendProtocolMessage(WP_Message *message)
         "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
         message->m_header.m_cmd,
         message->m_header.m_flags,
-        message->m_header._size);
+        message->m_header.m_size);
     WP_TransmitMessage(message);
 }
 
@@ -433,7 +433,7 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
         "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
         message.m_header.m_cmd,
         message.m_header.m_flags,
-        message.m_header._size);
+        message.m_header.m_size);
 
     WP_TransmitMessage(&message);
 }
