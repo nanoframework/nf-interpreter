@@ -2,92 +2,65 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  - task: Cache@2
-    inputs:
-      key: '3-3-5V3 | esp335ToolsKey'
-      restoreKeys: esp335ToolchainKey
-      path: $(Agent.TempDirectory)\ESP32_Tools
-      cacheHitVar: ESP_TOOLS_CACHE_RESTORED
-    displayName: Cache ESP32 tools
-
-  - task: PowerShell@2
-    displayName: Download & install xtensa ESP32 toolchain
-    inputs:
-      targetType: 'filePath'
-      filePath: 'install-scripts\install-esp32-toolchain.ps1'
-      failOnStderr: true
-
-  - task: ExtractFiles@1
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Extracting xtensa ESP32 toolchain
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\xtensa-esp32-elf-win32.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
-      cleanDestinationFolder: false
-
-  - task: PowerShell@2
-    displayName: Downloading & install ESP32 pre-compiled libs
-    inputs:
-      targetType: 'filePath'
-      filePath: 'install-scripts\install-esp32-libs.ps1'
-      failOnStderr: true
-
-  - task: ExtractFiles@1
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Installing ESP32 pre-compiled libs
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs'
-      cleanDestinationFolder: false
   
-  - task: ExtractFiles@1
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Installing ESP32 pre-compiled libs BLE
+  # cache IDF tools folder
+  - task: Cache@2
+    displayName: Cache ESP32 tools
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs_BLE.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs_BLE'
-      cleanDestinationFolder: false
+      key: 'esp32_tools | 4_3_1'
+      restoreKeys: |
+        esp32ToolsKey
+      path: $(UserProfile)\.espressif\tools
+      cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
-  - task: ExtractFiles@1
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Installing ESP32 pre-compiled libs V3
+  # cache pip packages
+  - task: Cache@2
+    displayName: Cache pip packages
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs_V3.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs_V3'
-      cleanDestinationFolder: false
+      key: 'python | "$(Agent.OS)" | esp-idf\requirements.txt'
+      restoreKeys: | 
+        python | "$(Agent.OS)"
+        python
+      path: $(PIP_CACHE_DIR)
 
+  # Use Python Version 3.6 and add it to path
+  - task: UsePythonVersion@0
+    displayName: Set Python to v3.6
+    inputs:
+      versionSpec: '3.6' 
+      addToPath: true
+
+  # run IDF installers
   - task: PowerShell@2
-    displayName: Downloading & install ESP32 IDF
+    displayName: Install IDF stuff (step 1)
     inputs:
       targetType: 'filePath'
-      filePath: 'install-scripts\install-esp32-idf.ps1'
-      failOnStderr: true
+      filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
-  - task: ExtractFiles@1
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Installing Espressif IDF
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf.zip' 
-      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools'
-      cleanDestinationFolder: false
-
-  # Use Python Version 3.7 and add it to path
-  - task: UsePythonVersion@0
-    displayName: Set Python to v3.7
-    inputs:
-      versionSpec: '3.7' 
-      addToPath: true 
-
-  # in this one have to call Python with full path otherwise it can fail
   - task: PowerShell@2
-    displayName: Installing python pyserial
+    displayName: Install IDF stuff (step 2)
     inputs:
-        targetType: 'inline'
-        script: python -m pip install pyserial
-        # the below settings are required as the script is installing an outdated version of pyserial
-        errorActionPreference: 'silentlyContinue' 
-        failOnStderr: false
-        ignoreLASTEXITCODE: false
+      targetType: 'inline'
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      script: |
+        python -m pip install -r requirements.txt
+
+  - task: PowerShell@2
+    displayName: Install IDF stuff (step 3)
+    inputs:
+      targetType: 'filePath'
+      filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+
+  # need to add these to the PATH, in case the tools where restored from the cache
+  - script: |
+      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\xtensa-esp32-elf\esp-2021r1-8.4.0\xtensa-esp32-elf\bin"
+      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\xtensa-esp32s2-elf\esp-2021r1-8.4.0\xtensa-esp32s2-elf\bin"
+      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\riscv32-esp-elf\esp-2021r1-8.4.0\riscv32-esp-elf\bin"
+      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\idf-exe\1.0.1"
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Add IDF tools to path
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
     displayName: Tweak PATH to reach cmd

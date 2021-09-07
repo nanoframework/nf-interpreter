@@ -46,17 +46,19 @@ if ($force) {
 # call the script for each of the tools
 Invoke-Expression $PSScriptRoot\install-cmake.ps1
 Invoke-Expression $PSScriptRoot\install-python.ps1
-Invoke-Expression "$PSScriptRoot\install-esp32-toolchain.ps1 $localCommandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-libs.ps1 $localCommandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-idf.ps1 $localCommandArgs"
 Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $localCommandArgs"
-Invoke-Expression "$PSScriptRoot\install-esp32-openocd.ps1 $localCommandArgs"
+
+"****************************************************************************************" | Write-Host -ForegroundColor Yellow
+"Please download the ESP-IDF Windows Installer from https://dl.espressif.com/dl/esp-idf/" | Write-Host -ForegroundColor Yellow
+"and install the various tools. If you're already done that, you can ignore this message." | Write-Host -ForegroundColor Yellow
+"****************************************************************************************" | Write-Host -ForegroundColor Yellow
 
 <#
 .SYNOPSIS
-    Install the default ESP32 tools and libraries needed to build nanoFramework, and setup the build environment.
+    Install the requirements for ESP32 builds, and setup the build environment.
 .DESCRIPTION
-	Power Shell Script to install the default tools to build nanoFramework, including setting the machine path and other environment variables needed for ESP32 WROOM 32.
+	Power Shell Script to install the requirements to build .NET nanoFramework for ESP32 targets, including setting the machine path and other environment variables.
+    It prompts the user to download and run the official ESP-IDF Windows Installer from Espressif.
 	Use the -Force parameter to overwrite existing Environment variables.
 .PARAMETER COMPort
 	The COM port for NANOCLR [e.g. COM1].
