@@ -26,7 +26,7 @@ namespace nanoFramework.Targets.STM32F769I_DISCOVERY
         public const int Channel_2 = 2;
 
         /// <summary>
-        /// Channel 3, exposed on A3, connected to PF10 (ADC1 - IN8)
+        /// Channel 3, exposed on A3, connected to PF10 (ADC3 - IN8)
         /// </summary>
         public const int Channel_3 = 3;
 
