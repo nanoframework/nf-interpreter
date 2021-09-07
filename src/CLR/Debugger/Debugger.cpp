@@ -15,20 +15,6 @@
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
-#if 0
-#define TRACE0(msg, ...) debug_printf(msg)
-#define TRACE(msg, ...)  debug_printf(msg, __VA_ARGS__) 
-char const* const AccessMemoryModeNames[] = {
-"AccessMemory_Check",
-"AccessMemory_Read", 
-"AccessMemory_Write",
-"AccessMemory_Erase"
-};
-#else
-#define TRACE0(msg, ...)
-#define TRACE(msg, ...)
-#endif
-
 //--//
 
 extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
@@ -652,7 +638,6 @@ void CLR_DBG_Debugger::AccessMemory(
     uint32_t *errorCode)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    TRACE("AccessMemory( 0x%08X, 0x%08x, 0x%08X, %s)\n", location, lengthInBytes, buf, AccessMemoryModeNames[mode]);
 
     bool proceed = false;
 
@@ -706,7 +691,7 @@ void CLR_DBG_Debugger::AccessMemory(
                 // AccessMemory_Check to free memory.
                 if (!CheckPermission(accessAddress, mode))
                 {
-                    TRACE0("=> Permission check failed!\n");
+                    // Permission check failed
 
                     // set error code
                     *errorCode = AccessMemoryErrorCode_PermissionDenied;
@@ -746,7 +731,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
                                 if (!bufPtr)
                                 {
-                                    TRACE0("=> Failed to allocate data buffer\n");
+                                    // Failed to allocate data buffer
 
                                     // set error code
                                     *errorCode = AccessMemoryErrorCode_FailedToAllocateReadBuffer;
@@ -858,12 +843,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
         if ((sectAddr < ramStartAddress) || (sectAddr >= ramEndAddress) || (sectAddrEnd > ramEndAddress))
         {
-            TRACE(
-                " Invalid address %x and range %x Ram Start %x, Ram end %x\r\n",
-                sectAddr,
-                lengthInBytes,
-                ramStartAddress,
-                ramEndAddress);
+            // Invalid address and range
             return;
         }
         else
@@ -895,8 +875,6 @@ void CLR_DBG_Debugger::AccessMemory(
             }
         }
     }
-
-    TRACE0("=> SUCCESS\n");
 
     *errorCode = AccessMemoryErrorCode_NoError;
 }
