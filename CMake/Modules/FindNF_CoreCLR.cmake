@@ -282,7 +282,8 @@ macro(nf_add_lib_coreclr)
 
     add_library(
         ${LIB_NAME} STATIC 
-            ${NF_CoreCLR_SOURCES})   
+            ${NF_CoreCLR_SOURCES}
+            ${NF_Diagnostics_SOURCES})   
 
     target_include_directories(
         ${LIB_NAME} 
@@ -305,7 +306,7 @@ macro(nf_add_lib_coreclr)
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALC_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

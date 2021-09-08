@@ -149,19 +149,6 @@ void SerialRxTask(UArg a0, UArg a1)
             // don't care about the success of the operation, if it's full we are droping the char anyway
             palUart->RxRingBuffer.Push((uint8_t)input);
 
-            if (palUart->WatchChar != 0)
-            {
-                while (bufferIndex < bytesRead)
-                {
-                    if (input == palUart->WatchChar)
-                    {
-                        watchCharFound = true;
-
-                        break;
-                    }
-                }
-            }
-
             // is there a read operation going on?
             if (palUart->RxBytesToRead > 0)
             {
@@ -180,14 +167,13 @@ void SerialRxTask(UArg a0, UArg a1)
             else
             {
                 // no read operation ongoing, so fire an event
-
                 // post a managed event with the port index and event code (check if this is the watch char or just
                 // another another)
                 PostManagedEvent(
                     EVENT_SERIAL,
                     0,
                     UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                    watchCharFound ? SerialData_WatchChar : SerialData_Chars);
+                    (input == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
             }
         }
     }

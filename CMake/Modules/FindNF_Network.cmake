@@ -9,6 +9,16 @@ list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Lwip)
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
+if(USE_SECURITY_MBEDTLS_OPTION)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
+endif()
+
+if(USE_ENC28J60_DRIVER_OPTION)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Network/Enc28j60)
+    list(APPEND NF_Network_Driver_Path ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Network/Enc28j60)
+    set(Use_Networking_Extra_Driver TRUE)
+endif()
+
 # source files for nanoFramework Networking
 set(NF_Network_SRCS
 
@@ -167,6 +177,11 @@ macro(nf_add_lib_network)
     # add this has a library
     set(LIB_NAME NF_Network)
 
+    if(RTOS_FREERTOS_ESP32_CHECK)
+        # IDF it's using tweaked version of mbedTLS, so clear ours
+        unset(mbedTLS_SOURCES)
+    endif()
+
     add_library(
         ${LIB_NAME} STATIC 
             ${NF_Network_SOURCES}
@@ -196,7 +211,7 @@ macro(nf_add_lib_network)
     else()    
         nf_set_compile_options(TARGET ${LIB_NAME} EXTRA_COMPILE_OPTIONS ${NFALN_EXTRA_COMPILE_OPTIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALN_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias
