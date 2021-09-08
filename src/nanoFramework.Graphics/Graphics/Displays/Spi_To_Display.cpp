@@ -30,7 +30,6 @@ CLR_UINT8 spiCommandMode = 0; // 0 Command first byte, 1 = Command all bytes
 void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
 {
     SPI_DEVICE_CONFIGURATION spiConfig;
-
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
     spiConfig.Spi_Bus = config.Spi.spiBus;
     spiConfig.DeviceChipSelect = config.Spi.chipSelect;
@@ -40,7 +39,7 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
 
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // Spi clock speed.
 
-    HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
+    HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);            
     ASSERT(hr == ESP_OK);
     if (hr == S_OK)
     {

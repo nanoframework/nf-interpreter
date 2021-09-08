@@ -809,6 +809,28 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_CancelEventArgs
     //--//
 };
 
+struct Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration
+{
+    static const int FIELD___spiBus = 1;
+    static const int FIELD___chipSelect = 2;
+    static const int FIELD___dataCommand = 3;
+    static const int FIELD___reset = 4;
+    static const int FIELD___backLight = 5;
+
+    //--//
+
+};
+
+struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
+{
+    static const int FIELD___i2cBus = 1;
+    static const int FIELD___address = 2;
+    static const int FIELD___fastMode = 3;
+
+    //--//
+
+};
+
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
     static const int FIELD_STATIC___fullScreen = 20;
@@ -820,8 +842,11 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
+    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__VOID__nanoFrameworkUISpiConfiguration__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__VOID__nanoFrameworkUII2cConfiguration__I4__I4__I4);
 
     //--//
+
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Ink

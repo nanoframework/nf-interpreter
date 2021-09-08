@@ -8,6 +8,9 @@
 #define GRAPHICSMEMORYHEAP_H
 
 #include <string.h>
+#include <nanoCLR_Interop.h>
+#include <nanoCLR_Interop.h>
+#include <nanoCLR_Runtime.h>
 #include "nanoCLR_Types.h"
 
 struct GraphicsMemoryHeap
@@ -20,5 +23,7 @@ struct GraphicsMemory
 {
     bool GraphicsHeapLocation(CLR_UINT8 *&BaseAddress, CLR_UINT8 *&SizeInBytes);
 };
+
+HRESULT InitScreen(CLR_RT_StackFrame &stack);
 
 #endif // GRAPHICSMEMORYHEAP_H
