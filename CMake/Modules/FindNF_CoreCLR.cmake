@@ -133,16 +133,11 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs
-    Hardware_stub.cpp
-    InterruptHandler_stub.cpp
-    NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
     BinaryFormatter_stub.cpp
 
     # CLR stubs
     Debugger_stub.cpp
-    Diagnostics_stub.cpp
-    Messaging_stub.cpp
     
     # Helpers
     nanoprintf.c
