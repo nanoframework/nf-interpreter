@@ -255,32 +255,35 @@ endmacro()
 # optional ESP32_EXTRA_COMPONENTS extra IDF components to add to the project
 macro(nf_setup_target_build)
 
-    set(elf_file ${CMAKE_PROJECT_NAME}.elf)
 
-    # Create idf::esp32 and idf::freertos static libraries
-    idf_build_process(esp32
-        # try and trim the build; additional components
-        # will be included as needed based on dependency tree
-        #
-        # although esptool_py does not generate static library,
-        # processing the component is needed for flashing related
-        # targets and file generation
-        COMPONENTS 
-            esp32
-            freertos
-            esptool_py
+    # # Create idf::esp32 and idf::freertos static libraries
+    # idf_build_process(esp32
+    #     # try and trim the build; additional components
+    #     # will be included as needed based on dependency tree
+    #     #
+    #     # although esptool_py does not generate static library,
+    #     # processing the component is needed for flashing related
+    #     # targets and file generation
+    #     COMPONENTS 
+    #         esp32s2
+    #         freertos
+    #         esptool_py
         
-        SDKCONFIG ${CMAKE_CURRENT_LIST_DIR}/sdkconfig
-        BUILD_DIR ${CMAKE_BINARY_DIR})
+    #     SDKCONFIG ${CMAKE_CURRENT_DIR}/sdkconfig
+    #     BUILD_DIR ${CMAKE_BINARY_DIR})
 
-    # OK to pass ARGN, to have it perform it's parsings and validation 
-    # nf_setup_target_build_common(${ARGN})
+    #         set(elf_file ${CMAKE_PROJECT_NAME}.elf)
+    #         add_executable(${elf_file} nanoCLR/app_main.c)
 
-    target_link_libraries(${CMAKE_PROJECT_NAME}.elf idf::esp32 idf::freertos idf::spi_flash)
+
+    # # OK to pass ARGN, to have it perform it's parsings and validation 
+    # # nf_setup_target_build_common(${ARGN})
+
+    # target_link_libraries(${elf_file} idf::esp32 idf::freertos idf::spi_flash)
     
-    # Attach additional targets to the executable file for flashing,
-    # linker script generation, partition_table generation, etc.
-    idf_build_executable(${CMAKE_PROJECT_NAME}.elf)
+    # # Attach additional targets to the executable file for flashing,
+    # # linker script generation, partition_table generation, etc.
+    # idf_build_executable(${elf_file})
 
 
 endmacro()
