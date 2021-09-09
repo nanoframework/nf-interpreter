@@ -16,6 +16,7 @@
 #define TRACE_HEADERS 2
 #define TRACE_STATE   4
 #define TRACE_NODATA  8
+#define TRACE_VERBOSE 16
 
 #if defined(TRACE_MASK) && TRACE_MASK != 0
 #define TRACE0(f, msg)                                                                                                 \
@@ -24,9 +25,33 @@
 #define TRACE(f, msg, ...)                                                                                             \
     if ((f)&TRACE_MASK)                                                                                                \
     debug_printf(msg, __VA_ARGS__)
+
+#if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
+#define TRACE0_LIMIT(f, modCount, msg)                                                                                 \
+    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
+    debug_printf(msg)
+#define TRACE_LIMIT(f, modCount, msg, ...)                                                                             \
+    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
+    debug_printf(msg, __VA_ARGS__)
+#endif
+
 #else
 #define TRACE0(msg, ...)
 #define TRACE(msg, ...)
+#define TRACE0_LIMIT(...)
+#define TRACE_LIMIT(...)
+#endif
+
+#if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS != 0
+#define WP_TXMSG            "TXMSG: "
+#define WP_RXMSG            "RXMSG: "
+#define WP_RXMSG_Hdr_OK     "RXHOK: "
+#define WP_RXMSG_Payload_Ok "RXPOK: "
+#define WP_RXMSG_NAK        "RXNAK: "
+void WP_TraceHeader(const char *pstrLabel, WP_Message *message);
+#define TRACE_WP_HEADER(l, m) WP_TraceHeader(l, m)
+#else
+#define TRACE_WP_HEADER(l, m)
 #endif
 
 ////////////////////////////////////////////////////
