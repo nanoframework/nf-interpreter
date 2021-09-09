@@ -4,9 +4,7 @@
 #
 
 include(FetchContent)
-include(toolchain.xtensa-esp32-elf)
 include(binutils.ESP32)
-include(binutils.common)
 
 # Set target series in lower case
 nf_set_esp32_target_series()
@@ -62,9 +60,6 @@ FetchContent_Populate(esp32_idf)
 # add IDF CMake dir to modules path
 list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
 
-# set and grab includes for IDF
-include(${esp32_idf_SOURCE_DIR}/tools/cmake/idf.cmake)
-
 # parse IDF path to allow proper comparison with environment variable
 string(REPLACE "\\" "/" IDF_SOURCE_DIR_PATH "$ENV{IDF_PATH}")
 
@@ -78,29 +73,9 @@ if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${esp32_idf_SOURCE_DIR})
 
 endif()
 
-# set IDF TARGET_NAME from our TARGET_SERIES
-if(${TARGET_SERIES} STREQUAL "ESP32")
-    set(TARGET_NAME ${TARGET_SERIES})
-
-elseif(${TARGET_SERIES} STREQUAL "ESP32_S2")
-    set(TARGET_NAME "ESP32S2")
-
-elseif(${TARGET_SERIES} STREQUAL "ESP32_C3")
-    set(TARGET_NAME "ESP32C3")
-
-else()
-    # series is NOT supported 
-    message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-endif()
-
-# board folder will be added from main CMakeList
-
-# idf_build_set_property(__COMPONENT_REQUIRES_COMMON ${IDF_TARGET} APPEND)
-
-# __component_get_requirements()
+# target folder was added in main CMakeList
 
 # add platform dirs
 add_subdirectory(_common)
 add_subdirectory(_Include)
 add_subdirectory(_nanoCLR)
-add_subdirectory(IDF/${TARGET_NAME})

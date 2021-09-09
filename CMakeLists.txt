@@ -34,6 +34,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
 include(binutils.common)
+include(binutils.ESP32)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -113,7 +114,7 @@ endif()
 
 #######################
 
-# icheck for toolchain path (this is required for Windows builds and we are only building on Windows)
+# check for toolchain path (this is required for Windows builds and we are only building on Windows)
 if(NOT RTOS_FREERTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
         message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
         message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
@@ -831,23 +832,22 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
+         
+    if (NOT ESP32_TARGET_VARIANT)
+        set(ESP32_TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
+    endif()
 
-        
-    #     if (NOT TARGET_VARIANT)
-    #     set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
-    # endif()
-
-    # # Only used by ESP32 at the moment
-    # if(API_nanoFramework.Hardware.Esp32.Ble)
-    #     set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
-    #     message(STATUS "Support for BLE enabled")
-    # else()
-    #     set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
-    #     message(STATUS "Support for BLE disabled")
-    # endif()
+    # Only used by ESP32 at the moment
+    if(API_nanoFramework.Hardware.Esp32.Ble)
+        set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+        message(STATUS "Support for BLE enabled")
+    else()
+        set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+        message(STATUS "Support for BLE disabled")
+    endif()
 
     # check watchdog feature
-    # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
+    # ESP32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
     # because the build system can't honour that preference
     if(NOT NF_FEATURE_WATCHDOG)
         message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
@@ -860,8 +860,9 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
 
-        # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
+        # board found
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
+        message(STATUS "${TARGET_BASE_LOCATION}")
 
     else()
 
@@ -882,11 +883,16 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         endif()
 
     endif()
-    
-    # add common directory for SimpleLink
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32)
+
+    # add common directory for ESP32
+    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
+
+    nf_add_idf_as_library()
+
+    # this one has to go *AFTER* the call to nf_add_idf_as_library()
+    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF)
 
 #######################
 # TI_SIMPLELINK

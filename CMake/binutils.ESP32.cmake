@@ -288,6 +288,32 @@ macro(nf_setup_target_build)
 
 endmacro()
 
+macro(nf_add_idf_as_library)
+
+    include($ENV{IDF_PATH}/tools/cmake/idf.cmake)
+
+    # create IDF static libraries
+    idf_build_process(${TARGET_SERIES_SHORT}
+        COMPONENTS 
+            ${TARGET_SERIES_SHORT}
+            freertos
+            esptool_py
+
+        # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
+        BUILD_DIR ${CMAKE_BINARY_DIR}
+    )
+
+    add_executable(${NANOCLR_PROJECT_NAME}.elf ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
+
+    # Link the static libraries to the executable
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
+        idf::${TARGET_SERIES_SHORT}
+        idf::freertos
+        idf::spi_flash
+    )
+
+endmacro()
+
 # macro to clear binary files related with nanoBooter from output
 # to make sure that the build file it's up to date
 macro(nf_clear_output_files_nanobooter)
