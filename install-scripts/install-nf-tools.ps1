@@ -7,6 +7,7 @@ param (
     [ValidateSet("ESP32", "STM32", "NXP", "TI")]
     [string]$TargetSeries,
 	[Parameter(HelpMessage = "Enter the path to the folder where the tools should be installed.")][string]$Path,
+    	[Parameter(HelpMessage = "Please enter the COM port for ESP32 flash utility [e.g. COM1].")][string]$COMPort,
     [switch]$force = $false
 )
 
@@ -20,6 +21,11 @@ if (-not [string]::IsNullOrEmpty($Path)) {
 # need to pass the 'force' switch?
 if ($force) {
     $commandArgs += " -force"
+}
+
+# need to pass the 'COMPort' parameter?
+if ($COMPort) {
+    $commandArgs += " -COMPort '$COMPort'"
 }
 
 if($TargetSeries -eq "ESP32")
