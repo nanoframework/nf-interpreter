@@ -29,7 +29,7 @@
           "BUILD_VERBOSE" : "OFF",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
-          "RTOS": "TI_SIMPLELINK",
+          "RTOS": "TI_SimpleLink",
           "TARGET_SERIES": "CC32xx",
           "TARGET_BOARD": "TI_CC3220SF_LAUNCHXL",
           "TI_SL_CC32xx_SDK_SOURCE": "",
