@@ -114,6 +114,11 @@
           "type": "BOOL"
         },
         {
+          "name": "NF_WP_TRACE_VERBOSE",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
           "name": "NF_WP_TRACE_ALL",
           "value": "OFF",
           "type": "BOOL"
@@ -385,6 +390,11 @@
         },
         {
           "name": "NF_WP_TRACE_NODATA",
+          "value": "OFF",
+          "type": "BOOL"
+        },
+        {
+          "name": "NF_WP_TRACE_VERBOSE",
           "value": "OFF",
           "type": "BOOL"
         },

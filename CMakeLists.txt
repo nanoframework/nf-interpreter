@@ -438,7 +438,8 @@ option(NF_WP_TRACE_ERRORS "option to Trace errors with Wire Protocol")
 option(NF_WP_TRACE_HEADERS "option to Trace headers with Wire Protocol")
 option(NF_WP_TRACE_STATE "option to Trace state with Wire Protocol")
 option(NF_WP_TRACE_NODATA "option to Trace empty packets with Wire Protocol")
-option(NF_WP_TRACE_ALL "option to Trace  with Wire Protocol")
+option(NF_WP_TRACE_VERBOSE "option to Trace more detailed state with Wire Protocol. ")
+option(NF_WP_TRACE_ALL "option to Trace ALL information with Wire Protocol.")
 
 # reports Wire Protocol CRC32 implementation
 if(NF_WP_IMPLEMENTS_CRC32)

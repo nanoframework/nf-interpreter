@@ -20,6 +20,11 @@ static uint8_t *_pos;
 static uint32_t _size;
 static WP_Message _inboundMessage;
 
+#if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
+// used WP_Message_Process() and methods it calls to avoid flooding TRACE
+static uint32_t traceLoopCounter = 0;
+#endif
+
 #ifdef DEBUG
 volatile uint8_t _rxStatePrev;
 #endif
@@ -246,7 +251,9 @@ void WP_Message_Process()
                 break;
 
             case ReceiveState_WaitingForHeader:
-                TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
+                // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
+                //          of the statemachine to avoid flooding the trace.
+                TRACE0_LIMIT(TRACE_VERBOSE, 100, "RxState==WaitForHeader\n");
 
                 WP_ReceiveBytes(&_pos, &_size);
 
@@ -319,16 +326,11 @@ void WP_Message_Process()
 
             case ReceiveState_CompleteHeader:
 
-                TRACE0(TRACE_STATE, "RxState=CompleteHeader\n");
+                TRACE0(TRACE_STATE, "RxState==CompleteHeader\n");
 
                 if (WP_Message_VerifyHeader(&_inboundMessage))
                 {
-                    TRACE(
-                        TRACE_HEADERS,
-                        "RXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-                        _inboundMessage.m_header.m_cmd,
-                        _inboundMessage.m_header.m_flags,
-                        _inboundMessage.m_header.m_size);
+                    TRACE_WP_HEADER(WP_RXMSG_Hdr_OK, &_inboundMessage);
 
                     if (WP_App_ProcessHeader(&_inboundMessage))
                     {
@@ -364,7 +366,7 @@ void WP_Message_Process()
 
             case ReceiveState_ReadingPayload:
 
-                TRACE(TRACE_STATE, "RxState=ReadingPayload. Expecting %d bytes.\n", _inboundMessage.m_header.m_size);
+                TRACE(TRACE_STATE, "RxState==ReadingPayload. Expecting %d bytes.\n", _inboundMessage.m_header.m_size);
 
                 // If the time between consecutive payload bytes exceeds the timeout threshold then assume that
                 // the rest of the payload is not coming. Reinitialize to sync with the next header.
@@ -391,10 +393,15 @@ void WP_Message_Process()
                 break;
 
             case ReceiveState_CompletePayload:
-                TRACE0(TRACE_STATE, "RxState=CompletePayload\n");
+                TRACE0(TRACE_STATE, "RxState==CompletePayload\n");
                 if (WP_Message_VerifyPayload(&_inboundMessage))
                 {
+                    TRACE_WP_HEADER(WP_RXMSG_Payload_Ok, &_inboundMessage);
                     WP_App_ProcessPayload(&_inboundMessage);
+                }
+                else
+                {
+                    TRACE_WP_HEADER(WP_RXMSG_NAK, &_inboundMessage);
                 }
 
                 _rxState = ReceiveState_Initialize;
@@ -403,7 +410,7 @@ void WP_Message_Process()
 
             default:
                 // unknown state
-                TRACE0(TRACE_ERRORS, "RxState=UNKNOWN!!\n");
+                TRACE0(TRACE_ERRORS, "RxState==UNKNOWN!!\n");
                 return;
         }
     }
@@ -411,12 +418,6 @@ void WP_Message_Process()
 
 void WP_SendProtocolMessage(WP_Message *message)
 {
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
     WP_TransmitMessage(message);
 }
 
@@ -427,13 +428,6 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
     WP_Message_Initialize(&message);
 
     WP_Message_PrepareRequest(&message, cmd, flags, payloadSize, payload);
-
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message.m_header.m_cmd,
-        message.m_header.m_flags,
-        message.m_header.m_size);
 
     WP_TransmitMessage(&message);
 }
@@ -449,3 +443,20 @@ __nfweak void debug_printf(const char *format, ...)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS != 0
+void WP_TraceHeader(const char *pstrLabel, WP_Message *message)
+{
+    TRACE(
+        TRACE_HEADERS,
+        "%scmd=0x%08X, flags=0x%08X, hCRC=0x%08X, pCRC=0x%08X, seq=0x%04X replySeq=0x%04X len=%d\n",
+        pstrLabel,
+        message->m_header.m_cmd,
+        message->m_header.m_flags,
+        message->m_header.m_crcHeader,
+        message->m_header.m_crcData,
+        message->m_header.m_seq,
+        message->m_header.m_seqReply,
+        message->m_header.m_size);
+}
+#endif
