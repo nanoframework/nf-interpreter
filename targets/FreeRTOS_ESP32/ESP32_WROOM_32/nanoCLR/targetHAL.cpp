@@ -87,7 +87,7 @@ void nanoHAL_Initialize()
     ConfigurationManager_Initialize();
 
 #if (NANOCLR_GRAPHICS == TRUE)
-    g_GraphicsMemoryHeap.Initialize();
+    //g_GraphicsMemoryHeap.Initialize();
 #endif
 
     Events_Initialize();

@@ -81,10 +81,12 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, C
     CLR_INT32 graphicsMemoryBlockSize = 2000000;
     CLR_INT32 memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM;
 
+    CLR_Debug::Printf("Memory initialization\n");
     if ( heapStartingAddress != 0)
     {
         graphicsStartingAddress = heapStartingAddress;
         graphicsEndingAddress = heapEndingAddress;
+        CLR_Debug::Printf("heapStartingAddress != 0, %d, %d\n", heapStartingAddress, heapEndingAddress);
         return true;
     }
 
@@ -113,6 +115,7 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, C
     heapStartingAddress = graphicsStartingAddress;
     heapEndingAddress = graphicsEndingAddress;
 
+    CLR_Debug::Printf("Alloc, s=%d, e=%d, s=%d\n", heapStartingAddress, heapEndingAddress, graphicsMemoryBlockSize);
     return true;
 }
 

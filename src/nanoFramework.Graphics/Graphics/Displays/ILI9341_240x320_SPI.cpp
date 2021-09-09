@@ -97,7 +97,6 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0X12, 0X81);
     g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x01, 0x79);
     g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
-
     g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
     g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
     g_DisplayInterface.SendCommand(2, Power_Control_1, 0x26);

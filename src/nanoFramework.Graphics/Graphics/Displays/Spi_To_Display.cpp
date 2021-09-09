@@ -39,7 +39,8 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
 
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // Spi clock speed.
 
-    HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);            
+    HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
+    CLR_Debug::Printf("SPI open=%d==%d\n", hr, S_OK);
     ASSERT(hr == ESP_OK);
     if (hr == S_OK)
     {

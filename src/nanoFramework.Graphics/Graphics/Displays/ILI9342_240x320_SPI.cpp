@@ -42,6 +42,8 @@ enum ILI9341_CMD : CLR_UINT8
     SOFTWARE_RESET = 0x01,
     POWER_STATE = 0x10,
     Sleep_Out = 0x11,
+    Noron = 0x13,
+    Invert_On = 0x21,
     Gamma_Set = 0x26,
     Display_OFF = 0x28,
     Display_ON = 0x29,
@@ -97,6 +99,8 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0x12, 81);
     g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x00, 0x78);
     g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
+    g_DisplayInterface.SendCommand(1, Invert_On);
+    g_DisplayInterface.SendCommand(1, Noron);
     g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
     g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
     g_DisplayInterface.SendCommand(3, Power_Control_1, 0x10);
@@ -298,10 +302,13 @@ void DisplayDriver::Clear()
 
     // Clear buffer
     memset(Attributes.TransferBuffer, 0, Attributes.TransferBufferSize);
-
+    CLR_Debug::Printf("Attributes.TransferBufferSize=%d\n", Attributes.TransferBufferSize);
     int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
+    CLR_Debug::Printf("totalBytesToClear=%d\n", totalBytesToClear);
     int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
+    CLR_Debug::Printf("fullTransferBuffersCount=%d\n", fullTransferBuffersCount);
     int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
+    CLR_Debug::Printf("totalBytesToClear=%d\n", totalBytesToClear);
 
     CLR_UINT8 command = Memory_Write;
     for (int i = 0; i < fullTransferBuffersCount; i++)
