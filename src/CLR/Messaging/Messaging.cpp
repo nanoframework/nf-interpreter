@@ -197,7 +197,7 @@ bool CLR_Messaging::App_ProcessHeader(void *state, WP_Message *msg)
 
     if (!pThis->ProcessHeader(msg))
     {
-        TRACE0("ProcessHeader() indicated invalid header!\n");
+        TRACE0(TRACE_HEADERS, "ProcessHeader() indicated invalid header!\n");
         return false;
     }
 
@@ -207,7 +207,7 @@ bool CLR_Messaging::App_ProcessHeader(void *state, WP_Message *msg)
 
         if (ptr == NULL)
         {
-            TRACE0("Failed to allocate 0x%08X bytes for message payload!\n");
+            TRACE0(TRACE_HEADERS, "Failed to allocate 0x%08X bytes for message payload!\n");
             return false;
         }
 
@@ -331,7 +331,7 @@ bool CLR_Messaging::ProcessHeader(WP_Message *msg)
     (void)msg;
 
     NATIVE_PROFILE_CLR_MESSAGING();
-    TRACE("MSG: 0x%08X\n", msg->m_header.m_cmd);
+    TRACE(TRACE_HEADERS, "MSG: 0x%08X\n", msg->m_header.m_cmd);
     return true;
 }
 
