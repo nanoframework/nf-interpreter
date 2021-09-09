@@ -92,51 +92,109 @@ bool DisplayDriver::Initialize()
 
     // g_DisplayInterface.SendCommand(SOFTWARE_RESET);
     // g_DisplayInterface.SendCommand(Display_OFF);
-    g_DisplayInterface.SendCommand(4, 0xC8, 0xFF, 0x93, 0X42);
-    g_DisplayInterface.SendCommand(3, Power_Control_1, 0x12, 0x12);
-    g_DisplayInterface.SendCommand(2, Power_Control_2, 0x03);
-    g_DisplayInterface.SendCommand(2, 0xB0, 0xE0);
-    g_DisplayInterface.SendCommand(4, 0xF6, 0x00, 0x01, 0X01);
-    g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0xA8); // Portrait?
-    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit
+
+    g_DisplayInterface.SendCommand(4, Power_Control_B, 0x00, 0xC1, 0x30);
+    g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0x12, 81);
+    g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x00, 0x78);
+    g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
+    g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
+    g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
+    g_DisplayInterface.SendCommand(3, Power_Control_1, 0x10);
+    g_DisplayInterface.SendCommand(3, Power_Control_2, 0x00);
+    g_DisplayInterface.SendCommand(3, VCOM_Control_1, 0x30, 0x30);
+    g_DisplayInterface.SendCommand(2, VCOM_Control_2, 0xB7);
+    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);
+    g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0x08);
+    g_DisplayInterface.SendCommand(3, Frame_Rate_Control_Normal, 0x00, 0x1A);
     g_DisplayInterface.SendCommand(4, Display_Function_Control, 0x08, 0x82, 0x27);
+    g_DisplayInterface.SendCommand(2, Enable_3G, 0x00);
+    g_DisplayInterface.SendCommand(2, Gamma_Set, 0x01);
     g_DisplayInterface.SendCommand(
         16,
         Positive_Gamma_Correction,
-        0x00,
-        0x1C,
-        0x11,
-        0x04,
-        0x11,
+        0x0F,
+        0x2A,
+        0x28,
         0x08,
-        0x37,
-        0X89,
-        0x4C,
-        0x06,
-        0x0C,
+        0x0E,
+        0x08,
+        0x54,
+        0XA9,
+        0x43,
         0x0A,
-        0x2E,
-        0x34,
-        0x0F); // gamma set 4
+        0x0F,
+        0x00,
+        0x00,
+        0x00,
+        0x00);
     g_DisplayInterface.SendCommand(
         16,
         Negative_Gamma_Correction,
         0x00,
-        0x0B,
-        0x11,
-        0x05,
-        0x13,
-        0x09,
-        0x33,
-        0x67,
-        0x48,
+        0x15,
+        0x17,
         0x07,
-        0x0E,
-        0x0B,
-        0x2E,
-        0x33,
+        0x11,
+        0x06,
+        0x2B,
+        0x56,
+        0x3C,
+        0x05,
+        0x10,
+        0x0F,
+        0x3F,
+        0x3F,
         0x0F);
+    g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
+    g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
 
+    //Supposed to be this from the M5 Stack
+    // g_DisplayInterface.SendCommand(4, 0xC8, 0xFF, 0x93, 0X42);
+    // g_DisplayInterface.SendCommand(3, Power_Control_1, 0x12, 0x12);
+    // g_DisplayInterface.SendCommand(2, Power_Control_2, 0x03);
+    // g_DisplayInterface.SendCommand(2, 0xB0, 0xE0);
+    // g_DisplayInterface.SendCommand(4, 0xF6, 0x00, 0x01, 0X01);
+    // g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0xA8); // Portrait?
+    // g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit
+    // g_DisplayInterface.SendCommand(4, Display_Function_Control, 0x08, 0x82, 0x27);
+    // g_DisplayInterface.SendCommand(
+    //     16,
+    //     Positive_Gamma_Correction,
+    //     0x00,
+    //     0x1C,
+    //     0x11,
+    //     0x04,
+    //     0x11,
+    //     0x08,
+    //     0x37,
+    //     0X89,
+    //     0x4C,
+    //     0x06,
+    //     0x0C,
+    //     0x0A,
+    //     0x2E,
+    //     0x34,
+    //     0x0F); // gamma set 4
+    // g_DisplayInterface.SendCommand(
+    //     16,
+    //     Negative_Gamma_Correction,
+    //     0x00,
+    //     0x0B,
+    //     0x11,
+    //     0x05,
+    //     0x13,
+    //     0x09,
+    //     0x33,
+    //     0x67,
+    //     0x48,
+    //     0x07,
+    //     0x0E,
+    //     0x0B,
+    //     0x2E,
+    //     0x33,
+    //     0x0F);
+
+    // This from a previous implementation
     // g_DisplayInterface.SendCommand(4, Power_Control_B, 0x00, 0x83, 0X30);
     // g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0X12, 0X81);
     // g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x01, 0x79);
