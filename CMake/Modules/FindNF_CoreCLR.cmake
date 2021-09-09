@@ -258,9 +258,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     
 endforeach()
 
-# need to set this for nanoprintf
-SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf/nanoprintf.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
-
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_CoreCLR DEFAULT_MSG NF_CoreCLR_INCLUDE_DIRS NF_CoreCLR_SOURCES)
