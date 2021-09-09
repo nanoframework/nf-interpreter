@@ -797,7 +797,7 @@ jobs:
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/build-azurertos.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-  - template: azure-pipelines-templates/publish-bintray.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
