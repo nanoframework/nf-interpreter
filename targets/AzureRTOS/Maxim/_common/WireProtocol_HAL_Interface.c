@@ -102,12 +102,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint8_t waitResult;
     uint32_t dummy;
 
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
+    TRACE_WP_HEADER(WP_TXMSG, message);
 
     NanoUART_InitRequest(&txRequest);
     

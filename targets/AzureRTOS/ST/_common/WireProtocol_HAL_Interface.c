@@ -25,7 +25,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         // non blocking read from serial port with 20ms timeout
         read = chnReadTimeout(&SERIAL_DRIVER, *ptr, requestedSize, OSAL_MS2I(20));
 
-        TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
+        // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
+        //          of the statemachine to avoid flooding the trace.
+        TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         *ptr += read;
         *size -= read;
@@ -37,12 +39,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t writeResult;
     bool operationResult = false;
 
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
+    TRACE_WP_HEADER(WP_TXMSG, message);
 
     // write header to output stream
     writeResult =
