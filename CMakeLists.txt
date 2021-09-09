@@ -830,7 +830,7 @@ elseif(RTOS_FREERTOS_CHECK)
 elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     # Define base path for the class libraries
-    SET_BASE_PATH_FOR_LIBRARIES_MODULES(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
 
         
     #     if (NOT TARGET_VARIANT)

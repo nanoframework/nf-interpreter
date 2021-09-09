@@ -3,6 +3,14 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+include(toolchain.xtensa-esp32-elf)
+include(binutils.ESP32)
+include(binutils.common)
+
+# Set target series in lower case
+nf_set_esp32_target_series()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -55,12 +63,8 @@ FetchContent_Populate(esp32_idf)
 # add IDF CMake dir to modules path
 list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
 
-# # set and grab includes for IDF
-# include(${esp32_idf_SOURCE_DIR}/tools/cmake/idf.cmake)
-
-# TODO (do we need really need this check?)
-# # Check for required Python modules
-# __build_check_python()
+# set and grab includes for IDF
+include(${esp32_idf_SOURCE_DIR}/tools/cmake/idf.cmake)
 
 # check IDF_PATH environment variable
 if(ENV{IDF_PATH} AND NOT (ENV{IDF_PATH} EQUAL ${esp32_idf_SOURCE_DIR}))
