@@ -24,8 +24,11 @@ endif()
 if(NF_WP_TRACE_NODATA)
     math(EXPR WP_TRACE_MASK "${WP_TRACE_MASK} + 8")
 endif()
+if(NF_WP_TRACE_VERBOSE)
+    math(EXPR WP_TRACE_MASK "${WP_TRACE_MASK} + 16")
+endif()
 if(NF_WP_TRACE_ALL)
-    math(EXPR WP_TRACE_MASK "8 + 4 + 2 + 1")
+    math(EXPR WP_TRACE_MASK "16 + 8 + 4 + 2 + 1")
 endif()
 
 message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'") # debug helper

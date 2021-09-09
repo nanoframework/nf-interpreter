@@ -10,6 +10,11 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
+#if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
+// used WP_Message_Process() and methods it calls to avoid flooding TRACE
+extern uint32_t traceLoopCounter;
+#endif
+
 #if (HAL_USE_SERIAL_USB == TRUE)
 #include "usbcfg.h"
 #elif (HAL_USE_SERIAL == TRUE)
@@ -32,8 +37,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
         *ptr += read;
         *size -= read;
-        // Warning: Uncommenting the following line will output trace on every loop
-        // TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
+        // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
+        //          of the statemachine to avoid flooding the trace. 
+        TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
     }
 }
 #elif (HAL_USE_SERIAL == TRUE)
@@ -50,8 +56,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         // non blocking read from serial port with 100ms timeout
         size_t read = chnReadTimeout(&SERIAL_DRIVER, *ptr, requestedSize, TIME_MS2I(100));
 
-        // Warning: Uncommenting the following line will output trace on every loop
-        // TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
+        // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
+        //          of the statemachine to avoid flooding the trace. 
+        TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         *ptr += read;
         *size -= read;
