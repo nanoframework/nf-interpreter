@@ -32,7 +32,7 @@
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "TOOL_SRECORD_PREFIX": "<absolute-path-to-srecord-folder-mind-the-forward-slashes>",
           "TARGET_SERIES": "STM32F0xx",
-          "RTOS": "CHIBIOS",
+          "RTOS": "ChibiOS",
           "RTOS_SOURCE_FOLDER": "",
           "TARGET_BOARD": "ST_NUCLEO64_F091RC",
           "CHIBIOS_CONTRIB_REQUIRED": "OFF",

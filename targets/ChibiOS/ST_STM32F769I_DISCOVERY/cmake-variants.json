@@ -31,7 +31,7 @@
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "TOOL_SRECORD_PREFIX": "<absolute-path-to-srecord-folder-mind-the-forward-slashes>",
-          "RTOS": "CHIBIOS",
+          "RTOS": "ChibiOS",
           "TARGET_SERIES": "STM32F7xx",
           "RTOS_SOURCE_FOLDER": "",
           "TARGET_BOARD": "ST_STM32F769I_DISCOVERY",
