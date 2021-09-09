@@ -38,7 +38,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         *ptr += read;
         *size -= read;
         // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
-        //          of the statemachine to avoid flooding the trace. 
+        //          of the statemachine to avoid flooding the trace.
         TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
     }
 }
@@ -57,7 +57,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         size_t read = chnReadTimeout(&SERIAL_DRIVER, *ptr, requestedSize, TIME_MS2I(100));
 
         // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
-        //          of the statemachine to avoid flooding the trace. 
+        //          of the statemachine to avoid flooding the trace.
         TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         *ptr += read;
