@@ -15,6 +15,7 @@
 
 struct GraphicsMemoryHeap
 {
+    uint GetMaxBuffer();
     bool Initialize();
     void *Allocate(CLR_UINT32 len);
     bool Release(void *pHeapBlock);

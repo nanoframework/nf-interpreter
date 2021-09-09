@@ -69,7 +69,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    NativeInitSpi___STATIC__VOID__nanoFrameworkUISpiConfiguration__I4__I4__I4( CLR_RT_StackFrame &stack )
+    NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();    
     //uint i = 0;
@@ -77,10 +77,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     // NANOCLR_CHECK_HRESULT(InitScreen(stack));
     
     CLR_RT_HeapBlock *spiconfig;
-    CLR_Debug::Printf("Spi init native\n");   
-    CLR_Debug::Printf("before memory initialize\n");
     g_GraphicsMemoryHeap.Initialize();
-    CLR_Debug::Printf("memory allocated\n");
     // Initialise Graphics after devices initialised
     DisplayInterfaceConfig displayConfig;
 
@@ -88,7 +85,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    CLR_Debug::Printf("before spi config\n");
     spiconfig = stack.Arg1().Dereference();
     FAULT_ON_NULL(spiconfig);
 
@@ -99,10 +95,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     //displayConfig.Spi.reset = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___reset].NumericByRef().s4;       // RST_1    GPIO18   RESET
     //displayConfig.Spi.backLight = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___backLight].NumericByRef().s4;    // GPIO5    Backlight
     displayConfig.Spi.spiBus = 1;                // Spi Bus
-    // displayConfig.Spi.chipSelect = 14;  // CS_1     GPIO22   CS
-    // displayConfig.Spi.dataCommand = 27; // D/CX_1   GPIO21   D/C
-    // displayConfig.Spi.reset = 33;       // RST_1    GPIO18   RESET
-    // displayConfig.Spi.backLight = 32;    // GPIO5    Backlight
+    //displayConfig.Spi.chipSelect = 14;  // CS_1     GPIO22   CS
+    //displayConfig.Spi.dataCommand = 27; // D/CX_1   GPIO21   D/C
+    //displayConfig.Spi.reset = 33;       // RST_1    GPIO18   RESET
+    //displayConfig.Spi.backLight = 32;    // GPIO5    Backlight
     displayConfig.Spi.chipSelect = 22;  // CS_1     GPIO22   CS
     displayConfig.Spi.dataCommand = 21; // D/CX_1   GPIO21   D/C
     displayConfig.Spi.reset = 18;       // RST_1    GPIO18   RESET
@@ -124,12 +120,14 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     // Ink_Initialize();
     g_DisplayDriver.SetDefaultOrientation();
     g_DisplayDriver.Clear();
+    
+    stack.SetResult_U4(g_GraphicsMemoryHeap.GetMaxBuffer());
 
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    NativeInitI2c___STATIC__VOID__nanoFrameworkUII2cConfiguration__I4__I4__I4( CLR_RT_StackFrame &stack )
+    NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__I4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

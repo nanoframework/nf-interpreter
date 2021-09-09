@@ -842,8 +842,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
-    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__VOID__nanoFrameworkUISpiConfiguration__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__VOID__nanoFrameworkUII2cConfiguration__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__I4__I4__I4);
 
     //--//
 

@@ -41,7 +41,14 @@ struct BlockHeader *ptrlastBlockHeader;
 
 CLR_UINT8 *graphicsHeapBeginAddress;
 CLR_UINT8 *graphicsHeapEndAddress;
+CLR_UINT32 SizeInBytes;
+
 const int blockHeaderSize = sizeof(struct BlockHeader);
+
+uint GraphicsMemoryHeap::GetMaxBuffer()
+{
+    return SizeInBytes;
+}
 
 bool GraphicsMemoryHeap::Initialize()
 {
@@ -49,7 +56,7 @@ bool GraphicsMemoryHeap::Initialize()
 
     if (gm.GraphicsHeapLocation(graphicsHeapBeginAddress, graphicsHeapEndAddress))
     {
-        CLR_UINT32 SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
+        SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
         memset(graphicsHeapBeginAddress, 0, SizeInBytes);
 
