@@ -25,7 +25,7 @@ if(ESP32_IDF_SOURCE)
 endif()
 
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.3" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.3.1" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_SOURCE)
     # no ESP32 IDF source specified, download it from official repo
@@ -35,7 +35,7 @@ if(NO_ESP32_IDF_SOURCE)
     FetchContent_Declare(
         esp32_idf
         GIT_REPOSITORY https://github.com/espressif/esp-idf
-        GIT_TAG release/v${ESP32_IDF_TAG}
+        GIT_TAG v${ESP32_IDF_TAG}
     )
 
 else()
@@ -48,7 +48,7 @@ else()
         FetchContent_Declare(
             esp32_idf
             GIT_REPOSITORY ${ESP32_IDF_SOURCE}
-            GIT_TAG release/v${ESP32_IDF_TAG}
+            GIT_TAG v${ESP32_IDF_TAG}
         )
 
     else()
