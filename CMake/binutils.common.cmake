@@ -339,7 +339,7 @@ endfunction()
 
 #######################################################################################################################################
 # this function sets the linker options AND a specific linker file (full path and name, including extension)
-function(nf_set_linker_options_and_file target linker_file_name)
+function(nf_set_link_options_and_file target linker_file_name)
 
     get_target_property(TARGET_LD_FLAGS ${target} LINK_FLAGS)
     if(TARGET_LD_FLAGS)
