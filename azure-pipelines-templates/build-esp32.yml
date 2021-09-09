@@ -18,7 +18,7 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '-DCMAKE_TOOLCHAIN_FILE=$(IDF_PATH)/tools/cmake/toolchain-esp32.cmake -DTARGET=esp32 -DESP_PLATFORM=1 -DIDF_TARGET=esp32 -G Ninja ..'
+      cmakeArgs: '-DESP32_IDF_SOURCE=$(IDF_PATH) -DCMAKE_TOOLCHAIN_FILE=$(IDF_PATH)/tools/cmake/toolchain-esp32.cmake -DTARGET=esp32 -DESP_PLATFORM=1 -DIDF_TARGET=esp32 -G Ninja ..'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf\examples\build_system\cmake\idf_as_lib\build
     displayName: Setup build with CMake
 
