@@ -69,13 +69,8 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t writeResult;
     bool operationResult = false;
 
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
-
+    TRACE_WP_HEADER(WP_TXMSG, message); 
+	
     // write header to output stream
     writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
 
@@ -109,12 +104,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t writeResult;
     bool operationResult = false;
 
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
+    TRACE_WP_HEADER(WP_TXMSG, message);
 
     // write header to output stream
     writeResult =
