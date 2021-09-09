@@ -22,7 +22,7 @@ static WP_Message _inboundMessage;
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
-static uint32_t traceLoopCounter=0;
+static uint32_t traceLoopCounter = 0;
 #endif
 
 #ifdef DEBUG
@@ -252,7 +252,7 @@ void WP_Message_Process()
 
             case ReceiveState_WaitingForHeader:
                 // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
-                //          of the statemachine to avoid flooding the trace. 
+                //          of the statemachine to avoid flooding the trace.
                 TRACE0_LIMIT(TRACE_VERBOSE, 100, "RxState==WaitForHeader\n");
 
                 WP_ReceiveBytes(&_pos, &_size);

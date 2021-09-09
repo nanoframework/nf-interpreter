@@ -27,11 +27,11 @@
     debug_printf(msg, __VA_ARGS__)
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
-#define TRACE0_LIMIT(f, modCount, msg)                                                                               \
-    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                       \
+#define TRACE0_LIMIT(f, modCount, msg)                                                                                 \
+    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
     debug_printf(msg)
-#define TRACE_LIMIT(f, modCount, msg, ...)                                                                                    \
-if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                           \
+#define TRACE_LIMIT(f, modCount, msg, ...)                                                                             \
+    if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
     debug_printf(msg, __VA_ARGS__)
 #endif
 
