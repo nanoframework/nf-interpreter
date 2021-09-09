@@ -246,8 +246,8 @@ void WP_Message_Process()
                 break;
 
             case ReceiveState_WaitingForHeader:
-                //Warning: Uncommenting the following line will output trace on every loop
-                //TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
+                // Warning: Uncommenting the following line will output trace on every loop
+                // TRACE0(TRACE_STATE, "RxState==WaitForHeader\n");
 
                 WP_ReceiveBytes(&_pos, &_size);
 
@@ -390,12 +390,12 @@ void WP_Message_Process()
                 TRACE0(TRACE_STATE, "RxState==CompletePayload\n");
                 if (WP_Message_VerifyPayload(&_inboundMessage))
                 {
-                    TRACE_WP_HEADER(WP_RXMSG_Payload_Ok,&_inboundMessage);
+                    TRACE_WP_HEADER(WP_RXMSG_Payload_Ok, &_inboundMessage);
                     WP_App_ProcessPayload(&_inboundMessage);
                 }
                 else
                 {
-                    TRACE_WP_HEADER(WP_RXMSG_NAK,&_inboundMessage);
+                    TRACE_WP_HEADER(WP_RXMSG_NAK, &_inboundMessage);
                 }
 
                 _rxState = ReceiveState_Initialize;
@@ -438,21 +438,19 @@ __nfweak void debug_printf(const char *format, ...)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 #if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS != 0
-        void WP_TraceHeader(const char* pstrLabel, WP_Message *message)
-        {
-                      TRACE(
-                        TRACE_HEADERS,
-                        "%scmd=0x%08X, flags=0x%08X, hCRC=0x%08X, pCRC=0x%08X, seq=0x%04X replySeq=0x%04X len=%d\n",
-                        pstrLabel,
-                        message->m_header.m_cmd,
-                        message->m_header.m_flags,
-                        message->m_header.m_crcHeader,
-                        message->m_header.m_crcData,
-                        message->m_header.m_seq,
-                        message->m_header.m_seqReply,
-                        message->m_header.m_size
-                        );
-        }
+void WP_TraceHeader(const char *pstrLabel, WP_Message *message)
+{
+    TRACE(
+        TRACE_HEADERS,
+        "%scmd=0x%08X, flags=0x%08X, hCRC=0x%08X, pCRC=0x%08X, seq=0x%04X replySeq=0x%04X len=%d\n",
+        pstrLabel,
+        message->m_header.m_cmd,
+        message->m_header.m_flags,
+        message->m_header.m_crcHeader,
+        message->m_header.m_crcData,
+        message->m_header.m_seq,
+        message->m_header.m_seqReply,
+        message->m_header.m_size);
+}
 #endif

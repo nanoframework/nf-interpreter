@@ -29,16 +29,16 @@
 #define TRACE(msg, ...)
 #endif
 
-#if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS!= 0
-#define WP_TXMSG             "TXMSG: "
-#define WP_RXMSG             "RXMSG: "
-#define WP_RXMSG_Hdr_OK      "RXHOK: "
-#define WP_RXMSG_Payload_Ok  "RXPOK: "
-#define WP_RXMSG_NAK         "RXNAK: "
-void WP_TraceHeader(const char* pstrLabel, WP_Message *message);  
-#define TRACE_WP_HEADER(l,m)  WP_TraceHeader(l,m)
+#if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS != 0
+#define WP_TXMSG            "TXMSG: "
+#define WP_RXMSG            "RXMSG: "
+#define WP_RXMSG_Hdr_OK     "RXHOK: "
+#define WP_RXMSG_Payload_Ok "RXPOK: "
+#define WP_RXMSG_NAK        "RXNAK: "
+void WP_TraceHeader(const char *pstrLabel, WP_Message *message);
+#define TRACE_WP_HEADER(l, m) WP_TraceHeader(l, m)
 #else
-#define TRACE_WP_HEADER(l,m)
+#define TRACE_WP_HEADER(l, m)
 #endif
 
 ////////////////////////////////////////////////////
