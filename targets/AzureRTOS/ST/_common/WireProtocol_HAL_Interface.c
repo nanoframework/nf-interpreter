@@ -11,6 +11,11 @@
 
 #include <serialcfg.h>
 
+#if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
+// used WP_Message_Process() and methods it calls to avoid flooding TRACE
+extern uint32_t traceLoopCounter;
+#endif
+
 void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     volatile uint32_t read;
