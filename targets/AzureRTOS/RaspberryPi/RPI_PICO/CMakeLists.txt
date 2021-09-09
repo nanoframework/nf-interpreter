@@ -88,8 +88,8 @@ nf_set_compiler_definitions(${NANOCLR_PROJECT_NAME}.elf )
 # endif()
 
 # set linker options
-# nf_set_linker_options(${NANOBOOTER_PROJECT_NAME}.elf)
-nf_set_linker_options(${NANOCLR_PROJECT_NAME}.elf)
+# nf_set_link_options(${NANOBOOTER_PROJECT_NAME}.elf)
+nf_set_link_options(${NANOCLR_PROJECT_NAME}.elf)
 
 # add other linker flags
 ###########################################################
