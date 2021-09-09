@@ -4,8 +4,8 @@
 steps:
   - task: Cache@2
     inputs:
-      key: '3-3-1 | esp331ToolsKey'
-      restoreKeys: esp331ToolchainKey
+      key: '3-3-5V3 | esp335ToolsKey'
+      restoreKeys: esp335ToolchainKey
       path: $(Agent.TempDirectory)\ESP32_Tools
       cacheHitVar: ESP_TOOLS_CACHE_RESTORED
     displayName: Cache ESP32 tools
@@ -40,6 +40,22 @@ steps:
       destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs'
       cleanDestinationFolder: false
   
+  - task: ExtractFiles@1
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Installing ESP32 pre-compiled libs BLE
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs_BLE.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs_BLE'
+      cleanDestinationFolder: false
+
+  - task: ExtractFiles@1
+    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
+    displayName: Installing ESP32 pre-compiled libs V3
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\esp-idf-libs_V3.zip' 
+      destinationFolder: '$(Agent.TempDirectory)\ESP32_Tools\libs_V3'
+      cleanDestinationFolder: false
+
   - task: PowerShell@2
     displayName: Downloading & install ESP32 IDF
     inputs:
