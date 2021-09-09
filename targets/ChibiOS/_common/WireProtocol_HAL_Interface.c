@@ -32,8 +32,8 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
         *ptr += read;
         *size -= read;
-        //Warning: Uncommenting the following line will output trace on every loop
-        //TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
+        // Warning: Uncommenting the following line will output trace on every loop
+        // TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
     }
 }
 #elif (HAL_USE_SERIAL == TRUE)
@@ -49,9 +49,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     {
         // non blocking read from serial port with 100ms timeout
         size_t read = chnReadTimeout(&SERIAL_DRIVER, *ptr, requestedSize, TIME_MS2I(100));
-        
-        //Warning: Uncommenting the following line will output trace on every loop
-        //TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
+
+        // Warning: Uncommenting the following line will output trace on every loop
+        // TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, read);
 
         *ptr += read;
         *size -= read;
@@ -70,8 +70,8 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t writeResult;
     bool operationResult = false;
 
-    TRACE_WP_HEADER(WP_TXMSG, message); 
-	
+    TRACE_WP_HEADER(WP_TXMSG, message);
+
     // write header to output stream
     writeResult = chnWriteTimeout(&SDU1, (const uint8_t *)&message->m_header, sizeof(message->m_header), TIME_MS2I(10));
 

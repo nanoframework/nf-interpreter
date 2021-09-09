@@ -39,7 +39,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint32_t writeResult;
     bool operationResult = false;
 
-    TRACE_WP_HEADER(WP_TXMSG,message);
+    TRACE_WP_HEADER(WP_TXMSG, message);
 
     // write header to uart
     UART2_writeTimeout(
