@@ -24,10 +24,6 @@ static WP_Message _inboundMessage;
 volatile uint8_t _rxStatePrev;
 #endif
 
-#ifdef DEBUG
-volatile uint8_t _rxStatePrev;
-#endif
-
 // timeout to receive WP payload before bailing out
 // 5 secs (100 nsecs units)
 static const uint64_t c_PayloadTimeout = 5 * TIME_CONVERSION__TO_SYSTICKS;
