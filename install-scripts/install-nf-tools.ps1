@@ -23,7 +23,7 @@ if ($force) {
     $commandArgs += " -force"
 }
 
-# need to pass the 'force' switch?
+# need to pass the 'COMPort' parameter?
 if ($COMPort) {
     $commandArgs += " -COMPort '$COMPort'"
 }
