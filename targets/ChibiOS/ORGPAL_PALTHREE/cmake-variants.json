@@ -30,7 +30,7 @@
            "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
-          "RTOS": "CHIBIOS",
+          "RTOS": "ChibiOS",
           "TARGET_SERIES": "STM32F7xx",
           "RTOS_SOURCE_FOLDER": "",
           "TARGET_BOARD": "ORGPAL_PALTHREE",
