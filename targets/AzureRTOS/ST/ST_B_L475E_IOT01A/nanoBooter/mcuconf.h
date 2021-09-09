@@ -28,6 +28,8 @@
  * 0...3        Lowest...Highest.
  */
 
+// clang-format on
+
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
@@ -122,7 +124,7 @@
 #define STM32_IRQ_TIM8_UP_PRIORITY          7
 #define STM32_IRQ_TIM8_CC_PRIORITY          7
 
-#define STM32_IRQ_USART1_PRIORITY           12
+#define STM32_IRQ_USART1_PRIORITY           3
 #define STM32_IRQ_USART2_PRIORITY           12
 #define STM32_IRQ_USART3_PRIORITY           12
 #define STM32_IRQ_UART4_PRIORITY            12
@@ -348,3 +350,5 @@
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 1
 
 #endif /* MCUCONF_H */
+
+// clang-format on
