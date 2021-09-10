@@ -118,7 +118,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         }
 
         UBaseType_t uxItemsWaiting;
-        vRingbufferGetInfo(ringbufHandle, NULL, NULL, NULL, &uxItemsWaiting);
+        vRingbufferGetInfo(ringbufHandle, NULL, NULL, NULL, NULL, &uxItemsWaiting);
 
         stack.SetResult_I4(uxItemsWaiting);
     }

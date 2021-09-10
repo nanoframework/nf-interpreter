@@ -8,7 +8,7 @@
 
 #include <target_board.h>
 // #include <lwipopts.h>
-#include <esp32_os.h>
+#include "esp32_idf.h"
 
 // global mutex protecting the internal state of the interpreter, including event flags
 extern portMUX_TYPE globalLockMutex;

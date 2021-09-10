@@ -5,9 +5,7 @@
 //
 
 #include "nanoFramework_hardware_esp32_native.h"
-
-#include <esp32_os.h>
-#include "Esp32_DeviceMapping.h"
+#include <Esp32_DeviceMapping.h>
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration::
     NativeSetPinFunction___STATIC__VOID__I4__I4(CLR_RT_StackFrame &stack)

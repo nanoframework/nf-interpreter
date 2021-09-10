@@ -7,7 +7,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPAL.h>
 #include <target_platform.h>
-#include <esp32_os.h>
+#include <esp32_idf.h>
 
 uint64_t CPU_MillisecondsToTicks(uint64_t ticks);
 

@@ -299,14 +299,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
     InitTxChannel(rmt_channel_t channel, gpio_num_t gpio)
 {
-    rmt_config_t rmt_tx{
-        RMT_MODE_TX,
-        channel,
-        DEFAULT_DIVIDER,
-        gpio,
-        1,
-        {false, 38000, 50, RMT_CARRIER_LEVEL_HIGH, false, RMT_IDLE_LEVEL_LOW, true}};
-
+    // TODO check replaced code
+    rmt_config_t rmt_tx = RMT_DEFAULT_CONFIG_TX(gpio, channel);
+      
     auto err = rmt_config(&rmt_tx);
     if (err != ESP_OK)
         return err;

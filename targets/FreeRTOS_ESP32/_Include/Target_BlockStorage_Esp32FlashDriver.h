@@ -6,7 +6,7 @@
 #ifndef TARGET_ESP32FLASH_DRIVER_H
 #define TARGET_ESP32FLASH_DRIVER_H
 
-#include <esp32_os.h>
+#include "esp32_idf.h"
 #include <esp_partition.h>
 
 #include <nanoPAL_BlockStorage.h>

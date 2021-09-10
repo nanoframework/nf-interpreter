@@ -11,7 +11,7 @@
 #include "nanoCLR_Types.h"
 #include <nanoPAL.h>
 #include <target_platform.h>
-#include <esp32_os.h>
+#include <esp32_idf.h>
 
 #include "TouchInterface.h"
              

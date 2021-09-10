@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <esp32_os.h>
+#include <esp32_idf.h>
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
 

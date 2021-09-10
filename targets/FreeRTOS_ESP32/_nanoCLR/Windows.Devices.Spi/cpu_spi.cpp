@@ -38,13 +38,11 @@
 //
 //  SPI2 - The pins are not assigned so need to be assigned.
 
-#include <targetHAL.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-
-#include <esp32_os.h>
-#include "Esp32_DeviceMapping.h"
+#include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 // Max frequency over GPIO mux pins, full duplex
 #define MAX_CLOCK_FREQUENCY_GPIO_FULL 26000000
@@ -107,7 +105,7 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
         sclk_io_num : (int)clockPin, // Clock
         quadwp_io_num : -1,          // Quad Write protect
         quadhd_io_num : -1,          // Quad Hold
-        max_transfer_sz : 16384,     // max transfer size 
+        max_transfer_sz : 16384,     // max transfer size
         flags : 0,                   // SPICOMMON_BUSFLAG_* flags
         intr_flags : 0               // Interrupt flags
     };
@@ -195,8 +193,8 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
 
     uint32_t flags =
         (spiDeviceConfig.DataOrder16 == DataBitOrder_LSB) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
-    
-    flags  |= SPI_DEVICE_NO_DUMMY;
+
+    flags |= SPI_DEVICE_NO_DUMMY;
 
     // Positive Chip Select for Active
     if (spiDeviceConfig.ChipSelectActive)
@@ -350,7 +348,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         spi_transaction_t *pTrans = &pnf_pal_spi->trans;
 
         // Mainly use full duplex unless no read data
-        pTrans->flags = (readSize==0)?SPI_DEVICE_HALFDUPLEX:0;
+        pTrans->flags = (readSize == 0) ? SPI_DEVICE_HALFDUPLEX : 0;
         pTrans->cmd = 0;
         pTrans->addr = 0;
         // length - Full duplex is total length, half duplex the TX length

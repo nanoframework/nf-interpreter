@@ -6,6 +6,7 @@
 #include <nanoHAL.h>
 #include "win_dev_serial_native_target.h"
 #include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 // UART buffer size: 256 bytes
 #define UART_BUFER_SIZE 256
@@ -976,7 +977,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
 
     // Enable pattern detection for the serial device
-    uart_enable_pattern_det_intr(uart_num, watchChar, 1, 10000, 10, 10);
+    uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 10000, 10, 10);
     // Reset the pattern queue length to record at most 10 pattern positions.
     uart_pattern_queue_reset(uart_num, 10);
 

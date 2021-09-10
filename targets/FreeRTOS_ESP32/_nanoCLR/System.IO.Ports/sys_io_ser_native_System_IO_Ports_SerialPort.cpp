@@ -7,6 +7,7 @@
 #include <nanoHAL_Time.h>
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 // UART buffer size: 256 bytes
 #define UART_BUFER_SIZE 256

@@ -11,12 +11,12 @@
 //  GPIO34-39 Only input mode
 //
 
-#include <targetHAL.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
-
-#include "Esp32_DeviceMapping.h"
+#include <targetHAL.h>
+#include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 static const char *TAG = "cpu_Gpio";
 
@@ -261,7 +261,7 @@ static void gpio_isr(void *arg)
     NATIVE_INTERRUPT_START
 
     gpio_input_state *pState = (gpio_input_state *)arg;
-    ;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     // Ignore any pin changes during debounce
     if (pState->waitingDebounce)
@@ -281,7 +281,7 @@ static void gpio_isr(void *arg)
         int ticks = pdMS_TO_TICKS(pState->debounceMs);
         if (ticks == 0)
             ticks = 1;
-        xTimerChangePeriodFromISR(pState->debounceTimer, ticks, pdFALSE);
+        xTimerChangePeriodFromISR(pState->debounceTimer, ticks, &xHigherPriorityTaskWoken);
     }
     else
     {

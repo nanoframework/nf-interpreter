@@ -6,7 +6,7 @@
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
-#include <esp32_os.h>
+#include <esp32_idf.h>
 #include <esp_partition.h>
 
 #include <Target_BlockStorage_Esp32FlashDriver.h>

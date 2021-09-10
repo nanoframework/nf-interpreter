@@ -6,7 +6,7 @@
 #ifndef TARGET_HAL_POWER_H
 #define TARGET_HAL_POWER_H
 
-// #include <esp32_os.h>
+// #include <esp32_idf.h>
 // #include <nanoHAL_v2.h>
 
 #ifdef __cplusplus

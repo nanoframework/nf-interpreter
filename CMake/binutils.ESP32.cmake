@@ -126,9 +126,60 @@ macro(nf_add_platform_dependencies target)
             ${CMAKE_CURRENT_SOURCE_DIR}/${target}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${CMAKE_CURRENT_SOURCE_DIR}/Network
+            ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
-    find_package(ESP32_IDF REQUIRED)
+    add_dependencies(${target}.elf nano::NF_CoreCLR)
+
+    nf_add_lib_wireprotocol(
+        EXTRA_INCLUDES
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${ESP32_IDF_INCLUDE_DIRS}
+            ${TARGET_ESP32_IDF_INCLUDES})
+
+    add_dependencies(${target}.elf nano::WireProtocol)
+
+    
+    if(NF_FEATURE_DEBUGGER)
+
+        nf_add_lib_debugger(
+            EXTRA_INCLUDES
+                ${CMAKE_CURRENT_SOURCE_DIR}
+                ${ESP32_IDF_INCLUDE_DIRS}
+                ${TARGET_ESP32_IDF_INCLUDES})
+
+        add_dependencies(${target}.elf nano::NF_Debugger)
+
+    endif()
+
+    nf_add_lib_native_assemblies(
+        EXTRA_INCLUDES
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${ESP32_IDF_INCLUDE_DIRS}
+            ${TARGET_ESP32_IDF_INCLUDES})
+    
+    add_dependencies(${target}.elf nano::NF_NativeAssemblies)
+  
+    if(USE_NETWORKING_OPTION)
+
+        nf_add_lib_network(
+            BUILD_TARGET
+                ${target}
+            EXTRA_SOURCES 
+                ${TARGET_LWIP_SOURCES}
+                ${CHIBIOS_LWIP_SOURCES}
+            EXTRA_INCLUDES 
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
+                ${CHIBIOS_LWIP_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+            EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+
+    add_dependencies(${target}.elf nano::NF_Network)
 
     # if(USE_FILESYSTEM_OPTION)
     #     find_package(CHIBIOS_FATFS REQUIRED)
@@ -138,16 +189,6 @@ macro(nf_add_platform_dependencies target)
     # if(NF_FEATURE_USE_SPIFFS)
     #     find_package(STM32F7_CubePackage REQUIRED)
     #     find_package(SPIFFS REQUIRED)
-    # endif()
-
-endmacro()
-
-# Add ESP32 platform dependencies to a specific CMake target
-# To be called from target CMakeList.txt
-macro(NF_ADD_PLATFORM_DEPENDENCIES TARGET)
-
-    # if(USE_NETWORKING_OPTION)
-    #     add_dependencies(${NANOCLR_PROJECT_NAME}.elf NetworkLib)
     # endif()
 
 endmacro()
@@ -162,6 +203,8 @@ macro(nf_add_platform_include_directories target)
 
         ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
         ${ESP32_IDF_INCLUDE_DIRS}
+        ${NF_NativeAssemblies_INCLUDE_DIRS}
+        ${NF_CoreCLR_INCLUDE_DIRS}
     )
 
     # includes specific to nanoCRL
@@ -316,6 +359,7 @@ macro(nf_add_idf_as_library)
             ${TARGET_SERIES_SHORT}
             freertos
             esptool_py
+            fatfs
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
@@ -327,6 +371,7 @@ macro(nf_add_idf_as_library)
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
         idf::${TARGET_SERIES_SHORT}
         idf::freertos
+        idf::fatfs
         idf::spi_flash
     )
 

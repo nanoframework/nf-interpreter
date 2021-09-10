@@ -5,7 +5,7 @@
 //
 
 #include <nanoHAL.h>
-#include "esp32_os.h"
+#include "esp32_idf.h"
 #include <esp32_ethernet_options.h>
 
 //

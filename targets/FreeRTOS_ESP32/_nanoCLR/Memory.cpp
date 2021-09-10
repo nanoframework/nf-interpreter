@@ -6,6 +6,7 @@
 
 #include <nanoHAL.h>
 #include <target_platform.h>
+#include <esp32_idf.h>
 
 //
 //  Allocate Memory for Managed heap
@@ -63,7 +64,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
                 MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
             if (pManagedHeap)
             {
-                ESP_LOGI(TAG, "Managed heap allocated, spiRam size:%d max:%d", managedHeapSize, spiramMaxSize);
+                //ESP_LOGI(TAG, "Managed heap allocated, spiRam size:%d max:%d", managedHeapSize, spiramMaxSize);
             }
         }
 
@@ -73,7 +74,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
             pManagedHeap = (unsigned char *)heap_caps_malloc(managedHeapSize, MALLOC_CAP_8BIT | MALLOC_CAP_32BIT);
             if (pManagedHeap)
             {
-                ESP_LOGI(TAG, "Managed heap allocated, internal size:%d", managedHeapSize);
+                //ESP_LOGI(TAG, "Managed heap allocated, internal size:%d", managedHeapSize);
             }
             else
             {

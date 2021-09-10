@@ -6,7 +6,7 @@
 // This file includes the board specific Network Intialisation
 
 #include <nanoHAL.h>
-#include "esp32_os.h"
+#include "esp32_idf.h"
 #include "lwIP_Sockets.h"
 #include "apps/sntp.h"
 #include <target_lwip_sntp_opts.h>

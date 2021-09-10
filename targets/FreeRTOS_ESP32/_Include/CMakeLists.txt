@@ -12,4 +12,4 @@ set(TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
 
 # add header with target platform definitions
 configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
-               ${CMAKE_BINARY_DIR}/targets/FreeRTOS_ESP32/target_os.h @ONLY)
+               ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)

@@ -6,8 +6,8 @@
 
 #include "nanoFramework_hardware_esp32_ble_native.h"
 
-#include <esp32_os.h>
-#include "Esp32_DeviceMapping.h"
+#include <esp32_idf.h>
+#include <Esp32_DeviceMapping.h>
 
 
 /*

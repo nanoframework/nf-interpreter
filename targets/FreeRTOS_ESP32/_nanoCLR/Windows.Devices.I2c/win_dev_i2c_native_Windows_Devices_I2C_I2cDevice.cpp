@@ -4,10 +4,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <string.h>
 #include <targetPAL.h>
 #include "win_dev_i2c_native_target.h"
-#include "Esp32_DeviceMapping.h"
+#include <Esp32_DeviceMapping.h>
+#include <esp32_idf.h>
 
 static const char *TAG = "I2C";
 

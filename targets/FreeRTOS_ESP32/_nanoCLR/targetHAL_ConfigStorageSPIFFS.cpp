@@ -4,9 +4,8 @@
 //
 
 #include <nanoHAL.h>
-#include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-#include "esp32_os.h"
+#include <esp32_idf.h>
 #include "targetHAL_ConfigStorage.h"
 
 // SPIFFS config
@@ -47,7 +46,7 @@ void Config_Initialise()
     ret = esp_spiffs_info(SPIFFS_Partition_Label, &total, &used);
     if (ret == ESP_OK) 
     {
-        ESP_LOGI(TAG, "SPIFFS Partition size: total: %d, used: %d", total, used);
+        // ESP_LOGI(TAG, "SPIFFS Partition size: total: %d, used: %d", total, used);
     }
 }
 

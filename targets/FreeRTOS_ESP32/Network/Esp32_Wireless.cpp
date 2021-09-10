@@ -6,7 +6,7 @@
 // This file includes the board specific Ethernet Intialisation
 
 #include <nanoHAL.h>
-#include "esp32_os.h"
+#include "esp32_idf.h"
 
 extern "C"
 {
