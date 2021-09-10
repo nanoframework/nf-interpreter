@@ -12,7 +12,7 @@
 union DisplayInterfaceConfig {
     struct
     {
-        CLR_INT8 spiBus;
+        CLR_UINT8 spiBus;
         GPIO_PIN chipSelect;
         GPIO_PIN dataCommand;
         GPIO_PIN reset;
