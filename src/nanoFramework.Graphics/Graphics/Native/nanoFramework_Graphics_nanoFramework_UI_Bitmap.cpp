@@ -129,7 +129,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4
     CLR_INT32 y = pArgs[1].NumericByRef().s4;
     CLR_INT32 width = pArgs[2].NumericByRef().s4;
     CLR_INT32 height = pArgs[3].NumericByRef().s4;
-    CLR_Debug::Printf("=%d,y=%d,w=%d,h=%d",x,y,width,height);
 
     CLR_GFX_Bitmap* bitmap;
 

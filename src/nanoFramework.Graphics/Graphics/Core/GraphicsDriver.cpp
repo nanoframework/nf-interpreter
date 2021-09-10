@@ -1433,6 +1433,5 @@ void GraphicsDriver::Screen_Flush(
     if (bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor)
         return;
 
-    CLR_Debug::Printf("flushing x=%d,y=%d,w=%d,h=%d\n",x,y,width,height);
     g_DisplayDriver.BitBlt(x, y, width, height, bitmap.m_palBitmap.data);
 }

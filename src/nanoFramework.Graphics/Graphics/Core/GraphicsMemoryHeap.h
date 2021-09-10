@@ -25,6 +25,4 @@ struct GraphicsMemory
     bool GraphicsHeapLocation(CLR_UINT8 *&BaseAddress, CLR_UINT8 *&SizeInBytes);
 };
 
-HRESULT InitScreen(CLR_RT_StackFrame &stack);
-
 #endif // GRAPHICSMEMORYHEAP_H

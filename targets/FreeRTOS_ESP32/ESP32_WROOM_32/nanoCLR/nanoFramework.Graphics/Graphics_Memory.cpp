@@ -34,59 +34,15 @@ struct GraphicsMemory g_GraphicsMemory;
 static CLR_UINT8* heapStartingAddress = 0;
 static CLR_UINT8* heapEndingAddress = 0;
 
-HRESULT InitScreen(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    CLR_RT_HeapBlock *spiconfig;
-
-    //CLR_Debug::Printf("before initialize");
-    //g_GraphicsMemoryHeap.Initialize();
-    //CLR_Debug::Printf("memory allocated");
-    // Initialise Graphics after devices initialised
-    DisplayInterfaceConfig displayConfig;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    CLR_Debug::Printf("before spi config");
-    spiconfig = stack.Arg1().Dereference();
-
-    // Define SPI display configuration for Wrover
-    displayConfig.Spi.spiBus = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u4;                // Spi Bus
-    displayConfig.Spi.chipSelect = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___chipSelect].NumericByRef().u4;  // CS_1     GPIO22   CS
-    displayConfig.Spi.dataCommand = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___dataCommand].NumericByRef().u4; // D/CX_1   GPIO21   D/C
-    displayConfig.Spi.reset = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___reset].NumericByRef().u4;       // RST_1    GPIO18   RESET
-    displayConfig.Spi.backLight = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___backLight].NumericByRef().u4;    // GPIO5    Backlight
-
-    CLR_Debug::Printf("before display initialize");
-    g_DisplayInterface.Initialize(displayConfig);
-    g_DisplayDriver.Initialize();
-    CLR_Debug::Printf("driver and display initialized");
-
-    // g_TouchInterface.Initialize();
-    // g_TouchDevice.Initialize();
-
-    PalEvent_Initialize();
-    // Gesture_Initialize();
-    // Ink_Initialize();
-
-    g_DisplayDriver.Clear();
-
-    NANOCLR_NOCLEANUP();
-}
-
 bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, CLR_UINT8*& graphicsEndingAddress)
 {
     CLR_INT32 graphicsMemoryBlockSize = 2000000;
     CLR_INT32 memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM;
 
-    CLR_Debug::Printf("Memory initialization\n");
     if ( heapStartingAddress != 0)
     {
         graphicsStartingAddress = heapStartingAddress;
         graphicsEndingAddress = heapEndingAddress;
-        CLR_Debug::Printf("heapStartingAddress != 0, %d, %d\n", heapStartingAddress, heapEndingAddress);
         return true;
     }
 
@@ -115,7 +71,6 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8*& graphicsStartingAddress, C
     heapStartingAddress = graphicsStartingAddress;
     heapEndingAddress = graphicsEndingAddress;
 
-    CLR_Debug::Printf("Alloc, s=%d, e=%d, s=%d\n", heapStartingAddress, heapEndingAddress, graphicsMemoryBlockSize);
     return true;
 }
 

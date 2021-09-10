@@ -24,6 +24,13 @@ union DisplayInterfaceConfig {
         CLR_INT8 address;
         CLR_INT8 fastMode;
     } I2c;
+    struct
+    {
+        CLR_INT16 x;
+        CLR_INT16 y;
+        CLR_INT16 width;
+        CLR_INT16 height;
+    } Screen;
 };
 
 struct DisplayInterface
