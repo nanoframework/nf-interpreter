@@ -5,6 +5,7 @@
 
 include(FetchContent)
 FetchContent_GetProperties(mbedtls)
+FetchContent_GetProperties(esp32_idf)
 
 # because of issues when passing the config file as a string when using ExternalProject_Add with mbedTLS
 # we are replicating their CMakeList here. Actually this is more a simplified version...
@@ -14,13 +15,13 @@ FetchContent_GetProperties(mbedtls)
 if(RTOS_FREERTOS_ESP32_CHECK)
 
     if (BUILD_VERBOSE)
-        message("Using IDF path >> ${ESP32_IDF_PATH}")
+        message("Using IDF path >> ${esp32_idf_SOURCE_DIR}")
     endif()
 
     # List of the required include paths
-    list(APPEND mbedTLS_INCLUDE_DIRS ${ESP32_IDF_PATH}/components/mbedtls/port/include)
-    list(APPEND mbedTLS_INCLUDE_DIRS ${ESP32_IDF_PATH}/components/mbedtls/port/include/mbedtls)
-    list(APPEND mbedTLS_INCLUDE_DIRS ${ESP32_IDF_PATH}/components/mbedtls/mbedtls/include)
+    list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include)
+    list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include/mbedtls)
+    list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include)
  
 else()
 
@@ -43,7 +44,7 @@ endif(ENABLE_ZLIB_SUPPORT)
 # sources need to be added from mbedTLS repo or ESP32 depending on build
 # adjust search path here
 if(RTOS_FREERTOS_ESP32_CHECK)
-    set(MBEDTLS_PATH ${ESP32_IDF_PATH}/components/mbedtls/mbedtls/library)
+    set(MBEDTLS_PATH ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/library)
 else()
     set(MBEDTLS_PATH ${mbedtls_SOURCE_DIR}/library)
 endif()
@@ -236,7 +237,7 @@ foreach(SRC_FILE ${src_platform_specific})
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS
 
-            ${ESP32_IDF_PATH}/components/mbedtls/port
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port
             ${MBEDTLS_PATH}
 
         CMAKE_FIND_ROOT_PATH_BOTH
