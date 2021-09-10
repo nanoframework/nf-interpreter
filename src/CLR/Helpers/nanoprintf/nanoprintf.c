@@ -32,6 +32,7 @@
 */
 
 #include "nanoprintf.h"
+#include <string.h>
 
 #if NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS == 1
 #include <math.h>
@@ -558,6 +559,9 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list vlist)
     npf__format_spec_t fs = {0};
     char const *cur = format;
     int n = 0, sign = 0, i;
+
+    // inialise structure
+    memset(&fs, 0, sizeof(npf__format_spec_t));
 
     while (*cur)
     {
