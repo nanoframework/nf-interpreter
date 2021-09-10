@@ -3,14 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_storage_native_target.h"
-#include <target_windows_storage_config.h>
-#include <nanoHAL_Windows_Storage.h>
-#include <target_platform.h>
+#include "nf_sys_io_filesystem.h"
 
-#include "Esp32_DeviceMapping.h"
-
-// Defines for Windows.Storage.c
 extern "C"
 {
     bool Storage_MountMMC( bool bit1Mode);
@@ -20,46 +14,7 @@ extern "C"
     bool Storage_UnMountSDCard();
 }
 
-#if defined(HAL_USE_SDC)
-bool Storage_MountMMC( bool bit1Mode)
-{
-	char     mountPoint[] = INDEX0_DRIVE_LETTER;
-
-	// Change fatfs drive letter to mount point  D: -> /D
-	mountPoint[1] = mountPoint[0];
-	mountPoint[0] = '/';
-
-    // Try mounting
-    if (!Storage_InitSDCardMMC(mountPoint, SDC_MAX_OPEN_FILES, bit1Mode) )
-    {
-        return false;
-    }
-    return true;
-}
-
-bool Storage_MountSpi(int spiBus, uint32_t CSPin)
-{
-    char     mountPoint[] = INDEX0_DRIVE_LETTER;
-
-	// Change fatfs drive letter to mount point  D: -> /D
-	mountPoint[1] = mountPoint[0]; 
-	mountPoint[0] = '/';
-
-    int mosiPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 0);
-    int misoPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 1);
-    int clockPin = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 2);
-
-    // Try mounting
-    if ( !Storage_InitSDCardSPI(mountPoint, SDC_MAX_OPEN_FILES, misoPin, mosiPin, clockPin, CSPin) )
-    {
-        return false;
-    }  
-    return true;  
-}
-#endif
-
-
-HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNative___STATIC__VOID__BOOLEAN(CLR_RT_StackFrame& stack)
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountMMCNative___STATIC__VOID__nanoFrameworkSystemIOFileSystemSDCardSDDataWidth( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -76,7 +31,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNativ
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNative___STATIC__VOID__I4__I4(CLR_RT_StackFrame& stack)
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountSpiNative___STATIC__VOID__I4__I4( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -97,16 +52,15 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
 #else
 	(void)stack;
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-#endif
+#endif    
 
     NANOCLR_NOCLEANUP();
 }
 
-
-HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative___STATIC__VOID(CLR_RT_StackFrame& stack)
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___STATIC__VOID( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
-    (void)stack;
+   (void)stack;
 
 #if defined(HAL_USE_SDC)
 
