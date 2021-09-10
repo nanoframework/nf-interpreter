@@ -884,15 +884,18 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     endif()
 
+    add_executable(
+        # executables for project, project sources
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
+        )
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32)
-    # add TARGET board directory
-    add_subdirectory(${TARGET_BASE_LOCATION})
 
     nf_add_idf_as_library()
 
-    # this one has to go *AFTER* the call to nf_add_idf_as_library()
-    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF)
+    # add TARGET board directory
+    add_subdirectory(${TARGET_BASE_LOCATION})
 
 #######################
 # TI_SIMPLELINK
