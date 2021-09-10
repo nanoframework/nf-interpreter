@@ -32,6 +32,7 @@
           "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
           "ESP32_IDF_PATH": "<path-to-esp32-idf-mind-the-forward-slash>/esp-idf",
           "ESP32_LIBS_PATH": "<path-to-esp32-libraries-mind-the-forward-slash>/libs",
+          "ESP32_TARGET_VARIANT": "<ESP32-target-variant-to-build>",
           "TARGET_BOARD": "<valid-board-name-from-platform-boards-collection>",
           "EXECUTABLE_OUTPUT_PATH": "${workspaceRoot}/build",
           "TARGET_SERIES": "<series-name-of-the-target-chip-STM32F0xx-STM32F4xx-STM32F7xx-ESP32-CC32xx>",
