@@ -21,7 +21,7 @@ uint32_t transmittedBytes;
 
 void UART_RxCallback(mxc_uart_req_t *req, int error)
 {
-    if(error == E_SUCCESS)
+    if (error == E_SUCCESS)
     {
         receivedBytes = req->rxCnt;
 
@@ -32,7 +32,7 @@ void UART_RxCallback(mxc_uart_req_t *req, int error)
 
 void UART_TxCallback(mxc_uart_req_t *req, int error)
 {
-    if(error == E_SUCCESS)
+    if (error == E_SUCCESS)
     {
         transmittedBytes = req->txCnt;
 
@@ -68,14 +68,14 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         if (NanoUART_TransactionAsync(&rxRequest) == E_NO_ERROR)
         {
             // wait for event
-            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 20 );
+            waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 20);
         }
         else
         {
             goto abort_rx;
         }
 
-        if(waitResult != TX_SUCCESS)
+        if (waitResult != TX_SUCCESS)
         {
             goto abort_rx;
         }
@@ -83,7 +83,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         *ptr += receivedBytes;
         *size -= receivedBytes;
 
-        TRACE(TRACE_STATE, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
+        // Warning: Includeing TRACE_VERBOSE will NOT output the following TRACE on every loop
+        //          of the statemachine to avoid flooding the trace.
+        TRACE_LIMIT(TRACE_VERBOSE, 100, "RXMSG: Expecting %d bytes, received %d.\n", requestedSize, receivedBytes);
     }
 
     return;
@@ -102,15 +104,10 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     uint8_t waitResult;
     uint32_t dummy;
 
-    TRACE(
-        TRACE_HEADERS,
-        "TXMSG: 0x%08X, 0x%08X, 0x%08X\n",
-        message->m_header.m_cmd,
-        message->m_header.m_flags,
-        message->m_header.m_size);
+    TRACE_WP_HEADER(WP_TXMSG, message);
 
     NanoUART_InitRequest(&txRequest);
-    
+
     // setup transmit request
     txRequest.uart = MXC_UART_GET_UART(WIRE_PROTOCOL_UART);
     txRequest.callback = UART_TxCallback;
@@ -131,8 +128,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     // wait for event
     waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 15);
 
-    if(waitResult != TX_SUCCESS ||
-       transmittedBytes != txRequest.txLen)
+    if (waitResult != TX_SUCCESS || transmittedBytes != txRequest.txLen)
     {
         goto abort_tx;
     }
@@ -160,12 +156,11 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         waitResult = tx_event_flags_get(&wpUartEvent, WP_UART_RX_EVENT_FLAG, TX_OR_CLEAR, &dummy, 60);
     }
 
-    if(waitResult != TX_SUCCESS||
-       transmittedBytes != txRequest.txLen)
+    if (waitResult != TX_SUCCESS || transmittedBytes != txRequest.txLen)
     {
         goto abort_tx;
     }
-    
+
     return true;
 
 abort_tx:

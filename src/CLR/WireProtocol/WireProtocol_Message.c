@@ -22,7 +22,7 @@ static WP_Message _inboundMessage;
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
-uint32_t traceLoopCounter = 0;
+int32_t traceLoopCounter = 0;
 #endif
 
 #ifdef DEBUG

@@ -262,7 +262,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     
 endforeach()
 
-
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NF_CoreCLR DEFAULT_MSG NF_CoreCLR_INCLUDE_DIRS NF_CoreCLR_SOURCES)
