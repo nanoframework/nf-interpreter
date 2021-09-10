@@ -318,6 +318,8 @@ macro(nf_add_idf_as_library)
             esptool_py
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
+        SDKCONFIG_DEFAULTS
+            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig.default
         BUILD_DIR ${CMAKE_BINARY_DIR}
     )
 
