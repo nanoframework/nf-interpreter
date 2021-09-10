@@ -5,43 +5,33 @@
 
 include(CMakeForceCompiler)
 
-# set toolchain directories
-set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
-# set(TOOLCHAIN_INC_DIR ${ESP32_IDF_PATH}/components/newlib/include)
-
 # the name of the operating system for which CMake is to build
 set(CMAKE_SYSTEM_NAME Generic)
 
-# name of the CPU CMake is building for
-set(CMAKE_SYSTEM_PROCESSOR xtensa-esp32)
-
 # macro to setup compilers
-macro(SET_COMPILER_VAR var name)
-   find_program(CMAKE_${var} xtensa-esp32-elf-${name} HINTS ${TOOLCHAIN_BIN_DIR} DOC "${name} tool")
+macro(nf_set_compiler_var var name)
+   find_program(CMAKE_${var} xtensa-esp32-elf-${name})
 endmacro()
 
+# safer to have these here as a check if the toolchain are accessible in the PATH
+
 # setup C compiler
-if(NOT CMAKE_C_COMPILER)
-    SET_COMPILER_VAR(C_COMPILER gcc)    
-endif()
-SET_COMPILER_VAR(C_COMPILER gcc)
+nf_set_compiler_var(C_COMPILER gcc)    
 
 # setup C++ compiler
-if(NOT CMAKE_CXX_COMPILER)
-    SET_COMPILER_VAR(CXX_COMPILER g++)    
-endif()
+nf_set_compiler_var(CXX_COMPILER g++)    
 
 # setup Assembler compiler
-if(NOT CMAKE_ASM_COMPILER)
-    SET_COMPILER_VAR(ASM_COMPILER gcc)
-    SET_COMPILER_VAR(ASM-ATT_COMPILER as)    
-endif()
- 
+nf_set_compiler_var(ASM_COMPILER gcc)
+
 # other toolchain configurations  
-set(CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-objcopy CACHE INTERNAL "objcopy tool")
-set(CMAKE_OBJDUMP ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-objdump CACHE INTERNAL "objdump tool")
-set(CMAKE_SIZE ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-size CACHE INTERNAL "size tool")
-set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gdb CACHE INTERNAL "debuger")
+find_program(CMAKE_OBJCOPY xtensa-esp32-elf-objcopy CACHE INTERNAL "objcopy tool")
+find_program(CMAKE_OBJDUMP xtensa-esp32-elf-objdump CACHE INTERNAL "objdump tool")
+find_program(CMAKE_SIZE xtensa-esp32-elf-size CACHE INTERNAL "size tool")
+
+# TODO check this (move to GCC options?)
+set(CMAKE_C_FLAGS "-mlongcalls -Wno-frame-address" CACHE STRING "C Compiler Base Flags")
+set(CMAKE_CXX_FLAGS "-mlongcalls -Wno-frame-address" CACHE STRING "C++ Compiler Base Flags")
 
 # set(GCC_ESP32_LINKER_FLAGS, " -nostdlib -u call_user_start_cpu0  -Wl,--gc-sections -Wl,-static -Wl,--start-group -Wl,--print-memory-usage " CACHE INTERNAL "Gcc esp32 liker flags" )
 # set(GCC_ESP32_LINKER_LIBS, " ${ESP32_IDF_PATH}/components/newlib/lib/libc.a ${ESP32_IDF_PATH}/components/newlib/lib/libm.a ${ESP32_IDF_PATH}/components/esp32/libhal.a -L${ESP32_IDF_PATH}/components/esp32/lib -lcore -lrtc -lnet80211 -lmesh -lpp -lwpa -lsmartconfig -lcoexist -lwps -lwpa2 -lphy -lgcc -lstdc++ "  CACHE INTERNAL "Gcc esp32 liker libs")
@@ -74,7 +64,7 @@ set(CMAKE_DEBUGER ${TOOLCHAIN_BIN_DIR}/xtensa-esp32-elf-gdb CACHE INTERNAL "debu
 # set( CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_CXX_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 
 # root paths to search on the filesystem for cross-compiling
-set(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_PREFIX}/xtensa-esp32-elf ${EXTRA_FIND_PATH})
+get_filename_component(CMAKE_FIND_ROOT_PATH ${CMAKE_C_COMPILER} DIRECTORY CACHE)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
