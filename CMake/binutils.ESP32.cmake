@@ -156,16 +156,13 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_platform_include_directories target)
 
-    target_include_directories(${target}.elf PUBLIC
+    FetchContent_GetProperties(esp32_idf)
 
     target_include_directories(${target}.elf PUBLIC
 
-        # directories for nanoFramework libraries
-        ${NF_CoreCLR_INCLUDE_DIRS}
-        ${NF_Debugger_INCLUDE_DIRS}
-        ${NF_Diagnostics_INCLUDE_DIRS}
-        
-        ${NF_Network_INCLUDE_DIRS}
+        ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
+        ${ESP32_IDF_INCLUDE_DIRS}
+    )
 
     # includes specific to nanoCRL
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
