@@ -41,12 +41,12 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
 
         // Get channel from argument
-        int channel = stack.Arg1().NumericByRef().s4;
+        int channelNumber = stack.Arg1().NumericByRef().s4;
 
-        if ( channel < ADC_CHANNEL_0 || channel > 19 ) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        if ( channelNumber < ADC_CHANNEL_0 || channelNumber > 19 ) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
         // Get ADC device number from channel
-        int adcUnit = channel <= 9 ? 1 : 2;
+        int adcUnit = channelNumber <= 9 ? 1 : 2;
 
         adc_power_acquire();         // Make sure powered on
 
@@ -54,11 +54,11 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         {
             case 1:
                 // Normal channel 0-7 ?
-                if ( channel <= 7 )
+                if ( channelNumber <= 7 )
                 {
                     adc1_config_width( width_bit );
 
-                    result =  adc1_config_channel_atten( (adc1_channel_t)channel, atten);
+                    result =  adc1_config_channel_atten( (adc1_channel_t)channelNumber, atten);
                     if ( result != ESP_OK )
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
@@ -67,7 +67,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
                 break;
 
             case 2:
-                result = adc2_config_channel_atten( (adc2_channel_t)channel, atten );
+                channelNumber -= 10; // Adjust for ADC2
+                result = adc2_config_channel_atten( (adc2_channel_t)channelNumber, atten );
                 if ( result != ESP_OK )
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);

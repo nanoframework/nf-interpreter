@@ -108,6 +108,12 @@ esp_err_t Esp32_InitaliseWifi()
         }
     }
 
+    // Don't init if Wifi Mode null (Disabled)
+    if ( wifi_mode == WIFI_MODE_NULL)
+    {
+        return ESP_FAIL;
+    }
+
     if (!WifiInitialised)
     {
         // Init WiFi Alloc resource for WiFi driver, such as WiFi control structure,
