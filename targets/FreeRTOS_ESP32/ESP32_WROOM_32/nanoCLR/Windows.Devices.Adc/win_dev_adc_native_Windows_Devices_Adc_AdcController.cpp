@@ -75,7 +75,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
                 // Adjust for ADC2
                 channelNumber -= 10;
                 result = adc2_config_channel_atten((adc2_channel_t)channelNumber, atten);
-                
+
                 if (result != ESP_OK)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
