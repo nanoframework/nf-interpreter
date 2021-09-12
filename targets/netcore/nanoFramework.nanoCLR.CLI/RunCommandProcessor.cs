@@ -93,7 +93,7 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.DebugTcpIpPort != null)
             {
-                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpHost ?? TcpIpListeningPort.Localhost,  options.DebugTcpIpPort.Value, options.DebugBroadcastPort ?? NetworkWireDiscoveryService.DebugBroadcastPort);
+                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpHost ?? TcpIpListeningPort.Localhost,  options.DebugTcpIpPort.Value, options.DebugBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
             }
 
             if (options.DebugNamedPipe != null)

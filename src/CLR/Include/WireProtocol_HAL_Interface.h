@@ -14,7 +14,7 @@ extern "C"
 #endif
 
     //////////////////////////////////////////
-    
+
     ///
     /// @brief Receives n bytes from the Wire Protocol channel.
     ///
@@ -22,7 +22,7 @@ extern "C"
     /// @param size Number of bytes to read. On return it will have the number of bytes actually received.
     ///
     void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size);
-    
+
     ///
     /// @brief Sends a message through the Wire Protocol channel.
     ///
@@ -30,7 +30,7 @@ extern "C"
     /// @return bool true for transmition succesfull, false otherwise.
     ///
     uint8_t WP_TransmitMessage(WP_Message *message);
-    
+
     void WP_CheckAvailableIncomingData();
 
 #if defined(__cplusplus)

@@ -26,7 +26,7 @@ namespace nanoFramework.nanoCLR.Host.Port
 
         public PortStatus Status { get; private set; }
 
-        public int BytesAvailable => _transmitBuffer.Count;
+        public int BytesAvailable => _syncRoot.Sync(() => _transmitBuffer.Count);
 
         public byte[] ReceiveData()
         {

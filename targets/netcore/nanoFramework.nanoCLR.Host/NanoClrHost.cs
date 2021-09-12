@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using nanoFramework.nanoCLR.Host.Interop;
 using nanoFramework.nanoCLR.Host.Port;
 
 namespace nanoFramework.nanoCLR.Host

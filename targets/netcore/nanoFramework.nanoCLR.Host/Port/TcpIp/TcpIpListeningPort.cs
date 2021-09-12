@@ -16,7 +16,7 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
         private readonly string _hostAddress;
         private readonly int _port;
         private readonly TcpListener _server;
-        private readonly NetworkWireDiscoveryService _discoveryService;
+        private readonly NetworkWireBroadcastService _broadcastService;
 
         public TcpIpListeningPort(string hostAddress, int port, int? broadcastPort)
         {
@@ -24,18 +24,18 @@ namespace nanoFramework.nanoCLR.Host.Port.TcpIp
             _port = port;
             _server = new TcpListener(IPAddress.Parse(hostAddress), port);
             if (broadcastPort != null)
-                _discoveryService = new NetworkWireDiscoveryService(broadcastPort.Value);
+                _broadcastService = new NetworkWireBroadcastService(broadcastPort.Value);
         }
 
         protected override void OpenListener()
         {
             _server.Start();
-            _discoveryService?.NotifyListenerStart(_hostAddress, _port);
+            _broadcastService?.NotifyListenerStart(_hostAddress, _port);
         }
 
         protected override void CloseListener()
         {
-            _discoveryService?.NotifyListenerStop(_hostAddress, _port);
+            _broadcastService?.NotifyListenerStop(_hostAddress, _port);
             _server.Stop();
         }
 
