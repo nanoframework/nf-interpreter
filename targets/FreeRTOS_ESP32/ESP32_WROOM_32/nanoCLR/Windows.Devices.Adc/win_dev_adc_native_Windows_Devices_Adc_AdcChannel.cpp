@@ -42,13 +42,19 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         }
         else if (adcNumber == 2)
         {
-            channelNumber -= 10; // Adjust channel number for ADC2
+            // Adjust channel number for ADC2
+            channelNumber -= 10;
             result = adc2_get_raw((adc2_channel_t)channelNumber, ADC_WIDTH_12Bit, &reading);
+
             if (result != ESP_OK)
+            {
                 NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
         }
         else
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         stack.SetResult_I4(reading);
     }
