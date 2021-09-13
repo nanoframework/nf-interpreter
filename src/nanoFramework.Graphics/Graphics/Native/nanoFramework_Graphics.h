@@ -821,6 +821,17 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration
 
 };
 
+struct Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration
+{
+    static const int FIELD___x = 1;
+    static const int FIELD___y = 2;
+    static const int FIELD___width = 3;
+    static const int FIELD___height = 4;
+
+    //--//
+
+};
+
 struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
 {
     static const int FIELD___i2cBus = 1;
@@ -834,7 +845,7 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
     static const int FIELD_STATIC___fullScreen = 20;
-  
+
     NANOCLR_NATIVE_DECLARE(get_LongerSide___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_ShorterSide___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_ScreenWidth___STATIC__I4);
@@ -842,8 +853,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
-    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__U4__U1__I4__I4__I4__I4__U2__U2__U2__U2__U4);
-    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__U4__U1__U1__BOOLEAN__U2__U2__U2__U2__U4);
+    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
+    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4);
 
     //--//
 
