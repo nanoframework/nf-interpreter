@@ -93,18 +93,20 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     displayConfig.Screen.height = stack.ArgN(8).NumericByRef().u2;
     CLR_Debug::Printf("spibus=%d,cs=%d,dc=%d,rst=%d,bl=%d\n", displayConfig.Spi.spiBus, displayConfig.Spi.chipSelect, displayConfig.Spi.dataCommand, displayConfig.Spi.reset, displayConfig.Spi.backLight);
     CLR_Debug::Printf("x=%d,y=%d,w=%d,h=%d\n", displayConfig.Screen.x,displayConfig.Screen.y, displayConfig.Screen.width, displayConfig.Screen.height);
-    
-    //TODO: uncomment when arg problem will be fixed
-    //g_DisplayInterface.Initialize(displayConfig);    
-    //g_DisplayDriver.Initialize();
 
+    g_DisplayInterface.Initialize(displayConfig);    
+    g_DisplayDriver.Initialize();
+
+    // TODO for touch
     // g_TouchInterface.Initialize();
     // g_TouchDevice.Initialize();
 
     PalEvent_Initialize();
-        
+    
+    // TODO for touch
     // Gesture_Initialize();
     // Ink_Initialize();
+
     g_DisplayDriver.SetDefaultOrientation();
     g_DisplayDriver.Clear();
     

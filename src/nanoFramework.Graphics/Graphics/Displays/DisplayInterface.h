@@ -9,27 +9,29 @@
 #include "nanoCLR_Types.h"
 
 // Display configuration
-union DisplayInterfaceConfig {
+struct DisplayInterfaceConfig {
+    union {
+        struct
+        {
+            CLR_UINT8 spiBus;
+            CLR_INT32 chipSelect;
+            CLR_INT32 dataCommand;
+            CLR_INT32 reset;
+            CLR_INT32 backLight;
+        } Spi;
+        struct
+        {
+            CLR_INT8 i2cBus;
+            CLR_INT8 address;
+            CLR_INT8 fastMode;
+        } I2c;
+    };
     struct
     {
-        CLR_UINT8 spiBus;
-        GPIO_PIN chipSelect;
-        GPIO_PIN dataCommand;
-        GPIO_PIN reset;
-        GPIO_PIN backLight;
-    } Spi;
-    struct
-    {
-        CLR_INT8 i2cBus;
-        CLR_INT8 address;
-        CLR_INT8 fastMode;
-    } I2c;
-    struct
-    {
-        CLR_INT16 x;
-        CLR_INT16 y;
-        CLR_INT16 width;
-        CLR_INT16 height;
+        CLR_UINT16 x;
+        CLR_UINT16 y;
+        CLR_UINT16 width;
+        CLR_UINT16 height;
     } Screen;
 };
 
