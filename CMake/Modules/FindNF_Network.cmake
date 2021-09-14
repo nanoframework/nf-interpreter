@@ -88,6 +88,7 @@ foreach(SRC_FILE ${NF_Network_SRCS})
             ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             ${CMAKE_SOURCE_DIR}/src/PAL/Lwip
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_common
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_Network
 
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
  

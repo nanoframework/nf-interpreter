@@ -6,17 +6,12 @@
 // This file includes the board specific Ethernet Intialisation
 
 #include <nanoHAL.h>
-#include "esp32_idf.h"
-#include "eth_phy/phy_lan8720.h"
-#include "soc/emac_reg_v2.h"
 #include <esp32_ethernet_options.h>
 
-extern "C"
-{
-#include "lwip/netif.h"
-}
-
 extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
+
+esp_eth_handle_t eth_handle = NULL;
+
 
 //
 // Olimex ESP32-EVB Rev B, OLimex ESP32-Gateway, Generic Lan8270
@@ -37,7 +32,7 @@ extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 //#define ESP32_CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
 
 #ifdef CONFIG_PHY_LAN8720
-#include "eth_phy/phy_lan8720.h"
+// #include "eth_phy/phy_lan8720.h"
 #define DEFAULT_ETHERNET_PHY_CONFIG phy_lan8720_default_ethernet_config
 #endif
 
@@ -48,20 +43,6 @@ extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 
 #define PIN_SMI_MDC  CONFIG_PHY_SMI_MDC_PIN
 #define PIN_SMI_MDIO CONFIG_PHY_SMI_MDIO_PIN
-
-static void eth_gpio_config_rmii(void)
-{
-    // RMII data pins are fixed:
-    // TXD0 = GPIO19
-    // TXD1 = GPIO22
-    // TX_EN = GPIO21
-    // RXD0 = GPIO25
-    // RXD1 = GPIO26
-    // CLK == GPIO0
-    phy_rmii_configure_data_interface_pins();
-    // MDC is GPIO 23, MDIO is GPIO 18
-    phy_rmii_smi_configure_pins(PIN_SMI_MDC, PIN_SMI_MDIO);
-}
 
 #ifdef ESP32_CONFIG_PIN_PHY_POWER
 static void phy_device_power_enable_via_gpio(bool enable)
@@ -86,28 +67,40 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
     (void)pMacAdr;
 
 #ifdef ESP32_ETHERNET_SUPPORT
-    // Config Ethernet interface which will depend on current hardware
-    eth_config_t config = DEFAULT_ETHERNET_PHY_CONFIG;
-    /* Set the PHY address in the example configuration */
-    config.phy_addr = PHY0;
-    config.gpio_config = eth_gpio_config_rmii;
-    config.tcpip_input = tcpip_adapter_eth_input;
-    config.clock_mode = ESP32_CONFIG_PHY_CLOCK_MODE;
-#endif
+    
+    esp_netif_config_t cfg = ESP_NETIF_DEFAULT_ETH();
+    esp_netif_t *eth_netif = esp_netif_new(&cfg);
+    // Set default handlers to process TCP/IP stuffs
+    ESP_ERROR_CHECK(esp_eth_set_default_handlers(eth_netif));
+
+    // now MAC and PHY configs
+    eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
+
+    eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
+    phy_config.phy_addr = CONFIG_EXAMPLE_ETH_PHY_ADDR;
+    phy_config.reset_gpio_num = CONFIG_EXAMPLE_ETH_PHY_RST_GPIO;
 
 #ifdef ESP32_CONFIG_PIN_PHY_POWER
-    config.phy_power_enable = phy_device_power_enable_via_gpio;
+    phy_config.phy_power_enable = phy_device_power_enable_via_gpio;
 #endif
 
-#ifdef ESP32_ETHERNET_SUPPORT
-    esp_err_t ret = esp_eth_init(&config);
-    if (ret != ESP_OK)
-    {
-        return ret;
-    }
+    mac_config.smi_mdc_gpio_num = CONFIG_EXAMPLE_ETH_MDC_GPIO;
+    mac_config.smi_mdio_gpio_num = CONFIG_EXAMPLE_ETH_MDIO_GPIO;
+    
+    esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&mac_config);
 
-    // esp_eth_set_mac( pMacAdr );  // need later IDF
-    esp_eth_enable();
+    esp_eth_phy_t *phy = esp_eth_phy_new_lan8720(&phy_config);
+
+    // now the ETH config
+    esp_eth_config_t config = ETH_DEFAULT_CONFIG(mac, phy);
+
+    ESP_ERROR_CHECK(esp_eth_driver_install(&config, &eth_handle));
+
+    // attach Ethernet driver to TCP/IP stack
+    ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
+    // start Ethernet driver state machine
+    ESP_ERROR_CHECK(esp_eth_start(eth_handle));
+
 #endif
 
     return ESP_OK;
@@ -135,8 +128,13 @@ int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
             if (pNetIf != NULL)
                 break;
         }
+
         if (pNetIf != NULL)
-            return pNetIf->num;
+        {
+            // TODO
+            // return pNetIf->num;
+            return 0;
+        }
     }
 
     return SOCK_SOCKET_ERROR;
@@ -145,5 +143,5 @@ int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
 bool Esp32_Ethernet_Close(int index)
 {
     (void)index;
-    return esp_eth_disable() == ESP_OK;
+    return esp_eth_stop(eth_handle) == ESP_OK;
 }

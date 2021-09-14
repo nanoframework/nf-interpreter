@@ -5,7 +5,6 @@
 //
 
 #include <nanoHAL.h>
-#include "esp32_idf.h"
 #include <esp32_ethernet_options.h>
 
 //
@@ -37,118 +36,145 @@ bool Network_Interface_Bind(int index)
     return true;
 }
 
-int Network_Interface_Open(int configIndex)
+int Network_Interface_Open(int index)
 {
-    HAL_Configuration_NetworkInterface *pConfig;
-
-    // Check index in range
-    if (g_TargetConfiguration.NetworkInterfaceConfigs->Count <= configIndex)
-        return SOCK_SOCKET_ERROR;
+    HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    pConfig = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
 
-    switch ((tcpip_adapter_if_t)configIndex)
+    switch (networkConfiguration.InterfaceType)
     {
         // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            return Esp32_Wireless_Open(configIndex, pConfig);
+        case NetworkInterfaceType_Wireless80211:
+            return Esp32_Wireless_Open(index, &networkConfiguration);
 
-            // Soft AP
-        case TCPIP_ADAPTER_IF_AP:
-            return Esp32_WirelessAP_Open(configIndex, pConfig);
+        // Soft AP
+        case NetworkInterfaceType_WirelessAP:
+            return Esp32_WirelessAP_Open(index, &networkConfiguration);
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
-        case TCPIP_ADAPTER_IF_ETH:
-            return Esp32_Ethernet_Open(configIndex, pConfig);
+        case NetworkInterfaceType_Ethernet:
+            return Esp32_Ethernet_Open(index, &networkConfiguration);
 #endif
-        default:
-            break;
+
     }
+
     return SOCK_SOCKET_ERROR;
 }
 
-bool Network_Interface_Close(int configIndex)
+bool Network_Interface_Close(int index)
 {
-    switch ((tcpip_adapter_if_t)configIndex)
+    HAL_Configuration_NetworkInterface networkConfiguration;
+
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
+
+    switch (networkConfiguration.InterfaceType)
     {
         // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            return Esp32_Wireless_Close(configIndex);
+        case NetworkInterfaceType_Wireless80211:
+            return Esp32_Wireless_Close(index);
 
         // Soft AP
-        case TCPIP_ADAPTER_IF_AP:
-            return Esp32_WirelessAP_Close(configIndex);
+        case NetworkInterfaceType_WirelessAP:
+            return Esp32_WirelessAP_Close(index);
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
-        case TCPIP_ADAPTER_IF_ETH:
-            return Esp32_Ethernet_Close(configIndex);
+        case NetworkInterfaceType_Ethernet:
+            return Esp32_Ethernet_Close(index);
 #endif
-        default:
-            break;
-    }
-    return false;
-}
 
-bool Network_Interface_Start_Scan(int configIndex)
-{
-    switch ((tcpip_adapter_if_t)configIndex)
-    {
-        // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            return (Esp32_Wireless_Scan() == 0);
     }
 
     return false;
 }
 
-bool GetWirelessConfig(int configIndex, HAL_Configuration_Wireless80211 **pWireless)
+bool Network_Interface_Start_Scan(int index)
 {
-    HAL_Configuration_NetworkInterface *pConfig;
-
-    // Check index in range
-    if (g_TargetConfiguration.NetworkInterfaceConfigs->Count <= configIndex)
-        return false;
+    HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    pConfig = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
-    if (pConfig->InterfaceType != NetworkInterfaceType_Wireless80211)
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
+
+    // can only do this is this is STA
+    if(networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
+    {
+        return (Esp32_Wireless_Scan() == 0);
+    }
+
+    return false;
+}
+
+bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **pWireless)
+{
+    HAL_Configuration_NetworkInterface *networkConfiguration;
+
+    // Check index in range
+    if (g_TargetConfiguration.NetworkInterfaceConfigs->Count <= index)
+    {
         return false;
+    }
 
-    *pWireless = ConfigurationManager_GetWirelessConfigurationFromId(pConfig->SpecificConfigId);
+    // load network interface configuration from storage
+    networkConfiguration = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
 
-    return true;
+    // can only do this is this is STA
+    if (networkConfiguration->InterfaceType != NetworkInterfaceType_Wireless80211)
+    {
+        *pWireless = ConfigurationManager_GetWirelessConfigurationFromId(networkConfiguration->SpecificConfigId);
+        return true;
+    }
+
+    return false;
 }
 
 //
 //  Connect to wireless network SSID using passphase
 //
-int Network_Interface_Start_Connect(int configIndex, const char *ssid, const char *passphase, int options)
+int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options)
 {
     HAL_Configuration_Wireless80211 *pWireless;
 
-    if (GetWirelessConfig(configIndex, &pWireless) == false)
+    if (GetWirelessConfig(index, &pWireless) == false)
+    {
         return SOCK_SOCKET_ERROR;
+    }
 
     pWireless->Options = Wireless80211Configuration_ConfigurationOptions_Enable;
 
     if (options & NETWORK_CONNECT_RECONNECT)
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '|='
-        pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
-            pWireless->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+        pWireless->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '^='
-        pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
-            pWireless->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+        pWireless->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
 
         // Make sure we are still enabled because AutoConnect includes Enable
-        pWireless->Options = (Wireless80211Configuration_ConfigurationOptions)(
-            pWireless->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
+        pWireless->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
     }
 
     // Update Wireless structure with new SSID and passphase
@@ -160,45 +186,54 @@ int Network_Interface_Start_Connect(int configIndex, const char *ssid, const cha
     {
         StoreConfigBlock(
             DeviceConfigurationOption_Wireless80211Network,
-            configIndex,
+            index,
             pWireless,
             sizeof(HAL_Configuration_Wireless80211));
     }
 
-    switch ((tcpip_adapter_if_t)configIndex)
-    {
-        // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            Esp32_ConnectInProgress = true;
-            esp_err_t err = Esp32_Wireless_Start_Connect(pWireless);
+    Esp32_ConnectInProgress = true;
+    esp_err_t err = Esp32_Wireless_Start_Connect(pWireless);
 
-            return (int)err;
+    return (int)err;
+}
+
+int Network_Interface_Connect_Result(int index)
+{
+    HAL_Configuration_NetworkInterface networkConfiguration;
+
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    {
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
+    }
+
+    if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
+    {
+        return Esp32_ConnectInProgress ? -1 : Esp32_ConnectResult;
     }
 
     return SOCK_SOCKET_ERROR;
 }
 
-int Network_Interface_Connect_Result(int configIndex)
+int Network_Interface_Disconnect(int index)
 {
-    switch ((tcpip_adapter_if_t)configIndex)
+    HAL_Configuration_NetworkInterface networkConfiguration;
+
+    // load network interface configuration from storage
+    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
     {
-        // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            return Esp32_ConnectInProgress ? -1 : Esp32_ConnectResult;
+        // failed to load configuration
+        // FIXME output error?
+        return SOCK_SOCKET_ERROR;
     }
 
-    return SOCK_SOCKET_ERROR;
-}
-
-int Network_Interface_Disconnect(int configIndex)
-{
-    switch ((tcpip_adapter_if_t)configIndex)
+    if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
     {
-        // Wireless
-        case TCPIP_ADAPTER_IF_STA:
-            esp_err_t err = Esp32_Wireless_Disconnect();
+        esp_err_t err = Esp32_Wireless_Disconnect();
 
-            return (err == ESP_OK);
+        return (err == ESP_OK);
     }
 
     return false;
@@ -278,6 +313,7 @@ bool Network_Interface_Get_Station(uint16_t index, uint8_t *macAddress, uint8_t 
         *rssi = wireless_sta[index].rssi;
         *phyModes = wireless_sta[index].phy_11b | (wireless_sta[index].phy_11g << 1) |
                     (wireless_sta[index].phy_11n << 2) | (wireless_sta[index].phy_lr << 3);
+
         return true;
     }
 
@@ -290,6 +326,7 @@ bool Network_Interface_Get_Station(uint16_t index, uint8_t *macAddress, uint8_t 
 void Network_Interface_Deauth_Station(uint16_t stationIndex)
 {
     stationIndex++;
+
     if (stationIndex >= 1 && stationIndex <= ESP_WIFI_MAX_CONN_NUM)
     {
         esp_wifi_deauth_sta(stationIndex);
