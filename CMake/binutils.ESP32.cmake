@@ -348,6 +348,9 @@ macro(nf_add_idf_as_library)
 
     include($ENV{IDF_PATH}/tools/cmake/idf.cmake)
 
+    target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
+        ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
+
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
