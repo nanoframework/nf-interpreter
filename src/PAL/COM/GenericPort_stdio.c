@@ -30,7 +30,7 @@ __nfweak bool GenericPort_Uninitialize(int comPortNum)
     return true;
 }
 
-__nfweak uint32_t GenericPort_Write(int comPortNum, const char* data, size_t size)
+__nfweak uint32_t GenericPort_Write(int comPortNum, const char *data, size_t size)
 {
     (void)comPortNum;
     (void)data;
@@ -38,12 +38,12 @@ __nfweak uint32_t GenericPort_Write(int comPortNum, const char* data, size_t siz
 
     NATIVE_PROFILE_PAL_COM();
 
-    /*size_t writeResult = */chnWriteTimeout(&SERIAL_DRIVER_STDIO, (const uint8_t*)data, size, TIME_INFINITE);
+    /*size_t writeResult = */ chnWriteTimeout(&SERIAL_DRIVER_STDIO, (const uint8_t *)data, size, TIME_INFINITE);
 
     return 0;
 }
 
-__nfweak int GenericPort_Read(int comPortNum, char* data, size_t size)
+__nfweak int GenericPort_Read(int comPortNum, char *data, size_t size)
 {
     (void)comPortNum;
     (void)data;
@@ -69,13 +69,13 @@ __nfweak bool GenericPort_IsSslSupported(int comPortNum)
     return false;
 }
 
-__nfweak bool GenericPort_UpgradeToSsl(int comPortNum, unsigned int flags) 
+__nfweak bool GenericPort_UpgradeToSsl(int comPortNum, unsigned int flags)
 {
     (void)comPortNum;
     (void)flags;
 
     NATIVE_PROFILE_PAL_COM();
-    return false; 
+    return false;
 }
 
 __nfweak bool GenericPort_IsUsingSsl(int comPortNum)
