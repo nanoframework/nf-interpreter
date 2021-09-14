@@ -8,7 +8,7 @@
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry": true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
             "setupCommands": [
                 {
                     "description": "",
@@ -20,7 +20,7 @@
                 },
                 {
                     "description": "",
-                    "text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
                 },
                 {
                     "description": "",
@@ -58,7 +58,7 @@
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry": true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
             "setupCommands": [
                 {
                     "description": "",
@@ -70,7 +70,7 @@
                 },
                 {
                     "description": "",
-                    "text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
                 },
                 {
                     "description": "",
@@ -108,7 +108,7 @@
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-esp32-toolchain-folder-mind-the-forward-slashes>/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
             "stopAtEntry": true,
-            "program": "<absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf",
+            "program": "${workspaceFolder}/build/nanoCLR.elf",
             "setupCommands": [
                 {
                     "text": "set logging on"
@@ -117,7 +117,7 @@
                     "text": "target extended-remote localhost:3333"
                 },
                 {
-                    "text": "file <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.elf"
+                    "text": "file ${workspaceFolder}/build/nanoCLR.elf"
                 },
                 {
                     "text": "monitor reset halt"
