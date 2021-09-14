@@ -11,23 +11,23 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/timers.h"
-#include "freertos/event_groups.h"
-#include "esp_system.h"
-#include "esp_attr.h"
-#include "nvs_flash.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/timers.h>
+#include <freertos/event_groups.h>
+#include <esp_system.h>
+#include <esp_attr.h>
+#include <nvs_flash.h>
 #include <sdkconfig.h>
 
-// TODO ONly with network
-#include "esp_wifi.h"
-#include "esp_wpa2.h"
-#include "esp_eth.h"
-#include "esp_event.h"
+// network
+#include <esp_wifi.h>
+#include <esp_wpa2.h>
+#include <esp_eth.h>
+#include <esp_event.h>
 
-#include "esp_timer.h"
-#include "esp_sleep.h"
+#include <esp_timer.h>
+#include <esp_sleep.h>
 
 // need this hack here, otherwise can't call ESP_LOGxx from cpp code
 #ifndef CONFIG_LOG_TIMESTAMP_SOURCE_RTOS
@@ -36,16 +36,18 @@
 
 #include <esp_log.h>
 
-#include "spi_master.h"
-#include "gpio.h"
-#include "i2c.h"
-#include "uart.h"
-#include "ledc.h"
-#include "adc.h"
-#include "dac.h"
-#include "timer.h"
-#include "esp_spiffs.h"
-#include "pcnt.h"
+#include <spi_master.h>
+#include <gpio.h>
+#include <i2c.h>
+#include <uart.h>
+#include <ledc.h>
+#include <adc.h>
+#include <dac.h>
+#include <timer.h>
+#include <esp_spiffs.h>
+#include <pcnt.h>
+
+#include <soc/uart_channel.h>
 
 // Uncomment to support Ethernet
 //#define ESP32_ETHERNET_SUPPORT

@@ -166,20 +166,15 @@ macro(nf_add_platform_dependencies target)
             BUILD_TARGET
                 ${target}
             EXTRA_SOURCES 
-                ${TARGET_LWIP_SOURCES}
-                ${CHIBIOS_LWIP_SOURCES}
+                ${TARGET_ESP32_IDF_NETWORK_SOURCES}
             EXTRA_INCLUDES 
-                ${CHIBIOS_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-                ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-                ${CHIBIOS_LWIP_INCLUDE_DIRS}
-                ${ChibiOSnfOverlay_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-            EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+                ${ESP32_IDF_INCLUDE_DIRS}
+                ${TARGET_ESP32_IDF_INCLUDES}
+        )
 
-    add_dependencies(${target}.elf nano::NF_Network)
+        add_dependencies(${target}.elf nano::NF_Network)
+
+    endif()
 
     # if(USE_FILESYSTEM_OPTION)
     #     find_package(CHIBIOS_FATFS REQUIRED)
@@ -360,6 +355,8 @@ macro(nf_add_idf_as_library)
             freertos
             esptool_py
             fatfs
+            spiffs
+            mbedtls
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
@@ -367,12 +364,43 @@ macro(nf_add_idf_as_library)
         BUILD_DIR ${CMAKE_BINARY_DIR}
     )
 
+    if(USE_NETWORKING_OPTION)
+
+        # get list of source files for lwIP
+        get_target_property(IDF_LWIP_SOURCES __idf_lwip SOURCES)
+
+        # remove the ones we'll be replacing
+        list(REMOVE_ITEM 
+            IDF_LWIP_SOURCES
+                $ENV{IDF_PATH}/components/lwip/lwip/src/api/api_msg.c
+                $ENV{IDF_PATH}/components/lwip/lwip/src/api/sockets.c
+                $ENV{IDF_PATH}/components/lwip/port/esp32/freertos/sys_arch.c
+        )
+
+        # add our modified sources
+        list(APPEND 
+            IDF_LWIP_SOURCES
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_api_msg.c
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_sockets.c
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_sys_arch.c
+        )
+
+        # replace the source list
+        set_property(
+            TARGET __idf_lwip 
+            PROPERTY SOURCES ${IDF_LWIP_SOURCES}
+        )
+
+    endif()
+
     # Link the static libraries to the executable
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
         idf::${TARGET_SERIES_SHORT}
         idf::freertos
         idf::fatfs
         idf::spi_flash
+        idf::spiffs
+        idf::mbedtls
     )
 
 endmacro()
