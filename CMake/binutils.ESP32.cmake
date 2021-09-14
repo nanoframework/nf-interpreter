@@ -366,15 +366,17 @@ macro(nf_add_idf_as_library)
 
     if(USE_NETWORKING_OPTION)
 
+        FetchContent_GetProperties(esp32_idf)
+
         # get list of source files for lwIP
         get_target_property(IDF_LWIP_SOURCES __idf_lwip SOURCES)
 
         # remove the ones we'll be replacing
         list(REMOVE_ITEM 
             IDF_LWIP_SOURCES
-                $ENV{IDF_PATH}/components/lwip/lwip/src/api/api_msg.c
-                $ENV{IDF_PATH}/components/lwip/lwip/src/api/sockets.c
-                $ENV{IDF_PATH}/components/lwip/port/esp32/freertos/sys_arch.c
+                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/api_msg.c
+                ${esp32_idf_SOURCE_DIR}/components/lwip/lwip/src/api/sockets.c
+                ${esp32_idf_SOURCE_DIR}/components/lwip/port/esp32/freertos/sys_arch.c
         )
 
         # add our modified sources
@@ -390,6 +392,8 @@ macro(nf_add_idf_as_library)
             TARGET __idf_lwip 
             PROPERTY SOURCES ${IDF_LWIP_SOURCES}
         )
+
+        get_target_property(IDF_LWIP_SOURCES_CHECK __idf_lwip SOURCES)
 
     endif()
 

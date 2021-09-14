@@ -388,14 +388,7 @@ int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-#ifdef PLATFORM_ESP32
-    // We have to call lwip_close_r() method otherwise the socket doesn't get freed up and we run out of sockets.
-    // We could also call the posix closesocket() which should work for all platforms and change all other methods to
-    // call the posix version to be consistent.(TODO)
-    return lwip_close_r(socket);
-#else
     return lwip_close(socket);
-#endif
 }
 
 int LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
