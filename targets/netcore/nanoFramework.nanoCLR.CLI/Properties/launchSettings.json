@@ -2,7 +2,7 @@
   "profiles": {
     "nanoCLR.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "run --serialport COM8",
+      "commandLineArgs": "run -p 8501",
       "nativeDebugging": true
     }
   }

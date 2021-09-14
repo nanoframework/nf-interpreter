@@ -17,8 +17,11 @@ namespace nanoFramework.nanoCLR.Host.Interop
 
         internal delegate void DebugPrintDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
 
-        internal delegate void WireTransmitDelegate([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
-            byte[] data, int length);
+        internal delegate int WireTransmitDelegate(
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [In] byte[] data, int length);
+
+        internal delegate int WireReceiveDelegate(
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [Out] byte[] data, int length);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // The following declaration have the functions names exposed in the C++ DLL
@@ -56,13 +59,12 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal static extern void nanoCLR_WireClose();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int nanoCLR_WireReceive(byte[] data, int length);
+        internal static extern void nanoCLR_SetWireReceiveCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] WireReceiveDelegate receiveCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_WireTransmit(byte[] data, int length);
-
-        [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int nanoCLR_WireBytesAvailable();
+        internal static extern void nanoCLR_SetWireTransmitCallback(
+            [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate transmitCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void nanoCLR_WireProcess();
