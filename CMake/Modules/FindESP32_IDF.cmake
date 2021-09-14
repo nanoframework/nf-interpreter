@@ -8,6 +8,7 @@ FetchContent_GetProperties(esp32_idf)
 
 include(binutils.ESP32)
 
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/config)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${TARGET_SERIES_SHORT})
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${TARGET_SERIES_SHORT}/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/${TARGET_SERIES_SHORT}/esp_rom/include)
