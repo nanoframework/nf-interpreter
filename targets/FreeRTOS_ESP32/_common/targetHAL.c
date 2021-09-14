@@ -3,9 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <esp32_idf.h>
 #include <nanoWeak.h>
 #include <nanoHAL_v2.h>
+#include <esp32_idf.h>
 
 inline void HAL_AssertEx()
 {
@@ -39,3 +39,6 @@ inline GET_TARGET_CAPABILITIES(0);
 inline TARGET_HAS_PROPRIETARY_BOOTER(true);
 
 inline TARGET_IFU_CAPABLE(false);
+
+// Mutex for GLOBAL_LOCK / GLOBAL_UNLOCK
+portMUX_TYPE globalLockMutex = portMUX_INITIALIZER_UNLOCKED;

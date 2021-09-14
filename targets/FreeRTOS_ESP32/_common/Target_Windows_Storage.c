@@ -28,12 +28,11 @@
 #include <string.h>
 #include <sys/unistd.h>
 #include <sys/stat.h>
-#include "esp_err.h"
-#include "esp_log.h"
+#include <esp32_idf.h>
 #include "esp_vfs_fat.h"
-#include "driver/sdmmc_host.h"
-#include "driver/sdspi_host.h"
-#include "sdmmc/include/sdmmc_cmd.h"
+#include "sdmmc_host.h"
+#include "sdspi_host.h"
+#include "include/sdmmc_cmd.h"
 #include <target_platform.h>
 
 static const char *TAG = "SDCard";

@@ -9,16 +9,16 @@
  * linking) to your LDFLAGS; same with all the other symbols you need.
  */
 
-#include <FreeRTOS.h>
-#include <esp_attr.h>
-#include <sdkconfig.h>
+// #include <FreeRTOS.h>
+// #include <esp_attr.h>
+// #include <sdkconfig.h>
 
-#ifdef __GNUC__
-#define USED __attribute__((used))
-#else
-#define USED
-#endif
+// #ifdef __GNUC__
+// #define USED __attribute__((used))
+// #else
+// #define USED
+// #endif
 
-//#ifdef CONFIG_ESP32_DEBUG_OCDAWARE
-const int USED DRAM_ATTR uxTopUsedPriority = configMAX_PRIORITIES - 1;
-//#endif
+// //#ifdef CONFIG_ESP32_DEBUG_OCDAWARE
+// const int USED DRAM_ATTR uxTopUsedPriority = configMAX_PRIORITIES - 1;
+// //#endif

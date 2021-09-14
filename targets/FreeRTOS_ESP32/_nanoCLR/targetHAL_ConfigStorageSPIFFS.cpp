@@ -5,7 +5,6 @@
 
 #include <nanoHAL.h>
 #include <nanoWeak.h>
-#include <esp32_idf.h>
 #include "targetHAL_ConfigStorage.h"
 
 // SPIFFS config
