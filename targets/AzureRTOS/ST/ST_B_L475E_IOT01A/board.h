@@ -83,6 +83,9 @@
 #define GPIOA_SWCLK                 14U
 #define GPIOA_PIN15                 15U
 
+#define GPIOA_USART4_TX             0U
+#define GPIOA_USART4_RX             1U
+
 #define GPIOB_LCD_SEG21             0U
 #define GPIOB_LCD_SEG2              1U
 #define GPIOB_LED_RED               2U
@@ -208,6 +211,9 @@
 /*
  * IO lines assignments.
  */
+#define LINE_GPIOA_USART4_TX        PAL_LINE(GPIOA, 0U)
+#define LINE_GPIOA_USART4_RX        PAL_LINE(GPIOA, 1U)
+
 #define LINE_JOY_CENTER             PAL_LINE(GPIOA, 0U)
 #define LINE_JOY_LEFT               PAL_LINE(GPIOA, 1U)
 #define LINE_JOY_RIGHT              PAL_LINE(GPIOA, 2U)
@@ -355,8 +361,8 @@
  * PA14 - SWCLK                     (alternate 0).
  * PA15 - PIN15                     (analog).
  */
-#define VAL_GPIOA_MODER             (PIN_MODE_INPUT(GPIOA_JOY_CENTER) |     \
-                                     PIN_MODE_INPUT(GPIOA_JOY_LEFT) |       \
+#define VAL_GPIOA_MODER             (PIN_MODE_ALTERNATE(GPIOA_USART4_TX) |  \
+                                     PIN_MODE_ALTERNATE(GPIOA_USART4_RX) |  \
                                      PIN_MODE_INPUT(GPIOA_JOY_RIGHT) |      \
                                      PIN_MODE_INPUT(GPIOA_JOY_UP) |         \
                                      PIN_MODE_OUTPUT(GPIOA_MFX_WAKEUP) |    \
@@ -371,8 +377,8 @@
                                      PIN_MODE_ALTERNATE(GPIOA_SWDIO) |      \
                                      PIN_MODE_ALTERNATE(GPIOA_SWCLK) |      \
                                      PIN_MODE_ANALOG(GPIOA_PIN15))
-#define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_JOY_CENTER) | \
-                                     PIN_OTYPE_PUSHPULL(GPIOA_JOY_LEFT) |   \
+#define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_USART4_TX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_USART4_RX) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOA_JOY_RIGHT) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOA_JOY_UP) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOA_MFX_WAKEUP) | \
@@ -387,8 +393,8 @@
                                      PIN_OTYPE_PUSHPULL(GPIOA_SWDIO) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOA_SWCLK) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOA_PIN15))
-#define VAL_GPIOA_OSPEEDR           (PIN_OSPEED_HIGH(GPIOA_JOY_CENTER) |    \
-                                     PIN_OSPEED_HIGH(GPIOA_JOY_LEFT) |      \
+#define VAL_GPIOA_OSPEEDR           (PIN_OSPEED_HIGH(GPIOA_USART4_TX) |    \
+                                     PIN_OSPEED_HIGH(GPIOA_USART4_RX) |      \
                                      PIN_OSPEED_HIGH(GPIOA_JOY_RIGHT) |     \
                                      PIN_OSPEED_HIGH(GPIOA_JOY_UP) |        \
                                      PIN_OSPEED_HIGH(GPIOA_MFX_WAKEUP) |    \
@@ -403,8 +409,8 @@
                                      PIN_OSPEED_HIGH(GPIOA_SWDIO) |         \
                                      PIN_OSPEED_HIGH(GPIOA_SWCLK) |         \
                                      PIN_OSPEED_HIGH(GPIOA_PIN15))
-#define VAL_GPIOA_PUPDR             (PIN_PUPDR_PULLDOWN(GPIOA_JOY_CENTER) | \
-                                     PIN_PUPDR_PULLDOWN(GPIOA_JOY_LEFT) |   \
+#define VAL_GPIOA_PUPDR             (PIN_PUPDR_FLOATING(GPIOA_USART4_TX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_USART4_RX) |   \
                                      PIN_PUPDR_PULLDOWN(GPIOA_JOY_RIGHT) |  \
                                      PIN_PUPDR_PULLDOWN(GPIOA_JOY_UP) |     \
                                      PIN_PUPDR_FLOATING(GPIOA_MFX_WAKEUP) | \
@@ -419,8 +425,8 @@
                                      PIN_PUPDR_PULLUP(GPIOA_SWDIO) |        \
                                      PIN_PUPDR_PULLDOWN(GPIOA_SWCLK) |      \
                                      PIN_PUPDR_FLOATING(GPIOA_PIN15))
-#define VAL_GPIOA_ODR               (PIN_ODR_HIGH(GPIOA_JOY_CENTER) |       \
-                                     PIN_ODR_HIGH(GPIOA_JOY_LEFT) |         \
+#define VAL_GPIOA_ODR               (PIN_ODR_LOW(GPIOA_USART4_TX) |       \
+                                     PIN_ODR_LOW(GPIOA_USART4_RX) |         \
                                      PIN_ODR_HIGH(GPIOA_JOY_RIGHT) |        \
                                      PIN_ODR_HIGH(GPIOA_JOY_UP) |           \
                                      PIN_ODR_HIGH(GPIOA_MFX_WAKEUP) |       \
@@ -435,8 +441,8 @@
                                      PIN_ODR_HIGH(GPIOA_SWDIO) |            \
                                      PIN_ODR_HIGH(GPIOA_SWCLK) |            \
                                      PIN_ODR_HIGH(GPIOA_PIN15))
-#define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_JOY_CENTER, 0U) |    \
-                                     PIN_AFIO_AF(GPIOA_JOY_LEFT, 0U) |      \
+#define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_USART4_TX, 8U) |    \
+                                     PIN_AFIO_AF(GPIOA_USART4_RX, 8U) |      \
                                      PIN_AFIO_AF(GPIOA_JOY_RIGHT, 0U) |     \
                                      PIN_AFIO_AF(GPIOA_JOY_UP, 0U) |        \
                                      PIN_AFIO_AF(GPIOA_MFX_WAKEUP, 0U) |    \
@@ -451,8 +457,8 @@
                                      PIN_AFIO_AF(GPIOA_SWDIO, 0U) |         \
                                      PIN_AFIO_AF(GPIOA_SWCLK, 0U) |         \
                                      PIN_AFIO_AF(GPIOA_PIN15, 0U))
-#define VAL_GPIOA_ASCR              (PIN_ASCR_DISABLED(GPIOA_JOY_CENTER) |  \
-                                     PIN_ASCR_DISABLED(GPIOA_JOY_LEFT) |    \
+#define VAL_GPIOA_ASCR              (PIN_ASCR_DISABLED(GPIOA_USART4_TX) |  \
+                                     PIN_ASCR_DISABLED(GPIOA_USART4_RX) |    \
                                      PIN_ASCR_DISABLED(GPIOA_JOY_RIGHT) |   \
                                      PIN_ASCR_DISABLED(GPIOA_JOY_UP) |      \
                                      PIN_ASCR_DISABLED(GPIOA_MFX_WAKEUP) |  \
@@ -467,8 +473,8 @@
                                      PIN_ASCR_DISABLED(GPIOA_SWDIO) |       \
                                      PIN_ASCR_DISABLED(GPIOA_SWCLK) |       \
                                      PIN_ASCR_DISABLED(GPIOA_PIN15))
-#define VAL_GPIOA_LOCKR             (PIN_LOCKR_DISABLED(GPIOA_JOY_CENTER) | \
-                                     PIN_LOCKR_DISABLED(GPIOA_JOY_LEFT) |   \
+#define VAL_GPIOA_LOCKR             (PIN_LOCKR_DISABLED(GPIOA_USART4_TX) | \
+                                     PIN_LOCKR_DISABLED(GPIOA_USART4_RX) |   \
                                      PIN_LOCKR_DISABLED(GPIOA_JOY_RIGHT) |  \
                                      PIN_LOCKR_DISABLED(GPIOA_JOY_UP) |     \
                                      PIN_LOCKR_DISABLED(GPIOA_MFX_WAKEUP) | \

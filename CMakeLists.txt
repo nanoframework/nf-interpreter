@@ -273,6 +273,20 @@ else()
 endif()
 
 #################################################################
+# nanoFramework features
+#################################################################
+
+###################################################################
+# native send trace to stdio (default is OFF so no support for sending stdio to serial port)
+option(NF_FEATURE_TRACE_TO_STDIO "option to enable sending trace data to stdio. Requires spare SERIAL device")
+
+if(NF_FEATURE_TRACE_TO_STDIO)
+    message(STATUS "Support for sending TRACE to stdio is included to serial device SD/UART ${NF_FEATURE_TRACE_TO_STDIO}.")
+else()
+    message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
+endif()
+
+#################################################################
 # enables Application Domains support in nanoCLR
 # (default is OFF so Application Domains is NOT supported)
 option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")

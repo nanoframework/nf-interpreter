@@ -60,7 +60,9 @@ void tx_application_define(void *first_unused_memory)
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
-
+#if defined(FEATURE_TRACE_TO_STDIO)
+    sdStart(&SERIAL_DRIVER_STDIO, NULL);
+#endif
     // Create receiver thread
     status = tx_thread_create(
         &receiverThread,

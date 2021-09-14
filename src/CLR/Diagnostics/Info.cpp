@@ -4,6 +4,9 @@
 // See LICENSE file in the project root for full license information.
 //
 #include "Diagnostics.h"
+#if defined(FEATURE_TRACE_TO_STDIO)
+extern uint32_t StdioPort_Write(int portNum, const char *data, size_t size);
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -283,6 +286,10 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #if defined(_WIN32)
     std::string outputString(buffer, iBuffer);
     SaveMessage(outputString);
+#endif
+
+#if defined(FEATURE_TRACE_TO_STDIO)
+    StdioPort_Write(0, (const char *)buffer, (size_t)iBuffer);
 #endif
 
 #if !defined(_WIN32)
