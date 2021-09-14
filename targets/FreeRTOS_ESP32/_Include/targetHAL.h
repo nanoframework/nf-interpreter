@@ -16,7 +16,7 @@ extern portMUX_TYPE globalLockMutex;
 #define GLOBAL_UNLOCK() portEXIT_CRITICAL(&globalLockMutex);
 
 // platform dependent delay
-#define PLATFORM_DELAY(milliSecs) vTaskDelay(milliSecs);
+#define PLATFORM_DELAY(milliSecs) vTaskDelay(pdMS_TO_TICKS(milliSecs));
 
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)

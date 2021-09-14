@@ -12,7 +12,6 @@ extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 
 esp_eth_handle_t eth_handle = NULL;
 
-
 //
 // Olimex ESP32-EVB Rev B, OLimex ESP32-Gateway, Generic Lan8270
 //
@@ -55,10 +54,12 @@ static void phy_device_power_enable_via_gpio(bool enable)
     gpio_set_level((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER, (int)enable);
 
     // Allow the power up/down to take effect, min 300us
-    vTaskDelay(1);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
 
     if (enable)
+    {
         phy_lan8720_default_ethernet_config.phy_power_enable(true);
+    }
 }
 #endif
 
@@ -67,7 +68,7 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
     (void)pMacAdr;
 
 #ifdef ESP32_ETHERNET_SUPPORT
-    
+
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_ETH();
     esp_netif_t *eth_netif = esp_netif_new(&cfg);
     // Set default handlers to process TCP/IP stuffs
@@ -86,7 +87,7 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
 
     mac_config.smi_mdc_gpio_num = CONFIG_EXAMPLE_ETH_MDC_GPIO;
     mac_config.smi_mdio_gpio_num = CONFIG_EXAMPLE_ETH_MDIO_GPIO;
-    
+
     esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&mac_config);
 
     esp_eth_phy_t *phy = esp_eth_phy_new_lan8720(&phy_config);
