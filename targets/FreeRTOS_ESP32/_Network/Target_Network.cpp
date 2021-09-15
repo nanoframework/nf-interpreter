@@ -31,29 +31,32 @@ int Network_Interface_Open(int index)
     HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
     {
         // failed to load configuration
         // FIXME output error?
         return SOCK_SOCKET_ERROR;
     }
+    _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
     switch (networkConfiguration.InterfaceType)
     {
-        // Wireless
+        // Wi-Fi (STA)
         case NetworkInterfaceType_Wireless80211:
-            return NF_ESP32_Wireless_Open(index, &networkConfiguration);
+            return NF_ESP32_Wireless_Open(&networkConfiguration);
 
-        // Soft AP
+        // Wi-Fi (Soft AP)
         case NetworkInterfaceType_WirelessAP:
-            return NF_ESP32_WirelessAP_Open(index, &networkConfiguration);
+            return NF_ESP32_WirelessAP_Open(&networkConfiguration);
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
-            return NF_ESP32_Ethernet_Open(index, &networkConfiguration);
+            return NF_ESP32_Ethernet_Open(&networkConfiguration);
 #endif
-
     }
 
     return SOCK_SOCKET_ERROR;
@@ -64,7 +67,10 @@ bool Network_Interface_Close(int index)
     HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
     {
         // failed to load configuration
         // FIXME output error?
@@ -75,18 +81,17 @@ bool Network_Interface_Close(int index)
     {
         // Wireless
         case NetworkInterfaceType_Wireless80211:
-            return NF_ESP32_Wireless_Close(index);
+            return NF_ESP32_Wireless_Close();
 
         // Soft AP
         case NetworkInterfaceType_WirelessAP:
-            return NF_ESP32_WirelessAP_Close(index);
+            return NF_ESP32_WirelessAP_Close();
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
-            return NF_ESP32_Ethernet_Close(index);
+            return NF_ESP32_Ethernet_Close();
 #endif
-
     }
 
     return false;
@@ -97,7 +102,10 @@ bool Network_Interface_Start_Scan(int index)
     HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
     {
         // failed to load configuration
         // FIXME output error?
@@ -105,7 +113,7 @@ bool Network_Interface_Start_Scan(int index)
     }
 
     // can only do this is this is STA
-    if(networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
+    if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
     {
         return (NF_ESP32_Wireless_Scan() == 0);
     }
@@ -192,7 +200,10 @@ int Network_Interface_Connect_Result(int index)
     HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
     {
         // failed to load configuration
         // FIXME output error?
@@ -212,7 +223,10 @@ int Network_Interface_Disconnect(int index)
     HAL_Configuration_NetworkInterface networkConfiguration;
 
     // load network interface configuration from storage
-    if(!ConfigurationManager_GetConfigurationBlock((void*)&networkConfiguration, DeviceConfigurationOption_Network, index))
+    if (!ConfigurationManager_GetConfigurationBlock(
+            (void *)&networkConfiguration,
+            DeviceConfigurationOption_Network,
+            index))
     {
         // failed to load configuration
         // FIXME output error?

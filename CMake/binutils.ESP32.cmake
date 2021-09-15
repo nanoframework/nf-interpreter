@@ -453,7 +453,9 @@ macro(nf_add_idf_as_library)
                 ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_Include
                 ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
                 ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
-                ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+                ${CMAKE_SOURCE_DIR}/src/CLR/Include
+                ${CMAKE_SOURCE_DIR}/src/HAL/Include
+        )
 
         # replace the include directories
         set_property(

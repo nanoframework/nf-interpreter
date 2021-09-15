@@ -82,12 +82,14 @@ static void initialize_sntp()
 //
 static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
+    esp_err_t result;
     int stationIndex;
-    wifi_event_ap_staconnected_t *connectedEvent;
-    wifi_event_ap_stadisconnected_t *disconnectedEvent;
+    wifi_event_ap_staconnected_t *apConnectedEvent;
+    wifi_event_ap_stadisconnected_t *apDisconnectedEvent;
+    wifi_event_sta_disconnected_t *staDisconnectedEvent;
 
 #ifdef PRINT_NET_EVENT
-    ets_printf("Network event %d\n", event->event_id);
+    ets_printf("Event %d, ID: %d\n", event_base, event_id);
 #endif
 
     if (event_base == WIFI_EVENT)
@@ -99,6 +101,14 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_START\n");
 #endif
+
+                if (NF_ESP32_IsToConnect)
+                {
+                    // start connect
+                    result = esp_wifi_connect();
+                    ets_printf("connect... %d \n", result);
+                }
+
                 break;
 
             case WIFI_EVENT_STA_CONNECTED:
@@ -111,24 +121,31 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 }
 
                 PostAvailabilityOn(IDF_WIFI_STA_DEF);
+
                 break;
 
             case WIFI_EVENT_STA_DISCONNECTED:
+                // get disconnected reason
+                staDisconnectedEvent = (wifi_event_sta_disconnected_t *)event_data;
+
 #ifdef PRINT_NET_EVENT
-                ets_printf("WIFI_EVENT_STA_DISCONNECTED  reason : %d\n", event->event_info.disconnected.reason);
+                ets_printf("WIFI_EVENT_STA_DISCONNECTED  reason : %d\n", staDisconnectedEvent->reason);
 #endif
 
                 if (NF_ESP32_ConnectInProgress)
                 {
-                    // get disconnected reason
-                    wifi_event_sta_disconnected_t *disconnectedEvent = (wifi_event_sta_disconnected_t *)event_data;
-                    PostConnectResult(disconnectedEvent->reason);
+                    PostConnectResult(staDisconnectedEvent->reason);
                 }
-                else
+
+                PostAvailabilityOff(IDF_WIFI_STA_DEF);
+
+                if (NF_ESP32_IsToConnect)
                 {
-                    PostAvailabilityOff(IDF_WIFI_STA_DEF);
-                    esp_wifi_connect();
+                    // better re-connect
+                    result = esp_wifi_connect();
+                    ets_printf("connect... %d \n", result);
                 }
+
                 break;
 
             // Scan of available Wi-Fi networks complete
@@ -186,27 +203,27 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 
             case WIFI_EVENT_AP_STACONNECTED:
                 // access STA connected event
-                connectedEvent = (wifi_event_ap_staconnected_t *)event_data;
-                stationIndex = connectedEvent->aid - 1;
-                Network_Interface_Add_Station(stationIndex, connectedEvent->mac);
+                apConnectedEvent = (wifi_event_ap_staconnected_t *)event_data;
+                stationIndex = apConnectedEvent->aid - 1;
+                Network_Interface_Add_Station(stationIndex, apConnectedEvent->mac);
 
                 // Post the Network interface + Client ID in top 8 bits
                 PostAPStationChanged(1, IDF_WIFI_AP_DEF + (stationIndex << 8));
 #ifdef PRINT_NET_EVENT
-                ets_printf("WIFI_EVENT_AP_STACONNECTED %d\n", event->event_info.sta_connected.aid);
+                ets_printf("WIFI_EVENT_AP_STACONNECTED %d\n", apConnectedEvent->aid);
 #endif
                 break;
 
             case WIFI_EVENT_AP_STADISCONNECTED:
                 // access STA disconnected event
-                disconnectedEvent = (wifi_event_ap_stadisconnected_t *)event_data;
-                stationIndex = disconnectedEvent->aid - 1;
+                apDisconnectedEvent = (wifi_event_ap_stadisconnected_t *)event_data;
+                stationIndex = apDisconnectedEvent->aid - 1;
 
                 Network_Interface_Remove_Station(stationIndex);
                 PostAPStationChanged(0, IDF_WIFI_AP_DEF + (stationIndex << 8));
 
 #ifdef PRINT_NET_EVENT
-                ets_printf("WIFI_EVENT_AP_STADISCONNECTED %d\n", event->event_info.sta_disconnected.aid);
+                ets_printf("WIFI_EVENT_AP_STADISCONNECTED %d\n", apDisconnectedEvent->aid);
 #endif
                 break;
 
@@ -285,12 +302,22 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 void nanoHAL_Network_Initialize()
 {
     // Initialise the lwIP CLR signal call-back
-    //set_signal_sock_function(&sys_signal_sock_event);
+    set_signal_sock_function(&sys_signal_sock_event);
 
     // initialize network interface
     ESP_ERROR_CHECK(esp_netif_init());
 
+    // create the default event loop
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    // register the handler for WIFI events
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+
+    // register the event handler for IP events
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+
+#ifdef ESP32_ETHERNET_SUPPORT
+    // register the event handler for Ethernet events
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(ETH_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
+#endif
 }

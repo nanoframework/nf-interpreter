@@ -108,10 +108,8 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 //
 //  Open Ethernet Network driver
 //
-int NF_ESP32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
+int NF_ESP32_Ethernet_Open(HAL_Configuration_NetworkInterface *config)
 {
-    (void)index;
-
     if (NF_ESP32_InitialiseEthernet(config->MacAddress) == ESP_OK)
     {
         // Return NetIf number for Esp32 wireless station
@@ -121,8 +119,7 @@ int NF_ESP32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config
     return SOCK_SOCKET_ERROR;
 }
 
-bool NF_ESP32_Ethernet_Close(int index)
+bool NF_ESP32_Ethernet_Close()
 {
-    (void)index;
     return esp_eth_stop(eth_handle) == ESP_OK;
 }

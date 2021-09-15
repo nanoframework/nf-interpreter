@@ -19,22 +19,24 @@
 
 extern bool NF_ESP32_ConnectInProgress;
 extern int NF_ESP32_ConnectResult;
+// flag to signal if connect is to happen
+extern bool NF_ESP32_IsToConnect;
 
 // Wireless
-int NF_ESP32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool NF_ESP32_Wireless_Close(int index);
+int NF_ESP32_Wireless_Open(HAL_Configuration_NetworkInterface *config);
+bool NF_ESP32_Wireless_Close();
 
-int NF_ESP32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool NF_ESP32_WirelessAP_Close(int index);
-esp_err_t NF_ESP32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *pConfig);
+int NF_ESP32_WirelessAP_Open(HAL_Configuration_NetworkInterface *config);
+bool NF_ESP32_WirelessAP_Close();
+esp_err_t NF_ESP32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *config);
 
 int NF_ESP32_Wireless_Scan();
 int NF_ESP32_Wireless_Disconnect();
-int NF_ESP32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless);
+int NF_ESP32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *config);
 
 // Ethernet
-int NF_ESP32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool NF_ESP32_Ethernet_Close(int index);
+int NF_ESP32_Ethernet_Open(HAL_Configuration_NetworkInterface *config);
+bool NF_ESP32_Ethernet_Close();
 
 // Smart config
 void NF_ESP32_Start_wifi_smart_config(void);

@@ -4,10 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// [NF_CHANGE]
-extern void sys_signal_sock_event();
-// [END_NF_CHANGE]
-
+#include <nanoHAL_Network.h>
 #include "lwip/opt.h"
 
 #if LWIP_NETCONN /* don't build if not configured for use in lwipopts.h */
