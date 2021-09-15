@@ -3,24 +3,21 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// This file includes the board specific Network Intialisation
+// This file includes the board specific Network Initialisation
 
-#include <nanoHAL.h>
+#include "NF_ESP32_Network.h"
 #include "lwIP_Sockets.h"
 #include "apps/sntp.h"
 #include <target_lwip_sntp_opts.h>
-#include <target_lwip_sntp_opts.h>
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
-extern bool Esp32_ConnectInProgress;
-extern int Esp32_ConnectResult;
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
 //#define 	PRINT_NET_EVENT 	1
 
 //
-// Callback from LWIP on event
+// Call-back from LWIP on event
 //
 void sys_signal_sock_event()
 {
@@ -60,14 +57,14 @@ static void PostAPStationChanged(uint connect, uint netInfo)
 
 static void PostConnectResult(int result)
 {
-    Esp32_ConnectResult = result;
-    Esp32_ConnectInProgress = false;
+    NF_ESP32_ConnectResult = result;
+    NF_ESP32_ConnectInProgress = false;
 
 #ifdef PRINT_NET_EVENT
     ets_printf("PostConnectResult  reason : %d\n", result);
 #endif
 
-    // fire event for Wifi station job complete
+    // fire event for Wi-Fi station job complete
     Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
 }
 
@@ -93,15 +90,11 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     ets_printf("Network event %d\n", event->event_id);
 #endif
 
-    esp_netif_t *staEspNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-    esp_netif_t *apEspNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-    esp_netif_t *ethnertEspNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
-
     if (event_base == WIFI_EVENT)
     {
         switch (event_id)
         {
-            // Wifi station events
+            // Wi-Fi station events
             case WIFI_EVENT_STA_START:
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_START\n");
@@ -112,12 +105,12 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_CONNECTED\n");
 #endif
-                if (Esp32_ConnectInProgress)
+                if (NF_ESP32_ConnectInProgress)
                 {
                     PostConnectResult(0);
                 }
 
-                // TODO PostAvailabilityOn(TCPIP_ADAPTER_IF_STA);
+                PostAvailabilityOn(IDF_WIFI_STA_DEF);
                 break;
 
             case WIFI_EVENT_STA_DISCONNECTED:
@@ -125,7 +118,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 ets_printf("WIFI_EVENT_STA_DISCONNECTED  reason : %d\n", event->event_info.disconnected.reason);
 #endif
 
-                if (Esp32_ConnectInProgress)
+                if (NF_ESP32_ConnectInProgress)
                 {
                     // get disconnected reason
                     wifi_event_sta_disconnected_t *disconnectedEvent = (wifi_event_sta_disconnected_t *)event_data;
@@ -133,21 +126,20 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 }
                 else
                 {
-                    // TODO PostAvailabilityOff(TCPIP_ADAPTER_IF_STA);
+                    PostAvailabilityOff(IDF_WIFI_STA_DEF);
                     esp_wifi_connect();
                 }
                 break;
 
-            // Scan of available Wifi networks complete
+            // Scan of available Wi-Fi networks complete
             case WIFI_EVENT_SCAN_DONE:
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_SCAN_DONE\n");
 #endif
-                // TODO PostScanComplete(TCPIP_ADAPTER_IF_STA);
+                PostScanComplete(IDF_WIFI_STA_DEF);
                 break;
 
             case WIFI_EVENT_STA_AUTHMODE_CHANGE:
-                // system_event_sta_authmode_change_t *auth_change = &event->event_info.auth_change;
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_AUTHMODE_CHANGE");
 #endif
@@ -179,14 +171,14 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 
             // Wireless AP events
             case WIFI_EVENT_AP_START:
-                // TODO PostAvailabilityOn(TCPIP_ADAPTER_IF_AP);
+                PostAvailabilityOn(IDF_WIFI_AP_DEF);
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_AP_START\n");
 #endif
                 break;
 
             case WIFI_EVENT_AP_STOP:
-                // TODO PostAvailabilityOff(TCPIP_ADAPTER_IF_AP);
+                PostAvailabilityOff(IDF_WIFI_AP_DEF);
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_AP_STOP\n");
 #endif
@@ -199,7 +191,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 Network_Interface_Add_Station(stationIndex, connectedEvent->mac);
 
                 // Post the Network interface + Client ID in top 8 bits
-                // TODO PostAPStationChanged(1, TCPIP_ADAPTER_IF_AP + (stationIndex << 8));
+                PostAPStationChanged(1, IDF_WIFI_AP_DEF + (stationIndex << 8));
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_AP_STACONNECTED %d\n", event->event_info.sta_connected.aid);
 #endif
@@ -211,7 +203,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 stationIndex = disconnectedEvent->aid - 1;
 
                 Network_Interface_Remove_Station(stationIndex);
-                // TODO PostAPStationChanged(0, TCPIP_ADAPTER_IF_AP + (stationIndex << 8));
+                PostAPStationChanged(0, IDF_WIFI_AP_DEF + (stationIndex << 8));
 
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_AP_STADISCONNECTED %d\n", event->event_info.sta_disconnected.aid);
@@ -234,12 +226,12 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("IP_EVENT_STA_GOT_IP\n");
 #endif
-                // TODO PostAddressChanged(TCPIP_ADAPTER_IF_STA);
+                PostAddressChanged(IDF_WIFI_STA_DEF);
                 initialize_sntp();
                 break;
 
             case IP_EVENT_STA_LOST_IP:
-                // TODO PostAddressChanged(TCPIP_ADAPTER_IF_STA);
+                PostAddressChanged(IDF_WIFI_STA_DEF);
 #ifdef PRINT_NET_EVENT
                 ets_printf("IP_EVENT_STA_LOST_IP\n");
 #endif
@@ -249,7 +241,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("IP_EVENT_ETH_GOT_IP\n");
 #endif
-                // TODO PostAddressChanged(TCPIP_ADAPTER_IF_ETH);
+                PostAddressChanged(IDF_ETH_DEF);
                 initialize_sntp();
                 break;
         }
@@ -274,14 +266,14 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("ETHERNET_EVENT_CONNECTED\n");
 #endif
-                // TODO PostAvailabilityOn(TCPIP_ADAPTER_IF_ETH);
+                PostAvailabilityOn(IDF_ETH_DEF);
                 break;
 
             case ETHERNET_EVENT_DISCONNECTED:
 #ifdef PRINT_NET_EVENT
                 ets_printf("ETHERNET_EVENT_DISCONNECTED\n");
 #endif
-                // TODO PostAvailabilityOff(TCPIP_ADAPTER_IF_ETH);
+                PostAvailabilityOff(IDF_ETH_DEF);
                 break;
 
             default:
@@ -292,10 +284,10 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 
 void nanoHAL_Network_Initialize()
 {
-    // Initialise the Lwip CLR signal callback
+    // Initialise the lwIP CLR signal call-back
     //set_signal_sock_function(&sys_signal_sock_event);
 
-    // initialize netif
+    // initialize network interface
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());

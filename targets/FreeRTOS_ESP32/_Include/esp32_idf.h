@@ -25,6 +25,7 @@
 #include <esp_wpa2.h>
 #include <esp_eth.h>
 #include <esp_event.h>
+#include <esp_netif_lwip_internal.h>
 
 #include <esp_timer.h>
 #include <esp_sleep.h>

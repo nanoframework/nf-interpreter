@@ -30,8 +30,6 @@ int errorCode;
 #define DEBUG_HANDLE_SOCKET_ERROR(t, a)
 #endif
 
-struct netif *netif_find_interface(int num);
-
 //
 
 // declaration of function not available in standard lwIP API
@@ -1400,7 +1398,8 @@ int LWIP_SOCKETS_Driver::GetNativeError(int error)
 struct netif *netif_find_interface(int num)
 {
 
-#ifdef LWIP_SINGLE_NETIF
+#if LWIP_SINGLE_NETIF
+
     // there is a single network interface
 
     // sanity check for interface other than 0

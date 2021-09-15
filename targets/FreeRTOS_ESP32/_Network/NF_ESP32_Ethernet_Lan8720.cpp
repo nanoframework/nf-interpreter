@@ -5,10 +5,8 @@
 
 // This file includes the board specific Ethernet Intialisation
 
-#include <nanoHAL.h>
+#include "NF_ESP32_Network.h"
 #include <esp32_ethernet_options.h>
-
-extern struct netif *Esp32_find_netif(esp_interface_t esp_if);
 
 esp_eth_handle_t eth_handle = NULL;
 
@@ -63,7 +61,7 @@ static void phy_device_power_enable_via_gpio(bool enable)
 }
 #endif
 
-esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
+esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 {
     (void)pMacAdr;
 
@@ -110,38 +108,20 @@ esp_err_t Esp32_InitialiseEthernet(uint8_t *pMacAdr)
 //
 //  Open Ethernet Network driver
 //
-int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
+int NF_ESP32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config)
 {
     (void)index;
 
-    if (Esp32_InitialiseEthernet(config->MacAddress) == ESP_OK)
+    if (NF_ESP32_InitialiseEthernet(config->MacAddress) == ESP_OK)
     {
         // Return NetIf number for Esp32 wireless station
-
-        // FIXME find a better way to get the netif ptr
-        struct netif *pNetIf;
-        while (true)
-        {
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-
-            // Return NetIf number for Esp32 wireless station
-            pNetIf = Esp32_find_netif(ESP_IF_ETH);
-            if (pNetIf != NULL)
-                break;
-        }
-
-        if (pNetIf != NULL)
-        {
-            // TODO
-            // return pNetIf->num;
-            return 0;
-        }
+        return NF_ESP32_Wait_NetNumber(IDF_WIFI_STA_DEF);
     }
 
     return SOCK_SOCKET_ERROR;
 }
 
-bool Esp32_Ethernet_Close(int index)
+bool NF_ESP32_Ethernet_Close(int index)
 {
     (void)index;
     return esp_eth_stop(eth_handle) == ESP_OK;

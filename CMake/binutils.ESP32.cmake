@@ -208,6 +208,7 @@ macro(nf_add_platform_include_directories target)
         target_include_directories(${target}.elf PUBLIC
 
             ${TARGET_ESP32_IDF_NANOCLR_INCLUDE_DIRS}
+            ${TARGET_ESP32_IDF_NETWORK_INCLUDE_DIRS}
         )
 
     endif()
@@ -441,8 +442,34 @@ macro(nf_add_idf_as_library)
             TARGET __idf_lwip 
             PROPERTY SOURCES ${IDF_LWIP_SOURCES}
         )
+        
+        # get list of include directories for lwIP
+        get_target_property(IDF_LWIP_INCLUDE_DIRECTORIES __idf_lwip INCLUDE_DIRECTORIES)
 
-        get_target_property(IDF_LWIP_SOURCES_CHECK __idf_lwip SOURCES)
+        # add nanoCLR include path to lwIP so our lwipots are taken instead of the IDF ones
+        list(INSERT 
+            IDF_LWIP_INCLUDE_DIRECTORIES 0
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_Include
+                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
+                ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
+                ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+
+        # replace the include directories
+        set_property(
+            TARGET __idf_lwip 
+            PROPERTY INCLUDE_DIRECTORIES ${IDF_LWIP_INCLUDE_DIRECTORIES}
+        )
+
+        # add nanoCLR compile definitions to lwIP
+        list(APPEND 
+            IDF_LWIP_COMPILE_DEFINITIONS 
+                PLATFORM_ESP32 )
+
+        # add the compile definitions
+        set_property(
+            TARGET __idf_lwip 
+            PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
+        )
 
     endif()
 

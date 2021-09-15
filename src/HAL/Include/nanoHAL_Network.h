@@ -10,7 +10,9 @@
 
 // this is the maximum hardware address length (MAC address)
 // setting it to 6 and using the same define that lwIP uses for this
-#define NETIF_MAX_HWADDR_LEN 6
+#ifndef NETIF_MAX_HWADDR_LEN
+#define NETIF_MAX_HWADDR_LEN 6U
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.Wireless80211Configuration.MaxPasswordLength (in managed code)

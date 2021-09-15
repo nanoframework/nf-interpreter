@@ -12,6 +12,8 @@
 
 #define NATIVE_PROFILE_PAL_NETWORK()
 
+struct netif *netif_find_interface(int num);
+
 //////////////////////////////////////////////////////////////////////////////
 // SOCKET driver
 //

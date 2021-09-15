@@ -97,7 +97,7 @@ void smartconfig_task(void *parm)
     }
 }
 
-void Start_wifi_smart_config(void)
+void NF_ESP32_Start_wifi_smart_config(void)
 {
     xTaskCreate(smartconfig_task, "smartconfig_task", 4096, NULL, 3, NULL);
 }

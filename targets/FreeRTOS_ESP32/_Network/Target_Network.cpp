@@ -4,24 +4,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoHAL.h>
+#include "NF_ESP32_Network.h"
 #include <esp32_ethernet_options.h>
 
 //
 // Works with the Target_NetworkConfig to map the Network_Interface_XXXXX calls to the correct driver
 
-int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool Esp32_Wireless_Close(int index);
-int Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool Esp32_WirelessAP_Close(int index);
-int Esp32_Ethernet_Open(int index, HAL_Configuration_NetworkInterface *config);
-bool Esp32_Ethernet_Close(int index);
-int Esp32_Wireless_Scan();
-int Esp32_Wireless_Disconnect();
-int Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless);
-
-bool Esp32_ConnectInProgress = false;
-int Esp32_ConnectResult = 0;
+bool NF_ESP32_ConnectInProgress = false;
+int NF_ESP32_ConnectResult = 0;
 
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
@@ -52,16 +42,16 @@ int Network_Interface_Open(int index)
     {
         // Wireless
         case NetworkInterfaceType_Wireless80211:
-            return Esp32_Wireless_Open(index, &networkConfiguration);
+            return NF_ESP32_Wireless_Open(index, &networkConfiguration);
 
         // Soft AP
         case NetworkInterfaceType_WirelessAP:
-            return Esp32_WirelessAP_Open(index, &networkConfiguration);
+            return NF_ESP32_WirelessAP_Open(index, &networkConfiguration);
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
-            return Esp32_Ethernet_Open(index, &networkConfiguration);
+            return NF_ESP32_Ethernet_Open(index, &networkConfiguration);
 #endif
 
     }
@@ -85,16 +75,16 @@ bool Network_Interface_Close(int index)
     {
         // Wireless
         case NetworkInterfaceType_Wireless80211:
-            return Esp32_Wireless_Close(index);
+            return NF_ESP32_Wireless_Close(index);
 
         // Soft AP
         case NetworkInterfaceType_WirelessAP:
-            return Esp32_WirelessAP_Close(index);
+            return NF_ESP32_WirelessAP_Close(index);
 
 #ifdef ESP32_ETHERNET_SUPPORT
         // Ethernet
         case NetworkInterfaceType_Ethernet:
-            return Esp32_Ethernet_Close(index);
+            return NF_ESP32_Ethernet_Close(index);
 #endif
 
     }
@@ -117,7 +107,7 @@ bool Network_Interface_Start_Scan(int index)
     // can only do this is this is STA
     if(networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
     {
-        return (Esp32_Wireless_Scan() == 0);
+        return (NF_ESP32_Wireless_Scan() == 0);
     }
 
     return false;
@@ -191,8 +181,8 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
             sizeof(HAL_Configuration_Wireless80211));
     }
 
-    Esp32_ConnectInProgress = true;
-    esp_err_t err = Esp32_Wireless_Start_Connect(pWireless);
+    NF_ESP32_ConnectInProgress = true;
+    esp_err_t err = NF_ESP32_Wireless_Start_Connect(pWireless);
 
     return (int)err;
 }
@@ -211,7 +201,7 @@ int Network_Interface_Connect_Result(int index)
 
     if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
     {
-        return Esp32_ConnectInProgress ? -1 : Esp32_ConnectResult;
+        return NF_ESP32_ConnectInProgress ? -1 : NF_ESP32_ConnectResult;
     }
 
     return SOCK_SOCKET_ERROR;
@@ -231,7 +221,7 @@ int Network_Interface_Disconnect(int index)
 
     if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
     {
-        esp_err_t err = Esp32_Wireless_Disconnect();
+        esp_err_t err = NF_ESP32_Wireless_Disconnect();
 
         return (err == ESP_OK);
     }

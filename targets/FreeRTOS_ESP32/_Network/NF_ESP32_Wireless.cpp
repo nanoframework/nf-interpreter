@@ -3,37 +3,26 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// This file includes the board specific Ethernet Intialisation
+// This file includes the board specific Ethernet Initialisation
 
-#include <nanoHAL.h>
-
-extern "C"
-{
-    //#include <esp_netif.h>
-    #include <esp_wifi.h>
-}
+#include "NF_ESP32_Network.h"
+#include "esp_netif_net_stack.h"
 
 static const char *TAG = "wifi";
 static bool WifiInitialised = false;
 static wifi_mode_t wifiMode;
 
-// Forward / external references
-struct netif *Esp32_find_netif(esp_interface_t esp_if);
-// int Esp32_Wait_NetNumber(esp_interface_t esp_if);
-void Start_wifi_smart_config();
-esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *pConfig);
-
 //
-//  Check what is the required Wifi mode
+//  Check what is the required Wi-Fi mode
 //  Station only or AP only or Station and AP
 //
 //  See what network interfaces are enabled
 //
-wifi_mode_t Esp32_CheckWifiMode()
+wifi_mode_t NF_ESP32_CheckWifiMode()
 {
     wifi_mode_t mode = WIFI_MODE_NULL;
 
-    // Check Wifi station available
+    // Check Wi-Fi station available
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count >= 1)
     {
         // Check if Station config available
@@ -80,7 +69,7 @@ wifi_mode_t Esp32_CheckWifiMode()
     return mode;
 }
 
-wifi_mode_t Esp32_GetWifiMode()
+wifi_mode_t NF_ESP32_GetWifiMode()
 {
     wifi_mode_t current_wifi_mode;
 
@@ -89,7 +78,7 @@ wifi_mode_t Esp32_GetWifiMode()
     return current_wifi_mode;
 }
 
-void Esp32_DeinitWifi()
+void NF_ESP32_DeinitWifi()
 {
     WifiInitialised = false;
 
@@ -98,19 +87,19 @@ void Esp32_DeinitWifi()
     esp_wifi_deinit();
 }
 
-esp_err_t Esp32_InitaliseWifi()
+esp_err_t NF_ESP32_InitaliseWifi()
 {
     esp_err_t ec = ESP_OK;
 
-    wifi_mode_t wifi_mode = Esp32_CheckWifiMode();
+    wifi_mode_t wifi_mode = NF_ESP32_CheckWifiMode();
 
     if (WifiInitialised)
     {
         // Check if we are running correct mode
-        // if not force a new init
-        if (Esp32_GetWifiMode() != wifi_mode)
+        // if not force a new initialization
+        if (NF_ESP32_GetWifiMode() != wifi_mode)
         {
-            Esp32_DeinitWifi();
+            NF_ESP32_DeinitWifi();
         }
     }
 
@@ -122,7 +111,7 @@ esp_err_t Esp32_InitaliseWifi()
 
     if (!WifiInitialised)
     {
-        // Init WiFi Alloc resource for WiFi driver, such as WiFi control structure,
+        // Initialise WiFi, allocate resource for WiFi driver, such as WiFi control structure,
         // RX/TX buffer, WiFi NVS structure etc, this WiFi also start WiFi task.
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         ec = esp_wifi_init(&cfg);
@@ -135,13 +124,13 @@ esp_err_t Esp32_InitaliseWifi()
         esp_wifi_set_mode(wifi_mode);
 
         // We need to start the WIFI stack before the station can Connect
-        // Also we can only get the NetIf number used by ESP Idf after it has been started.
+        // Also we can only get the NetIf number used by ESP IDF after it has been started.
         // Starting will also start the Soft- AP (if we have enabled it).
         // So make sure it configured as per wireless config otherwise we will get the default SSID
         if (wifi_mode & WIFI_MODE_AP)
         {
             HAL_Configuration_NetworkInterface *pConfig = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[1];
-            ec = Esp32_WirelessAP_Configure(pConfig);
+            ec = NF_ESP32_WirelessAP_Configure(pConfig);
         }
 
         ec = esp_wifi_start();
@@ -157,7 +146,7 @@ esp_err_t Esp32_InitaliseWifi()
     return ec;
 }
 
-esp_err_t Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless)
+esp_err_t NF_ESP32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireless)
 {
     esp_err_t ec;
 
@@ -197,7 +186,7 @@ esp_err_t Esp32_Wireless_Start_Connect(HAL_Configuration_Wireless80211 *pWireles
     return ESP_OK;
 }
 
-esp_err_t Esp32_Wireless_Disconnect()
+esp_err_t NF_ESP32_Wireless_Disconnect()
 {
     esp_err_t ec;
 
@@ -211,13 +200,13 @@ esp_err_t Esp32_Wireless_Disconnect()
     return ESP_OK;
 }
 
-int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
+int NF_ESP32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
 {
     (void)index;
 
     esp_err_t ec;
 
-    ec = Esp32_InitaliseWifi();
+    ec = NF_ESP32_InitaliseWifi();
 
     if (ec != ESP_OK)
     {
@@ -234,7 +223,7 @@ int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
     }
 
     // Wireless station not enabled
-    if (!(Esp32_GetWifiMode() & WIFI_MODE_STA))
+    if (!(NF_ESP32_GetWifiMode() & WIFI_MODE_STA))
     {
         return SOCK_SOCKET_ERROR;
     }
@@ -245,27 +234,25 @@ int Esp32_Wireless_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
         return SOCK_SOCKET_ERROR;
     }
 
-    // Connect if Auto connect and we have an ssid
+    // Connect if Auto connect and we have an SSID
     if ((pWireless->Options & Wireless80211Configuration_ConfigurationOptions_AutoConnect) &&
         (hal_strlen_s((const char *)pWireless->Ssid) > 0))
     {
-        Esp32_Wireless_Start_Connect(pWireless);
+        NF_ESP32_Wireless_Start_Connect(pWireless);
 
-        // Maybe remove SmartConfig flag if conected ok
+        // Maybe remove SmartConfig flag if connection was OK
     }
 
     if (pWireless->Options & Wireless80211Configuration_ConfigurationOptions_SmartConfig)
     {
         // Start Smart config (if enabled)
-        Start_wifi_smart_config();
+        NF_ESP32_Start_wifi_smart_config();
     }
 
-    esp_netif_t* espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-
-    return 0;// TODO espNetif->lwip_netif->num;
+    return NF_ESP32_Wait_NetNumber(IDF_WIFI_STA_DEF);
 }
 
-bool Esp32_Wireless_Close(int index)
+bool NF_ESP32_Wireless_Close(int index)
 {
     (void)index;
 
@@ -280,14 +267,15 @@ bool Esp32_Wireless_Close(int index)
 }
 
 // Start a scan
-int Esp32_Wireless_Scan()
+int NF_ESP32_Wireless_Scan()
 {
     wifi_scan_config_t config = {};
 
     config.scan_type = WIFI_SCAN_TYPE_PASSIVE;
-    config.scan_time.passive = 500; // 500 ms
+    // 500ms
+    config.scan_time.passive = 500;
 
-    // Start a WIFI scan
+    // Start a Wi-Fi scan
     // When complete a Scan Complete event will be fired
     esp_err_t res = esp_wifi_scan_start(&config, false);
 
@@ -311,12 +299,12 @@ wifi_auth_mode_t MapAuthentication(AuthenticationType type)
     return mapAuth[type];
 }
 
-esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *pConfig)
+esp_err_t NF_ESP32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *pConfig)
 {
     esp_err_t ec;
     esp_netif_ip_info_t ip_info;
 
-    esp_netif_t* espNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+    esp_netif_t *espNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
 
     ec = esp_netif_get_ip_info(espNetif, &ip_info);
 
@@ -392,14 +380,14 @@ esp_err_t Esp32_WirelessAP_Configure(HAL_Configuration_NetworkInterface *pConfig
 //
 //  If AP is enabled it will have been configured and started running when the WiFI stack is initialised
 //  All we need to do here is return the NetIf number used by ESP IDF
-//  Also make sure WIfi in initialised correctly if config is changed
-int Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
+//  Also make sure Wi-Fi in initialised correctly if config is changed
+int NF_ESP32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *pConfig)
 {
     (void)index;
     esp_err_t ec;
 
-    // Initialise Wifi stack if required
-    ec = Esp32_InitaliseWifi();
+    // Initialise Wi-Fi stack if required
+    ec = NF_ESP32_InitaliseWifi();
 
     if (ec != ESP_OK)
     {
@@ -407,19 +395,16 @@ int Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *pConfig
     }
 
     // AP mode enabled ?
-    if (!(Esp32_GetWifiMode() & WIFI_MODE_AP))
+    if (!(NF_ESP32_GetWifiMode() & WIFI_MODE_AP))
     {
         return SOCK_SOCKET_ERROR;
     }
 
     // Return NetIf number
-    esp_netif_t* espNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
-
-
     // FIXME find a better way to get the netif ptr
     // This becomes available on the event AP STARTED
     // for the moment we just wait for it
-    return 0;// TODO espNetif->lwip_netif->num;
+    return NF_ESP32_Wait_NetNumber(IDF_WIFI_AP_DEF);
 }
 
 //
@@ -428,11 +413,51 @@ int Esp32_WirelessAP_Open(int index, HAL_Configuration_NetworkInterface *pConfig
 //  	Either config being updated  or shutdown
 //  	Closing AP will also stop Station
 //
-bool Esp32_WirelessAP_Close(int index)
+bool NF_ESP32_WirelessAP_Close(int index)
 {
     (void)index;
 
-    Esp32_DeinitWifi();
+    NF_ESP32_DeinitWifi();
 
     return true;
+}
+
+// Wait for the network interface to become available
+int NF_ESP32_Wait_NetNumber(int num)
+{
+    int number = 0;
+
+    esp_netif_t *espNetif;
+
+    while (true)
+    {
+        switch (num)
+        {
+            case IDF_WIFI_STA_DEF:
+                espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+                break;
+
+            case IDF_WIFI_AP_DEF:
+                espNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+                break;
+
+            case IDF_ETH_DEF:
+                espNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
+                break;
+
+            default:
+                // can't reach here
+                HAL_AssertEx();
+                break;
+        }
+
+        if (espNetif != NULL)
+        {
+            break;
+        }
+
+        vTaskDelay(20 / portTICK_PERIOD_MS);
+    }
+
+    return num;
 }
