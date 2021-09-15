@@ -411,7 +411,8 @@ macro(nf_add_idf_as_library)
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
             ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig.default
-        BUILD_DIR ${CMAKE_BINARY_DIR}
+        PROJECT_NAME "nanoCRL"
+        PROJECT_VER ${BUILD_VERSION}
     )
 
     if(USE_NETWORKING_OPTION)
