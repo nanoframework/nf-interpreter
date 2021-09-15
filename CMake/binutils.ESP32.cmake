@@ -488,16 +488,9 @@ macro(nf_add_idf_as_library)
 
 endmacro()
 
-# macro to clear binary files related with nanoBooter from output
+# macro to clear binary files from output
 # to make sure that the build file it's up to date
-macro(nf_clear_output_files_nanobooter)
-    nf_clear_common_output_files_nanobooter()
-    # other files specific to this platform should go here
-endmacro()
-
-# macro to clear binary files related with nanoCLR from output
-# to make sure that the build file it's up to date
-macro(nf_clear_output_files_nanoclr)
-    nf_clear_common_output_files_nanoclr()
+macro(nf_clear_output_files)
+    nf_clear_common_output_files()
     # other files specific to this platform should go here
 endmacro()

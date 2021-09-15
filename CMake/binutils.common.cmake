@@ -614,4 +614,11 @@ macro(nf_clear_common_output_files_nanoclr)
         COMMENT "Removing nanoCLR bin and elf files from build folder"
     )
 
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove ${BUILD_FILES_TO_REMOVE}
+        COMMENT "Removing bin and elf files from build folder"
+    )
+    
 endmacro()

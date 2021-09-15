@@ -898,6 +898,8 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 
+    nf_clear_output_files()
+
 #######################
 # TI_SIMPLELINK
 elseif(RTOS_TI_SIMPLELINK_CHECK)
