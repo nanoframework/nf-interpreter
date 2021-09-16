@@ -490,9 +490,25 @@ macro(nf_add_idf_as_library)
 
 endmacro()
 
-# macro to clear binary files from output
+# macro to clear binary files related with nanoBooter from output
 # to make sure that the build file it's up to date
-macro(nf_clear_output_files)
-    nf_clear_common_output_files()
-    # other files specific to this platform should go here
+macro(nf_clear_output_files_nanobooter)
+    message("nanoCLR for ESP32 doesn't have a nanoBooter! Check the build options.")
 endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.elf)
+
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${CLR_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoCLR bin and elf files from build folder"
+    )
+
+endmacro()
+

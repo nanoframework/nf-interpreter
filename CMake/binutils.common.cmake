@@ -613,12 +613,30 @@ macro(nf_clear_common_output_files_nanoclr)
         COMMAND_EXPAND_LISTS
         COMMENT "Removing nanoCLR bin and elf files from build folder"
     )
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_common_output_files_nanoclr)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.elf)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.hex)
 
     add_custom_command(
         TARGET ${NANOCLR_PROJECT_NAME}.elf
         PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E remove ${BUILD_FILES_TO_REMOVE}
-        COMMENT "Removing bin and elf files from build folder"
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${CLR_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoCLR bin and elf files from build folder"
+    )
+
+endmacro()
+
+    add_custom_command(
+        TARGET ${NANOBOOTER_PROJECT_NAME}.elf
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${BOOTER_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoBooter bin and elf files from build folder"
     )
     
 endmacro()
+
