@@ -6,7 +6,6 @@
 
 #include <hal.h>
 
-#if defined(NF_TRACE_TO_STDIO)
 #include <target_stdio_config.h>
 
 // Select which STM32 uart/serial port used.
@@ -31,7 +30,7 @@ UART_CONFIG_PINS(4, GPIOA, GPIOA, 0, 1, 8)
 //#elif (STDIO_UART == x)
 // UART_CONFIG_PINS(x, GPIOx, GPIOx, x, x, x)
 #else
-#error "Define NF_TRACE_TO_STDIO_UART to a support UART/USART number [4]"
+#error "Missing UART_CONFIG_PINS() definition"
 #endif
 
 // These macros lead to the definition of the external method used to inialise the GPIO
@@ -58,5 +57,3 @@ uint32_t StdioPort_Write(int portNum, const char *data, size_t size)
         1000); //(systime_t)TIMEOUT_INFINITE); // 1000); //
     return (uint32_t)writeResult;
 }
-
-#endif

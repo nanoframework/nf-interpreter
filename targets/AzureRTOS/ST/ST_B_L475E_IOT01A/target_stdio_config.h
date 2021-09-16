@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-#if defined(NF_TRACE_TO_STDIO)
+#if defined(TRACE_TO_STDIO)
 
 // Generalised method to init stdio. This method is expected to initialise and required GPIO and driver.
 #define STDIOPORT_INIT()                     StdioPort_Init()

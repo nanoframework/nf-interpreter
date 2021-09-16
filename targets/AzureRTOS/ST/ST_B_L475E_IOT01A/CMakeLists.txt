@@ -24,16 +24,17 @@ nf_setup_target_build(
     CLR_LINKER_FILE 
         STM32L475xG_CLR
 
-    CLR_EXTRA_SOURCE_FILES
-        # this is required to support configuration of a UART used as stdio port (if enabled)
-        ${CMAKE_CURRENT_SOURCE_DIR}/target_stdio_config.c
-    
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
 )
+
+# this is required to support configuration of a UART used as stdio port (if enabled)
+if(NF_TRACE_TO_STDIO)
+    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/target_stdio_config.c)
+endif()
 
 # make vars global
 set(TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_AZURERTOS_COMMON_SOURCES} CACHE INTERNAL "make global")
