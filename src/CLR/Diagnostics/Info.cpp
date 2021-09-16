@@ -5,7 +5,6 @@
 //
 #include "Diagnostics.h"
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_WIN32)
@@ -286,7 +285,6 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
     SaveMessage(outputString);
 #endif
 
- 
 #if !defined(_WIN32)
     if (buffer != NULL)
     {
