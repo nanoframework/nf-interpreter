@@ -64,13 +64,9 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
-    # set compiler definition for implementing (or not) CRC32 in Wire Protocol
-    if(NF_FEATURE_TRACE_TO_STDIO)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DFEATURE_TRACE_TO_STDIO=${NF_FEATURE_TRACE_TO_STDIO})
-        # define which serial driver the stdio TRACE will be using
-        # (e.g. set "NF_FEATURE_TRACE_TO_STDIO": "4" in cmake-variants.json for the Traget)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DSTM32_SERIAL_USE_UART${NF_FEATURE_TRACE_TO_STDIO})
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DSERIAL_DRIVER_STDIO=SD${NF_FEATURE_TRACE_TO_STDIO})
+    # set compiler definition for implementing (or not) TRACE to stdio
+    if(NF_TRACE_TO_STDIO)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNF_TRACE_TO_STDIO)
     endif()
 
 endmacro()

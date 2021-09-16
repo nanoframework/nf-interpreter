@@ -278,10 +278,10 @@ endif()
 
 ###################################################################
 # native send trace to stdio (default is OFF so no support for sending stdio to serial port)
-option(NF_FEATURE_TRACE_TO_STDIO "option to enable sending trace data to stdio. Requires spare SERIAL device")
+option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
 
-if(NF_FEATURE_TRACE_TO_STDIO)
-    message(STATUS "Support for sending TRACE to stdio is included to serial device SD/UART ${NF_FEATURE_TRACE_TO_STDIO}.")
+if(NF_TRACE_TO_STDIO )
+    message(STATUS "Support for sending TRACE to stdio is included.")
 else()
     message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
 endif()

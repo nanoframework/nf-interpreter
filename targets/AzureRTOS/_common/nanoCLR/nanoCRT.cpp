@@ -5,11 +5,7 @@
 //
 
 #include <nanoHAL.h>
-
-#if defined(FEATURE_TRACE_TO_STDIO)
-extern uint32_t StdioPort_Write(int portNum, const char *data, size_t size);
-#endif
-
+#include <target_stdio_config.h>
 //--//
 /* STDIO stubs                                                              */
 //--//
@@ -128,9 +124,6 @@ extern "C"
 
         DebuggerPort_Write(HalSystemConfig.stdio, buffer, len, 0); // skip null terminator
 
-#if defined(FEATURE_TRACE_TO_STDIO)
-        StdioPort_Write(0, buffer, len);
-#endif
         va_end(arg_ptr);
     }
 
