@@ -368,6 +368,9 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fStopOnBoot = true;
 
+#if !defined(BUILD_RTM) && defined(TRACE_TO_STDIO) && (TRACE_TO_STDIO == TRUE)
+    CLR_Debug::Printf("CLR_DBG_Debugger::Monitor_Ping...\r\n");
+#endif
     //
     // There's someone on the other side!!
     //
