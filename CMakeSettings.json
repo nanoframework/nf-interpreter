@@ -319,6 +319,10 @@
           "value": "OFF"
         },
         {
+          "name": "NF_WP_TRACE_VERBOSE:BOOL", //OFF-default-ON-to-enable-trace-verbose-state-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
           "name": "NF_WP_TRACE_ALL:BOOL", //OFF-default-ON-to-enable-trace-all-messages-wire-protocol
           "value": "OFF"
         },

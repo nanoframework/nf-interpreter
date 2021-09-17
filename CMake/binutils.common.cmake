@@ -523,6 +523,8 @@ macro(nf_setup_target_build_common)
                 ${NANOBOOTER_PROJECT_NAME}.elf
             EXTRA_LINKMAP_PROPERTIES ${NFSTBC_BOOTER_EXTRA_LINKMAP_PROPERTIES})
 
+        nf_clear_output_files_nanobooter()
+
     endif()
 
     #######################
@@ -575,5 +577,41 @@ macro(nf_setup_target_build_common)
     endif()
 
     nf_generate_build_output_files(${NANOCLR_PROJECT_NAME}.elf)
+   
+    nf_clear_output_files_nanoclr()
+
+endmacro()
+
+# macro to clear binary files related with nanoBooter from output
+# to make sure that the build file it's up to date
+macro(nf_clear_common_output_files_nanobooter)
+    list(APPEND BOOTER_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.bin)
+    list(APPEND BOOTER_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.elf)
+    list(APPEND BOOTER_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOBOOTER_PROJECT_NAME}.hex)
+
+    add_custom_command(
+        TARGET ${NANOBOOTER_PROJECT_NAME}.elf
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${BOOTER_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoBooter bin and elf files from build folder"
+    )
+    
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_common_output_files_nanoclr)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.bin)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.elf)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/${NANOCLR_PROJECT_NAME}.hex)
+
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${CLR_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoCLR bin and elf files from build folder"
+    )
 
 endmacro()

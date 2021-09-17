@@ -32,7 +32,7 @@
           "TOOL_SRECORD_PREFIX": "<absolute-path-to-srecord-folder-mind-the-forward-slashes>",
           "TARGET_SERIES": "IMXRT10xx",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
-          "RTOS": "FREERTOS",
+          "RTOS": "FreeRTOS",
           "TARGET_BOARD": "NXP_MIMXRT1060_EVK",
           "RTOS_VERSION": "",
           "CMSIS_VERSION": "",
