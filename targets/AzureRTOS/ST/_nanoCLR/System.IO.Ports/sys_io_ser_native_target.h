@@ -183,4 +183,4 @@ void UnInit_UART6();
 void UnInit_UART7();
 void UnInit_UART8();
 
-#endif //WIN_DEV_SERIAL_NATIVE_TARGET_H
+#endif // WIN_DEV_SERIAL_NATIVE_TARGET_H
