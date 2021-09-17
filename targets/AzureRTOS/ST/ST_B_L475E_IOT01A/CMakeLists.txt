@@ -32,7 +32,7 @@ nf_setup_target_build(
 )
 
 # this is required to support configuration of a UART used as stdio port (if enabled)
-if(NF_TRACE_TO_STDIO)
+if(TRACE_TO_STDIO)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/target_stdio_config.c)
 endif()
 

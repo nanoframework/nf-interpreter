@@ -281,8 +281,10 @@ endif()
 option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
 
 if(NF_TRACE_TO_STDIO )
+    set(TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
     message(STATUS "Support for sending TRACE to stdio is included.")
 else()
+    set(TRACE_TO_STDIO FALSE CACHE INTERNAL "Option for stdio TRACE implementation")
     message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
 endif()
 
