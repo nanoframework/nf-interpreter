@@ -235,6 +235,22 @@ else()
 endif()
 
 #################################################################
+# nanoFramework features
+#################################################################
+
+###################################################################
+# native send trace to stdio (default is OFF so no support for sending stdio to serial port)
+option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
+
+if(NF_TRACE_TO_STDIO)
+    set(TARGET_TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio is included.")
+else()
+    set(TARGET_TRACE_TO_STDIO FALSE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
+endif()
+
+#################################################################
 # enables Application Domains support in nanoCLR
 # (default is OFF so Application Domains is NOT supported)
 option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")

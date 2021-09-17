@@ -64,6 +64,11 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
+    # set compiler definition for implementing (or not) TRACE to stdio
+    if(NF_TRACE_TO_STDIO)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNF_TRACE_TO_STDIO)
+    endif()
+
 endmacro()
 
 # Add packages that are common to ALL builds
