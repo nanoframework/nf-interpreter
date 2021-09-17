@@ -58,6 +58,7 @@
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Adc": "OFF",
+          "API_System.IO.Ports": "OFF",
           "API_Windows.Devices.SerialCommunication": "OFF",
           "API_nanoFramework.ResourceManager": "OFF",
           "API_nanoFramework.System.Collections": "OFF",
