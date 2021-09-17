@@ -68,6 +68,32 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Clear___STATIC__VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();    
+    {
+        (void)stack;
+        g_DisplayDriver.Clear();
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock_Array *colors;
+        CLR_UINT32 *writeData;
+        colors = stack.Arg4().DereferenceArray();
+        FAULT_ON_NULL(colors);
+
+        writeData = (CLR_UINT32 *)colors->GetFirstElement();
+        g_DisplayDriver.BitBlt(stack.Arg0().NumericByRef().u2, stack.Arg1().NumericByRef().u2, stack.Arg2().NumericByRef().u2, stack.Arg3().NumericByRef().u2, writeData);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4(CLR_RT_StackFrame &stack)
 {
@@ -75,13 +101,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
     CLR_RT_HeapBlock *spiconfig;
     CLR_RT_HeapBlock *screenconfig;
-    g_GraphicsMemoryHeap.Initialize();
+    CLR_INT32 desired;
     // Initialise Graphics after devices initialised
     DisplayInterfaceConfig displayConfig;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
+   
+    desired = stack.Arg2().NumericByRef().u4;
+    g_GraphicsMemoryHeap.Initialize(desired);
 
     spiconfig = stack.Arg0().Dereference();
     screenconfig = stack.Arg1().Dereference();
@@ -95,9 +120,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     displayConfig.Screen.y = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___y].NumericByRef().u2;
     displayConfig.Screen.width = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___width].NumericByRef().u2;
     displayConfig.Screen.height = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___height].NumericByRef().u2;
-    CLR_Debug::Printf("spibus=%d,cs=%d,dc=%d,rst=%d,bl=%d\n", displayConfig.Spi.spiBus, displayConfig.Spi.chipSelect, displayConfig.Spi.dataCommand, displayConfig.Spi.reset, displayConfig.Spi.backLight);
-    CLR_Debug::Printf("x=%d,y=%d,w=%d,h=%d\n", displayConfig.Screen.x,displayConfig.Screen.y, displayConfig.Screen.width, displayConfig.Screen.height);
-
     g_DisplayInterface.Initialize(displayConfig);    
     g_DisplayDriver.Initialize();
 
@@ -116,7 +138,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     
     stack.SetResult_U4(g_GraphicsMemoryHeap.GetMaxBuffer());
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::

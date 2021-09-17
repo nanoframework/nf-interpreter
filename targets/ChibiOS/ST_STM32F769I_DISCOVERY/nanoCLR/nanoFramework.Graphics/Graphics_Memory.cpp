@@ -13,7 +13,7 @@ struct GraphicsMemory g_GraphicsMemory;
 
 extern CLR_UINT32 GraphicsHeapBegin;
 extern CLR_UINT32 GraphicsHeapEnd;
-bool GraphicsMemory::GraphicsHeapLocation( CLR_UINT8*&graphicsStartingAddress, CLR_UINT8*&graphicsEndingAddress)
+bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT32 desired, CLR_UINT8*&graphicsStartingAddress, CLR_UINT8*&graphicsEndingAddress)
 {
     graphicsStartingAddress = (CLR_UINT8*)&GraphicsHeapBegin;
     graphicsEndingAddress = (CLR_UINT8*)&GraphicsHeapEnd;

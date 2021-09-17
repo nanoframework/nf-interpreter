@@ -35,6 +35,7 @@ This implementation was initially written for 16 bit colour.
 
 struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
+extern DisplayInterfaceConfig g_DisplayInterfaceConfig;
 
 enum ILI9341_CMD : CLR_UINT8
 {
@@ -42,8 +43,6 @@ enum ILI9341_CMD : CLR_UINT8
     SOFTWARE_RESET = 0x01,
     POWER_STATE = 0x10,
     Sleep_Out = 0x11,
-    Noron = 0x13,
-    Invert_On = 0x21,
     Gamma_Set = 0x26,
     Display_OFF = 0x28,
     Display_ON = 0x29,
@@ -58,10 +57,16 @@ enum ILI9341_CMD : CLR_UINT8
     Memory_Write_Continue = 0x3C,
     Write_Display_Brightness = 0x51,
     Frame_Rate_Control_Normal = 0xB1,
+    Frame_Rate_Control_2 = 0xB2,
+    Frame_Rate_Control_3 = 0xB3,
+    Invert_On = 0xB4,
     Display_Function_Control = 0xB6,
     Entry_Mode_Set = 0xB7,
     Power_Control_1 = 0xC0,
     Power_Control_2 = 0xC1,
+    Power_Control_3 = 0xC2,
+    Power_Control_4 = 0xC3,
+    Power_Control_5 = 0xC4,
     VCOM_Control_1 = 0xC5,
     VCOM_Control_2 = 0xC7,
     Power_Control_A = 0xCB,
@@ -72,7 +77,8 @@ enum ILI9341_CMD : CLR_UINT8
     Driver_Timing_Control_B = 0xEA,
     Power_On_Sequence = 0xED,
     Enable_3G = 0xF2,
-    Pump_Ratio_Control = 0xF7
+    Pump_Ratio_Control = 0xF7,
+    Power_Control_6 = 0xFC,
 };
 
 enum ILI9341_Orientation : CLR_UINT8
@@ -92,144 +98,42 @@ bool DisplayDriver::Initialize()
 
     SetupDisplayAttributes();
 
-    // g_DisplayInterface.SendCommand(SOFTWARE_RESET);
-    // g_DisplayInterface.SendCommand(Display_OFF);
-
-    g_DisplayInterface.SendCommand(4, Power_Control_B, 0x00, 0xC1, 0x30);
-    g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0x12, 81);
-    g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x00, 0x78);
-    g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
-    g_DisplayInterface.SendCommand(1, Invert_On);
-    g_DisplayInterface.SendCommand(1, Noron);
-    g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
-    g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
-    g_DisplayInterface.SendCommand(3, Power_Control_1, 0x10);
-    g_DisplayInterface.SendCommand(3, Power_Control_2, 0x00);
-    g_DisplayInterface.SendCommand(3, VCOM_Control_1, 0x30, 0x30);
-    g_DisplayInterface.SendCommand(2, VCOM_Control_2, 0xB7);
-    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);
-    g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0x08);
-    g_DisplayInterface.SendCommand(3, Frame_Rate_Control_Normal, 0x00, 0x1A);
-    g_DisplayInterface.SendCommand(4, Display_Function_Control, 0x08, 0x82, 0x27);
-    g_DisplayInterface.SendCommand(2, Enable_3G, 0x00);
-    g_DisplayInterface.SendCommand(2, Gamma_Set, 0x01);
+    g_DisplayInterface.SendCommand(SOFTWARE_RESET);
+    OS_DELAY(50);    
+    g_DisplayInterface.SendCommand(1, Sleep_Out);
+    OS_DELAY(500); // Send Sleep Out command to display : no parameter
+    g_DisplayInterface.SendCommand(4, Frame_Rate_Control_Normal, 0x01, 0x2C, 0x2D);
+    g_DisplayInterface.SendCommand(4, Frame_Rate_Control_2, 0x01, 0x2C, 0x2D);
+    g_DisplayInterface.SendCommand(7, Frame_Rate_Control_3, 0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D);
+    g_DisplayInterface.SendCommand(2, Invert_On, 0x07); 
+    g_DisplayInterface.SendCommand(4, Power_Control_1, 0xA2, 0x02, 0x84);
+    g_DisplayInterface.SendCommand(2, Power_Control_2, 0xC5);
+    g_DisplayInterface.SendCommand(3, Power_Control_3, 0x0A, 0x00);
+    g_DisplayInterface.SendCommand(3, Power_Control_4, 0x8A, 0x2A);
+    g_DisplayInterface.SendCommand(3, Power_Control_5, 0x8A, 0xEE);
+    g_DisplayInterface.SendCommand(4, VCOM_Control_1, 0x0E, 0xFF, 0xFF);
     g_DisplayInterface.SendCommand(
-        16,
+        17,
         Positive_Gamma_Correction,
-        0x0F,
-        0x2A,
-        0x28,
-        0x08,
-        0x0E,
-        0x08,
-        0x54,
-        0XA9,
-        0x43,
-        0x0A,
-        0x0F,
-        0x00,
-        0x00,
-        0x00,
-        0x00);
+        0x02, 0x1c, 0x07, 0x12,
+        0x37, 0x32, 0x29, 0x2d,
+        0x29, 0x25, 0x2B, 0x39,
+        0x00, 0x01, 0x03, 0x10);
     g_DisplayInterface.SendCommand(
-        16,
+        17,
         Negative_Gamma_Correction,
-        0x00,
-        0x15,
-        0x17,
-        0x07,
-        0x11,
-        0x06,
-        0x2B,
-        0x56,
-        0x3C,
-        0x05,
-        0x10,
-        0x0F,
-        0x3F,
-        0x3F,
-        0x0F);
-    g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
-    g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
-
-    //Supposed to be this from the M5 Stack
-    // g_DisplayInterface.SendCommand(4, 0xC8, 0xFF, 0x93, 0X42);
-    // g_DisplayInterface.SendCommand(3, Power_Control_1, 0x12, 0x12);
-    // g_DisplayInterface.SendCommand(2, Power_Control_2, 0x03);
-    // g_DisplayInterface.SendCommand(2, 0xB0, 0xE0);
-    // g_DisplayInterface.SendCommand(4, 0xF6, 0x00, 0x01, 0X01);
-    // g_DisplayInterface.SendCommand(2, Memory_Access_Control, 0xA8); // Portrait?
-    // g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit
-    // g_DisplayInterface.SendCommand(4, Display_Function_Control, 0x08, 0x82, 0x27);
-    // g_DisplayInterface.SendCommand(
-    //     16,
-    //     Positive_Gamma_Correction,
-    //     0x00,
-    //     0x1C,
-    //     0x11,
-    //     0x04,
-    //     0x11,
-    //     0x08,
-    //     0x37,
-    //     0X89,
-    //     0x4C,
-    //     0x06,
-    //     0x0C,
-    //     0x0A,
-    //     0x2E,
-    //     0x34,
-    //     0x0F); // gamma set 4
-    // g_DisplayInterface.SendCommand(
-    //     16,
-    //     Negative_Gamma_Correction,
-    //     0x00,
-    //     0x0B,
-    //     0x11,
-    //     0x05,
-    //     0x13,
-    //     0x09,
-    //     0x33,
-    //     0x67,
-    //     0x48,
-    //     0x07,
-    //     0x0E,
-    //     0x0B,
-    //     0x2E,
-    //     0x33,
-    //     0x0F);
-
-    // This from a previous implementation
-    // g_DisplayInterface.SendCommand(4, Power_Control_B, 0x00, 0x83, 0X30);
-    // g_DisplayInterface.SendCommand(5, Power_On_Sequence, 0x64, 0x03, 0X12, 0X81);
-    // g_DisplayInterface.SendCommand(4, Driver_Timing_Control_A, 0x85, 0x01, 0x79);
-    // g_DisplayInterface.SendCommand(6, Power_Control_A, 0x39, 0x2C, 0x00, 0x34, 0x02);
-
-    // g_DisplayInterface.SendCommand(2, Pump_Ratio_Control, 0x20);
-    // g_DisplayInterface.SendCommand(3, Driver_Timing_Control_B, 0x00, 0x00);
-    
-    
-    // g_DisplayInterface.SendCommand(3, VCOM_Control_1, 0x35, 0x3E);
-    // g_DisplayInterface.SendCommand(2, VCOM_Control_2, 0xBE);
-    
-    
-    // g_DisplayInterface.SendCommand(3, Frame_Rate_Control_Normal, 0x00, 0x1B);
-    // g_DisplayInterface.SendCommand(2, Enable_3G, 0x08);
-    // g_DisplayInterface.SendCommand(2, Gamma_Set, 0x01); // Gamma curve selected (0x01, 0x02, 0x04, 0x08)
-    
-    // g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
-    // g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
-    // g_DisplayInterface.SendCommand(1, Memory_Write);
-    // g_DisplayInterface.SendCommand(2, Entry_Mode_Set, 0x07); // Entry mode set
-    
+        0x03, 0x1d, 0x07, 0x06,
+        0x2E, 0x2C, 0x29, 0x2D,
+        0x2E, 0x2E, 0x37, 0x3F,
+        0x00, 0x00, 0x02, 0x10);
 
     g_DisplayInterface.SendCommand(1, Sleep_Out);
-    OS_DELAY(20); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, Display_ON);
-    OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
+    OS_DELAY(100);                           // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, NOP); // End of sequence
     OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
 
-    //SetDefaultOrientation();
+    SetDefaultOrientation();
 
     return true;
 }
@@ -237,8 +141,8 @@ bool DisplayDriver::Initialize()
 void DisplayDriver::SetupDisplayAttributes()
 {
     // Define the LCD/TFT resolution
-    Attributes.LongerSide = 320;
-    Attributes.ShorterSide = 240;
+    Attributes.LongerSide = g_DisplayInterfaceConfig.Screen.width;
+    Attributes.ShorterSide = g_DisplayInterfaceConfig.Screen.height;
     Attributes.PowerSave = PowerSaveState::NORMAL;
     Attributes.BitsPerPixel = 16;
     g_DisplayInterface.GetTransferBuffer(Attributes.TransferBuffer, Attributes.TransferBufferSize);
@@ -297,29 +201,25 @@ void DisplayDriver::PowerSave(PowerSaveState powerState)
 
 void DisplayDriver::Clear()
 {
-    // Clear the ILI9341 controller frame
+    // Clear the ILI9342 controller frame
     SetWindow(0, 0, Attributes.Width - 1, Attributes.Height - 1);
 
     // Clear buffer
-    memset(Attributes.TransferBuffer, 0, Attributes.TransferBufferSize);
-    CLR_Debug::Printf("Attributes.TransferBufferSize=%d\n", Attributes.TransferBufferSize);
+    memset(Attributes.TransferBuffer, 0x00, Attributes.TransferBufferSize);
     int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
-    CLR_Debug::Printf("totalBytesToClear=%d\n", totalBytesToClear);
     int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
-    CLR_Debug::Printf("fullTransferBuffersCount=%d\n", fullTransferBuffersCount);
     int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
-    CLR_Debug::Printf("totalBytesToClear=%d\n", totalBytesToClear);
 
     CLR_UINT8 command = Memory_Write;
+    g_DisplayInterface.SendCommand(1, command);
     for (int i = 0; i < fullTransferBuffersCount; i++)
     {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, Attributes.TransferBufferSize);
-        command = Memory_Write_Continue;
+        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, Attributes.TransferBufferSize);
     }
 
     if (remainderTransferBuffer > 0)
     {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, remainderTransferBuffer);
+        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, remainderTransferBuffer);
     }
 }
 
@@ -332,10 +232,10 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
 {
     CLR_UINT8 Column_Address_Set_Data[4];
-    Column_Address_Set_Data[0] = (x1 >> 8) & 0xFF;
-    Column_Address_Set_Data[1] = x1 & 0xFF;
-    Column_Address_Set_Data[2] = (x2 >> 8) & 0xFF;
-    Column_Address_Set_Data[3] = x2 & 0xFF;
+    Column_Address_Set_Data[0] = ((x1 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[1] = (x1 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
+    Column_Address_Set_Data[2] = ((x2 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[3] = (x2 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Column_Address_Set,
@@ -345,10 +245,10 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
         Column_Address_Set_Data[3]);
 
     CLR_UINT8 Page_Address_Set_Data[4];
-    Page_Address_Set_Data[0] = (y1 >> 8) & 0xFF;
-    Page_Address_Set_Data[1] = y1 & 0xFF;
-    Page_Address_Set_Data[2] = (y2 >> 8) & 0xFF;
-    Page_Address_Set_Data[3] = y2 & 0xFF;
+    Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 +g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Page_Address_Set,
@@ -369,15 +269,11 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     SetWindow(x, y, (x + width - 1), (y + height - 1));
 
     CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
-
-    // Position to offset in data[] for start of window
-    CLR_UINT16 offset = (y * Attributes.Width) + x;
-    StartOfLine_src += offset;
-
     CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
     CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
     CLR_UINT8 command = Memory_Write;
 
+    g_DisplayInterface.SendCommand(1, command);
     while (height--)
     {
         CLR_UINT16 *src;
@@ -397,34 +293,32 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
             if (transferBufferCount < 1)
             {
                 // Transfer buffer full, send it
-                g_DisplayInterface.WriteToFrameBuffer(
-                    command,
+                g_DisplayInterface.SendBytes(
                     Attributes.TransferBuffer,
                     (Attributes.TransferBufferSize - transferBufferCount));
 
                 // Reset transfer ptrs/count
                 transferBufferIndex = Attributes.TransferBuffer;
                 transferBufferCount = Attributes.TransferBufferSize;
-                command = Memory_Write_Continue;
             }
         }
 
         // Next row in data[]
-        StartOfLine_src += Attributes.Width;
+        StartOfLine_src += width;
     }
 
     // Send remaining data in transfer buffer to SPI
     if (transferBufferCount < Attributes.TransferBufferSize)
     {
         // Transfer buffer full, send it
-        g_DisplayInterface.WriteToFrameBuffer(
-            command,
+        g_DisplayInterface.SendBytes(
             Attributes.TransferBuffer,
             (Attributes.TransferBufferSize - transferBufferCount));
     }
 
     return;
 }
+
 
 CLR_UINT32 DisplayDriver::PixelsPerWord()
 {

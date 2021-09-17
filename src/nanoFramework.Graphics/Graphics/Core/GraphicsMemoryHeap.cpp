@@ -50,11 +50,11 @@ uint GraphicsMemoryHeap::GetMaxBuffer()
     return SizeInBytes;
 }
 
-bool GraphicsMemoryHeap::Initialize()
+bool GraphicsMemoryHeap::Initialize(CLR_UINT32 desired)
 {
     GraphicsMemory gm;
 
-    if (gm.GraphicsHeapLocation(graphicsHeapBeginAddress, graphicsHeapEndAddress))
+    if (gm.GraphicsHeapLocation(desired, graphicsHeapBeginAddress, graphicsHeapEndAddress))
     {
         SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
