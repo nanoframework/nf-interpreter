@@ -15,6 +15,10 @@
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
+#if !defined(TRACE_TO_STDIO)
+#define TRACE_TO_STDIO FALSE
+#endif
+
 //--//
 
 extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
