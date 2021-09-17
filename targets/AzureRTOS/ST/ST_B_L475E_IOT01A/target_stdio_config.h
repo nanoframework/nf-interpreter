@@ -5,6 +5,7 @@
 //
 
 // Select which STM32 uart/serial port used.
-// Always update both STDIO_UART & STDIO_SERIAL_DRIVER to indicate the same UARTn
-// Edit mcuconf.h and set #define STM32_SERIAL_USE_UARTn TRUE
+// If you change STDIO_SERIAL_DRIVER here to another UARTn, also
+// edit mcuconf.h to set #define STM32_SERIAL_USE_UARTn TRUE
+// and edit GPIO pins defined in target_stdio_config.c
 #define STDIO_SERIAL_DRIVER SD4
