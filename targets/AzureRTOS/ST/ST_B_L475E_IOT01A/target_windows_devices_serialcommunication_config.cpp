@@ -19,7 +19,7 @@
 // RX pin: is GPIOD_9
 // GPIO alternate pin function is 7 (see "Table 12. STM32F427xx and STM32F429xx alternate function mapping" in
 // STM32F427xx and STM32F429xx datasheet)
-//UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
+// UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
@@ -27,17 +27,17 @@
 //#if defined(__GNUC__)
 //__attribute__((aligned(32)))
 //#endif
-//uint8_t Uart3_TxBuffer[UART3_TX_SIZE];
+// uint8_t Uart3_TxBuffer[UART3_TX_SIZE];
 //#if defined(__GNUC__)
 //__attribute__((aligned(32)))
 //#endif
-//uint8_t Uart3_RxBuffer[UART3_RX_SIZE];
+// uint8_t Uart3_RxBuffer[UART3_RX_SIZE];
 
 // initialization for UART3
-//UART_INIT(3, UART3_TX_SIZE, UART3_RX_SIZE)
+// UART_INIT(3, UART3_TX_SIZE, UART3_RX_SIZE)
 
 // un-initialization for UART3
-//UART_UNINIT(3)
+// UART_UNINIT(3)
 
 ///////////
 // UART4 //
