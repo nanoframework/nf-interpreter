@@ -160,6 +160,7 @@ set(NF_CoreCLR_SRCS
     COM_stubs.c
     GenericPort_stubs.c
 )
+
 if(NF_TRACE_TO_STDIO)
     list(APPEND NF_CoreCLR_SRCS GenericPort_stdio.c)
 endif()

@@ -15,6 +15,7 @@
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoCLR_Application.h>
 #include <nanoHAL_v2.h>
+#include <nanoPAL_COM.h>
 #include <target_stdio_config.h>
 
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
@@ -61,6 +62,10 @@ void tx_application_define(void *first_unused_memory)
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
+
+#if (TRACE_TO_STDIO == TRUE)
+    StdioPort_Init();
+#endif
 
     // Create receiver thread
     status = tx_thread_create(
@@ -114,9 +119,6 @@ void tx_application_define(void *first_unused_memory)
 int main(void)
 {
     halInit();
-
-    // setup stdio UART if used
-    STDIOPORT_INIT();
 
     // init boot clipboard
     InitBootClipboard();

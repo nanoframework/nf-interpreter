@@ -3,25 +3,8 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-// select which STM32 uart/serial port used.
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#if (TRACE_TO_STDIO == TRUE)
-
-// Generalised method to init stdio. This method is expected to initialise and required GPIO and driver.
-#define STDIOPORT_INIT()                     StdioPort_Init()
-#define STDIOPORT_WRITE(portNum, data, size) StdioPort_Write(portNum, data, size)
-    void StdioPort_Init();
-    uint32_t StdioPort_Write(int portNum, const char *data, size_t size);
-#else
-#define STDIOPORT_INIT()
-#define STDIOPORT_WRITE(...)
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+// Select which STM32 uart/serial port used.
+// Always update both STDIO_UART & STDIO_SERIAL_DRIVER to indicate the same UARTn
+// Edit mcuconf.h and set #define STM32_SERIAL_USE_UARTn TRUE
+#define STDIO_SERIAL_DRIVER SD4
