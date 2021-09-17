@@ -161,6 +161,10 @@ set(NF_CoreCLR_SRCS
     GenericPort_stubs.c
 )
 
+if(NF_TRACE_TO_STDIO)
+    list(APPEND NF_CoreCLR_SRCS GenericPort_stdio.c)
+endif()
+
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_Assembly.cpp)

@@ -18,6 +18,11 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
 endif()
 
+if(NF_TRACE_TO_STDIO)
+    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_GenericPort_stdio.c)
+    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_BASE_LOCATION}/target_stdio_config.c)
+endif()
+
 # append hard fault handler if the build type is to include debug info
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     # list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hard_fault_handler.c)

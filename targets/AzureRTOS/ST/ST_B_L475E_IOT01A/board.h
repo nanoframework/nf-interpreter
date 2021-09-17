@@ -14,11 +14,12 @@
     limitations under the License.
 */
 
+// clang-format off
+
 /*
  * This file has been automatically generated using ChibiStudio board
  * generator plugin. Do not edit manually.
  */
-
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -1542,3 +1543,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* BOARD_H */
+
+// clang-format on
