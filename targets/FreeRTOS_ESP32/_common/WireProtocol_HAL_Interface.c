@@ -17,8 +17,6 @@
 #define TARGET_SERIAL_BAUDRATE 921600
 #endif
 
-bool WP_Initialise(COM_HANDLE port);
-
 static bool WP_Port_Intitialised = false;
 static uart_port_t WP_Port = UART_NUM_0;
 
@@ -60,9 +58,7 @@ bool WP_Initialise(COM_HANDLE port)
         // stop bit mode
         .stop_bits = UART_STOP_BITS_1,
         // hardware flow control(cts/rts)
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        // flow control threshold
-        .rx_flow_ctrl_thresh = 120,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
 
     uart_param_config(WP_Port, &uart_config);
@@ -75,7 +71,7 @@ bool WP_Initialise(COM_HANDLE port)
         UART_PIN_NO_CHANGE);
 
     // Setup UART driver(without UART queue)
-    uart_driver_install(WP_Port, 1024 * 2, 512, 0, NULL, 0);
+    uart_driver_install(WP_Port, WP_PACKET_SIZE, WP_PACKET_SIZE, 0, NULL, 0);
 
     WP_Port_Intitialised = true;
 
