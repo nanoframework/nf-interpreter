@@ -8,8 +8,8 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TARGET_OS_H_
-#define _TARGET_OS_H_
+#ifndef TARGET_OS_H
+#define TARGET_OS_H
 
 #define STR_HELPER(x) #x
 #define STR(x)        STR_HELPER(x)
@@ -28,5 +28,6 @@
 #define NANOCLR_REFLECTION          @TARGET_NANOCLR_REFLECTION@
 #define NANOCLR_SYSTEM_COLLECTIONS  @TARGET_SYSTEM_COLLECTIONS@
 #define TARGET_HAS_NANOBOOTER       @TARGET_HAS_NANOBOOTER@
+#define TRACE_TO_STDIO              @TARGET_TRACE_TO_STDIO@
 
-#endif /* _TARGET_OS_H_ */
+#endif // TARGET_OS_H
