@@ -31,11 +31,6 @@ nf_setup_target_build(
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
 )
 
-# this is required to support configuration of a UART used as stdio port (if enabled)
-if(TRACE_TO_STDIO)
-    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/target_stdio_config.c)
-endif()
-
 # make vars global
 set(TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_AZURERTOS_COMMON_SOURCES} CACHE INTERNAL "make global")
 
