@@ -71,7 +71,7 @@ bool WP_Initialise(COM_HANDLE port)
         UART_PIN_NO_CHANGE);
 
     // Setup UART driver(without UART queue)
-    uart_driver_install(WP_Port, WP_PACKET_SIZE, WP_PACKET_SIZE, 0, NULL, 0);
+    uart_driver_install(WP_Port, WP_PACKET_SIZE + 32, WP_PACKET_SIZE, 0, NULL, 0);
 
     WP_Port_Intitialised = true;
 
@@ -93,7 +93,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     if (*size)
     {
         // non blocking read from serial port with 100ms timeout
-        size_t read = uart_read_bytes(WP_Port, *ptr, (uint32_t)requestedSize, (TickType_t)100 / portTICK_PERIOD_MS);
+        size_t read = uart_read_bytes(WP_Port, *ptr, (uint32_t)requestedSize, pdMS_TO_TICKS(100));
 
         *ptr += read;
         *size -= read;
