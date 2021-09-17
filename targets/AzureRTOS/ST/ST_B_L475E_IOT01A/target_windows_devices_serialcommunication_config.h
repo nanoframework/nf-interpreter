@@ -28,4 +28,3 @@
 #define UART4_TX_SIZE 256
 // rx buffer size: 256 bytes
 #define UART4_RX_SIZE 256
-#endif
