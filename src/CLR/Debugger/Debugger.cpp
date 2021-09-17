@@ -15,10 +15,6 @@
 
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
 
-#if !defined(TRACE_TO_STDIO)
-#define TRACE_TO_STDIO FALSE
-#endif
-
 //--//
 
 extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
@@ -368,7 +364,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fStopOnBoot = true;
 
-#if !defined(BUILD_RTM) && (TRACE_TO_STDIO == TRUE)
+#if !defined(BUILD_RTM) && defined(TRACE_TO_STDIO) && (TRACE_TO_STDIO == TRUE)
     CLR_Debug::Printf("CLR_DBG_Debugger::Monitor_Ping...\r\n");
 #endif
     //
