@@ -7,7 +7,7 @@
 #define _TARGET_HAL_SPI_H_
 
 // # of buses
-#define NUM_SPI_BUSES 0
+#define NUM_SPI_BUSES 3
 
 // Maximum number of devices per SPI bus
 #define MAX_SPI_DEVICES 5
