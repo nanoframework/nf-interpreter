@@ -72,4 +72,4 @@ void ConfigPins_SPI4();
 void ConfigPins_SPI5();
 void ConfigPins_SPI6();
 
-#endif //SYS_DEV_SPI_NATIVE_TARGET_H
+#endif // SYS_DEV_SPI_NATIVE_TARGET_H
