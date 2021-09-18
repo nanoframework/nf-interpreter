@@ -58,10 +58,11 @@
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Adc": "OFF",
-          "API_Windows.Devices.SerialCommunication": "OFF",
+          "API_System.IO.Ports": "ON",
+          "API_Windows.Devices.SerialCommunication": "ON",
           "API_nanoFramework.ResourceManager": "OFF",
           "API_nanoFramework.System.Collections": "OFF",
-          "API_nanoFramework.System.Text": "OFF"
+          "API_nanoFramework.System.Text": "ON"
         }
       }
     }
