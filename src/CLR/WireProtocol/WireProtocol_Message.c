@@ -425,6 +425,13 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
 {
     WP_Message message;
 
+    if (_rxState == ReceiveState_ReadingPayload && cmd == CLR_DBG_Commands_c_Monitor_Message)
+    {
+        // skip the outgoing Monitor message while we are busy receiving a packet payload
+        TRACE0(TRACE_ERRORS, "Skip CLR_DBG_Commands_c_Monitor_Message\n");
+        return;
+    }
+
     WP_Message_Initialize(&message);
 
     WP_Message_PrepareRequest(&message, cmd, flags, payloadSize, payload);
