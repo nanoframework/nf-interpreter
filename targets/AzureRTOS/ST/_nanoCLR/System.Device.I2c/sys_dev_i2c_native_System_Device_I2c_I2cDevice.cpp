@@ -34,29 +34,24 @@ extern bool IsLongRunningOperation(
     float byteTime,
     uint32_t &estimatedDurationMiliseconds);
 
-#define TIME_MS2I(ms) ((ms) * (TX_TIMER_TICKS_PER_SECOND) / 1000)
-
 // ThreadX I2C Working thread
-// FIXME: Statically allocated in 1st version. consider malloc later.
-TX_THREAD i2cWorkingThread;
-uint32_t i2cWorkingThread_stack[I2C_THREAD_STACK_SIZE / sizeof(uint32_t)];
 static void I2CWorkingThread_entry(uint32_t arg)
 {
     NF_PAL_I2C *palI2c = (NF_PAL_I2C *)arg;
-    msg_t result;
+
     int estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + palI2c->ReadSize + 1);
 
     if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
     {
         // this is a Write/Read transaction
-        result = i2cMasterTransmitTimeout(
+        palI2c->TransactionResult = i2cMasterTransmitTimeout(
             palI2c->Driver,
             palI2c->Address,
             palI2c->WriteBuffer,
             palI2c->WriteSize,
             palI2c->ReadBuffer,
             palI2c->ReadSize,
-            TIME_MS2I(estimatedDurationMiliseconds));
+            TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
     }
     else
     {
@@ -66,14 +61,14 @@ static void I2CWorkingThread_entry(uint32_t arg)
 
             estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + 1);
 
-            result = i2cMasterTransmitTimeout(
+            palI2c->TransactionResult = i2cMasterTransmitTimeout(
                 palI2c->Driver,
                 palI2c->Address,
                 palI2c->WriteBuffer,
                 palI2c->WriteSize,
                 NULL,
                 0,
-                TIME_MS2I(estimatedDurationMiliseconds));
+                TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
         }
         else
         {
@@ -81,19 +76,20 @@ static void I2CWorkingThread_entry(uint32_t arg)
 
             estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->ReadSize + 1);
 
-            result = i2cMasterReceiveTimeout(
+            palI2c->TransactionResult = i2cMasterReceiveTimeout(
                 palI2c->Driver,
                 palI2c->Address,
                 palI2c->ReadBuffer,
                 palI2c->ReadSize,
-                TIME_MS2I(estimatedDurationMiliseconds));
+                TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
         }
     }
 
     // fire event for I2C transaction complete
     Events_Set(SYSTEM_EVENT_FLAG_I2C_MASTER);
 
-    chThdExit(result);
+    // terminate this thread
+    tx_thread_terminate(palI2c->WorkingThread);
 }
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
@@ -200,6 +196,10 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
         palI2c->ByteTime = 0.02;
     }
 
+    // clear pointer to working thread
+    palI2c->WorkingThread = NULL;
+    palI2c->WorkingThreadStack = NULL;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -208,6 +208,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     NANOCLR_HEADER();
 
     uint8_t busIndex;
+    NF_PAL_I2C *palI2c = NULL;
 
     CLR_RT_HeapBlock *connectionSettings;
 
@@ -226,6 +227,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     {
 #if (STM32_I2C_USE_I2C1 == TRUE)
         case 1:
+            palI2c = &I2C1_PAL;
+
             // remove device
             I2C1_DeviceCounter--;
 
@@ -237,11 +240,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
                 // nulls driver
                 I2C1_PAL.Driver = NULL;
             }
+
             break;
 #endif
 
 #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
         case 2:
+            palI2c = &I2C2_PAL;
+
             // remove device
             I2C2_DeviceCounter--;
 
@@ -259,6 +265,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 
 #if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
         case 3:
+            palI2c = &I2C3_PAL;
+
             // remove device
             I2C3_DeviceCounter--;
 
@@ -270,11 +278,14 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
                 // nulls driver
                 I2C3_PAL.Driver = NULL;
             }
+
             break;
 #endif
 
 #if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
         case 4:
+            palI2c = &I2C4_PAL;
+
             // remove device
             I2C4_DeviceCounter--;
 
@@ -286,6 +297,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
                 // nulls driver
                 I2C4_PAL.Driver = NULL;
             }
+
             break;
 #endif
 
@@ -293,6 +305,20 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             // the requested I2C bus is not valid
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             break;
+    }
+
+    // stop working thread, if it's running
+    if (palI2c->WorkingThread != NULL)
+    {
+        // delete thread
+        tx_thread_delete(palI2c->WorkingThread);
+
+        // free stack memory
+        platform_free(palI2c->WorkingThreadStack);
+
+        // clear pointers
+        palI2c->WorkingThread = NULL;
+        palI2c->WorkingThreadStack = NULL;
     }
 
     NANOCLR_NOCLEANUP();
@@ -462,29 +488,27 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             // perform I2C transaction using driver's ASYNC API which is launching a thread to perform it
             if (stack.m_customState == 1)
             {
-                /**********
                 // spawn working thread to perform the I2C transaction
-                palI2c->WorkingThread = chThdCreateFromHeap(
-                    NULL,
-                    THD_WORKING_AREA_SIZE(256),
-                    "I2CWT",
-                    NORMALPRIO,
-                    I2CWorkingThread,
-                    palI2c);
 
-                if (palI2c->WorkingThread == NULL)
+                // 1. allocate memory for I2C thread
+                palI2c->WorkingThreadStack = (uint32_t *)platform_malloc(I2C_THREAD_STACK_SIZE);
+
+                if (palI2c->WorkingThreadStack == NULL)
                 {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
-                **************/
 
-                // Create receiver thread
+                // 2. create thread
                 uint16_t status = tx_thread_create(
-                    (palI2c->WorkingThread = &i2cWorkingThread),
+                    palI2c->WorkingThread,
+#if !defined(BUILD_RTM)
                     (CHAR *)"I2C Thread",
+#else
+                    NULL,
+#endif
                     I2CWorkingThread_entry,
                     (uint32_t)palI2c,
-                    i2cWorkingThread_stack,
+                    palI2c->WorkingThreadStack,
                     I2C_THREAD_STACK_SIZE,
                     I2C_THREAD_PRIORITY,
                     I2C_THREAD_PRIORITY,
@@ -515,7 +539,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                     palI2c->WriteSize,
                     palI2c->ReadBuffer,
                     palI2c->ReadSize,
-                    TIME_MS2I(20));
+                    TX_TICKS_PER_MILLISEC(20));
             }
             else
             {
@@ -529,7 +553,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                         palI2c->WriteSize,
                         NULL,
                         0,
-                        TIME_MS2I(20));
+                        TX_TICKS_PER_MILLISEC(20));
                 }
                 else
                 {
@@ -539,7 +563,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                         palI2c->Address,
                         palI2c->ReadBuffer,
                         palI2c->ReadSize,
-                        TIME_MS2I(20));
+                        TX_TICKS_PER_MILLISEC(20));
                 }
             }
         }
@@ -552,7 +576,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 break;
             }
 
-            if (palI2c->WorkingThread->state == CH_STATE_FINAL)
+            if (palI2c->WorkingThread->tx_thread_state == TX_TERMINATED)
             {
                 // I2C working thread is now complete
                 break;
@@ -587,9 +611,18 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
             if (isLongRunningOperation)
             {
-                // ChibiOS requirement: need to call chThdWait for I2C working thread in order to have it's memory
-                // released to the heap, otherwise it won't be returned
-                transactionResult = chThdWait(palI2c->WorkingThread);
+                // get transaction result from I2C struct
+                transactionResult = palI2c->TransactionResult;
+
+                // delete thread
+                tx_thread_delete(palI2c->WorkingThread);
+
+                // free stack memory
+                platform_free(palI2c->WorkingThreadStack);
+
+                // clear pointers
+                palI2c->WorkingThread = NULL;
+                palI2c->WorkingThreadStack = NULL;
             }
 
             // get the result from the working thread execution
@@ -622,7 +655,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             }
             else
             {
-                // successfull transaction
+                // successful transaction
                 // set the result field
                 result[I2cTransferResult::FIELD___status].SetInteger((CLR_UINT32)I2cTransferStatus_FullTransfer);
 
@@ -639,5 +672,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             }
         }
     }
+
     NANOCLR_NOCLEANUP();
 }
