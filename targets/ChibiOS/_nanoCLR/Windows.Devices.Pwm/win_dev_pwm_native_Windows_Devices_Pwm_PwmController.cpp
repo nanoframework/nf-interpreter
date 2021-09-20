@@ -130,31 +130,29 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::GetDeviceS
     {
         // declare the device selector string whose max size is "TIM1,TIM3,TIM4,TIM5,TIM8,TIM9," + terminator and init
         // with the terminator
-        char deviceSelectorString[7 * 5 + 1] = {0};
-
+        static char deviceSelectorString[] =
 #if STM32_PWM_USE_TIM1
-        strcat(deviceSelectorString, "TIM1,");
+            "TIM1,"
 #endif
 #if STM32_PWM_USE_TIM2
-        strcat(deviceSelectorString, "TIM2,");
+            "TIM2,"
 #endif
 #if STM32_PWM_USE_TIM3
-        strcat(deviceSelectorString, "TIM3,");
+            "TIM3,"
 #endif
-#ifndef STM32F0XX
 #if STM32_PWM_USE_TIM4
-        strcat(deviceSelectorString, "TIM4,");
+            "TIM4,"
 #endif
 #if STM32_PWM_USE_TIM5
-        strcat(deviceSelectorString, "TIM5,");
+            "TIM5,"
 #endif
 #if STM32_PWM_USE_TIM8
-        strcat(deviceSelectorString, "TIM8,");
+            "TIM8,"
 #endif
 #if STM32_PWM_USE_TIM9
-        strcat(deviceSelectorString, "TIM9,");
+            "TIM9,"
 #endif
-#endif
+            ;
         // replace the last comma with a terminator
         deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
 
