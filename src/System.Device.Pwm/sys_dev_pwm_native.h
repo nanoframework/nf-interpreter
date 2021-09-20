@@ -20,22 +20,25 @@ typedef enum __nfpack PwmPulsePolarity
 struct Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel
 {
     static const int FIELD___frequency = 1;
-    static const int FIELD___dutyCyclePercentage = 2;
-    static const int FIELD___dutyCycle = 3;
-    static const int FIELD___polarity = 4;
-    static const int FIELD___pinNumber = 5;
+    static const int FIELD___dutyCycle = 2;
+    static const int FIELD___polarity = 3;
+    static const int FIELD___pinNumber = 4;
+    static const int FIELD___channelNumber = 5;
     static const int FIELD___pwmTimer = 6;
     static const int FIELD___disposedValue = 7;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeSetDesiredFrequency___U4__U4);
-    NANOCLR_NATIVE_DECLARE(NativeSetActiveDutyCyclePercentage___VOID__U4);
+    NANOCLR_NATIVE_DECLARE(NativeSetDesiredFrequency___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeSetActiveDutyCyclePercentage___VOID__R8);
     NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
     NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(GetChannel___STATIC__I4__I4__I4);
 
     //--//
+
+    // matches PwmChannel._dutyCycleFactor in C# class
+    static const int CONST_DutyCycleFactor = 10000;
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Pwm;
