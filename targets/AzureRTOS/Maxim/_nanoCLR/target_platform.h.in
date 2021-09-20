@@ -8,6 +8,7 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
 #ifndef _TARGET_PLATFORM_H_
 #define _TARGET_PLATFORM_H_
 
@@ -17,3 +18,4 @@
 #define HAL_USE_GPIO                @HAL_USE_GPIO_OPTION@
 
 #endif // _TARGET_PLATFORM_H_
+// clang-format on
