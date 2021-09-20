@@ -4,10 +4,15 @@
 //
 
 #include "sys_dev_pwm_native.h"
+#include <esp32_os.h>
+#include "Esp32_DeviceMapping.h"
 
 // Used to map a PWM channel number to a pin number for High and low speed channels
 static char HighSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 static char LowSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
+// Pin functions from PWM1 to PWM16
+static int PwmMapping[16] = { 262400, 262656, 262912, 263168, 263424, 263680, 263936, 264192,
+    264448, 264704, 264960, 265216, 265472, 265728, 265984, 266240};
 
 #define GetSpeedMode(timer) (ledc_mode_t)((timer > 3) ? LEDC_LOW_SPEED_MODE : LEDC_HIGH_SPEED_MODE)
 #define IDF_ERROR(result)                                                                                              \
@@ -324,9 +329,24 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___ST
 
     int pin = stack.Arg0().NumericByRef().s4;
     int timerId = stack.Arg1().NumericByRef().s4;
-
+    int32_t pinSetup;
+    int pwm = 0;
     // Check if the combination is ok and set the result
-    stack.SetResult_I4(sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::GetChannel(pin, timerId, false));
+    for(pwm = timerId * 2; pwm < timerId * 2 + 2; pwm++)
+    {
+        pinSetup = (int32_t)Esp32_GetMappedDevicePinsWithFunction(PwmMapping[pwm]);
+        if (pinSetup == pin)
+        {
+            // The channel is actually the pin number
+            stack.SetResult_I4(pin);
+            break;
+        }
+    }    
 
+    if (pwm == timerId * 2 + 2)
+    {
+        stack.SetResult_I4(-1);
+    }
+    
     NANOCLR_NOCLEANUP_NOLABEL();
 }
