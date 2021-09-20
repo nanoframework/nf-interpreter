@@ -11,8 +11,23 @@
 static char HighSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 static char LowSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 // Pin functions from PWM1 to PWM16
-static int PwmMapping[16] = { 262400, 262656, 262912, 263168, 263424, 263680, 263936, 264192,
-    264448, 264704, 264960, 265216, 265472, 265728, 265984, 266240};
+static int PwmMapping[16] = {
+    262400,
+    262656,
+    262912,
+    263168,
+    263424,
+    263680,
+    263936,
+    264192,
+    264448,
+    264704,
+    264960,
+    265216,
+    265472,
+    265728,
+    265984,
+    266240};
 
 #define GetSpeedMode(timer) (ledc_mode_t)((timer > 3) ? LEDC_LOW_SPEED_MODE : LEDC_HIGH_SPEED_MODE)
 #define IDF_ERROR(result)                                                                                              \
@@ -23,11 +38,11 @@ static int PwmMapping[16] = { 262400, 262656, 262912, 263168, 263424, 263680, 26
 
 namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 {
-    uint32_t PwmController_Timer_resolution[8];
+uint32_t PwmController_Timer_resolution[8];
 
-    int GetChannel(int pin, int timerId, bool create);
-    uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
-    HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart);
+int GetChannel(int pin, int timerId, bool create);
+uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
+HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart);
 } // namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 
 using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
@@ -323,7 +338,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -332,7 +348,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___ST
     int32_t pinSetup;
     int pwm = 0;
     // Check if the combination is ok and set the result
-    for(pwm = timerId * 2; pwm < timerId * 2 + 2; pwm++)
+    for (pwm = timerId * 2; pwm < timerId * 2 + 2; pwm++)
     {
         pinSetup = (int32_t)Esp32_GetMappedDevicePinsWithFunction(PwmMapping[pwm]);
         if (pinSetup == pin)
@@ -341,12 +357,12 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___ST
             stack.SetResult_I4(pin);
             break;
         }
-    }    
+    }
 
     if (pwm == timerId * 2 + 2)
     {
         stack.SetResult_I4(-1);
     }
-    
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
