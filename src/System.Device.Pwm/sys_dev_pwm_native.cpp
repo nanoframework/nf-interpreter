@@ -26,12 +26,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID,
     Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID,
     NULL,
+    NULL,
+    Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Pwm =
 {
     "System.Device.Pwm",
-    0x3D216AC0,
+    0x198ADF35,
     method_lookup,
     { 100, 1, 0, 4 }
 };

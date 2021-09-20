@@ -1042,3 +1042,17 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
+
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4__I4( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    // Get pin and potential TIM
+    int pin = stack.Arg0().NumericByRef().s4;
+    int timerId = stack.Arg1().NumericByRef().s4;    
+
+    // Check if the combination is ok and set the result
+    stack.SetResult_I4(GetChannelPwm(pin, timerId));
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
