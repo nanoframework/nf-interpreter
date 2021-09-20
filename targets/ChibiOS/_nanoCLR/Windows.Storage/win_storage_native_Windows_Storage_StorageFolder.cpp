@@ -1092,7 +1092,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 }
                 else
                 {
-                    // file created (or opened) succesfully
+                    // file created (or opened) successfully
                     // OK to close it
                     SPIFFS_close(driveFs, fd);
 
@@ -1177,7 +1177,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
         if (operationResult == FR_OK)
         {
-            // file created (or opened) succesfully
+            // file created (or opened) successfully
             // OK to close it
             f_close(&file);
 
@@ -1305,7 +1305,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     }
     else
     {
-        // file created (or opened) succesfully
+        // file created (or opened) successfully
         // OK to close it
         SPIFFS_close(driveFs, fd);
 

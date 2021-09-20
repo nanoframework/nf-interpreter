@@ -51,7 +51,7 @@ int DebuggerPort_Write( COM_HANDLE ComPortNum, const char* Data, size_t size, in
             Events_WaitForEvents(0, 1);
         }
         else
-        { // succesfully transmitted at least some of the data
+        { // successfully transmitted at least some of the data
           // update counters and loop back to try sending more
             retries   = maxRetries + 1;
             size     -= ret;
