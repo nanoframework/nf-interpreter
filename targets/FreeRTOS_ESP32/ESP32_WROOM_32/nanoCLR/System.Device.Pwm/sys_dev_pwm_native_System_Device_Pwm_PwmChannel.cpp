@@ -76,7 +76,9 @@ uint32_t sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::CalculateDuty(
 {
     // if polarity Active low then reverse duty cycle
     if (polarity == PwmPulsePolarity::PwmPulsePolarity_ActiveLow)
+    {
         dutyCycle = 10000 - dutyCycle;
+    }
 
     // Return a duy cycle in the range of the current timer duty resolution
     uint32_t calculatedDuty = PwmController_Timer_resolution[timerId] * dutyCycle / 10000;
@@ -126,7 +128,9 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 
         // Because it is started from the configure we optionally stop it and set idle level based on polarity
         if (noStart)
+        {
             ledc_stop(mode, channel, polarity);
+        }
     }
     NANOCLR_NOCLEANUP();
 }

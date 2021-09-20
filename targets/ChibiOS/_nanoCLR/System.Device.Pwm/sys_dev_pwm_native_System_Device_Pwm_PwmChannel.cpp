@@ -811,9 +811,15 @@ int GetChannelPwm(int pin, int timerId)
 int GetAlternateFunctionPwm(int timerId)
 {
     if (timerId >= 8)
+    {
         return 3;
+    }
+
     if (timerId >= 3)
+    {
         return 2;
+    }
+    
     return 1;
 }
 
