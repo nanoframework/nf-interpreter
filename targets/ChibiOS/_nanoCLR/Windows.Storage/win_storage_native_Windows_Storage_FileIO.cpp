@@ -63,7 +63,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
         // read string
         if (f_gets((TCHAR *)fileIoOperation->Content, readLength, fileIoOperation->FatFile))
         {
-            // operation succesfull
+            // operation successful
         }
         else
         {

@@ -802,7 +802,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     file = fopen(workingPath, mode);
     if (file)
     {
-        // file created (or opened) succesfully
+        // file created (or opened) successfully
         // OK to close it
         fclose(file);
 
@@ -1024,7 +1024,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
     // return allocated converted path, must be freed
     workingPath = ConvertToESP32Path(managedPath);
 
-    // Delete folder, 0=succesfull
+    // Delete folder, 0=successfull
     operationResult = rmdir(workingPath);
     if (operationResult < 0)
         operationResult = errno;
@@ -1083,7 +1083,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNa
     desiredPath = stack.Arg1().DereferenceString()->StringText();
     desiredWorkingPath = ConvertToESP32Path(desiredPath);
 
-    // rename folder, 0=succesfull
+    // rename folder, 0=successfull
     operationResult = rename(workingPath, desiredWorkingPath);
     if (operationResult < 0)
         operationResult = errno;
