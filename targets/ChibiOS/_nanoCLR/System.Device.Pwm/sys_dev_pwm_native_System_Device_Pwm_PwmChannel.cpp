@@ -863,8 +863,7 @@ PWMDriver *GetDriverPwm(int timerId)
     return _drv;
 }
 
-
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
@@ -873,25 +872,28 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VO
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___U4__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___U4__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int timerId = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
+        int timerId =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
         unsigned int desiredFrequency = (unsigned int)stack.Arg1().NumericByRef().u4;
 
         // Gets the PWM driver associated with the requested timer
-        PWMDriver * _drv;
+        PWMDriver *_drv;
         _drv = GetDriverPwm(timerId);
 
         // Sets the period to something able to be precise enough with low and high frequencies
         // and that allows the clock frequency parameter to fit in an unsigned int
         int period = 1000;
-        if (desiredFrequency >= 1000) 
+        if (desiredFrequency >= 1000)
         {
             period = 100;
         }
@@ -901,22 +903,19 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
         }
 
         // Build the PWM config structure
-        PWMConfig pwmConfig = 
-        {
-            (desiredFrequency * period),        // PWM clock frequency
-            (pwmcnt_t)period,                   // PWM period
-            NULL,                               // No callback
+        PWMConfig pwmConfig = {
+            (desiredFrequency * period), // PWM clock frequency
+            (pwmcnt_t)period,            // PWM period
+            NULL,                        // No callback
             // Enable all channels
-            {
-                {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-                {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-                {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-                {PWM_OUTPUT_ACTIVE_HIGH, NULL}
-            },
+            {{PWM_OUTPUT_ACTIVE_HIGH, NULL},
+             {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+             {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+             {PWM_OUTPUT_ACTIVE_HIGH, NULL}},
             0,
-          #if STM32_PWM_USE_ADVANCED
+#if STM32_PWM_USE_ADVANCED
             0,
-          #endif            
+#endif
             0,
         };
 
@@ -930,7 +929,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -941,8 +941,10 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
         FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties or method parameters
-        int timerId = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int timerId =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
         unsigned int dutyCycle = (unsigned int)stack.Arg1().NumericByRef().u4;
 
         // Gets the PWM driver associated with the requested timer
@@ -962,7 +964,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -973,9 +975,12 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___V
         FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties or method parameters
-        int timerId = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
-        unsigned int dutyCycle = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4);
+        int timerId =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        unsigned int dutyCycle =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4);
 
         // Gets the PWM driver associated with the requested timer
         _drv = GetDriverPwm(timerId);
@@ -995,7 +1000,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___V
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -1004,8 +1009,10 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
         FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties or method parameters
-        int timerId = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int timerId =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
 
         // get channel for this pin and timer
         int channelId = GetChannelPwm(pinNumber, timerId);
@@ -1021,7 +1028,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
