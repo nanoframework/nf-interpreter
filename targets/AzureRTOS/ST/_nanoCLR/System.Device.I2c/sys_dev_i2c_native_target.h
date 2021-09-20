@@ -23,6 +23,8 @@ typedef struct NF_PAL_I2C_
     I2CDriver *Driver;
     I2CConfig Configuration;
     TX_THREAD *WorkingThread;
+    uint32_t* WorkingThreadStack;
+    msg_t TransactionResult;
     i2caddr_t Address;
     float ByteTime;
 
