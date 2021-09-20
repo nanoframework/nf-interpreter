@@ -9,12 +9,17 @@
 #include <win_dev_i2c_native.h>
 #include <hal.h>
 
+
+// receiver thread
+#define I2C_THREAD_STACK_SIZE 256
+#define I2C_THREAD_PRIORITY   5
+
 // struct representing the I2C
 typedef struct NF_PAL_I2C_
 {
     I2CDriver *Driver;
     I2CConfig Configuration;
-    thread_t *WorkingThread;
+    TX_THREAD *WorkingThread;
     i2caddr_t Address;
     float ByteTime;
 

@@ -34,8 +34,13 @@ extern bool IsLongRunningOperation(
     float byteTime,
     uint32_t &estimatedDurationMiliseconds);
 
-// ChibiOS I2C working thread
-static THD_FUNCTION(I2CWorkingThread, arg)
+#define TIME_MS2I(ms) ((ms) * (TX_TIMER_TICKS_PER_SECOND) / 1000)
+
+// ThreadX I2C Working thread
+// FIXME: Statically allocated in 1st version. consider malloc later.
+TX_THREAD i2cWorkingThread;
+uint32_t i2cWorkingThread_stack[I2C_THREAD_STACK_SIZE / sizeof(uint32_t)];
+static void I2CWorkingThread_entry(uint32_t arg)
 {
     NF_PAL_I2C *palI2c = (NF_PAL_I2C *)arg;
     msg_t result;
@@ -457,6 +462,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             // perform I2C transaction using driver's ASYNC API which is launching a thread to perform it
             if (stack.m_customState == 1)
             {
+                /**********
                 // spawn working thread to perform the I2C transaction
                 palI2c->WorkingThread = chThdCreateFromHeap(
                     NULL,
@@ -467,6 +473,25 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                     palI2c);
 
                 if (palI2c->WorkingThread == NULL)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+                }
+                **************/
+
+                // Create receiver thread
+                uint16_t status = tx_thread_create(
+                    (palI2c->WorkingThread = &i2cWorkingThread),
+                    (CHAR *)"I2C Thread",
+                    I2CWorkingThread_entry,
+                    (uint32_t)palI2c,
+                    i2cWorkingThread_stack,
+                    I2C_THREAD_STACK_SIZE,
+                    I2C_THREAD_PRIORITY,
+                    I2C_THREAD_PRIORITY,
+                    TX_NO_TIME_SLICE,
+                    TX_AUTO_START);
+
+                if (status != TX_SUCCESS)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
                 }
