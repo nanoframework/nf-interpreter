@@ -9,7 +9,6 @@
 #include <win_dev_i2c_native.h>
 #include <hal.h>
 
-
 // receiver thread
 #define I2C_THREAD_STACK_SIZE 256
 #define I2C_THREAD_PRIORITY   5
