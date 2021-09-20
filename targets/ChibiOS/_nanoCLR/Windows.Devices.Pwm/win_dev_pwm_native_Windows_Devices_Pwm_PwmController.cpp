@@ -125,7 +125,7 @@ HRESULT Library_win_dev_pwm_native_Windows_Devices_Pwm_PwmController::GetDeviceS
     NANOCLR_HEADER();
     {
     // declare the device selector string whose max size is "TIM1,TIM3,TIM4,TIM5,TIM8,TIM9," + terminator and init with the terminator
-       char deviceSelectorString[ 30 + 1] = { 0 };
+       char deviceSelectorString[7 * 5 + 1] = { 0 };
 
    #if STM32_PWM_USE_TIM1
        strcat(deviceSelectorString, "TIM1,");
