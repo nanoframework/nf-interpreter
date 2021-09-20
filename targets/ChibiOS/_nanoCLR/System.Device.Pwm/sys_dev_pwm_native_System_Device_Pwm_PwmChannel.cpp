@@ -819,7 +819,7 @@ int GetAlternateFunctionPwm(int timerId)
     {
         return 2;
     }
-    
+
     return 1;
 }
 
