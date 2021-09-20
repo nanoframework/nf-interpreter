@@ -18,11 +18,11 @@ static char LowSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 
 namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 {
-    uint32_t PwmController_Timer_resolution[8];
+uint32_t PwmController_Timer_resolution[8];
 
-    int GetChannel(int pin, int timerId, bool create);
-    uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
-    HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart);
+int GetChannel(int pin, int timerId, bool create);
+uint32_t CalculateDuty(int timerId, uint32_t dutyCycle, PwmPulsePolarity polarity);
+HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart);
 } // namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers
 
 using namespace sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers;
@@ -318,7 +318,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative__
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___STATIC__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
