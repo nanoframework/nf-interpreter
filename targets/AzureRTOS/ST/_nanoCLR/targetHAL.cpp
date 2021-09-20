@@ -18,9 +18,9 @@
 // #if (HAL_USE_I2C == TRUE)
 // #include <win_dev_i2c_native_target.h>
 // #endif
-// #if (HAL_USE_SPI == TRUE)
-// #include <win_dev_spi_native_target.h>
-// #endif
+#if (HAL_USE_SPI == TRUE)
+#include <win_dev_spi_native_target.h>
+#endif
 // #if (HAL_USE_UART == TRUE)
 // #include <win_dev_serial_native_target.h>
 // #endif
@@ -176,7 +176,7 @@ void nanoHAL_Uninitialize()
     // }
 
     // TODO
-    //SOCKETS_CloseConnections();
+    // SOCKETS_CloseConnections();
 
 #if !defined(HAL_REDUCESIZE)
     // TODO need to call this but it's preventing the debug session from starting
