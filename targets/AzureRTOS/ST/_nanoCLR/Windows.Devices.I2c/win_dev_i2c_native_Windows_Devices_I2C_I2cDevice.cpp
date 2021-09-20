@@ -28,7 +28,7 @@ NF_PAL_I2C I2C3_PAL;
 NF_PAL_I2C I2C4_PAL;
 #endif
 
-#define TIME_MS2I(ms)  ((ms) * (TX_TIMER_TICKS_PER_SECOND) / 1000)
+#define TIME_MS2I(ms) ((ms) * (TX_TIMER_TICKS_PER_SECOND) / 1000)
 
 // ThreadX I2C Working thread
 // FIXME: Statically allocated in 1st version. consider malloc later.
@@ -467,7 +467,7 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::
                 // Create receiver thread
                 uint16_t status = tx_thread_create(
                     (palI2c->WorkingThread = &i2cWorkingThread),
-                    (CHAR*)"I2C Thread",
+                    (CHAR *)"I2C Thread",
                     I2CWorkingThread_entry,
                     (uint32_t)palI2c,
                     i2cWorkingThread_stack,
