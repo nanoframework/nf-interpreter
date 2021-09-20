@@ -10,14 +10,14 @@
 
 enum PwmPulsePolarity
 {
-        /// <summary>
-        /// Configures the PWM signal to start in the active high state.
-        /// </summary>
-        ActiveHigh,
-        /// <summary>
-        /// Configures the PWM signal to start in the active low state.
-        /// </summary>
-        ActiveLow
+    /// <summary>
+    /// Configures the PWM signal to start in the active high state.
+    /// </summary>
+    ActiveHigh,
+    /// <summary>
+    /// Configures the PWM signal to start in the active low state.
+    /// </summary>
+    ActiveLow
 };
 
-#endif  //_SYS_DEV_PWM_NATIVE_TARGET_H_
+#endif //_SYS_DEV_PWM_NATIVE_TARGET_H_

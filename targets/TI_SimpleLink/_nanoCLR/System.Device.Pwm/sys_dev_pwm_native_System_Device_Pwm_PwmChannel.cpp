@@ -9,7 +9,7 @@
 
 PWM_Handle PwmPins[PWM_PIN_COUNT];
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
@@ -18,12 +18,14 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VO
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___U4__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___U4__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         // get a pointer to the managed object instance and check that it's not NULL
-            CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // the SimpleLink PWM driver doesn't require any general setting
         // so there is nothing to do here, just keeping the ceremony for the managed API
@@ -34,15 +36,18 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-   {
+    {
         // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
 
         // Retrieves the needed parameters from method parameters
         unsigned int dutyCycle = (unsigned int)stack.Arg1().NumericByRef().u4;
@@ -52,21 +57,24 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
 
         // get the controller
-        CLR_RT_HeapBlock* controller = pThis[ FIELD___pwmController ].Dereference();
+        CLR_RT_HeapBlock *controller = pThis[FIELD___pwmController].Dereference();
 
         // get the frequency from the controller
-        double frequency = controller[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___frequency].NumericByRef().r8;
+        double frequency =
+            controller[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___frequency].NumericByRef().r8;
 
         PWM_Params params;
         PWM_Params_init(&params);
@@ -86,15 +94,17 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___V
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
 
         // Stops PWM output on the channel associated with this handler
         PWM_stop(PwmPins[pinNumber]);
@@ -102,15 +112,17 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VO
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock* pThis = stack.This();  FAULT_ON_NULL(pThis);
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
         // Retrieves the needed parameters from private class properties
-        int pinNumber = (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+        int pinNumber =
+            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
 
         PWM_close(PwmPins[pinNumber]);
     }

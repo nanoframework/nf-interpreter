@@ -35,9 +35,8 @@ struct Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Pwm;
 
-#endif  //_SYS_DEV_PWM_NATIVE_H_
+#endif //_SYS_DEV_PWM_NATIVE_H_
