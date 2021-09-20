@@ -4,7 +4,7 @@
 //
 
 #include <targetPAL.h>
-#include "sys_dev_pwm_native.h"
+#include <sys_dev_pwm_native.h>
 
 int GetChannelPwm(int pin, int timerId)
 {
@@ -166,7 +166,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
 
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -280,7 +280,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
 
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -427,7 +427,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
 
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -582,7 +582,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
 
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -653,7 +653,7 @@ int GetChannelPwm(int pin, int timerId)
             }
             break;
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -801,7 +801,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
 
         default:
-            channel = 0xFF;
+            channel = -1;
             break;
     }
 #endif
@@ -825,48 +825,54 @@ int GetAlternateFunctionPwm(int timerId)
 
 PWMDriver *GetDriverPwm(int timerId)
 {
-    PWMDriver *_drv = NULL;
+    PWMDriver *pwmDriver = NULL;
 
     switch (timerId)
     {
+
 #if STM32_PWM_USE_TIM1
         case 1:
-            _drv = &PWMD1;
+            pwmDriver = &PWMD1;
             break;
 #endif
+
 #if STM32_PWM_USE_TIM2
         case 2:
-            _drv = &PWMD2;
+            pwmDriver = &PWMD2;
             break;
 #endif
+
 #if STM32_PWM_USE_TIM3
         case 3:
-            _drv = &PWMD3;
+            pwmDriver = &PWMD3;
             break;
 #endif
 #if STM32_PWM_USE_TIM4
         case 4:
-            _drv = &PWMD4;
+            pwmDriver = &PWMD4;
             break;
 #endif
+
 #if STM32_PWM_USE_TIM5
         case 5:
-            _drv = &PWMD5;
+            pwmDriver = &PWMD5;
             break;
 #endif
+
 #if STM32_PWM_USE_TIM8
         case 8:
-            _drv = &PWMD8;
+            pwmDriver = &PWMD8;
             break;
 #endif
+
 #if STM32_PWM_USE_TIM9
         case 9:
-            _drv = &PWMD9;
+            pwmDriver = &PWMD9;
             break;
 #endif
     }
 
-    return _drv;
+    return pwmDriver;
 }
 
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VOID(CLR_RT_StackFrame &stack)
@@ -878,159 +884,170 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeInit___VO
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___U4__U4(
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesiredFrequency___VOID__I4(
     CLR_RT_StackFrame &stack)
 {
+    uint32_t timerId;
+    int32_t desiredFrequency;
+    uint32_t period;
+
+    PWMConfig pwmConfig;
+    PWMDriver *pwmDriver;
+
     NANOCLR_HEADER();
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Retrieves the needed parameters from private class properties
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+    desiredFrequency = stack.Arg1().NumericByRef().s4;
+
+    // parameter check
+    if (desiredFrequency)
     {
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // Retrieves the needed parameters from private class properties
-        int timerId =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        unsigned int desiredFrequency = (unsigned int)stack.Arg1().NumericByRef().u4;
-
-        // Gets the PWM driver associated with the requested timer
-        PWMDriver *_drv;
-        _drv = GetDriverPwm(timerId);
-
-        // Sets the period to something able to be precise enough with low and high frequencies
-        // and that allows the clock frequency parameter to fit in an unsigned int
-        int period = 1000;
-        if (desiredFrequency >= 1000)
-        {
-            period = 100;
-        }
-        else if (desiredFrequency >= 1000000)
-        {
-            period = 10;
-        }
-
-        // Build the PWM config structure
-        PWMConfig pwmConfig = {
-            (desiredFrequency * period), // PWM clock frequency
-            (pwmcnt_t)period,            // PWM period
-            NULL,                        // No callback
-            // Enable all channels
-            {{PWM_OUTPUT_ACTIVE_HIGH, NULL},
-             {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-             {PWM_OUTPUT_ACTIVE_HIGH, NULL},
-             {PWM_OUTPUT_ACTIVE_HIGH, NULL}},
-            0,
-#if STM32_PWM_USE_ADVANCED
-            0,
-#endif
-            0,
-        };
-
-        // Starts the pwm driver
-        pwmStop(_drv);
-        osDelay(5);
-        pwmStart(_drv, &pwmConfig);
-
-        stack.SetResult_R8((double)desiredFrequency);
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    // Gets the PWM driver associated with the requested timer
+    pwmDriver = GetDriverPwm(timerId);
+
+    // Sets the period to something able to be precise enough with low and high frequencies
+    // and that allows the clock frequency parameter to fit in an unsigned int
+    period = 1000;
+    if (desiredFrequency >= 1000)
+    {
+        period = 100;
+    }
+    else if (desiredFrequency >= 1000000)
+    {
+        period = 10;
+    }
+
+    // Build the PWM config structure
+    pwmConfig = {
+        // PWM clock frequency
+        (desiredFrequency * period),
+        // PWM period
+        (pwmcnt_t)period,
+        // No callback
+        NULL,
+        // Enable all channels
+        {{PWM_OUTPUT_ACTIVE_HIGH, NULL},
+         {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+         {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+         {PWM_OUTPUT_ACTIVE_HIGH, NULL}},
+        0,
+#if STM32_PWM_USE_ADVANCED
+        0,
+#endif
+        0,
+    };
+
+    // Starts the PWM driver
+    pwmStop(pwmDriver);
+    osDelay(5);
+    pwmStart(pwmDriver, &pwmConfig);
+
+    // store the frequency
+    pThis[FIELD___frequency].NumericByRef().s4 = desiredFrequency;
+
+    stack.SetResult_R8((double)desiredFrequency);
+
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__U4(
+HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActiveDutyCyclePercentage___VOID__R8(
     CLR_RT_StackFrame &stack)
 {
+    int32_t timerId;
+    int32_t channelId;
+    uint32_t dutyCycle;
+
+    PWMDriver *pwmDriver;
+
     NANOCLR_HEADER();
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Retrieves the needed parameters from private class properties or method parameters
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+    channelId = pThis[FIELD___channelNumber].NumericByRef().s4;
+
+    // parameter check
+    if (stack.Arg1().NumericByRef().r8 < 0 || stack.Arg1().NumericByRef().r8 > 1.0)
     {
-        PWMDriver *_drv;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // Retrieves the needed parameters from private class properties or method parameters
-        int timerId =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
-        unsigned int dutyCycle = (unsigned int)stack.Arg1().NumericByRef().u4;
-
-        // Gets the PWM driver associated with the requested timer
-        _drv = GetDriverPwm(timerId);
-
-        // get channel for this pin and timer
-        int channelId = GetChannelPwm(pinNumber, timerId);
-        if (channelId < 0)
-        {
-            // no channel available for combination pinNumber/timerId provided
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // Enables the channel associated with the selected pin on that timer
-        pwmEnableChannel(_drv, channelId, PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    dutyCycle = (uint32_t)(stack.Arg1().NumericByRef().r8 * CONST_DutyCycleFactor);
+
+    // Gets the PWM driver associated with the requested timer
+    pwmDriver = GetDriverPwm(timerId);
+
+    // Enables the channel associated with the selected pin on that timer
+    pwmEnableChannel(pwmDriver, channelId, PWM_PERCENTAGE_TO_WIDTH(pwmDriver, dutyCycle));
+
+    // store the new duty cycle
+    pThis[FIELD___dutyCycle].NumericByRef().u4 = dutyCycle;
+
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStart___VOID(CLR_RT_StackFrame &stack)
 {
+    int32_t timerId;
+    int32_t pinNumber;
+    uint32_t dutyCycle;
+    int32_t channelId;
+
+    PWMDriver *pwmDriver;
+
     NANOCLR_HEADER();
-    {
-        PWMDriver *_drv;
 
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        // Retrieves the needed parameters from private class properties or method parameters
-        int timerId =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
-        unsigned int dutyCycle =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4);
+    // Retrieves the needed parameters from private class properties or method parameters
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+    pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
+    dutyCycle = pThis[FIELD___dutyCycle].NumericByRef().u4;
+    channelId = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-        // Gets the PWM driver associated with the requested timer
-        _drv = GetDriverPwm(timerId);
+    // Gets the PWM driver associated with the requested timer
+    pwmDriver = GetDriverPwm(timerId);
 
-        // get channel for this pin and timer
-        int channelId = GetChannelPwm(pinNumber, timerId);
-        if (channelId < 0)
-        {
-            // no channel available for combination pinNumber/timerId provided
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+    // Sets the pin to the correct PWM alternate function and...
+    palSetPadMode(GPIO_PORT(pinNumber), pinNumber % 16, PAL_MODE_ALTERNATE(GetAlternateFunctionPwm(timerId)));
 
-        // Sets the pin to the correct pwm alternate functin and enables the associated channel
-        palSetPadMode(GPIO_PORT(pinNumber), pinNumber % 16, PAL_MODE_ALTERNATE(GetAlternateFunctionPwm(timerId)));
-        pwmEnableChannel(_drv, channelId, PWM_PERCENTAGE_TO_WIDTH(_drv, dutyCycle));
-    }
+    // ...enables the associated channel
+    pwmEnableChannel(pwmDriver, channelId, PWM_PERCENTAGE_TO_WIDTH(pwmDriver, dutyCycle));
+
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeStop___VOID(CLR_RT_StackFrame &stack)
 {
+    int32_t timerId;
+    int32_t channelId;
+
     NANOCLR_HEADER();
-    {
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
 
-        // Retrieves the needed parameters from private class properties or method parameters
-        int timerId =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().u4);
-        int pinNumber =
-            (int)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().u4);
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        // get channel for this pin and timer
-        int channelId = GetChannelPwm(pinNumber, timerId);
-        if (channelId < 0)
-        {
-            // no channel available for combination pinNumber/timerId provided
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+    // Retrieves the needed parameters from private class properties or method parameters
+    timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
+    channelId = pThis[FIELD___channelNumber].NumericByRef().s4;
 
-        // Stops pwm output on the channel associated with the selected pin
-        pwmDisableChannel(GetDriverPwm(timerId), channelId);
-    }
+    // Stops PWM output on the channel associated with the selected pin
+    pwmDisableChannel(GetDriverPwm(timerId), channelId);
+
     NANOCLR_NOCLEANUP();
 }
 
