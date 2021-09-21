@@ -275,7 +275,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
     // Retrieves the needed parameters from private class properties or method parameters
     timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
     pinNumber = pThis[FIELD___pinNumber].NumericByRef().s4;
-        polarity = (PwmPulsePolarity)(pThis[FIELD___polarity].NumericByRef().u4;
+    polarity = (PwmPulsePolarity)(pThis[FIELD___polarity].NumericByRef().u4);
 
     // parameter check
     if (stack.Arg1().NumericByRef().r8 < 0 || stack.Arg1().NumericByRef().r8 > 1.0)
@@ -303,9 +303,8 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
     IDF_ERROR(ledc_update_duty(speed_mode, channel));
 
     // store the new duty cycle
-    pThis[FIELD___dutyCycle].NumericByRef().u4 =
-        dutyCycle;
-    
+    pThis[FIELD___dutyCycle].NumericByRef().u4 = dutyCycle;
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -398,6 +397,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::GetChannel___ST
     for (pwm = timerId * 2; pwm < timerId * 2 + 2; pwm++)
     {
         pinSetup = (int32_t)Esp32_GetMappedDevicePinsWithFunction(PwmMapping[pwm]);
+
         if (pinSetup == pin)
         {
             // The channel is actually the pin number
