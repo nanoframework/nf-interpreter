@@ -188,7 +188,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     CLR_RT_StackFrame &stack)
 {
     int32_t timerId;
-    uint32_t desiredFrequency;
+    int32_t desiredFrequency;
     int32_t optimumDutyResolution;
     uint32_t precision;
     uint64_t divParam;
@@ -207,10 +207,10 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
 
     // Retrieves the needed parameters from private class properties ( 0 - 7 )
     timerId = pThis[FIELD___pwmTimer].NumericByRef().s4;
-    desiredFrequency = (uint32_t)stack.Arg1().NumericByRef().s4;
+    desiredFrequency = stack.Arg1().NumericByRef().s4;
 
     // parameter check
-    if (desiredFrequency)
+    if (desiredFrequency < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
