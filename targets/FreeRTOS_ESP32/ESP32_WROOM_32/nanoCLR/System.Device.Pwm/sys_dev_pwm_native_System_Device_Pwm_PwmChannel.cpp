@@ -188,7 +188,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     CLR_RT_StackFrame &stack)
 {
     int32_t timerId;
-    uint32_t desiredFrequency;
+    int32_t desiredFrequency;
     int32_t optimumDutyResolution;
     uint32_t precision;
     uint64_t divParam;
