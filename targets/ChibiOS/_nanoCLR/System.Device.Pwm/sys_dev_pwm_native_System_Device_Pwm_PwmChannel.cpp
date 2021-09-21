@@ -905,7 +905,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     desiredFrequency = stack.Arg1().NumericByRef().s4;
 
     // parameter check
-    if (desiredFrequency)
+    if (desiredFrequency < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
