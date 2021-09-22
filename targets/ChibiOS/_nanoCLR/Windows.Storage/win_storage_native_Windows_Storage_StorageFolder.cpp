@@ -248,8 +248,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // is the SPIFFS file system available and mounted?
     if (spiffsFileSystemReady)
     {
-        // add count
-        driveCount++;
+        // get SPIFFS instances count
+        driveCount = hal_spiffs_get_instances_count();
     }
 #endif
 
@@ -260,19 +260,31 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // create an array of <StorageFolder>
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, driveCount, storageFolderTypeDef));
 
-    if (driveCount > 0)
+    // get a pointer to the first object in the array (which is of type <StorageFolder>)
+    storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+    for (uint16_t driveIterator = 0; driveIterator < driveCount; driveIterator++)
     {
         // SPIFFS is mounted
-        // currently there is support for a single SPIFFS instance
-
-        // get a pointer to the first object in the array (which is of type <StorageFolder>)
-        storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
         // create an instance of <StorageFolder>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
 
         // fill the folder name and path
-        memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
+        switch (driveIterator)
+        {
+            case 0:
+                memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
+                break;
+
+            case 1:
+                memcpy(workingDrive, INTERNAL_DRIVE1_PATH, DRIVE_PATH_LENGTH);
+                break;
+
+            default:
+                HAL_AssertEx();
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
 
         // dereference the object in order to reach its fields
         hbObj = storageFolder->Dereference();
@@ -284,6 +296,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
             hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path],
             workingDrive));
+
+        // move pointer to the next folder item
+        storageFolder++;
     }
 
     NANOCLR_NOCLEANUP();
