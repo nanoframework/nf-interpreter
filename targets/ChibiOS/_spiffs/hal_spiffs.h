@@ -77,14 +77,14 @@ extern "C"
     s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst);
     s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src);
 #else
-    s32_t hal_spiffs_erase_0(u32_t addr, u32_t size);
-    s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst);
-    s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src);
+s32_t hal_spiffs_erase_0(u32_t addr, u32_t size);
+s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst);
+s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src);
 #if SPIFFS_INSTANCES_COUNT > 0
-    s32_t hal_spiffs_erase_1(u32_t addr, u32_t size);
-    s32_t hal_spiffs_read_1(u32_t addr, u32_t size, u8_t *dst);
-    s32_t hal_spiffs_write_1(u32_t addr, u32_t size, u8_t *src);
-#endif 
+s32_t hal_spiffs_erase_1(u32_t addr, u32_t size);
+s32_t hal_spiffs_read_1(u32_t addr, u32_t size, u8_t *dst);
+s32_t hal_spiffs_write_1(u32_t addr, u32_t size, u8_t *src);
+#endif
 
 #endif // SPIFFS_SINGLETON
 

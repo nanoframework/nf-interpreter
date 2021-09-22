@@ -109,8 +109,11 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead =
-            SPIFFS_read(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead = SPIFFS_read(
+            fileIoOperation->SpiffsInstance,
+            *fileIoOperation->SpiffsFile,
+            fileIoOperation->Content,
+            fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -181,8 +184,11 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
-            0)
+        if (SPIFFS_write(
+                fileIoOperation->SpiffsInstance,
+                *fileIoOperation->SpiffsFile,
+                fileIoOperation->Content,
+                fileIoOperation->ContentLength) < 0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
@@ -251,8 +257,11 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
-            0)
+        if (SPIFFS_write(
+                fileIoOperation->SpiffsInstance,
+                *fileIoOperation->SpiffsFile,
+                fileIoOperation->Content,
+                fileIoOperation->ContentLength) < 0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
@@ -322,8 +331,11 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead =
-            SPIFFS_read(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead = SPIFFS_read(
+            fileIoOperation->SpiffsInstance,
+            *fileIoOperation->SpiffsFile,
+            fileIoOperation->Content,
+            fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -388,7 +400,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
-    spiffs* driveFs = NULL;
+    spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
 
@@ -429,7 +441,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // create file struct
             spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
-            
+
             // check allocation
             if (spiffsFile == NULL)
             {
@@ -588,7 +600,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
-    spiffs* driveFs = NULL;
+    spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
 
@@ -780,7 +792,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
-    spiffs* driveFs = NULL;
+    spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
 
@@ -993,7 +1005,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
-    spiffs* driveFs = NULL;
+    spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
 
