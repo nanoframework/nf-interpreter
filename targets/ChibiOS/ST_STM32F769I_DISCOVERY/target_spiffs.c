@@ -6,9 +6,6 @@
 
 #include <hal.h>
 #include <hal_spiffs.h>
-#include <hal_stm32_qspi.h>
-#include "target_spiffs.h"
-#include <nanoHAL_v2.h>
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
@@ -100,12 +97,12 @@ uint8_t target_spiffs_init()
 }
 
 // target specific implementation of hal_spiffs_erase
-s32_t hal_spiffs_erase(u32_t addr, u32_t size)
+s32_t hal_spiffs_erase_0(u32_t addr, u32_t size)
 {
     uint32_t i = 0;
 
     // how many sectors need to be erased?
-    uint32_t erase_count = (size + SPIFFS_ERASE_BLOCK_SIZE - 1) / SPIFFS_ERASE_BLOCK_SIZE;
+    uint32_t erase_count = (size + SPIFFS0_ERASE_BLOCK_SIZE - 1) / SPIFFS0_ERASE_BLOCK_SIZE;
 
     for (i = 0; i < erase_count; i++)
     {
@@ -115,14 +112,14 @@ s32_t hal_spiffs_erase(u32_t addr, u32_t size)
         }
 
         // adjust sector address
-        addr += i * SPIFFS_ERASE_BLOCK_SIZE;
+        addr += i * SPIFFS0_ERASE_BLOCK_SIZE;
     }    
 
     return SPIFFS_SUCCESS;
 }
 
 // target specific implementation of hal_spiffs_read
-s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst)
+s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst)
 {
     if(QSPI_Read(dst, addr, size) != QSPI_OK)
     {
@@ -133,7 +130,7 @@ s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst)
 }
 
 // target specific implementation of hal_spiffs_write
-s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src)
+s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src)
 {
     if( QSPI_Write(src, addr, size) != QSPI_OK)
     {
