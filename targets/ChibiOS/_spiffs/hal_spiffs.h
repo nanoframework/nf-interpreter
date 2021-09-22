@@ -6,20 +6,72 @@
 #ifndef HAL_SPIFFS_H
 #define HAL_SPIFFS_H
 
+#include <hal.h>
+#include <hal_nf_community.h>
+#include <nanoCLR_Headers.h>
 #include <spiffs.h>
+#include <target_spiffs.h>
+#include <nanoHAL_v2.h>
 
-#ifdef __cplusplus
-extern "C" {
+////////////////////////////////////
+// buffers configuration, if not defined at target level
+#ifndef SPIFFS_LOGICAL_PAGE_SIZE
+#define SPIFFS_LOGICAL_PAGE_SIZE (256)
 #endif
 
-#define SPIFFS_SUCCESS          (0)
-#define SPIFFS_ERROR            (-1)
+#ifndef SPIFFS_WORK_BUFFER_SIZE
+#define SPIFFS_WORK_BUFFER_SIZE (SPIFFS_LOGICAL_PAGE_SIZE * 2)
+#endif
 
-extern spiffs fs;
-extern spiffs_config spiffs_cfg;
-extern bool spiffsFileSystemReady;
+#ifndef SPIFFS_FILE_DESCRIPTORS_SPACE
+#define SPIFFS_FILE_DESCRIPTORS_SPACE (32 * 2)
+#endif
 
-uint8_t hal_spiffs_config();
+#ifndef SPIFFS_CACHE_SIZE
+#define SPIFFS_CACHE_SIZE ((SPIFFS_LOGICAL_PAGE_SIZE + 32) * 4)
+#endif
+
+#if SPIFFS_SINGLETON
+
+// we're running a SINGLETON implementation, set
+#define SPIFFS_INSTANCES_COUNT 1
+
+#else
+
+// instance count has to be defined at target level
+#ifndef SPIFFS_INSTANCES_COUNT
+#error "Count of SPIFFS instances wasn't defined at target level. Please check target_spiffs.h."
+#endif
+
+#endif // SPIFFS_SINGLETON
+
+#define SPIFFS_TOTAL_SIZE(index)         SPIFFS##index##_TOTAL_SIZE
+#define SPIFFS_ERASE_BLOCK_SIZE(index)   SPIFFS##index##_ERASE_BLOCK_SIZE
+#define SPIFFS_LOGICAL_BLOCK_SIZE(index) SPIFFS##index##_LOGICAL_BLOCK_SIZE
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#define SPIFFS_SUCCESS (0)
+#define SPIFFS_ERROR   (-1)
+
+    extern spiffs fs[SPIFFS_INSTANCES_COUNT];
+    extern spiffs_config spiffs_cfg[SPIFFS_INSTANCES_COUNT];
+    extern bool spiffsFileSystemReady;
+
+    uint8_t hal_spiffs_config();
+    s32_t hal_spiffs_erase(u32_t addr, u32_t size);
+    s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst);
+    s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src);
+
+    uint8_t target_spiffs_init();
+    uint32_t hal_spiffs_get_totalsize(int spiffsIndex);
+    uint32_t hal_spiffs_get_eraseblocksize(int spiffsIndex);
+    uint32_t hal_spiffs_get_logicalblocksize(int spiffsIndex);
+    int32_t hal_spiffs_get_fs_index(spiffs *fsInstance);
+    spiffs *hal_spiffs_get_fs_from_index(int32_t index);
 
 #ifdef __cplusplus
 }

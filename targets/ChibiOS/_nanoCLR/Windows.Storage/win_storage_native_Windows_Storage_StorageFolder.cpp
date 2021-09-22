@@ -26,7 +26,6 @@ extern bool usbMsdFileSystemReady;
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
 extern bool spiffsFileSystemReady;
-extern spiffs fs;
 #endif
 
 void CombinePath(char *outpath, const char *path1, const char *path2)
@@ -188,7 +187,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // malloc stringBuffer to work with FS
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL)
             {
                 // failed to allocate memory
@@ -273,7 +272,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
 
         // fill the folder name and path
-        memcpy(workingDrive, INTERNAL_DRIVE_PATH, DRIVE_PATH_LENGTH);
+        memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
 
         // dereference the object in order to reach its fields
         hbObj = storageFolder->Dereference();
@@ -405,7 +404,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -525,6 +524,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     uint32_t maxItemsToRetrieve;
     uint32_t itemIndex = 0;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
+
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
 
     DIR currentDirectory;
@@ -621,7 +625,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
                 workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-                // sanity check for successfull malloc
+                // sanity check for successful malloc
                 if (stringBuffer == NULL || workingBuffer == NULL)
                 {
                     // failed to allocate memory
@@ -718,6 +722,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         if ((WORKING_DRIVE_IS_INTERNAL_DRIVE) && (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
         {
+            // get SPIFFS drive index...
+            driveIndex = GetInternalDriveIndex(workingDrive);
+            //... and pointer to the SPIFFS instance
+            driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
             // this is the SPIFFS drive
             spiffs_DIR drive;
             struct spiffs_dirent e;
@@ -728,7 +737,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // 2nd: create the array items with each file object
 
             // perform 1st pass
-            SPIFFS_opendir(&fs, "/", &drive);
+            SPIFFS_opendir(driveFs, "/", &drive);
             while ((pe = SPIFFS_readdir(&drive, pe)))
             {
                 fileCount++;
@@ -751,7 +760,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 // allocate memory for buffer
                 workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-                // sanity check for successfull malloc
+                // sanity check for successful malloc
                 if (workingBuffer == NULL)
                 {
                     // failed to allocate memory
@@ -760,7 +769,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
                 // perform 2nd pass
                 // need to open the directory again
-                SPIFFS_opendir(&fs, "/", &drive);
+                SPIFFS_opendir(driveFs, "/", &drive);
 
                 // and reset the file iterator vars too
                 itemIndex = 0;
@@ -823,12 +832,17 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     struct spiffs_dirent e;
     struct spiffs_dirent *pe = &e;
 
+    // get SPIFFS drive index...
+    driveIndex = GetInternalDriveIndex(workingDrive);
+    //... and pointer to the SPIFFS instance
+    driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
     // need to perform this in two steps
     // 1st: count the file objects
     // 2nd: create the array items with each file object
 
     // perform 1st pass
-    SPIFFS_opendir(&fs, "/", &drive);
+    SPIFFS_opendir(driveFs, "/", &drive);
     while ((pe = SPIFFS_readdir(&drive, pe)))
     {
         fileCount++;
@@ -851,7 +865,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // allocate memory for buffer
         workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (workingBuffer == NULL)
         {
             // failed to allocate memory
@@ -860,7 +874,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
         // perform 2nd pass
         // need to open the directory again
-        SPIFFS_opendir(&fs, "/", &drive);
+        SPIFFS_opendir(driveFs, "/", &drive);
 
         // and reset the file iterator vars too
         itemIndex = 0;
@@ -934,6 +948,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
     CreationCollisionOption options;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
+
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
 
     FIL file;
@@ -967,7 +986,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -992,6 +1011,12 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
             {
                 // this is the SPIFFS drive
+
+                // get SPIFFS drive index...
+                driveIndex = GetInternalDriveIndex(workingDrive);
+                //... and pointer to the SPIFFS instance
+                driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
                 // proceed to create the file
 
                 // compute mode flags from CreationCollisionOption
@@ -1018,10 +1043,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         break;
                 }
 
-                spiffs_file fd = SPIFFS_open(&fs, fileName, modeFlags, 0);
+                spiffs_file fd = SPIFFS_open(driveFs, fileName, modeFlags, 0);
                 if (fd < 0)
                 {
-                    int32_t error = SPIFFS_errno(&fs);
+                    int32_t error = SPIFFS_errno(driveFs);
 
                     // process operation result according to creation options
                     if ((error == SPIFFS_ERR_FILE_EXISTS) && (options == CreationCollisionOption_FailIfExists))
@@ -1042,7 +1067,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 {
                     // file created (or opened) succesfully
                     // OK to close it
-                    SPIFFS_close(&fs, fd);
+                    SPIFFS_close(driveFs, fd);
 
                     // compose return object
                     // find <StorageFile> type, don't bother checking the result as it exists for sure
@@ -1194,7 +1219,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -1231,10 +1256,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             break;
     }
 
-    spiffs_file fd = SPIFFS_open(&fs, filePath, modeFlags, 0);
+    spiffs_file fd = SPIFFS_open(driveFs, filePath, modeFlags, 0);
     if (fd < 0)
     {
-        int32_t error = SPIFFS_errno(&fs);
+        int32_t error = SPIFFS_errno(driveFs);
 
         // process operation result according to creation options
         if ((error == SPIFFS_ERR_FILE_EXISTS) && (options == CreationCollisionOption_FailIfExists))
@@ -1255,7 +1280,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     {
         // file created (or opened) succesfully
         // OK to close it
-        SPIFFS_close(&fs, fd);
+        SPIFFS_close(driveFs, fd);
 
         // compose return object
         // find <StorageFile> type, don't bother checking the result as it exists for sure
@@ -1335,7 +1360,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
     folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (folderPath == NULL)
     {
         // failed to allocate memory
@@ -1637,7 +1662,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
     folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (folderPath == NULL)
     {
         // failed to allocate memory
