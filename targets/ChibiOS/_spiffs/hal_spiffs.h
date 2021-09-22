@@ -9,8 +9,8 @@
 #include <hal.h>
 #include <hal_nf_community.h>
 #include <nanoCLR_Headers.h>
-#include <spiffs.h>
 #include <target_spiffs.h>
+#include <spiffs.h>
 #include <nanoHAL_v2.h>
 
 ////////////////////////////////////
