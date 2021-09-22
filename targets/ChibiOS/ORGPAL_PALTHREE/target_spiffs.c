@@ -36,6 +36,50 @@ bool SPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size);
 
 extern uint32_t HAL_GetTick(void);
 
+// target specific implementation of hal_spiffs_erase
+s32_t hal_spiffs_erase_0(u32_t addr, u32_t size)
+{
+    // how many sectors need to be erased?
+    uint32_t erase_count = (size + SPIFFS0_ERASE_BLOCK_SIZE - 1) / SPIFFS0_ERASE_BLOCK_SIZE;
+
+    for (uint32_t i = 0; i < erase_count; i++)
+    {
+        Watchdog_Reset();
+
+        if (!SPI_Erase_Block(addr))
+        {
+            return SPIFFS_ERROR;
+        }
+
+        // adjust sector address
+        addr += i * SPIFFS0_ERASE_BLOCK_SIZE;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_read
+s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst)
+{
+    if (!SPI_Read(dst, addr, size))
+    {
+        return SPIFFS_ERROR;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_write
+s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src)
+{
+    if (!SPI_Write(src, addr, size))
+    {
+        return SPIFFS_ERROR;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
 bool SPI_WaitOnBusy()
 {
     uint32_t tickstart = HAL_GetTick();
@@ -198,6 +242,48 @@ static uint8_t QSPI_ReadChipID(QSPI_HandleTypeDef *hqspi, uint8_t *buffer);
 static uint8_t QSPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
 static uint8_t QSPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size);
 static uint8_t QSPI_Erase_Block(uint32_t blockAddress);
+
+// target specific implementation of hal_spiffs_erase
+s32_t hal_spiffs_erase_1(u32_t addr, u32_t size)
+{
+    // how many sectors need to be erased?
+    uint32_t erase_count = (size + SPIFFS1_ERASE_BLOCK_SIZE - 1) / SPIFFS1_ERASE_BLOCK_SIZE;
+
+    for (uint32_t i = 0; i < erase_count; i++)
+    {
+        if (QSPI_Erase_Block(addr) != QSPI_OK)
+        {
+            return SPIFFS_ERROR;
+        }
+
+        // adjust sector address
+        addr += i * SPIFFS1_ERASE_BLOCK_SIZE;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_read
+s32_t hal_spiffs_read_1(u32_t addr, u32_t size, u8_t *dst)
+{
+    if (QSPI_Read(dst, addr, size) != QSPI_OK)
+    {
+        return SPIFFS_ERROR;
+    }
+
+    return SPIFFS_SUCCESS;
+}
+
+// target specific implementation of hal_spiffs_write
+s32_t hal_spiffs_write_1(u32_t addr, u32_t size, u8_t *src)
+{
+    if (QSPI_Write(src, addr, size) != QSPI_OK)
+    {
+        return SPIFFS_ERROR;
+    }
+
+    return SPIFFS_SUCCESS;
+}
 
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi)
 {
@@ -719,101 +805,6 @@ uint8_t target_spiffs_init()
 
     return 1;
 }
-
-// target specific implementation of hal_spiffs_erase
-s32_t hal_spiffs_erase(u32_t addr, u32_t size)
-{
-    uint32_t i = 0;
-    uint32_t erase_count;
-
-#ifdef SPIFFS_SPI1
-
-    // how many sectors need to be erased?
-    erase_count = (size + SPIFFS0_ERASE_BLOCK_SIZE - 1) / SPIFFS0_ERASE_BLOCK_SIZE;
-
-    for (i = 0; i < erase_count; i++)
-    {
-        Watchdog_Reset();
-
-        if (!SPI_Erase_Block(addr))
-        {
-            return SPIFFS_ERROR;
-        }
-
-        // adjust sector address
-        addr += i * SPIFFS0_ERASE_BLOCK_SIZE;
-    }
-#endif // SPIFFS_SPI1
-
-#ifdef SPIFFS_QSPI
-
-    // how many sectors need to be erased?
-    erase_count = (size + SPIFFS1_ERASE_BLOCK_SIZE - 1) / SPIFFS1_ERASE_BLOCK_SIZE;
-
-    for (i = 0; i < erase_count; i++)
-    {
-        if (QSPI_Erase_Block(addr) != QSPI_OK)
-        {
-            return SPIFFS_ERROR;
-        }
-
-        // adjust sector address
-        addr += i * SPIFFS1_ERASE_BLOCK_SIZE;
-    }
-
-#endif // SPIFFS_QSPI
-
-    return SPIFFS_SUCCESS;
-}
-
-// target specific implementation of hal_spiffs_read
-s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst)
-{
-    #ifdef SPIFFS_SPI1
-
-    if (!SPI_Read(dst, addr, size))
-    {
-        return SPIFFS_ERROR;
-    }
-
-#endif // SPIFFS_SPI1
-
-#ifdef SPIFFS_QSPI
-
-    if (QSPI_Read(dst, addr, size) != QSPI_OK)
-    {
-        return SPIFFS_ERROR;
-    }
-
-#endif // SPIFFS_QSPI
-
-    return SPIFFS_SUCCESS;
-}
-
-// target specific implementation of hal_spiffs_write
-s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src)
-{
-#ifdef SPIFFS_SPI1
-
-    if (!SPI_Write(src, addr, size))
-    {
-        return SPIFFS_ERROR;
-    }
-
-#endif // SPIFFS_SPI1
-
-#ifdef SPIFFS_QSPI
-
-    if (QSPI_Write(src, addr, size) != QSPI_OK)
-    {
-        return SPIFFS_ERROR;
-    }
-
-#endif // SPIFFS_QSPI
-
-    return SPIFFS_SUCCESS;
-}
-
 
 #ifdef SPIFFS_SPI1
 #endif // SPIFFS_SPI1
