@@ -16,6 +16,21 @@
 #include <hal_spiffs.h>
 #endif
 
+int32_t GetInternalDriveIndex(char *drive)
+{
+    if (memcmp(drive, INTERNAL_DRIVE0_LETTER, sizeof(INTERNAL_DRIVE0_LETTER) - 1) == 0)
+    {
+        return 0;
+    }
+    if (memcmp(drive, INTERNAL_DRIVE1_LETTER, sizeof(INTERNAL_DRIVE1_LETTER) - 1) == 0)
+    {
+        return 1;
+    }
+
+    HAL_AssertEx();
+    return -1;
+}
+
 // defining these types here to make it shorter and improve code readability
 typedef Library_win_storage_native_Windows_Storage_StorageFolder StorageFolder;
 typedef Library_win_storage_native_Windows_Storage_StorageFile StorageFile;
@@ -38,6 +53,7 @@ struct FileOperation
 #endif
 #if USE_SPIFFS_FOR_STORAGE
     spiffs_file *SpiffsFile;
+    spiffs *SpiffsInstance;
 #endif
     char *Content;
     uint32_t ContentLength;
@@ -63,7 +79,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
         // read string
         if (f_gets((TCHAR *)fileIoOperation->Content, readLength, fileIoOperation->FatFile))
         {
-            // operation succesfull
+            // operation successful
         }
         else
         {
@@ -93,8 +109,11 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead =
-            SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead = SPIFFS_read(
+            fileIoOperation->SpiffsInstance,
+            *fileIoOperation->SpiffsFile,
+            fileIoOperation->Content,
+            fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -107,7 +126,7 @@ static THD_FUNCTION(ReadTextWorkingThread, arg)
         }
 
         // close file
-        SPIFFS_close(&fs, *fileIoOperation->SpiffsFile);
+        SPIFFS_close(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile);
 
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
@@ -165,15 +184,18 @@ static THD_FUNCTION(WriteTextWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
-            0)
+        if (SPIFFS_write(
+                fileIoOperation->SpiffsInstance,
+                *fileIoOperation->SpiffsFile,
+                fileIoOperation->Content,
+                fileIoOperation->ContentLength) < 0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
         }
 
         // close file
-        SPIFFS_close(&fs, *fileIoOperation->SpiffsFile);
+        SPIFFS_close(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile);
 
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
@@ -235,15 +257,18 @@ static THD_FUNCTION(WriteBinaryWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        if (SPIFFS_write(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength) <
-            0)
+        if (SPIFFS_write(
+                fileIoOperation->SpiffsInstance,
+                *fileIoOperation->SpiffsFile,
+                fileIoOperation->Content,
+                fileIoOperation->ContentLength) < 0)
         {
             // failed to write expected number of bytes
             opResult = FileOperationResult_Error;
         }
 
         // close file
-        SPIFFS_close(&fs, *fileIoOperation->SpiffsFile);
+        SPIFFS_close(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile);
 
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
@@ -306,8 +331,11 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
 #if USE_SPIFFS_FOR_STORAGE
     if (fileIoOperation->SpiffsFile != NULL)
     {
-        uint32_t bytesRead =
-            SPIFFS_read(&fs, *fileIoOperation->SpiffsFile, fileIoOperation->Content, fileIoOperation->ContentLength);
+        uint32_t bytesRead = SPIFFS_read(
+            fileIoOperation->SpiffsInstance,
+            *fileIoOperation->SpiffsFile,
+            fileIoOperation->Content,
+            fileIoOperation->ContentLength);
 
         if (bytesRead == fileIoOperation->ContentLength)
         {
@@ -320,7 +348,7 @@ static THD_FUNCTION(ReadBinaryWorkingThread, arg)
         }
 
         // close file
-        SPIFFS_close(&fs, *fileIoOperation->SpiffsFile);
+        SPIFFS_close(fileIoOperation->SpiffsInstance, *fileIoOperation->SpiffsFile);
 
         // free memory
         platform_free(fileIoOperation->SpiffsFile);
@@ -372,6 +400,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
 #endif
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -404,8 +434,14 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
+            // get SPIFFS drive index...
+            driveIndex = GetInternalDriveIndex(workingDrive);
+            //... and pointer to the SPIFFS instance
+            driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
             // create file struct
             spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
+
             // check allocation
             if (spiffsFile == NULL)
             {
@@ -414,15 +450,17 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // get file name removing the drive letter
             workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-            // sanity check for successfull malloc
+
+            // sanity check for successful malloc
             if (workingBuffer == NULL)
             {
                 // failed to allocate memory
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
+
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-            *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+            *spiffsFile = SPIFFS_open(driveFs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
             if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -444,7 +482,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
             }
 
             // open file (which is supposed to already exist)
-            // need to use FA_OPEN_ALWAYS because we are writting the file content from start
+            // need to use FA_OPEN_ALWAYS because we are writing the file content from start
             operationResult = f_open(fatFile, filePath, FA_OPEN_ALWAYS | FA_WRITE);
 
             if (operationResult != FR_OK)
@@ -466,6 +504,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
+        fileIoOperation->SpiffsInstance = driveFs;
 #endif
 
         fileIoOperation->Content = buffer;
@@ -561,6 +600,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
 #endif
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -589,6 +630,11 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
+            // get SPIFFS drive index...
+            driveIndex = GetInternalDriveIndex(workingDrive);
+            //... and pointer to the SPIFFS instance
+            driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
             // create file struct
             spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
@@ -599,7 +645,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 
             // get file name removing the drive letter
             workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -607,7 +653,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
             }
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-            *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
+            *spiffsFile = SPIFFS_open(driveFs, workingBuffer, SPIFFS_TRUNC | SPIFFS_RDWR, 0);
             if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -651,6 +697,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 #endif
 #if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
+        fileIoOperation->SpiffsInstance = driveFs;
 #endif
 
         fileIoOperation->Content = (char *)content->StringText();
@@ -745,6 +792,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
 #endif
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -770,6 +819,11 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
+            // get SPIFFS drive index...
+            driveIndex = GetInternalDriveIndex(workingDrive);
+            //... and pointer to the SPIFFS instance
+            driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
             // create file struct
             spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
@@ -780,7 +834,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // get file name removing the drive letter
             workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -788,7 +842,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
             }
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-            *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_RDONLY, 0);
+            *spiffsFile = SPIFFS_open(driveFs, workingBuffer, SPIFFS_RDONLY, 0);
             if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -796,7 +850,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // get file details
             spiffs_stat fileInfo;
-            SPIFFS_stat(&fs, workingBuffer, &fileInfo);
+            SPIFFS_stat(driveFs, workingBuffer, &fileInfo);
 
             // we are only interested in the file size
             fileSize = fileInfo.size;
@@ -856,6 +910,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
+        fileIoOperation->SpiffsInstance = driveFs;
 #endif
 
         fileIoOperation->Content = (char *)bufferArray->GetFirstElement();
@@ -950,6 +1005,8 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
     spiffs_file *spiffsFile = NULL;
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
 #endif
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -975,6 +1032,11 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
             // SPIFFS drive workflow
 
+            // get SPIFFS drive index...
+            driveIndex = GetInternalDriveIndex(workingDrive);
+            //... and pointer to the SPIFFS instance
+            driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
             // create file struct
             spiffsFile = (spiffs_file *)platform_malloc(sizeof(spiffs_file));
             // check allocation
@@ -985,7 +1047,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // get file name removing the drive letter
             workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -993,7 +1055,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
             }
             memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-            *spiffsFile = SPIFFS_open(&fs, workingBuffer, SPIFFS_RDONLY, 0);
+            *spiffsFile = SPIFFS_open(driveFs, workingBuffer, SPIFFS_RDONLY, 0);
             if (*spiffsFile < 0)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -1001,7 +1063,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
             // get file details
             spiffs_stat fileInfo;
-            SPIFFS_stat(&fs, workingBuffer, &fileInfo);
+            SPIFFS_stat(driveFs, workingBuffer, &fileInfo);
 
             // we are only interested in the file size
             fileSize = fileInfo.size;
@@ -1061,6 +1123,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 #endif
 #if USE_SPIFFS_FOR_STORAGE
         fileIoOperation->SpiffsFile = spiffsFile;
+        fileIoOperation->SpiffsInstance = driveFs;
 #endif
 
         fileIoOperation->Content = (char *)textString->StringText();

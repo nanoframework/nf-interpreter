@@ -26,7 +26,6 @@ extern bool usbMsdFileSystemReady;
 #endif
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
 extern bool spiffsFileSystemReady;
-extern spiffs fs;
 #endif
 
 void CombinePath(char *outpath, const char *path1, const char *path2)
@@ -188,7 +187,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // malloc stringBuffer to work with FS
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL)
             {
                 // failed to allocate memory
@@ -249,8 +248,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // is the SPIFFS file system available and mounted?
     if (spiffsFileSystemReady)
     {
-        // add count
-        driveCount++;
+        // get SPIFFS instances count
+        driveCount = hal_spiffs_get_instances_count();
     }
 #endif
 
@@ -261,19 +260,31 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // create an array of <StorageFolder>
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, driveCount, storageFolderTypeDef));
 
-    if (driveCount > 0)
+    // get a pointer to the first object in the array (which is of type <StorageFolder>)
+    storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+    for (uint16_t driveIterator = 0; driveIterator < driveCount; driveIterator++)
     {
         // SPIFFS is mounted
-        // currently there is support for a single SPIFFS instance
-
-        // get a pointer to the first object in the array (which is of type <StorageFolder>)
-        storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
         // create an instance of <StorageFolder>
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFolder, storageFolderTypeDef));
 
         // fill the folder name and path
-        memcpy(workingDrive, INTERNAL_DRIVE_PATH, DRIVE_PATH_LENGTH);
+        switch (driveIterator)
+        {
+            case 0:
+                memcpy(workingDrive, INTERNAL_DRIVE0_PATH, DRIVE_PATH_LENGTH);
+                break;
+
+            case 1:
+                memcpy(workingDrive, INTERNAL_DRIVE1_PATH, DRIVE_PATH_LENGTH);
+                break;
+
+            default:
+                HAL_AssertEx();
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
 
         // dereference the object in order to reach its fields
         hbObj = storageFolder->Dereference();
@@ -285,6 +296,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
             hbObj[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path],
             workingDrive));
+
+        // move pointer to the next folder item
+        storageFolder++;
     }
 
     NANOCLR_NOCLEANUP();
@@ -305,7 +319,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     const char *workingPath;
     char workingDrive[DRIVE_LETTER_LENGTH];
 
-    DIR currentDirectory;
+    DIR currentDirectory = {};
     FRESULT operationResult;
     static FILINFO fileInfo;
     uint16_t directoryCount = 0;
@@ -405,7 +419,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
             workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-            // sanity check for successfull malloc
+            // sanity check for successful malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
             {
                 // failed to allocate memory
@@ -491,8 +505,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     NANOCLR_CLEANUP();
 
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    // close directory
-    f_closedir(&currentDirectory);
+    // close directory, if it was ever opened
+    if (currentDirectory.dir)
+    {
+        f_closedir(&currentDirectory);
+    }
 
     // free buffers memory, if allocated
     if (stringBuffer != NULL)
@@ -525,9 +542,14 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     uint32_t maxItemsToRetrieve;
     uint32_t itemIndex = 0;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex = -1;
+#endif
+
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
 
-    DIR currentDirectory;
+    DIR currentDirectory = {};
     FRESULT operationResult;
     static FILINFO fileInfo;
     uint16_t fileCount = 0;
@@ -557,85 +579,130 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     workingPath =
         pThis[Library_win_storage_native_Windows_Storage_StorageFolder::FIELD___path].DereferenceString()->StringText();
 
-    // change drive
-    if (f_chdrive(workingDrive) == FR_OK)
+    // check if the working drive is the SPIFFS drive and...
+    // ... that the path is the drive root (because SPIFFS doesn't support folders)
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    if ((WORKING_DRIVE_IS_INTERNAL_DRIVE) && (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
     {
-        // open directory
-        operationResult = f_opendir(&currentDirectory, workingPath);
+        // get SPIFFS drive index...
+        driveIndex = GetInternalDriveIndex(workingDrive);
+        //... and pointer to the SPIFFS instance
+        driveFs = hal_spiffs_get_fs_from_index(driveIndex);
 
-        if (operationResult != FR_OK)
+        // this is the SPIFFS drive
+        spiffs_DIR drive;
+        memset(&drive, 0, sizeof(spiffs_DIR));
+
+        struct spiffs_dirent e = {};
+        struct spiffs_dirent *pe = &e;
+
+        // need to perform this in two steps
+        // 1st: count the file objects
+        // 2nd: create the array items with each file object
+
+        // perform 1st pass
+        SPIFFS_opendir(driveFs, "/", &drive);
+        while ((pe = SPIFFS_readdir(&drive, pe)))
         {
-            // error or directory empty
-            // find <StorageFile> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
-
-            // create an array of <StorageFile>
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
+            fileCount++;
         }
-        else
+
+        // have to close dir
+        SPIFFS_closedir(&drive);
+        memset(&drive, 0, sizeof(spiffs_DIR));
+
+        // find <StorageFile> type, don't bother checking the result as it exists for sure
+        g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
+
+        // create an array of <StorageFile>
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
+
+        // get a pointer to the first object in the array (which is of type <StorageFile>)
+        storageFile = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+        if (fileCount > 0)
         {
-            // need to perform this in two steps
-            // 1st: count the file objects
-            // 2nd: create the array items with each file object
-
-            // perform 1st pass
-            for (;;)
+            // allocate memory for buffer, if not already done
+            if (workingBuffer == NULL)
             {
-                // read next directory item
-                operationResult = f_readdir(&currentDirectory, &fileInfo);
-
-                // break on error or at end of dir
-                if (operationResult != FR_OK || fileInfo.fname[0] == 0)
-                {
-                    break;
-                }
-
-                // check if this is a file
-                // but skip if:
-                // - has system attribute set
-                // - has hidden attribute set
-                if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
-                {
-                    // check if this file is within the requested parameters
-                    if ((itemIndex >= startIndex) && (fileCount < maxItemsToRetrieve))
-                    {
-                        fileCount++;
-                    }
-
-                    itemIndex++;
-                }
-            }
-
-            // find <StorageFile> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
-
-            // create an array of <StorageFile>
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
-
-            // get a pointer to the first object in the array (which is of type <StorageFile>)
-            storageFile = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
-
-            if (fileCount > 0)
-            {
-                // allocate memory for buffers
-                stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
                 workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-                // sanity check for successfull malloc
-                if (stringBuffer == NULL || workingBuffer == NULL)
+                // sanity check for successful malloc
+                if (workingBuffer == NULL)
                 {
                     // failed to allocate memory
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
+            }
 
-                // perform 2nd pass
-                // need to rewind the directory read index first
-                f_readdir(&currentDirectory, NULL);
+            // perform 2nd pass
+            // need to open the directory again
+            SPIFFS_opendir(driveFs, "/", &drive);
 
-                // and reset the file iterator vars too
-                itemIndex = 0;
-                fileCount = 0;
+            // and reset the file iterator vars too
+            itemIndex = 0;
+            fileCount = 0;
+            e = {};
+            pe = &e;
 
+            while ((pe = SPIFFS_readdir(&drive, pe)))
+            {
+                // create an instance of <StorageFile>
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFile, storageFileTypeDef));
+
+                // dereference the object in order to reach its fields
+                hbObj = storageFile->Dereference();
+
+                // file name
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+                    hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name],
+                    (const char *)pe->name));
+
+                // clear working buffer
+                memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+
+                // compose file path
+                CombinePath(workingBuffer, workingPath, (const char *)pe->name);
+
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+                    hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path],
+                    (const char *)workingBuffer));
+
+                // SPIFFS files don't have date information
+
+                // move the storage folder pointer to the next item in the array
+                storageFile++;
+            }
+
+            // done here, close dir
+            SPIFFS_closedir(&drive);
+        }
+    }
+    else
+#endif
+    {
+        // change drive
+        if (f_chdrive(workingDrive) == FR_OK)
+        {
+            // open directory
+            operationResult = f_opendir(&currentDirectory, workingPath);
+
+            if (operationResult != FR_OK)
+            {
+                // error or directory empty
+                // find <StorageFile> type, don't bother checking the result as it exists for sure
+                g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
+
+                // create an array of <StorageFile>
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
+            }
+            else
+            {
+                // need to perform this in two steps
+                // 1st: count the file objects
+                // 2nd: create the array items with each file object
+
+                // perform 1st pass
                 for (;;)
                 {
                     // read next directory item
@@ -656,156 +723,120 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         // check if this file is within the requested parameters
                         if ((itemIndex >= startIndex) && (fileCount < maxItemsToRetrieve))
                         {
-                            // create an instance of <StorageFile>
-                            NANOCLR_CHECK_HRESULT(
-                                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFile, storageFileTypeDef));
-
-                            // dereference the object in order to reach its fields
-                            hbObj = storageFile->Dereference();
-
-                            // file name
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                                hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name],
-                                fileInfo.fname));
-
-                            // clear working buffer
-                            memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
-
-                            // compose file path
-                            CombinePath(workingBuffer, workingPath, fileInfo.fname);
-
-                            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                                hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path],
-                                workingBuffer));
-
-                            // compute directory date
-                            fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
-
-                            // get a reference to the dateCreated managed field...
-                            CLR_RT_HeapBlock &dateFieldRef =
-                                hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
-                            CLR_INT64 *pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
-                            // ...and set it with the fileInfoTime
-                            *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
-
-                            // move the storage folder pointer to the next item in the array
-                            storageFile++;
-
-                            // update iterator var
                             fileCount++;
                         }
 
-                        // update iterator var
                         itemIndex++;
                     }
                 }
-            }
-            else
-            {
-                // empty directory
+
                 // find <StorageFile> type, don't bother checking the result as it exists for sure
                 g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
 
                 // create an array of <StorageFile>
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
-            }
-        }
-    }
-    else
-    {
-        // check if the working drive is the SPIFFS drive and...
-        // ... that the path is the drive root (because SPIFFS doesn't support folders)
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
-        if ((WORKING_DRIVE_IS_INTERNAL_DRIVE) && (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
-        {
-            // this is the SPIFFS drive
-            spiffs_DIR drive;
-            struct spiffs_dirent e;
-            struct spiffs_dirent *pe = &e;
 
-            // need to perform this in two steps
-            // 1st: count the file objects
-            // 2nd: create the array items with each file object
+                // get a pointer to the first object in the array (which is of type <StorageFile>)
+                storageFile = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
-            // perform 1st pass
-            SPIFFS_opendir(&fs, "/", &drive);
-            while ((pe = SPIFFS_readdir(&drive, pe)))
-            {
-                fileCount++;
-            }
-
-            // have to close dir
-            SPIFFS_closedir(&drive);
-
-            // find <StorageFile> type, don't bother checking the result as it exists for sure
-            g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
-
-            // create an array of <StorageFile>
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
-
-            // get a pointer to the first object in the array (which is of type <StorageFile>)
-            storageFile = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
-
-            if (fileCount > 0)
-            {
-                // allocate memory for buffer
-                workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-
-                // sanity check for successfull malloc
-                if (workingBuffer == NULL)
+                if (fileCount > 0)
                 {
-                    // failed to allocate memory
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    // allocate memory for buffers
+                    stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
+                    workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
+
+                    // sanity check for successful malloc
+                    if (stringBuffer == NULL || workingBuffer == NULL)
+                    {
+                        // failed to allocate memory
+                        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    }
+
+                    // perform 2nd pass
+                    // need to rewind the directory read index first
+                    f_readdir(&currentDirectory, NULL);
+
+                    // and reset the file iterator vars too
+                    itemIndex = 0;
+                    fileCount = 0;
+
+                    for (;;)
+                    {
+                        // read next directory item
+                        operationResult = f_readdir(&currentDirectory, &fileInfo);
+
+                        // break on error or at end of dir
+                        if (operationResult != FR_OK || fileInfo.fname[0] == 0)
+                        {
+                            break;
+                        }
+
+                        // check if this is a file
+                        // but skip if:
+                        // - has system attribute set
+                        // - has hidden attribute set
+                        if ((fileInfo.fattrib & AM_ARC) && !(fileInfo.fattrib & AM_SYS) && !(fileInfo.fattrib & AM_HID))
+                        {
+                            // check if this file is within the requested parameters
+                            if ((itemIndex >= startIndex) && (fileCount < maxItemsToRetrieve))
+                            {
+                                // create an instance of <StorageFile>
+                                NANOCLR_CHECK_HRESULT(
+                                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFile, storageFileTypeDef));
+
+                                // dereference the object in order to reach its fields
+                                hbObj = storageFile->Dereference();
+
+                                // file name
+                                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+                                    hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name],
+                                    fileInfo.fname));
+
+                                // clear working buffer
+                                memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
+
+                                // compose file path
+                                CombinePath(workingBuffer, workingPath, fileInfo.fname);
+
+                                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
+                                    hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path],
+                                    workingBuffer));
+
+                                // compute directory date
+                                fileInfoTime = GetDateTime(fileInfo.fdate, fileInfo.ftime);
+
+                                // get a reference to the dateCreated managed field...
+                                CLR_RT_HeapBlock &dateFieldRef =
+                                    hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated];
+                                CLR_INT64 *pRes = (CLR_INT64 *)&dateFieldRef.NumericByRef().s8;
+                                // ...and set it with the fileInfoTime
+                                *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
+
+                                // move the storage folder pointer to the next item in the array
+                                storageFile++;
+
+                                // update iterator var
+                                fileCount++;
+                            }
+
+                            // update iterator var
+                            itemIndex++;
+                        }
+                    }
                 }
-
-                // perform 2nd pass
-                // need to open the directory again
-                SPIFFS_opendir(&fs, "/", &drive);
-
-                // and reset the file iterator vars too
-                itemIndex = 0;
-                fileCount = 0;
-                pe = &e;
-
-                while ((pe = SPIFFS_readdir(&drive, pe)))
+                else
                 {
-                    // create an instance of <StorageFile>
-                    NANOCLR_CHECK_HRESULT(
-                        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*storageFile, storageFileTypeDef));
+                    // empty directory
+                    // find <StorageFile> type, don't bother checking the result as it exists for sure
+                    g_CLR_RT_TypeSystem.FindTypeDef("StorageFile", "Windows.Storage", storageFileTypeDef);
 
-                    // dereference the object in order to reach its fields
-                    hbObj = storageFile->Dereference();
-
-                    // file name
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                        hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___name],
-                        (const char *)pe->name));
-
-                    // clear working buffer
-                    memset(workingBuffer, 0, 2 * FF_LFN_BUF + 1);
-
-                    // compose file path
-                    CombinePath(workingBuffer, workingPath, (const char *)pe->name);
-
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(
-                        hbObj[Library_win_storage_native_Windows_Storage_StorageFile::FIELD___path],
-                        workingBuffer));
-
-                    // SPIFFS files don't have date information
-
-                    // move the storage folder pointer to the next item in the array
-                    storageFile++;
+                    // create an array of <StorageFile>
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, fileCount, storageFileTypeDef));
                 }
-
-                // done here, close dir
-                SPIFFS_closedir(&drive);
             }
         }
         else
         {
-#else
-        {
-#endif
             // failed to change drive
             NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
         }
@@ -823,12 +854,17 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     struct spiffs_dirent e;
     struct spiffs_dirent *pe = &e;
 
+    // get SPIFFS drive index...
+    driveIndex = GetInternalDriveIndex(workingDrive);
+    //... and pointer to the SPIFFS instance
+    driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
     // need to perform this in two steps
     // 1st: count the file objects
     // 2nd: create the array items with each file object
 
     // perform 1st pass
-    SPIFFS_opendir(&fs, "/", &drive);
+    SPIFFS_opendir(driveFs, "/", &drive);
     while ((pe = SPIFFS_readdir(&drive, pe)))
     {
         fileCount++;
@@ -851,7 +887,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // allocate memory for buffer
         workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (workingBuffer == NULL)
         {
             // failed to allocate memory
@@ -860,7 +896,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
         // perform 2nd pass
         // need to open the directory again
-        SPIFFS_opendir(&fs, "/", &drive);
+        SPIFFS_opendir(driveFs, "/", &drive);
 
         // and reset the file iterator vars too
         itemIndex = 0;
@@ -903,8 +939,13 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     NANOCLR_CLEANUP();
 
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
-    // close directory
-    f_closedir(&currentDirectory);
+
+    // close directory, if it was ever opened
+    if (currentDirectory.dir)
+    {
+        f_closedir(&currentDirectory);
+    }
+
 #endif
 
     // free buffers memory, if allocated
@@ -933,6 +974,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     char workingDrive[DRIVE_LETTER_LENGTH];
 
     CreationCollisionOption options;
+
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
 
 #if ((HAL_USE_SDC == TRUE) || (HAL_USBH_USE_MSD == TRUE))
 
@@ -967,7 +1013,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -992,6 +1038,12 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
             {
                 // this is the SPIFFS drive
+
+                // get SPIFFS drive index...
+                driveIndex = GetInternalDriveIndex(workingDrive);
+                //... and pointer to the SPIFFS instance
+                driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
                 // proceed to create the file
 
                 // compute mode flags from CreationCollisionOption
@@ -1018,10 +1070,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                         break;
                 }
 
-                spiffs_file fd = SPIFFS_open(&fs, fileName, modeFlags, 0);
+                spiffs_file fd = SPIFFS_open(driveFs, fileName, modeFlags, 0);
                 if (fd < 0)
                 {
-                    int32_t error = SPIFFS_errno(&fs);
+                    int32_t error = SPIFFS_errno(driveFs);
 
                     // process operation result according to creation options
                     if ((error == SPIFFS_ERR_FILE_EXISTS) && (options == CreationCollisionOption_FailIfExists))
@@ -1042,7 +1094,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 {
                     // file created (or opened) succesfully
                     // OK to close it
-                    SPIFFS_close(&fs, fd);
+                    SPIFFS_close(driveFs, fd);
 
                     // compose return object
                     // find <StorageFile> type, don't bother checking the result as it exists for sure
@@ -1194,7 +1246,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (filePath == NULL)
     {
         // failed to allocate memory
@@ -1231,10 +1283,10 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             break;
     }
 
-    spiffs_file fd = SPIFFS_open(&fs, filePath, modeFlags, 0);
+    spiffs_file fd = SPIFFS_open(driveFs, filePath, modeFlags, 0);
     if (fd < 0)
     {
-        int32_t error = SPIFFS_errno(&fs);
+        int32_t error = SPIFFS_errno(driveFs);
 
         // process operation result according to creation options
         if ((error == SPIFFS_ERR_FILE_EXISTS) && (options == CreationCollisionOption_FailIfExists))
@@ -1255,7 +1307,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     {
         // file created (or opened) succesfully
         // OK to close it
-        SPIFFS_close(&fs, fd);
+        SPIFFS_close(driveFs, fd);
 
         // compose return object
         // find <StorageFile> type, don't bother checking the result as it exists for sure
@@ -1335,7 +1387,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
     folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (folderPath == NULL)
     {
         // failed to allocate memory
@@ -1637,7 +1689,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
 
     folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
-    // sanity check for successfull malloc
+    // sanity check for successful malloc
     if (folderPath == NULL)
     {
         // failed to allocate memory
