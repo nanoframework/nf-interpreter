@@ -61,17 +61,32 @@ extern "C"
     extern spiffs_config spiffs_cfg[SPIFFS_INSTANCES_COUNT];
     extern bool spiffsFileSystemReady;
 
-    uint8_t hal_spiffs_config();
-    s32_t hal_spiffs_erase(u32_t addr, u32_t size);
-    s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst);
-    s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src);
-
     uint8_t target_spiffs_init();
     uint32_t hal_spiffs_get_totalsize(int spiffsIndex);
     uint32_t hal_spiffs_get_eraseblocksize(int spiffsIndex);
     uint32_t hal_spiffs_get_logicalblocksize(int spiffsIndex);
     int32_t hal_spiffs_get_fs_index(spiffs *fsInstance);
     spiffs *hal_spiffs_get_fs_from_index(int32_t index);
+    int32_t hal_spiffs_get_instances_count();
+
+    // declarations of hal/target implementations
+    uint8_t hal_spiffs_config();
+
+#if SPIFFS_SINGLETON
+    s32_t hal_spiffs_erase(u32_t addr, u32_t size);
+    s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst);
+    s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src);
+#else
+    s32_t hal_spiffs_erase_0(u32_t addr, u32_t size);
+    s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst);
+    s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src);
+#if SPIFFS_INSTANCES_COUNT > 0
+    s32_t hal_spiffs_erase_1(u32_t addr, u32_t size);
+    s32_t hal_spiffs_read_1(u32_t addr, u32_t size, u8_t *dst);
+    s32_t hal_spiffs_write_1(u32_t addr, u32_t size, u8_t *src);
+#endif 
+
+#endif // SPIFFS_SINGLETON
 
 #ifdef __cplusplus
 }

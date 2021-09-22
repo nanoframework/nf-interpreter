@@ -48,9 +48,18 @@ uint8_t hal_spiffs_config()
         spiffs_cfg[i].log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
 
         // setup pointers to HAL functions
-        spiffs_cfg[i].hal_erase_f = hal_spiffs_erase;
-        spiffs_cfg[i].hal_read_f = hal_spiffs_read;
-        spiffs_cfg[i].hal_write_f = hal_spiffs_write;
+        if (i == 0)
+        {
+            spiffs_cfg[0].hal_erase_f = hal_spiffs_erase_0;
+            spiffs_cfg[0].hal_read_f = hal_spiffs_read_0;
+            spiffs_cfg[0].hal_write_f = hal_spiffs_write_0;
+        }
+        else if (i == 1)
+        {
+            spiffs_cfg[1].hal_erase_f = hal_spiffs_erase_1;
+            spiffs_cfg[1].hal_read_f = hal_spiffs_read_1;
+            spiffs_cfg[1].hal_write_f = hal_spiffs_write_1;
+        }
 
         mountResult = SPIFFS_mount(
             &fs[i],
@@ -214,4 +223,16 @@ int32_t hal_spiffs_get_fs_index(spiffs *fsInstance)
 spiffs *hal_spiffs_get_fs_from_index(int32_t index)
 {
     return &fs[index];
+}
+
+int32_t hal_spiffs_get_instances_count()
+{
+    // there is at least one
+    int32_t count = 1;
+
+#if SPIFFS_INSTANCES_COUNT > 0
+    count++;
+#endif
+
+    return count;
 }
