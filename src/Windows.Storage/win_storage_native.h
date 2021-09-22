@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 #ifndef WIN_STORAGE_NATIVE_H
 #define WIN_STORAGE_NATIVE_H
 
@@ -19,7 +18,6 @@ struct Library_win_storage_native_Windows_Storage_Devices_SDCard
     NANOCLR_NATIVE_DECLARE(UnmountNative___STATIC__VOID);
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_FileIO
@@ -30,7 +28,6 @@ struct Library_win_storage_native_Windows_Storage_FileIO
     NANOCLR_NATIVE_DECLARE(ReadTextNative___STATIC__VOID__WindowsStorageIStorageFile__BYREF_STRING);
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
@@ -39,7 +36,6 @@ struct Library_win_storage_native_Windows_Storage_RemovableDeviceEventArgs
     static const int FIELD___event = 2;
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_StorageEventManager
@@ -48,7 +44,6 @@ struct Library_win_storage_native_Windows_Storage_StorageEventManager
     static const int FIELD_STATIC__RemovableDeviceRemoved = 2;
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
@@ -58,7 +53,6 @@ struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEv
     static const int FIELD__Time = 5;
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_StorageFile
@@ -72,7 +66,6 @@ struct Library_win_storage_native_Windows_Storage_StorageFile
     NANOCLR_NATIVE_DECLARE(GetFileFromPathNative___STATIC__WindowsStorageStorageFile__STRING__STRING);
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_StorageFolder
@@ -93,7 +86,6 @@ struct Library_win_storage_native_Windows_Storage_StorageFolder
     NANOCLR_NATIVE_DECLARE(GetFolderNative___WindowsStorageStorageFolder__STRING);
 
     //--//
-
 };
 
 struct Library_win_storage_native_Windows_Storage_StorageProvider
@@ -102,7 +94,6 @@ struct Library_win_storage_native_Windows_Storage_StorageProvider
     static const int FIELD___id = 2;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Storage;
