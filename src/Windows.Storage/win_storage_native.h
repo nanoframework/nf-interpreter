@@ -53,9 +53,9 @@ struct Library_win_storage_native_Windows_Storage_StorageEventManager
 
 struct Library_win_storage_native_Windows_Storage_StorageEventManager__StorageEvent
 {
-    static const int FIELD__EventType = 1;
-    static const int FIELD__DriveIndex = 2;
-    static const int FIELD__Time = 3;
+    static const int FIELD__EventType = 3;
+    static const int FIELD__DriveIndex = 4;
+    static const int FIELD__Time = 5;
 
     //--//
 
