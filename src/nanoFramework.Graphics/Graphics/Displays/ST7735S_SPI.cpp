@@ -43,6 +43,8 @@ enum ILI9341_CMD : CLR_UINT8
     SOFTWARE_RESET = 0x01,
     POWER_STATE = 0x10,
     Sleep_Out = 0x11,
+    Invertion_Off = 0x20,
+    Invertion_On = 0x21,
     Gamma_Set = 0x26,
     Display_OFF = 0x28,
     Display_ON = 0x29,
@@ -94,7 +96,7 @@ enum ILI9341_Orientation : CLR_UINT8
 
 bool DisplayDriver::Initialize()
 {
-    // Initialize ILI9341 registers
+    // Initialize ST7735S registers
 
     SetupDisplayAttributes();
 
@@ -105,7 +107,9 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(4, Frame_Rate_Control_Normal, 0x01, 0x2C, 0x2D);
     g_DisplayInterface.SendCommand(4, Frame_Rate_Control_2, 0x01, 0x2C, 0x2D);
     g_DisplayInterface.SendCommand(7, Frame_Rate_Control_3, 0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D);
-    g_DisplayInterface.SendCommand(2, Invert_On, 0x07); 
+    g_DisplayInterface.SendCommand(2, Invert_On, 0x07);
+    g_DisplayInterface.SendCommand(1, Invertion_On);
+    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit   
     g_DisplayInterface.SendCommand(4, Power_Control_1, 0xA2, 0x02, 0x84);
     g_DisplayInterface.SendCommand(2, Power_Control_2, 0xC5);
     g_DisplayInterface.SendCommand(3, Power_Control_3, 0x0A, 0x00);
@@ -164,7 +168,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             g_DisplayInterface.SendCommand(
                 2,
                 Memory_Access_Control,
-                (MADCTL_MY | MADCTL_MX | MADCTL_MV | MADCTL_BGR)); // Landscape  + BGR
+                (MADCTL_MX | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;
@@ -318,7 +322,6 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
 
     return;
 }
-
 
 CLR_UINT32 DisplayDriver::PixelsPerWord()
 {
