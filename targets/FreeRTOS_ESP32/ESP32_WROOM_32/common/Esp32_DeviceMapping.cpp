@@ -97,14 +97,14 @@ int8_t Esp32_I2S_DevicePinMap[2][5] = {
     {-1, -1, -1, -1, -1}};
 
 void Esp32_DecodeAlternateFunction(
-    uint32_t             alternateFunction,
+    uint32_t alternateFunction,
     Esp32_MapDeviceType &deviceType,
-    uint8_t &            busIndex,
-    uint16_t &           PinIndex)
+    uint8_t &busIndex,
+    uint16_t &PinIndex)
 {
     deviceType = (Esp32_MapDeviceType)((alternateFunction >> 16) & 0x00ff);
-    busIndex   = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
-    PinIndex   = (uint16_t)(alternateFunction & 0x00ff);
+    busIndex = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
+    PinIndex = (uint16_t)(alternateFunction & 0x00ff);
 }
 
 int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int PinIndex)
@@ -144,8 +144,8 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int
 int Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction)
 {
     Esp32_MapDeviceType deviceType;
-    uint8_t             deviceIndex;
-    uint16_t            pinIndex;
+    uint8_t deviceIndex;
+    uint16_t pinIndex;
 
     Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, pinIndex);
 
@@ -195,8 +195,8 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int devNumber, in
 void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
 {
     Esp32_MapDeviceType deviceType;
-    uint8_t             deviceIndex;
-    uint16_t            mapping;
+    uint8_t deviceIndex;
+    uint16_t mapping;
 
     Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, mapping);
 
@@ -234,9 +234,9 @@ void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
                 Esp32_LED_DevicePinMap[deviceIndex] = pin;
             }
             break;
-        
+
         case DEV_TYPE_I2S:
-            if (deviceIndex <=1)
+            if (deviceIndex <= 1)
             {
                 Esp32_I2S_DevicePinMap[deviceIndex][mapping] = pin;
             }
