@@ -86,6 +86,16 @@ int8_t Esp32_DAC_DevicePinMap[2] = {
     25,
     26};
 
+// =============================================
+//  I2S
+//  2 devices I2S1 & I2S2
+//  Map pins various pins. If not used, I2S_PIN_NO_CHANGE is used
+int8_t Esp32_I2S_DevicePinMap[2][5] = {
+    // No pin pre configured
+    {-1, -1, -1, -1, -1},
+    // No pin pre configured
+    {-1, -1, -1, -1, -1}};
+
 void Esp32_DecodeAlternateFunction(
     uint32_t             alternateFunction,
     Esp32_MapDeviceType &deviceType,
@@ -120,6 +130,9 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int
 
             case DEV_TYPE_DAC:
                 return (int)Esp32_DAC_DevicePinMap[PinIndex];
+
+            case DEV_TYPE_I2S:
+                return (int)Esp32_I2S_DevicePinMap[DevNumber][PinIndex];
 
             default:
                 break;
@@ -162,6 +175,9 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int devNumber, in
 
             case DEV_TYPE_DAC:
                 Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
+
+            case DEV_TYPE_I2S:
+                Esp32_I2S_DevicePinMap[pinIndex][pinIndex] = ioPinNumber;
 
             default:
                 break;
@@ -218,6 +234,12 @@ void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
                 Esp32_LED_DevicePinMap[deviceIndex] = pin;
             }
             break;
+        
+        case DEV_TYPE_I2S:
+            if (deviceIndex <=1)
+            {
+                Esp32_I2S_DevicePinMap[deviceIndex][mapping] = pin;
+            }
 
         default: // ignore
             break;
