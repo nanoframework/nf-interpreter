@@ -6,6 +6,8 @@
 
 #include "nanoFramework_hardware_esp32_native.h"
 
+// clang-format off
+
 static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
@@ -74,3 +76,5 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp3
     method_lookup,
     { 100, 0, 7, 2 }
 };
+
+// clang-format on
