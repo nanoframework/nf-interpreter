@@ -44,14 +44,60 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     conf.sample_rate = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
     conf.bits_per_sample = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4;
     conf.channel_format = (i2s_channel_fmt_t)config[I2sConnectionSettings::FIELD___i2sChannelFormat].NumericByRef().s4;
-    conf.communication_format = (i2s_comm_format_t)config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
+
+    int commformat = config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
+    // Important: this will have to have to be adjusted for IDF4
+    switch(commformat)
+    {
+        case I2sCommunicationFormat_PcmLong:
+            commformat = I2S_COMM_FORMAT_PCM_LONG;
+            break;
+
+        case I2sCommunicationFormat_PcmShort:
+            commformat = I2S_COMM_FORMAT_PCM_SHORT;
+            break;
+
+        case I2sCommunicationFormat_StandardI2sLsb:
+            commformat = I2S_COMM_FORMAT_I2S_LSB;
+            break;
+
+        case I2sCommunicationFormat_StandardI2sMsb:
+            commformat = I2S_COMM_FORMAT_I2S_MSB;
+            break;
+
+        case I2sCommunicationFormat_StandardI2sPcm:
+            commformat = I2S_COMM_FORMAT_PCM;
+            break;
+        case I2sCommunicationFormat_StandardI2s:
+            commformat = I2S_COMM_FORMAT_I2S;
+            break;
+    }
+    // I2sCommunicationFormat
+    
+    conf.communication_format = (i2s_comm_format_t)commformat;
     // As recommended from the sample
     conf.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
     // Default size used in samples
     conf.dma_buf_count = 2;
     conf.dma_buf_len = 128;
     
-    CLR_Debug::Printf("mod=%d,rate=%d,chfrmt=%d,commfrmt=%d\n",conf.mode,conf.sample_rate,conf.bits_per_sample,conf.channel_format);
+    CLR_Debug::Printf("mod=%d,rate=%d,chfrmt=%d,chfrmt=%d,commfrmt=%d\n",conf.mode,conf.sample_rate,conf.bits_per_sample,conf.channel_format,conf.communication_format);
+
+// TO BE DELETED
+// Just to compare the default values setup from M5StickC sample
+  i2s_config_t i2s_config;
+  i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_PDM);// Set the I2S operating mode.  设置I2S工作模式
+  i2s_config.sample_rate =  44100;// Set the I2S sampling rate.  设置I2S采样率
+  i2s_config.bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT; // Fixed 12-bit stereo MSB.  固定为12位立体声MSB
+  i2s_config.channel_format = I2S_CHANNEL_FMT_ALL_RIGHT;// Set the channel format.  设置频道格式
+  i2s_config.communication_format = I2S_COMM_FORMAT_I2S;// Set the format of the communication.  设置通讯格式
+  i2s_config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;// Set the interrupt flag.  设置中断的标志
+  i2s_config.dma_buf_count = 2;//DMA buffer count.  DMA缓冲区计数
+  i2s_config.dma_buf_len = 128;//DMA buffer length.  DMA缓冲区长度
+  
+CLR_Debug::Printf("mod=%d,rate=%d,chfrmt=%d,chfrmt=%d,commfrmt=%d\n",i2s_config.mode,i2s_config.sample_rate,i2s_config.bits_per_sample,i2s_config.channel_format,i2s_config.communication_format);
+
+
 
     // If this is first device on Bus then init driver
     if (Esp_I2S_Initialised_Flag[bus] == 0)
