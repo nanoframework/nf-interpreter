@@ -27,6 +27,7 @@ if(RTOS_TI_SIMPLELINK_CHECK)
 
         sys_io_ser_native.cpp
         sys_io_ser_native_System_IO_Ports_SerialDevice.cpp
+        sys_io_ser_native_System_IO_Ports_SerialPort__.cpp
 
         target_system_io_serial_config.cpp
     )
@@ -53,6 +54,8 @@ else()
 
         sys_io_ser_native.cpp
         sys_io_ser_native_System_IO_Ports_SerialPort.cpp
+        sys_io_ser_native_System_IO_Ports_SerialPort__.cpp
+
         # this will have to be adjusted to the system_device file once Windows.Devices removed
         target_windows_devices_serialcommunication_config.cpp
     )

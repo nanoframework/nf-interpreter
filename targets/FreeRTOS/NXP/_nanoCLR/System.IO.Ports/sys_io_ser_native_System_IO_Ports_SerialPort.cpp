@@ -710,6 +710,227 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+
+    uint8_t uartNum = 0;
+    LPUART_Type *base = NULL;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+    base = lpuart_bases[uartNum];
+
+    // Quit if parameters or device is invalid or out of range
+    if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || base == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    palUart = Uart_PAL[uartNum];
+
+    // Free ring buffers memory
+    platform_free(palUart->TxBuffer);
+    platform_free(palUart->RxBuffer);
+
+    // Deinitialize device and delete FreeRTOS idle tasks
+    LPUART_Deinit(base);
+    vTaskDelete(palUart->xRTaskToNotify);
+    vTaskDelete(palUart->xWTaskToNotify);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        status_t status = 0;
+        uint8_t uartNum = 0;
+        lpuart_config_t *config = NULL;
+        LPUART_Type *base = NULL;
+
+        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+        config = &Uart_PAL[uartNum]->uartCfg;
+        base = lpuart_bases[uartNum];
+
+        // Quit if parameters or device is invalid or out of range
+        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+
+        // Allocate memory for TX and RX circular buffer
+        palUart->TxBuffer = (uint8_t *)platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
+        if (palUart->TxBuffer == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+        if (palUart->RxBuffer == NULL)
+        {
+            platform_free(palUart->TxBuffer);
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // Initialize TX and RX buffer
+        palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART_TX_BUFER_SIZE);
+        palUart->TxOngoingCount = 0;
+        palUart->WatchChar = 0;
+        palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
+        palUart->RxBytesToRead = 0;
+
+        // Get default config structure for initializing given UART peripheral and enable TX, RX
+        LPUART_GetDefaultConfig(config);
+        config->enableRx = true;
+        config->enableTx = true;
+
+        // FreeRTOS Task needs parameter data survive after this function finish, so write this parameter to Uart_PAL
+        // structure.
+        palUart->uartNum = uartNum;
+
+        // Enable RX interrupts
+        EnableIRQ((IRQn_Type)(19 + uartNum));
+        NVIC_SetPriority((IRQn_Type)(19 + uartNum), UART_INTERRUPT_PRIO);
+
+        // Initialize UART peripheral with default config
+        status = LPUART_Init(base, config, GetSrcFreq());
+        if (status != kStatus_Success)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+        }
+
+        // Create idle task waiting for read/write.
+        BaseType_t xReturned = xTaskCreate(
+            vREvent,
+            "UART Read Event",
+            configMINIMAL_STACK_SIZE,
+            (void *)palUart,
+            configMAX_PRIORITIES - 1,
+            &palUart->xRTaskToNotify);
+        if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        xReturned = xTaskCreate(
+            vWEvent,
+            "UART Read Event",
+            configMINIMAL_STACK_SIZE,
+            (void *)palUart,
+            configMAX_PRIORITIES,
+            &palUart->xWTaskToNotify);
+        if (xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        status_t status = 0;
+        uint8_t uartNum = 0;
+        lpuart_config_t *config = NULL;
+        LPUART_Type *base = NULL;
+
+        uartNum = pThis[FIELD___portIndex].NumericByRef().s4;
+        config = &Uart_PAL[uartNum]->uartCfg;
+        base = lpuart_bases[uartNum];
+
+        if (uartNum >= (sizeof(Uart_PAL) / sizeof(Uart_PAL[0])) || config == NULL || base == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+        }
+
+        // Check RS485 mode is not selected as currently not supported
+        if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+        }
+
+        config->baudRate_Bps = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
+
+        switch (pThis[FIELD___dataBits].NumericByRef().s4)
+        {
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+            case 7:
+                config->dataBitsCount = kLPUART_SevenDataBits;
+                break;
+            case 8:
+                config->dataBitsCount = kLPUART_EightDataBits;
+                break;
+        }
+
+        switch (pThis[FIELD___parity].NumericByRef().s4)
+        {
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+            case Parity_None:
+                config->parityMode = kLPUART_ParityDisabled;
+                break;
+            case Parity_Even:
+                config->parityMode = kLPUART_ParityEven;
+                break;
+            case Parity_Odd:
+                config->parityMode = kLPUART_ParityOdd;
+                break;
+        }
+
+        switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
+        {
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+            case StopBits_One:
+                config->stopBitCount = kLPUART_OneStopBit;
+                break;
+            case StopBits_Two:
+                config->stopBitCount = kLPUART_TwoStopBit;
+                break;
+        }
+
+        // write config to UART peripheral
+        status = LPUART_Init(base, config, GetSrcFreq());
+        if (status != kStatus_Success)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_IO);
+        }
+
+        // Enable interrupts after setting configuration
+        // Disable transmitter and receiver
+        base->CTRL &= ~(1U << 19);
+        base->CTRL &= ~(1U << 18);
+        // Enable receiver interrupt
+        base->CTRL |= 1U << LPUART_CTRL_RIE_SHIFT;
+        // Enable receiver ovverun interrupt
+        base->CTRL |= 1U << LPUART_CTRL_ORIE_SHIFT;
+        // Renable transmitter and receiver
+        base->CTRL |= 1U << 19;
+        base->CTRL |= 1U << 18;
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

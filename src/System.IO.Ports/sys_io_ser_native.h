@@ -92,19 +92,23 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     static const int FIELD___callbacksDataReceivedEvent = 16;
     static const int FIELD___stream = 17;
     static const int FIELD___newLine = 18;
-    static const int FIELD___encoding = 19;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
+    NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(ReadExisting___STRING);
+    NANOCLR_NATIVE_DECLARE(ReadLine___STRING);
+    NANOCLR_NATIVE_DECLARE(Write___VOID__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeConfig___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeWrite___VOID__SZARRAY_U1__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeStore___U4);
-    NANOCLR_NATIVE_DECLARE(NativeRead___U4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeSetWatchChar___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeWriteString___VOID__STRING__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
+
+    // static HRESULT PerformWriteOperation(const char *buffer, int32_t offset, int32_t count);
+    static HRESULT SetupWriteLine(CLR_RT_StackFrame &stack, char **buffer, uint32_t *length, bool *isNewAllocation);
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceEventListener
@@ -123,4 +127,4 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialStream
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports;
 
-#endif //SYS_IO_SER_NATIVE_H
+#endif // SYS_IO_SER_NATIVE_H

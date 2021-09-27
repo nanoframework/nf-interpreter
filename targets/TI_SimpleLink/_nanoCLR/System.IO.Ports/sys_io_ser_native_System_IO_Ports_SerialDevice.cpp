@@ -205,198 +205,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    uint8_t uartNum;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // Get Uart number for serial device
-    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-
-    UnitializePalUart(GetPalUartFromUartNum(uartNum));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        NF_PAL_UART *palUart;
-        uint8_t uartNum;
-        uint16_t txBufferSize;
-        uint16_t rxBufferSize;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // Get UART number from PortIndex
-        uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-        if (uartNum > CONFIG_TI_DRIVERS_UART2_COUNT || uartNum < 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // call the configure and abort if not OK
-        NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
-        // Choose the driver for this SerialDevice
-        palUart = GetPalUartFromUartNum(uartNum);
-        if (palUart == NULL)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-#if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-        // assign buffers, if not already done
-        if (palUart->TxBuffer == NULL && palUart->RxBuffer == NULL)
-        {
-            palUart->TxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
-            palUart->RxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
-
-            // check allocation
-            if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-            }
-
-            // init buffers
-            palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
-            palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
-        }
-#endif
-
-        // all the rest
-        palUart->WatchChar = 0;
-        palUart->RxBytesToRead = 0;
-        palUart->TxOngoingCount = 0;
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NF_PAL_UART *palUart = NULL;
-    uint8_t uartNum;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-
-    // Choose the driver for this SerialDevice
-    palUart = GetPalUartFromUartNum(uartNum);
-    if (palUart == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // store UART index
-    palUart->UartNum = uartNum;
-
-    // setup configuration
-
-    // Check RS485 mode is not selected as currently not supported
-    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
-    }
-
-    // Create a UART with data processing off
-    UART2_Params_init(&palUart->UartParams);
-
-    // set R/W mode with callbacks
-    palUart->UartParams.writeMode = UART2_Mode_CALLBACK;
-    palUart->UartParams.readMode = UART2_Mode_BLOCKING;
-
-    // store pointer to PAL UART
-    palUart->UartParams.userArg = palUart;
-
-    // palUart->UartParams.readCallback = RxCallback;
-    palUart->UartParams.writeCallback = TxCallback;
-
-    palUart->UartParams.readReturnMode = UART2_ReadReturnMode_FULL;
-    palUart->UartParams.baudRate = (int)pThis[FIELD___baudRate].NumericByRef().s4;
-
-    // UART2_DataLen goes from 5->0 to 8->3 bits.
-    // Because the parameter carries the bits count, subtracting 5 gives the correct setting.
-    palUart->UartParams.dataLength = (UART2_DataLen)(pThis[FIELD___dataBits].NumericByRef().s4 - 5);
-
-    // parity (SerialParity enum matches UART2_Parity)
-    palUart->UartParams.parityType = (UART2_Parity)pThis[FIELD___parity].NumericByRef().s4;
-
-    // stop bits
-    switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
-    {
-        case StopBits_One:
-            palUart->UartParams.stopBits = UART2_StopBits_1;
-            break;
-
-        case StopBits_Two:
-            palUart->UartParams.stopBits = UART2_StopBits_2;
-            break;
-
-        default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // abort any ongoing operations, just in case
-    UART2_readCancel(palUart->UartDriver);
-    UART2_writeCancel(palUart->UartDriver);
-
-    if (palUart->UartDriver != NULL)
-    {
-        // stop UART before changing configuration, just in case
-        UART2_close(palUart->UartDriver);
-
-        // destroy task UART task, if it's running
-        if (palUart->WorkingTask != NULL)
-        {
-            Task_destruct(&SerialRxTaskStruct);
-
-            // null pointer
-            palUart->WorkingTask = NULL;
-        }
-    }
-
-    palUart->UartDriver = UART2_open(uartNum, &palUart->UartParams);
-
-    // check if UART was opened
-    if (palUart->UartDriver == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-    }
-
-    // OK to enable RX on UART now
-    UART2_rxEnable(palUart->UartDriver);
-
-    // create RX task
-    // this can be replaced with an RX handler when TI decides to add a decent RX event to their API
-    Task_Params taskParams;
-    Task_Params_init(&taskParams);
-    taskParams.stackSize = SERIAL_TASKSTACKSIZE;
-    taskParams.priority = 4;
-    taskParams.stack = &SerialRxHandlerStack;
-    taskParams.arg0 = (UArg)palUart->UartNum;
-
-    // construct task
-    Task_construct(&SerialRxTaskStruct, (Task_FuncPtr)SerialRxTask, &taskParams, NULL);
-
-    // store pointer to task
-    palUart->WorkingTask = Task_handle(&SerialRxTaskStruct);
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -741,6 +549,198 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
 
     // return how many bytes were read
     stack.SetResult_U4(bytesRead);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    uint8_t uartNum;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Get Uart number for serial device
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    UnitializePalUart(GetPalUartFromUartNum(uartNum));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        NF_PAL_UART *palUart;
+        uint8_t uartNum;
+        uint16_t txBufferSize;
+        uint16_t rxBufferSize;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        // Get UART number from PortIndex
+        uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+        if (uartNum > CONFIG_TI_DRIVERS_UART2_COUNT || uartNum < 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // call the configure and abort if not OK
+        NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
+
+        // Choose the driver for this SerialDevice
+        palUart = GetPalUartFromUartNum(uartNum);
+        if (palUart == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+#if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
+        // assign buffers, if not already done
+        if (palUart->TxBuffer == NULL && palUart->RxBuffer == NULL)
+        {
+            palUart->TxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
+            palUart->RxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
+
+            // check allocation
+            if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
+
+            // init buffers
+            palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
+            palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
+        }
+#endif
+
+        // all the rest
+        palUart->WatchChar = 0;
+        palUart->RxBytesToRead = 0;
+        palUart->TxOngoingCount = 0;
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uint8_t uartNum;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // Choose the driver for this SerialDevice
+    palUart = GetPalUartFromUartNum(uartNum);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // store UART index
+    palUart->UartNum = uartNum;
+
+    // setup configuration
+
+    // Check RS485 mode is not selected as currently not supported
+    if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+    }
+
+    // Create a UART with data processing off
+    UART2_Params_init(&palUart->UartParams);
+
+    // set R/W mode with callbacks
+    palUart->UartParams.writeMode = UART2_Mode_CALLBACK;
+    palUart->UartParams.readMode = UART2_Mode_BLOCKING;
+
+    // store pointer to PAL UART
+    palUart->UartParams.userArg = palUart;
+
+    // palUart->UartParams.readCallback = RxCallback;
+    palUart->UartParams.writeCallback = TxCallback;
+
+    palUart->UartParams.readReturnMode = UART2_ReadReturnMode_FULL;
+    palUart->UartParams.baudRate = (int)pThis[FIELD___baudRate].NumericByRef().s4;
+
+    // UART2_DataLen goes from 5->0 to 8->3 bits.
+    // Because the parameter carries the bits count, subtracting 5 gives the correct setting.
+    palUart->UartParams.dataLength = (UART2_DataLen)(pThis[FIELD___dataBits].NumericByRef().s4 - 5);
+
+    // parity (SerialParity enum matches UART2_Parity)
+    palUart->UartParams.parityType = (UART2_Parity)pThis[FIELD___parity].NumericByRef().s4;
+
+    // stop bits
+    switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
+    {
+        case StopBits_One:
+            palUart->UartParams.stopBits = UART2_StopBits_1;
+            break;
+
+        case StopBits_Two:
+            palUart->UartParams.stopBits = UART2_StopBits_2;
+            break;
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // abort any ongoing operations, just in case
+    UART2_readCancel(palUart->UartDriver);
+    UART2_writeCancel(palUart->UartDriver);
+
+    if (palUart->UartDriver != NULL)
+    {
+        // stop UART before changing configuration, just in case
+        UART2_close(palUart->UartDriver);
+
+        // destroy task UART task, if it's running
+        if (palUart->WorkingTask != NULL)
+        {
+            Task_destruct(&SerialRxTaskStruct);
+
+            // null pointer
+            palUart->WorkingTask = NULL;
+        }
+    }
+
+    palUart->UartDriver = UART2_open(uartNum, &palUart->UartParams);
+
+    // check if UART was opened
+    if (palUart->UartDriver == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    // OK to enable RX on UART now
+    UART2_rxEnable(palUart->UartDriver);
+
+    // create RX task
+    // this can be replaced with an RX handler when TI decides to add a decent RX event to their API
+    Task_Params taskParams;
+    Task_Params_init(&taskParams);
+    taskParams.stackSize = SERIAL_TASKSTACKSIZE;
+    taskParams.priority = 4;
+    taskParams.stack = &SerialRxHandlerStack;
+    taskParams.arg0 = (UArg)palUart->UartNum;
+
+    // construct task
+    Task_construct(&SerialRxTaskStruct, (Task_FuncPtr)SerialRxTask, &taskParams, NULL);
+
+    // store pointer to task
+    palUart->WorkingTask = Task_handle(&SerialRxTaskStruct);
 
     NANOCLR_NOCLEANUP();
 }

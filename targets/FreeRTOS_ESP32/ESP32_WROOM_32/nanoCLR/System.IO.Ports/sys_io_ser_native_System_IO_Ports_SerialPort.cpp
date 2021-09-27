@@ -278,294 +278,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    uart_port_t uart_num;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // Get Uart number for serial device
-    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-
-    UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    char task_name[16];
-    uart_port_t uart_num;
-    esp_err_t esp_err;
-
-    NF_PAL_UART *palUart;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    // Get Uart number for serial device
-    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-    if (uart_num > UART_NUM_2 || uart_num < 0)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // call the configure and abort if not OK
-    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
-    palUart = GetPalUartFromUartNum_sys(uart_num);
-    if (palUart == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // alloc buffers memory
-    palUart->TxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
-    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
-
-    // sanity check
-    if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
-    // init buffers
-    palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART_BUFER_SIZE);
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_BUFER_SIZE);
-
-    // set/reset all the rest
-    palUart->SerialDevice = stack.This();
-    palUart->UartNum = uart_num;
-    palUart->TxOngoingCount = 0;
-    palUart->RxBytesToRead = 0;
-
-    // Install driver
-    esp_err = uart_driver_install(
-        uart_num,
-        UART_BUFER_SIZE,            // rx_buffer_size,
-        0,                          // tx_buffer_size, not buffered
-        20,                         // queue_size
-        &(palUart->UartEventQueue), // QueueHandle_t *uart_queue ( none for now )
-        0                           // intr_alloc_flags
-    );
-    if (esp_err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to install uart driver");
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
-
-    // Create a task to handle UART event from ISR
-    snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
-    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
-        pdPASS)
-    {
-        ESP_LOGE(TAG, "Failed to start UART events task");
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
-
-    // Ensure driver gets unitialized during soft reboot
-    HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll_sys);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        uart_config_t uart_config;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // Get Uart number for serial device
-        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-        if (uart_num > UART_NUM_2 || uart_num < 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // setup configuration
-        // baud rate
-        uart_config.baud_rate = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
-
-        // data bits
-        switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
-        {
-            case 5:
-                uart_config.data_bits = UART_DATA_5_BITS;
-                break;
-
-            case 6:
-                uart_config.data_bits = UART_DATA_6_BITS;
-                break;
-
-            case 7:
-                uart_config.data_bits = UART_DATA_7_BITS;
-                break;
-
-            case 8:
-                uart_config.data_bits = UART_DATA_8_BITS;
-                break;
-
-            default:
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // parity
-        switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
-        {
-            default:
-            case Parity_None:
-                uart_config.parity = UART_PARITY_DISABLE;
-                break;
-
-            case Parity_Even:
-                uart_config.parity = UART_PARITY_EVEN;
-                break;
-
-            case Parity_Odd:
-                uart_config.parity = UART_PARITY_ODD;
-                break;
-        }
-
-        // stop bits
-        switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
-        {
-            default:
-            case StopBits_One:
-                uart_config.stop_bits = UART_STOP_BITS_1;
-                break;
-
-            case StopBits_OnePointFive:
-                uart_config.stop_bits = UART_STOP_BITS_1_5;
-                break;
-
-            case StopBits_Two:
-                uart_config.stop_bits = UART_STOP_BITS_2;
-                break;
-        }
-
-        uart_config.rx_flow_ctrl_thresh = 120;
-
-        bool EnableXonXoff = false;
-        switch ((Handshake)pThis[FIELD___handshake].NumericByRef().s4)
-        {
-            default:
-            case Handshake_None:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-                break;
-
-            case Handshake_RequestToSend:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
-                uart_config.rx_flow_ctrl_thresh = 122;
-                break;
-
-            case Handshake_RequestToSendXOnXOff:
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
-                uart_config.rx_flow_ctrl_thresh = 122;
-                EnableXonXoff = true;
-                break;
-
-            case Handshake_XOnXOff:
-                EnableXonXoff = true;
-                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-                break;
-        }
-
-        bool rs485Mode = ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 == SerialMode_RS485);
-        if (rs485Mode)
-        {
-            // Disable any flow control & Set RS485 half duplex mode
-            uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-            uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX);
-        }
-        else
-        {
-            // Reset to normal mode
-            uart_set_mode(uart_num, UART_MODE_UART);
-        }
-
-        // Already Initialised ?
-        if (GetPalUartFromUartNum_sys(uart_num)->SerialDevice)
-        {
-            int errors = 0;
-
-            errors += uart_set_word_length(uart_num, uart_config.data_bits);
-            errors += uart_set_baudrate(uart_num, uart_config.baud_rate);
-            errors += uart_set_parity(uart_num, uart_config.parity);
-            errors += uart_set_stop_bits(uart_num, uart_config.stop_bits);
-            errors += uart_set_hw_flow_ctrl(uart_num, uart_config.flow_ctrl, uart_config.rx_flow_ctrl_thresh);
-            if (errors)
-            {
-                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-        }
-        else
-        {
-            // First time make sure UART is reset so use uart_param_config.
-            // If you call this once driver installed it resets UART and stop events ISR being called.
-            if (uart_param_config(uart_num, &uart_config) != ESP_OK)
-            {
-                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            }
-        }
-
-        if (EnableXonXoff)
-        {
-            uart_set_sw_flow_ctrl(uart_num, true, 20, 40);
-        }
-
-        // Map to currently assigned pins
-        int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Tx);
-        int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rx);
-        int rtsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rts);
-        int ctsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Cts);
-
-        // check if TX, RX pins have been previously set
-        if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
-        }
-
-        // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode
-        if (rs485Mode)
-        {
-            ctsPin = UART_PIN_NO_CHANGE; // no need for a CTS pin enabled, just RTS
-        }
-        else
-        {
-            if (uart_config.flow_ctrl == UART_HW_FLOWCTRL_DISABLE)
-            {
-                rtsPin = UART_PIN_NO_CHANGE;
-                ctsPin = UART_PIN_NO_CHANGE;
-            }
-        }
-
-        if (uart_set_pin(uart_num, txPin, rxPin, rtsPin, ctsPin) != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Failed to set UART pins");
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
-
-        // null pointers and vars
-        pThis = NULL;
-    }
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -921,6 +633,294 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Get Uart number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    char task_name[16];
+    uart_port_t uart_num;
+    esp_err_t esp_err;
+
+    NF_PAL_UART *palUart;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Get Uart number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+    if (uart_num > UART_NUM_2 || uart_num < 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // call the configure and abort if not OK
+    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
+
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // alloc buffers memory
+    palUart->TxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
+    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
+
+    // sanity check
+    if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // init buffers
+    palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART_BUFER_SIZE);
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_BUFER_SIZE);
+
+    // set/reset all the rest
+    palUart->SerialDevice = stack.This();
+    palUart->UartNum = uart_num;
+    palUart->TxOngoingCount = 0;
+    palUart->RxBytesToRead = 0;
+
+    // Install driver
+    esp_err = uart_driver_install(
+        uart_num,
+        UART_BUFER_SIZE,            // rx_buffer_size,
+        0,                          // tx_buffer_size, not buffered
+        20,                         // queue_size
+        &(palUart->UartEventQueue), // QueueHandle_t *uart_queue ( none for now )
+        0                           // intr_alloc_flags
+    );
+    if (esp_err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to install uart driver");
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
+
+    // Create a task to handle UART event from ISR
+    snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
+    if (xTaskCreatePinnedToCore(uart_event_task_sys, task_name, 2048, palUart, 12, &(palUart->UartEventTask), 1) !=
+        pdPASS)
+    {
+        ESP_LOGE(TAG, "Failed to start UART events task");
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    // Ensure driver gets unitialized during soft reboot
+    HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll_sys);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        uart_config_t uart_config;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        // Get Uart number for serial device
+        uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+        if (uart_num > UART_NUM_2 || uart_num < 0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // setup configuration
+        // baud rate
+        uart_config.baud_rate = (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4;
+
+        // data bits
+        switch ((uint16_t)pThis[FIELD___dataBits].NumericByRef().s4)
+        {
+            case 5:
+                uart_config.data_bits = UART_DATA_5_BITS;
+                break;
+
+            case 6:
+                uart_config.data_bits = UART_DATA_6_BITS;
+                break;
+
+            case 7:
+                uart_config.data_bits = UART_DATA_7_BITS;
+                break;
+
+            case 8:
+                uart_config.data_bits = UART_DATA_8_BITS;
+                break;
+
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // parity
+        switch ((Parity)pThis[FIELD___parity].NumericByRef().s4)
+        {
+            default:
+            case Parity_None:
+                uart_config.parity = UART_PARITY_DISABLE;
+                break;
+
+            case Parity_Even:
+                uart_config.parity = UART_PARITY_EVEN;
+                break;
+
+            case Parity_Odd:
+                uart_config.parity = UART_PARITY_ODD;
+                break;
+        }
+
+        // stop bits
+        switch ((StopBits)pThis[FIELD___stopBits].NumericByRef().s4)
+        {
+            default:
+            case StopBits_One:
+                uart_config.stop_bits = UART_STOP_BITS_1;
+                break;
+
+            case StopBits_OnePointFive:
+                uart_config.stop_bits = UART_STOP_BITS_1_5;
+                break;
+
+            case StopBits_Two:
+                uart_config.stop_bits = UART_STOP_BITS_2;
+                break;
+        }
+
+        uart_config.rx_flow_ctrl_thresh = 120;
+
+        bool EnableXonXoff = false;
+        switch ((Handshake)pThis[FIELD___handshake].NumericByRef().s4)
+        {
+            default:
+            case Handshake_None:
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+                break;
+
+            case Handshake_RequestToSend:
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.rx_flow_ctrl_thresh = 122;
+                break;
+
+            case Handshake_RequestToSendXOnXOff:
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_RTS;
+                uart_config.rx_flow_ctrl_thresh = 122;
+                EnableXonXoff = true;
+                break;
+
+            case Handshake_XOnXOff:
+                EnableXonXoff = true;
+                uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+                break;
+        }
+
+        bool rs485Mode = ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 == SerialMode_RS485);
+        if (rs485Mode)
+        {
+            // Disable any flow control & Set RS485 half duplex mode
+            uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
+            uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX);
+        }
+        else
+        {
+            // Reset to normal mode
+            uart_set_mode(uart_num, UART_MODE_UART);
+        }
+
+        // Already Initialised ?
+        if (GetPalUartFromUartNum_sys(uart_num)->SerialDevice)
+        {
+            int errors = 0;
+
+            errors += uart_set_word_length(uart_num, uart_config.data_bits);
+            errors += uart_set_baudrate(uart_num, uart_config.baud_rate);
+            errors += uart_set_parity(uart_num, uart_config.parity);
+            errors += uart_set_stop_bits(uart_num, uart_config.stop_bits);
+            errors += uart_set_hw_flow_ctrl(uart_num, uart_config.flow_ctrl, uart_config.rx_flow_ctrl_thresh);
+            if (errors)
+            {
+                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+        }
+        else
+        {
+            // First time make sure UART is reset so use uart_param_config.
+            // If you call this once driver installed it resets UART and stop events ISR being called.
+            if (uart_param_config(uart_num, &uart_config) != ESP_OK)
+            {
+                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+        }
+
+        if (EnableXonXoff)
+        {
+            uart_set_sw_flow_ctrl(uart_num, true, 20, 40);
+        }
+
+        // Map to currently assigned pins
+        int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Tx);
+        int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rx);
+        int rtsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Rts);
+        int ctsPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, uart_num, Esp32SerialPin_Cts);
+
+        // check if TX, RX pins have been previously set
+        if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+        }
+
+        // Don't use RTS/CTS pins if no hardware handshake enabled unless in RS485 mode
+        if (rs485Mode)
+        {
+            ctsPin = UART_PIN_NO_CHANGE; // no need for a CTS pin enabled, just RTS
+        }
+        else
+        {
+            if (uart_config.flow_ctrl == UART_HW_FLOWCTRL_DISABLE)
+            {
+                rtsPin = UART_PIN_NO_CHANGE;
+                ctsPin = UART_PIN_NO_CHANGE;
+            }
+        }
+
+        if (uart_set_pin(uart_num, txPin, rxPin, rtsPin, ctsPin) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to set UART pins");
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        // null pointers and vars
+        pThis = NULL;
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -958,7 +958,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
     // COM1 is being used for VS debug, so it's not available
-    char deviceSelectorString[15] = "COM2,COM3";
+    char deviceSelectorString[10] = "COM2,COM3";
 
     // because the caller is expecting a result to be returned
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable
