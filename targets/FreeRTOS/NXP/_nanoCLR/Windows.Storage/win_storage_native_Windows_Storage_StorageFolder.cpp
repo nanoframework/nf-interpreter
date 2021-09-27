@@ -124,7 +124,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 workingDrive));
 
             // malloc stringBuffer to work with FS
-            char *stringBuffer = (char *)malloc(FF_LFN_BUF + 1);
+            char *stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
 
             // sanity check for successfull malloc
             if (stringBuffer == NULL)
@@ -157,7 +157,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                     stringBuffer));
 
                 // free stringBuffer
-                free(stringBuffer);
+                platform_free(stringBuffer);
             }
 
             // move pointer to the next folder item
@@ -274,8 +274,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         if (directoryCount > 0)
         {
             // allocate memory for buffers
-            stringBuffer = (char *)malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)malloc(2 * FF_LFN_BUF + 1);
+            stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
             // sanity check for successfull malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -351,11 +351,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // free buffers memory, if allocated
     if (stringBuffer != NULL)
     {
-        free(stringBuffer);
+        platform_free(stringBuffer);
     }
     if (workingBuffer != NULL)
     {
-        free(workingBuffer);
+        platform_free(workingBuffer);
     }
 
     NANOCLR_CLEANUP_END();
@@ -467,8 +467,8 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         if (fileCount > 0)
         {
             // allocate memory for buffers
-            stringBuffer = (char *)malloc(FF_LFN_BUF + 1);
-            workingBuffer = (char *)malloc(2 * FF_LFN_BUF + 1);
+            stringBuffer = (char *)platform_malloc(FF_LFN_BUF + 1);
+            workingBuffer = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
             // sanity check for successfull malloc
             if (stringBuffer == NULL || workingBuffer == NULL)
@@ -567,11 +567,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // free buffers memory, if allocated
     if (stringBuffer != NULL)
     {
-        free(stringBuffer);
+        platform_free(stringBuffer);
     }
     if (workingBuffer != NULL)
     {
-        free(workingBuffer);
+        platform_free(workingBuffer);
     }
 
     NANOCLR_CLEANUP_END();
@@ -621,8 +621,8 @@ static void CreateFileWorkingThread(void *arg)
     f_close(&file);
 
     // free memory
-    free((void *)fileIoOperation->FilePath);
-    free(fileIoOperation);
+    platform_free((void *)fileIoOperation->FilePath);
+    platform_free(fileIoOperation);
 
     // fire event for FileIO operation complete
     Events_Set(SYSTEM_EVENT_FLAG_STORAGE_IO);
@@ -672,7 +672,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     {
 
         // setup file path
-        filePath = (char *)malloc(2 * FF_LFN_BUF + 1);
+        filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
         if (filePath == NULL)
@@ -714,7 +714,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
         // setup File operation
         StorageFolderFileOperation *fileOperation =
-            reinterpret_cast<StorageFolderFileOperation *>(malloc(sizeof(StorageFolderFileOperation)));
+            reinterpret_cast<StorageFolderFileOperation *>(platform_malloc(sizeof(StorageFolderFileOperation)));
 
         fileOperation->FilePath = filePath;
         fileOperation->mode = modeFlags;
@@ -780,7 +780,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             storageFile = stack.TopValue().Dereference();
 
             // setup file path
-            filePath = (char *)malloc(2 * FF_LFN_BUF + 1);
+            filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
             // sanity check for successfull malloc
             if (filePath == NULL)
@@ -810,7 +810,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
                 Library_win_storage_native_Windows_Storage_StorageFile::FIELD___dateCreated,
                 HAL_Time_CurrentDateTime(false));
 
-            free(filePath);
+            platform_free(filePath);
 
             // done here
             break;
@@ -857,7 +857,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         // get a pointer to the desired folder name
         folderName = stack.Arg1().DereferenceString()->StringText();
 
-        folderPath = (char *)malloc(2 * FF_LFN_BUF + 1);
+        folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
         // sanity check for successfull malloc
         if (folderPath == NULL)
@@ -967,7 +967,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     // free buffer memory, if allocated
     if (folderPath != NULL)
     {
-        free(folderPath);
+        platform_free(folderPath);
     }
 
     NANOCLR_CLEANUP_END();
@@ -1109,7 +1109,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     // get a pointer to the desired folder name
     folderName = stack.Arg1().DereferenceString()->StringText();
 
-    folderPath = (char *)malloc(2 * FF_LFN_BUF + 1);
+    folderPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
     // sanity check for successfull malloc
     if (folderPath == NULL)
@@ -1177,7 +1177,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     // free buffer memory, if allocated
     if (folderPath != NULL)
     {
-        free(folderPath);
+        platform_free(folderPath);
     }
 
     NANOCLR_CLEANUP_END();

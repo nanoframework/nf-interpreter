@@ -7,6 +7,16 @@
 #ifndef NANOHAL_V2_H
 #define NANOHAL_V2_H
 
+// need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
+#include <stdlib.h>
+
+// defines to prevent use of malloc, free and realloc
+// the platform implementations: platform_malloc(), platform_free and platform_realloc
+// are the preferred calls to use as they ensure thread safety and RTOS integration
+#define malloc  YOU_SHALL_NOT_USE_malloc
+#define free    YOU_SHALL_NOT_USE_free
+#define realloc YOU_SHALL_NOT_USE_realloc
+
 #include <nanoCLR_Headers.h>
 
 #include <nanoHAL_Capabilites.h>

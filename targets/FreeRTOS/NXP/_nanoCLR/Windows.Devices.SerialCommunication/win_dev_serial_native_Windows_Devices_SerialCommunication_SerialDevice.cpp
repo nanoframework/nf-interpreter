@@ -170,8 +170,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
         // Free ring buffers memory
-        free(palUart->TxBuffer);
-        free(palUart->RxBuffer);
+        platform_free(palUart->TxBuffer);
+        platform_free(palUart->RxBuffer);
 
         // Deinitialize device and delete FreeRTOS idle tasks
         LPUART_Deinit(base);
@@ -208,16 +208,16 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NF_PAL_UART *palUart = Uart_PAL[uartNum];
 
         // Allocate memory for TX and RX circular buffer
-        palUart->TxBuffer = (uint8_t *)malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
+        palUart->TxBuffer = (uint8_t *)platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
         if (palUart->TxBuffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
-        palUart->RxBuffer = (uint8_t *)malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+        palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
         if (palUart->RxBuffer == NULL)
         {
-            free(palUart->TxBuffer);
+            platform_free(palUart->TxBuffer);
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
