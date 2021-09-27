@@ -7,6 +7,8 @@
 #ifndef NANOHAL_V2_H
 #define NANOHAL_V2_H
 
+#if !defined(_WIN32)
+
 // need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
 #include <stdlib.h>
 
@@ -16,6 +18,8 @@
 #define malloc  YOU_SHALL_NOT_USE_malloc
 #define free    YOU_SHALL_NOT_USE_free
 #define realloc YOU_SHALL_NOT_USE_realloc
+
+#endif
 
 #include <nanoCLR_Headers.h>
 
