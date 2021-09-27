@@ -9,6 +9,9 @@
 #include <nanoCLR_Types.h>
 #include <WireProtocol.h>
 
+// definition for the table size of the messaging lookup table
+#define CMD_HANDLER_LOOKUP_TABLE_SIZE 2
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef bool (*CLR_Messaging_CommandHandler)(WP_Message *msg);
@@ -84,8 +87,8 @@ struct CLR_Messaging
 
     //--//
 
-    CLR_Messaging_CommandHandlerLookups m_Lookup_Requests[2];
-    CLR_Messaging_CommandHandlerLookups m_Lookup_Replies[2];
+    CLR_Messaging_CommandHandlerLookups m_Lookup_Requests[CMD_HANDLER_LOOKUP_TABLE_SIZE];
+    CLR_Messaging_CommandHandlerLookups m_Lookup_Replies[CMD_HANDLER_LOOKUP_TABLE_SIZE];
 
     COM_HANDLE m_port;
 

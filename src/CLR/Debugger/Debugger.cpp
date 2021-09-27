@@ -1327,11 +1327,11 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
     }
 }
 
-static bool GetInteropNativeAssemblies(uint8_t *&data, int *size, uint32_t startIndex, uint32_t count)
+static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t startIndex, uint32_t count)
 {
     uint32_t index = 0;
 
-    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails *interopNativeAssemblies = NULL;
+    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails *interopNativeAssemblies;
 
     // sanity checks on the requested size
     // - if 0, adjust to the assemblies count to make the execution backwards compatible
@@ -1348,22 +1348,23 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, int *size, uint32_t start
         count = g_CLR_InteropAssembliesCount - startIndex;
     }
 
+    // set buffer size which matches the allocation size
+    *size = (sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
+
     // alloc buffer to hold the requested number of assemblies
-    interopNativeAssemblies =
-        (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails *)platform_malloc(
-            sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
+    data = (uint8_t *)platform_malloc(*size);
 
     // check for malloc failure
-    if (interopNativeAssemblies == NULL)
+    if (data == NULL)
     {
         return false;
     }
 
+    // copy pointer to ease handling ahead
+    interopNativeAssemblies = (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails *)data;
+
     // clear buffer memory
-    memset(
-        interopNativeAssemblies,
-        0,
-        sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
+    memset(interopNativeAssemblies, 0, (uint32_t)*size);
 
     // fill the array
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
@@ -1388,12 +1389,6 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, int *size, uint32_t start
         }
     }
 
-    // copy back the buffer
-    data = (uint8_t *)interopNativeAssemblies;
-
-    // set buffer size
-    *size = (sizeof(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails) * count);
-
     return true;
 }
 
@@ -1410,7 +1405,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
     reply.u_capsFlags = 0;
 
     CLR_UINT8 *data = NULL;
-    int size = 0;
+    uint32_t size = 0;
     bool fSuccess = true;
     bool freeAllocFlag = false;
     uint32_t startIndex = 0;
@@ -1601,7 +1596,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
     WP_ReplyToCommand(msg, fSuccess, false, data, size);
 
     // check if we need to free data pointer
-    if (freeAllocFlag)
+    if (freeAllocFlag && data != NULL)
     {
         platform_free(data);
     }
