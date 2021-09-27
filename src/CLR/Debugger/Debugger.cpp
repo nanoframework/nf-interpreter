@@ -448,62 +448,82 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
+    BlockStorageDevice *storageDevices = NULL;
+    DeviceBlockInfo *devicesBlockInfos = NULL;
+    Flash_BlockRegionInfo *pData = NULL;
+    bool success = false;
+    unsigned int rangeCount = 0;
+    unsigned int rangeIndex = 0;
+    uint32_t size = 0;
+
     if ((msg->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
-        Flash_BlockRegionInfo *pData = NULL;
-
-        unsigned int rangeCount = 0;
-        unsigned int rangeIndex = 0;
-
         // get the number of available block storage devices
         unsigned int numDevices = BlockStorageList_GetNumDevices();
 
         // get an array of pointer to all the storage devices in the list and then request the device info
-        BlockStorageDevice **devices =
-            (BlockStorageDevice **)platform_malloc(numDevices * sizeof(BlockStorageDevice *));
-        DeviceBlockInfo **deviceInfos = (DeviceBlockInfo **)platform_malloc(numDevices * sizeof(DeviceBlockInfo *));
+        storageDevices = (BlockStorageDevice *)platform_malloc(numDevices * sizeof(BlockStorageDevice));
+        if (storageDevices == NULL)
+        {
+            // allocation failed
+            goto cmd_executed;
+        }
+
+        devicesBlockInfos = (DeviceBlockInfo *)platform_malloc(numDevices * sizeof(DeviceBlockInfo));
+        if (devicesBlockInfos == NULL)
+        {
+            // allocation failed
+            goto cmd_executed;
+        }
+
+        // clear memory
+        memset(storageDevices, 0, numDevices * sizeof(BlockStorageDevice));
+        memset(devicesBlockInfos, 0, numDevices * sizeof(DeviceBlockInfo));
 
         for (unsigned int i = 0; i < numDevices; i++)
         {
             if (i == 0)
             {
-                devices[i] = BlockStorageList_GetFirstDevice();
+                // device = 
+                storageDevices[i] = *BlockStorageList_GetFirstDevice();
             }
             else
             {
-                devices[i] = BlockStorageList_GetNextDevice(devices[i - 1]);
+                storageDevices[i] = *BlockStorageList_GetNextDevice(&storageDevices[i - 1]);
             }
+
             // sanity check
-            if (devices[i] == NULL)
+            if (&storageDevices[i] == NULL)
             {
-                WP_ReplyToCommand(msg, true, false, NULL, 0);
-                return false;
+                // failed
+                goto cmd_executed;
             }
-            deviceInfos[i] = BlockStorageDevice_GetDeviceInfo(devices[i]);
+
+            devicesBlockInfos[i] = *BlockStorageDevice_GetDeviceInfo(&storageDevices[i]);
         }
 
         for (int cnt = 0; cnt < 2; cnt++)
         {
             if (cnt == 1)
             {
-                uint32_t allocationSize = rangeCount * sizeof(struct Flash_BlockRegionInfo);
+                size = rangeCount * sizeof(struct Flash_BlockRegionInfo);
 
-                pData = (Flash_BlockRegionInfo *)platform_malloc(allocationSize);
+                pData = (Flash_BlockRegionInfo *)platform_malloc(size);
 
                 if (pData == NULL)
                 {
-                    WP_ReplyToCommand(msg, true, false, NULL, 0);
-                    return false;
+                    goto cmd_executed;
                 }
 
                 // clear memory
-                memset(pData, 0, allocationSize);
+                memset(pData, 0, size);
             }
+
             for (unsigned int i = 0; i < numDevices; i++)
             {
-                for (unsigned int j = 0; j < deviceInfos[i]->NumRegions; j++)
+                for (unsigned int j = 0; j < devicesBlockInfos[i].NumRegions; j++)
                 {
-                    const BlockRegionInfo *pRegion = &deviceInfos[i]->Regions[j];
+                    const BlockRegionInfo *pRegion = &devicesBlockInfos[i].Regions[j];
 
                     for (unsigned int k = 0; k < pRegion->NumBlockRanges; k++)
                     {
@@ -527,13 +547,29 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
                     }
                 }
             }
+
+            // done here
+            success = true;
         }
+    }
 
-        WP_ReplyToCommand(msg, true, false, (void *)pData, rangeCount * sizeof(struct Flash_BlockRegionInfo));
+cmd_executed:
+    WP_ReplyToCommand(msg, success, false, (void *)pData, size);
 
+    // free memory, when needed
+    if (pData)
+    {
         platform_free(pData);
-        platform_free(devices);
-        platform_free(deviceInfos);
+    }
+
+    if (storageDevices)
+    {
+        platform_free(storageDevices);
+    }
+
+    if (devicesBlockInfos)
+    {
+        platform_free(devicesBlockInfos);
     }
 
     return true;
