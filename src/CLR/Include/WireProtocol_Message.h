@@ -94,7 +94,7 @@ extern "C"
 {
 #endif
 
-    void WP_ReplyToCommand(WP_Message *message, int fSuccess, int fCritical, void *ptr, int size);
+    void WP_ReplyToCommand(WP_Message *message, uint8_t fSuccess, uint8_t fCritical, void *ptr, uint32_t size);
     void WP_SendProtocolMessage(WP_Message *message);
     void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_t *payload, uint32_t flags);
 

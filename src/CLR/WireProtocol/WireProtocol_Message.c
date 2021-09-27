@@ -41,7 +41,7 @@ extern void debug_printf(const char *format, ...);
 //////////////////////////////////////////
 // helper functions
 
-void WP_ReplyToCommand(WP_Message *message, int fSuccess, int fCritical, void *ptr, int size)
+void WP_ReplyToCommand(WP_Message *message, uint8_t fSuccess, uint8_t fCritical, void *ptr, uint32_t size)
 {
     WP_Message msgReply;
     uint32_t flags = 0;
