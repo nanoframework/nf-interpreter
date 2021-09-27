@@ -21,9 +21,21 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountMMCNative___STATIC__VOID__nanoFrameworkSystemIOFileSystemSDCardSDDataWidth,
-    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountSpiNative___STATIC__VOID__I4__I4,
-    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___STATIC__VOID,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::InitNative___VOID,
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::NativeDispose___VOID,
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountNative___VOID,
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___VOID,
+    Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::PollCardDetectNative___BOOLEAN,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -134,7 +146,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem =
 {
     "System.IO.FileSystem",
-    0x37039716,
+    0x210D05B1,
     method_lookup,
     { 1, 0, 0, 0 }
 };

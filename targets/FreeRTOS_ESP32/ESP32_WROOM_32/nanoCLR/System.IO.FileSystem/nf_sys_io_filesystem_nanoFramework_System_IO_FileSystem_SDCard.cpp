@@ -14,66 +14,312 @@ extern "C"
     bool Storage_UnMountSDCard();
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountMMCNative___STATIC__VOID__nanoFrameworkSystemIOFileSystemSDCardSDDataWidth( CLR_RT_StackFrame &stack )
+
+StorageEventType GetStorageEventType(bool PinState)
 {
-    NANOCLR_HEADER();
-
-#if defined(HAL_USE_SDC)
-    bool bit1Mode = stack.Arg0().NumericByRef().s4;
-    if (!Storage_MountMMC(bit1Mode))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
-    }
-#else
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-#endif
-
-    NANOCLR_NOCLEANUP();
+    // Low means card inserted
+    return PinState ? StorageEventType_RemovableDeviceRemoval:StorageEventType_RemovableDeviceInsertion;
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountSpiNative___STATIC__VOID__I4__I4( CLR_RT_StackFrame &stack )
+void postManagedStorageEvent(bool PinState, uint32_t driveIndex)
 {
-    NANOCLR_HEADER();
-
-#if defined(HAL_USE_SDC)
-    // Get passed SPi bus number 1 or 2
-    int spiBus = stack.Arg0().NumericByRef().s4;
-
-    // get Gpio pin for Chip select
-    uint32_t CSPin = stack.Arg1().NumericByRef().s4;
-
-    // Get current Gpio pins used by SPI device 
-    spiBus--;  // Spi devnumber 0 & 1
-
-    if (!Storage_MountSpi(spiBus, CSPin) )
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);    
-    }
-#else
-	(void)stack;
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-#endif    
-
-    NANOCLR_NOCLEANUP();
+    PostManagedEvent(EVENT_STORAGE, 0, GetStorageEventType(PinState), driveIndex);
 }
 
-HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___STATIC__VOID( CLR_RT_StackFrame &stack )
+void cardDetect_interrupt(GPIO_PIN Pin, bool PinState, void *pArg)
 {
-    NANOCLR_HEADER();
-   (void)stack;
+    (void)Pin;
 
-#if defined(HAL_USE_SDC)
+    postManagedStorageEvent(PinState, (uint32_t)pArg);
+}
 
-    // Unmount SPI device
-    if (!Storage_UnMountSDCard())
+
+// Reserve all MMC pins
+//                CMD, Data0, Data1, Data2, Data3
+int8_t pins4bit[] = {15, 2, 4, 12, 13};
+//                CMD, Data0
+int8_t pins1bit[] = {15, 2};
+
+void GetMMCPins(bool _1bit, int *count, int8_t **pPins)
+{
+    if (_1bit)
     {
-        // SDcard not mounted
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        *pPins = pins1bit;
+        *count = sizeof(pins1bit);
     }
+    else
+    {
+        *pPins = pins4bit;
+        *count = sizeof(pins4bit);
+    }
+}
+ 
+
+void UnReservePins( int count, int8_t * pPins)
+{
+    for(int index=count; index<=count; index++)
+    {
+        CPU_GPIO_ReservePin((GPIO_PIN)pPins[index], false);
+    }
+}
+
+bool TryReservePins( int count, int8_t * pPins)
+{
+    int index=0;
+    bool failed = false;
+
+    for(index=0; index<count; index++)
+    {
+        if (CPU_GPIO_ReservePin((int8_t)pPins[index], true) == false )
+        {
+            failed = true;
+            break;
+        }
+    }
+
+    // If we failed then UnReserve pins already reserved
+    if (failed)
+    {
+        UnReservePins(index-1, pPins);
+        return false;
+    }    
     
-#else	
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-#endif
+    return true;
+}
 
+
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::InitNative___VOID( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+        SDCard_SDInterfaceType cardType;
+        bool useCardDetect = false;
+        int  cardDetectPin;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        useCardDetect = (bool)(pThis[FIELD___enableCardDetectPin].NumericByRef().s4);
+        cardDetectPin = (int)(pThis[FIELD___cardDetectPin].NumericByRef().s4);
+
+        cardType = (SDCard_SDInterfaceType)pThis[FIELD___sdCardType].NumericByRef().s4;
+        switch(cardType)
+        {
+            case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
+            {
+                bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+
+                int count;
+                int8_t * pPins;
+
+                GetMMCPins(bit1Mode, &count, &pPins);
+
+                if (!TryReservePins( count, pPins))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+                }
+            }
+            break;
+            
+            case  SDCard_SDInterfaceType::SDCard_SDInterfaceType_Spi:
+                // TODO reserve pins ?
+                //  or init SPI
+                break;
+
+            // No predefined system SD card or other
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        }
+
+        if (useCardDetect)
+        {
+            if (!CPU_GPIO_ReservePin(cardDetectPin, true))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
+
+            // Set interrupt for change on Card Detect GPIO pin
+            if (!CPU_GPIO_EnableInputPin(cardDetectPin, 100, cardDetect_interrupt, 0, GPIO_INT_EDGE::GPIO_INT_EDGE_BOTH, GpioPinDriveMode::GpioPinDriveMode_InputPullUp))
+            {
+                CPU_GPIO_ReservePin(cardDetectPin, false);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
+            bool cardDetectPinState = CPU_GPIO_GetPinState(cardDetectPin);
+            if ( GetStorageEventType(cardDetectPinState) == StorageEventType_RemovableDeviceInsertion )
+            {
+                // Fire event for initial card detect state if card inserted
+                // This is so mount can be done solely in event handler
+                postManagedStorageEvent(cardDetectPinState, 0);
+            }
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::NativeDispose___VOID( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+        SDCard_SDInterfaceType cardType;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+        
+        if ((bool)(pThis[FIELD___enableCardDetectPin].NumericByRef().s4))
+        {
+            // Stop card detect interupt
+            int cardDetectPin = (int)(pThis[FIELD___cardDetectPin].NumericByRef().s4);
+
+            CPU_GPIO_DisablePin(cardDetectPin, GpioPinDriveMode::GpioPinDriveMode_Input, 0 );         
+        }
+
+        cardType = (SDCard_SDInterfaceType)pThis[FIELD___sdCardType].NumericByRef().s4;
+        switch(cardType)
+        {
+            // Unreserve MMC pins. I suppose they could be used for something else
+            case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
+            {
+                bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+                int count;
+                int8_t * pPins;
+
+                GetMMCPins(bit1Mode, &count, &pPins);
+
+                UnReservePins( count, pPins);
+            }
+            break;
+
+            default:
+            break;
+        }
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::MountNative___VOID( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+#if defined(HAL_USE_SDC)
+
+        SDCard_SDInterfaceType cardType;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        // Get Card type so we know what parameters to use
+        cardType = (SDCard_SDInterfaceType)pThis[FIELD___sdCardType].NumericByRef().s4;
+        switch(cardType)
+        {
+            case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
+            {
+                bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+
+                if (!Storage_MountMMC(bit1Mode))
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
+                }
+            }    
+            break;
+
+            case  SDCard_SDInterfaceType::SDCard_SDInterfaceType_Spi:
+            {
+                int spiBus;
+                int chipSelectPin;
+
+                spiBus = (int)(pThis[FIELD___spiBus].NumericByRef().s4);
+                chipSelectPin = (int)(pThis[FIELD___chipSelectPin].NumericByRef().s4);
+
+                // Get current Gpio pins used by SPI device 
+                spiBus--;  // Spi devnumber 0 & 1
+
+                if (!Storage_MountSpi(spiBus, chipSelectPin) )
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);    
+                }
+            }
+            break;
+
+            // No predefined system SD card or other
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                break;
+        } // switch
+
+#else
+	    (void)stack;
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif  
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::UnmountNative___VOID( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+#if defined(HAL_USE_SDC)
+
+        SDCard_SDInterfaceType cardType;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        cardType = (SDCard_SDInterfaceType)pThis[FIELD___sdCardType].NumericByRef().s4;
+        switch(cardType)
+        {
+            case SDCard_SDInterfaceType_Mmc:
+            case SDCard_SDInterfaceType_Spi:
+    
+            // Unmount SPI device
+            if (!Storage_UnMountSDCard())
+            {
+                // SDcard not mounted
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            }
+            break;
+
+            // Any other type unsupported
+            default:
+                NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+            break;
+        }
+#else	
+        (void)stack;
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::PollCardDetectNative___BOOLEAN( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+#if defined(HAL_USE_SDC)
+        int cardDetectPin;
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        if ( !pThis[FIELD___enableCardDetectPin].NumericByRef().s4 )
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        // Poll Card Detect pin
+        cardDetectPin = (int)pThis[FIELD___enableCardDetectPin].NumericByRef().s4;
+        stack.SetResult_Boolean(CPU_GPIO_GetPinState(cardDetectPin) == GpioPinValue_Low);
+#else
+        (void)stack;
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif
+    }
     NANOCLR_NOCLEANUP();
 }

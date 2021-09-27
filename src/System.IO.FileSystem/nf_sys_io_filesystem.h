@@ -24,6 +24,13 @@ typedef enum __nfpack SDCard_SDDataWidth
     SDCard_SDDataWidth__4_bit = 2,
 } SDCard_SDDataWidth;
 
+typedef enum __nfpack SDCard_SDInterfaceType
+{
+    SDCard_SDInterfaceType_System = 0,
+    SDCard_SDInterfaceType_Mmc = 1,
+    SDCard_SDInterfaceType_Spi = 2,
+} SDCard_SDInterfaceType;
+
 typedef enum __nfpack StorageEventManager_StorageEventType
 {
     StorageEventManager_StorageEventType_Invalid = 0,
@@ -76,11 +83,41 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_Removable
 
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard
 {
-    static const int FIELD_STATIC___mounted = 0;
+    static const int FIELD___mounted = 1;
+    static const int FIELD___disposed = 2;
+    static const int FIELD___sdCardType = 3;
+    static const int FIELD___enableCardDetectPin = 4;
+    static const int FIELD___cardDetectPin = 5;
+    static const int FIELD___dataWidth = 6;
+    static const int FIELD___spiBus = 7;
+    static const int FIELD___chipSelectPin = 8;
 
-    NANOCLR_NATIVE_DECLARE(MountMMCNative___STATIC__VOID__nanoFrameworkSystemIOFileSystemSDCardSDDataWidth);
-    NANOCLR_NATIVE_DECLARE(MountSpiNative___STATIC__VOID__I4__I4);
-    NANOCLR_NATIVE_DECLARE(UnmountNative___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(InitNative___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
+    NANOCLR_NATIVE_DECLARE(MountNative___VOID);
+    NANOCLR_NATIVE_DECLARE(UnmountNative___VOID);
+    NANOCLR_NATIVE_DECLARE(PollCardDetectNative___BOOLEAN);
+
+    //--//
+
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__SDCardMmcParameters
+{
+    static const int FIELD__dataWidth = 1;
+    static const int FIELD__enableCardDetectPin = 2;
+    static const int FIELD__cardDetectPin = 3;
+
+    //--//
+
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__SDCardSpiParameters
+{
+    static const int FIELD__spiBus = 1;
+    static const int FIELD__chipSelectPin = 2;
+    static const int FIELD__enableCardDetectPin = 3;
+    static const int FIELD__cardDetectPin = 4;
 
     //--//
 
@@ -88,8 +125,8 @@ struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard
 
 struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEventManager
 {
-    static const int FIELD_STATIC__RemovableDeviceInserted = 1;
-    static const int FIELD_STATIC__RemovableDeviceRemoved = 2;
+    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
 
     //--//
 
@@ -168,9 +205,9 @@ struct Library_nf_sys_io_filesystem_System_IO_MemoryStream
 
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 3;
-    static const int FIELD_STATIC__InvalidPathChars = 4;
-    static const int FIELD_STATIC__m_illegalCharacters = 5;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 2;
+    static const int FIELD_STATIC__InvalidPathChars = 3;
+    static const int FIELD_STATIC__m_illegalCharacters = 4;
 
     //--//
 
