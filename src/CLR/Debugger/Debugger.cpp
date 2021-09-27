@@ -484,7 +484,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
         {
             if (i == 0)
             {
-                // device = 
+                // device =
                 storageDevices[i] = *BlockStorageList_GetFirstDevice();
             }
             else
