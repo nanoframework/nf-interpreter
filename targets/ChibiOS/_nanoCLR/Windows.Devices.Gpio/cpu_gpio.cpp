@@ -336,7 +336,7 @@ bool CPU_GPIO_EnableInputPin(
 // pinNumber    -   Gpio pin number
 // InitialState -   Initial state of pin
 // driveMode    -   Drive mode and resistors
-// return       -   True if succesful, false invalid pin, pin not putput, invalid drive mode for ouptput
+// return       -   True if successful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
 bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
 {

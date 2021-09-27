@@ -29,7 +29,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
     // return allocated converted path, must be freed
     workingPath = ConvertToESP32Path(managedPath);
 
-    // Delete folder, 0=succesfull
+    // Delete folder, 0=successful
     operationResult = unlink(workingPath);
     if (operationResult < 0)
         operationResult = errno;
@@ -77,7 +77,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
     desiredPath = stack.Arg1().DereferenceString()->StringText();
     desiredWorkingPath = ConvertToESP32Path(desiredPath);
 
-    // rename folder, 0=succesfull
+    // rename folder, 0=successful
     operationResult = rename(workingPath, desiredWorkingPath);
     if (operationResult < 0)
         operationResult = errno;

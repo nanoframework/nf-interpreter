@@ -315,7 +315,7 @@ struct IBLOCKSTORAGEDEVICE
     //    Initializes a given block device for use
     //
     // Returns:
-    //   true if succesful; false if not
+    //   true if successful; false if not
     //
     // Remarks:
     //   De initializes the device when no longer needed
