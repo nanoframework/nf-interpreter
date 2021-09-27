@@ -9,8 +9,6 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-// the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
-CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
 CLR_Messaging *g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,13 +254,17 @@ HRESULT CLR_Messaging::CreateInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    g_CLR_Messaging = (CLR_Messaging *)&g_scratchMessaging[0];
+    // alloc memory for messenger instance
+    g_CLR_Messaging = (CLR_Messaging *)platform_malloc(sizeof(CLR_Messaging));
 
-    CLR_RT_Memory::ZeroFill(g_CLR_Messaging, sizeof(CLR_Messaging));
+    // sanity check...
+    FAULT_ON_NULL(g_CLR_Messaging);
+
+    NANOCLR_CLEAR(g_CLR_Messaging);
 
     g_CLR_Messaging->Initialize(NULL, 0, NULL, 0);
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -302,6 +304,11 @@ HRESULT CLR_Messaging::DeleteInstance()
 
     g_CLR_Messaging->Cleanup();
 
+    // free messenger instance
+    platform_free(g_CLR_Messaging);
+
+    g_CLR_Messaging = NULL;
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
@@ -338,6 +345,7 @@ bool CLR_Messaging::ProcessHeader(WP_Message *msg)
 bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
+
     if (msg->m_header.m_flags & WP_Flags_c_NACK)
     {
         //
@@ -348,38 +356,48 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 
     //--//
 
-    const CLR_Messaging_CommandHandlerLookups *tables;
-    int tableCount = 0;
+    CLR_Messaging_CommandHandlerLookups *tables = NULL;
+    int tableCount = CMD_HANDLER_LOOKUP_TABLE_SIZE;
+    size_t num;
+    const CLR_Messaging_CommandHandlerLookup *cmd = NULL;
 
+    // developer note: load lookup tables, starting with the upper one
+    // until there is use for RPC Messaging, useful replies and request are in the second table
     if (msg->m_header.m_flags & WP_Flags_c_Reply)
     {
-        tables = m_Lookup_Replies;
-        tableCount = ARRAYSIZE(m_Lookup_Replies);
+        tables = &m_Lookup_Replies[CMD_HANDLER_LOOKUP_TABLE_SIZE - 1];
     }
     else
     {
-        tables = m_Lookup_Requests;
-        tableCount = ARRAYSIZE(m_Lookup_Requests);
+        tables = &m_Lookup_Requests[CMD_HANDLER_LOOKUP_TABLE_SIZE - 1];
     }
 
+    _ASSERTE(tables != NULL);
+
+    // go over lookup tables
     while (tableCount-- > 0)
     {
-        size_t num = tables->size;
-        const CLR_Messaging_CommandHandlerLookup *cmd = tables->table;
+        num = tables->size;
+        cmd = tables->table;
 
         while (num-- > 0 && cmd != NULL)
         {
             if (cmd->cmd == msg->m_header.m_cmd)
             {
-                WP_ReplyToCommand(msg, (*(cmd->hnd))(msg), false, NULL, 0);
-                return true;
+                // execute command handler, returning execution result
+                return (*(cmd->hnd))(msg);
             }
 
+            // move to next command
             cmd++;
         }
-        tables++;
+
+        // move to next lookup table
+        // (backwards, because we've loaded the upper one above)
+        tables--;
     }
 
+    // getting here means failure, as no command handler was found for this request
     WP_ReplyToCommand(msg, false, false, NULL, 0);
 
     return true;
