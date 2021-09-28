@@ -24,6 +24,7 @@ typedef struct
     uint16_t RxBytesToRead;
 
     uint8_t WatchChar;
+    uint8_t NewLineChar;
 } NF_PAL_UART;
 
 ////////////////////////////////////////////

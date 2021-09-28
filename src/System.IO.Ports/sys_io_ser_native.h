@@ -107,8 +107,8 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
 
     //--//
 
-    // static HRESULT PerformWriteOperation(const char *buffer, int32_t offset, int32_t count);
     static HRESULT SetupWriteLine(CLR_RT_StackFrame &stack, char **buffer, uint32_t *length, bool *isNewAllocation);
+    static bool GetLineFromRxBuffer(CLR_RT_HeapBlock *serialDevice, HAL_RingBuffer<uint8_t> *ringBuffer, uint8_t *&line);
 };
 
 struct Library_sys_io_ser_native_System_IO_Ports_SerialDeviceEventListener

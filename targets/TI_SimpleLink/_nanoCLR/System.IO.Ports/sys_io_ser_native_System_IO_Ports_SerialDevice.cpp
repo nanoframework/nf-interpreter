@@ -103,14 +103,11 @@ static void TxCallback(UART2_Handle handle, void *buf, size_t count, void *userA
 
     if (status == UART2_STATUS_SUCCESS)
     {
-        // reset Tx ongoing count, if we are done here
+        // reset TX ongoing count, if we are done here
         if (count > 0)
         {
             if (palUart->TxOngoingCount > 0)
             {
-                // pop elements from ring buffer, just pop
-                palUart->TxRingBuffer.Pop(count);
-
                 palUart->TxOngoingCount -= count;
 
                 // it TX complete?
@@ -164,6 +161,11 @@ void SerialRxTask(UArg a0, UArg a1)
                     Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
                 }
             }
+            else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+            {
+                // fire event for new line char found
+                Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+            }
             else
             {
                 // no read operation ongoing, so fire an event
@@ -205,243 +207,22 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        NF_PAL_UART *palUart = NULL;
-
-        uint8_t uartNum;
-        uint8_t *data;
-        unsigned int length = 0;
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        // dereference the data buffer from the argument
-        CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
-
-        // get a the pointer to the array by using the first element of the array
-        data = dataBuffer->GetFirstElement();
-
-        // get the size of the buffer
-        length = dataBuffer->m_numOfElements;
-
-        uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-
-        // get pointer to PAL UART
-        palUart = GetPalUartFromUartNum(uartNum);
-        if (palUart == NULL)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
-
-        // check if there is enough room in the buffer
-        if (palUart->TxRingBuffer.Capacity() - palUart->TxRingBuffer.Length() < length)
-        {
-            // not enough room in the buffer
-            NANOCLR_SET_AND_LEAVE(CLR_E_BUFFER_TOO_SMALL);
-        }
-
-        // push data to buffer
-        size_t bytesWritten = palUart->TxRingBuffer.Push(data, length);
-
-        // check if all requested bytes were written
-        if (bytesWritten != length)
-        {
-            // not sure if this is the best exception to throw here...
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-        }
-
-        // // need to update the _unstoredBufferLength field in the SerialDeviceOutputStream
-        // // get pointer to outputStream field
-        // CLR_RT_HeapBlock *outputStream =
-        //     pThis[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::FIELD___outputStream]
-        //         .Dereference();
-        // // get pointer to _unstoredBufferLength field and udpate field value
-        // outputStream[Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDeviceOutputStream::
-        //                  FIELD___unstoredBufferLength]
-        //     .NumericByRef()
-        //     .s4 = palUart->TxRingBuffer.Length();
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock hbTimeout;
-
-    NF_PAL_UART *palUart = NULL;
-
-    uint32_t estimatedDurationMiliseconds;
-    size_t length = 0;
-    uint8_t uartNum;
-
-    int64_t *timeoutTicks;
-    bool eventResult = true;
-    bool txOk = false;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-    }
-
-    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-
-    // Choose the driver for this SerialDevice
-    palUart = GetPalUartFromUartNum(uartNum);
-    if (palUart == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    if (stack.m_customState == 0)
-    {
-        // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation(
-            palUart->TxRingBuffer.Length(),
-            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t &)estimatedDurationMiliseconds);
-    }
-
-    // check if there is anything the buffer
-    if (palUart->TxRingBuffer.Length() > 0)
-    {
-        // check if there is a TX operation ongoing
-        if (palUart->TxOngoingCount == 0)
-        {
-            // OK to Tx
-            txOk = true;
-        }
-        else
-        {
-            // need to wait for the ongoing operation to complete before starting a new one
-        }
-    }
-
-    if (txOk)
-    {
-        // optimize buffer for sequential reading
-        palUart->TxRingBuffer.OptimizeSequence();
-
-        // get data length available in the buffer
-        length = palUart->TxRingBuffer.Length();
-
-        if (palUart->IsLongRunning)
-        {
-
-            // setup timeout
-            hbTimeout.SetInteger(
-                (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
-            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-
-            // this is a long running operation and hasn't started yet
-            // perform operation by launching a thread to
-            if (stack.m_customState == 1)
-            {
-                // push to the stack how many bytes bytes where buffered for Tx
-                stack.PushValueI4(length);
-
-                // set TX count
-                palUart->TxOngoingCount = length;
-
-                // Write data to start sending
-                // by design: don't bother checking the return value
-                UART2_write(palUart->UartDriver, (const void *)palUart->TxRingBuffer.Reader(), length, NULL);
-
-                // bump custom state so the read value above is pushed only once
-                stack.m_customState = 2;
-            }
-        }
-        else
-        {
-            // this is NOT a long running operation
-            // perform TX operation right away
-
-            // Write data to ring buffer to start sending
-            // by design: don't bother checking the return value
-            UART2_write(palUart->UartDriver, (const void *)palUart->TxRingBuffer.Reader(), length, NULL);
-
-            // pop data that was written to FIFO
-            // pop elements from ring buffer, just pop
-            palUart->TxRingBuffer.Pop(length);
-        }
-    }
-
-    while (eventResult)
-    {
-        if (!palUart->IsLongRunning)
-        {
-            // this is not a long running operation so nothing to do here
-            break;
-        }
-
-        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortOut, eventResult));
-
-        if (eventResult)
-        {
-            // event occurred
-            // get from the eval stack how many bytes were buffered to Tx
-            length = stack.m_evalStack[1].NumericByRef().s4;
-
-            // reset Tx ongoing count
-            palUart->TxOngoingCount = 0;
-
-            // done here
-            break;
-        }
-        else
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
-        }
-    }
-
-    if (palUart->IsLongRunning)
-    {
-        // pop length heap block from stack
-        stack.PopValue();
-
-        // pop timeout heap block from stack
-        stack.PopValue();
-    }
-
-    stack.SetResult_U4(length);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
     CLR_RT_HeapBlock_Array *dataBuffer;
     NF_PAL_UART *palUart = NULL;
-    CLR_RT_HeapBlock hbTimeout;
-
     uint8_t uartNum;
-    uint8_t *data;
-    size_t dataLength = 0;
 
-    size_t count = 0;
-    size_t bytesRead = 0;
-    size_t bytesToRead = 0;
-    size_t readOffset = 0;
+    uint8_t *data;
+
+    uint32_t length;
+    uint32_t count = 0;
+    uint32_t bytesRead = 0;
+    uint32_t offset = 0;
+    uint32_t bytesToRead = 0;
 
     int64_t *timeoutTicks;
     bool eventResult = true;
@@ -454,18 +235,40 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // dereference the data buffer from the argument
     dataBuffer = stack.Arg1().DereferenceArray();
-
     // The offset to start filling the buffer
-    readOffset = stack.Arg2().NumericByRef().s4;
-
-    // get a the pointer to the array by using the first element of the array
-    data = dataBuffer->GetElement(readOffset);
-
+    offset = stack.Arg2().NumericByRef().s4;
     // get how many bytes are requested to read
     count = stack.Arg3().NumericByRef().s4;
+
+    // perform parameter validation (only on initial call)
+    if (stack.m_customState == 1)
+    {
+        // get the size of the buffer
+        length = dataBuffer->m_numOfElements;
+
+        // check parameters
+        FAULT_ON_NULL_ARG(dataBuffer);
+
+        if ((offset > length) || (count > length))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        if (offset + count > length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+    }
+
+    // get a the pointer to the array by using the first element of the array
+    data = dataBuffer->GetElement(offset);
 
     uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
 
@@ -475,10 +278,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-
-    // setup timeout from the _readtimeout heap block
-    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // figure out what's available in the Rx ring buffer
     if (palUart->RxRingBuffer.Length() >= count)
@@ -544,11 +343,319 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__S
         bytesRead = palUart->RxRingBuffer.Pop(data, bytesToRead);
     }
 
-    // pop timeout heap block from stack
+    // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
     // return how many bytes were read
     stack.SetResult_U4(bytesRead);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uint8_t uartNum;
+
+    uint8_t *buffer;
+    uint32_t bufferLength;
+
+    CLR_RT_HeapBlock &top = stack.PushValue();
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // Choose the driver for this SerialDevice
+    palUart = GetPalUartFromUartNum(uartNum);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    bufferLength = palUart->RxRingBuffer.Length();
+
+    if (bufferLength)
+    {
+        // there are bytes available in the Rx buffer
+        // setup read buffer
+        buffer = (uint8_t *)platform_malloc(bufferLength);
+
+        // sanity check
+        if (buffer)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // fill data buffer from Rx buffer
+        palUart->RxRingBuffer.Pop(buffer, bufferLength);
+
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
+
+        platform_free(buffer);
+    }
+    else
+    {
+        // create an empty <string>
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock hbTimeout;
+    NF_PAL_UART *palUart = NULL;
+    uint8_t uartNum;
+
+    uint8_t *line = NULL;
+    const char *newLine;
+    uint32_t newLineLength;
+
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // Choose the driver for this SerialDevice
+    palUart = GetPalUartFromUartNum(uartNum);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (stack.m_customState == 1)
+    {
+        // check if there is a full line available to read
+        if (GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line))
+        {
+            // got one!
+            eventResult = false;
+        }
+
+        // get new line from field
+        newLine = pThis[FIELD___newLine].RecoverString();
+        newLineLength = hal_strlen_s(newLine);
+        // need to subtract one because we are 0 indexed
+        newLineLength--;
+
+        // set new line char as the last one in the string
+        // only if this one is found it will have a chance of the others being there
+        palUart->NewLineChar = newLine[newLineLength];
+
+        stack.m_customState = 2;
+    }
+
+    while (eventResult)
+    {
+        // wait for event
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
+
+        // clear the new line watch char
+        palUart->NewLineChar = 0;
+
+        if (eventResult)
+        {
+            GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+
+            // done here
+            break;
+        }
+        else
+        {
+            // event timeout
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    // pop "hbTimeout" heap block from stack
+    stack.PopValue();
+
+    // return how many bytes were read
+    stack.SetResult_String((const char *)line);
+
+    // free memory, if needed
+    if (line != NULL)
+    {
+        platform_free(line);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uint8_t uartNum;
+
+    CLR_RT_HeapBlock_Array *dataBuffer;
+    CLR_RT_HeapBlock hbTimeout;
+
+    uint32_t estimatedDurationMiliseconds;
+
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    uint8_t *data;
+    int32_t length = 0;
+    int32_t count = 0;
+    int32_t offset = 0;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // Choose the driver for this SerialDevice
+    palUart = GetPalUartFromUartNum(uartNum);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // perform parameter validation and setup TX operation
+    if (stack.m_customState == 0)
+    {
+        // dereference the data buffer from the argument
+        dataBuffer = stack.Arg1().DereferenceArray();
+        offset = stack.Arg2().NumericByRef().s4;
+        count = stack.Arg3().NumericByRef().s4;
+
+        // get the size of the buffer
+        length = dataBuffer->m_numOfElements;
+
+        // check parameters
+        FAULT_ON_NULL_ARG(dataBuffer);
+
+        if ((offset > length) || (count > length))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+
+        if (offset + count > length)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // get a the pointer to the array by using the first element of the array
+        data = dataBuffer->GetElement(offset);
+
+        // check if this is a long running operation
+        palUart->IsLongRunning = IsLongRunningOperation(
+            length,
+            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
+            (uint32_t &)estimatedDurationMiliseconds);
+
+        if (palUart->IsLongRunning)
+        {
+            // setup timeout
+            hbTimeout.SetInteger(
+                (CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+            NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+            // this is a long running operation and hasn't started yet
+            // perform operation by launching a thread to
+            if (stack.m_customState == 1)
+            {
+                // push to the stack how many bytes bytes where buffered for TX
+                stack.PushValueI4(length);
+
+                // set TX count
+                palUart->TxOngoingCount = length;
+
+                // Write data to start sending
+                // by design: don't bother checking the return value
+                UART2_write(palUart->UartDriver, (const void *)data, length, NULL);
+
+                // bump custom state so the read value above is pushed only once
+                stack.m_customState = 2;
+            }
+        }
+        else
+        {
+            // this is NOT a long running operation
+            // perform TX operation right away
+
+            // Write data to ring buffer to start sending
+            // by design: don't bother checking the return value
+            UART2_write(palUart->UartDriver, (const void *)data, length, NULL);
+        }
+    }
+
+    while (eventResult)
+    {
+        if (!palUart->IsLongRunning)
+        {
+            // this is not a long running operation so nothing to do here
+            break;
+        }
+
+        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortOut, eventResult));
+
+        if (eventResult)
+        {
+            // event occurred
+            // get from the eval stack how many bytes were buffered to Tx
+            length = stack.m_evalStack[1].NumericByRef().s4;
+
+            // reset Tx ongoing count
+            palUart->TxOngoingCount = 0;
+
+            // done here
+            break;
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    if (palUart->IsLongRunning)
+    {
+        // pop "length" heap block from stack
+        stack.PopValue();
+
+        // pop "hbTimeout" heap block from stack
+        stack.PopValue();
+    }
+
+    stack.SetResult_U4(length);
 
     NANOCLR_NOCLEANUP();
 }
@@ -614,14 +721,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
 
-            // init buffers
-            palUart->TxRingBuffer.Initialize(palUart->TxBuffer, UART1_TX_SIZE);
+            // init buffer
             palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
         }
 #endif
 
         // all the rest
         palUart->WatchChar = 0;
+        palUart->NewLineChar = 0;
         palUart->RxBytesToRead = 0;
         palUart->TxOngoingCount = 0;
     }
@@ -766,6 +873,115 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
 
     // set watch char
     palUart->WatchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString___VOID__STRING__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    uint8_t uartNum;
+
+    CLR_RT_HeapBlock hbTimeout;
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    bool isNewAllocation = false;
+    char *buffer = NULL;
+    uint32_t bufferLength;
+    int32_t length = 0;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    if (stack.Arg1().RecoverString() == NULL)
+    {
+        // text string it's empty so there is noting to do here
+        stack.SetResult_U4(0);
+        NANOCLR_SET_AND_LEAVE(S_OK);
+    }
+
+    uartNum = PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    palUart = GetPalUartFromUartNum(uartNum);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // perform parameter validation and setup TX operation
+    if (stack.m_customState == 1)
+    {
+        // get buffer to output
+        NANOCLR_CHECK_HRESULT(SetupWriteLine(stack, &buffer, &bufferLength, &isNewAllocation));
+
+        // push onto the eval stack how many bytes are being pushed to the UART
+        stack.PushValueI4(bufferLength);
+
+        // store pointer
+        palUart->TxBuffer = (uint8_t *)buffer;
+
+        // set TX ongoing count
+        palUart->TxOngoingCount = bufferLength;
+
+        UART2_write(palUart->UartDriver, (const void *)buffer, bufferLength, NULL);
+
+        // bump custom state
+        stack.m_customState = 2;
+    }
+
+    while (eventResult)
+    {
+        // non-blocking wait allowing other threads to run while we wait for the Tx operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortOut, eventResult));
+
+        if (eventResult)
+        {
+            // event occurred
+            // get from the eval stack how many bytes were buffered to Tx
+            length = stack.m_evalStack[1].NumericByRef().s4;
+
+            palUart->TxOngoingCount = 0;
+
+            // done here
+            break;
+        }
+        else
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    // pop "length" heap block from stack
+    stack.PopValue();
+
+    // pop "hbTimeout" heap block from stack
+    stack.PopValue();
+
+    stack.SetResult_U4(length);
+
+    // free memory, if it was allocated
+    if (isNewAllocation && buffer)
+    {
+        platform_free(buffer);
+    }
+
+    // null pointers and vars
+    pThis = NULL;
 
     NANOCLR_NOCLEANUP();
 }

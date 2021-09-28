@@ -21,7 +21,6 @@ typedef struct
 
     Task_Handle WorkingTask;
 
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
@@ -32,6 +31,7 @@ typedef struct
     bool IsLongRunning;
 
     uint8_t WatchChar;
+    uint8_t NewLineChar;
 } NF_PAL_UART;
 
 ////////////////////////////////////////////

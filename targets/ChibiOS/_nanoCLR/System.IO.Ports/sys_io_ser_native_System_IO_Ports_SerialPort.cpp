@@ -36,6 +36,56 @@
 // NF_PAL_UART Uart8_PAL;
 // #endif
 
+static NF_PAL_UART *GetUartPAL(int index)
+{
+    // Choose the driver for this SerialDevice
+    switch (index)
+    {
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+        case 1:
+            return &Uart1_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+        case 2:
+            return &Uart2_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+        case 3:
+            return &Uart3_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+        case 4:
+            return &Uart4_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+        case 5:
+            return &Uart5_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+        case 6:
+            return &Uart6_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+        case 7:
+            return &Uart7_PAL;
+#endif
+
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+        case 8:
+            return &Uart8_PAL;
+#endif
+        default:
+            // this COM port is not valid;
+            return NULL;
+    }
+}
+
 // This callback is invoked when a transmission buffer has been completely read by the driver.
 static void TxEnd1(UARTDriver *uartp)
 {
@@ -189,6 +239,11 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
             Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
         }
     }
+    else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+    {
+        // fire event for new line char found
+        Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
+    }
     else
     {
         // no read operation ongoing, so fire an event
@@ -219,52 +274,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     FAULT_ON_NULL(pThis);
 
     // Choose the driver for this SerialDevice
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
-        default:
-            // this COM port is not valid
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            break;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // get length of Rx ring buffer
@@ -334,55 +347,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
     data = dataBuffer->GetElement(offset);
 
     // Choose the driver for this SerialDevice
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // figure out what's available in the Rx ring buffer
@@ -479,55 +447,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
     }
 
     // Choose the driver for this SerialDevice
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     bufferLength = palUart->RxRingBuffer.Length();
@@ -547,14 +470,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         // fill data buffer from Rx buffer
         palUart->RxRingBuffer.Pop(buffer, bufferLength);
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char*)buffer, bufferLength));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
 
         platform_free(buffer);
     }
     else
     {
         // create an empty <string>
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char*)NULL));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
     }
 
     NANOCLR_NOCLEANUP();
@@ -564,7 +487,92 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    CLR_RT_HeapBlock hbTimeout;
+    NF_PAL_UART *palUart = NULL;
+
+    uint8_t *line = NULL;
+    const char *newLine;
+    uint32_t newLineLength;
+
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (stack.m_customState == 1)
+    {
+        // check if there is a full line available to read
+        if (GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line))
+        {
+            // got one!
+            eventResult = false;
+        }
+
+        // get new line from field
+        newLine = pThis[FIELD___newLine].RecoverString();
+        newLineLength = hal_strlen_s(newLine);
+        // need to subtract one because we are 0 indexed
+        newLineLength--;
+
+        // set new line char as the last one in the string
+        // only if this one is found it will have a chance of the others being there
+        palUart->NewLineChar = newLine[newLineLength];
+
+        stack.m_customState = 2;
+    }
+
+    while (eventResult)
+    {
+        // wait for event
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_SerialPortIn, eventResult));
+
+        // clear the new line watch char
+        palUart->NewLineChar = 0;
+
+        if (eventResult)
+        {
+            GetLineFromRxBuffer(pThis, &(palUart->RxRingBuffer), line);
+
+            // done here
+            break;
+        }
+        else
+        {
+            // event timeout
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    // pop "hbTimeout" heap block from stack
+    stack.PopValue();
+
+    // return how many bytes were read
+    stack.SetResult_String((const char *)line);
+
+    // free memory, if needed
+    if (line != NULL)
+    {
+        platform_free(line);
+    }
 
     NANOCLR_NOCLEANUP();
 }
@@ -594,56 +602,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
 
-    // get pointer to PAL UART
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // setup timeout
@@ -928,48 +891,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
     FAULT_ON_NULL(pThis);
 
     // Choose the driver for this SerialDevice
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // setup configuration
@@ -1075,52 +1000,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     FAULT_ON_NULL(pThis);
 
     // Choose the driver for this SerialDevice
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
-        default:
-            // this COM port is not valid
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            break;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // set watch char
@@ -1161,56 +1044,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    // get pointer to PAL UART
-    switch ((int)pThis[FIELD___portIndex].NumericByRef().s4)
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
     {
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-        case 1:
-            palUart = &Uart1_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-        case 2:
-            palUart = &Uart2_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-        case 3:
-            palUart = &Uart3_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-        case 4:
-            palUart = &Uart4_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-        case 5:
-            palUart = &Uart5_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-        case 6:
-            palUart = &Uart6_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-        case 7:
-            palUart = &Uart7_PAL;
-            break;
-#endif
-
-#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-        case 8:
-            palUart = &Uart8_PAL;
-            break;
-#endif
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // setup timeout
@@ -1334,12 +1172,3 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
-
-// static HRESULT PerformWriteOperation(const char *buffer, int32_t offset, int32_t count)
-// {
-//     (void)buffer;
-//     (void)offset;
-//     (void)count;
-//     NANOCLR_HEADER();
-//     NANOCLR_NOCLEANUP();
-// }

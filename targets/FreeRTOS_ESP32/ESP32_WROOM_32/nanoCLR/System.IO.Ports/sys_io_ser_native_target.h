@@ -17,7 +17,6 @@ typedef struct
 
     CLR_RT_HeapBlock *SerialDevice;
 
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
@@ -26,6 +25,8 @@ typedef struct
     uint16_t RxBytesToRead;
 
     bool IsLongRunning;
+
+    uint8_t NewLineChar;
 } NF_PAL_UART;
 
 #endif //SYS_IO_SER_NATIVE_
