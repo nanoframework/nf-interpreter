@@ -254,7 +254,7 @@ HRESULT CLR_Messaging::CreateInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    // alloc memory for messenger instance
+    // allocate memory for messenger instance
     g_CLR_Messaging = (CLR_Messaging *)platform_malloc(sizeof(CLR_Messaging));
 
     // sanity check...
@@ -319,7 +319,7 @@ void CLR_Messaging::Cleanup()
     if (!m_fInitialized)
         return;
 
-    // Some devices cannot reset the USB controller so we need to allow them to skip uninitialization
+    // Some devices cannot reset the USB controller so we need to allow them to skip un-initialization
     // of the debug transport
     if (!g_fDoNotUninitializeDebuggerPort)
     {
@@ -384,8 +384,20 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
         {
             if (cmd->cmd == msg->m_header.m_cmd)
             {
+                // developer note:
+                // all command handlers have to take care of the respective reply
+                // if the handler fails to execute, it will return false and ONLY in that case the code here replies
+                // reporting the failure to execute the command
+
                 // execute command handler, returning execution result
-                return (*(cmd->hnd))(msg);
+                if (!(*(cmd->hnd))(msg))
+                {
+                    // only need to reply if outcome is false
+                    WP_ReplyToCommand(msg, false, false, NULL, 0);
+                }
+
+                // done here
+                return true;
             }
 
             // move to next command
@@ -404,7 +416,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 }
 
 // wrapper function for CLR_Messaging::ProcessPayload(...)
-// has to mirror declaration of the function with the same name for platorms that implement nanoBooter
+// has to mirror declaration of the function with the same name for platforms that implement nanoBooter
 extern "C" uint8_t Messaging_ProcessPayload(WP_Message *msg)
 {
     if (g_CLR_DBG_Debugger == NULL)
