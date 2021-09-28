@@ -48,28 +48,23 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4,
     NULL,
     NULL,
     NULL,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4,
     NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STRING,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZARRAY_U1__I4__I4,
     NULL,
     NULL,
     NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID,
-    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWrite___VOID__SZARRAY_U1__I4__I4,
-    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeStore___U4,
-    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeRead___U4__SZARRAY_U1__I4__I4,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString___VOID__STRING__BOOLEAN,
     NULL,
     NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING,
@@ -98,9 +93,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0x61B8380C,
+    0x564F2452,
     method_lookup,
-    { 100, 1, 1, 3 }
+    { 100, 1, 2, 0 }
 };
 
 // clang-format on

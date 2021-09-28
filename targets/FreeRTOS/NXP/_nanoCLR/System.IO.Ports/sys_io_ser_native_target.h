@@ -22,7 +22,6 @@ typedef struct
     lpuart_config_t uartCfg;
     lpuart_transfer_t xfer;
 
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
@@ -30,10 +29,11 @@ typedef struct
     uint8_t *RxBuffer;
     uint16_t RxBytesToRead;
     uint8_t WatchChar;
+    uint8_t NewLineChar;
 
     TaskHandle_t xRTaskToNotify;
     TaskHandle_t xWTaskToNotify;
 
 } NF_PAL_UART;
 
-#endif //SYS_IO_SER_NATIVE_
+#endif // SYS_IO_SER_NATIVE_
