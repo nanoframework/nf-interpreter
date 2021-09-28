@@ -36,4 +36,4 @@ typedef struct
 
 } NF_PAL_UART;
 
-#endif //SYS_IO_SER_NATIVE_
+#endif // SYS_IO_SER_NATIVE_
