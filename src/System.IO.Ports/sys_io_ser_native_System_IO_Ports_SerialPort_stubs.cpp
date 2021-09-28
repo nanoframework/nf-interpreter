@@ -107,7 +107,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     NANOCLR_NOCLEANUP();
 }
 
-static HRESULT SetupWriteLine(CLR_RT_StackFrame &stack, char **buffer, uint32_t *length, bool *isNewAllocation);
+static HRESULT SetupWriteLine(CLR_RT_StackFrame &stack, char **buffer, uint32_t *length, bool *isNewAllocation)
 {
     (void)stack;
     (void)buffer;
