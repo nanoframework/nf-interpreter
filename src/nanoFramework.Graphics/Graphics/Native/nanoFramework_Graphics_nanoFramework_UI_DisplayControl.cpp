@@ -162,7 +162,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         uint16_t height;
         CLR_GFX_Font* font;
         uint32_t foregroundColor;
-        uint32_t backgroundColor;    
+        uint32_t backgroundColor;
         CLR_RT_HeapBlock_BinaryBlob* blob;
         CLR_GFX_FontCharacterInfo chr;
         CLR_UINT32 widthChar = 0;
@@ -176,6 +176,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         height = stack.Arg4().NumericByRef().u2;
         foregroundColor = stack.Arg6().NumericByRef().u4;
         backgroundColor = stack.Arg7().NumericByRef().u4;
+
+        // TODO: remove this once they are used
+        CLR_Debug::Printf("%d,%d", height, backgroundColor);
 
         // Get the font
         CLR_RT_HeapBlock*  pThis = stack.Arg5().Dereference();
@@ -217,7 +220,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         int prevCharWidth = 0;
         int lineBreakPixels = width - 20;
         int textLength = uh.CountNumberOfCharacters();
-        CLR_UINT16 c
+        CLR_UINT16 c;
 
         // Loop for each characters
         for (int i = 0; i < textLength; i++)
@@ -231,8 +234,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
             }
 
             c = buf[0];
-            char converted = char(c);
-
             font->GetCharInfo(c, chr);
             if (chr.isValid) 
             {
@@ -253,12 +254,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
                 {
                     posX += prevCharWidth;
                 }
-
+                // TODO: check if you are already at the height, in this case exist as no need to print the characters
                 CLR_Debug::Printf("posX =%d, posY=%d\n", posX, posY);
-                // TODO: fill the bitmap with the background color
+
+                // TODO: fill the bitmap with the background color instead of clear
                 bitmap->Clear();
                 font->DrawChar(bitmap, chr, 0, 0, foregroundColor);
-                g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, font->m_font.m_metrics.m_maxCharWidth + 1, font->m_font.m_metrics.m_height);
+                g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
                 if (i + 1 < textLength)
                 {
                     if (posX >= lineBreakPixels)
