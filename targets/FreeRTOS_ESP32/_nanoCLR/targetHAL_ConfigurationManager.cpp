@@ -60,13 +60,11 @@ void PrintBlock(char *pBlock, int bsize)
 #endif
 
 // initialization of configuration manager
-// provided as weak so it can be replaced at target level, if required because of the target implementing the storage
-// with a mechanism other then saving to flash
 void ConfigurationManager_Initialize()
 {
     memset((void *)&g_TargetConfiguration, 0, sizeof(g_TargetConfiguration));
 
-    Config_Initialise();
+    ConfigStorage_Initialise();
 
     // enumerate the blocks
     ConfigurationManager_EnumerateConfigurationBlocks();
@@ -76,124 +74,20 @@ int32_t ConfigurationManager_FindConfigurationBlockSize(
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
 {
-    uint32_t handle;
+    FILE *handle;
     int32_t configSize = 0;
 
-    handle = Config_OpenFile(configuration, configurationIndex, false);
-    if (handle != CONFIG_ERROR)
+    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
+    if (handle != NULL)
     {
-        configSize = Config_FileSize(handle);
+        configSize = ConfigStorage_FileSize(handle);
 #ifdef DEBUG_CONFIG
         ets_printf("Find type %d index %d, length %d\n", (int)configuration, configurationIndex, configSize);
 #endif
-        Config_CloseFile(handle);
+        ConfigStorage_CloseFile(handle);
     }
 
     return configSize;
-}
-
-bool ConfigurationManager_GetConfigurationBlockFromStorage(
-    DeviceConfigurationOption configuration,
-    uint32_t configurationIndex,
-    void *configurationBlock,
-    int32_t maxBlockSize)
-{
-    uint32_t handle;
-    uint32_t readSize = CONFIG_ERROR;
-
-#ifdef DEBUG_CONFIG
-    ets_printf("GetConfigFromStorage %d, %d\n", (int)configuration, configurationIndex);
-#endif
-
-    handle = Config_OpenFile(configuration, configurationIndex, false);
-    if (handle != CONFIG_ERROR)
-    {
-        readSize = Config_ReadFile(handle, (uint8_t *)configurationBlock, maxBlockSize);
-
-#ifdef DEBUG_CONFIG
-        ets_printf("GetConfigFromStorage read %d, %d size %d\n", (int)configuration, configurationIndex, readSize);
-#endif
-
-        Config_CloseFile(handle);
-    }
-
-    return (readSize != CONFIG_ERROR);
-}
-
-// Allocate HAL_CONFIGURATION_NETWORK block if required
-void ConfigurationManager_allocate_network(uint32_t configCount)
-{
-    if (g_TargetConfiguration.NetworkInterfaceConfigs == 0)
-    {
-        uint32_t sizeOfNetworkInterfaceConfigs =
-            offsetof(HAL_CONFIGURATION_NETWORK, Configs) + configCount * sizeof(HAL_Configuration_NetworkInterface *);
-        g_TargetConfiguration.NetworkInterfaceConfigs =
-            (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
-        memset((void *)g_TargetConfiguration.NetworkInterfaceConfigs, 0, sizeOfNetworkInterfaceConfigs);
-    }
-}
-
-// Allocate HAL_CONFIGURATION_WIRELESS80211 block if required
-void ConfigurationManager_allocate_wireless(uint32_t configCount)
-{
-    if (g_TargetConfiguration.Wireless80211Configs == 0)
-    {
-        uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
-                                              configCount * sizeof(HAL_Configuration_Wireless80211 *);
-        g_TargetConfiguration.Wireless80211Configs =
-            (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
-        memset((void *)g_TargetConfiguration.Wireless80211Configs, 0, sizeOfWireless80211Configs);
-    }
-}
-
-void ConfigurationManager_allocate_wirelessAP(uint32_t configCount)
-{
-    if (g_TargetConfiguration.WirelessAPConfigs == 0)
-    {
-        uint32_t sizeOfWirelessAPConfigs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESSAP, Configs) +
-                                           configCount * sizeof(HAL_Configuration_WirelessAP *);
-        g_TargetConfiguration.WirelessAPConfigs =
-            (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(sizeOfWirelessAPConfigs);
-        memset((void *)g_TargetConfiguration.WirelessAPConfigs, 0, sizeOfWirelessAPConfigs);
-    }
-}
-
-// Allocate HAL_CONFIGURATION_X509_CERTIFICATE block if required
-void ConfigurationManager_allocate_certificates(uint32_t certificateCount)
-{
-    if (g_TargetConfiguration.CertificateStore == 0)
-    {
-        uint32_t sizeOfX509CertificateStore =
-            offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
-            certificateCount * sizeof(g_TargetConfiguration.CertificateStore->Certificates[0]);
-        g_TargetConfiguration.CertificateStore =
-            (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
-        memset((void *)g_TargetConfiguration.CertificateStore, 0, sizeOfX509CertificateStore);
-    }
-
-    // Init pointers to cert bundles to 0 ( not allocated )
-    for (uint32_t index = 0; index < certificateCount; index++)
-        g_TargetConfiguration.CertificateStore->Certificates[index] = 0;
-}
-
-// Allocate HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE block if required
-void ConfigurationManager_allocate_device_certificates(uint32_t certificateCount)
-{
-    if (g_TargetConfiguration.DeviceCertificates == 0)
-    {
-        uint32_t sizeOfX509DeviceCertificates =
-            offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
-            certificateCount * sizeof(g_TargetConfiguration.DeviceCertificates->Certificates[0]);
-        g_TargetConfiguration.DeviceCertificates =
-            (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificates);
-        memset((void *)g_TargetConfiguration.DeviceCertificates, 0, sizeOfX509DeviceCertificates);
-    }
-
-    // Init pointers to cert bundles to 0 ( not allocated )
-    for (uint32_t index = 0; index < certificateCount; index++)
-    {
-        g_TargetConfiguration.DeviceCertificates->Certificates[index] = 0;
-    }
 }
 
 bool StoreConfigBlock(
@@ -203,12 +97,12 @@ bool StoreConfigBlock(
     size_t writeSize)
 {
     bool result = false;
-    uint32_t fileHandle;
+    FILE *fileHandle;
 
-    fileHandle = Config_OpenFile(configType, configurationIndex, true);
-    if (fileHandle != CONFIG_ERROR)
+    fileHandle = ConfigStorage_OpenFile(configType, configurationIndex, true);
+    if (fileHandle != NULL)
     {
-        result = Config_WriteFile(fileHandle, (uint8_t *)pConfigBlock, writeSize);
+        result = ConfigStorage_WriteFile(fileHandle, (uint8_t *)pConfigBlock, writeSize);
 #ifdef DEBUG_CONFIG
         ets_printf(
             "store type %d index %d, length %d result %d\n",
@@ -217,7 +111,7 @@ bool StoreConfigBlock(
             writeSize,
             (int)result);
 #endif
-        Config_CloseFile(fileHandle);
+        ConfigStorage_CloseFile(fileHandle);
     }
 
     return result;
@@ -228,156 +122,171 @@ bool StoreConfigBlock(
 // used
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
-    // Fix adapter counts -  will get these from NVS
-    // Still need to do wireless AP
-    int networkCount = 3; // Esp32 has 3 network interfaces, Ethernet, Wireless Station & Wireless APn
-    int wirelessCount = 1;
-    int wirelessAPCount = 1;
-    int certificateCount = 1;
-    int deviceCertificateCount = 1;
+    HAL_CONFIGURATION_NETWORK *networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
 
-    // Allocate main structures for each type
-    ConfigurationManager_allocate_network(networkCount);
-    ConfigurationManager_allocate_wireless(wirelessCount);
-    ConfigurationManager_allocate_wirelessAP(wirelessAPCount);
-    ConfigurationManager_allocate_certificates(certificateCount);
-    ConfigurationManager_allocate_device_certificates(deviceCertificateCount);
-
-    // For each network interface allocate Network config if required and load from storage
-    for (int configIndex = 0; configIndex < networkCount; configIndex++)
+    // check network configs count
+    if (networkConfigs->Count == 0)
     {
-        if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex] == 0)
-        {
-            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex] =
-                (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
-        }
+        // there is no network config block available, need to create a default for each network interface
+        int networkCount;
 
-        if (ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_Network,
-                configIndex,
-                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex],
-                sizeof(HAL_Configuration_NetworkInterface)) == false)
+        // ESP32 can have has much as 3 network interfaces: Wireless Station, Wireless AP and Ethernet
+#ifdef ESP32_ETHERNET_SUPPORT
+        networkCount = 3;
+#else
+        networkCount = 2;
+#endif
+
+        // allocate memory for ONE network configuration
+        HAL_Configuration_NetworkInterface *networkConfig =
+            (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+
+        for (int configIndex = 0; configIndex < networkCount; configIndex++)
         {
-            // No config saved so init default block
-            HAL_Configuration_NetworkInterface *configPtr =
-                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configIndex];
-            InitialiseNetworkDefaultConfig(configPtr, configIndex);
+            // clear memory
+            memset(networkConfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+
+            // init to default
+            InitialiseNetworkDefaultConfig(networkConfig, configIndex);
+
+            // store
             StoreConfigBlock(
                 DeviceConfigurationOption_Network,
                 configIndex,
-                configPtr,
+                networkConfig,
                 sizeof(HAL_Configuration_NetworkInterface));
         }
+
+        // free memory
+        platform_free(networkConfig);
+
+        // have to enumerate again to pick it up
+        networkConfigs = ConfigStorage_FindNetworkConfigurationBlocks();
     }
 
-    g_TargetConfiguration.NetworkInterfaceConfigs->Count = networkCount;
+    // find wireless 80211 network configuration blocks
+    HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs =
+        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
 
-    // For each Wireless interface allocate Wireless config if required and load from storage
-    for (int configIndex = 0; configIndex < wirelessCount; configIndex++)
+    // check wireless configs count
+    if (networkWirelessConfigs->Count == 0)
     {
-        if (g_TargetConfiguration.Wireless80211Configs->Configs[configIndex] == 0)
-        {
-            g_TargetConfiguration.Wireless80211Configs->Configs[configIndex] =
-                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
-        }
-        if (ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_Wireless80211Network,
-                configIndex,
-                g_TargetConfiguration.Wireless80211Configs->Configs[configIndex],
-                sizeof(HAL_Configuration_Wireless80211)) == false)
-        {
-            HAL_Configuration_Wireless80211 *configPtr =
-                g_TargetConfiguration.Wireless80211Configs->Configs[configIndex];
-            InitialiseWirelessDefaultConfig(configPtr, configIndex);
-            StoreConfigBlock(
-                DeviceConfigurationOption_Wireless80211Network,
-                configIndex,
-                configPtr,
-                sizeof(HAL_Configuration_Wireless80211));
-        }
-    }
-    g_TargetConfiguration.Wireless80211Configs->Count = wirelessCount;
+        // allocate memory for ONE network configuration
+        HAL_Configuration_Wireless80211 *wirelessConfig =
+            (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
 
-    // For each Wireless AP interface allocate Wireless AP config if required and load from storage
-    for (int configIndex = 0; configIndex < wirelessAPCount; configIndex++)
+        InitialiseWirelessDefaultConfig(wirelessConfig, 0);
+
+        StoreConfigBlock(
+            DeviceConfigurationOption_Wireless80211Network,
+            0,
+            wirelessConfig,
+            sizeof(HAL_Configuration_Wireless80211));
+
+        // free memory
+        platform_free(wirelessConfig);
+
+        // have to enumerate again to pick it up
+        networkWirelessConfigs = ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
+    }
+
+    // find wireless AP configuration blocks
+    HAL_CONFIGURATION_NETWORK_WIRELESSAP *wirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
+
+    // check wireless AP configs count
+    if (wirelessAPConfigs->Count == 0)
     {
-        if (g_TargetConfiguration.WirelessAPConfigs->Configs[configIndex] == 0)
-        {
-            g_TargetConfiguration.WirelessAPConfigs->Configs[configIndex] =
-                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
-        }
-        if (ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_WirelessNetworkAP,
-                configIndex,
-                g_TargetConfiguration.WirelessAPConfigs->Configs[configIndex],
-                sizeof(HAL_Configuration_WirelessAP)) == false)
-        {
-            HAL_Configuration_WirelessAP *configPtr = g_TargetConfiguration.WirelessAPConfigs->Configs[configIndex];
-            InitialiseWirelessAPDefaultConfig(configPtr, configIndex);
-            StoreConfigBlock(
-                DeviceConfigurationOption_WirelessNetworkAP,
-                configIndex,
-                configPtr,
-                sizeof(HAL_Configuration_WirelessAP));
-        }
-    }
-    g_TargetConfiguration.WirelessAPConfigs->Count = wirelessCount;
+        // allocate memory for ONE wireless AP configuration
+        HAL_Configuration_WirelessAP *wirelessAPConfig =
+            (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
 
-    // For each Certificate bundle allocate memory and load from storage
-    for (int certificateIndex = 0; certificateIndex < certificateCount; certificateIndex++)
-    {
-        // Free any existing bundles first, we need to reallocate as bundles are variable size
-        if (g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] != 0)
-        {
-            platform_free(g_TargetConfiguration.CertificateStore->Certificates[certificateIndex]);
-            g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] = 0;
-        }
+        InitialiseWirelessAPDefaultConfig(wirelessAPConfig, 0);
 
-        // Find size of saved cert bundle
-        int32_t bundleSize = ConfigurationManager_FindConfigurationBlockSize(
-            DeviceConfigurationOption_X509CaRootBundle,
-            certificateIndex);
-        if (bundleSize > 0)
-        {
-            // Bundle exits
-            g_TargetConfiguration.CertificateStore->Count = certificateIndex + 1;
-            g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] =
-                (HAL_Configuration_X509CaRootBundle *)platform_malloc(bundleSize);
-            ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_X509CaRootBundle,
-                certificateIndex,
-                g_TargetConfiguration.CertificateStore->Certificates[certificateIndex],
-                bundleSize);
-        }
+        StoreConfigBlock(
+            DeviceConfigurationOption_WirelessNetworkAP,
+            0,
+            wirelessAPConfig,
+            sizeof(HAL_Configuration_WirelessAP));
+
+        // free memory
+        platform_free(wirelessAPConfig);
+
+        // have to enumerate again to pick it up
+        wirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
     }
 
-    // For each Device Certificate allocate memory and load from storage
-    for (int certificateIndex = 0; certificateIndex < certificateCount; certificateIndex++)
-    {
-        // Free any existing device certificates first, we need to reallocate as bundles are variable size
-        if (g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] != 0)
-        {
-            platform_free(g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex]);
-            g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] = 0;
-        }
+    // find X509 CA certificate blocks
+    HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
 
-        // Find size of saved device certificate
-        int32_t bundleSize = ConfigurationManager_FindConfigurationBlockSize(
-            DeviceConfigurationOption_X509DeviceCertificates,
-            certificateIndex);
-        if (bundleSize > 0)
-        {
-            // Bundle exits
-            g_TargetConfiguration.DeviceCertificates->Count = certificateIndex + 1;
-            g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] =
-                (HAL_Configuration_X509DeviceCertificate *)platform_malloc(bundleSize);
-            ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_X509DeviceCertificates,
-                certificateIndex,
-                g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex],
-                bundleSize);
-        }
-    }
+    // find X509 device certificate blocks
+    HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates =
+        ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
+
+    // allocate memory for g_TargetConfiguration
+    // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
+    // the malloc size for each struct is computed separately
+    uint32_t sizeOfNetworkInterfaceConfigs =
+        offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
+
+    uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
+                                          networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
+
+    uint32_t sizeOfWirelessAPConfigs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESSAP, Configs) +
+                                       wirelessAPConfigs->Count * sizeof(wirelessAPConfigs->Configs[0]);
+
+    uint32_t sizeOfX509CertificateStore = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
+                                          certificateStore->Count * sizeof(certificateStore->Certificates[0]);
+
+    uint32_t sizeOfX509DeviceCertificate = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
+                                           deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
+
+    g_TargetConfiguration.NetworkInterfaceConfigs =
+        (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
+
+    g_TargetConfiguration.Wireless80211Configs =
+        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
+
+    g_TargetConfiguration.WirelessAPConfigs =
+        (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(sizeOfWirelessAPConfigs);
+
+    g_TargetConfiguration.CertificateStore =
+        (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
+
+    g_TargetConfiguration.DeviceCertificates =
+        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificate);
+
+    // copy structs to g_TargetConfiguration
+    memcpy(
+        (HAL_CONFIGURATION_NETWORK *)g_TargetConfiguration.NetworkInterfaceConfigs,
+        networkConfigs,
+        sizeOfNetworkInterfaceConfigs);
+
+    memcpy(
+        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)g_TargetConfiguration.Wireless80211Configs,
+        networkWirelessConfigs,
+        sizeOfWireless80211Configs);
+
+    memcpy(
+        (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)g_TargetConfiguration.WirelessAPConfigs,
+        wirelessAPConfigs,
+        sizeOfWirelessAPConfigs);
+
+    memcpy(
+        (HAL_CONFIGURATION_X509_CERTIFICATE *)g_TargetConfiguration.CertificateStore,
+        certificateStore,
+        sizeOfX509CertificateStore);
+
+    memcpy(
+        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
+        deviceCertificates,
+        sizeOfX509DeviceCertificate);
+
+    // now free the memory of the original structs
+    platform_free(networkConfigs);
+    platform_free(networkWirelessConfigs);
+    platform_free(wirelessAPConfigs);
+    platform_free(certificateStore);
+    platform_free(deviceCertificates);
 }
 
 // Build AP default ssid based on last 3 bytes of MAC addr
@@ -586,18 +495,38 @@ bool ConfigurationManager_GetConfigurationBlock(
 
 DeviceConfigurationOption GetConfigOption(char *pConfig)
 {
-    switch (*pConfig)
+    if (!memcmp(c_MARKER_CONFIGURATION_NETWORK_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)))
     {
-        case CONFIG_TYPE_NETWORK:
-            return DeviceConfigurationOption::DeviceConfigurationOption_Network;
-        case CONFIG_TYPE_WIRELESS:
-            return DeviceConfigurationOption::DeviceConfigurationOption_Wireless80211Network;
-        case CONFIG_TYPE_WIRELESSAP:
-            return DeviceConfigurationOption::DeviceConfigurationOption_WirelessNetworkAP;
-        case CONFIG_TYPE_CERTIFICATE:
-            return DeviceConfigurationOption::DeviceConfigurationOption_X509CaRootBundle;
+        return DeviceConfigurationOption_Network;
     }
-    return DeviceConfigurationOption_Network;
+    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS80211_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1)))
+    {
+        return DeviceConfigurationOption_Wireless80211Network;
+    }
+    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS_AP_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_WIRELESS_AP_V1)))
+    {
+        return DeviceConfigurationOption_WirelessNetworkAP;
+    }
+    else if (!memcmp(
+                 c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1,
+                 pConfig,
+                 sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1)))
+    {
+        return DeviceConfigurationOption_X509CaRootBundle;
+    }
+    else if (!memcmp(
+                 c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
+                 pConfig,
+                 sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1)))
+    {
+        return DeviceConfigurationOption_X509DeviceCertificates;
+    }
+    else
+    {
+        // shouldn't EVER EVER get here
+        ASSERT(false);
+        return (DeviceConfigurationOption)0;
+    }
 }
 
 bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, uint32_t blockSize, uint32_t offset)
