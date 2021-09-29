@@ -6,7 +6,4 @@
 #ifndef TARGET_PAL_TIME_H
 #define TARGET_PAL_TIME_H
 
-#include <esp32_os.h>
-
-
 #endif //TARGET_PAL_TIME_H

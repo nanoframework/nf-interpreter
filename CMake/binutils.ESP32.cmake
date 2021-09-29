@@ -219,19 +219,16 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_platform_sources target)
 
-    # add header files with common OS definitions and board definitions specific for each image
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
-
+    # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
+                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
     
         ${TARGET_ESP32_IDF_COMMON_SOURCES}
 
-    target_sources(${target}.elf PUBLIC
+    )
 
     # sources specific to nanoCRL
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
@@ -514,4 +511,3 @@ macro(nf_clear_output_files_nanoclr)
     )
 
 endmacro()
-
