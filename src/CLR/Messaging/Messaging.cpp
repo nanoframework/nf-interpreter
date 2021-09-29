@@ -258,7 +258,7 @@ HRESULT CLR_Messaging::CreateInstance()
 
     g_CLR_Messaging.Initialize(NULL, 0, NULL, 0);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
