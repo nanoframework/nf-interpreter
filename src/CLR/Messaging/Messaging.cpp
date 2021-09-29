@@ -9,7 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-CLR_Messaging *g_CLR_Messaging;
+CLR_Messaging g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +92,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
     CLR_Messaging_Commands::Messaging_Query::Reply *cmd =
         (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
 
-    g_CLR_Messaging->AllocateAndQueueMessage(
+    g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Query,
         0,
         NULL,
@@ -115,7 +115,7 @@ bool CLR_Messaging::Messaging_Send(WP_Message *msg)
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
 
-    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Send,
         len,
         cmd->m_data,
@@ -154,7 +154,7 @@ bool CLR_Messaging::Messaging_Reply(WP_Message *msg)
     CLR_UINT32 len;
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
-    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Reply,
         len,
         cmd->m_data,
@@ -254,17 +254,11 @@ HRESULT CLR_Messaging::CreateInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    // allocate memory for messenger instance
-    g_CLR_Messaging = (CLR_Messaging *)platform_malloc(sizeof(CLR_Messaging));
-
-    // sanity check...
-    FAULT_ON_NULL(g_CLR_Messaging);
-
     NANOCLR_CLEAR(g_CLR_Messaging);
 
-    g_CLR_Messaging->Initialize(NULL, 0, NULL, 0);
+    g_CLR_Messaging.Initialize(NULL, 0, NULL, 0);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
@@ -302,12 +296,7 @@ HRESULT CLR_Messaging::DeleteInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    g_CLR_Messaging->Cleanup();
-
-    // free messenger instance
-    platform_free(g_CLR_Messaging);
-
-    g_CLR_Messaging = NULL;
+    g_CLR_Messaging.Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
