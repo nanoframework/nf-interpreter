@@ -111,12 +111,12 @@ esp_err_t IRAM_ATTR NF_ESP32_InitaliseWifi()
     }
 
     // Don't init if Wifi Mode null (Disabled)
-    if (wifi_mode == WIFI_MODE_NULL)
+    if (expectedWifiMode == WIFI_MODE_NULL)
     {
         return ESP_FAIL;
     }
 
-    if (!WifiInitialised)
+    if (!IsWifiInitialised)
     {
         // create Wi-Fi STA (ignoring return)
         esp_netif_create_default_wifi_sta();
