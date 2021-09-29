@@ -330,7 +330,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
 
     NF_PAL_UART *palUart = NULL;
     uint8_t uartNum = 0;
-    uint8_t *buffer;
+    uint8_t *buffer = NULL;
     uint32_t bufferLength;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
@@ -364,7 +364,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer)
+        if (buffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -373,8 +373,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         palUart->RxRingBuffer.Pop(buffer, bufferLength);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
-
-        platform_free(buffer);
     }
     else
     {
@@ -382,7 +380,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (buffer != NULL)
+    {
+        platform_free(buffer);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(CLR_RT_StackFrame &stack)
@@ -634,9 +639,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
 
     palUart = Uart_PAL[uartNum];
 
-    // Free ring buffers memory
-    platform_free(palUart->TxBuffer);
+    // Free ring buffer memory
     platform_free(palUart->RxBuffer);
+
+    // null all pointers
+    palUart->RxBuffer = NULL;
+    palUart->TxBuffer = NULL;
 
     // Deinitialize device and delete FreeRTOS idle tasks
     LPUART_Deinit(base);
@@ -672,26 +680,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     palUart = Uart_PAL[uartNum];
 
-    // Allocate memory for TX and RX circular buffer
-    palUart->TxBuffer = (uint8_t *)platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
-    if (palUart->TxBuffer == NULL)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    }
-
+    // Allocate memory for RX circular buffer
     palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
     if (palUart->RxBuffer == NULL)
     {
-        platform_free(palUart->TxBuffer);
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     // Initialize RX buffer
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
+    palUart->RxBytesToRead = 0;
+
+    // now all the rest
     palUart->TxOngoingCount = 0;
     palUart->WatchChar = 0;
     palUart->NewLineChar = 0;
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
-    palUart->RxBytesToRead = 0;
 
     // Get default config structure for initializing given UART peripheral and enable TX, RX
     LPUART_GetDefaultConfig(config);

@@ -154,6 +154,10 @@ void Init_UART8();
 #define UART_UNINIT(num)                                                                                               \
     void UnInit_UART##num()                                                                                            \
     {                                                                                                                  \
+        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        uartStop(&UARTD##num##);                                                                                       \
+        Uart##num##_PAL.UartDriver = NULL;                                                                             \
         return;                                                                                                        \
     }
 

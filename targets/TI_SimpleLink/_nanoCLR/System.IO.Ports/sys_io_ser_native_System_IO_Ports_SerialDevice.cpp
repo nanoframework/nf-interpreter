@@ -63,7 +63,6 @@ void UnitializePalUart(NF_PAL_UART *palUart)
         UART2_close(palUart->UartDriver);
 
         // free buffers memory
-        platform_free(palUart->TxBuffer);
         platform_free(palUart->RxBuffer);
 
         // null all pointers
@@ -391,7 +390,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer)
+        if (buffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -400,8 +399,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         palUart->RxRingBuffer.Pop(buffer, bufferLength);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
-
-        platform_free(buffer);
     }
     else
     {
@@ -409,7 +406,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (buffer != NULL)
+    {
+        platform_free(buffer);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(CLR_RT_StackFrame &stack)
@@ -710,13 +714,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
         // assign buffers, if not already done
-        if (palUart->TxBuffer == NULL && palUart->RxBuffer == NULL)
+        if (palUart->RxBuffer == NULL)
         {
-            palUart->TxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
             palUart->RxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
 
             // check allocation
-            if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
+            if (palUart->RxBuffer == NULL)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
             }
