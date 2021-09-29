@@ -60,9 +60,8 @@ void UnitializePalUart_sys(NF_PAL_UART *palUart)
         event.type = UART_EVENT_MAX;
         xQueueSend(palUart->UartEventQueue, &event, (portTickType)0);
 
-        // free buffers meory
+        // free buffer memory
         platform_free(palUart->RxBuffer);
-        platform_free(palUart->TxBuffer);
 
         // null all pointers
         palUart->RxBuffer = NULL;
@@ -441,7 +440,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
     NF_PAL_UART *palUart = NULL;
     uart_port_t uart_num;
 
-    uint8_t *buffer;
+    uint8_t *buffer = NULL;
     uint32_t bufferLength;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
@@ -474,7 +473,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer)
+        if (buffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -483,8 +482,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         palUart->RxRingBuffer.Pop(buffer, bufferLength);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
-
-        platform_free(buffer);
     }
     else
     {
@@ -492,7 +489,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (buffer != NULL)
+    {
+        platform_free(buffer);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(CLR_RT_StackFrame &stack)
@@ -804,11 +808,10 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // alloc buffers memory
-    palUart->TxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
     palUart->RxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
 
     // sanity check
-    if (palUart->TxBuffer == NULL || palUart->RxBuffer == NULL)
+    if (palUart->RxBuffer == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }

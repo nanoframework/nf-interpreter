@@ -432,7 +432,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
 
     NF_PAL_UART *palUart = NULL;
 
-    uint8_t *buffer;
+    uint8_t *buffer = NULL;
     uint32_t bufferLength;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
@@ -462,7 +462,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         buffer = (uint8_t *)platform_malloc(bufferLength);
 
         // sanity check
-        if (buffer)
+        if (buffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
@@ -471,8 +471,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         palUart->RxRingBuffer.Pop(buffer, bufferLength);
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)buffer, bufferLength));
-
-        platform_free(buffer);
     }
     else
     {
@@ -480,7 +478,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadExisting___STR
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(top, (const char *)NULL));
     }
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_CLEANUP();
+
+    if (buffer != NULL)
+    {
+        platform_free(buffer);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(CLR_RT_StackFrame &stack)
@@ -716,72 +721,48 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
         case 1:
             UnInit_UART1();
-            // stop UART
-            uartStop(&UARTD1);
-            Uart1_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
         case 2:
             UnInit_UART2();
-            // stop UART
-            uartStop(&UARTD2);
-            Uart2_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
         case 3:
             UnInit_UART3();
-            // stop UART
-            uartStop(&UARTD3);
-            Uart3_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
         case 4:
             UnInit_UART4();
-            // stop UART
-            uartStop(&UARTD4);
-            Uart4_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
         case 5:
             UnInit_UART5();
-            // stop UART
-            uartStop(&UARTD5);
-            Uart5_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
         case 6:
             UnInit_UART6();
-            // stop UART
-            uartStop(&UARTD6);
-            Uart6_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
         case 7:
             UnInit_UART7();
-            // stop UART
-            uartStop(&UARTD7);
-            Uart7_PAL.UartDriver = NULL;
             break;
 #endif
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
         case 8:
             UnInit_UART8();
-            // stop UART
-            uartStop(&UARTD8);
-            Uart8_PAL.UartDriver = NULL;
             break;
 #endif
 
