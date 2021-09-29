@@ -168,6 +168,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         CLR_UINT32 widthChar = 0;
         CLR_UINT32 heightChar = 0;
 
+        // Get the text and the other parameters
         szText = stack.Arg0().RecoverString();
         x = stack.Arg1().NumericByRef().u2;
         y = stack.Arg2().NumericByRef().u2;
@@ -175,11 +176,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         height = stack.Arg4().NumericByRef().u2;
         foregroundColor = stack.Arg6().NumericByRef().u4;
         backgroundColor = stack.Arg7().NumericByRef().u4;
-        CLR_Debug::Printf("text=%s,x=%d,y=%d,w=%d,h=%d,fc=%d,bc=%d\n",szText, x, y, width, height, foregroundColor, backgroundColor);
-        
+
         // Get the font
         CLR_RT_HeapBlock*  pThis = stack.Arg5().Dereference();
-
         blob = pThis[CLR_GFX_Font::FIELD__m_font].DereferenceBinaryBlob();
         if (!blob || blob->DataType() != DATATYPE_BINARY_BLOB_HEAD) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         font = (CLR_GFX_Font*)blob->GetData();
@@ -188,61 +187,91 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         CLR_GFX_Bitmap *bitmap;
         CLR_GFX_BitmapDescription bm;
         int size;
-
+        // The bitmap need to be 1 more pixel width than the font
         if (bm.BitmapDescription_Initialize(font->m_font.m_metrics.m_maxCharWidth + 1, font->m_font.m_metrics.m_height, CLR_GFX_BitmapDescription::c_NativeBpp) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
+
         size = sizeof(CLR_GFX_Bitmap) + bm.GetTotalSize();
-        bitmap = (CLR_GFX_Bitmap *)malloc(size);
-
+        bitmap = (CLR_GFX_Bitmap *)platform_malloc(size);
         if (!bitmap)
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
 
-        memset(bitmap, 0, size); // Clear the memory to contain the bitmap structure
+        // Clear the memory to contain the bitmap structure
+        // TODO: will the bitmap with the background color
+        memset(bitmap, 0, size); 
         bitmap->m_bm = bm;
         bitmap->Bitmap_Initialize();
 
         // Now fill the text
-        //int incStr = 0;
         CLR_RT_UnicodeHelper uh;
         CLR_UINT16 buf[3];
-        CLR_UINT32 nTotWidth = 0;
-        
+
+        // Get a proper character from the UTF8 encoded string
         uh.SetInputUTF8(szText);
-        
-        uh.m_outputUTF16 = buf;
-        uh.m_outputUTF16_size = MAXSTRLEN(buf);
+        int posX = x;
+        int posY = y;
+        int prevCharWidth = 0;
+        int lineBreakPixels = width - 20;
+        int textLength = uh.CountNumberOfCharacters();
+        CLR_UINT16 c
 
-        //if (uh.ConvertFromUTF8(1, false) == false)
-        //    break;
-
-        CLR_UINT16 c = buf[0];
-
-        font->GetCharInfo(c, chr);
-
-        if (chr.isValid) 
+        // Loop for each characters
+        for (int i = 0; i < textLength; i++)
         {
-            widthChar = chr.width;
-            heightChar = chr.height;
-            CLR_Debug::Printf("w=%d,h=%d\n", widthChar, heightChar);
-
-            // It doesn't look like we support kerning??            
-
-            int nOffset = ((nTotWidth + (chr.width + 1) / 2)) - (chr.width + 1) / 2;
-
-            nTotWidth = nOffset + chr.width;
-
-            if (bitmap)
+            uh.m_outputUTF16 = buf;
+            uh.m_outputUTF16_size = MAXSTRLEN(buf); 
+            // If not a valid character, go to the next one
+            if (uh.ConvertFromUTF8(1, false) == false)
             {
-                font->DrawChar(bitmap, chr, 0 + chr.marginLeft + nOffset, 0, foregroundColor);
+               break;
+            }
+
+            c = buf[0];
+            char converted = char(c);
+
+            font->GetCharInfo(c, chr);
+            if (chr.isValid) 
+            {
+                prevCharWidth = widthChar;
+                widthChar = chr.width;
+
+                // Set the start for the character
+                if (chr.height > heightChar)
+                {
+                    heightChar = chr.height;
+                }
+
+                if (posX == x && c == 32)
+                {
+                    posX = 0;
+                }
+                else
+                {
+                    posX += prevCharWidth;
+                }
+
+                CLR_Debug::Printf("posX =%d, posY=%d\n", posX, posY);
+                // TODO: fill the bitmap with the background color
+                bitmap->Clear();
+                font->DrawChar(bitmap, chr, 0, 0, foregroundColor);
+                g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, font->m_font.m_metrics.m_maxCharWidth + 1, font->m_font.m_metrics.m_height);
+                if (i + 1 < textLength)
+                {
+                    if (posX >= lineBreakPixels)
+                    {
+                        posX = x;
+                        posY += heightChar;
+                    }
+                }
             }
         }
-        
-        g_GraphicsDriver.Screen_Flush(*bitmap, x, y, font->m_font.m_metrics.m_maxCharWidth, font->m_font.m_metrics.m_height);
 
-        
-        free(bitmap);
+        // Free the bitmap
+        platform_free(bitmap);
     }
     NANOCLR_NOCLEANUP();
 }
