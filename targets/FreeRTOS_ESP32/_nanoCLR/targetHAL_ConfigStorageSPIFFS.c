@@ -163,6 +163,29 @@ FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t c
 }
 
 //
+//  ConfigStorage_DeleteFile -
+//
+//  Deletes configuration file
+//
+// Parameters:-
+//   configuration      : Type of configuration block
+//   configurationIndex : Index of config to delete
+//
+// Return : operation success
+//
+bool ConfigStorage_DeleteFile(DeviceConfigurationOption configuration, uint32_t configurationIndex)
+{
+    // buffer for file name
+    // add extra position for terminator
+    char fileName[SPIFFS_OBJ_NAME_LEN + 1] = {0};
+
+    ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
+
+    // Open SPIFFS config storage
+    return (unlink(fileName) == 0);
+}
+
+//
 //  ConfigStorage_CloseFile - Close opened file / NVS system
 //
 // Parameters:-
@@ -214,7 +237,7 @@ uint32_t Config_IO(FILE *handle, ConfigIoType ioType, uint8_t *pData, int32_t si
 
             // Read blob into pData
             fseek(file, 0, SEEK_SET);
-            ret = fread((void *)pData, 1, (size_t)blobSize, file);
+            ret = fread(pData, 1, (size_t)blobSize, file);
 
             if (ret != (size_t)blobSize)
             {
@@ -225,12 +248,8 @@ uint32_t Config_IO(FILE *handle, ConfigIoType ioType, uint8_t *pData, int32_t si
         }
         else if (ioType == ConfigIoType_Write)
         {
-            ret = fwrite((const void *)pData, 1, (size_t)size, file);
+            result = fwrite((const void *)pData, 1, (size_t)size, file);
 
-            if (ret == (size_t)size)
-            {
-                result = 0;
-            }
             break;
         }
         else
@@ -271,7 +290,7 @@ int32_t ConfigStorage_FileSize(FILE *handle)
 //
 bool ConfigStorage_WriteFile(FILE *handle, uint8_t *pData, int32_t writeSize)
 {
-    return (Config_IO(handle, ConfigIoType_Write, pData, writeSize) != 0);
+    return (Config_IO(handle, ConfigIoType_Write, pData, writeSize) == writeSize);
 }
 
 //
@@ -316,8 +335,7 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
 
     // allocate config struct
     // allocation size
-    int32_t allocationSize =
-        offsetof(HAL_CONFIGURATION_NETWORK, Configs) + configCount * sizeof(HAL_Configuration_NetworkInterface);
+    int32_t allocationSize = sizeof(HAL_CONFIGURATION_NETWORK);
 
     HAL_CONFIGURATION_NETWORK *networkConfigs = (HAL_CONFIGURATION_NETWORK *)platform_malloc(allocationSize);
 
@@ -332,23 +350,6 @@ HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks()
 
     // set collection count
     networkConfigs->Count = configCount;
-
-    if (configCount > 0)
-    {
-        // second pass: load each config from storage
-        for (uint32_t configIndex = 0; configIndex < configCount; configIndex++)
-        {
-            // allocate memory for reading the file
-            networkConfigs->Configs[configIndex] =
-                (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
-
-            ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_Network,
-                configIndex,
-                networkConfigs->Configs[configIndex],
-                sizeof(HAL_Configuration_NetworkInterface));
-        }
-    }
 
     return networkConfigs;
 }
@@ -379,8 +380,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
 
     // allocate config struct
     // allocation size
-    int32_t allocationSize = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
-                             configCount * sizeof(HAL_Configuration_Wireless80211);
+    int32_t allocationSize = sizeof(HAL_Configuration_Wireless80211 *);
 
     HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs =
         (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(allocationSize);
@@ -396,23 +396,6 @@ HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211C
 
     // set collection count
     networkWirelessConfigs->Count = configCount;
-
-    if (configCount > 0)
-    {
-        // second pass: load each config from storage
-        for (uint32_t configIndex = 0; configIndex < configCount; configIndex++)
-        {
-            // allocate memory for reading the file
-            networkWirelessConfigs->Configs[configIndex] =
-                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
-
-            ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_Wireless80211Network,
-                configIndex,
-                networkWirelessConfigs->Configs[configIndex],
-                sizeof(HAL_Configuration_Wireless80211));
-        }
-    }
 
     return networkWirelessConfigs;
 }
@@ -443,8 +426,7 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
 
     // allocate config struct
     // allocation size
-    int32_t allocationSize =
-        offsetof(HAL_CONFIGURATION_NETWORK_WIRELESSAP, Configs) + configCount * sizeof(HAL_Configuration_WirelessAP);
+    int32_t allocationSize = sizeof(HAL_CONFIGURATION_NETWORK_WIRELESSAP);
 
     HAL_CONFIGURATION_NETWORK_WIRELESSAP *networkWirelessAPConfigs =
         (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(allocationSize);
@@ -457,26 +439,6 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
 
     // clear memory
     memset(networkWirelessAPConfigs, 0, allocationSize);
-
-    // set collection count
-    networkWirelessAPConfigs->Count = configCount;
-
-    if (configCount > 0)
-    {
-        // second pass: load each config from storage
-        for (uint32_t configIndex = 0; configIndex < configCount; configIndex++)
-        {
-            // allocate memory for reading the file
-            networkWirelessAPConfigs->Configs[configIndex] =
-                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
-
-            ConfigurationManager_GetConfigurationBlockFromStorage(
-                DeviceConfigurationOption_WirelessNetworkAP,
-                configIndex,
-                networkWirelessAPConfigs->Configs[configIndex],
-                sizeof(HAL_Configuration_WirelessAP));
-        }
-    }
 
     return networkWirelessAPConfigs;
 }
@@ -527,20 +489,6 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
     // set collection count
     certificateStore->Count = configCount;
 
-    if (configCount > 0)
-    {
-        // allocate memory for reading the file
-        certificateStore->Certificates[0] =
-            (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeof(HAL_Configuration_X509CaRootBundle));
-
-        // second pass: load CA root bundle from storage
-        ConfigurationManager_GetConfigurationBlockFromStorage(
-            DeviceConfigurationOption_X509CaRootBundle,
-            0,
-            certificateStore->Certificates[0],
-            sizeof(HAL_Configuration_X509CaRootBundle));
-    }
-
     return certificateStore;
 }
 
@@ -589,20 +537,6 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertifica
 
     // set collection count
     deviceCertificate->Count = configCount;
-
-    if (configCount > 0)
-    {
-        // allocate memory for reading the file
-        deviceCertificate->Certificates[0] =
-            (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeof(HAL_Configuration_X509DeviceCertificate));
-
-        // second pass: load device cert from storage
-        ConfigurationManager_GetConfigurationBlockFromStorage(
-            DeviceConfigurationOption_X509DeviceCertificates,
-            0,
-            deviceCertificate->Certificates[0],
-            sizeof(HAL_Configuration_X509DeviceCertificate));
-    }
 
     return deviceCertificate;
 }

@@ -62,7 +62,7 @@ void PrintBlock(char *pBlock, int bsize)
 // initialization of configuration manager
 void ConfigurationManager_Initialize()
 {
-    memset((void *)&g_TargetConfiguration, 0, sizeof(g_TargetConfiguration));
+    memset((void *)&g_TargetConfiguration, 0, sizeof(HAL_TARGET_CONFIGURATION));
 
     ConfigStorage_Initialise();
 
@@ -93,7 +93,7 @@ int32_t ConfigurationManager_FindConfigurationBlockSize(
 bool StoreConfigBlock(
     DeviceConfigurationOption configType,
     uint32_t configurationIndex,
-    void *pConfigBlock,
+    void *configBlock,
     size_t writeSize)
 {
     bool result = false;
@@ -102,7 +102,7 @@ bool StoreConfigBlock(
     fileHandle = ConfigStorage_OpenFile(configType, configurationIndex, true);
     if (fileHandle != NULL)
     {
-        result = ConfigStorage_WriteFile(fileHandle, (uint8_t *)pConfigBlock, writeSize);
+        result = ConfigStorage_WriteFile(fileHandle, (uint8_t *)configBlock, writeSize);
 #ifdef DEBUG_CONFIG
         ets_printf(
             "store type %d index %d, length %d result %d\n",
@@ -118,7 +118,7 @@ bool StoreConfigBlock(
 }
 
 // Enumerates the configuration blocks from the configuration flash sector
-// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistance mechanism is
+// it's implemented with 'weak' attribute so it can be replaced at target level if a different persistence mechanism is
 // used
 void ConfigurationManager_EnumerateConfigurationBlocks()
 {
@@ -191,10 +191,10 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     }
 
     // find wireless AP configuration blocks
-    HAL_CONFIGURATION_NETWORK_WIRELESSAP *wirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
+    HAL_CONFIGURATION_NETWORK_WIRELESSAP *wirelessAPconfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
 
     // check wireless AP configs count
-    if (wirelessAPConfigs->Count == 0)
+    if (wirelessAPconfigs->Count == 0)
     {
         // allocate memory for ONE wireless AP configuration
         HAL_Configuration_WirelessAP *wirelessAPConfig =
@@ -212,7 +212,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         platform_free(wirelessAPConfig);
 
         // have to enumerate again to pick it up
-        wirelessAPConfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
+        wirelessAPconfigs = ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
     }
 
     // find X509 CA certificate blocks
@@ -222,83 +222,23 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
     HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates =
         ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
 
-    // allocate memory for g_TargetConfiguration
-    // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
-    // the malloc size for each struct is computed separately
-    uint32_t sizeOfNetworkInterfaceConfigs =
-        offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
-
-    uint32_t sizeOfWireless80211Configs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
-                                          networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
-
-    uint32_t sizeOfWirelessAPConfigs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESSAP, Configs) +
-                                       wirelessAPConfigs->Count * sizeof(wirelessAPConfigs->Configs[0]);
-
-    uint32_t sizeOfX509CertificateStore = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
-                                          certificateStore->Count * sizeof(certificateStore->Certificates[0]);
-
-    uint32_t sizeOfX509DeviceCertificate = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
-                                           deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
-
-    g_TargetConfiguration.NetworkInterfaceConfigs =
-        (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
-
-    g_TargetConfiguration.Wireless80211Configs =
-        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
-
-    g_TargetConfiguration.WirelessAPConfigs =
-        (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(sizeOfWirelessAPConfigs);
-
-    g_TargetConfiguration.CertificateStore =
-        (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
-
-    g_TargetConfiguration.DeviceCertificates =
-        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificate);
-
-    // copy structs to g_TargetConfiguration
-    memcpy(
-        (HAL_CONFIGURATION_NETWORK *)g_TargetConfiguration.NetworkInterfaceConfigs,
-        networkConfigs,
-        sizeOfNetworkInterfaceConfigs);
-
-    memcpy(
-        (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)g_TargetConfiguration.Wireless80211Configs,
-        networkWirelessConfigs,
-        sizeOfWireless80211Configs);
-
-    memcpy(
-        (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)g_TargetConfiguration.WirelessAPConfigs,
-        wirelessAPConfigs,
-        sizeOfWirelessAPConfigs);
-
-    memcpy(
-        (HAL_CONFIGURATION_X509_CERTIFICATE *)g_TargetConfiguration.CertificateStore,
-        certificateStore,
-        sizeOfX509CertificateStore);
-
-    memcpy(
-        (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
-        deviceCertificates,
-        sizeOfX509DeviceCertificate);
-
-    // now free the memory of the original structs
-    platform_free(networkConfigs);
-    platform_free(networkWirelessConfigs);
-    platform_free(wirelessAPConfigs);
-    platform_free(certificateStore);
-    platform_free(deviceCertificates);
+    g_TargetConfiguration.NetworkInterfaceConfigs = networkConfigs;
+    g_TargetConfiguration.Wireless80211Configs = networkWirelessConfigs;
+    g_TargetConfiguration.WirelessAPConfigs = wirelessAPconfigs;
+    g_TargetConfiguration.CertificateStore = certificateStore;
+    g_TargetConfiguration.DeviceCertificates = deviceCertificates;
 }
 
-// Build AP default ssid based on last 3 bytes of MAC addr
+// Build AP default SSID based on the last 3 bytes of MAC
 // nano_xxxxxx
-//
-void CreateDefaultApSSID(HAL_Configuration_WirelessAP *pconfig)
+void CreateDefaultApSSID(HAL_Configuration_WirelessAP *config)
 {
     uint8_t mac[6];
     esp_efuse_mac_get_default(mac);
 
-    hal_strcpy_s((char *)pconfig->Ssid, sizeof(pconfig->Ssid), "nano_");
-    char *pMac = (char *)pconfig->Ssid + 5;
+    hal_strcpy_s((char *)config->Ssid, sizeof(config->Ssid), "nano_");
+    char *pMac = (char *)config->Ssid + 5;
+
     // Last 3 bytes of MAC address
     for (int index = 3; index < 6; index++)
     {
@@ -308,83 +248,85 @@ void CreateDefaultApSSID(HAL_Configuration_WirelessAP *pconfig)
 }
 
 //  Default initialisation of wireless config blocks for ESP32 targets
-void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *pconfig, uint32_t configurationIndex)
+void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, uint32_t configurationIndex)
 {
-    memset(pconfig, 0, sizeof(HAL_Configuration_Wireless80211));
+    memset(config, 0, sizeof(HAL_Configuration_Wireless80211));
+
+    // make sure the config block marker is set
+    memcpy(config, c_MARKER_CONFIGURATION_WIRELESS80211_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
 
     // Wireless station
-    pconfig->Id = configurationIndex;
-
-    // test default data for AP
-    // hal_strcpy_s( (char*)pconfig->Ssid, sizeof(pconfig->Ssid), "MySSID" );
-    // hal_strcpy_s( (char*)pconfig->Password, sizeof(pconfig->Password), "MyPassword" );
+    config->Id = configurationIndex;
 
     // Set default to Auto Connect + Enable + WirelessFlags_SmartConfig so station can be started by default
     // Once smart config has run will start up automatically and reconnect of disconnected
-    // Application will have to disable wifi to save power etc
-    pconfig->Options =
+    // Application will have to disable Wi-Fi to save power etc
+    config->Options =
         (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
 }
 
 //  Default initialisation of wireless config blocks for ESP32 targets
-void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *pconfig, uint32_t configurationIndex)
+void InitialiseWirelessAPDefaultConfig(HAL_Configuration_WirelessAP *config, uint32_t configurationIndex)
 {
-    memset(pconfig, 0, sizeof(HAL_Configuration_WirelessAP));
+    memset(config, 0, sizeof(HAL_Configuration_WirelessAP));
 
-    pconfig->Id = configurationIndex;
+    // make sure the config block marker is set
+    memcpy(config, c_MARKER_CONFIGURATION_WIRELESS_AP_V1, sizeof(c_MARKER_CONFIGURATION_WIRELESS_AP_V1));
 
-    // Build AP default ssid/password based on MAC addr
+    config->Id = configurationIndex;
+
+    // Build AP default SSID/password based on MAC
     // but don't enable by default
-    CreateDefaultApSSID(pconfig);
+    CreateDefaultApSSID(config);
 
-    hal_strcpy_s((char *)pconfig->Password, sizeof(pconfig->Password), "nanoframework");
+    hal_strcpy_s((char *)config->Password, sizeof(config->Password), "nanoframework");
 
-    pconfig->Authentication = AuthenticationType_WPA2;
-    pconfig->Encryption = EncryptionType_WPA2;
-    pconfig->Radio = RadioType__802_11n;
-    pconfig->Channel = 11;
-    pconfig->MaxConnections = 4;
+    config->Authentication = AuthenticationType_WPA2;
+    config->Encryption = EncryptionType_WPA2;
+    config->Radio = RadioType__802_11n;
+    config->Channel = 11;
+    config->MaxConnections = 4;
 
     // Disable Soft AP (default)
-    pconfig->Options = WirelessAPConfiguration_ConfigurationOptions_Disable;
+    config->Options = WirelessAPConfiguration_ConfigurationOptions_Disable;
 }
 
 //  Default initialisation of Network interface config blocks for ESP32 targets
-bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *pconfig, uint32_t configurationIndex)
+bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
-    memset(pconfig, 0, sizeof(HAL_Configuration_NetworkInterface));
+    memset(config, 0, sizeof(HAL_Configuration_NetworkInterface));
 
     // make sure the config block marker is set
-    memcpy(pconfig->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
+    memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
     switch (configurationIndex)
     {
         case 0: // Wireless Station
-            pconfig->InterfaceType = NetworkInterfaceType_Wireless80211;
-            pconfig->StartupAddressMode = AddressMode_DHCP;
-            pconfig->AutomaticDNS = 1;
-            pconfig->SpecificConfigId = 0;
+            config->InterfaceType = NetworkInterfaceType_Wireless80211;
+            config->StartupAddressMode = AddressMode_DHCP;
+            config->AutomaticDNS = 1;
+            config->SpecificConfigId = 0;
             break;
 
         case 1: // Wireless AP
-            pconfig->InterfaceType = NetworkInterfaceType_WirelessAP;
-            pconfig->StartupAddressMode = AddressMode_Static;
-            pconfig->SpecificConfigId = 0;
+            config->InterfaceType = NetworkInterfaceType_WirelessAP;
+            config->StartupAddressMode = AddressMode_Static;
+            config->SpecificConfigId = 0;
             // Set default address 192.168.1.1
-            // pconfig->IPv4Address
-            // pconfig->IPv4NetMask
-            // pconfig->IPv4GatewayAddress
+            // config->IPv4Address
+            // config->IPv4NetMask
+            // config->IPv4GatewayAddress
             break;
 
         case 2: // Ethernet
-            pconfig->InterfaceType = NetworkInterfaceType_Ethernet;
-            pconfig->StartupAddressMode = AddressMode_DHCP;
-            pconfig->AutomaticDNS = 1;
+            config->InterfaceType = NetworkInterfaceType_Ethernet;
+            config->StartupAddressMode = AddressMode_DHCP;
+            config->AutomaticDNS = 1;
             break;
     }
 
     // get default MAC
-    esp_efuse_mac_get_default(pconfig->MacAddress);
+    esp_efuse_mac_get_default(config->MacAddress);
 
     // always good
     return TRUE;
@@ -424,14 +366,11 @@ bool ConfigurationManager_GetConfigurationBlock(
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig CN exit false\n");
 #endif
-            return FALSE;
+            return false;
         }
 
         // set block size
         sizeOfBlock = sizeof(HAL_Configuration_NetworkInterface);
-
-        // get block address
-        blockAddress = (uint8_t *)g_TargetConfiguration.NetworkInterfaceConfigs->Configs[configurationIndex];
     }
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
@@ -441,14 +380,11 @@ bool ConfigurationManager_GetConfigurationBlock(
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig WN exit false\n");
 #endif
-            return FALSE;
+            return false;
         }
 
         // set block size
         sizeOfBlock = sizeof(HAL_Configuration_Wireless80211);
-
-        // get block address
-        blockAddress = (uint8_t *)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex];
     }
     else if (configuration == DeviceConfigurationOption_WirelessNetworkAP)
     {
@@ -458,14 +394,11 @@ bool ConfigurationManager_GetConfigurationBlock(
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig AP exit false\n");
 #endif
-            return FALSE;
+            return false;
         }
 
         // set block size
         sizeOfBlock = sizeof(HAL_Configuration_WirelessAP);
-
-        // get block address
-        blockAddress = (uint8_t *)g_TargetConfiguration.WirelessAPConfigs->Configs[configurationIndex];
     }
     else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
@@ -475,48 +408,86 @@ bool ConfigurationManager_GetConfigurationBlock(
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig XC exit false\n");
 #endif
-            return FALSE;
+            return false;
         }
-
-        // get block address
-        blockAddress = (uint8_t *)g_TargetConfiguration.CertificateStore->Certificates[configurationIndex];
 
         // set block size
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509CaRootBundle *)blockAddress)->CertificateSize;
     }
+    else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+    {
+        if (g_TargetConfiguration.CertificateStore->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
+        {
+#ifdef DEBUG_CONFIG
+            ets_printf("GetConfig XC exit false\n");
+#endif
+            return false;
+        }
+
+        // set block size
+        // because X509 certificate has a variable length need to compute the block size in two steps
+        sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+        sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
+    }
+    else
+    {
+        // unknown configuration option
+        return false;
+    }
+
+    // allocate memory
+    blockAddress = (uint8_t *)platform_malloc(sizeOfBlock);
+
+    if (blockAddress)
+    {
+        ConfigurationManager_GetConfigurationBlockFromStorage(
+            configuration,
+            configurationIndex,
+            blockAddress,
+            sizeOfBlock);
+    }
+    else
+    {
+        // failure to allocate memory
+        return false;
+    }
 
     // copy the config block content to the pointer in the argument
     memcpy(configurationBlock, blockAddress, sizeOfBlock);
 
+    // free memory
+    platform_free(blockAddress);
+
     return TRUE;
 }
 
-DeviceConfigurationOption GetConfigOption(char *pConfig)
+DeviceConfigurationOption GetConfigOption(char *config)
 {
-    if (!memcmp(c_MARKER_CONFIGURATION_NETWORK_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)))
+    if (!memcmp(c_MARKER_CONFIGURATION_NETWORK_V1, config, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)))
     {
         return DeviceConfigurationOption_Network;
     }
-    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS80211_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1)))
+    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS80211_V1, config, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1)))
     {
         return DeviceConfigurationOption_Wireless80211Network;
     }
-    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS_AP_V1, pConfig, sizeof(c_MARKER_CONFIGURATION_WIRELESS_AP_V1)))
+    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS_AP_V1, config, sizeof(c_MARKER_CONFIGURATION_WIRELESS_AP_V1)))
     {
         return DeviceConfigurationOption_WirelessNetworkAP;
     }
     else if (!memcmp(
                  c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1,
-                 pConfig,
+                 config,
                  sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1)))
     {
         return DeviceConfigurationOption_X509CaRootBundle;
     }
     else if (!memcmp(
                  c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
-                 pConfig,
+                 config,
                  sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1)))
     {
         return DeviceConfigurationOption_X509DeviceCertificates;
@@ -549,26 +520,26 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
 
     configurationIndex = 0;
 
-    char *pConfig = (char *)configurationBlock;
-    char *pEndConfig = (pConfig + blockSize);
+    char *config = (char *)configurationBlock;
+    char *pEndConfig = (config + blockSize);
     DeviceConfigurationOption currentConfigType;
 
-    while (pConfig < pEndConfig)
+    while (config < pEndConfig)
     {
-        int remainingBlockSize = pEndConfig - pConfig;
+        int remainingBlockSize = pEndConfig - config;
 
 #ifdef DEBUG_CONFIG
-        ets_printf("Parse block %d:%d\n", pConfig, pEndConfig);
-        PrintBlock((char *)pConfig, 16);
+        ets_printf("Parse block %d:%d\n", config, pEndConfig);
+        PrintBlock((char *)config, 16);
 #endif
-        currentConfigType = GetConfigOption(pConfig);
+        currentConfigType = GetConfigOption(config);
 
         // X509 certificate block ?
-        if (currentConfigType == DeviceConfigurationOption_X509CaRootBundle || offset > 0)
+        if (currentConfigType == DeviceConfigurationOption_X509CaRootBundle)
         {
             if (offset == 0)
             {
-                HAL_Configuration_X509CaRootBundle *pX509Certificate = (HAL_Configuration_X509CaRootBundle *)pConfig;
+                HAL_Configuration_X509CaRootBundle *pX509Certificate = (HAL_Configuration_X509CaRootBundle *)config;
 
                 // First block of certificate bundle
                 // set total bundle size including header
@@ -580,7 +551,9 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
 
                 // Free if already allocated ( could be different size )
                 if (g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] != 0)
+                {
                     platform_free((void *)g_TargetConfiguration.CertificateStore->Certificates);
+                }
 
                 g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] =
                     (HAL_Configuration_X509CaRootBundle *)platform_malloc(savedBundleSize);
@@ -597,13 +570,13 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
             // Copy into correct position in memory
             memcpy(
                 (void *)(g_TargetConfiguration.CertificateStore->Certificates[0] + savedBundleOffset),
-                (const void *)pConfig,
+                (const void *)config,
                 chunkSize);
 #ifdef DEBUG_CONFIG
             ets_printf("X509 certificate chunksize:%d reminaing:%d\n", chunkSize, savedBundleSize);
-            PrintBlock((char *)pConfig, 32);
+            PrintBlock((char *)config, 32);
 #endif
-            pConfig += chunkSize;
+            config += chunkSize;
             remainingBundleSize -= chunkSize;
             savedBundleOffset += chunkSize;
             // Return true for partial blocks
@@ -627,11 +600,78 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
             ets_printf("X509 certificate block ret:%d\n", result);
 #endif
         }
+        // X509 device certificate block ?
+        else if (currentConfigType == DeviceConfigurationOption_X509DeviceCertificates)
+        {
+            if (offset == 0)
+            {
+                HAL_Configuration_X509DeviceCertificate *deviceCertificate =
+                    (HAL_Configuration_X509DeviceCertificate *)config;
+
+                // First block of certificate bundle
+                // set total bundle size including header
+                // because X509 certificate has a variable length need to compute the block size in two steps
+                savedBundleSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+                savedBundleSize += deviceCertificate->CertificateSize;
+                remainingBundleSize = savedBundleSize;
+                savedBundleOffset = 0;
+
+                // Free if already allocated ( could be different size )
+                if (g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] != 0)
+                {
+                    platform_free((void *)g_TargetConfiguration.DeviceCertificates->Certificates);
+                }
+
+                g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] =
+                    (HAL_Configuration_X509DeviceCertificate *)platform_malloc(savedBundleSize);
+
+#ifdef DEBUG_CONFIG
+                ets_printf("Device certificate block total size:%d\n", deviceCertificate->CertificateSize);
+#endif
+            }
+
+            // The current chunk size is what remains in current block
+            // we can't use offset as it relates to flash memory offset, not useful
+            chunkSize = remainingBlockSize;
+
+            // Copy into correct position in memory
+            memcpy(
+                (void *)(g_TargetConfiguration.DeviceCertificates->Certificates[0] + savedBundleOffset),
+                (const void *)config,
+                chunkSize);
+#ifdef DEBUG_CONFIG
+            ets_printf("Device certificate chunksize:%d reminaing:%d\n", chunkSize, savedBundleSize);
+            PrintBlock((char *)config, 32);
+#endif
+            config += chunkSize;
+            remainingBundleSize -= chunkSize;
+            savedBundleOffset += chunkSize;
+            // Return true for partial blocks
+            result = true;
+
+            if (remainingBundleSize <= 0)
+            {
+                // Save Certificate Bundle to storage
+                result = StoreConfigBlock(
+                    DeviceConfigurationOption_X509CaRootBundle,
+                    certificateIndex,
+                    (void *)g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex],
+                    savedBundleSize);
+                certificateIndex++;
+#ifdef DEBUG_CONFIG
+                ets_printf("Device certificate complete, saving\n");
+#endif
+            }
+
+#ifdef DEBUG_CONFIG
+            ets_printf("X509 certificate block ret:%d\n", result);
+#endif
+        }
         // Network interface block ?
         else if (currentConfigType == DeviceConfigurationOption_Network)
         {
-            HAL_Configuration_NetworkInterface *pNetConfig = (HAL_Configuration_NetworkInterface *)pConfig;
-            pConfig += sizeof(HAL_Configuration_NetworkInterface);
+            HAL_Configuration_NetworkInterface *pNetConfig = (HAL_Configuration_NetworkInterface *)config;
+            config += sizeof(HAL_Configuration_NetworkInterface);
 
             result = StoreConfigBlock(
                 currentConfigType,
@@ -648,8 +688,8 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
         // Wireless block ?
         else if (currentConfigType == DeviceConfigurationOption_Wireless80211Network)
         {
-            HAL_Configuration_Wireless80211 *pWirelessConfig = (HAL_Configuration_Wireless80211 *)pConfig;
-            pConfig += sizeof(HAL_Configuration_Wireless80211);
+            HAL_Configuration_Wireless80211 *pWirelessConfig = (HAL_Configuration_Wireless80211 *)config;
+            config += sizeof(HAL_Configuration_Wireless80211);
 
             result = StoreConfigBlock(
                 currentConfigType,
@@ -668,7 +708,10 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
 #endif
         }
         else
+        {
             break;
+        }
+
     } // while
 
 #ifdef DEBUG_CONFIG
@@ -738,16 +781,68 @@ bool ConfigurationManager_StoreConfigurationBlock(
         }
         else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
         {
-            // set blockSize size ( Total size of  X509 certificate )
-            // because X509 certificate has a variable length need to compute the block size in two steps
-            blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-            blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+            // check for 0 size on certificate
+            if (((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize)
+            {
+                // set blockSize size ( Total size of  X509 certificate )
+                // because X509 certificate has a variable length need to compute the block size in two steps
+                blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
+                blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+            }
+            else
+            {
+                // 0 size means that there is a request to clear the certificate
+                result = ConfigStorage_DeleteFile(configuration, configurationIndex);
+
+                // check if operation was successful
+                if (result)
+                {
+                    // reset this
+                    blockSize = 0;
+
+                    // removing a config, enumeration is required
+                    requiresEnumeration = true;
+                }
+            }
 
 #ifdef DEBUG_CONFIG
             ets_printf(
                 "StoreConfig x509 blockSize:%d, certsize:%d",
                 blockSize,
                 ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize);
+#endif
+        }
+        else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
+        {
+            // check for 0 size on certificate
+            if (((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize)
+            {
+                // set blockSize size ( Total size of  X509 certificate )
+                // because X509 certificate has a variable length need to compute the block size in two steps
+                blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+                blockSize += ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+            }
+            else
+            {
+                // 0 size means that there is a request to clear the certificate
+                result = ConfigStorage_DeleteFile(configuration, configurationIndex);
+
+                // check if operation was successful
+                if (result)
+                {
+                    // reset this
+                    blockSize = 0;
+
+                    // removing a config, enumeration is required
+                    requiresEnumeration = true;
+                }
+            }
+
+#ifdef DEBUG_CONFIG
+            ets_printf(
+                "StoreDeviceCert blockSize:%d, certsize:%d",
+                blockSize,
+                ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize);
 #endif
         }
         else
@@ -804,9 +899,14 @@ bool ConfigurationManager_UpdateConfigurationBlock(
             blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
             break;
 
+        case DeviceConfigurationOption_X509DeviceCertificates:
+            blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+            blockSize += ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+            break;
+
         default:
             // shouldn't ever reach here
-            return FALSE;
+            return false;
     }
 
     return ConfigurationManager_StoreConfigurationBlock(

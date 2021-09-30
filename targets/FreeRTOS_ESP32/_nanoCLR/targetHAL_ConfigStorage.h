@@ -85,6 +85,19 @@ extern "C"
     //
     int32_t ConfigStorage_ReadFile(FILE *handle, uint8_t *pData, int32_t maxSizeData);
 
+    //
+    //  ConfigStorage_DeleteFile -
+    //
+    //  Deletes configuration file
+    //
+    // Parameters:-
+    //   configuration      : Type of configuration block
+    //   configurationIndex : Index of config to delete
+    //
+    // Return : operation success
+    //
+    bool ConfigStorage_DeleteFile(DeviceConfigurationOption configuration, uint32_t configurationIndex);
+
     bool ConfigurationManager_GetConfigurationBlockFromStorage(
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex,
