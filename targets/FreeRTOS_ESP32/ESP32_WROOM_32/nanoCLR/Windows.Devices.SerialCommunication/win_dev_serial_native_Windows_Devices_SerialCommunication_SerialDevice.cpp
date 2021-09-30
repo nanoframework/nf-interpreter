@@ -459,7 +459,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 break;
         }
 
-        bool rs485Mode = ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 == SerialMode___RS485);
+        bool rs485Mode = ((SerialMode__)pThis[FIELD___mode].NumericByRef().s4 == SerialMode___RS485);
         if (rs485Mode)
         {
             // Disable any flow control & Set RS485 half duplex mode

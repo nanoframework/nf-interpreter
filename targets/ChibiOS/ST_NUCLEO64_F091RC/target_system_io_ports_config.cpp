@@ -17,7 +17,7 @@
 // RX pin: is GPIOC_3
 // GPIO alternate pin function is 1 (see "Table 16. Alternate functions selected through GPIOC_AFR registers for port C"
 // in STM32F091RC datasheet)
-UART_CONFIG_PINS__(8, GPIOC, GPIOC, 2, 3, 2)
+UART_CONFIG_PINS(8, GPIOC, GPIOC, 2, 3, 2)
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
@@ -28,7 +28,7 @@ __attribute__((aligned(32)))
 uint8_t Uart8_RxBuffer[UART8_RX_SIZE];
 
 // initialization for UART8
-UART_INIT(8, UART8_TX_SIZE, UART8_RX_SIZE)
+UART_INIT(8, UART8_RX_SIZE)
 
 // un-initialization for UART8
 UART_UNINIT(8)

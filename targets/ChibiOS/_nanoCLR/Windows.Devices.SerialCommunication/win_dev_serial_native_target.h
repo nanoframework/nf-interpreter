@@ -144,10 +144,10 @@ extern uint8_t Uart8_RxBuffer__[];
         Uart##num##_PAL__.Uart_cfg.cr2 = 0;                                                                            \
         Uart##num##_PAL__.Uart_cfg.cr3 = 0;                                                                            \
         Uart##num##_PAL__.TxBuffer = Uart##num##_TxBuffer__;                                                           \
-        Uart##num##_PAL__.TxRingBuffer.Initialize(Uart##num##_PAL__.TxBuffer__, tx_buffer_size);                       \
+        Uart##num##_PAL__.TxRingBuffer.Initialize(Uart##num##_PAL__.TxBuffer, tx_buffer_size);                         \
         Uart##num##_PAL__.TxOngoingCount = 0;                                                                          \
         Uart##num##_PAL__.RxBuffer = Uart##num##_RxBuffer__;                                                           \
-        Uart##num##_PAL__.RxRingBuffer.Initialize(Uart##num##_PAL__.RxBuffer__, rx_buffer_size);                       \
+        Uart##num##_PAL__.RxRingBuffer.Initialize(Uart##num##_PAL__.RxBuffer, rx_buffer_size);                         \
         Uart##num##_PAL__.WatchChar = 0;                                                                               \
     }
 

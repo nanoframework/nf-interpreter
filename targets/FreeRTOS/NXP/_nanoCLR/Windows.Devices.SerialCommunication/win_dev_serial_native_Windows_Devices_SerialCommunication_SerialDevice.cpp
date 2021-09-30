@@ -12,7 +12,7 @@
 static LPUART_Type *const lpuart_bases[] = LPUART_BASE_PTRS;
 
 // Static UART config/data structs.
-static NF_PAL_UART____ Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_PAL6, Uart_PAL7, Uart_PAL8;
+static NF_PAL_UART__ Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_PAL6, Uart_PAL7, Uart_PAL8;
 
 // Array of pointers to above config UART structs.
 NF_PAL_UART__ *const
@@ -300,7 +300,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // Check RS485 mode is not selected as currently not supported
-        if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode___Normal)
+        if ((SerialMode__)pThis[FIELD___mode].NumericByRef().s4 != SerialMode___Normal)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
         }
