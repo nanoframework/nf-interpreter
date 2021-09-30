@@ -69,7 +69,7 @@ endif()
 # to perform custom add_subdirectory() actions.
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/targets/${RTOS})
-    message(STATUS "\nSetting RTOS to ${RTOS} Exists!\n")
+    message(STATUS "\nSetting RTOS to ${RTOS}\n")
     string(TOUPPER ${RTOS} RTOS_UPPERCASE)
     set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
 else()
