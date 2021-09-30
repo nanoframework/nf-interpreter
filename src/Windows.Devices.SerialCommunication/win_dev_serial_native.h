@@ -12,11 +12,11 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-typedef enum __nfpack SerialData
+typedef enum __nfpack SerialData__
 {
-    SerialData_Chars = 0,
-    SerialData_WatchChar = 1,
-} SerialData;
+    SerialData___Chars = 0,
+    SerialData___WatchChar = 1,
+} SerialData__;
 
 typedef enum __nfpack SerialHandshake
 {
@@ -26,11 +26,11 @@ typedef enum __nfpack SerialHandshake
     SerialHandshake_XOnXOff = 3,
 } SerialHandshake;
 
-typedef enum __nfpack SerialMode
+typedef enum __nfpack SerialMode__
 {
-    SerialMode_Normal = 0,
-    SerialMode_RS485 = 1,
-} SerialMode;
+    SerialMode___Normal = 0,
+    SerialMode___RS485 = 1,
+} SerialMode__;
 
 typedef enum __nfpack SerialParity
 {
@@ -128,4 +128,4 @@ struct Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialD
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Windows_Devices_SerialCommunication;
 
-#endif //WIN_DEV_SERIAL_NATIVE_H
+#endif // WIN_DEV_SERIAL_NATIVE_H
