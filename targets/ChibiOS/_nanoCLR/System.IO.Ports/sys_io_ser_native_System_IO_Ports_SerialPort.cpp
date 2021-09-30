@@ -7,34 +7,30 @@
 #include <nanoHAL.h>
 #include "sys_io_ser_native_target.h"
 
-/////////////////////////////////////////////////////////
-// UART PAL strucs delcared in win_dev_serial_native.h //
-/////////////////////////////////////////////////////////
-// TODO: uncomment when Windows.Deveices.SerialCommunication will be removed
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-// NF_PAL_UART Uart1_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-// NF_PAL_UART Uart2_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-// NF_PAL_UART Uart3_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-// NF_PAL_UART Uart4_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-// NF_PAL_UART Uart5_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-// NF_PAL_UART Uart6_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-// NF_PAL_UART Uart7_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-// NF_PAL_UART Uart8_PAL;
-// #endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+NF_PAL_UART Uart1_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+NF_PAL_UART Uart2_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+NF_PAL_UART Uart3_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+NF_PAL_UART Uart4_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+NF_PAL_UART Uart5_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+NF_PAL_UART Uart6_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+NF_PAL_UART Uart7_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+NF_PAL_UART Uart8_PAL;
+#endif
 
 static NF_PAL_UART *GetUartPAL(int index)
 {

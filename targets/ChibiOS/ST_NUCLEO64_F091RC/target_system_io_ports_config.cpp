@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "target_windows_devices_serialcommunication_config.h"
-#include <win_dev_serial_native_target.h>
+#include "target_system_io_ports_config.h"
+#include <sys_io_ser_native_target.h>
 
 ////////////
 // USART8 //
@@ -17,7 +17,7 @@
 // RX pin: is GPIOC_3
 // GPIO alternate pin function is 1 (see "Table 16. Alternate functions selected through GPIOC_AFR registers for port C"
 // in STM32F091RC datasheet)
-UART_CONFIG_PINS__(8, GPIOC, GPIOC, 2, 3, 2)
+UART_CONFIG_PINS(8, GPIOC, GPIOC, 2, 3, 2)
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
@@ -25,14 +25,10 @@ UART_CONFIG_PINS__(8, GPIOC, GPIOC, 2, 3, 2)
 #if defined(__GNUC__)
 __attribute__((aligned(32)))
 #endif
-uint8_t Uart8_TxBuffer__[UART8_TX_SIZE];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t Uart8_RxBuffer__[UART8_RX_SIZE];
+uint8_t Uart8_RxBuffer[UART8_RX_SIZE];
 
 // initialization for UART8
-UART_INIT__(8, UART8_TX_SIZE, UART8_RX_SIZE)
+UART_INIT(8, UART8_RX_SIZE)
 
 // un-initialization for UART8
-UART_UNINIT__(8)
+UART_UNINIT(8)

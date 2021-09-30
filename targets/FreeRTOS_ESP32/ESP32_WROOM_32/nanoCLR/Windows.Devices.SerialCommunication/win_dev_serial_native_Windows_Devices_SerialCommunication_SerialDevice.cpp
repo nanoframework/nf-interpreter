@@ -19,13 +19,13 @@
 
 static const char *TAG = "SerialDevice";
 
-static NF_PAL_UART Uart0_PAL;
-static NF_PAL_UART Uart1_PAL;
-static NF_PAL_UART Uart2_PAL;
+static NF_PAL_UART__ Uart0_PAL;
+static NF_PAL_UART__ Uart1_PAL;
+static NF_PAL_UART__ Uart2_PAL;
 
-NF_PAL_UART *GetPalUartFromUartNum(int uart_num)
+NF_PAL_UART__ *GetPalUartFromUartNum(int uart_num)
 {
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART__ *palUart = NULL;
 
     switch (uart_num)
     {
@@ -50,7 +50,7 @@ NF_PAL_UART *GetPalUartFromUartNum(int uart_num)
     return palUart;
 }
 
-void UnitializePalUart(NF_PAL_UART *palUart)
+void UnitializePalUart(NF_PAL_UART__ *palUart)
 {
     if (palUart && palUart->SerialDevice)
     {
@@ -93,7 +93,7 @@ void Esp32_Serial_UnitializeAll()
 void uart_event_task(void *pvParameters)
 {
     // get PAL UART from task parameters
-    NF_PAL_UART *palUart = (NF_PAL_UART *)pvParameters;
+    NF_PAL_UART__ *palUart = (NF_PAL_UART__ *)pvParameters;
 
     uart_event_t event;
     bool run = true;
@@ -198,7 +198,7 @@ void uart_event_task(void *pvParameters)
                                     EVENT_SERIAL,
                                     0,
                                     UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                                    (watchCharPos > -1) ? SerialData_WatchChar : SerialData_Chars);
+                                    (watchCharPos > -1) ? SerialData___WatchChar : SerialData___Chars);
                             }
                         }
                     }
@@ -213,7 +213,7 @@ void uart_event_task(void *pvParameters)
 void UartTxWorkerTask(void *pvParameters)
 {
     // get PAL UART from task parameters
-    NF_PAL_UART *palUart = (NF_PAL_UART *)pvParameters;
+    NF_PAL_UART__ *palUart = (NF_PAL_UART__ *)pvParameters;
 
     // Write data directly to UART FIFO
     // by design: don't bother checking the return value
@@ -277,7 +277,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     uart_port_t uart_num;
     esp_err_t esp_err;
 
-    NF_PAL_UART *palUart;
+    NF_PAL_UART__ *palUart;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -459,7 +459,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
                 break;
         }
 
-        bool rs485Mode = ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 == SerialMode_RS485);
+        bool rs485Mode = ((SerialMode__)pThis[FIELD___mode].NumericByRef().s4 == SerialMode___RS485);
         if (rs485Mode)
         {
             // Disable any flow control & Set RS485 half duplex mode
@@ -550,7 +550,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_UART *palUart = NULL;
+        NF_PAL_UART__ *palUart = NULL;
 
         uint8_t *data;
         size_t length = 0;
@@ -623,7 +623,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART__ *palUart = NULL;
 
     uint32_t estimatedDurationMiliseconds;
     size_t length = 0;
@@ -782,7 +782,7 @@ HRESULT IRAM_ATTR
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock_Array *dataBuffer;
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART__ *palUart = NULL;
 
     uint8_t *data;
     size_t dataLength = 0;
@@ -988,7 +988,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
 
-    NF_PAL_UART *palUart = NULL;
+    NF_PAL_UART__ *palUart = NULL;
     uart_port_t uart_num;
 
     // get a pointer to the managed object instance and check that it's not NULL
