@@ -64,51 +64,16 @@ if(NOT RTOS OR RTOS STREQUAL "")
     message(FATAL_ERROR "\n\nMissing build option 'RTOS'.")
 endif()
 
-# list of supported RTOSes
-# when adding a new RTOS add the corresponding string below AND...
-# ... also on the compare block below
-set(RTOS_SUPPORTED "ChibiOS" "FreeRTOS" "FreeRTOS_ESP32" "TI_SimpleLink" CACHE INTERNAL "supported RTOS options")
+# check the RTOS and TARGET folders exist. 
+# optionally add custom logic in the last section of this CMakeLists.txt 
+# to perform custom add_subdirectory() actions.
 
-list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
-if(RTOS_INDEX EQUAL -1)
-    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
+if(EXISTS ${CMAKE_SOURCE_DIR}/targets/${RTOS})
+    message(STATUS "\nSetting RTOS to ${RTOS} Exists!\n")
+    string(TOUPPER ${RTOS} RTOS_UPPERCASE)
+    set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
 else()
-    message(STATUS "\nSetting RTOS to ${RTOS}\n")
-endif()
-
-string(COMPARE EQUAL "ChibiOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FreeRTOS" ${RTOS} RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "FreeRTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
-string(COMPARE EQUAL "TI_SimpleLink" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
-
-##########################################################################
-
-if(RTOS_FREERTOS_CHECK)
-    set(RTOS_FREERTOS_CHECK TRUE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-endif()
-
-if(RTOS_FREERTOS_ESP32_CHECK)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK TRUE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-endif()
-
-if(RTOS_CHIBIOS_CHECK)
-    set(RTOS_CHIBIOS_CHECK TRUE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-endif()
-
-if(RTOS_TI_SIMPLELINK_CHECK)
-    set(RTOS_TI_SIMPLELINK_CHECK TRUE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
+    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
 endif()
 
 #######################
@@ -774,45 +739,13 @@ endif()
 # assume no community board... until proven otherwise
 set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
-#######################
-# ChibiOS
-if(RTOS_CHIBIOS_CHECK)
 
-    # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
-    
-    add_subdirectory(targets/ChibiOS)
-
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
-
-        # board found
-        message(STATUS "Support for target board '${TARGET_BOARD}' found")
-
-        # add TARGET board directory
-        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
-
-    else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
-            # board found
-            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-
-            # add TARGET board directory from Community
-            add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
-    endif()
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR})
 
 #######################
 # FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
+if(RTOS_FREERTOS_CHECK)
 
     add_subdirectory(targets/FreeRTOS)
 
@@ -840,63 +773,58 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
         # becuase the build system can't honour that preference
         if(NOT NF_FEATURE_WATCHDOG)
-        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
+            message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
         endif()
 
-        # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
-
-        add_subdirectory(targets/FreeRTOS_ESP32)
-
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
- 		add_subdirectory(targets/FreeRTOS_ESP32/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+
+        # Define base path for the class libraries
+        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
+        # add common directory for TARGET
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
+        # add TARGET board directory
+        add_subdirectory(${TARGET_BASE_LOCATION})
 
     endif()
 
 #######################
-# TI_SIMPLELINK
-elseif(RTOS_TI_SIMPLELINK_CHECK)
-
-    # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/_nanoCLR)
+# All standard nanoFramework Platforms
+else()
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
 
         # board found
-        message(STATUS "Support for target board '${TARGET_BOARD}' found")
+        message(STATUS "'${RTOS}' support for target board '${TARGET_BOARD}' found")
+        message(STATUS "${TARGET_BASE_LOCATION}")
+
+    # try to find board in the Community targets folder
+    elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
+            
+        # set flag for this being a community board
+        set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+
+        # set target base location
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
+    
+        # board found
+        message(STATUS "'${RTOS}' support for target board '${TARGET_BOARD}' found in Community targets")
         message(STATUS "${TARGET_BASE_LOCATION}")
 
     else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
-            
-            # set flag for this being a community board
-            set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
-
-            # set target base location
-            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
-        
-            # board found
-            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-            message(STATUS "${TARGET_BASE_LOCATION}")
-
-        else()
         # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available in '${RTOS}' ...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
     endif()
-    
-    # add common directory for SimpleLink
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink)
+
+    # Define base path for the class libraries
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR)
+    # add common directory for TARGET
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 
