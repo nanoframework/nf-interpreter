@@ -28,4 +28,4 @@ typedef struct
     bool IsLongRunning;
 } NF_PAL_UART__;
 
-#endif //WIN_DEV_SERIAL_NATIVE_TARGET_H
+#endif // WIN_DEV_SERIAL_NATIVE_TARGET_H
