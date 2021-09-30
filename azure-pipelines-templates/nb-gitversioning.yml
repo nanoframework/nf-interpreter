@@ -10,6 +10,10 @@ steps:
       custom: tool
       arguments: install --tool-path . nbgv
 
+  - script: nbgv cloud -a -c
+    condition: succeeded()
+    displayName: Set build number
+    
   # Force version number for PRs
   - task: PowerShell@2
     condition: ne(variables['system.pullrequest.pullRequestId'], '')
