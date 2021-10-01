@@ -456,7 +456,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         // TODO
 
         // Check RS485 mode is not selected as currently not supported
-        if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+        if ((SerialMode__)pThis[FIELD___mode].NumericByRef().s4 != SerialMode___Normal)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
         }
@@ -1094,7 +1094,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         {
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
             case 1:
-                palUart = &Uart1_PA__L;
+                palUart = &Uart1_PAL__;
                 break;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
