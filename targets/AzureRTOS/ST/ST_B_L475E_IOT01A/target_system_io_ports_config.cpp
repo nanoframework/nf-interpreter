@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "target_windows_devices_serialcommunication_config.h"
-#include <win_dev_serial_native_target.h>
+#include "target_system_io_ports_config.h"
+#include <sys_io_ser_native_target.h>
 
 ///////////
 // UART3 //
