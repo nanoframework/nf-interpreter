@@ -121,63 +121,89 @@ bool Network_Interface_Start_Scan(int index)
     return false;
 }
 
-bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **pWireless)
+bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConfig)
 {
-    HAL_Configuration_NetworkInterface *networkConfiguration;
-
     // Check index in range
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count <= index)
     {
         return false;
     }
 
-    // load network interface configuration from storage
-    networkConfiguration = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
+    HAL_Configuration_NetworkInterface *networkConfiguration =
+        (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
-    // can only do this is this is STA
-    if (networkConfiguration->InterfaceType != NetworkInterfaceType_Wireless80211)
+    // check allocation
+    if (networkConfiguration)
     {
-        *pWireless = ConfigurationManager_GetWirelessConfigurationFromId(networkConfiguration->SpecificConfigId);
-        return true;
+        // load network interface configuration from storage
+        if (ConfigurationManager_GetConfigurationBlock(networkConfiguration, DeviceConfigurationOption_Network, index))
+        {
+            if (networkConfiguration->InterfaceType == NetworkInterfaceType_Wireless80211)
+            {
+                *wirelessConfig =
+                    (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+                // check allocation
+                if (wirelessConfig)
+                {
+                    if (ConfigurationManager_GetConfigurationBlock(
+                            *wirelessConfig,
+                            DeviceConfigurationOption_Wireless80211Network,
+                            networkConfiguration->SpecificConfigId))
+                    {
+                        // found and loaded
+                        return true;
+                    }
+                }
+            }
+        }
+
+        platform_free(networkConfiguration);
     }
 
     return false;
 }
 
 //
-//  Connect to wireless network SSID using passphase
+//  Connect to wireless network SSID using passphrase
 //
 int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options)
 {
-    HAL_Configuration_Wireless80211 *pWireless;
+    // need to free memory, if allocated in successful GetWirelessConfig
+    HAL_Configuration_Wireless80211 *wirelessConfig = NULL;
 
-    if (GetWirelessConfig(index, &pWireless) == false)
+    if (GetWirelessConfig(index, &wirelessConfig) == false)
     {
+        if (wirelessConfig != NULL)
+        {
+            platform_free(wirelessConfig);
+        }
+
         return SOCK_SOCKET_ERROR;
     }
 
-    pWireless->Options = Wireless80211Configuration_ConfigurationOptions_Enable;
+    wirelessConfig->Options = Wireless80211Configuration_ConfigurationOptions_Enable;
 
     if (options & NETWORK_CONNECT_RECONNECT)
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '|='
-        pWireless->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+        wirelessConfig->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_AutoConnect);
     }
     else
     {
         // need this stupid cast because the current gcc version with ESP32 IDF is not happy with the simple syntax '^='
-        pWireless->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
+        wirelessConfig->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options ^ Wireless80211Configuration_ConfigurationOptions_AutoConnect);
 
         // Make sure we are still enabled because AutoConnect includes Enable
-        pWireless->Options =
-            (Wireless80211Configuration_ConfigurationOptions)(pWireless->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
+        wirelessConfig->Options =
+            (Wireless80211Configuration_ConfigurationOptions)(wirelessConfig->Options | Wireless80211Configuration_ConfigurationOptions_Enable);
     }
 
     // Update Wireless structure with new SSID and passphase
-    hal_strcpy_s((char *)pWireless->Ssid, sizeof(pWireless->Ssid), ssid);
-    hal_strcpy_s((char *)pWireless->Password, sizeof(pWireless->Password), passphase);
+    hal_strcpy_s((char *)wirelessConfig->Ssid, sizeof(wirelessConfig->Ssid), ssid);
+    hal_strcpy_s((char *)wirelessConfig->Password, sizeof(wirelessConfig->Password), passphase);
 
     // Option to Save new config
     if (options & NETWORK_CONNECT_SAVE_CONFIG)
@@ -185,12 +211,14 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
         StoreConfigBlock(
             DeviceConfigurationOption_Wireless80211Network,
             index,
-            pWireless,
+            wirelessConfig,
             sizeof(HAL_Configuration_Wireless80211));
     }
 
     NF_ESP32_ConnectInProgress = true;
-    esp_err_t err = NF_ESP32_Wireless_Start_Connect(pWireless);
+    esp_err_t err = NF_ESP32_Wireless_Start_Connect(wirelessConfig);
+
+    platform_free(wirelessConfig);
 
     return (int)err;
 }
