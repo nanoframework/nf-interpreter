@@ -321,50 +321,67 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
     NANOCLR_CLEANUP_END();
 }
 
-//
-//  Find wireless adapters in network config
-//  return count of adapters found
-//
-int FindWirelessAdaptersStore(uint8_t *pTarget)
-{
-    int wirelessCount = 0;
-
-    for (int index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
-    {
-        HAL_Configuration_NetworkInterface *pNetInterface =
-            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index];
-
-        if (pNetInterface->InterfaceType == NetworkInterfaceType_Wireless80211)
-        {
-            wirelessCount++;
-            if (pTarget != 0)
-                *pTarget++ = (uint8_t)index;
-        }
-    }
-
-    return wirelessCount;
-}
-
 HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *array;
+    CLR_UINT8 *arrayOfIndexes;
+    int rlen;
+    int index;
+    int interfaceCount = 0;
+
+    // add return object to stack
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    HAL_Configuration_NetworkInterface *netInterfaceConfig =
+        (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+
+    // check allocation
+    if (netInterfaceConfig == NULL)
     {
-        CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-        CLR_RT_HeapBlock_Array *array;
-        CLR_UINT8 *buf;
-        int rlen;
-
-        // Find number of wireless adapters so we can allocated return array
-        rlen = FindWirelessAdaptersStore(0);
-
-        // Return interface indexes
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, rlen, g_CLR_RT_WellKnownTypes.m_UInt8));
-        array = top.DereferenceArray();
-        buf = array->GetFirstElement();
-
-        // Store adapters indexes in to returned array
-        FindWirelessAdaptersStore(buf);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
+
+    // 1st pass: find number of wireless adapters
+    for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
+    {
+        if (!ConfigurationManager_GetConfigurationBlock(netInterfaceConfig, DeviceConfigurationOption_Network, index))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        // check if this is a Wireless80211 adapter
+        if (netInterfaceConfig->InterfaceType == NetworkInterfaceType_Wireless80211)
+        {
+            interfaceCount++;
+        }
+    }
+
+    // build array with indexes of Wireless interfaces
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, interfaceCount, g_CLR_RT_WellKnownTypes.m_UInt8));
+    array = top.DereferenceArray();
+    arrayOfIndexes = array->GetFirstElement();
+
+    // 2nd pass: grab the index of the of the wireless adapters
+    for (index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
+    {
+        if (!ConfigurationManager_GetConfigurationBlock(netInterfaceConfig, DeviceConfigurationOption_Network, index))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        }
+
+        // check if this is a Wireless80211 adapter
+        if (netInterfaceConfig->InterfaceType == NetworkInterfaceType_Wireless80211)
+        {
+            // store index
+            *arrayOfIndexes = index;
+
+            // move to next position in array of indexes
+            arrayOfIndexes++;
+        }
+    }
+
     NANOCLR_NOCLEANUP();
 }
