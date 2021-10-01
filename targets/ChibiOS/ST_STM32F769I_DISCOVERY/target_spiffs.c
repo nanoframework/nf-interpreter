@@ -7,6 +7,13 @@
 #include <hal.h>
 #include <hal_spiffs.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+    void HAL_Delay(uint32_t delay);
+
+#endif
+
 static uint8_t QSPI_ResetMemory(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_EnterFourBytesAddress(QSPI_HandleTypeDef *hqspi);
 static uint8_t QSPI_DummyCyclesCfg(QSPI_HandleTypeDef *hqspi);
@@ -848,3 +855,7 @@ uint8_t QSPI_Erase_Block(uint32_t blockAddress)
 
     return QSPI_OK;
 }
+
+#ifdef __cplusplus
+}
+#endif
