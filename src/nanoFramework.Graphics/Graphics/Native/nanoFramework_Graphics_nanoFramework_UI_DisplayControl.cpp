@@ -177,8 +177,16 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         foregroundColor = stack.Arg6().NumericByRef().u4;
         backgroundColor = stack.Arg7().NumericByRef().u4;
 
-        // TODO: remove this once they are used
-        CLR_Debug::Printf("%d,%d", height, backgroundColor);
+        // Prepare all the elements for the colors
+        GFX_Pen pen;
+        GFX_Brush brush;
+        GFX_Rect rectangle;
+        pen.color = backgroundColor;
+        pen.thickness = 0;
+        brush.gradientStartColor = backgroundColor;
+        brush.gradientEndColor = backgroundColor;
+        rectangle.left = 0;
+        rectangle.top = 0;
 
         // Get the font
         CLR_RT_HeapBlock*  pThis = stack.Arg5().Dereference();
@@ -190,12 +198,14 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         CLR_GFX_Bitmap *bitmap;
         CLR_GFX_BitmapDescription bm;
         int size;
+
         // The bitmap need to be 1 more pixel width than the font
         if (bm.BitmapDescription_Initialize(font->m_font.m_metrics.m_maxCharWidth + 1, font->m_font.m_metrics.m_height, CLR_GFX_BitmapDescription::c_NativeBpp) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
 
+        // Create the bitmap with the propersize
         size = sizeof(CLR_GFX_Bitmap) + bm.GetTotalSize();
         bitmap = (CLR_GFX_Bitmap *)platform_malloc(size);
         if (!bitmap)
@@ -203,9 +213,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
-        // Clear the memory to contain the bitmap structure
-        // TODO: will the bitmap with the background color
-        memset(bitmap, 0, size); 
+        // Setup the bitmap properly
         bitmap->m_bm = bm;
         bitmap->Bitmap_Initialize();
 
@@ -218,62 +226,82 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         int posX = x;
         int posY = y;
         int prevCharWidth = 0;
+        int prevCharHeight = 0;
         int lineBreakPixels = width - 20;
+        int heightBreakPixels = height - 20;
         int textLength = uh.CountNumberOfCharacters();
         CLR_UINT16 c;
 
         // Loop for each characters
         for (int i = 0; i < textLength; i++)
         {
-            uh.m_outputUTF16 = buf;
-            uh.m_outputUTF16_size = MAXSTRLEN(buf); 
-            // If not a valid character, go to the next one
-            if (uh.ConvertFromUTF8(1, false) == false)
+            // check if exceeded the height
+            if (posY <= heightBreakPixels)
             {
-               break;
-            }
+                uh.m_outputUTF16 = buf;
+                uh.m_outputUTF16_size = MAXSTRLEN(buf);
 
-            c = buf[0];
-            font->GetCharInfo(c, chr);
-            if (chr.isValid) 
-            {
-                prevCharWidth = widthChar;
-                widthChar = chr.width;
-
-                // Set the start for the character
-                if (chr.height > heightChar)
+                // If not a valid character, go to the next one
+                if (uh.ConvertFromUTF8(1, false) == false)
                 {
-                    heightChar = chr.height;
+                    break;
                 }
 
-                if (posX == x && c == 32)
+                c = buf[0];
+                font->GetCharInfo(c, chr);
+                if (chr.isValid) 
                 {
-                    posX = 0;
-                }
-                else
-                {
+                    widthChar = chr.width;
+                    // Set the start for the character
+                    if (chr.height > heightChar)
+                    {
+                        heightChar = chr.height;
+                        prevCharHeight = heightChar;
+                    }
+
+                    // set position using previous chars
                     posX += prevCharWidth;
-                }
-                // TODO: check if you are already at the height, in this case exist as no need to print the characters
-                CLR_Debug::Printf("posX =%d, posY=%d\n", posX, posY);
-
-                // TODO: fill the bitmap with the background color instead of clear
-                bitmap->Clear();
-                font->DrawChar(bitmap, chr, 0, 0, foregroundColor);
-                g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
-                if (i + 1 < textLength)
-                {
-                    if (posX >= lineBreakPixels)
+                    if(posY != prevCharHeight)
                     {
                         posX = x;
-                        posY += heightChar;
+                        prevCharHeight = posY;
+                    }
+                    
+                    // If there is a background, will fill the bitmap with it
+                    if (backgroundColor != 0) {
+                        rectangle.right = widthChar;
+                        rectangle.bottom = heightChar;
+                        bitmap->DrawRectangle(pen, brush, rectangle);
+                    }
+                    else
+                    {
+                        // If no background, just clear it (faster)
+                        bitmap->Clear();
+                    }
+
+                    // Draw the char in the bitmap
+                    font->DrawChar(bitmap, chr, 0, 0, foregroundColor);
+
+                    // Flush the character on the screen incrememting accordingly the position
+                    // to fit into the rectangle.
+                    g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
+                    if (i + 1 < textLength)
+                    {
+                        prevCharWidth = widthChar;
+                        if (posX >= lineBreakPixels)
+                        {
+                            posX = x;
+                            posY += heightChar;
+                        }
                     }
                 }
             }
         }
 
-        // Free the bitmap
+        // Free the bitmap, the bitmpa exists for sure.
+        // And there is no exist before, so memory will be properly released
         platform_free(bitmap);
     }
+
     NANOCLR_NOCLEANUP();
 }
