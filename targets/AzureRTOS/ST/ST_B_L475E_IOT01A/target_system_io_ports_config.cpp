@@ -27,17 +27,13 @@
 //#if defined(__GNUC__)
 //__attribute__((aligned(32)))
 //#endif
-// uint8_t Uart3_TxBuffer__[UART3_TX_SIZE];
-//#if defined(__GNUC__)
-//__attribute__((aligned(32)))
-//#endif
-// uint8_t Uart3_RxBuffer__[UART3_RX_SIZE];
+// uint8_t Uart3_RxBuffer[UART3_RX_SIZE];
 
 // initialization for UART3
-// UART_INIT__(3, UART3_TX_SIZE, UART3_RX_SIZE)
+// UART_INIT(3, UART3_RX_SIZE)
 
 // un-initialization for UART3
-// UART_UNINIT__(3)
+// UART_UNINIT(3)
 
 ///////////
 // UART4 //
@@ -51,7 +47,7 @@
 // TX pin: is GPIOA_0
 // RX pin: is GPIOA_1
 // GPIO alternate pin function is 8
-UART_CONFIG_PINS__(4, GPIOA, GPIOA, 0, 1, 8)
+UART_CONFIG_PINS(4, GPIOA, GPIOA, 0, 1, 8)
 
 // buffers
 // buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
@@ -59,14 +55,10 @@ UART_CONFIG_PINS__(4, GPIOA, GPIOA, 0, 1, 8)
 #if defined(__GNUC__)
 __attribute__((aligned(32)))
 #endif
-uint8_t Uart4_TxBuffer__[UART4_TX_SIZE];
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t Uart4_RxBuffer__[UART4_RX_SIZE];
+uint8_t Uart4_RxBuffer[UART4_RX_SIZE];
 
 // initialization for UART3
-UART_INIT__(4, UART4_TX_SIZE, UART4_RX_SIZE)
+UART_INIT(4, UART4_RX_SIZE)
 
 // un-initialization for UART3
-UART_UNINIT__(4)
+UART_UNINIT(4)
