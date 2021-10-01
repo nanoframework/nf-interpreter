@@ -808,6 +808,12 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     endif()
 
 #######################
+# AzureRTOS
+elseif(RTOS_AZURERTOS_CHECK)
+
+    add_subdirectory(targets/AzureRTOS)
+    
+#######################
 # All standard nanoFramework Platforms
 else()
 
@@ -846,11 +852,5 @@ else()
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
-
-#######################
-# AzureRTOS
-elseif(RTOS_AZURERTOS_CHECK)
-
-    add_subdirectory(targets/AzureRTOS)
 
 endif()
