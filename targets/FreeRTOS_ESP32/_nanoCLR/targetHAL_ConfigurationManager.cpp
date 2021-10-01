@@ -350,7 +350,6 @@ bool ConfigurationManager_GetConfigurationBlock(
     uint32_t configurationIndex)
 {
     int sizeOfBlock = 0;
-    uint8_t *blockAddress = NULL;
 
 #ifdef DEBUG_CONFIG
     ets_printf("GetConfig %d, %d\n", (int)configuration, configurationIndex);
@@ -414,7 +413,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         // set block size
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-        sizeOfBlock += ((HAL_Configuration_X509CaRootBundle *)blockAddress)->CertificateSize;
+        sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[configurationIndex]->CertificateSize;
     }
     else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
@@ -430,7 +429,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         // set block size
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
-        sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
+        sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex]->CertificateSize;
     }
     else
     {
@@ -438,30 +437,14 @@ bool ConfigurationManager_GetConfigurationBlock(
         return false;
     }
 
-    // allocate memory
-    blockAddress = (uint8_t *)platform_malloc(sizeOfBlock);
+    // clear memory
+    memset(configurationBlock, 0, sizeOfBlock);
 
-    if (blockAddress)
-    {
-        ConfigurationManager_GetConfigurationBlockFromStorage(
-            configuration,
-            configurationIndex,
-            blockAddress,
-            sizeOfBlock);
-    }
-    else
-    {
-        // failure to allocate memory
-        return false;
-    }
-
-    // copy the config block content to the pointer in the argument
-    memcpy(configurationBlock, blockAddress, sizeOfBlock);
-
-    // free memory
-    platform_free(blockAddress);
-
-    return TRUE;
+    return ConfigurationManager_GetConfigurationBlockFromStorage(
+        configuration,
+        configurationIndex,
+        (uint8_t*)configurationBlock,
+        sizeOfBlock);
 }
 
 DeviceConfigurationOption GetConfigOption(char *config)
