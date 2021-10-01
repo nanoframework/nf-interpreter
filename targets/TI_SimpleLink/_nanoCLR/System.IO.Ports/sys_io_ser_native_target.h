@@ -6,7 +6,7 @@
 #ifndef SYS_IO_SER_NATIVE_TARGET_H
 #define SYS_IO_SER_NATIVE_TARGET_H
 
-#include <target_system_io_serial_config.h>
+#include <target_system_io_ports_config.h>
 #include <sys_io_ser_native.h>
 
 #include <ti/drivers/UART2.h>
