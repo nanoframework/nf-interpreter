@@ -240,9 +240,10 @@ extern "C"
 #define NX_TRACE_INTERNAL_IGMP_RECEIVE                                                                                 \
     306 /* I1 = ip ptr, I2 = source IP address, I3 = packet ptr, I4 = header word 0 */
 
-#define NX_TRACE_INTERNAL_IP_RECEIVE 308 /* I1 = ip ptr, I2 = source IP address, I3 = packet ptr, I4 = packet length   \
-                                          */
-#define NX_TRACE_INTERNAL_IP_SEND 309    /* I1 = ip ptr, I2 = destination IP address, I3 = packet ptr, I4 = length   */
+#define NX_TRACE_INTERNAL_IP_RECEIVE                                                                                   \
+    308                               /* I1 = ip ptr, I2 = source IP address, I3 = packet ptr, I4 = packet length      \
+                                       */
+#define NX_TRACE_INTERNAL_IP_SEND 309 /* I1 = ip ptr, I2 = destination IP address, I3 = packet ptr, I4 = length   */
 #define NX_TRACE_INTERNAL_TCP_DATA_RECEIVE                                                                             \
     310 /* I1 = ip ptr, I2 = source IP address, I3 = packet ptr, I4 = sequence      */
 #define NX_TRACE_INTERNAL_TCP_DATA_SEND                                                                                \
@@ -362,9 +363,10 @@ extern "C"
 #define NX_TRACE_PACKET_LENGTH_GET    390 /* I1 = packet ptr, I2 = length                                             */
 #define NX_TRACE_PACKET_POOL_CREATE   391 /* I1 = pool ptr, I2 = payload size, I3 = memory ptr, I4 = memory_size      */
 #define NX_TRACE_PACKET_POOL_DELETE   392 /* I1 = pool ptr                                                            */
-#define NX_TRACE_PACKET_POOL_INFO_GET 393 /* I1 = pool ptr, I2 = total_packets, I3 = free packets, I4 = empty          \
-                                             requests*/
-#define NX_TRACE_PACKET_RELEASE 394       /* I1 = packet ptr, I2 = packet status, I3 = available packets              */
+#define NX_TRACE_PACKET_POOL_INFO_GET                                                                                  \
+    393                             /* I1 = pool ptr, I2 = total_packets, I3 = free packets, I4 = empty                \
+                                       requests*/
+#define NX_TRACE_PACKET_RELEASE 394 /* I1 = packet ptr, I2 = packet status, I3 = available packets              */
 #define NX_TRACE_PACKET_TRANSMIT_RELEASE                                                                               \
     395                                /* I1 = packet ptr, I2 = packet status, I3 = available packets              */
 #define NX_TRACE_RARP_DISABLE      396 /* I1 = ip ptr                                                              */
@@ -477,9 +479,10 @@ extern "C"
     484                          /* I1 = ip_ptr                                                              */
 #define NX_TRACE_IPV6_ENABLE 485 /* I1 = ip_ptr                                                              */
 #define NXD_TRACE_IPV6_RAW_PACKET_SEND                                                                                 \
-    486                                  /* I1 = ip_ptr, I2 = ip address lsw, I3 = protocol, I4 = packet_ptr         */
-#define NXD_TRACE_IP_RAW_PACKET_SEND 487 /* I1 = ip_ptr, I2 = ip address lsw, I3 = type of serveice, I4 = packet_ptr   \
-                                          */
+    486 /* I1 = ip_ptr, I2 = ip address lsw, I3 = protocol, I4 = packet_ptr         */
+#define NXD_TRACE_IP_RAW_PACKET_SEND                                                                                   \
+    487 /* I1 = ip_ptr, I2 = ip address lsw, I3 = type of serveice, I4 = packet_ptr                                    \
+         */
 #define NXD_TRACE_IPV6_LINKLOCAL_ADDRESS_GET                                                                           \
     488 /* (Obsolete) I1 = ip_ptr, I2 = IP address lsw                              */
 #define NXD_TRACE_IPV6_LINKLOCAL_ADDRESS_SET                                                                           \
@@ -2596,7 +2599,7 @@ extern "C"
 
 #ifdef FEATURE_NX_IPV6
 #ifdef NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY
-        VOID (*nx_ipv6_address_change_notify)
+        VOID(*nx_ipv6_address_change_notify)
         (struct NX_IP_STRUCT *ip_ptr, UINT status, UINT interface_index, UINT addres_index, ULONG *ip_address);
 #endif /* NX_ENABLE_IPV6_ADDRESS_CHANGE_NOTIFY */
 #endif /* FEATURE_NX_IPV6 */
@@ -2890,14 +2893,14 @@ extern "C"
         UINT (*nx_ip_ipsec_authentication_header_transmit)(struct NX_IP_STRUCT *, NX_PACKET **, UINT, UINT);
 
         /* Define the IPsec Encapsulating Security Payload header process function, for the received packet. */
-        UINT (*nx_ip_ipsec_encapsulating_security_payload_receive)
+        UINT(*nx_ip_ipsec_encapsulating_security_payload_receive)
         (struct NX_IP_STRUCT *, NX_PACKET *, ULONG *, NX_PACKET **);
 
         /* Define the IPsec Encapsulating Security Payload header insert function, for the transmit packet. */
         UINT (*nx_ip_ipsec_encapsulating_security_payload_transmit)(struct NX_IP_STRUCT *, NX_PACKET **, UINT);
 
         /* Define the IPsec egress SA lookup routine. This is called by TCP/UDP/ICMP/RAW packet send. */
-        UINT (*nx_ip_packet_egress_sa_lookup)
+        UINT(*nx_ip_packet_egress_sa_lookup)
         (struct NX_IP_STRUCT *ip_ptr,
          NXD_ADDRESS *src_address,
          NXD_ADDRESS *dst_address,
