@@ -38,7 +38,7 @@ endif()
 if(NO_RTOS_SOURCE_FOLDER)
     # no AzureRTOS source specified, download it from it's repo
 
-    message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} from GitHub repo")
+    message(STATUS "RTOS is: ${RTOS} ${RTOS_VERSION} from GitHub repo")
 
     FetchContent_Declare(
         azure_rtos
@@ -51,7 +51,7 @@ else()
 
     # sanity check is source path exists
     if(EXISTS "${RTOS_SOURCE_FOLDER}/")
-        message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+        message(STATUS "RTOS is: ${RTOS} ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
 
         FetchContent_Declare(
             azure_rtos
@@ -60,7 +60,7 @@ else()
         )
 
     else()
-        message(FATAL_ERROR "Couldn't find AzureRTOS source at ${RTOS_SOURCE_FOLDER}/")
+        message(FATAL_ERROR "Couldn't find ${RTOS} source at ${RTOS_SOURCE_FOLDER}/")
     endif()
 
 endif()
@@ -87,6 +87,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
 
     if(CHIBIOS_HAL_REQUIRED)
         set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+        set(RTOS_AZURERTOS_CHIBIOS_HAL_CHECK TRUE)
     endif()
 
     add_subdirectory(ST)
