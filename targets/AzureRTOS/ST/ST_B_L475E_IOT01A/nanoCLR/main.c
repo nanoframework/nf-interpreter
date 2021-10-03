@@ -21,6 +21,9 @@
 extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 extern CLR_SETTINGS clrSettings;
 
+extern void blink_led_thread_define(void *first_unused_memory);
+extern void azure_thread_define(void *first_unused_memory);
+
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
 TX_BYTE_POOL byte_pool_0;
@@ -66,6 +69,12 @@ void tx_application_define(void *first_unused_memory)
 #if (TRACE_TO_STDIO == TRUE)
     StdioPort_Init();
 #endif
+												 
+    // define simply LED blinky thread
+    blink_led_thread_define(first_unused_memory);
+
+    // define azure / networking test thread
+	azure_thread_define(first_unused_memory);
 
     // Create receiver thread
     status = tx_thread_create(
