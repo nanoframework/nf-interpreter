@@ -86,11 +86,18 @@ FetchContent_Populate(chibios)
 
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_include)
 
-# make vars global
-set(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
+print_list(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS)
+message(STATUS "add platform dirs ....")
 
 # add platform dirs
 add_subdirectory(_include)
 add_subdirectory(_common)
 add_subdirectory(_nanoBooter)
 add_subdirectory(_nanoCLR)
+add_subdirectory(lib)
+
+message(STATUS "done adding platform dirs.")
+print_list(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS)
+
+# make vars global
+set(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")
