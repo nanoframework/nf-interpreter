@@ -6,10 +6,40 @@
 include(FetchContent)
 include(binutils.common)
 include(binutils.arm-none-eabi)
-include(binutils.AzureRTOS)
+  
+# add path to local cmake
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Define PLATFORM base path
-set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+include(utilities)
+
+# Sanity checks for cmake-variants.json
+# Define PLATFORM base path (usually set in top level CMAkeLists.txt)
+if(NOT BASE_PATH_FOR_PLATFORM)
+    set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+endif()
+
+# try to find board in the targets folder - ${CMAKE_CURRENT_SOURCE_DIR}/ST/${TARGET_BOARD})
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ST/${TARGET_BOARD})
+    list(APPEND PLATFORM_CHECK_FAILED "${CMAKE_CURRENT_SOURCE_DIR}/ST/${TARGET_BOARD} is not currently a supported option.")
+endif()          
+
+# this platform REQUIRES support from ChibiOS HAL
+if(NOT CHIBIOS_HAL_REQUIRED)
+    list(APPEND PLATFORM_CHECK_FAILED "CHIBIOS_HAL_REQUIRED=${CHIBIOS_HAL_REQUIRED} must be ON.")
+else()
+    set(RTOS_AZURERTOS_CHIBIOS_HAL_CHECK TRUE)
+endif()          
+          
+if(PLATFORM_CHECK_FAILED)
+    print_list(PLATFORM_CHECK_FAILED)
+    message(STATUS "\n\n")
+    message(FATAL_ERROR "\nFor '${RTOS}' TARGET_BOARD '${TARGET_BOARD}' the following checks failed. Please review cmake-variants.json")
+endif()          
+
+
+# Passed sanity checks, continue CMakeLists.txt for this platform
+
+include(binutils.AzureRTOS)
 
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
@@ -74,19 +104,19 @@ add_subdirectory(_include)
 # try to find STM board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
+if(EXISTS ${BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD})
 
     # board found
-    message(STATUS "Support for target board '${TARGET_BOARD}' found")
+    message(STATUS "${RTOS} support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${BASE_PATH_FOR_PLATFORM}/ST/_nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
+    set(TARGET_BASE_LOCATION ${BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD})
 
     if(CHIBIOS_HAL_REQUIRED)
-        set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+        set(CHIBIOS_BOARD_DEFINITIONS_PATH ${BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
         set(RTOS_AZURERTOS_CHIBIOS_HAL_CHECK TRUE)
     endif()
 
@@ -96,16 +126,16 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
     add_subdirectory(ST/${TARGET_BOARD})
 
 # try to find Nordic board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
+elseif(EXISTS ${BASE_PATH_FOR_PLATFORM}/Nordic/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${BASE_PATH_FOR_PLATFORM}/Nordic/_nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
+    set(TARGET_BASE_LOCATION ${BASE_PATH_FOR_PLATFORM}/Nordic/${TARGET_BOARD})
 
     add_subdirectory(Nordic)
 
@@ -113,16 +143,16 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
     add_subdirectory(Nordic/${TARGET_BOARD})
 
 # try to find MicroBit board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
+elseif(EXISTS ${BASE_PATH_FOR_PLATFORM}/MicroBit/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${BASE_PATH_FOR_PLATFORM}/MicroBit/_nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
+    set(TARGET_BASE_LOCATION ${BASE_PATH_FOR_PLATFORM}/MicroBit/${TARGET_BOARD})
 
     add_subdirectory(MicroBit)
 
@@ -130,16 +160,16 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
     add_subdirectory(MicroBit/${TARGET_BOARD})
 
 # try to find Raspberry Pi Pico board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
+elseif(EXISTS ${BASE_PATH_FOR_PLATFORM}/RaspberryPi/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${BASE_PATH_FOR_PLATFORM}/RaspberryPi/_nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
+    set(TARGET_BASE_LOCATION ${BASE_PATH_FOR_PLATFORM}/RaspberryPi/${TARGET_BOARD})
 
     add_subdirectory(RaspberryPi)
 
@@ -147,16 +177,16 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD
     add_subdirectory(RaspberryPi/${TARGET_BOARD})
 
 # try to find Maxim board in the targets folder
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
+elseif(EXISTS ${BASE_PATH_FOR_PLATFORM}/Maxim/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${BASE_PATH_FOR_PLATFORM}/Maxim/_nanoCLR)
 
     # set target base location
-    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
+    set(TARGET_BASE_LOCATION ${BASE_PATH_FOR_PLATFORM}/Maxim/${TARGET_BOARD})
 
     add_subdirectory(Maxim)
 
@@ -166,47 +196,50 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
 else()
 
     # try to find STM board in the Community targets folder
-    if(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
+    set(COMMUNITY_BASE_PATH_FOR_PLATFORM  ${PROJECT_SOURCE_DIR}/targets-community/${RTOS} PARENT_SCOPE)
+    set(COMMUNITY_BASE_PATH_FOR_PLATFORM  ${PROJECT_SOURCE_DIR}/targets-community/${RTOS})
+
+    if(EXISTS ${COMMUNITY_BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR)
+        nf_set_base_path_for_libraries_modules(${COMMUNITY_BASE_PATH_FOR_PLATFORM}/ST/_nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${COMMUNITY_BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD})
 
         if(CHIBIOS_HAL_REQUIRED)
-            set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
+             set(CHIBIOS_BOARD_DEFINITIONS_PATH ${COMMUNITY_BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
         endif()
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ST)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/ST/${TARGET_BOARD})
+        add_subdirectory(${COMMUNITY_BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD})
 
     # try to find Nordic board in the Community targets folder
-    elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
+    elseif(EXISTS ${${COMMUNITY_BASE_PATH_FOR_PLATFORM}}/Nordic/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
 
         # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/_nanoCLR)
+        nf_set_base_path_for_libraries_modules(${${COMMUNITY_BASE_PATH_FOR_PLATFORM}}/Nordic/_nanoCLR)
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${COMMUNITY_BASE_PATH_FOR_PLATFORM}/Nordic/${TARGET_BOARD})
 
         add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Nordic)
 
         # add TARGET board directory from Community
-        add_subdirectory(${PROJECT_SOURCE_DIR}/targets-community/AzureRTOS/Nordic/${TARGET_BOARD})
+        add_subdirectory(${COMMUNITY_BASE_PATH_FOR_PLATFORM}/Nordic/${TARGET_BOARD})
 
     else()
 
         # board NOT found in targets folder
-        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available on ${RTOS} ...\n\nYou can wait for it to be added or you might want to contribute and start working on a PR for it.\n\n")
 
     endif()
 

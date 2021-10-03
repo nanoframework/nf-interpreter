@@ -3,15 +3,17 @@
 # See LICENSE file in the project root for full license information.
 #
 
-list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
+list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS})
 
 # add header with target platform definitions
 if(AZURERTOS_COMMUNITY_TARGET)
     configure_file(${CMAKE_SOURCE_DIR}/CMake/AzureRTOS_target_os.h.in
-                   ${CMAKE_BINARY_DIR}/targets-community/AzureRTOS/target_os.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets-community/${RTOS}/target_os.h @ONLY)
+    list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets-community/${RTOS})
 else()
     configure_file(${CMAKE_SOURCE_DIR}/CMake/AzureRTOS_target_os.h.in
-                   ${CMAKE_BINARY_DIR}/targets/AzureRTOS/target_os.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/target_os.h @ONLY)
+    # list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS})
 endif()
 
 # append target Azure RTOS source files

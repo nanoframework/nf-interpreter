@@ -25,10 +25,15 @@ nf_setup_target_build(
         STM32L475xG_CLR
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/${RTOS}/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/${RTOS}/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
+
+    # optional BOOTER_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoBooter build target
+    
+    # optional CLR_EXTRA_SOURCE_FILES with paths to extra files to be added to the nanoCLR build target
+
 )
 
 # make vars global
