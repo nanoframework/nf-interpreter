@@ -201,8 +201,10 @@ macro(nf_add_platform_dependencies target)
             #         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
             #     EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
 
-            # add_dependencies(${target}.elf nano::NF_Network)
-
+            add_dependencies(${target}.elf nano::NF_Network)
+            add_dependencies(${target}.elf azrtos::netxduo)
+            add_dependencies(${target}.elf netx_driver)
+            add_dependencies(${target}.elf jsmn)
         endif()
 
     endif()
@@ -253,9 +255,14 @@ macro(nf_add_platform_include_directories target)
     # includes specific to nanoCRL
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
+        message(STATUS "# includes specific to nanoCRL ++++++++++++++++")
+        print_list(TARGET_AZURERTOS_NANOCLR_INCLUDE_DIRS)
+        print_list(NANOCLR_PROJECT_INCLUDE_DIRS)
+        message(STATUS "# includes specific to nanoCRL ++++++++++++++++")
         target_include_directories(${target}.elf PUBLIC
 
             ${TARGET_AZURERTOS_NANOCLR_INCLUDE_DIRS}
+            ${NANOCLR_PROJECT_INCLUDE_DIRS}
             # ${CHIBIOS_FATFS_INCLUDE_DIRS}
         )
 
