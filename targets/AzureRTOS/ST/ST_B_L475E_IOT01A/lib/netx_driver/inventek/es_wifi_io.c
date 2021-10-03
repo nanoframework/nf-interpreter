@@ -1,23 +1,23 @@
 /**
-  ******************************************************************************
-  * @file    es_wifi_io.c
-  * @author  MCD Application Team
-  * @brief   This file implements the IO operations to deal with the es-wifi
-  *          module. It mainly Inits and Deinits the SPI interface. Send and
-  *          receive data over it.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    es_wifi_io.c
+ * @author  MCD Application Team
+ * @brief   This file implements the IO operations to deal with the es-wifi
+ *          module. It mainly Inits and Deinits the SPI interface. Send and
+ *          receive data over it.
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under Ultimate Liberty license
+ * SLA0044, the "License"; You may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at:
+ *                             www.st.com/SLA0044
+ *
+ ******************************************************************************
+ */
 
 // clang-format off
 
