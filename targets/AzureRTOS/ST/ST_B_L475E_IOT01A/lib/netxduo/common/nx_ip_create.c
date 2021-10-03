@@ -27,6 +27,8 @@
 #include "nx_ip.h"
 #include "nx_system.h"
 
+// clang-format off
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -81,24 +83,17 @@
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_ip_create(
-    NX_IP *ip_ptr,
-    CHAR *name,
-    ULONG ip_address,
-    ULONG network_mask,
-    NX_PACKET_POOL *default_pool,
-    VOID (*ip_link_driver)(struct NX_IP_DRIVER_STRUCT *),
-    VOID *memory_ptr,
-    ULONG memory_size,
-    UINT priority)
+UINT  _nx_ip_create(NX_IP *ip_ptr, CHAR *name, ULONG ip_address, ULONG network_mask,
+                    NX_PACKET_POOL *default_pool, VOID (*ip_link_driver)(struct NX_IP_DRIVER_STRUCT *),
+                    VOID *memory_ptr, ULONG memory_size, UINT priority)
 {
 
-    TX_INTERRUPT_SAVE_AREA
+TX_INTERRUPT_SAVE_AREA
 
-    NX_IP *tail_ptr;
-    UINT i;
-    UINT old_threshold = 0;
-    TX_THREAD *current_thread;
+NX_IP     *tail_ptr;
+UINT       i;
+UINT       old_threshold = 0;
+TX_THREAD *current_thread;
 
 #ifdef NX_DISABLE_IPV4
     NX_PARAMETER_NOT_USED(ip_address);
@@ -111,102 +106,109 @@ UINT _nx_ip_create(
     {
 
         /* We should never get here!  */
-        return (NX_NOT_IMPLEMENTED);
+        return(NX_NOT_IMPLEMENTED);
     }
 
     /* Initialize the IP control block to zero.  */
     memset((void *)ip_ptr, 0, sizeof(NX_IP));
 
     /* Configure the primary interface. */
-    ip_ptr->nx_ip_interface[0].nx_interface_valid = 1;
+    ip_ptr -> nx_ip_interface[0].nx_interface_valid = 1;
 
 #ifndef NX_DISABLE_IPV4
     /* Save the IP address.  */
-    ip_ptr->nx_ip_interface[0].nx_interface_ip_address = ip_address;
+    ip_ptr -> nx_ip_interface[0].nx_interface_ip_address =   ip_address;
 
     /* Save the network mask.  */
-    ip_ptr->nx_ip_interface[0].nx_interface_ip_network_mask = network_mask;
+    ip_ptr -> nx_ip_interface[0].nx_interface_ip_network_mask =  network_mask;
 
     /* Derive the network bits of this IP address.  */
-    ip_ptr->nx_ip_interface[0].nx_interface_ip_network = ip_address & network_mask;
+    ip_ptr -> nx_ip_interface[0].nx_interface_ip_network =  ip_address & network_mask;
 
     /* Initialize the ARP defend timeout.  */
-    ip_ptr->nx_ip_interface[0].nx_interface_arp_defend_timeout = 0;
+    ip_ptr -> nx_ip_interface[0].nx_interface_arp_defend_timeout = 0;
 #endif /* !NX_DISABLE_IPV4  */
 
     /* Setup the link driver address.  */
-    ip_ptr->nx_ip_interface[0].nx_interface_link_driver_entry = ip_link_driver;
+    ip_ptr -> nx_ip_interface[0].nx_interface_link_driver_entry =  ip_link_driver;
 
     /* Set the device interface name to "PRI". */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-    ip_ptr->nx_ip_interface[0].nx_interface_name = (CHAR *)"PRI";
+    ip_ptr -> nx_ip_interface[0].nx_interface_name = (CHAR *)"PRI";
 
     /* Set index of each interface. */
     for (i = 0; i < NX_MAX_IP_INTERFACES; i++)
     {
-        ip_ptr->nx_ip_interface[i].nx_interface_index = (UCHAR)i;
+        ip_ptr -> nx_ip_interface[i].nx_interface_index = (UCHAR)i;
     }
+
 
 #ifndef NX_DISABLE_LOOPBACK_INTERFACE
 
     /* Set the Loopback interface name. */
     /*lint -e{927} -e{826} suppress cast of pointer to pointer, since it is necessary  */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_name = (CHAR *)"Internal IP Loopback";
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_name = (CHAR *)"Internal IP Loopback";
+
 
     /* Mark the loopback interface as valid. */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_valid = 1;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_valid = 1;
 
 #ifndef NX_DISABLE_IPV4
     /* Set the loopback interface address. */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_address = 0x7F000001;
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_network_mask = 0xFF000000;
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_network = 0x7F000000;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_address = 0x7F000001;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_network_mask = 0xFF000000;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_network = 0x7F000000;
 #endif /* !NX_DISABLE_IPV4  */
 
     /* Loopback interface is a special case. Therefore no dedicated link driver needed. */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_link_driver_entry = NX_NULL;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_link_driver_entry = NX_NULL;
 
     /* Loopback interface does not need IP/MAC address mapping. */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_address_mapping_needed = 0;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_address_mapping_needed = 0;
 
     /* There is actually no MTU limit for the loopback interface. */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_mtu_size = 65535;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_ip_mtu_size = 65535;
 
     /* Mark the loopback interface as LINK UP */
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_link_up = 1;
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_link_up = 1;
 
     /* Set all the link capability. */
 #ifdef NX_ENABLE_INTERFACE_CAPABILITY
-    ip_ptr->nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_capability_flag =
-        (NX_INTERFACE_CAPABILITY_IPV4_TX_CHECKSUM | NX_INTERFACE_CAPABILITY_IPV4_RX_CHECKSUM |
-         NX_INTERFACE_CAPABILITY_TCP_TX_CHECKSUM | NX_INTERFACE_CAPABILITY_TCP_RX_CHECKSUM |
-         NX_INTERFACE_CAPABILITY_UDP_TX_CHECKSUM | NX_INTERFACE_CAPABILITY_UDP_RX_CHECKSUM |
-         NX_INTERFACE_CAPABILITY_ICMPV4_TX_CHECKSUM | NX_INTERFACE_CAPABILITY_ICMPV4_RX_CHECKSUM |
-         NX_INTERFACE_CAPABILITY_ICMPV6_RX_CHECKSUM | NX_INTERFACE_CAPABILITY_ICMPV6_TX_CHECKSUM |
-         NX_INTERFACE_CAPABILITY_IGMP_TX_CHECKSUM | NX_INTERFACE_CAPABILITY_IGMP_RX_CHECKSUM);
+    ip_ptr -> nx_ip_interface[NX_LOOPBACK_INTERFACE].nx_interface_capability_flag = (NX_INTERFACE_CAPABILITY_IPV4_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_IPV4_RX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_TCP_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_TCP_RX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_UDP_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_UDP_RX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_ICMPV4_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_ICMPV4_RX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_ICMPV6_RX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_ICMPV6_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_IGMP_TX_CHECKSUM |
+                                                                                     NX_INTERFACE_CAPABILITY_IGMP_RX_CHECKSUM);
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 
 #endif /* !NX_DISABLE_LOOPBACK_INTERFACE */
 
     /* Save the supplied IP name.  */
-    ip_ptr->nx_ip_name = name;
+    ip_ptr -> nx_ip_name =  name;
 
     /* Set the initial IP packet ID.  */
-    ip_ptr->nx_ip_packet_id = NX_INIT_PACKET_ID;
+    ip_ptr -> nx_ip_packet_id =  NX_INIT_PACKET_ID;
 
     /* Setup the default packet pool for this IP instance.  */
-    ip_ptr->nx_ip_default_packet_pool = default_pool;
+    ip_ptr -> nx_ip_default_packet_pool =  default_pool;
 
 #ifdef NX_ENABLE_DUAL_PACKET_POOL
     /* Setup the auxiliary packet pool for this IP instance. By default it pointers to default pool. */
-    ip_ptr->nx_ip_auxiliary_packet_pool = default_pool;
+    ip_ptr -> nx_ip_auxiliary_packet_pool = default_pool;
 #endif /* NX_ENABLE_DUAL_PACKET_POOL */
 
     /* Create the internal IP protection mutex.  */
-    tx_mutex_create(&(ip_ptr->nx_ip_protection), name, TX_NO_INHERIT);
+    tx_mutex_create(&(ip_ptr -> nx_ip_protection), name, TX_NO_INHERIT);
 
     /* Pickup current thread pointer.  */
-    current_thread = tx_thread_identify();
+    current_thread =  tx_thread_identify();
 
     /* Disable preemption temporarily.  */
     if (current_thread)
@@ -219,7 +221,7 @@ UINT _nx_ip_create(
     TX_DISABLE
 
     /* Load the IP ID field in the IP control block.  */
-    ip_ptr->nx_ip_id = NX_IP_ID;
+    ip_ptr -> nx_ip_id =  NX_IP_ID;
 
     /* Place the new IP control block on the list of created IPs.  First,
        check for an empty list.  */
@@ -227,23 +229,23 @@ UINT _nx_ip_create(
     {
 
         /* Pickup tail pointer.  */
-        tail_ptr = _nx_ip_created_ptr->nx_ip_created_previous;
+        tail_ptr =  _nx_ip_created_ptr -> nx_ip_created_previous;
 
         /* Place the new IP control block in the list.  */
-        _nx_ip_created_ptr->nx_ip_created_previous = ip_ptr;
-        tail_ptr->nx_ip_created_next = ip_ptr;
+        _nx_ip_created_ptr -> nx_ip_created_previous =  ip_ptr;
+        tail_ptr -> nx_ip_created_next =  ip_ptr;
 
         /* Setup this IP's created links.  */
-        ip_ptr->nx_ip_created_previous = tail_ptr;
-        ip_ptr->nx_ip_created_next = _nx_ip_created_ptr;
+        ip_ptr -> nx_ip_created_previous =  tail_ptr;
+        ip_ptr -> nx_ip_created_next =      _nx_ip_created_ptr;
     }
     else
     {
 
         /* The created IP list is empty.  Add IP control block to empty list.  */
-        _nx_ip_created_ptr = ip_ptr;
-        ip_ptr->nx_ip_created_next = ip_ptr;
-        ip_ptr->nx_ip_created_previous = ip_ptr;
+        _nx_ip_created_ptr =                ip_ptr;
+        ip_ptr -> nx_ip_created_next =      ip_ptr;
+        ip_ptr -> nx_ip_created_previous =  ip_ptr;
     }
 
     /* Increment the created IP counter.  */
@@ -256,11 +258,12 @@ UINT _nx_ip_create(
     if (current_thread)
     {
 
-        /*lint -e{644} suppress variable might not be initialized, since "old_threshold" was initialized in previous
-         * tx_thread_preemption_change call. */
+        /*lint -e{644} suppress variable might not be initialized, since "old_threshold" was initialized in previous tx_thread_preemption_change call. */
         tx_thread_preemption_change(current_thread, old_threshold, &old_threshold);
     }
 
     /* Return success to the caller.  */
-    return (NX_SUCCESS);
+    return(NX_SUCCESS);
 }
+
+// clang-format on

@@ -27,6 +27,8 @@
 #include "tx_thread.h"
 #include "nx_ip.h"
 
+// clang-format off
+
 /**************************************************************************/
 /*                                                                        */
 /*  FUNCTION                                               RELEASE        */
@@ -80,54 +82,56 @@
 /*                                            resulting in version 6.1    */
 /*                                                                        */
 /**************************************************************************/
-UINT _nx_ip_delete(NX_IP *ip_ptr)
+UINT  _nx_ip_delete(NX_IP *ip_ptr)
 {
 
-    TX_INTERRUPT_SAVE_AREA
+TX_INTERRUPT_SAVE_AREA
 
     /* If trace is enabled, insert this event into the trace buffer.  */
     NX_TRACE_IN_LINE_INSERT(NX_TRACE_IP_DELETE, ip_ptr, 0, 0, 0, NX_TRACE_IP_EVENTS, 0, 0);
 
     /* Get mutex protection.  */
-    tx_mutex_get(&(ip_ptr->nx_ip_protection), TX_WAIT_FOREVER);
+    tx_mutex_get(&(ip_ptr -> nx_ip_protection), TX_WAIT_FOREVER);
 
     /* Determine if the IP instance has any sockets bound to it.  */
-    if ((ip_ptr->nx_ip_udp_created_sockets_count) || (ip_ptr->nx_ip_tcp_created_sockets_count))
+    if ((ip_ptr -> nx_ip_udp_created_sockets_count) || (ip_ptr -> nx_ip_tcp_created_sockets_count))
     {
 
         /* Still sockets bound to this IP instance.  They must all be deleted prior
            to deleting the IP instance.  Release the mutex and return
            an error code.  */
-        tx_mutex_put(&(ip_ptr->nx_ip_protection));
+        tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
-        return (NX_SOCKETS_BOUND);
+        return(NX_SOCKETS_BOUND);
     }
 
     /* Disable interrupts.  */
     TX_DISABLE
-
+    
     /* Remove the IP instance from the created list.  */
 
     /* See if the IP instance is the only one on the list.  */
-    if (ip_ptr == ip_ptr->nx_ip_created_next)
+    if (ip_ptr == ip_ptr -> nx_ip_created_next)
     {
 
         /* Only created IP instance, just set the created list to NULL.  */
-        _nx_ip_created_ptr = TX_NULL;
+        _nx_ip_created_ptr =  TX_NULL;
     }
     else
     {
 
         /* Otherwise, not the only created IP, link-up the neighbors.  */
-        (ip_ptr->nx_ip_created_next)->nx_ip_created_previous = ip_ptr->nx_ip_created_previous;
-        (ip_ptr->nx_ip_created_previous)->nx_ip_created_next = ip_ptr->nx_ip_created_next;
+        (ip_ptr -> nx_ip_created_next) -> nx_ip_created_previous =
+            ip_ptr -> nx_ip_created_previous;
+        (ip_ptr -> nx_ip_created_previous) -> nx_ip_created_next =
+            ip_ptr -> nx_ip_created_next;
 
         /* See if we have to update the created list head pointer.  */
         if (_nx_ip_created_ptr == ip_ptr)
         {
 
             /* Yes, move the head pointer to the next link. */
-            _nx_ip_created_ptr = ip_ptr->nx_ip_created_next;
+            _nx_ip_created_ptr =  ip_ptr -> nx_ip_created_next;
         }
     }
 
@@ -141,13 +145,13 @@ UINT _nx_ip_delete(NX_IP *ip_ptr)
     TX_RESTORE
 
     /* Release mutex protection.  */
-    tx_mutex_put(&(ip_ptr->nx_ip_protection));
+    tx_mutex_put(&(ip_ptr -> nx_ip_protection));
 
     /* Delete the internal IP protection mutex.  */
-    tx_mutex_delete(&(ip_ptr->nx_ip_protection));
+    tx_mutex_delete(&(ip_ptr -> nx_ip_protection));
 
     /* Clear the IP ID to make it invalid.  */
-    ip_ptr->nx_ip_id = 0;
+    ip_ptr -> nx_ip_id =  0;
 
     /* Disable interrupts.  */
     TX_DISABLE
@@ -162,5 +166,7 @@ UINT _nx_ip_delete(NX_IP *ip_ptr)
     _tx_thread_system_preempt_check();
 
     /* Return success to the caller.  */
-    return (NX_SUCCESS);
+    return(NX_SUCCESS);
 }
+
+// clang-format on
