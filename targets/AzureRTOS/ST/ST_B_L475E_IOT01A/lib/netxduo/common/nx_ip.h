@@ -9,7 +9,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-
 /**************************************************************************/
 /**************************************************************************/
 /**                                                                       */
@@ -19,7 +18,6 @@
 /**                                                                       */
 /**************************************************************************/
 /**************************************************************************/
-
 
 /**************************************************************************/
 /*                                                                        */
@@ -50,46 +48,40 @@
 #ifndef NX_IP_H
 #define NX_IP_H
 
-
 /* Define IP constants.  */
 
-#define NX_IP_ID                     ((ULONG)0x49502020)
-
-
+#define NX_IP_ID ((ULONG)0x49502020)
 
 /* Define the mask for the IP header length field.  */
 
-#define NX_IP_LENGTH_MASK            ((ULONG)0x0F000000)       /* Mask for length bit      */
-
-
+#define NX_IP_LENGTH_MASK ((ULONG)0x0F000000) /* Mask for length bit      */
 
 /* Define IP event flags.  These events are processed by the IP thread. */
 
-#define NX_IP_ALL_EVENTS             ((ULONG)0xFFFFFFFF)       /* All event flags              */
-#define NX_IP_PERIODIC_EVENT         ((ULONG)0x00000001)       /* Periodic event               */
-#define NX_IP_UNFRAG_EVENT           ((ULONG)0x00000002)       /* Unfragment event             */
-#define NX_IP_ICMP_EVENT             ((ULONG)0x00000004)       /* ICMP message event           */
-#define NX_IP_RECEIVE_EVENT          ((ULONG)0x00000008)       /* IP receive packet event      */
-#define NX_IP_ARP_REC_EVENT          ((ULONG)0x00000010)       /* ARP deferred receive event   */
-#define NX_IP_RARP_REC_EVENT         ((ULONG)0x00000020)       /* RARP deferred receive event  */
-#define NX_IP_IGMP_EVENT             ((ULONG)0x00000040)       /* IGMP message event           */
-#define NX_IP_TCP_EVENT              ((ULONG)0x00000080)       /* TCP message event            */
-#define NX_IP_FAST_EVENT             ((ULONG)0x00000100)       /* Fast TCP timer event         */
+#define NX_IP_ALL_EVENTS     ((ULONG)0xFFFFFFFF) /* All event flags              */
+#define NX_IP_PERIODIC_EVENT ((ULONG)0x00000001) /* Periodic event               */
+#define NX_IP_UNFRAG_EVENT   ((ULONG)0x00000002) /* Unfragment event             */
+#define NX_IP_ICMP_EVENT     ((ULONG)0x00000004) /* ICMP message event           */
+#define NX_IP_RECEIVE_EVENT  ((ULONG)0x00000008) /* IP receive packet event      */
+#define NX_IP_ARP_REC_EVENT  ((ULONG)0x00000010) /* ARP deferred receive event   */
+#define NX_IP_RARP_REC_EVENT ((ULONG)0x00000020) /* RARP deferred receive event  */
+#define NX_IP_IGMP_EVENT     ((ULONG)0x00000040) /* IGMP message event           */
+#define NX_IP_TCP_EVENT      ((ULONG)0x00000080) /* TCP message event            */
+#define NX_IP_FAST_EVENT     ((ULONG)0x00000100) /* Fast TCP timer event         */
 #ifdef NX_DRIVER_DEFERRED_PROCESSING
-#define NX_IP_DRIVER_PACKET_EVENT    ((ULONG)0x00000200)       /* Driver Deferred packet event */
-#endif /* NX_DRIVER_DEFERRED_PROCESSING */
-#define NX_IP_IGMP_ENABLE_EVENT      ((ULONG)0x00000400)       /* IGMP enable event            */
-#define NX_IP_DRIVER_DEFERRED_EVENT  ((ULONG)0x00000800)       /* Driver deferred processing   */
-                                                               /*   event                      */
-#define NX_IP_TCP_CLEANUP_DEFERRED   ((ULONG)0x00001000)       /* Deferred TCP cleanup event   */
+#define NX_IP_DRIVER_PACKET_EVENT ((ULONG)0x00000200)   /* Driver Deferred packet event */
+#endif                                                  /* NX_DRIVER_DEFERRED_PROCESSING */
+#define NX_IP_IGMP_ENABLE_EVENT     ((ULONG)0x00000400) /* IGMP enable event            */
+#define NX_IP_DRIVER_DEFERRED_EVENT ((ULONG)0x00000800) /* Driver deferred processing   */
+                                                        /*   event                      */
+#define NX_IP_TCP_CLEANUP_DEFERRED ((ULONG)0x00001000)  /* Deferred TCP cleanup event   */
 #ifdef NX_IPSEC_ENABLE
-#define NX_IP_HW_DONE_EVENT          ((ULONG)0x00002000)       /* HW done event                */
-#endif /* NX_IPSEC_ENABLE */
-#define NX_IP_LINK_STATUS_EVENT      ((ULONG)0x00004000)       /* Link status change event     */
-
+#define NX_IP_HW_DONE_EVENT ((ULONG)0x00002000)     /* HW done event                */
+#endif                                              /* NX_IPSEC_ENABLE */
+#define NX_IP_LINK_STATUS_EVENT ((ULONG)0x00004000) /* Link status change event     */
 
 #ifndef NX_IP_FAST_TIMER_RATE
-#define NX_IP_FAST_TIMER_RATE        10
+#define NX_IP_FAST_TIMER_RATE 10
 #endif
 
 /* Define the amount of time to sleep in nx_ip_(interface_)status_check */
@@ -98,8 +90,6 @@
 #endif /* NX_IP_STATUS_CHECK_WAIT_TIME */
 
 #include "nx_ipv4.h"
-
-
 
 #if 0 /* Not support for STM32L4XX.  */
 /* Define IP function prototypes.  */
@@ -119,9 +109,16 @@ UINT _nx_ip_interface_status_check(NX_IP *ip_ptr, UINT interface_index, ULONG ne
                                    ULONG wait_option);
 #endif
 
-UINT _nx_ip_create(NX_IP *ip_ptr, CHAR *name, ULONG ip_address, ULONG network_mask,
-                   NX_PACKET_POOL *default_pool, VOID (*ip_link_driver)(NX_IP_DRIVER *),
-                   VOID *memory_ptr, ULONG memory_size, UINT priority);
+UINT _nx_ip_create(
+    NX_IP *ip_ptr,
+    CHAR *name,
+    ULONG ip_address,
+    ULONG network_mask,
+    NX_PACKET_POOL *default_pool,
+    VOID (*ip_link_driver)(NX_IP_DRIVER *),
+    VOID *memory_ptr,
+    ULONG memory_size,
+    UINT priority);
 UINT _nx_ip_delete(NX_IP *ip_ptr);
 
 #if 0 /* Not support for STM32L4XX.  */
@@ -180,14 +177,20 @@ VOID _nx_ip_packet_checksum_compute(NX_PACKET *packet_ptr);
 #endif /* NX_ENABLE_INTERFACE_CAPABILITY */
 #endif
 
-
 /* Define error checking shells for API services.  These are only referenced by the
    application.  */
 
-UINT _nxe_ip_create(NX_IP *ip_ptr, CHAR *name, ULONG ip_address, ULONG network_mask,
-                    NX_PACKET_POOL *default_pool,
-                    VOID (*ip_link_driver)(NX_IP_DRIVER *),
-                    VOID *memory_ptr, ULONG memory_size, UINT priority, UINT ip_control_block_size);
+UINT _nxe_ip_create(
+    NX_IP *ip_ptr,
+    CHAR *name,
+    ULONG ip_address,
+    ULONG network_mask,
+    NX_PACKET_POOL *default_pool,
+    VOID (*ip_link_driver)(NX_IP_DRIVER *),
+    VOID *memory_ptr,
+    ULONG memory_size,
+    UINT priority,
+    UINT ip_control_block_size);
 UINT _nxe_ip_delete(NX_IP *ip_ptr);
 
 #if 0 /* Not support for STM32L4XX.  */
@@ -255,16 +258,12 @@ UINT _nx_ip_dispatch_process(NX_IP *ip_ptr, NX_PACKET *packet_ptr, UINT protocol
 #endif
 /*lint +e767 enable checking for different definitions.  */
 
-
 /* Define the head pointer of the created IP list.  */
 
-IP_DECLARE  NX_IP *_nx_ip_created_ptr;
-
+IP_DECLARE NX_IP *_nx_ip_created_ptr;
 
 /* Define the number of created IP instances.  */
 
-IP_DECLARE  ULONG _nx_ip_created_count;
-
+IP_DECLARE ULONG _nx_ip_created_count;
 
 #endif
-
