@@ -440,6 +440,9 @@ HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigu
     // clear memory
     memset(networkWirelessAPConfigs, 0, allocationSize);
 
+    // set collection count
+    networkWirelessAPConfigs->Count = configCount;
+
     return networkWirelessAPConfigs;
 }
 
