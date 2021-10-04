@@ -900,3 +900,70 @@ bool ConfigurationManager_UpdateConfigurationBlock(
         0,
         false);
 }
+
+HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId)
+{
+    HAL_Configuration_Wireless80211 *wirelessConfig =
+        (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+    if (wirelessConfig)
+    {
+        // loop though all Wireless config blocks trying to find one with this ID
+        for (int index = 0; index < g_TargetConfiguration.Wireless80211Configs->Count; index++)
+        {
+            if (ConfigurationManager_GetConfigurationBlock(
+                    wirelessConfig,
+                    DeviceConfigurationOption_Wireless80211Network,
+                    index))
+            {
+
+                if (wirelessConfig->Id == configurationId)
+                {
+                    return wirelessConfig;
+                }
+            }
+        }
+    }
+
+    if (wirelessConfig != NULL)
+    {
+        platform_free(wirelessConfig);
+    }
+
+    // not found, or failed to allocate memory
+    return NULL;
+}
+
+HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId)
+{
+    HAL_Configuration_WirelessAP *wirelessAPConfig =
+        (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+
+    if (wirelessAPConfig)
+    {
+        // loop though all Wireless AP config blocks trying to find one with this ID
+        for (int index = 0; index < g_TargetConfiguration.WirelessAPConfigs->Count; index++)
+        {
+            if (ConfigurationManager_GetConfigurationBlock(
+                    wirelessAPConfig,
+                    DeviceConfigurationOption_WirelessNetworkAP,
+                    index))
+            {
+
+                if (wirelessAPConfig->Id == configurationId)
+                {
+                    return wirelessAPConfig;
+                }
+            }
+        }
+    }
+
+    if (wirelessAPConfig != NULL)
+    {
+        platform_free(wirelessAPConfig);
+    }
+
+    // not found, or failed to allocate memory
+    return NULL;
+}
+
