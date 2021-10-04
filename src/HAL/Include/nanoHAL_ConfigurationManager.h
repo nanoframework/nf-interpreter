@@ -204,4 +204,4 @@ extern "C"
 // declaration of Target configuration union as external, has to be provided at target level
 extern HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
-#endif //NANOHAL_CONFIG_MANAGER_H
+#endif // NANOHAL_CONFIG_MANAGER_H

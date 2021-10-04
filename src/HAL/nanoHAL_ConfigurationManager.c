@@ -254,7 +254,6 @@ __nfweak HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificate
 
     // not found
     return NULL;
-
 }
 
 __nfweak HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
