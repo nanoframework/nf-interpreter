@@ -27,23 +27,34 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
 {
     wifi_mode_t mode = WIFI_MODE_NULL;
 
+    HAL_Configuration_Wireless80211 *wirelessConfig = NULL;
+
+    HAL_Configuration_NetworkInterface *networkConfig =
+        (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+
+    // check allocation
+    if (networkConfig == NULL)
+    {
+        return WIFI_MODE_NULL;
+    }
+
     // Check Wi-Fi station available
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count >= 1)
     {
-        // Check if Station config available
-        HAL_Configuration_NetworkInterface *config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[0];
-
-        // Wireless Config with SSID setup
-        if (config->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_Wireless80211)
+        // get config Index 0 (Wireless station config in ESP32)
+        if (ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 0))
         {
-            HAL_Configuration_Wireless80211 *wirelessConfig =
-                ConfigurationManager_GetWirelessConfigurationFromId(config->SpecificConfigId);
-
-            if (wirelessConfig != NULL)
+            // Wireless Config with SSID setup
+            if (networkConfig->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_Wireless80211)
             {
-                if (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_Enable)
+                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(networkConfig->SpecificConfigId);
+
+                if (wirelessConfig != NULL)
                 {
-                    mode = WIFI_MODE_STA;
+                    if (wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_Enable)
+                    {
+                        mode = WIFI_MODE_STA;
+                    }
                 }
             }
         }
@@ -52,23 +63,33 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
     // Check if AP config available
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count >= 2)
     {
-        HAL_Configuration_NetworkInterface *config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[1];
-
-        // Wireless Config with SSID setup
-        if (config->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_WirelessAP)
+        // get config Index 1 (Wireless AP config in ESP32)
+        if (ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 1))
         {
-            HAL_Configuration_WirelessAP *wirelessConfig =
-                ConfigurationManager_GetWirelessAPConfigurationFromId(config->SpecificConfigId);
-
-            if (wirelessConfig != NULL)
+            // Wireless Config with SSID setup
+            if (networkConfig->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_WirelessAP)
             {
-                if (wirelessConfig->Options & WirelessAPConfiguration_ConfigurationOptions_Enable)
+                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(networkConfig->SpecificConfigId);
+
+                if (wirelessConfig != NULL)
                 {
-                    // Use STATION + AP or just AP
-                    mode = (mode == WIFI_MODE_STA) ? WIFI_MODE_APSTA : WIFI_MODE_AP;
+                    if (wirelessConfig->Options & WirelessAPConfiguration_ConfigurationOptions_Enable)
+                    {
+                        // Use STATION + AP or just AP
+                        mode = (mode == WIFI_MODE_STA) ? WIFI_MODE_APSTA : WIFI_MODE_AP;
+                    }
                 }
             }
         }
+    }
+
+    // this one is always set
+    platform_free(networkConfig);
+
+    // free this one, if it was allocated
+    if (wirelessConfig)
+    {
+        platform_free(wirelessConfig);
     }
 
     return mode;
@@ -110,7 +131,7 @@ esp_err_t IRAM_ATTR NF_ESP32_InitaliseWifi()
         }
     }
 
-    // Don't init if Wifi Mode null (Disabled)
+    // Don't init if Wi-Fi Mode null (Disabled)
     if (expectedWifiMode == WIFI_MODE_NULL)
     {
         return ESP_FAIL;
@@ -129,15 +150,6 @@ esp_err_t IRAM_ATTR NF_ESP32_InitaliseWifi()
         {
             // create AP (ignoring return)
             esp_netif_create_default_wifi_ap();
-
-            HAL_Configuration_NetworkInterface *config = g_TargetConfiguration.NetworkInterfaceConfigs->Configs[1];
-
-            // take care of configuring Soft AP
-            ec = NF_ESP32_WirelessAP_Configure(config);
-            if (ec != ESP_OK)
-            {
-                return ec;
-            }
         }
 
         // Initialise WiFi, allocate resource for WiFi driver, such as WiFi control structure,
@@ -162,6 +174,31 @@ esp_err_t IRAM_ATTR NF_ESP32_InitaliseWifi()
         if (ec != ESP_OK)
         {
             return ec;
+        }
+
+        // if need, config the AP 
+        // this can only be performed after Wi-Fi is started
+        if (expectedWifiMode & WIFI_MODE_AP)
+        {
+            HAL_Configuration_NetworkInterface *networkConfig =
+                (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
+            if (networkConfig == NULL)
+            {
+                return ESP_FAIL;
+            }
+
+            if (ConfigurationManager_GetConfigurationBlock(networkConfig, DeviceConfigurationOption_Network, 1))
+            {
+                // take care of configuring Soft AP
+                ec = NF_ESP32_WirelessAP_Configure(networkConfig);
+
+                platform_free(networkConfig);
+            }
+
+            if (ec != ESP_OK)
+            {
+                return ec;
+            }
         }
 
         IsWifiInitialised = true;
