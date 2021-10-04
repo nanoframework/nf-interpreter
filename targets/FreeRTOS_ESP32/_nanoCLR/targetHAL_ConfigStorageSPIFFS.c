@@ -572,3 +572,22 @@ bool ConfigurationManager_GetConfigurationBlockFromStorage(
 
     return (readSize > 0);
 }
+
+int32_t ConfigurationManager_GetConfigurationBlockSize(
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex)
+{
+    FILE *handle;
+    int32_t readSize;
+
+    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
+
+    if (handle != NULL)
+    {
+        readSize = ConfigStorage_FileSize(handle);
+
+        ConfigStorage_CloseFile(handle);
+    }
+
+    return readSize;
+}

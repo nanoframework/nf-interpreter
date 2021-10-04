@@ -104,6 +104,10 @@ extern "C"
         uint8_t *configurationBlock,
         int32_t maxBlockSize);
 
+    int32_t ConfigurationManager_GetConfigurationBlockSize(
+        DeviceConfigurationOption configuration,
+        uint32_t configurationIndex);
+
     HAL_CONFIGURATION_NETWORK *ConfigStorage_FindNetworkConfigurationBlocks();
     HAL_CONFIGURATION_NETWORK_WIRELESS80211 *ConfigStorage_FindNetworkWireless80211ConfigurationBlocks();
     HAL_CONFIGURATION_NETWORK_WIRELESSAP *ConfigStorage_FindNetworkWirelessAPConfigurationBlocks();
