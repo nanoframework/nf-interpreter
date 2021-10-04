@@ -178,11 +178,6 @@ macro(nf_add_lib_network)
     # add this has a library
     set(LIB_NAME NF_Network)
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
-        # IDF it's using tweaked version of mbedTLS, so clear ours
-        unset(mbedTLS_SOURCES)
-    endif()
-
     add_library(
         ${LIB_NAME} STATIC 
             ${NF_Network_SOURCES}
@@ -199,7 +194,6 @@ macro(nf_add_lib_network)
 
     # TODO can be removed later
     if(RTOS_FREERTOS_ESP32_CHECK)
-       
         # nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NFALN_TARGET})
 
         # this is the only one different
@@ -209,7 +203,7 @@ macro(nf_add_lib_network)
             ${NFALN_EXTRA_COMPILER_DEFINITIONS}
         )
 
-    else()    
+    else()
         nf_set_compile_options(TARGET ${LIB_NAME} EXTRA_COMPILE_OPTIONS ${NFALN_EXTRA_COMPILE_OPTIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALN_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
         nf_set_link_options(TARGET ${LIB_NAME})

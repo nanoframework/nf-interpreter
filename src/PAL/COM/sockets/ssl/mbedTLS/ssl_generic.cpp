@@ -7,7 +7,6 @@
 #include "mbedtls.h"
 
 #include "lwip/sockets.h"
-  
 
 // this one lives in lwIPSocket.cpp
 extern int errno;

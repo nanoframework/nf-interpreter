@@ -13,22 +13,13 @@ FetchContent_GetProperties(esp32_idf)
 # List of the required include paths
 # the list of the required include paths needs to be platform specific because of ESP32 port
 if(RTOS_FREERTOS_ESP32_CHECK)
-
-    if (BUILD_VERBOSE)
-        message("Using IDF path >> ${esp32_idf_SOURCE_DIR}")
-    endif()
-
-    # List of the required include paths
     list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include)
     list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include/mbedtls)
-    list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include)
- 
-else()
-
-    list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR})
-    list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
-
 endif()
+
+list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR})
+list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
+
 
 option(USE_PKCS11_HELPER_LIBRARY "Build mbed TLS with the pkcs11-helper library." OFF)
 option(ENABLE_ZLIB_SUPPORT "Build mbed TLS with zlib library." OFF)
@@ -40,14 +31,6 @@ if(ENABLE_ZLIB_SUPPORT)
         include_directories(${ZLIB_INCLUDE_DIR})
     endif(ZLIB_FOUND)
 endif(ENABLE_ZLIB_SUPPORT)
-
-# sources need to be added from mbedTLS repo or ESP32 depending on build
-# adjust search path here
-if(RTOS_FREERTOS_ESP32_CHECK)
-    set(MBEDTLS_PATH ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/library)
-else()
-    set(MBEDTLS_PATH ${mbedtls_SOURCE_DIR}/library)
-endif()
 
 set(src_crypto
     aes.c
@@ -106,10 +89,13 @@ set(src_crypto
     version.c
     version_features.c
     xtea.c
-
-    # platform implementation of hardware random provider
-    mbedtls_entropy_hardware_pool.c
+    
 )
+
+if(NOT RTOS_FREERTOS_ESP32_CHECK)
+    # platform implementation of hardware random provider
+    list(APPEND src_crypto mbedtls_entropy_hardware_pool.c)
+endif()
 
 foreach(SRC_FILE ${src_crypto})
 
@@ -117,7 +103,7 @@ foreach(SRC_FILE ${src_crypto})
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${MBEDTLS_PATH}
+            ${mbedtls_SOURCE_DIR}/library
 
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/
 
@@ -154,7 +140,7 @@ foreach(SRC_FILE ${src_x509})
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${MBEDTLS_PATH}
+            ${mbedtls_SOURCE_DIR}/library
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -176,6 +162,8 @@ set(src_tls
     ssl_srv.c
     ssl_ticket.c
     ssl_tls.c
+
+    ssl_msg.c
 )
 
 foreach(SRC_FILE ${src_tls})
@@ -184,7 +172,7 @@ foreach(SRC_FILE ${src_tls})
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
         PATHS 
-            ${MBEDTLS_PATH}
+            ${mbedtls_SOURCE_DIR}/library
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -203,18 +191,22 @@ if(RTOS_FREERTOS_ESP32_CHECK)
 
     set(src_platform_specific
 
-        md_wrap.c
-
-        esp_bignum.c
+        mbedtls_debug.c
+        
         esp_hardware.c
         esp_mem.c
+        esp_timing.c
+        esp_sha.c
+        esp_aes_xts.c
+        esp_aes_common.c
+        esp_aes.c
+        sha.c
+        esp_bignum.c
+        bignum.c
         esp_sha1.c
         esp_sha256.c
         esp_sha512.c
-        mbedtls_debug.c
-
-        net_sockets.c
-
+        esp_md.c
     )
  
 else()
@@ -223,9 +215,7 @@ else()
 
     set(src_platform_specific
 
-        ssl_msg.c
         net_sockets.c
-
     )
 
 endif()
@@ -238,7 +228,14 @@ foreach(SRC_FILE ${src_platform_specific})
         PATHS
 
             ${esp32_idf_SOURCE_DIR}/components/mbedtls/port
-            ${MBEDTLS_PATH}
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/sha/parallel_engine
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/sha/
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/aes
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/aes/block
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/${TARGET_SERIES_SHORT}
+            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/md
+
+            ${mbedtls_SOURCE_DIR}/library
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

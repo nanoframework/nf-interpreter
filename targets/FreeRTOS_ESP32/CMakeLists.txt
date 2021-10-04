@@ -75,6 +75,63 @@ endif()
 
 # target folder was added in main CMakeList
 
+# if mbed TLS is enabled add it to the build
+if(NF_SECURITY_MBEDTLS)
+
+    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
+    set(NO_MBEDTLS_SOURCE TRUE)
+
+    if(MBEDTLS_SOURCE)
+        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
+            set(NO_MBEDTLS_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
+
+    # set options for mbed TLS
+    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+
+    if(NO_MBEDTLS_SOURCE)
+        # no mbed TLS source specified, download it from it's repo
+        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
+
+        FetchContent_Declare(
+            mbedtls
+            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
+            GIT_TAG ${MBEDTLS_GIT_TAG}
+        )
+
+    else()
+        # mbedTLS source was specified
+        # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
+
+        # sanity check is source path exists
+        if(EXISTS ${MBEDTLS_SOURCE}/)
+
+        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
+            
+            FetchContent_Declare(
+                mbedtls
+                SOURCE_DIR ${MBEDTLS_SOURCE}
+            )
+
+        else()
+            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
+        endif()
+
+    endif()
+
+    FetchContent_GetProperties(mbedtls)
+    FetchContent_Populate(mbedtls)
+
+    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
+    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+endif()
+
 # add platform dirs
 add_subdirectory(_common)
 add_subdirectory(_Include)

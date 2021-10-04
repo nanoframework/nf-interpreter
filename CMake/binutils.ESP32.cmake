@@ -248,12 +248,12 @@ macro(nf_add_platform_sources target)
 
     endif()
 
-    # # mbed TLS requires a config file
-    # if(USE_SECURITY_MBEDTLS_OPTION)
-    #     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-    #     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-    #     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-    # endif()
+    # mbed TLS requires a config file
+    if(USE_SECURITY_MBEDTLS_OPTION)
+        # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+    endif()
 
 endmacro()
 
@@ -403,7 +403,6 @@ macro(nf_add_idf_as_library)
             esptool_py
             fatfs
             spiffs
-            mbedtls
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
@@ -473,6 +472,8 @@ macro(nf_add_idf_as_library)
 
     endif()
 
+
+
     # Link the static libraries to the executable
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
         idf::${TARGET_SERIES_SHORT}
@@ -480,7 +481,6 @@ macro(nf_add_idf_as_library)
         idf::fatfs
         idf::spi_flash
         idf::spiffs
-        idf::mbedtls
     )
 
     # add nano libraries to the link dependencies of IDF build
