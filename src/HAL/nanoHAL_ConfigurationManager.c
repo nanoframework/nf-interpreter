@@ -245,6 +245,29 @@ __nfweak HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigu
     return NULL;
 }
 
+__nfweak HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
+{
+    if (g_TargetConfiguration.CertificateStore->Count)
+    {
+        return g_TargetConfiguration.CertificateStore->Certificates[0];
+    }
+
+    // not found
+    return NULL;
+
+}
+
+__nfweak HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
+{
+    if (g_TargetConfiguration.DeviceCertificates->Count)
+    {
+        return g_TargetConfiguration.DeviceCertificates->Certificates[0];
+    }
+
+    // not found
+    return NULL;
+}
+
 __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
     void *existingConfigBlock,
     void *newConfigBlock,

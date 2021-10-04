@@ -189,6 +189,14 @@ extern "C"
     // defined as weak needs to be free to implement the storage of the configuration block as they see fit
     HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId);
 
+    // gets the HAL_Configuration_X509CaRootBundle certificate store, if that exists
+    // defined as weak needs to be free to implement the storage of the configuration block as they see fit
+    HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore();
+
+    // gets the HAL_Configuration_X509DeviceCertificate device certificate, if that exists
+    // defined as weak needs to be free to implement the storage of the configuration block as they see fit
+    HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate();
+
 #ifdef __cplusplus
 }
 #endif
