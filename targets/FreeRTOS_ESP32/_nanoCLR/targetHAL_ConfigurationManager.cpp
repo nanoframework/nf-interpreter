@@ -411,9 +411,7 @@ bool ConfigurationManager_GetConfigurationBlock(
         }
 
         // set block size
-        // because X509 certificate has a variable length need to compute the block size in two steps
-        sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-        sizeOfBlock += g_TargetConfiguration.CertificateStore->Certificates[configurationIndex]->CertificateSize;
+        sizeOfBlock = ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509CaRootBundle, 0);
     }
     else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
@@ -428,8 +426,8 @@ bool ConfigurationManager_GetConfigurationBlock(
 
         // set block size
         // because X509 certificate has a variable length need to compute the block size in two steps
-        sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
-        sizeOfBlock += g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex]->CertificateSize;
+        sizeOfBlock =
+            ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509DeviceCertificates, 0);
     }
     else
     {
@@ -969,23 +967,30 @@ HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFro
 
 HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
 {
-    HAL_Configuration_X509CaRootBundle *certStore =
-        (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeof(HAL_Configuration_X509CaRootBundle));
-
-    if (certStore != NULL)
+    if (g_TargetConfiguration.CertificateStore->Count)
     {
-        if (g_TargetConfiguration.CertificateStore->Count)
+        // get cert store size
+        int32_t certSize =
+            ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509CaRootBundle, 0);
+
+        if (certSize > 0)
         {
-            if (ConfigurationManager_GetConfigurationBlock(certStore, DeviceConfigurationOption_X509CaRootBundle, 0))
+            HAL_Configuration_X509CaRootBundle *certStore =
+                (HAL_Configuration_X509CaRootBundle *)platform_malloc(certSize);
+
+            if (certStore != NULL)
             {
-                return certStore;
+                if (ConfigurationManager_GetConfigurationBlock(
+                        certStore,
+                        DeviceConfigurationOption_X509CaRootBundle,
+                        0))
+                {
+                    return certStore;
+                }
+
+                platform_free(certStore);
             }
         }
-    }
-
-    if (certStore)
-    {
-        platform_free(certStore);
     }
 
     // not found, or failed to allocate memory
@@ -994,26 +999,30 @@ HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
 
 HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
 {
-    HAL_Configuration_X509DeviceCertificate *deviceCert =
-        (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeof(HAL_Configuration_X509DeviceCertificate));
-
-    if (deviceCert != NULL)
+    if (g_TargetConfiguration.CertificateStore->Count)
     {
-        if (g_TargetConfiguration.DeviceCertificates->Count)
+        // get cert store size
+        int32_t certSize =
+            ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509DeviceCertificates, 0);
+
+        if (certSize > 0)
         {
-            if (ConfigurationManager_GetConfigurationBlock(
-                    deviceCert,
-                    DeviceConfigurationOption_X509DeviceCertificates,
-                    0))
+            HAL_Configuration_X509DeviceCertificate *deviceCert =
+                (HAL_Configuration_X509DeviceCertificate *)platform_malloc(certSize);
+
+            if (deviceCert != NULL)
             {
-                return deviceCert;
+                if (ConfigurationManager_GetConfigurationBlock(
+                        deviceCert,
+                        DeviceConfigurationOption_X509DeviceCertificates,
+                        0))
+                {
+                    return deviceCert;
+                }
+
+                platform_free(deviceCert);
             }
         }
-    }
-
-    if (deviceCert)
-    {
-        platform_free(deviceCert);
     }
 
     // not found, or failed to allocate memory
