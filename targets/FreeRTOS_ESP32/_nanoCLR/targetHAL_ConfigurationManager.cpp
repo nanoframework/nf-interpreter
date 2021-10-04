@@ -967,3 +967,55 @@ HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFro
     return NULL;
 }
 
+HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
+{
+    HAL_Configuration_X509CaRootBundle *certStore =
+        (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeof(HAL_Configuration_X509CaRootBundle));
+
+    if (certStore != NULL)
+    {
+        if (g_TargetConfiguration.CertificateStore->Count)
+        {
+            if (ConfigurationManager_GetConfigurationBlock(certStore, DeviceConfigurationOption_X509CaRootBundle, 0))
+            {
+                return certStore;
+            }
+        }
+    }
+
+    if (certStore)
+    {
+        platform_free(certStore);
+    }
+
+    // not found, or failed to allocate memory
+    return NULL;
+}
+
+HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
+{
+    HAL_Configuration_X509DeviceCertificate *deviceCert =
+        (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeof(HAL_Configuration_X509DeviceCertificate));
+
+    if (deviceCert != NULL)
+    {
+        if (g_TargetConfiguration.DeviceCertificates->Count)
+        {
+            if (ConfigurationManager_GetConfigurationBlock(
+                    deviceCert,
+                    DeviceConfigurationOption_X509DeviceCertificates,
+                    0))
+            {
+                return deviceCert;
+            }
+        }
+    }
+
+    if (deviceCert)
+    {
+        platform_free(deviceCert);
+    }
+
+    // not found, or failed to allocate memory
+    return NULL;
+}
