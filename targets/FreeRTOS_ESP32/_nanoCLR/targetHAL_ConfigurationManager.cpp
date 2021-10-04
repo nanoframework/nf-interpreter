@@ -443,7 +443,7 @@ bool ConfigurationManager_GetConfigurationBlock(
     return ConfigurationManager_GetConfigurationBlockFromStorage(
         configuration,
         configurationIndex,
-        (uint8_t*)configurationBlock,
+        (uint8_t *)configurationBlock,
         sizeOfBlock);
 }
 
@@ -782,11 +782,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 {
                     // reset this
                     blockSize = 0;
-
-                    // removing a config, enumeration is required
-                    requiresEnumeration = true;
                 }
             }
+
+            // removing or adding a config, enumeration is required
+            requiresEnumeration = true;
 
 #ifdef DEBUG_CONFIG
             ets_printf(
@@ -815,11 +815,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 {
                     // reset this
                     blockSize = 0;
-
-                    // removing a config, enumeration is required
-                    requiresEnumeration = true;
                 }
             }
+
+            // removing or adding a config, enumeration is required
+            requiresEnumeration = true;
 
 #ifdef DEBUG_CONFIG
             ets_printf(
@@ -835,7 +835,7 @@ bool ConfigurationManager_StoreConfigurationBlock(
         }
     }
 
-    // Anything to save
+    // Anything to save?
     if (blockSize != 0)
     {
         result = StoreConfigBlock(configuration, configurationIndex, configurationBlock, blockSize);
