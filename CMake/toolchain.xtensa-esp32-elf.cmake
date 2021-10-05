@@ -10,24 +10,39 @@ set(CMAKE_SYSTEM_NAME Generic)
 
 # macro to setup compilers
 macro(nf_set_compiler_var var name)
-   find_program(CMAKE_${var} xtensa-esp32-elf-${name})
+   find_program(
+      CMAKE_${var}
+      xtensa-esp32-elf-${name}
+      CMAKE_FIND_ROOT_PATH_BOTH
+      REQUIRED)
 endmacro()
 
 # safer to have these here as a check if the toolchain are accessible in the PATH
 
 # setup C compiler
-nf_set_compiler_var(C_COMPILER gcc)    
+nf_set_compiler_var(C_COMPILER gcc)
 
 # setup C++ compiler
-nf_set_compiler_var(CXX_COMPILER g++)    
+nf_set_compiler_var(CXX_COMPILER g++)
 
 # setup Assembler compiler
 nf_set_compiler_var(ASM_COMPILER gcc)
 
 # other toolchain configurations  
-find_program(CMAKE_OBJCOPY xtensa-esp32-elf-objcopy CACHE INTERNAL "objcopy tool")
-find_program(CMAKE_OBJDUMP xtensa-esp32-elf-objdump CACHE INTERNAL "objdump tool")
-find_program(CMAKE_SIZE xtensa-esp32-elf-size CACHE INTERNAL "size tool")
+find_program(
+   CMAKE_OBJCOPY
+   xtensa-esp32-elf-objcopy
+   CMAKE_FIND_ROOT_PATH_BOTH)
+
+find_program(
+   CMAKE_OBJDUMP
+   xtensa-esp32-elf-objdump
+   CMAKE_FIND_ROOT_PATH_BOTH)
+
+find_program(
+   CMAKE_SIZE
+   xtensa-esp32-elf-size
+   CMAKE_FIND_ROOT_PATH_BOTH)
 
 # TODO check this (move to GCC options?)
 set(CMAKE_C_FLAGS "-mlongcalls -Wno-frame-address" CACHE STRING "C Compiler Base Flags")

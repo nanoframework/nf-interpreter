@@ -8,8 +8,7 @@ steps:
     displayName: Cache ESP32 tools
     inputs:
       key: 'esp32_tools | 4_3_1'
-      restoreKeys: |
-        esp32ToolsKey
+      restoreKeys: 4_3_1
       path: $(UserProfile)\.espressif\tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
@@ -18,10 +17,9 @@ steps:
     displayName: Cache pip packages
     inputs:
       key: 'python | "$(Agent.OS)" | esp-idf\requirements.txt'
-      restoreKeys: | 
-        python | "$(Agent.OS)"
-        python
+      restoreKeys: python | "$(Agent.OS)" | esp-idf\requirements.txt
       path: $(PIP_CACHE_DIR)
+      cacheHitVar: PIP_PACKAGES_RESTORED
 
   # Use Python Version 3.6 and add it to path
   - task: UsePythonVersion@0
@@ -32,14 +30,14 @@ steps:
 
   # run IDF installers
   - task: PowerShell@2
-    displayName: Install IDF stuff (step 1)
+    displayName: Install IDF bits (step 1)
     inputs:
       targetType: 'filePath'
       filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
   - task: PowerShell@2
-    displayName: Install IDF stuff (step 2)
+    displayName: Install IDF bits (step 2)
     inputs:
       targetType: 'inline'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
@@ -47,20 +45,25 @@ steps:
         python -m pip install -r requirements.txt
 
   - task: PowerShell@2
-    displayName: Install IDF stuff (step 3)
+    displayName: Install IDF bits (step 3)
     inputs:
       targetType: 'filePath'
       filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
-  # need to add these to the PATH, in case the tools where restored from the cache
-  - script: |
-      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\xtensa-esp32-elf\esp-2021r1-8.4.0\xtensa-esp32-elf\bin"
-      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\xtensa-esp32s2-elf\esp-2021r1-8.4.0\xtensa-esp32s2-elf\bin"
-      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\riscv32-esp-elf\esp-2021r1-8.4.0\riscv32-esp-elf\bin"
-      echo "##vso[task.prependpath]$(UserProfile)\.espressif\tools\idf-exe\1.0.1"
-    condition: ne(variables.ESP_TOOLS_CACHE_RESTORED, 'true')
-    displayName: Add IDF tools to path
+  - task: PowerShell@2
+    displayName: Update PATH with IDF tools
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      failOnStderr: false
+      ignoreLASTEXITCODE: true
+      script: |
+        $ErrorActionPreference = 'SilentlyContinue'
+        $envars_raw = python $(IDF_PATH)/tools/idf_tools.py export --format key-value 2>$null
+        $varsCount = $envars_raw.Count
+        $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '')
+        echo "##vso[task.prependpath]$newPath"
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
     displayName: Tweak PATH to reach cmd
