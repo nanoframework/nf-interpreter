@@ -73,7 +73,6 @@ void ConfigStorage_GetConfigFileName(
     uint32_t configurationIndex,
     char *configName)
 {
-    char *startName = configName;
     // buffer for config index
     // this is only working for single digit indexes
     // it's assumed that this validation has occurred in the caller
@@ -203,7 +202,7 @@ bool ConfigStorage_CloseFile(FILE *handle)
 //
 //  Shared IO
 //
-uint32_t Config_IO(FILE *handle, ConfigIoType ioType, uint8_t *pData, int32_t size)
+int32_t Config_IO(FILE *handle, ConfigIoType ioType, uint8_t *pData, int32_t size)
 {
     FILE *file = handle;
     int32_t result = -1;
@@ -550,7 +549,7 @@ bool ConfigurationManager_GetConfigurationBlockFromStorage(
     int32_t maxBlockSize)
 {
     FILE *handle;
-    uint32_t readSize;
+    int32_t readSize = 0;
 
 #ifdef DEBUG_CONFIG
     ets_printf("GetConfigFromStorage %d, %d\n", (int)configuration, configurationIndex);
@@ -577,7 +576,7 @@ int32_t ConfigurationManager_GetConfigurationBlockSize(
     uint32_t configurationIndex)
 {
     FILE *handle;
-    int32_t readSize;
+    int32_t readSize = 0;
 
     handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
 

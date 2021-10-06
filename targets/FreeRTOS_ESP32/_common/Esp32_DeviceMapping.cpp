@@ -87,14 +87,14 @@ int8_t Esp32_DAC_DevicePinMap[2] = {
     26};
 
 void Esp32_DecodeAlternateFunction(
-    uint32_t             alternateFunction,
+    uint32_t alternateFunction,
     Esp32_MapDeviceType &deviceType,
-    uint8_t &            busIndex,
-    uint16_t &           PinIndex)
+    uint8_t &busIndex,
+    uint16_t &PinIndex)
 {
     deviceType = (Esp32_MapDeviceType)((alternateFunction >> 16) & 0x00ff);
-    busIndex   = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
-    PinIndex   = (uint16_t)(alternateFunction & 0x00ff);
+    busIndex = (uint8_t)((alternateFunction >> 8) & 0x00ff) - 1;
+    PinIndex = (uint16_t)(alternateFunction & 0x00ff);
 }
 
 int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int PinIndex)
@@ -131,8 +131,8 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int DevNumber, int
 int Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction)
 {
     Esp32_MapDeviceType deviceType;
-    uint8_t             deviceIndex;
-    uint16_t            pinIndex;
+    uint8_t deviceIndex;
+    uint16_t pinIndex;
 
     Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, pinIndex);
 
@@ -147,21 +147,27 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int devNumber, in
         {
             case DEV_TYPE_SPI:
                 Esp32_SPI_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+                break;
 
             case DEV_TYPE_I2C:
                 Esp32_I2C_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+                break;
 
             case DEV_TYPE_SERIAL:
                 Esp32_SERIAL_DevicePinMap[devNumber][pinIndex] = ioPinNumber;
+                break;
 
             case DEV_TYPE_LED_PWM:
                 Esp32_LED_DevicePinMap[devNumber] = ioPinNumber;
+                break;
 
             case DEV_TYPE_ADC:
                 Esp32_ADC_DevicePinMap[pinIndex] = ioPinNumber;
+                break;
 
             case DEV_TYPE_DAC:
                 Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
+                break;
 
             default:
                 break;
@@ -179,8 +185,8 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int devNumber, in
 void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
 {
     Esp32_MapDeviceType deviceType;
-    uint8_t             deviceIndex;
-    uint16_t            mapping;
+    uint8_t deviceIndex;
+    uint16_t mapping;
 
     Esp32_DecodeAlternateFunction(alternateFunction, deviceType, deviceIndex, mapping);
 
