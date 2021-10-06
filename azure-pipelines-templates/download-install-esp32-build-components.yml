@@ -57,6 +57,7 @@ steps:
       targetType: 'inline'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
       script: |
+        $ErrorActionPreference = 'SilentlyContinue'
         $envars_raw = python $(IDF_PATH)/tools/idf_tools.py export --format key-value 2>$null
         
         # need to access the PATH collection, which seems to always be the last on in the collection
