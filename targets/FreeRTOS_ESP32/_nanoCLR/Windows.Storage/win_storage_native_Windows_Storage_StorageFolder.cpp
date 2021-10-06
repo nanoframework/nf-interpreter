@@ -8,7 +8,6 @@
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_Windows_Storage.h>
 #include <target_platform.h>
-#include "dirent.h"
 
 //
 //  Converts from windows type path       "c:\folder\folder\file.ext"
