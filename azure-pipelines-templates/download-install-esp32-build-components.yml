@@ -30,14 +30,14 @@ steps:
 
   # run IDF installers
   - task: PowerShell@2
-    displayName: Install IDF bits (step 1)
+    displayName: Install IDF (step 1)
     inputs:
       targetType: 'filePath'
       filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
 
   - task: PowerShell@2
-    displayName: Install IDF bits (step 2)
+    displayName: Install IDF (step 2)
     inputs:
       targetType: 'inline'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
@@ -45,7 +45,7 @@ steps:
         python -m pip install -r requirements.txt
 
   - task: PowerShell@2
-    displayName: Install IDF bits (step 3)
+    displayName: Install IDF (step 3)
     inputs:
       targetType: 'filePath'
       filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1

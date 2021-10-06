@@ -11,7 +11,7 @@ steps:
     condition: succeeded()
     displayName: Setup build with CMake
     inputs:
-      cmakeArgs: ' -G Ninja -DESP32_IDF_SOURCE=$(IDF_PATH) -DEXECUTABLE_OUTPUT_PATH=$(Build.SourcesDirectory)/build -DCMAKE_TOOLCHAIN_FILE=CMake/$(TOOLCHAINFILE) -DIDF_TARGET=$(IDF_TARGET) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) ..'
+      cmakeArgs: ' -G Ninja -DESP32_IDF_SOURCE=$(IDF_PATH) -DCMAKE_TOOLCHAIN_FILE=CMake/$(TOOLCHAINFILE) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions) ..'
       workingDirectory: ${{ parameters.buildDirectory }}
 
   - task: CMake@1
