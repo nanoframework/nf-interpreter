@@ -33,14 +33,14 @@ steps:
     displayName: Install IDF (step 1)
     inputs:
       targetType: 'filePath'
-      filePath: $(Agent.BuildDirectory)\s\esp-idf\install.ps1
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      filePath: $(Agent.TempDirectory)\esp-idf\install.ps1
+      workingDirectory: $(Agent.TempDirectory)\esp-idf
 
   - task: PowerShell@2
     displayName: Install IDF (step 2)
     inputs:
       targetType: 'inline'
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      workingDirectory: $(Agent.TempDirectory)\esp-idf
       script: |
         python -m pip install -r requirements.txt
 
@@ -48,14 +48,14 @@ steps:
     displayName: Install IDF (step 3)
     inputs:
       targetType: 'filePath'
-      filePath: $(Agent.BuildDirectory)\s\esp-idf\export.ps1
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      filePath: $(Agent.TempDirectory)\esp-idf\export.ps1
+      workingDirectory: $(Agent.TempDirectory)\esp-idf
 
   - task: PowerShell@2
     displayName: Update PATH with IDF tools
     inputs:
       targetType: 'inline'
-      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      workingDirectory: $(Agent.TempDirectory)\esp-idf
       failOnStderr: false
       ignoreLASTEXITCODE: true
       script: |

@@ -13,7 +13,7 @@ if (BUILD_VERBOSE)
 endif()
 
 # the following prevents launchin a build in the source tree
-# set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # fatal error and message explaining this
