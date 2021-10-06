@@ -349,9 +349,12 @@ endmacro()
 macro(nf_setup_partition_tables_generator)
 
     # create partition tables for other memory sizes
-    set(ESP32_PARTITION_TABLE_UTILITY $ENV{IDF_PATH}/components/partition_table/gen_esp32part.py )
+    set(ESP32_PARTITION_TABLE_UTILITY ${IDF_PATH_CMAKED}/components/partition_table/gen_esp32part.py )
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
+
+        message(STATUS "\n-- Generating partition tables\r")
+        
         # partition tables for ESP32
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
@@ -390,7 +393,7 @@ endmacro()
 # macro to add IDF as a library to the build and add the IDF components according to variant and options
 macro(nf_add_idf_as_library)
 
-    include($ENV{IDF_PATH}/tools/cmake/idf.cmake)
+    include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)

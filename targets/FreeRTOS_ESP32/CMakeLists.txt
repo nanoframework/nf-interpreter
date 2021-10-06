@@ -71,6 +71,10 @@ if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${esp32_idf_SOURCE_DIR})
 
     message(FATAL_ERROR "${IDF_SOURCE_DIR_PATH}\n-- ########################################\nFound environment variable IDF_PATH different from the current specified IDF location.\nIt's currently set to '$ENV{IDF_PATH}'.\nIf you have a local install and want to use it for the build, set the build option 'ESP32_IDF_SOURCE' to that location.\n########################################\n\n")
 
+else()
+    message(STATUS "\n-- IDF_PATH is '${IDF_SOURCE_DIR_PATH}'\r")
+
+    set(IDF_PATH_CMAKED ${IDF_SOURCE_DIR_PATH} CACHE INTERNAL "CMake formated IDF path")
 endif()
 
 # if using FatFS need to remove IDF ffconfig.h so it can pick ours
