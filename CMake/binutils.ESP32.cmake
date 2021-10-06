@@ -393,6 +393,27 @@ macro(nf_add_idf_as_library)
 
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
+    # if running on Azure Pipeline, tweak the reported version so it doesn't show '-dirty'
+    # because it is not!
+    set(RUNNING_ON_AZURE ($ENV{Agent_HomeDirectory} AND $ENV{Build_BuildNumber}))
+
+    if(RUNNING_ON_AZURE)
+        get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER )
+
+        string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+ 
+        set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+
+        # for COMPILE DEFINITIONS it's a bit more work
+        get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+
+        string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+
+        set_property(TARGET __idf_build_target APPEND PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+
+        message(STATUS "Fixing IDF version. It is now: ${MY_IDF_VER}")
+    endif()
+
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
