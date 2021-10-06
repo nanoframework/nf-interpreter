@@ -7,7 +7,7 @@
 steps:
 
   - task: ArchiveFiles@2
-    condition: succeeded()
+    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
     displayName: Zip binary files (release)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -17,7 +17,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: succeeded()
+    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
     displayName: Collecting deployable artifacts (release)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
@@ -27,7 +27,7 @@ steps:
       flattenFolders: true
 
   - task: ArchiveFiles@2
-    condition: succeeded()
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) ) )
     displayName: Zip binary files (preview)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -37,7 +37,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: succeeded()
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) ) )
     displayName: Collecting deployable artifacts (preview)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
@@ -56,7 +56,7 @@ steps:
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Set Cloudsmith repo path
     inputs:
       targetType: 'inline'
@@ -103,7 +103,7 @@ steps:
       failOnStderr: 'true'
 
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
+    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], 'main'), contains(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) ) )
     displayName: Upload package to Cloudsmith
     inputs:
       targetType: 'inline'
