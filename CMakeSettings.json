@@ -247,18 +247,6 @@
           "value": "${env.ESP32_TOOLS}"
         },
         {
-          "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "${env.ESP32_TOOLS}"
-        },
-        {
-          "name": "ESP32_IDF_PATH:PATH",
-          "value": "${env.ESP32_IDF}"
-        },
-        {
-          "name": "ESP32_LIBS_PATH:PATH",
-          "value": "${env.ESP32_LIB}"
-        },
-        {
           "name": "CMAKE_SYSTEM_NAME:STRING",
           "value": "Generic"
         },

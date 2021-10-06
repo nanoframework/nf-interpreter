@@ -49,7 +49,7 @@ Invoke-Expression $PSScriptRoot\install-python.ps1
 Invoke-Expression "$PSScriptRoot\install-ninja.ps1 $localCommandArgs"
 
 "****************************************************************************************" | Write-Host -ForegroundColor Yellow
-"Please download the ESP-IDF Windows Installer from https://dl.espressif.com/dl/esp-idf/" | Write-Host -ForegroundColor Yellow
+"Please download the ESP-IDF Windows Installer from https://dl.espressif.com/dl/esp-idf/"  | Write-Host -ForegroundColor Yellow
 "and install the various tools. If you're already done that, you can ignore this message." | Write-Host -ForegroundColor Yellow
 "****************************************************************************************" | Write-Host -ForegroundColor Yellow
 
