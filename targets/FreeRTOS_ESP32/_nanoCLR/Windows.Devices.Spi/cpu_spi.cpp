@@ -116,7 +116,8 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
     if (ret != ESP_OK)
     {
         // Try again without DMA
-        esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 0);
+        ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 0);
+
         if (ret != ESP_OK)
         {
             ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus + HSPI_HOST, ret);

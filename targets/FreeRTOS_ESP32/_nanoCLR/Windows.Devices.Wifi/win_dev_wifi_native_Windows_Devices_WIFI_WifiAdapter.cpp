@@ -328,7 +328,6 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeFind
 
     CLR_RT_HeapBlock_Array *array;
     CLR_UINT8 *arrayOfIndexes;
-    int rlen;
     int index;
     int interfaceCount = 0;
 

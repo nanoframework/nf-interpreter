@@ -240,7 +240,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     // Save resolution for working out values for percent duty cycle
     PwmController_Timer_resolution[timerId] = (0x1 << optimumDutyResolution);
 
-    timer_conf = {mode, duty_res, timer, (uint32_t)desiredFrequency};
+    timer_conf = {mode, duty_res, timer, (uint32_t)desiredFrequency, LEDC_AUTO_CLK};
 
     result = ledc_timer_config(&timer_conf);
     if (result != ESP_OK)
