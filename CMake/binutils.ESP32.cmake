@@ -352,8 +352,6 @@ macro(nf_setup_partition_tables_generator)
     set(ESP32_PARTITION_TABLE_UTILITY ${IDF_PATH_CMAKED}/components/partition_table/gen_esp32part.py )
 
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
-
-        message(STATUS "\n-- Generating partition tables\r")
         
         # partition tables for ESP32
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
