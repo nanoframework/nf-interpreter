@@ -7,7 +7,7 @@
 steps:
 
   - task: ArchiveFiles@2
-    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) )
     displayName: Zip binary files (release)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -17,7 +17,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')) ) )
+    condition: and( succeeded(), ne(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'main'), eq(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets') ) )
     displayName: Collecting deployable artifacts (release)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
@@ -27,7 +27,7 @@ steps:
       flattenFolders: true
 
   - task: ArchiveFiles@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) ) )
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) )
     displayName: Zip binary files (preview)
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
@@ -37,7 +37,7 @@ steps:
       replaceExistingArchive: true
 
   - task: CopyFiles@1
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) ) )
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or(eq(variables['ForceUpload'], true), eq(variables['Build.SourceBranchName'], 'develop') ) )
     displayName: Collecting deployable artifacts (preview)
     inputs:
       sourceFolder: $(Agent.TempDirectory)
