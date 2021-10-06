@@ -776,9 +776,9 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT IRAM_ATTR
-    Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4(
-        CLR_RT_StackFrame &stack)
+HRESULT
+Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

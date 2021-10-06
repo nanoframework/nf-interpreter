@@ -115,7 +115,7 @@ void NF_ESP32_DeinitWifi()
     esp_wifi_deinit();
 }
 
-esp_err_t IRAM_ATTR NF_ESP32_InitaliseWifi()
+esp_err_t NF_ESP32_InitaliseWifi()
 {
     esp_err_t ec = ESP_OK;
 
