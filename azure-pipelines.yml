@@ -381,17 +381,19 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/build-esp32.yml
 
-  # - task: CopyFiles@1
-  #   condition: succeeded()
-  #   displayName: Copying bootloader from ESP32 libs
-  #   inputs:
-  #     sourceFolder: $(ESP32_LIBS_PATH)
-  #     Contents: |
-  #       bootloader.bin
-  #     TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-  #     flattenFolders: true
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Copying bootloader
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+      Contents: |
+        bootloader.bin
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
 
-  # - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+    parameters:
+      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
   # - template: azure-pipelines-templates/publish-cloudsmith.yml
 
 #################
