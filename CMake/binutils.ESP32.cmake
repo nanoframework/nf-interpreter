@@ -418,7 +418,7 @@ macro(nf_add_idf_as_library)
         ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
     # check for SDK config from build options
-    if(${SDK_CONFIG_FILE})
+    if(SDK_CONFIG_FILE)
         # got an SDK config CONFIG on the build options
 
         # check if the file exists
