@@ -7,16 +7,8 @@
 #include <target_windows_storage_config.h>
 #include <nanoHAL_Windows_Storage.h>
 #include <target_platform.h>
-
-#include "Esp32_DeviceMapping.h"
-
-// Defines for Windows.Storage.c
-extern "C"
-{
-    bool Storage_InitSDCardSPI(char * vfsName, int maxFiles, int pin_Miso, int pin_Mosi, int pin_Clk, int pin_Cs);
-    bool Storage_InitSDCardMMC(char * vfsName, int maxFiles, bool bit1Mode);
-    bool Storage_UnMountSDCard();
-}
+#include <Target_Windows_Storage.h>
+#include <Esp32_DeviceMapping.h>
 
 HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNative___STATIC__VOID__BOOLEAN(CLR_RT_StackFrame& stack)
 {

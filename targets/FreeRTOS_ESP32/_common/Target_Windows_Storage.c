@@ -35,6 +35,8 @@
 #include <include/sdmmc_cmd.h>
 #include <target_platform.h>
 
+#include <Target_Windows_Storage.h>
+
 static const char *TAG = "SDCard";
 
 // Pin mapping when using SPI mode.

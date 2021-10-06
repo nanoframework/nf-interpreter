@@ -6,8 +6,7 @@
 // #include <nanoHAL.h>
 // #include <nanoWeak.h>
 #include "targetHAL_ConfigStorage.h"
-
-// ESP32 SPIFFS
+#include <esp_vfs.h>
 
 // this one is following the the same "drive letter" as the HAL Windows Storage INTERNAL_DRIVE0_LETTER
 #define NANO_SPIFFS_BASE_PATH   "/I"

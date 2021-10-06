@@ -73,6 +73,13 @@ if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${esp32_idf_SOURCE_DIR})
 
 endif()
 
+# if using FatFS need to remove IDF ffconfig.h so it can pick ours
+if(NF_FEATURE_HAS_SDCARD)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
+    )
+endif()
+
 # target folder was added in main CMakeList
 
 # if mbed TLS is enabled add it to the build

@@ -50,7 +50,6 @@
 
 #include <soc/uart_channel.h>
 #include <spiffs_config.h>
-#include <esp_vfs.h>
 #include <esp_spiffs.h>
 
 // Uncomment to support Ethernet
