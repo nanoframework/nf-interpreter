@@ -435,7 +435,7 @@ macro(nf_add_lib_native_assemblies)
     if(RTOS_FREERTOS_ESP32_CHECK)
         # this is the only one different
 
-        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 
         nf_set_compile_definitions(
             TARGET ${LIB_NAME} 
@@ -445,11 +445,6 @@ macro(nf_add_lib_native_assemblies)
             BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 
         nf_set_link_options(TARGET ${LIB_NAME})
-        # target_compile_definitions(
-        #     ${LIB_NAME} PUBLIC
-        #     -DPLATFORM_ESP32
-        #     ${NFALNA_EXTRA_COMPILER_DEFINITIONS}
-        # )
 
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
