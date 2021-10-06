@@ -367,14 +367,12 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('ESP32_versioncounter', 0)]
-    IDF_PATH: '$(Agent.TempDirectory)/esp-idf'
+    IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
 
   steps:
   - checkout: self
-    path: 's'
   - checkout: esp32_idf
-    path: $(Agent.TempDirectory)\esp-idf
     fetchDepth: 1
 
   - template: azure-pipelines-templates/build-preparations.yml

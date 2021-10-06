@@ -2,8 +2,8 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  buildDirectory: '$(Build.SourcesDirectory)\build'
-  partitionsDirectory: '$(Build.SourcesDirectory)\targets\FreeRTOS_ESP32\$(TargetBoard)'
+  buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+  partitionsDirectory: '$(Build.SourcesDirectory)\nf-interpreter\targets\FreeRTOS_ESP32\$(TargetBoard)'
 
 steps:
 
