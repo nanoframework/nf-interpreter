@@ -417,6 +417,15 @@ macro(nf_add_idf_as_library)
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
+    # check for SDK config from build options
+    if(${SDK_CONFIG_FILE})
+        # got an SDK config CONFIG on the build options
+        set(SDKCONFIG_DEFAULTS_FILE ${SDK_CONFIG_FILE})
+    else()
+        # get default SDK CONFIG file
+        set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig.default)
+    endif()
+
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
@@ -428,7 +437,7 @@ macro(nf_add_idf_as_library)
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig.default
+            ${SDKCONFIG_DEFAULTS_FILE}
         PROJECT_NAME "nanoCRL"
         PROJECT_VER ${BUILD_VERSION}
     )
