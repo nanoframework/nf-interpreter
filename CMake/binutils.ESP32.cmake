@@ -426,8 +426,9 @@ macro(nf_add_idf_as_library)
             set(SDKCONFIG_DEFAULTS_FILE ${SDK_CONFIG_FILE})
         else()
             # no, try the IDF folder
-            if(EXISTS targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
-                set(SDKCONFIG_DEFAULTS_FILE targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
+            if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
+                # found it
+                set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
             else()
                 message(FATAL_ERROR "Couldn't find IDF SDK CONFIG file '${ESP32_IDF_SOURCE}'. Please check the SDK_CONFIG_FILE build option.")
             endif()
