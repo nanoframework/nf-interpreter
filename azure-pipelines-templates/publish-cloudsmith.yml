@@ -42,7 +42,7 @@ steps:
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        $(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
+        $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
