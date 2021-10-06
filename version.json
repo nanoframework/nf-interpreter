@@ -14,7 +14,7 @@
   "cloudBuild": {
     "setAllVariables": true,
     "buildNumber": {
-      "enabled": true,
+      "enabled": false,
       "includeCommitId": {
         "when": "always"
       }
