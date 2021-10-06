@@ -56,13 +56,14 @@ steps:
     inputs:
       targetType: 'inline'
       workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
-      failOnStderr: false
-      ignoreLASTEXITCODE: true
       script: |
-        $ErrorActionPreference = 'SilentlyContinue'
         $envars_raw = python $(IDF_PATH)/tools/idf_tools.py export --format key-value 2>$null
-        $varsCount = $envars_raw.Count
+        
+        # need to access the PATH collection, which seems to always be the last on in the collection
+        $varsCount = $envars_raw.Count       
         $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '')
+
+        # append to path
         echo "##vso[task.prependpath]$newPath"
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
