@@ -30,14 +30,14 @@ macro(nf_find_esp32_files_at_location files locations)
 
 endmacro()
 
-function(nf_set_optimization_options TARGET) 
+function(nf_set_optimization_options target) 
 
-    # target_compile_options(${TARGET} PRIVATE
-    #     $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-    #     $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
-    #     $<$<CONFIG:MinSizeRel>:-Os -flto>
-    #     $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
-    # )
+    target_compile_options(${target} PRIVATE
+        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:MinSizeRel>:-Os>
+        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+    )
 
 endfunction()
 
