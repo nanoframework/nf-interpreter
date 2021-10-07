@@ -409,7 +409,7 @@ macro(nf_add_idf_as_library)
 
         string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
 
-        set_property(TARGET __idf_build_target APPEND PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+        set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
 
         message(STATUS "Fixing IDF version. It is now: ${MY_IDF_VER_FIXED}")
     endif()
