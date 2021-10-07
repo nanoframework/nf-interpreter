@@ -70,8 +70,8 @@ bool WP_Initialise(COM_HANDLE port)
         UART_PIN_NO_CHANGE,
         UART_PIN_NO_CHANGE);
 
-    // Setup UART driver(without UART queue)
-    uart_driver_install(WP_Port, WP_PACKET_SIZE + 32, WP_PACKET_SIZE, 0, NULL, 0);
+    // setup UART driver with UART queue
+    uart_driver_install(WP_Port, 256, 256, 0, NULL, 0);
 
     WP_Port_Intitialised = true;
 
