@@ -22,7 +22,7 @@ steps:
     inputs:
       sourceFolder: $(Agent.TempDirectory)
       Contents: |
-        '$(TargetPublishName)-$(NBGV_AssemblyVersion).zip'
+        $(TargetPublishName)-$(NBGV_AssemblyVersion).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
