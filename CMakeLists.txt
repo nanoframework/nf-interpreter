@@ -832,10 +832,6 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
-         
-    if (NOT ESP32_TARGET_VARIANT)
-        set(ESP32_TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
-    endif()
 
     # Only used by ESP32 at the moment
     if(API_nanoFramework.Hardware.Esp32.Ble)
