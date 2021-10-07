@@ -167,7 +167,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         CLR_GFX_FontCharacterInfo chr;
         CLR_UINT32 widthChar = 0;
         CLR_UINT32 heightChar = 0;
-
+        
         // Get the text and the other parameters
         szText = stack.Arg0().RecoverString();
         x = stack.Arg1().NumericByRef().u2;
@@ -266,11 +266,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
                         posX = x;
                         prevCharHeight = posY;
                     }
-                    
+
                     // If there is a background, will fill the bitmap with it
                     if (backgroundColor != 0) {
-                        rectangle.right = widthChar;
-                        rectangle.bottom = heightChar;
+                        rectangle.right = bm.m_width;
+                        rectangle.bottom = bm.m_height;
                         bitmap->DrawRectangle(pen, brush, rectangle);
                     }
                     else
@@ -302,6 +302,5 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         // And there is no exist before, so memory will be properly released
         platform_free(bitmap);
     }
-
     NANOCLR_NOCLEANUP();
 }
