@@ -60,8 +60,9 @@ void app_main()
 
     ESP_ERROR_CHECK(nvs_flash_init());
 
-    xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 1);
+    // start receiver task pinned to the 1st core
+    xTaskCreatePinnedToCore(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL, 0);
 
-    // Start the main task pinned to 2nd core
+    // start the CLR main task pinned to 2nd core
     xTaskCreatePinnedToCore(&main_task, "main_task", 15000, NULL, 5, NULL, 1);
 }
