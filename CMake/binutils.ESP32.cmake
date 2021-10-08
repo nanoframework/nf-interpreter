@@ -440,15 +440,33 @@ macro(nf_add_idf_as_library)
 
     message(STATUS "\n--SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
 
+    # set list with the IDF components to add
+    # need to match the list below with the respective libraries
+    set(IDF_COMPONENTS_TO_ADD
+        ${TARGET_SERIES_SHORT}
+        freertos
+        esptool_py
+        spiffs
+    )
 
+    # set list with the libraries for IDF components added
+    # need to match the list above with the IDF components
+    set(IDF_LIBRARIES_TO_ADD
+        idf::${TARGET_SERIES_SHORT}
+        idf::freertos
+        idf::esptool_py
+        idf::spiffs
+    )
+
+    if(NF_FEATURE_HAS_SDCARD)
+        list(APPEND IDF_COMPONENTS_TO_ADD fatfs)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::fatfs)
+    endif()
+    
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
-            ${TARGET_SERIES_SHORT}
-            freertos
-            esptool_py
-            fatfs
-            spiffs
+            ${IDF_COMPONENTS_TO_ADD}
 
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
@@ -540,11 +558,7 @@ macro(nf_add_idf_as_library)
 
     # Link the static libraries to the executable
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
-        idf::${TARGET_SERIES_SHORT}
-        idf::freertos
-        idf::fatfs
-        idf::spi_flash
-        idf::spiffs
+        ${IDF_LIBRARIES_TO_ADD}
     )
 
     # add nano libraries to the link dependencies of IDF build
