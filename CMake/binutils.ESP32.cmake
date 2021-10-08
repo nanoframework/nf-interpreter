@@ -467,7 +467,43 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::bt)
     endif()
-    
+
+    if(ESP32_ETHERNET_SUPPORT)
+        list(APPEND IDF_COMPONENTS_TO_ADD esp_eth)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
+
+        # check for ETH_RMII_CLK_OUT_GPIO in the build options
+        if(ETH_RMII_CLK_OUT_GPIO)
+            # need to read the SDK CONFIG file and replace the appropriate options            
+            file(READ
+                "${SDKCONFIG_DEFAULTS_FILE}"
+                SDKCONFIG_DEFAULT_CONTENTS)
+
+            string(REPLACE
+                "#CONFIG_ETH_RMII_CLK_OUTPUT=y"
+                "CONFIG_ETH_RMII_CLK_OUTPUT=y"
+                SDKCONFIG_DEFAULT_NEW_CONTENTS
+                "${SDKCONFIG_DEFAULT_CONTENTS}")
+
+            string(REPLACE
+                "#CONFIG_ETH_RMII_CLK_OUT_GPIO=n"
+                "CONFIG_ETH_RMII_CLK_OUT_GPIO=${ETH_RMII_CLK_OUT_GPIO}"
+                SDKCONFIG_DEFAULT_FINAL_CONTENTS
+                "${SDKCONFIG_DEFAULT_NEW_CONTENTS}")
+
+            # need to temporarilly allow changes in source files
+            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+            file(WRITE 
+                ${SDKCONFIG_DEFAULTS_FILE} 
+                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
+
+            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+            
+        endif()
+
+    endif()
+
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
@@ -482,6 +518,7 @@ macro(nf_add_idf_as_library)
 
     if(USE_NETWORKING_OPTION)
 
+        
         FetchContent_GetProperties(esp32_idf)
 
         # get list of source files for lwIP

@@ -5,60 +5,41 @@
 
 // This file includes the board specific Ethernet Intialisation
 
-#include "NF_ESP32_Network.h"
+#include <NF_ESP32_Network.h>
 #include <esp32_ethernet_options.h>
 
 esp_eth_handle_t eth_handle = NULL;
 
-//
-// Olimex ESP32-EVB Rev B, OLimex ESP32-Gateway, Generic Lan8270
-//
-#define CONFIG_PHY_LAN8720      1
-#define CONFIG_PHY_ADDRESS      0
-#define CONFIG_PHY_SMI_MDC_PIN  23
-#define CONFIG_PHY_SMI_MDIO_PIN 18
+// OLIMEX ESP32-EVB Rev B, OLIMEX ESP32-Gateway, Generic Lan8270
+// ETH_PHY_ADDR  0
+// ETH_MDC_GPIO  23
+// ETH_MDIO_GPIO 18
 
-// Uncomment one of these following lines to support switching of a power gpio used on some boards
-//#define ESP32_CONFIG_PIN_PHY_POWER		12     // Olimex_POE
-//#define ESP32_CONFIG_PIN_PHY_POWER		5      // Olimex_gateway revs newer than C
+// OLIMEX POE and LILYGO use ETH_RMII_CLK_OUT_GPIO 17
+// OLIMEX POE use ETH_PHY_RST_GPIO 12
+// OLIMEX gateway revs newer than C use ETH_PHY_RST_GPIO 5
 
-// Uncomment one of these lines to select alternate clock modes
-//#define ESP32_CONFIG_PHY_CLOCK_MODE       ETH_CLOCK_GPIO0_IN      // Default
-//#define ESP32_CONFIG_PHY_CLOCK_MODE       ETH_CLOCK_GPIO17_OUT    // Olimex_POE, Olimex_POE-ISO
-//#define ESP32_CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO0_OUT     //
-//#define ESP32_CONFIG_PHY_CLOCK_MODE		ETH_CLOCK_GPIO16_OUT    //
+// default values for ESP32 boards
+// values taken from IDF KCONFIG files
 
-#ifdef CONFIG_PHY_LAN8720
-// #include "eth_phy/phy_lan8720.h"
-#define DEFAULT_ETHERNET_PHY_CONFIG phy_lan8720_default_ethernet_config
+#ifndef ETH_PHY_ADDR
+// PHY address
+#define ETH_PHY_ADDR 1
 #endif
 
-#ifdef CONFIG_PHY_TLK110
-#include "eth_phy/phy_tlk110.h"
-#define DEFAULT_ETHERNET_PHY_CONFIG phy_tlk110_default_ethernet_config
+#ifndef ETH_MDC_GPIO
+// GPIO number used by SMI MDC
+#define ETH_MDC_GPIO 23
 #endif
 
-#define PIN_SMI_MDC  CONFIG_PHY_SMI_MDC_PIN
-#define PIN_SMI_MDIO CONFIG_PHY_SMI_MDIO_PIN
+#ifndef ETH_MDIO_GPIO
+// GPIO number used by SMI MDIO
+#define ETH_MDIO_GPIO 18
+#endif
 
-#ifdef ESP32_CONFIG_PIN_PHY_POWER
-static void phy_device_power_enable_via_gpio(bool enable)
-{
-    if (!enable)
-        phy_lan8720_default_ethernet_config.phy_power_enable(false);
-
-    gpio_pad_select_gpio((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER);
-    gpio_set_direction((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER, GPIO_MODE_OUTPUT);
-    gpio_set_level((gpio_num_t)ESP32_CONFIG_PIN_PHY_POWER, (int)enable);
-
-    // Allow the power up/down to take effect, min 300us
-    vTaskDelay(10 / portTICK_PERIOD_MS);
-
-    if (enable)
-    {
-        phy_lan8720_default_ethernet_config.phy_power_enable(true);
-    }
-}
+#ifndef ETH_PHY_RST_GPIO
+// GPIO number used to reset PHY chip.
+#define ETH_PHY_RST_GPIO 5
 #endif
 
 esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
@@ -76,15 +57,11 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
 
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
-    phy_config.phy_addr = CONFIG_EXAMPLE_ETH_PHY_ADDR;
-    phy_config.reset_gpio_num = CONFIG_EXAMPLE_ETH_PHY_RST_GPIO;
+    phy_config.phy_addr = ETH_PHY_ADDR;
+    phy_config.reset_gpio_num = ETH_PHY_RST_GPIO;
 
-#ifdef ESP32_CONFIG_PIN_PHY_POWER
-    phy_config.phy_power_enable = phy_device_power_enable_via_gpio;
-#endif
-
-    mac_config.smi_mdc_gpio_num = CONFIG_EXAMPLE_ETH_MDC_GPIO;
-    mac_config.smi_mdio_gpio_num = CONFIG_EXAMPLE_ETH_MDIO_GPIO;
+    mac_config.smi_mdc_gpio_num = ETH_MDC_GPIO;
+    mac_config.smi_mdio_gpio_num = ETH_MDIO_GPIO;
 
     esp_eth_mac_t *mac = esp_eth_mac_new_esp32(&mac_config);
 
@@ -97,6 +74,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     // attach Ethernet driver to TCP/IP stack
     ESP_ERROR_CHECK(esp_netif_attach(eth_netif, esp_eth_new_netif_glue(eth_handle)));
+
     // start Ethernet driver state machine
     ESP_ERROR_CHECK(esp_eth_start(eth_handle));
 

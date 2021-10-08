@@ -370,16 +370,6 @@ CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_AP=y
 # end of Common ESP-related
 
 #
-# Ethernet
-#
-CONFIG_ETH_ENABLED=y
-CONFIG_ETH_USE_SPI_ETHERNET=y
-# CONFIG_ETH_SPI_ETHERNET_DM9051 is not set
-# CONFIG_ETH_SPI_ETHERNET_W5500 is not set
-# CONFIG_ETH_USE_OPENETH is not set
-# end of Ethernet
-
-#
 # Event Loop Library
 #
 # CONFIG_ESP_EVENT_LOOP_PROFILING is not set

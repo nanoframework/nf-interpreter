@@ -842,6 +842,12 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
         message(STATUS "Support for BLE disabled")
     endif()
 
+    if(ESP32_ETHERNET_SUPPORT)
+        message(STATUS "Support for Ethernet network interface enabled")
+    else()
+    message(STATUS "Support for Ethernet network interface disabled")
+    endif()
+
     # check watchdog feature
     # ESP32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
     # because the build system can't honour that preference
