@@ -255,8 +255,8 @@ jobs:
   - checkout: self
     fetchDepth: 1
 
-  # - template: azure-pipelines-templates/download-install-llvm.yml
-  # - template: azure-pipelines-templates/check-code-style.yml
+  - template: azure-pipelines-templates/download-install-llvm.yml
+  - template: azure-pipelines-templates/check-code-style.yml
 
 ################
 # STM32
@@ -272,30 +272,30 @@ jobs:
 
   strategy:
     matrix:
-      # NETDUINO3_WIFI:
-      #   TargetBoard: NETDUINO3_WIFI
-      #   BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-      #   GccArm_Version:
-      #   NeedsDFU: true
-      #   NeedsSRECORD: false
-      # ORGPAL_PALTHREE:
-      #   TargetBoard: ORGPAL_PALTHREE
-      #   BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-      #   GccArm_Version:
-      #   NeedsDFU: true
-      #   NeedsSRECORD: false
-      # ST_STM32F429I_DISCOVERY:
-      #   TargetBoard: ST_STM32F429I_DISCOVERY
-      #   BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-      #   GccArm_Version:
-      #   NeedsDFU: false
-      #   NeedsSRECORD: false
-      # ST_NUCLEO64_F091RC:
-      #   TargetBoard: ST_NUCLEO64_F091RC
-      #   BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=ChibiOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
-      #   GccArm_Version:
-      #   NeedsDFU: false
-      #   NeedsSRECORD: true
+      NETDUINO3_WIFI:
+        TargetBoard: NETDUINO3_WIFI
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: true
+        NeedsSRECORD: false
+      ORGPAL_PALTHREE:
+        TargetBoard: ORGPAL_PALTHREE
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: true
+        NeedsSRECORD: false
+      ST_STM32F429I_DISCOVERY:
+        TargetBoard: ST_STM32F429I_DISCOVERY
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: false
+        NeedsSRECORD: false
+      ST_NUCLEO64_F091RC:
+        TargetBoard: ST_NUCLEO64_F091RC
+        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=ChibiOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: false
+        NeedsSRECORD: true
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
         BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_System.IO.FileSystem=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_MEMORY=Graphics_Memory.cpp -DGRAPHICS_DISPLAY=Otm8009a_DSI_Video_Mode.cpp  -DGRAPHICS_DISPLAY_INTERFACE=DSI_To_Display_Video_Mode.cpp -DTOUCHPANEL_DEVICE=ft6x06_I2C.cpp -DTOUCHPANEL_INTERFACE=I2C_To_TouchPanel.cpp
@@ -325,11 +325,11 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  # condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS_ESP32'], true)) )
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS_ESP32'], true)) )
 
   # dependsOn:
-  # - Check_Build_Options
-  # - Check_Code_Style
+  - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'windows-2019'
@@ -426,357 +426,357 @@ jobs:
 
 #################
 # NXP
-# - job: Build_NXP_targets
-#   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)) )
+- job: Build_NXP_targets
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)) )
 
-#   dependsOn:
-#   - Check_Build_Options
-#   - Check_Code_Style
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   strategy:
-#     matrix:
-#       NXP_MIMXRT1060_EVK:
-#         TargetBoard: NXP_MIMXRT1060_EVK
-#         BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FreeRTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-#         GccArm_Version: 
-#         NeedsSRECORD: true
+  strategy:
+    matrix:
+      NXP_MIMXRT1060_EVK:
+        TargetBoard: NXP_MIMXRT1060_EVK
+        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FreeRTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version: 
+        NeedsSRECORD: true
 
-#   variables:
-#     DOTNET_NOLOGO: true
-#     # creates a counter and assigns it to the revision variable
-#     REVISION: $[counter('NXP_versioncounter', 0)]
-#     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
-#     GIT_LFS_SKIP_SMUDGE: 1
+  variables:
+    DOTNET_NOLOGO: true
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('NXP_versioncounter', 0)]
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    GIT_LFS_SKIP_SMUDGE: 1
 
-#   steps:
-#   - template: azure-pipelines-templates/build-preparations.yml
-#   - template: azure-pipelines-templates/nb-gitversioning.yml
-#   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-#   - template: azure-pipelines-templates/download-install-ninja.yml
-#   - template: azure-pipelines-templates/download-srecord.yml
-#   - template: azure-pipelines-templates/build-freertos-nxp.yml
-#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-#   - template: azure-pipelines-templates/publish-cloudsmith.yml
-#   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-srecord.yml
+  - template: azure-pipelines-templates/build-freertos-nxp.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # TI SimpleLink
-# - job: Build_TI_SimpleLink_targets
-#   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)) )
+- job: Build_TI_SimpleLink_targets
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)) )
 
-#   dependsOn:
-#   - Check_Build_Options
-#   - Check_Code_Style
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   strategy:
-#     matrix:
-#       # disabled: waiting to update SDK to latest version with Sys Config
-#       # TI_CC3220SF_LAUNCHXL:
-#       #   TargetBoard: TI_CC3220SF_LAUNCHXL
-#       #   BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SimpleLink -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-#       #   GccArm_Version:
-#       TI_CC1352R1_LAUNCHXL_868:
-#         TargetBoard: TI_CC1352R1_LAUNCHXL
-#         PackageName: TI_CC1352R1_LAUNCHXL_868
-#         BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=868 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
-#         GccArm_Version:
-#       TI_CC1352R1_LAUNCHXL_915:
-#         TargetBoard: TI_CC1352R1_LAUNCHXL
-#         PackageName: TI_CC1352R1_LAUNCHXL_915
-#         BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=915 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
-#         GccArm_Version:
+  strategy:
+    matrix:
+      # disabled: waiting to update SDK to latest version with Sys Config
+      # TI_CC3220SF_LAUNCHXL:
+      #   TargetBoard: TI_CC3220SF_LAUNCHXL
+      #   BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SimpleLink -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+      #   GccArm_Version:
+      TI_CC1352R1_LAUNCHXL_868:
+        TargetBoard: TI_CC1352R1_LAUNCHXL
+        PackageName: TI_CC1352R1_LAUNCHXL_868
+        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=868 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
+        GccArm_Version:
+      TI_CC1352R1_LAUNCHXL_915:
+        TargetBoard: TI_CC1352R1_LAUNCHXL
+        PackageName: TI_CC1352R1_LAUNCHXL_915
+        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=915 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
+        GccArm_Version:
 
-#   variables:
-#     DOTNET_NOLOGO: true
-#     # creates a counter and assigns it to the revision variable
-#     REVISION: $[counter('TI_versioncounter', 0)]
-#     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
-#     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+  variables:
+    DOTNET_NOLOGO: true
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('TI_versioncounter', 0)]
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
 
-#   steps:
-#   - template: azure-pipelines-templates/build-preparations.yml
-#   - template: azure-pipelines-templates/nb-gitversioning.yml
-#   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
-#   - template: azure-pipelines-templates/download-install-ninja.yml
-#   - template: azure-pipelines-templates/build-ti-simplelink.yml
-#   - template: azure-pipelines-templates/pack-publish-artifacts.yml
-#   - template: azure-pipelines-templates/publish-cloudsmith.yml
-#   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/build-ti-simplelink.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
 # WIN32 
-# - job: Build_WIN32_nanoCLR
-#   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)) )
+- job: Build_WIN32_nanoCLR
+  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)) )
 
-#   dependsOn:
-#   - Check_Build_Options
-#   - Check_Code_Style
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   variables:
-#     DOTNET_NOLOGO: true
-#     TargetPublishName: WIN32_nanoCLR
-#     # creates a counter and assigns it to the revision variable
-#     REVISION: $[counter('WIN32_versioncounter', 0)]
+  variables:
+    DOTNET_NOLOGO: true
+    TargetPublishName: WIN32_nanoCLR
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('WIN32_versioncounter', 0)]
 
-#   steps:
-#   - template: azure-pipelines-templates/nb-gitversioning.yml
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
 
-#   - template: azure-pipelines-templates/install-nuget.yml@templates
+  - template: azure-pipelines-templates/install-nuget.yml@templates
 
-#   - task: VSBuild@1
-#     inputs:
-#       solution: 'targets\win32\nanoCLR.sln'
-#       platform: 'x86'
-#       msbuildArgs: '/p:PublicRelease=true'
-#       configuration: 'Release'
+  - task: VSBuild@1
+    inputs:
+      solution: 'targets\win32\nanoCLR.sln'
+      platform: 'x86'
+      msbuildArgs: '/p:PublicRelease=true'
+      configuration: 'Release'
       
-#   - task: DotNetCoreCLI@2
-#     displayName: Install SignTool tool
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
-#     inputs:
-#       command: custom
-#       custom: tool
-#       arguments: install --tool-path . SignClient
+  - task: DotNetCoreCLI@2
+    displayName: Install SignTool tool
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . SignClient
 
-#   - pwsh: |
-#       .\SignClient "Sign" `
-#       --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
-#       --input "**/nanoFramework.nanoCLR.exe" `
-#       --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-#       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-#       --user "$(SignClientUser)" `
-#       --secret '$(SignClientSecret)' `
-#       --name "nanoFramework.nanoCLR.Win32" `
-#       --description "nanoFramework.nanoCLR.Win32" `
-#       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
-#     displayName: Sign nanoCLR WIN32 EXE
-#     continueOnError: true
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --input "**/nanoFramework.nanoCLR.exe" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.Win32" `
+      --description "nanoFramework.nanoCLR.Win32" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign nanoCLR WIN32 EXE
+    continueOnError: true
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
 
-#   - task: NuGetCommand@2
-#     condition: succeeded()
-#     displayName: Pack nanoCLR WIN32
-#     inputs:
-#       command: 'custom' 
-#       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
+  - task: NuGetCommand@2
+    condition: succeeded()
+    displayName: Pack nanoCLR WIN32
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
 
-#   - task: CopyFiles@1
-#     condition: succeeded()
-#     displayName: Collecting managed helpers deployable artifacts
-#     inputs:
-#       sourceFolder: $(Build.SourcesDirectory)
-#       Contents: |
-#         **\nanoFramework.nanoCLR.Win32*.nupkg
-#       TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#       flattenFolders: true
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Collecting managed helpers deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.Win32*.nupkg
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      flattenFolders: true
   
-#   - task: CopyFiles@1
-#     condition: succeeded()
-#     displayName: Collecting EXE to deployable artifacts
-#     inputs:
-#       sourceFolder: $(Build.SourcesDirectory)
-#       Contents: |
-#         **\nanoFramework.nanoCLR.exe
-#       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-#       flattenFolders: true
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Collecting EXE to deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
 
-#   - pwsh: |
-#       .\SignClient "Sign" `
-#       --baseDirectory "$(Build.ArtifactStagingDirectory)" `
-#       --input "**/*.nupkg" `
-#       --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
-#       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
-#       --user "$(SignClientUser)" `
-#       --secret '$(SignClientSecret)' `
-#       --name "nanoFramework.nanoCLR.Win32 NuGet" `
-#       --description "nanoFramework.nanoCLR.Win32 NuGet" `
-#       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
-#     displayName: Sign packages
-#     continueOnError: true
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.ArtifactStagingDirectory)" `
+      --input "**/*.nupkg" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.Win32 NuGet" `
+      --description "nanoFramework.nanoCLR.Win32 NuGet" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign packages
+    continueOnError: true
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
     
-#   # publish artifacts (only possible if this is not a PR originated on a fork)
-#   - task: PublishBuildArtifacts@1
-#     condition: succeeded()
-#     displayName: Publish deployables artifacts
-#     inputs:
-#       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#       ArtifactName: deployables
-#       ArtifactType: Container
+  # publish artifacts (only possible if this is not a PR originated on a fork)
+  - task: PublishBuildArtifacts@1
+    condition: succeeded()
+    displayName: Publish deployables artifacts
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: deployables
+      ArtifactType: Container
 
-#   # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
-#   - task: NuGetCommand@2
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
-#     continueOnError: true
-#     displayName: Push NuGet packages to Azure Artifacts
-#     inputs:
-#       command: push
-#       nuGetFeedType: external
-#       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-#       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
-#       allowPackageConflicts: true
+  # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+  - task: NuGetCommand@2
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    continueOnError: true
+    displayName: Push NuGet packages to Azure Artifacts
+    inputs:
+      command: push
+      nuGetFeedType: external
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
+      allowPackageConflicts: true
 
-#   # push NuGet class lib package to NuGet (always happens except on PR builds)
-#   - task: NuGetCommand@2
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
-#     continueOnError: true
-#     displayName: Push NuGet packages to NuGet
-#     inputs:
-#       command: push
-#       nuGetFeedType: external
-#       allowPackageConflicts: true
-#       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-#       publishFeedCredentials: 'NuGet-nf-interpreter'
+  # push NuGet class lib package to NuGet (always happens except on PR builds)
+  - task: NuGetCommand@2
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    continueOnError: true
+    displayName: Push NuGet packages to NuGet
+    inputs:
+      command: push
+      nuGetFeedType: external
+      allowPackageConflicts: true
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'NuGet-nf-interpreter'
 
-#   - template: azure-pipelines-templates/publish-win32-nanoclr.yml
+  - template: azure-pipelines-templates/publish-win32-nanoclr.yml
 
-#######################
+######################
 # generate change log
-# - job: Generate_change_log
-#   dependsOn:
-#   - Build_STM32_targets
-#   - Build_ESP32_targets
-#   - Build_NXP_targets
-#   - Build_TI_SimpleLink_targets
-#   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-#   condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+- job: Generate_change_log
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_NXP_targets
+  - Build_TI_SimpleLink_targets
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   steps:
-#   - task: DotNetCoreCLI@2  
-#     condition: succeeded()
-#     displayName: Install NBGV tool
-#     inputs:
-#       command: custom
-#       custom: tool
-#       arguments: install --tool-path . nbgv
+  steps:
+  - task: DotNetCoreCLI@2  
+    condition: succeeded()
+    displayName: Install NBGV tool
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
 
-#   - script: nbgv cloud -a -c
-#     condition: succeeded()
-#     displayName: Set build number
+  - script: nbgv cloud -a -c
+    condition: succeeded()
+    displayName: Set build number
 
-#   - task: UseRubyVersion@0
-#     condition: succeeded()
-#     inputs:
-#       versionSpec: '= 2.7' 
-#       addToPath: true
+  - task: UseRubyVersion@0
+    condition: succeeded()
+    inputs:
+      versionSpec: '= 2.7' 
+      addToPath: true
 
-#   # generate change log including future version
-#   - powershell: |
-#         gem install github_changelog_generator --quiet --no-document
-#         # need to call it passing both cache options with full path otherwise it won't work
-#         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-#     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
-#     displayName: Generate change log
+  # generate change log including future version
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
+    displayName: Generate change log
 
-#   # generate change log without future version
-#   - powershell: |
-#         gem install github_changelog_generator --quiet --no-document
-#         # need to call it passing both cache options with full path otherwise it won't work
-#         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-#     condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
-#     displayName: Generate change log
+  # generate change log without future version
+  - powershell: |
+        gem install github_changelog_generator --quiet --no-document
+        # need to call it passing both cache options with full path otherwise it won't work
+        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
+    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
+    displayName: Generate change log
 
-#   # push new changelog to GitHub repo
-#   - powershell: |
-#         git config --global gc.auto 0
-#         git config --global user.name nfbot
-#         git config --global user.email nanoframework@outlook.com
-#         git config --global core.autocrlf true
+  # push new changelog to GitHub repo
+  - powershell: |
+        git config --global gc.auto 0
+        git config --global user.name nfbot
+        git config --global user.email nanoframework@outlook.com
+        git config --global core.autocrlf true
 
-#         git add CHANGELOG.md
-#         git commit -m "Update CHANGELOG" -m"***NO_CI***"
+        git add CHANGELOG.md
+        git commit -m "Update CHANGELOG" -m"***NO_CI***"
 
-#         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-#         # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-#         $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
 
-#         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-#     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), eq( variables['StartReleaseCandidate'], false ))
-#     continueOnError: true
-#     displayName: Push changelog to GitHub
+        git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
+    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), eq( variables['StartReleaseCandidate'], false ))
+    continueOnError: true
+    displayName: Push changelog to GitHub
 
-#######################
+######################
 # create or update GitHub release ON tags from main branch or tags
-# - job: Publish_Release
-#   dependsOn:
-#   - Build_STM32_targets
-#   - Build_ESP32_targets
-#   - Build_NXP_targets
-#   - Build_TI_SimpleLink_targets
-#   - Build_WIN32_nanoCLR
-#   - Generate_change_log
-#   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-#   condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+- job: Publish_Release
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_NXP_targets
+  - Build_TI_SimpleLink_targets
+  - Build_WIN32_nanoCLR
+  - Generate_change_log
+  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
+  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   steps:
-#   - task: DotNetCoreCLI@2  
-#     inputs:
-#       command: custom
-#       custom: tool
-#       arguments: install --tool-path . nbgv
-#     displayName: Install NBGV tool
+  steps:
+  - task: DotNetCoreCLI@2  
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . nbgv
+    displayName: Install NBGV tool
 
-#   - script: nbgv cloud -a -c
-#     displayName: Set build number
+  - script: nbgv cloud -a -c
+    displayName: Set build number
 
-#   - task: GitHubReleasePublish@1
-#     condition: endsWith(variables['Build.SourceBranch'], 'main')
-#     displayName: Create/Update GitHub stable release
-#     inputs:
-#       githubEndpoint: 'nanoframework'
-#       githubOwner: 'nanoframework'
-#       githubRepositoryName: nf-interpreter
-#       githubTag: v$(NBGV_AssemblyVersion)
-#       githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
-#       githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Cloudsmith repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
-#       githubTargetCommitsh: $(Build.SourceVersion)
-#       githubReleaseDraft: false
-#       githubReleasePrerelease: false
-#       githubReuseDraftOnly: false
-#       githubReuseRelease: true
-#       githubEditRelease: true
-#       githubDeleteEmptyTag: true
-#       githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+  - task: GitHubReleasePublish@1
+    condition: endsWith(variables['Build.SourceBranch'], 'main')
+    displayName: Create/Update GitHub stable release
+    inputs:
+      githubEndpoint: 'nanoframework'
+      githubOwner: 'nanoframework'
+      githubRepositoryName: nf-interpreter
+      githubTag: v$(NBGV_AssemblyVersion)
+      githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
+      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Cloudsmith repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
+      githubTargetCommitsh: $(Build.SourceVersion)
+      githubReleaseDraft: false
+      githubReleasePrerelease: false
+      githubReuseDraftOnly: false
+      githubReuseRelease: true
+      githubEditRelease: true
+      githubDeleteEmptyTag: true
+      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**/*.zip'
 
-##################################
+#################################
 # report build failure to Discord
-# - job: Report_Build_Failure
-#   dependsOn:
-#   - Build_STM32_targets
-#   - Build_ESP32_targets
-#   - Build_NXP_targets
-#   - Build_TI_SimpleLink_targets
-#   - Build_WIN32_nanoCLR
-#   - Generate_change_log
-#   - Check_Code_Style
-#   condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
+- job: Report_Build_Failure
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_NXP_targets
+  - Build_TI_SimpleLink_targets
+  - Build_WIN32_nanoCLR
+  - Generate_change_log
+  - Check_Code_Style
+  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
 
-#   pool:
-#     vmImage: 'windows-2019'
+  pool:
+    vmImage: 'windows-2019'
 
-#   steps:
+  steps:
 
-#   - checkout: self
-#     fetchDepth: 1
+  - checkout: self
+    fetchDepth: 1
 
-#   # step from template @ nf-tools repo
-#   - template: azure-pipelines-templates/discord-webhook.yml@templates  
-#     parameters:
-#       status: 'failure'
-#       webhookUrl: '$(DiscordWebhook)'
-#       message: ''
+  # step from template @ nf-tools repo
+  - template: azure-pipelines-templates/discord-webhook.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''
