@@ -462,6 +462,11 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_COMPONENTS_TO_ADD fatfs)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::fatfs)
     endif()
+
+    if(HAL_USE_BLE)
+        list(APPEND IDF_COMPONENTS_TO_ADD bt)
+        list(APPEND IDF_LIBRARIES_TO_ADD idf::bt)
+    endif()
     
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}

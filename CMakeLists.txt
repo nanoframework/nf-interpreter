@@ -835,10 +835,10 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     # Only used by ESP32 at the moment
     if(API_nanoFramework.Hardware.Esp32.Ble)
-        set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+        set(HAL_USE_BLE TRUE CACHE INTERNAL "BLE Support")
         message(STATUS "Support for BLE enabled")
     else()
-        set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+        set(HAL_USE_BLE FALSE CACHE INTERNAL "No BLE Support")
         message(STATUS "Support for BLE disabled")
     endif()
 
