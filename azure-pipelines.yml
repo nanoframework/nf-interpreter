@@ -327,7 +327,7 @@ jobs:
 - job: Build_ESP32_targets
   condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS_ESP32'], true)) )
 
-  # dependsOn:
+  dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
