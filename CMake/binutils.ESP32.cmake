@@ -474,7 +474,10 @@ macro(nf_add_idf_as_library)
 
         # check for ETH_RMII_CLK_OUT_GPIO in the build options
         if(ETH_RMII_CLK_OUT_GPIO)
-            # need to read the SDK CONFIG file and replace the appropriate options            
+
+            message(STATUS "\nETH_RMII_CLK_OUT_GPIO specified. Updating SDK CONFIG to enable CLK output on GPIO${ETH_RMII_CLK_OUT_GPIO}.\n")
+            
+            # need to read the supplied SDK CONFIG file and replace the appropriate options            
             file(READ
                 "${SDKCONFIG_DEFAULTS_FILE}"
                 SDKCONFIG_DEFAULT_CONTENTS)
