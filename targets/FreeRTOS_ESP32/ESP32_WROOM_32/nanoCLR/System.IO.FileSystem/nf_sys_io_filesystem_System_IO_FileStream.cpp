@@ -64,7 +64,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     const char *fileName = stack.Arg2().RecoverString();
     FileMode mode = (FileMode)(stack.Arg3().NumericByRef().s4);
 
-    FILE * file;
+    FILE *file;
     char modeFlags[4] = {0};
     char *filePath = NULL;
     char *vfsPath = NULL;
@@ -106,7 +106,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
     {
         // Create new file. If already exist give  IOException exception.
         case FileMode_CreateNew:
-            if ( fileExists)
+            if (fileExists)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
             }
@@ -120,15 +120,15 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
 
         // Open existing file. If not found then FileNotFoundException exception
         case FileMode_Open:
-            if ( !fileExists)
+            if (!fileExists)
             {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
             modeFlags[0] = 'r';
             break;
 
         case FileMode_OpenOrCreate:
-            if ( fileExists)
+            if (fileExists)
             {
                 modeFlags[0] = 'r';
             }
@@ -140,14 +140,14 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
 
         // Open existing file, if not found then FileNotFoundException exception
         case FileMode_Truncate:
-            if ( !fileExists)
+            if (!fileExists)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
             }
             modeFlags[0] = 'w';
             break;
 
-        // Opens the file if it exists and seeks to the end of the file, or creates a new file. 
+        // Opens the file if it exists and seeks to the end of the file, or creates a new file.
         case FileMode_Append:
             modeFlags[0] = 'a';
             break;
@@ -199,7 +199,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
 
     int operationResult;
     CLR_UINT32 readCount = 0;
-    FILE * file;
+    FILE *file;
     char *filePath = NULL;
     char *vfsPath = NULL;
     unsigned char *buffer = NULL;
@@ -281,7 +281,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
     NANOCLR_CLEANUP_END();
 }
 
-
 HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__STRING__STRING__I8__SZARRAY_U1__I4(
     CLR_RT_StackFrame &stack)
 {
@@ -293,7 +292,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     CLR_RT_HeapBlock_Array *pArray = stack.Arg4().DereferenceArray();
     const CLR_INT32 length = stack.Arg5().NumericByRef().s4;
 
-    FILE * file;
+    FILE *file;
     char *filePath = NULL;
     char *vfsPath = NULL;
     unsigned char *buffer = NULL;
@@ -329,7 +328,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     if (file != NULL)
     {
         // Change to actual position in file to start write
-        if ( fseek(file, position, SEEK_SET) != 0)
+        if (fseek(file, position, SEEK_SET) != 0)
         {
             // failed to change position
             NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
@@ -406,9 +405,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
     // Convert to ESP32 VFS path
     vfsPath = ConvertToVfsPath(filePath);
 
-    if ( stat(vfsPath,&fileInfo) == 0 )
+    if (stat(vfsPath, &fileInfo) == 0)
     {
-        if (S_ISREG(fileInfo.st_mode) )
+        if (S_ISREG(fileInfo.st_mode))
         {
             length = fileInfo.st_size;
         }

@@ -29,7 +29,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     const char *fileName = stack.Arg1().RecoverString();
 
     bool exists = false;
-    int  operationResult;
+    int operationResult;
     char *filePath = NULL;
     char *vfsPath = NULL;
     struct stat fno;
@@ -38,7 +38,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     FAULT_ON_NULL(fileName);
 
     // TODO don't really need to pass in path & filename, whole path would have been OK for ESP32
-    
+
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
@@ -58,18 +58,18 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::ExistsNative___STATIC__BOOL
     vfsPath = ConvertToVfsPath(filePath);
 
     operationResult = stat(vfsPath, &fno);
-    if (operationResult == 0 )
+    if (operationResult == 0)
     {
         if (S_ISREG(fno.st_mode))
         {
             exists = true;
-        }    
+        }
     }
 
     stack.SetResult_Boolean(exists);
 
     NANOCLR_CLEANUP();
- 
+
     // free buffer memory, if allocated
     if (filePath != NULL)
     {
@@ -113,15 +113,15 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::MoveNative___STATIC__VOID__
             // file already exists
             NANOCLR_SET_AND_LEAVE(CLR_E_PATH_ALREADY_EXISTS);
         }
-        else 
+        else
         {
             // Some other error
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
     }
-    
+
     NANOCLR_CLEANUP();
- 
+
     // free memory buffers , if allocated
     if (vfsPathSrc != NULL)
     {
@@ -154,7 +154,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::DeleteNative___STATIC__VOID
     }
 
     NANOCLR_CLEANUP();
- 
+
     if (vfsPath != NULL)
     {
         platform_free(vfsPath);
@@ -192,7 +192,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
                     attributes |= FileAttributes::FileAttributes_Directory;
                 }
             }
-            else 
+            else
             {
                 if (errno == ENOENT)
                 {
@@ -202,50 +202,50 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
                 else
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-                }            
+                }
             }
         }
         else
         {
-                // We don't know the fatfs drive used by VFS 0:,  1: etc
-                // So for the moment assume "0:"" as that ok for 1 mounted FATFS drive
+            // We don't know the fatfs drive used by VFS 0:,  1: etc
+            // So for the moment assume "0:"" as that ok for 1 mounted FATFS drive
 
-                // Take copy of filepath, use vfspath string
-                int srcLen = hal_strlen_s(filePath);
-                workingPath = (char *)platform_malloc(srcLen + 1);
-                if (workingPath == NULL)
-                {
-                    // failed to allocate memory
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-                }
+            // Take copy of filepath, use vfspath string
+            int srcLen = hal_strlen_s(filePath);
+            workingPath = (char *)platform_malloc(srcLen + 1);
+            if (workingPath == NULL)
+            {
+                // failed to allocate memory
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            }
 
-                hal_strcpy_s(workingPath, srcLen + 1, filePath);
-    
-                // Make drive 0:
-                workingPath[0] = '0';
+            hal_strcpy_s(workingPath, srcLen + 1, filePath);
 
-                FILINFO fno;
+            // Make drive 0:
+            workingPath[0] = '0';
 
-                // Get infos about file
-                FRESULT operationResult = f_stat(workingPath, &fno);
-                if (operationResult == FR_OK)
-                {
-                    attributes = fno.fattrib;
-                }
-                else if (operationResult == FR_NO_FILE)
-                {
-                    // File/Directory not found
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
-                }
-                else
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-                }
+            FILINFO fno;
+
+            // Get infos about file
+            FRESULT operationResult = f_stat(workingPath, &fno);
+            if (operationResult == FR_OK)
+            {
+                attributes = fno.fattrib;
+            }
+            else if (operationResult == FR_NO_FILE)
+            {
+                // File/Directory not found
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
+            }
+            else
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+            }
         }
         stack.SetResult_U1(attributes);
     }
     NANOCLR_CLEANUP();
- 
+
     if (workingPath != NULL)
     {
         platform_free(workingPath);
@@ -257,7 +257,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
 HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATIC__VOID__STRING__U1(
     CLR_RT_StackFrame &stack)
 {
-    char * workingPath = NULL;
+    char *workingPath = NULL;
 
     NANOCLR_HEADER();
     {
@@ -268,10 +268,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
         CLR_UINT8 attributes = stack.Arg1().NumericByRef().u1;
 
         // TODO fix
-        // No way to change attribute with ESP32 VFS so need to call FATFS if driver is FAT drive, anything other than internal drive
-        // But we don't know the fatfs drive used by VFS 0:,  1: etc
-        // For the moment just use 0: as that ok for 1 mounted FATFS drive
-        // For internal drive just ignore
+        // No way to change attribute with ESP32 VFS so need to call FATFS if driver is FAT drive, anything other than
+        // internal drive But we don't know the fatfs drive used by VFS 0:,  1: etc For the moment just use 0: as that
+        // ok for 1 mounted FATFS drive For internal drive just ignore
         if (!IsInternalFilePath(filePath))
         {
             // Take copy of filepath
@@ -284,7 +283,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
             }
 
             hal_strcpy_s(workingPath, srcLen + 1, filePath);
-            
+
             // Make drive 0:
             workingPath[0] = '0';
 
@@ -295,10 +294,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::SetAttributesNative___STATI
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
             }
         }
-
     }
     NANOCLR_CLEANUP();
- 
+
     if (workingPath != NULL)
     {
         platform_free(workingPath);
@@ -337,7 +335,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     SYSTEMTIME fileInfoTime;
     CLR_RT_TypeDescriptor dtType;
     struct stat fileInfo;
@@ -367,9 +365,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
 
     pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
     *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
-    
+
     NANOCLR_CLEANUP();
- 
+
     if (vfsPath != NULL)
     {
         platform_free(vfsPath);

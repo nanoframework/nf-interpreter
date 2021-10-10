@@ -380,7 +380,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 // Enumerate drives in system
 // if array == null then only count drives
 // Return number of drives
-HRESULT EnumerateDrives(CLR_RT_HeapBlock * array, int &count)
+HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
 {
     NANOCLR_HEADER();
     {
@@ -389,18 +389,18 @@ HRESULT EnumerateDrives(CLR_RT_HeapBlock * array, int &count)
         DIR currentDirectory;
         char workingDrive[] = INDEX0_DRIVE_PATH;
 
-        if(array)
+        if (array)
         {
             // get a pointer to the first object in the array (which is of type <String>)
             storageFolder = (CLR_RT_HeapBlock *)array->DereferenceArray()->GetFirstElement();
         }
 
         count = 0;
-        for (char drive=INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE_LETTER[0]; drive++)
+        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE_LETTER[0]; drive++)
         {
             workingDrive[0] = drive;
 
-            operationResult = f_opendir(&currentDirectory,  workingDrive);
+            operationResult = f_opendir(&currentDirectory, workingDrive);
             if (operationResult == FR_OK)
             {
                 count++;
@@ -410,7 +410,7 @@ HRESULT EnumerateDrives(CLR_RT_HeapBlock * array, int &count)
                 {
                     // Add entry to array
                     // set the drive letter in string array
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));    
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
 
                     // Next element in array
                     storageFolder++;
@@ -429,7 +429,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
         int count = 0;
 
-        // 1st pass find number of drives 
+        // 1st pass find number of drives
         NANOCLR_CHECK_HRESULT(EnumerateDrives(NULL, count));
 
         // create an array of files paths <String> for count drives
