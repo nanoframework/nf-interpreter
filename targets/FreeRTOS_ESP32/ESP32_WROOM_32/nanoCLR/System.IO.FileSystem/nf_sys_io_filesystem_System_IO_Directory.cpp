@@ -391,7 +391,7 @@ static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
         }
 
         count = 0;
-        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE_LETTER[0]; drive++)
+        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE0_LETTER[0]; drive++)
         {
             workingDrive[1] = drive;
             currentDirectory = opendir(workingDrive);
