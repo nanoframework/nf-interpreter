@@ -13,21 +13,21 @@
 // Defines for Windows.Storage.c
 extern "C"
 {
-    bool Storage_MountMMC( bool bit1Mode);
-    bool Storage_MountSpi(int spiBus, uint32_t CSPin);
+    bool Storage_MountMMC( bool bit1Mode, int driveIndex);
+    bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
     bool Storage_InitSDCardSPI(char * vfsName, int maxFiles, int pin_Miso, int pin_Mosi, int pin_Clk, int pin_Cs);
     bool Storage_InitSDCardMMC(char * vfsName, int maxFiles, bool bit1Mode);
     bool Storage_UnMountSDCard();
 }
 
 #if defined(HAL_USE_SDC)
-bool Storage_MountMMC( bool bit1Mode)
+bool Storage_MountMMC( bool bit1Mode, int driveIndex=0)
 {
 	char     mountPoint[] = INDEX0_DRIVE_LETTER;
 
 	// Change fatfs drive letter to mount point  D: -> /D
-	mountPoint[1] = mountPoint[0];
-	mountPoint[0] = '/';
+    mountPoint[1] = mountPoint[0]  + driveIndex;
+    mountPoint[0] = '/';
 
     // Try mounting
     if (!Storage_InitSDCardMMC(mountPoint, SDC_MAX_OPEN_FILES, bit1Mode) )
@@ -37,13 +37,13 @@ bool Storage_MountMMC( bool bit1Mode)
     return true;
 }
 
-bool Storage_MountSpi(int spiBus, uint32_t CSPin)
+bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex=0)
 {
-    char     mountPoint[] = INDEX0_DRIVE_LETTER;
+    char     mountPoint[] = INDEX0_DRIVE_LETTER ;
 
-	// Change fatfs drive letter to mount point  D: -> /D
-	mountPoint[1] = mountPoint[0]; 
-	mountPoint[0] = '/';
+	// Change fatfs drive letter to mount point  D: -> /D for ESP32 VTFS
+    mountPoint[1] = mountPoint[0] + driveIndex; 
+    mountPoint[0] = '/';
 
     int mosiPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 0);
     int misoPin =  Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 1);
