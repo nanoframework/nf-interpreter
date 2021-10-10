@@ -404,7 +404,7 @@ HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
             if (operationResult == FR_OK)
             {
                 count++;
-                closedir(currentDirectory);
+                f_closedir(currentDirectory);
 
                 if (array)
                 {

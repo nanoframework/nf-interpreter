@@ -6,7 +6,7 @@
 #include "nf_sys_io_filesystem.h"
 
 __nfweak HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
-    InitNative___VOID__nanoFrameworkSystemIOFileSystemSDCardSDInterfaceType(CLR_RT_StackFrame &stack)
+    InitNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
