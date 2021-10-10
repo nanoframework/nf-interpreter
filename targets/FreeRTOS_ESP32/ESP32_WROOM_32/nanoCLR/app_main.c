@@ -45,7 +45,7 @@ void main_task(void *pvParameter)
 }
 
 // Dummy default log method to stop output from ESP32 IDF
-int dummyLog ( const char * format, va_list arg )
+int dummyLog(const char *format, va_list arg)
 {
     (void)format;
     (void)arg;

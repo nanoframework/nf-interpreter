@@ -30,7 +30,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::ExistsNative___STATIC_
     if (stat(vfsPath, &fileInfo) == 0)
     {
         // Exists and a Directory
-        if(S_ISDIR(fileInfo.st_mode))
+        if (S_ISDIR(fileInfo.st_mode))
         {
             exists = true;
         }
@@ -53,7 +53,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::MoveNative___STATIC__V
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
     char *workingPathSrc = NULL;
     char *workingPathDest = NULL;
 
@@ -73,7 +73,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::MoveNative___STATIC__V
             // invalid path
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
-        else 
+        else
         {
             // folder / file doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_FOUND);
@@ -108,14 +108,14 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::DeleteNative___STATIC_
     vfsPath = ConvertToVfsPath(folderPath);
 
     // Delete folder
-    if (unlink(vfsPath) != 0 )
+    if (unlink(vfsPath) != 0)
     {
         if (errno == EACCES)
         {
             // directory not empty, cannot delete
             NANOCLR_SET_AND_LEAVE(CLR_E_DIRECTORY_NOT_EMPTY);
         }
-        else 
+        else
         {
             // file doesn't exist
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -144,7 +144,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CreateNative___STATIC_
 
     vfsPath = ConvertToVfsPath(folderPath);
 
-    if (mkdir(vfsPath, 0 ) != 0)
+    if (mkdir(vfsPath, 0) != 0)
     {
         if (errno == EEXIST)
         {
@@ -168,11 +168,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::CreateNative___STATIC_
     NANOCLR_CLEANUP_END();
 }
 
-int CountEntries(const char *folderPath, int type )
+int CountEntries(const char *folderPath, int type)
 {
     uint16_t count = 0;
-    DIR * currentDirectory;
-    struct dirent * fileInfo;
+    DIR *currentDirectory;
+    struct dirent *fileInfo;
 
     currentDirectory = opendir(folderPath);
     if (currentDirectory == NULL)
@@ -207,7 +207,7 @@ int CountEntries(const char *folderPath, int type )
     return count;
 }
 
-HRESULT BuildPathsArray(const char * vfsFolderPath, const char * folderPath, CLR_RT_HeapBlock arrayPaths, int entryType)
+HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_RT_HeapBlock arrayPaths, int entryType)
 {
     char *stringBuffer = NULL;
     char *workingBuffer = NULL;
@@ -215,8 +215,8 @@ HRESULT BuildPathsArray(const char * vfsFolderPath, const char * folderPath, CLR
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock *pathEntry;
-        DIR * currentDirectory;
-        struct dirent * fileInfo;
+        DIR *currentDirectory;
+        struct dirent *fileInfo;
 
         // get a pointer to the first object in the array (which is of type <String>)
         pathEntry = (CLR_RT_HeapBlock *)arrayPaths.DereferenceArray()->GetFirstElement();
@@ -299,16 +299,18 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
     vfsPath = ConvertToVfsPath(folderPath);
 
     fileCount = CountEntries(vfsPath, DT_REG);
-    if (fileCount<0)
+    if (fileCount < 0)
     {
         // failed to change drive
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
 
     // create an array of files paths <String>
-    NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(folderArrayPaths, (CLR_UINT32)fileCount, g_CLR_RT_WellKnownTypes.m_String));
-    
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+        folderArrayPaths,
+        (CLR_UINT32)fileCount,
+        g_CLR_RT_WellKnownTypes.m_String));
+
     if (fileCount > 0)
     {
         // 2nd pass fill directory path names
@@ -326,7 +328,6 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
     NANOCLR_CLEANUP_END();
 }
 
-
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative___STATIC__SZARRAY_STRING__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -342,9 +343,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 
     vfsPath = ConvertToVfsPath(folderPath);
 
-    // 1st pass count directory entries 
-    directoryCount = CountEntries(vfsPath, DT_DIR );
-    if ( directoryCount < 0)
+    // 1st pass count directory entries
+    directoryCount = CountEntries(vfsPath, DT_DIR);
+    if (directoryCount < 0)
     {
         // failed to change drive
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
@@ -374,23 +375,23 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 // Enumerate drives in system
 // if array == null then only count drives
 // Return number of drives
-static HRESULT EnumerateDrives(CLR_RT_HeapBlock * array, int &count)
+static HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
 {
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock *storageFolder = NULL;
-        DIR * currentDirectory;
+        DIR *currentDirectory;
         char outputDrive[] = INDEX0_DRIVE_PATH;
         char workingDrive[] = "/D/";
 
-        if(array)
+        if (array)
         {
             // get a pointer to the first object in the array (which is of type <String>)
             storageFolder = (CLR_RT_HeapBlock *)array->DereferenceArray()->GetFirstElement();
         }
 
         count = 0;
-        for (char drive=INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE_LETTER[0]; drive++)
+        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE_LETTER[0]; drive++)
         {
             workingDrive[1] = drive;
             currentDirectory = opendir(workingDrive);
@@ -405,7 +406,7 @@ static HRESULT EnumerateDrives(CLR_RT_HeapBlock * array, int &count)
                     outputDrive[0] = drive;
 
                     // set the drive letter in string array
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, outputDrive));    
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, outputDrive));
 
                     // Next element in array
                     storageFolder++;
@@ -424,7 +425,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
         int count = 0;
 
-        // 1st pass find number of drives 
+        // 1st pass find number of drives
         NANOCLR_CHECK_HRESULT(EnumerateDrives(NULL, count));
 
         // create an array of files paths <String> for count drives
@@ -447,7 +448,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
     char *vfsPath = NULL;
     CLR_INT64 *pRes;
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();;
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+    ;
 
     const char *folderPath = stack.Arg0().RecoverString();
     FAULT_ON_NULL_ARG(folderPath);
@@ -462,8 +464,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
 
     // get the date time details and return it on Stack as DateTime object
     fileInfoTime = GetDateTimeFromStat(&fileInfo.st_mtime);
-   
-     // initialize <DateTime> type descriptor
+
+    // initialize <DateTime> type descriptor
     NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
 
     // create an instance of <DateTime>

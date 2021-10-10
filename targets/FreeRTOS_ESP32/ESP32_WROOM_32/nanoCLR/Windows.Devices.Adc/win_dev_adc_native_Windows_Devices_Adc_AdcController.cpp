@@ -12,9 +12,9 @@
 // ADC1 with 8 channels ( GPIO 32 - 39 ) 0=36, 1=37, 2=38, 3=39, 4=32, 5=33, 6=34, 7=35
 //                      channel 8/9 are logical channels for temperature sensor and is the built in Esp32 Hall sensor.
 //                      For hall sensor there is a restriction channel 0 and 3 must be unused
-// ADC2 with 10 channels (GPIO 0,2,4,12-15 and 25-27) 
+// ADC2 with 10 channels (GPIO 0,2,4,12-15 and 25-27)
 // Note : ADC2 cannot be used if WiFi started and other restrictions as pins used for other things.
-// 
+//
 // ESP_DevKitC GPIO 0 cannot be used
 // ESP-Wrover_kit V3 GPIO 0,2,4 and 15 can't be used
 
