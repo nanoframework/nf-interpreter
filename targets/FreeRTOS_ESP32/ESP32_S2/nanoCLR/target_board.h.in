@@ -13,6 +13,6 @@
 
 #include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TARGET_BOARD@"
+#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TARGET_BOARD@ built with ESP IDF @IDF_VER@"
 
 #endif // TARGET_BOARD_NANOCLR_H

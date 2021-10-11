@@ -17,6 +17,8 @@ macro(nf_set_compiler_var var name)
       REQUIRED)
 endmacro()
 
+# safer to have these here as a check if the toolchain are accessible in the PATH
+
 # setup C compiler
 nf_set_compiler_var(C_COMPILER gcc)
 

@@ -384,6 +384,30 @@ macro(nf_setup_partition_tables_generator)
 
     elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
         # partition tables for ESP32-S2)
+
+                
+        # partition tables for ESP32
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            --flash-size 16MB 
+            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
+            COMMENT "Generate ESP32 partition table for 16MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            --flash-size 8MB 
+            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
+            COMMENT "Generate ESP32 partition table for 8MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            --flash-size 4MB 
+            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_4mb.bin
+            COMMENT "Generate Esp32 partition table for 4MB flash" )
+
     endif()
 
 endmacro()
