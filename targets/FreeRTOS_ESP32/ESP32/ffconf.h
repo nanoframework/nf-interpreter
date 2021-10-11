@@ -1,6 +1,19 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) 2018, ChaN, all right reserved.
+// See LICENSE file in the project root for full license information.
+//
+
+// clang-format off
+
 #include <sys/param.h>
 #include <sdkconfig.h>
- 
+
+#if !defined(HAL_USE_SDC)
+// need this include here when not using SDCARD so it can load the one from IDF
+#include <ffconf.h>
+#endif
+
 /*---------------------------------------------------------------------------/
 /  FatFs Functional Configurations
 /---------------------------------------------------------------------------*/
@@ -324,3 +337,5 @@ void ff_memfree(void*);
 #define disk_read           ff_disk_read
 #define disk_write          ff_disk_write
 #define disk_ioctl          ff_disk_ioctl
+
+// clang-format on

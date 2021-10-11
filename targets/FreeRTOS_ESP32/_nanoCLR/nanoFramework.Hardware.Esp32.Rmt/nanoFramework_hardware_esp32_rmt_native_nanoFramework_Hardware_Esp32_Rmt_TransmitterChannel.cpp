@@ -296,12 +296,17 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NANOCLR_NOCLEANUP();
 }
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
+
 esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
     InitTxChannel(rmt_channel_t channel, gpio_num_t gpio)
 {
     // TODO check replaced code
     rmt_config_t rmt_tx = RMT_DEFAULT_CONFIG_TX(gpio, channel);
-      
+
     auto err = rmt_config(&rmt_tx);
     if (err != ESP_OK)
         return err;
@@ -316,3 +321,7 @@ esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware
         std::forward_as_tuple());
     return ESP_OK;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

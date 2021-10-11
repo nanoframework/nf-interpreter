@@ -45,8 +45,7 @@ bool WP_Initialise(COM_HANDLE port)
 {
     (void)port;
 
-    if (WP_Port > UART_NUM_2)
-        return false;
+    ASSERT(WP_Port <= SOC_UART_NUM);
 
     uart_config_t uart_config = {
         // baudrate

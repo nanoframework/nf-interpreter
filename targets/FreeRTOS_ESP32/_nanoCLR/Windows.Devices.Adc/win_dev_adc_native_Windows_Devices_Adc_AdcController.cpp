@@ -35,7 +35,8 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
     NANOCLR_HEADER();
     {
         esp_err_t result;
-        adc_bits_width_t width_bit = ADC_WIDTH_BIT_12; // default to 12
+        // default to MAX bit width for SoC
+        adc_bits_width_t width_bit = (adc_bits_width_t)SOC_ADC_MAX_BITWIDTH;
         adc_atten_t atten = ADC_ATTEN_DB_11;
 
         // get a pointer to the managed object instance and check that it's not NULL

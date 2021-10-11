@@ -10,7 +10,12 @@
 static char HighSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 static char LowSpeedPinMap[8] = {255, 255, 255, 255, 255, 255, 255, 255};
 
+#if SOC_LEDC_SUPPORT_HS_MODE
 #define GetSpeedMode(timer) (ledc_mode_t)((timer > 3) ? LEDC_LOW_SPEED_MODE : LEDC_HIGH_SPEED_MODE)
+#else
+#define GetSpeedMode(timer) (ledc_mode_t)(LEDC_LOW_SPEED_MODE)
+#endif
+
 #define IDF_ERROR(result)                                                                                              \
     if (result != ESP_OK)                                                                                              \
     {                                                                                                                  \

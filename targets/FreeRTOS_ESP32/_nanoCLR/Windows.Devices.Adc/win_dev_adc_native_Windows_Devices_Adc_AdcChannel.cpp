@@ -6,7 +6,9 @@
 
 #include "win_dev_adc_native_target.h"
 
+#if defined(IDF_TARGET_ESP32)
 extern "C" uint8_t temprature_sens_read();
+#endif
 
 HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadValue___I4(CLR_RT_StackFrame &stack)
 {
@@ -29,12 +31,17 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         {
             switch (channelNumber)
             {
+
+#if defined(IDF_TARGET_ESP32)
                 case 8:
-                    reading = temprature_sens_read();
+                    reading = temperature_sens_read();
                     break;
+
                 case 9:
                     reading = hall_sensor_read();
                     break;
+#endif
+
                 default:
                     reading = adc1_get_raw((adc1_channel_t)channelNumber);
                     break;
@@ -44,7 +51,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcChannel::NativeReadVal
         {
             // Adjust channel number for ADC2
             channelNumber -= 10;
-            result = adc2_get_raw((adc2_channel_t)channelNumber, ADC_WIDTH_12Bit, &reading);
+            result = adc2_get_raw((adc2_channel_t)channelNumber, (adc_bits_width_t)SOC_ADC_MAX_BITWIDTH, &reading);
 
             if (result != ESP_OK)
             {

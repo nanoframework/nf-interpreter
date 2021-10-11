@@ -11,9 +11,10 @@
 //  Map pins  mosi, miso, clock
 //
 int8_t Esp32_SPI_DevicePinMap[2][3] = {
-    {GPIO_NUM_23, GPIO_NUM_25, GPIO_NUM_19}, // SPI1 - Wrover SPI display pins
-    {-1, -1, -1}                             // SPI2 - no pins assigned
-};
+    // SPI1 - use defaults from IDF sample
+    {GPIO_NUM_35, GPIO_NUM_37, GPIO_NUM_36},
+    // SPI2 - no pins assigned
+    {-1, -1, -1}};
 
 //  Serial
 //  2 devices COM1,COM2 ( UART_NUM_0, UART_NUM_1 )
@@ -27,8 +28,11 @@ int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
      UART_NUM_0_RTS_DIRECT_GPIO_NUM,
      UART_NUM_0_CTS_DIRECT_GPIO_NUM},
 
+#if defined(UART_NUM_2)
     // COM 2 - all set to UART_PIN_NO_CHANGE
     {UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE},
+#endif
+};
 
 // =============================================
 //  I2C
@@ -67,9 +71,10 @@ int8_t Esp32_LED_DevicePinMap[16] = {
 // We use "ADC1" for 20 logical channels
 // Mapped to ESP32 controllers
 // ESP32 ADC1 channels 0 - 7
-//  "    ADC1 channel  8 - Internal Temperture sensor (VP)
+//  "    ADC1 channel  8 - Internal Temperature sensor (VP)
 //  "    ADC1 channel  9 - Internal Hall Sensor (VN)
 //  "    ADC2 channels 10 - 19
+// TODO review ADC channels for ESP32_S2
 int8_t Esp32_ADC_DevicePinMap[20] = {
     // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19
     36, 37, 38, 39, 32, 33, 34, 35, 36, 39, 04, 00, 02, 15, 13, 12, 14, 27, 25, 26};

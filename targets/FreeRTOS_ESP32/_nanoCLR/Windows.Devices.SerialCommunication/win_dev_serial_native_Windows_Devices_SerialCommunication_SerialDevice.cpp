@@ -22,7 +22,9 @@ static const char *TAG = "SerialDevice";
 
 static NF_PAL_UART Uart0_PAL;
 static NF_PAL_UART Uart1_PAL;
+#if defined(UART_NUM_2)
 static NF_PAL_UART Uart2_PAL;
+#endif
 
 NF_PAL_UART *GetPalUartFromUartNum(int uart_num)
 {
@@ -40,10 +42,12 @@ NF_PAL_UART *GetPalUartFromUartNum(int uart_num)
             palUart = &Uart1_PAL;
             break;
 
+#if defined(UART_NUM_2)
         case UART_NUM_2:
             // set UART PAL
             palUart = &Uart2_PAL;
             break;
+#endif
 
         default:
             break;
@@ -286,7 +290,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     // Get Uart number for serial device
     uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-    if (uart_num > UART_NUM_2 || uart_num < 0)
+    if (uart_num > UART_NUM_MAX || uart_num < 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -367,7 +371,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
         // Get Uart number for serial device
         uart_port_t uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
-        if (uart_num > UART_NUM_2 || uart_num < 0)
+        if (uart_num > UART_NUM_MAX || uart_num < 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
