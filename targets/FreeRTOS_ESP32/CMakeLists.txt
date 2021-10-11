@@ -58,13 +58,13 @@ FetchContent_GetProperties(esp32_idf)
 FetchContent_Populate(esp32_idf)
 
 # add IDF CMake dir to modules path
-list(APPEND CMAKE_MODULE_PATH ${ESP32_IDF_PATH_DIR}/CMake)
+list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
 
 # parse IDF path to allow proper comparison with environment variable
 string(REPLACE "\\" "/" IDF_SOURCE_DIR_PATH "$ENV{IDF_PATH}")
 
 # check IDF_PATH environment variable
-if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${ESP32_IDF_PATH_DIR})
+if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${esp32_idf_SOURCE_DIR})
     
     # variable is set and it's different from the current location
     # can't continue
@@ -80,7 +80,7 @@ endif()
 # if using FatFS need to remove IDF ffconfig.h so it can pick ours
 if(NF_FEATURE_HAS_SDCARD)
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E remove ${ESP32_IDF_PATH_DIR}/components/fatfs/src/ffconf.h
+        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
     )
 endif()
 
