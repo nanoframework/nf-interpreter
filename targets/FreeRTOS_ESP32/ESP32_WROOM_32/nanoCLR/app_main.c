@@ -44,8 +44,8 @@ void main_task(void *pvParameter)
     vTaskDelete(NULL);
 }
 
-// Dummy default log method to stop output from ESP32 IDF
-int dummyLog(const char *format, va_list arg)
+// Dummy defauly log method to stop output from ESP32 IDF
+int dummyLog ( const char * format, va_list arg )
 {
     (void)format;
     (void)arg;
@@ -62,7 +62,7 @@ void app_main()
 
     // Stop any logging being directed to VS connection, was an issue with Nimble, outputting on Uart0
     // TODO : redirect these to debugger controlled from nanoframework.Hardware.Esp32
-    esp_log_set_vprintf(dummyLog);
+    esp_log_set_vprintf(dummyLog); 
 
     ESP_ERROR_CHECK(nvs_flash_init());
 
