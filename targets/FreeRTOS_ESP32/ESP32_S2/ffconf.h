@@ -8,6 +8,7 @@
 
 #include <sys/param.h>
 #include <sdkconfig.h>
+#include <target_platform.h>
 
 #if !defined(HAL_USE_SDC)
 // need this include here when not using SDCARD so it can load the one from IDF

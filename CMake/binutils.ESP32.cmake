@@ -471,6 +471,7 @@ macro(nf_add_idf_as_library)
         freertos
         esptool_py
         spiffs
+        fatfs
     )
 
     # set list with the libraries for IDF components added
@@ -480,12 +481,8 @@ macro(nf_add_idf_as_library)
         idf::freertos
         idf::esptool_py
         idf::spiffs
+        idf::fatfs
     )
-
-    if(NF_FEATURE_HAS_SDCARD)
-        list(APPEND IDF_COMPONENTS_TO_ADD fatfs)
-        list(APPEND IDF_LIBRARIES_TO_ADD idf::fatfs)
-    endif()
 
     if(HAL_USE_BLE)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -605,25 +602,28 @@ macro(nf_add_idf_as_library)
 
     endif()
 
-    if(NF_FEATURE_HAS_SDCARD)
-        # need to add include path to find our ffconfig.h
-        
-        # get list of include directories for FATFS
-        get_target_property(IDF_FATFS_INCLUDE_DIRECTORIES __idf_fatfs INCLUDE_DIRECTORIES)
+    # need to add include path to find our ffconfig.h and target_platform.h
+    
+    # get list of include directories for FATFS
+    get_target_property(IDF_FATFS_INCLUDE_DIRECTORIES __idf_fatfs INCLUDE_DIRECTORIES)
 
-        # add nanoCLR include path to FATFS so our lwipots are taken instead of the IDF ones
-        list(APPEND
-            IDF_FATFS_INCLUDE_DIRECTORIES
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
-        )
+    # add nanoCLR include path to FATFS so our lwipots are taken instead of the IDF ones
+    list(APPEND
+        IDF_FATFS_INCLUDE_DIRECTORIES
+        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/
+    )
 
-        # replace the include directories
-        set_property(
-            TARGET __idf_fatfs 
-            PROPERTY INCLUDE_DIRECTORIES ${IDF_FATFS_INCLUDE_DIRECTORIES}
-        )
+    # add nanoCLR include path to FATFS so our lwipots are taken instead of the IDF ones
+    list(APPEND
+        IDF_FATFS_INCLUDE_DIRECTORIES
+            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
+    )
 
-    endif()
+    # replace the include directories
+    set_property(
+        TARGET __idf_fatfs 
+        PROPERTY INCLUDE_DIRECTORIES ${IDF_FATFS_INCLUDE_DIRECTORIES}
+    )
 
     # Link the static libraries to the executable
     target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
