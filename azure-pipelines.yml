@@ -337,21 +337,21 @@ jobs:
   # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
   strategy:
     matrix:
-      ESP32_REV1:
+      ESP32_REV0:
         TargetBoard: ESP32
         BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config:
         IDF_Target: esp32
-        PackageName: ESP32_REV1
+        PackageName: ESP32_REV0
       # BUILD FAILING ON IRAM0 overflow
-      # ESP32_BLE_REV1:
+      # ESP32_BLE_REV0:
       #   TargetBoard: ESP32
       #   BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON -DAPI_nanoFramework.Hardware.Esp32.Ble=ON
       #   ToolchainFile: toolchain.xtensa-esp32-elf.cmake
       #   SDK_config: sdkconfig.default_ble.esp32
       #   IDF_Target: esp32
-      #   PackageName: ESP32_BLE_REV1
+      #   PackageName: ESP32_BLE_REV0
       ESP32_REV3:
         TargetBoard: ESP32
         BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
