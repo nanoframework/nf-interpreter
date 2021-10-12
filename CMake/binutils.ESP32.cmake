@@ -649,7 +649,7 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
     else()
-        set(PSRAM_INFO ", no support for PSRAM")
+        set(PSRAM_INFO ", without support for PSRAM")
     endif()
 
     # find out revision info
