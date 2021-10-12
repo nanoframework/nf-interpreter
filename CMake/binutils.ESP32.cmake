@@ -635,6 +635,34 @@ macro(nf_add_idf_as_library)
 
     nf_setup_partition_tables_generator()
 
+    # set variables to mirror SDK CONFIG options
+
+    # need to read the supplied SDK CONFIG file and replace the appropriate options            
+    file(READ
+        "${SDKCONFIG_DEFAULTS_FILE}"
+        SDKCONFIG_DEFAULT_CONTENTS)
+
+    # find out if there is support for PSRAM
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" CONFIG_ESP32_SPIRAM_SUPPORT_POS)
+
+    # set variable
+    if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
+        set(PSRAM_INFO ", support for PSRAM")
+    else()
+        set(PSRAM_INFO ", no support for PSRAM")
+    endif()
+
+    # find out revision info
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_0=y" CONFIG_ESP32_REV_MIN_0_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_3=y" CONFIG_ESP32_REV_MIN_3_POS)
+
+    # set variable
+    if(${CONFIG_ESP32_REV_MIN_0_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 0")
+    elseif(${CONFIG_ESP32_REV_MIN_3_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. 3")
+    endif()
+
 endmacro()
 
 # macro to clear binary files related with nanoBooter from output
