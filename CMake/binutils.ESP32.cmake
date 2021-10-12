@@ -663,6 +663,14 @@ macro(nf_add_idf_as_library)
         set(REVISION_INFO ", chip rev. 3")
     endif()
 
+    # find out if there is support for BLE
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)
+
+    # set variable
+    if(${CONFIG_BT_ENABLED_POS} GREATER -1)
+        set(BLE_INFO ", support for BLE")
+    endif()
+
 endmacro()
 
 # macro to clear binary files related with nanoBooter from output
