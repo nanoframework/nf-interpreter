@@ -160,7 +160,7 @@ void SerialRxTask(UArg a0, UArg a1)
                     Events_Set(SYSTEM_EVENT_FLAG_COM_IN);
                 }
             }
-            else if (palUart->NewLineChar > 0 && c == palUart->NewLineChar)
+            else if (palUart->NewLineChar > 0 && input == palUart->NewLineChar)
             {
                 // fire event for new line char found
                 Events_Set(SYSTEM_EVENT_FLAG_COM_IN);

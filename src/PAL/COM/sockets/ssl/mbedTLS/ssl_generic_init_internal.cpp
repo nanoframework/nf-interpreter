@@ -264,7 +264,7 @@ bool ssl_generic_init_internal(
         }
 
         // free memory, if allocated
-        if(deviceCert)
+        if (deviceCert)
         {
             platform_free(deviceCert);
         }
