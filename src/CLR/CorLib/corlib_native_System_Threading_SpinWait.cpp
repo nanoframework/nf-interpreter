@@ -40,7 +40,7 @@ HRESULT Library_corlib_native_System_Threading_SpinWait::SpinUntil___STATIC__VOI
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    NANOCLR_CHECK_HRESULT(Spin(stack, true));
+    NANOCLR_CHECK_HRESULT(Spin(stack, false));
 
     NANOCLR_NOCLEANUP();
 }
