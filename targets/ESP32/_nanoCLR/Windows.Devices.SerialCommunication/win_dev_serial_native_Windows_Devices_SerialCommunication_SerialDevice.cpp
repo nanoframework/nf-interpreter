@@ -6,7 +6,6 @@
 #include <nanoHAL.h>
 #include "win_dev_serial_native_target.h"
 #include <Esp32_DeviceMapping.h>
-#include <esp32_idf.h>
 
 // UART buffer size: 256 bytes
 #define UART_BUFER_SIZE 256
@@ -20,10 +19,10 @@
 
 static const char *TAG = "SerialDevice";
 
-static NF_PAL_UART Uart0_PAL;
-static NF_PAL_UART Uart1_PAL;
+static NF_PAL_UART__ Uart0_PAL;
+static NF_PAL_UART__ Uart1_PAL;
 #if defined(UART_NUM_2)
-static NF_PAL_UART Uart2_PAL;
+static NF_PAL_UART__ Uart2_PAL;
 #endif
 
 NF_PAL_UART__ *GetPalUartFromUartNum(int uart_num)
@@ -780,9 +779,8 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT
-Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::NativeRead___U4__SZARRAY_U1__I4__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_SerialDevice::
+    NativeRead___U4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -1017,7 +1015,6 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 
     // return how many bytes can be read from the Rx buffer
     stack.SetResult_U4(palUart->RxRingBuffer.Length());
-
     NANOCLR_NOCLEANUP();
 }
 
