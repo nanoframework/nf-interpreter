@@ -89,7 +89,7 @@
         * [STM32 Flexible Memory Controller driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_fsmc)
         * [STM32 Random number generator driver](targets/ChibiOS/_nf-overlay/os/hal/src/stm32_rng)
   * FreeRTOS 移植
-    * [ESP32_REV0](targets/FreeRTOS_ESP32/ESP32_REV0)
+    * [ESP32_REV0](targets/ESP32/ESP32_REV0)
     * [NXP_MIMXRT1060_EVK](targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK)
   * TI SimpleLink 移植
     * [TI CC1352R1_LAUNCHXL](targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL)

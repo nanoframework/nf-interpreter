@@ -12,7 +12,7 @@ FetchContent_GetProperties(esp32_idf)
 
 # List of the required include paths
 # the list of the required include paths needs to be platform specific because of ESP32 port
-if(RTOS_FREERTOS_ESP32_CHECK)
+if(RTOS_ESP32_CHECK)
     list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include)
     list(APPEND mbedTLS_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include/mbedtls)
 endif()
@@ -92,7 +92,7 @@ set(src_crypto
     
 )
 
-if(NOT RTOS_FREERTOS_ESP32_CHECK)
+if(NOT RTOS_ESP32_CHECK)
     # platform implementation of hardware random provider
     list(APPEND src_crypto mbedtls_entropy_hardware_pool.c)
 endif()
@@ -187,7 +187,7 @@ endforeach()
 
 # some sources need to be added from mbedTLS repo or ESP32 depending on build
 # check port files specific to ESP32 IDF here 'components/mbedtls/CMakeLists.txt'
-if(RTOS_FREERTOS_ESP32_CHECK)
+if(RTOS_ESP32_CHECK)
 
     set(src_platform_specific
 

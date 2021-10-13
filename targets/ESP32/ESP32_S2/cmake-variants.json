@@ -33,7 +33,7 @@
           "TARGET_BOARD": "ESP32_S2",
           "SDK_CONFIG_FILE": "sdkconfig.default_pico",
           "ESP32_IDF_PATH": "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>",
-          "RTOS": "FreeRTOS_ESP32",
+          "RTOS": "ESP32",
           "NF_BUILD_RTM": "OFF",
           "NF_TARGET_HAS_NANOBOOTER": "OFF",
           "NF_FEATURE_DEBUGGER": "ON",

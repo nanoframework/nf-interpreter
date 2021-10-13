@@ -432,7 +432,7 @@ macro(nf_add_lib_native_assemblies)
             ${NFALNA_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
         # this is the only one different
 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})

@@ -3,7 +3,7 @@
 
 parameters:
   buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
-  partitionsDirectory: '$(Build.SourcesDirectory)\nf-interpreter\targets\FreeRTOS_ESP32\_IDF\$(IDF_Target)'
+  partitionsDirectory: '$(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)'
 
 steps:
 

@@ -357,28 +357,28 @@ macro(nf_setup_partition_tables_generator)
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
             COMMENT "Generate ESP32 partition table for 16MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
             ${CMAKE_BINARY_DIR}/partitions_8mb.bin
             COMMENT "Generate ESP32 partition table for 8MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
             COMMENT "Generate Esp32 partition table for 4MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 2MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
             ${CMAKE_BINARY_DIR}/partitions_2mb.bin
             COMMENT "Generate Esp32 partition table for 2MB flash" )
 
@@ -390,21 +390,21 @@ macro(nf_setup_partition_tables_generator)
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
             COMMENT "Generate ESP32 partition table for 16MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
             ${CMAKE_BINARY_DIR}/partitions_8mb.bin
             COMMENT "Generate ESP32 partition table for 8MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
             --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
             COMMENT "Generate Esp32 partition table for 4MB flash" )
 
@@ -439,7 +439,7 @@ macro(nf_add_idf_as_library)
     endif()
 
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-        ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)
@@ -450,16 +450,16 @@ macro(nf_add_idf_as_library)
             set(SDKCONFIG_DEFAULTS_FILE ${SDK_CONFIG_FILE})
         else()
             # no, try the IDF folder
-            if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
+            if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${SDK_CONFIG_FILE})
                 # found it
-                set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/${SDK_CONFIG_FILE})
+                set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${SDK_CONFIG_FILE})
             else()
                 message(FATAL_ERROR "Couldn't find IDF SDK CONFIG file '${ESP32_IDF_SOURCE}'. Please check the SDK_CONFIG_FILE build option.")
             endif()
         endif()
     else()
         # get default SDK CONFIG file
-        set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig.default)
+        set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig.default)
     endif()
 
     message(STATUS "\n--SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
@@ -533,7 +533,7 @@ macro(nf_add_idf_as_library)
         COMPONENTS 
             ${IDF_COMPONENTS_TO_ADD}
 
-        # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/sdkconfig
+        # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
             ${SDKCONFIG_DEFAULTS_FILE}
         PROJECT_NAME "nanoCRL"
@@ -559,9 +559,9 @@ macro(nf_add_idf_as_library)
         # add our modified sources
         list(APPEND 
             IDF_LWIP_SOURCES
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_api_msg.c
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_sockets.c
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_lwIP/nf_sys_arch.c
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_lwIP/nf_api_msg.c
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_lwIP/nf_sockets.c
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_lwIP/nf_sys_arch.c
         )
 
         # replace the source list
@@ -576,8 +576,8 @@ macro(nf_add_idf_as_library)
         # add nanoCLR include path to lwIP so our lwipots are taken instead of the IDF ones
         list(INSERT 
             IDF_LWIP_INCLUDE_DIRECTORIES 0
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_Include
-                ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_Include
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD}
                 ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
                 ${CMAKE_SOURCE_DIR}/src/CLR/Include
                 ${CMAKE_SOURCE_DIR}/src/HAL/Include
@@ -616,7 +616,7 @@ macro(nf_add_idf_as_library)
     # add nanoCLR include path to FATFS so our lwipots are taken instead of the IDF ones
     list(APPEND
         IDF_FATFS_INCLUDE_DIRECTORIES
-            ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD}
     )
 
     # replace the include directories

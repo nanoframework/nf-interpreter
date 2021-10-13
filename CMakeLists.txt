@@ -80,7 +80,7 @@ endif()
 #######################
 
 # check for toolchain path (this is required for Windows builds and we are only building on Windows)
-if(NOT RTOS_FREERTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
+if(NOT RTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
         message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
         message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
         message(STATUS "########################################\n\n")
@@ -288,7 +288,7 @@ option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
 if(NF_FEATURE_HAS_SDCARD)
 
     # this feature currently is supported only on ChibiOS, iMX.RT FreeRTOS and ESP32 FreeRTOS
-    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
@@ -326,7 +326,7 @@ if(NF_FEATURE_HAS_USB_MSD)
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
         # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
         message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
         
@@ -761,10 +761,10 @@ if(RTOS_FREERTOS_CHECK)
 
 #######################
 # FreeRTOS ESP32
-elseif(RTOS_FREERTOS_ESP32_CHECK)
+elseif(RTOS_ESP32_CHECK)
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_nanoCLR)
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ESP32/_nanoCLR)
 
     # Only used by ESP32 at the moment
     if(API_nanoFramework.Hardware.Esp32.Ble)
@@ -790,10 +790,10 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -802,10 +802,10 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/FreeRTOS_ESP32/${TARGET_BOARD})
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/FreeRTOS_ESP32/${TARGET_BOARD})
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
         
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
@@ -829,11 +829,11 @@ elseif(RTOS_FREERTOS_ESP32_CHECK)
     # need to add this here to keep IDF build system happy
     add_executable(
         ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/_IDF/dummy.c
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
     )
 
     # add common directory for ESP32
-    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)
 
     nf_add_idf_as_library()
 
