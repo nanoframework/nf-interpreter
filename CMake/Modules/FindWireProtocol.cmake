@@ -96,7 +96,7 @@ macro(nf_add_lib_wireprotocol)
             ${NFAWP_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
 
         nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 

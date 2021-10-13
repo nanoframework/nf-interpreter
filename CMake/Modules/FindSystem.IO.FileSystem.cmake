@@ -8,10 +8,6 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO
 
 
 # set include directories
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem)
 

@@ -247,18 +247,6 @@
           "value": "${env.ESP32_TOOLS}"
         },
         {
-          "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "${env.ESP32_TOOLS}"
-        },
-        {
-          "name": "ESP32_IDF_PATH:PATH",
-          "value": "${env.ESP32_IDF}"
-        },
-        {
-          "name": "ESP32_LIBS_PATH:PATH",
-          "value": "${env.ESP32_LIB}"
-        },
-        {
           "name": "CMAKE_SYSTEM_NAME:STRING",
           "value": "Generic"
         },
@@ -296,7 +284,7 @@
         },
         {
           "name": "RTOS:STRING", //"Selected Operating system
-          "value": "FREERTOS_ESP32"
+          "value": "ESP32"
         },
         {
           "name": "NF_BUILD_RTM:BOOL", // OFF-default-ON-to-enable-RTM-build
@@ -377,10 +365,6 @@
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.IO.FileSystem:BOOL",  //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

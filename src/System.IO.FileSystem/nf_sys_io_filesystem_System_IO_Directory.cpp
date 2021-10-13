@@ -386,7 +386,7 @@ HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
     {
         CLR_RT_HeapBlock *storageFolder = NULL;
         FRESULT operationResult;
-        DIR currentDirectory;
+        NANO_DIR currentDirectory;
         char workingDrive[] = INDEX0_DRIVE_PATH;
 
         if (array)

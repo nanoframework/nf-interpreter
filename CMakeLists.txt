@@ -34,6 +34,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
 include(binutils.common)
+include(binutils.ESP32)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -79,7 +80,7 @@ endif()
 #######################
 
 # check for toolchain path (this is required for Windows builds and we are only building on Windows)
-if(NOT DEFINED TOOLCHAIN_PREFIX)
+if(NOT RTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
         message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
         message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
         message(STATUS "########################################\n\n")
@@ -150,6 +151,15 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
     #################################################################
     
+    #################################################################
+    # clear other options and definitions that we want to set
+    unset(COMPILE_OPTIONS)
+    unset(C_COMPILE_OPTIONS)
+    unset(CXX_COMPILE_OPTIONS)
+    unset(COMPILE_DEFINITIONS)
+    unset(LINK_OPTIONS)
+    #################################################################
+
     #################################################################
     # clear other options and definitions that we want to set
     unset(COMPILE_OPTIONS)
@@ -278,7 +288,7 @@ option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
 if(NF_FEATURE_HAS_SDCARD)
 
     # this feature currently is supported only on ChibiOS, iMX.RT FreeRTOS and ESP32 FreeRTOS
-    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
@@ -316,7 +326,7 @@ if(NF_FEATURE_HAS_USB_MSD)
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
         # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
         message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
         
@@ -751,42 +761,86 @@ if(RTOS_FREERTOS_CHECK)
 
 #######################
 # FreeRTOS ESP32
-elseif(RTOS_FREERTOS_ESP32_CHECK)
+elseif(RTOS_ESP32_CHECK)
 
-    if(${TARGET_SERIES} STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD} variant: ${TARGET_VARIANT}")
+    # Define base path for the class libraries
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ESP32/_nanoCLR)
 
-        if (NOT TARGET_VARIANT)
-            set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
-        endif()
+    # Only used by ESP32 at the moment
+    if(API_nanoFramework.Hardware.Esp32.Ble)
+        set(HAL_USE_BLE TRUE CACHE INTERNAL "BLE Support")
+        message(STATUS "Support for BLE enabled")
+    else()
+        set(HAL_USE_BLE FALSE CACHE INTERNAL "No BLE Support")
+        message(STATUS "Support for BLE disabled")
+    endif()
 
-        # Only used by ESP32 at the moment
-        if(API_nanoFramework.Hardware.Esp32.Ble)
-            set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
-            message(STATUS "Support for BLE enabled")
-        else()
-            set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
-            message(STATUS "Support for BLE disabled")
-        endif()
+    if(ESP32_ETHERNET_SUPPORT)
+        message(STATUS "Support for Ethernet network interface enabled")
+    else()
+        message(STATUS "Support for Ethernet network interface disabled")
+    endif()
 
-        # check watchdog feature
-        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
-        # becuase the build system can't honour that preference
-        if(NOT NF_FEATURE_WATCHDOG)
-            message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
-        endif()
+    # check watchdog feature
+    # ESP32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
+    # because the build system can't honour that preference
+    if(NOT NF_FEATURE_WATCHDOG)
+        message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
+    endif()
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
-        # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
-        # add common directory for TARGET
-        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
-        # add TARGET board directory
-        add_subdirectory(${TARGET_BASE_LOCATION})
+        # board found
+        message(STATUS "Support for target board '${TARGET_BOARD}' found")
+        message(STATUS "${TARGET_BASE_LOCATION}")
 
+    else()
+
+        # try to find board in the Community targets folder
+        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
+
+            # set target base location
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
+        
+            # board found
+            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
+            message(STATUS "${TARGET_BASE_LOCATION}")
+
+            # Only used by ESP32 at the moment
+            if(API_nanoFramework.Hardware.Esp32.Ble)
+                set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
+                message(STATUS "Support for BLE enabled")
+            else()
+                set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
+                message(STATUS "Support for BLE disabled")
+            # board NOT found in targets folder
+                # board NOT found in targets folder
+                message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            endif()
+
+        endif()
     endif()
+
+    # need to add this here to keep IDF build system happy
+    add_executable(
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
+    )
+
+    # add common directory for ESP32
+    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)
+
+    nf_add_idf_as_library()
+
+    # add TARGET board directory
+    add_subdirectory(${TARGET_BASE_LOCATION})
+
+    nf_clear_output_files_nanoclr()
 
 #######################
 # All standard nanoFramework Platforms

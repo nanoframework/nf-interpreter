@@ -24,21 +24,6 @@
           "type": "PATH"
         },
         {
-          "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/ESP32_TOOLS/xtensa-esp32-elf",
-          "type": "PATH"
-        },
-        {
-          "name": "ESP32_IDF_PATH",
-          "value": "C:/ESP32_TOOLS/esp-idf-v3.3.5",
-          "type": "PATH"
-        },
-        {
-          "name": "ESP32_LIBS_PATH",
-          "value": "C:/ESP32_TOOLS/libs-v3.3.5",
-          "type": "PATH"
-        },
-        {
           "name": "CMAKE_SYSTEM_NAME",
           "value": "Generic",
           "type": "STRING"
@@ -85,7 +70,7 @@
         },
         {
           "name": "RTOS",
-          "value": "FREERTOS_ESP32",
+          "value": "ESP32",
           "type": "STRING"
         },
         {
@@ -181,11 +166,6 @@
         {
           "name": "API_nanoFramework.Devices.OneWire",
           "value": "True",
-          "type": "BOOL"
-        },
-        {
-          "name": "API_System.IO.FileSystem",
-          "value": "ON",
           "type": "BOOL"
         },
         {
@@ -471,11 +451,6 @@
         {
           "name": "API_nanoFramework.Devices.OneWire",
           "value": "True",
-          "type": "BOOL"
-        },
-        {
-          "name": "API_System.IO.FileSystem",
-          "value": "ON",
           "type": "BOOL"
         },
         {

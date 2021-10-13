@@ -10,7 +10,7 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
-#include "target_platform.h"
+#include <target_platform.h>
 
 typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
 {
@@ -205,3 +205,4 @@ struct Library_nf_sys_io_filesystem_System_IO_Path
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
 #endif // NF_SYS_IO_FILESYSTEM_H
+
