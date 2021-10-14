@@ -639,7 +639,7 @@ macro(nf_add_idf_as_library)
 
     # need to read the supplied SDK CONFIG file and replace the appropriate options            
     file(READ
-        "${SDKCONFIG_DEFAULTS_FILE}"
+        ${CMAKE_SOURCE_DIR}/sdkconfig
         SDKCONFIG_DEFAULT_CONTENTS)
 
     # find out if there is support for PSRAM
@@ -648,8 +648,10 @@ macro(nf_add_idf_as_library)
     # set variable
     if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
+        message(STATUS "Support for PSRAM included")
     else()
         set(PSRAM_INFO ", without support for PSRAM")
+        message(STATUS "Support for PSRAM **IS NOT** included")
     endif()
 
     # find out revision info
@@ -659,8 +661,10 @@ macro(nf_add_idf_as_library)
     # set variable
     if(${CONFIG_ESP32_REV_MIN_0_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 0")
+        message(STATUS "Building for chip revision >= 0")
     elseif(${CONFIG_ESP32_REV_MIN_3_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. 3")
+        message(STATUS "Building for chip revision 3")
     endif()
 
     # find out if there is support for BLE
