@@ -779,7 +779,7 @@ if(RTOS_FREERTOS_CHECK)
     add_subdirectory(targets/FreeRTOS)
 
 #######################
-# FreeRTOS ESP32
+# ESP32
 elseif(RTOS_ESP32_CHECK)
 
     # Define base path for the class libraries
@@ -862,7 +862,13 @@ elseif(RTOS_ESP32_CHECK)
     nf_clear_output_files_nanoclr()
 
 #######################
-# All standard nanoFramework Platforms
+# AzureRTOS
+elseif(RTOS_AZURERTOS_CHECK)
+
+    add_subdirectory(targets/AzureRTOS)
+
+#######################
+# all other platforms
 else()
 
     # now add the subdirectory for the board
@@ -896,15 +902,11 @@ else()
 
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR)
+    
     # add common directory for TARGET
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
+    
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
-
-#######################
-# AzureRTOS
-elseif(RTOS_AZURERTOS_CHECK)
-
-    add_subdirectory(targets/AzureRTOS)
 
 endif()
