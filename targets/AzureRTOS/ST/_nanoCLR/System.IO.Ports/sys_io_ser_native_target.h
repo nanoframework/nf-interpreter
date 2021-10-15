@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef WIN_DEV_SERIAL_NATIVE_TARGET_H
-#define WIN_DEV_SERIAL_NATIVE_TARGET_H
+#ifndef SYS_IO_SER_NATIVE_TARGET_H
+#define SYS_IO_SER_NATIVE_TARGET_H
 
-#include <target_windows_devices_serialcommunication_config.h>
+#include <target_system_io_ports_config.h>
 #include <sys_io_ser_native.h>
 #include <hal.h>
 
@@ -16,7 +16,6 @@ typedef struct
     UARTDriver *UartDriver;
     UARTConfig Uart_cfg;
 
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
@@ -25,6 +24,7 @@ typedef struct
     uint16_t RxBytesToRead;
 
     uint8_t WatchChar;
+    uint8_t NewLineChar;
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
@@ -79,19 +79,6 @@ void ConfigPins_UART7();
 void ConfigPins_UART8();
 
 /////////////////////////////////////
-// UART Tx buffers                 //
-// these live in the target folder //
-/////////////////////////////////////
-extern uint8_t Uart1_TxBuffer[];
-extern uint8_t Uart2_TxBuffer[];
-extern uint8_t Uart3_TxBuffer[];
-extern uint8_t Uart4_TxBuffer[];
-extern uint8_t Uart5_TxBuffer[];
-extern uint8_t Uart6_TxBuffer[];
-extern uint8_t Uart7_TxBuffer[];
-extern uint8_t Uart8_TxBuffer[];
-
-/////////////////////////////////////
 // UART Rx buffers                 //
 // these live in the target folder //
 /////////////////////////////////////
@@ -110,7 +97,7 @@ extern uint8_t Uart8_RxBuffer[];
 #if defined(STM32F7XX) || defined(STM32F0XX)
 
 // STM32F7 and STM32F0 use UART driver v2
-#define UART_INIT(num, tx_buffer_size, rx_buffer_size)                                                                 \
+#define UART_INIT(num, rx_buffer_size)                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
         Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
@@ -122,18 +109,18 @@ extern uint8_t Uart8_RxBuffer[];
         Uart##num##_PAL.Uart_cfg.cr1 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr2 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr3 = 0;                                                                              \
-        Uart##num##_PAL.TxBuffer = Uart##num##_TxBuffer;                                                               \
-        Uart##num##_PAL.TxRingBuffer.Initialize(Uart##num##_PAL.TxBuffer, tx_buffer_size);                             \
+        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
         Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer;                                                               \
         Uart##num##_PAL.RxRingBuffer.Initialize(Uart##num##_PAL.RxBuffer, rx_buffer_size);                             \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
+        Uart##num##_PAL.NewLineChar = 0;                                                                               \
     }
 
 #else
 
 // all other STM32F use UART driver v1 which has a different UARTConfig struct
-#define UART_INIT(num, tx_buffer_size, rx_buffer_size)                                                                 \
+#define UART_INIT(num, rx_buffer_size)                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
         Uart##num##_PAL.Uart_cfg.txend2_cb = NULL;                                                                     \
@@ -143,12 +130,12 @@ extern uint8_t Uart8_RxBuffer[];
         Uart##num##_PAL.Uart_cfg.cr1 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr2 = 0;                                                                              \
         Uart##num##_PAL.Uart_cfg.cr3 = 0;                                                                              \
-        Uart##num##_PAL.TxBuffer = Uart##num##_TxBuffer;                                                               \
-        Uart##num##_PAL.TxRingBuffer.Initialize(Uart##num##_PAL.TxBuffer, tx_buffer_size);                             \
+        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
         Uart##num##_PAL.TxOngoingCount = 0;                                                                            \
         Uart##num##_PAL.RxBuffer = Uart##num##_RxBuffer;                                                               \
         Uart##num##_PAL.RxRingBuffer.Initialize(Uart##num##_PAL.RxBuffer, rx_buffer_size);                             \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
+        Uart##num##_PAL.NewLineChar = 0;                                                                               \
     }
 
 #endif
@@ -169,6 +156,10 @@ void Init_UART8();
 #define UART_UNINIT(num)                                                                                               \
     void UnInit_UART##num()                                                                                            \
     {                                                                                                                  \
+        Uart##num##_PAL.TxBuffer = NULL;                                                                               \
+        Uart##num##_PAL.RxBuffer = NULL;                                                                               \
+        uartStop(&UARTD##num);                                                                                         \
+        Uart##num##_PAL.UartDriver = NULL;                                                                             \
         return;                                                                                                        \
     }
 
@@ -183,4 +174,4 @@ void UnInit_UART6();
 void UnInit_UART7();
 void UnInit_UART8();
 
-#endif // WIN_DEV_SERIAL_NATIVE_TARGET_H
+#endif // SYS_IO_SER_NATIVE_TARGET_H
