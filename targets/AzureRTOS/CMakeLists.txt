@@ -3,6 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+unset(TARGET_AZURERTOS_NANOCLR_INCLUDE_DIRS CACHE)
+unset(TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS CACHE)
+unset(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS CACHE)
+unset(EXTRA_COMPILE_DEFINITIONS CACHE)
+
 include(FetchContent)
 include(binutils.common)
 include(binutils.arm-none-eabi)
@@ -62,7 +67,7 @@ endif()
 # check if build was requested with a specifc AzureRTOS version
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(RTOS_VERSION "v6.1.7_rel")
+    set(RTOS_VERSION "v6.1.8_rel")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
@@ -100,6 +105,10 @@ FetchContent_Populate(azure_rtos)
 # AzureRTOS common directories
 add_subdirectory(_common)
 add_subdirectory(_include)
+		      
+message(STATUS "BASE_PATH_FOR_PLATFORM=${BASE_PATH_FOR_PLATFORM}")
+
+message(STATUS "TARGET_PLATFORM=${BASE_PATH_FOR_PLATFORM}/ST/${TARGET_BOARD}")
 
 # try to find STM board in the targets folder
 # and set target base location and base path for class libs

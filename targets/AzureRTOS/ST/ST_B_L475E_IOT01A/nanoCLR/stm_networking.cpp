@@ -1,8 +1,6 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT License. */
-
 #define NX_SECURE_TLS_TLS_1_3_ENABLED 1
-#include "stm_networking.h"
 
 #include "nx_api.h"
 #include "nx_secure_tls_api.h"
@@ -10,7 +8,10 @@
 #include "nxd_dns.h"
 #include <tx_api.h>
 #include <targetHAL.h>
+
 #include "wifi.h"
+
+#include "stm_networking.h"
 
 #define THREADX_PACKET_COUNT 20
 #define THREADX_PACKET_SIZE  1200 // Set the default value to 1200 since WIFI payload size (ES_WIFI_PAYLOAD_SIZE) is 1200
@@ -26,7 +27,7 @@ NX_DNS nx_dns_client;
 static const UINT wifi_required_version[] = {3, 5, 2, 5};
 
 // Print IPv4 address
-static void print_address(CHAR *preable, uint8_t address[4])
+static void print_address(const CHAR *preable, uint8_t address[4])
 {
     printf("\t%s: %d.%d.%d.%d\r\n", preable, address[0], address[1], address[2], address[3]);
 }
@@ -208,7 +209,7 @@ int stm32_network_init(CHAR *ssid, CHAR *password, WiFi_Mode mode)
 
     // Create a packet pool
     status =
-        nx_packet_pool_create(&nx_pool, "NetX Packet Pool", THREADX_PACKET_SIZE, threadx_ip_pool, THREADX_POOL_SIZE);
+        nx_packet_pool_create(&nx_pool, (char*)"NetX Packet Pool", THREADX_PACKET_SIZE, threadx_ip_pool, THREADX_POOL_SIZE);
     if (status != NX_SUCCESS)
     {
         printf("ERROR: Packet pool create fail.\r\n");
@@ -216,7 +217,7 @@ int stm32_network_init(CHAR *ssid, CHAR *password, WiFi_Mode mode)
     }
 
     // Create an IP instance
-    status = nx_ip_create(&nx_ip, "NetX IP Instance 0", 0, 0, &nx_pool, NULL, NULL, 0, 0);
+    status = nx_ip_create(&nx_ip, (char*)"NetX IP Instance 0", 0, 0, &nx_pool, NULL, NULL, 0, 0);
     if (status != NX_SUCCESS)
     {
         nx_packet_pool_delete(&nx_pool);

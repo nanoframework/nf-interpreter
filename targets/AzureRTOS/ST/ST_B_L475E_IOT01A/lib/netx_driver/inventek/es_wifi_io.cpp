@@ -78,8 +78,7 @@ void SPI_WIFI_MspInit(SPI_HandleTypeDef* _hspi)
   GPIO_InitTypeDef GPIO_Init;
   
   __HAL_RCC_SPI3_CLK_ENABLE();
-
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
     

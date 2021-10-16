@@ -186,7 +186,7 @@ UINT    status;
     nx_wifi_socket_counter = 0;
 
     /* Create the wifi thread.  */
-    status = tx_thread_create(&nx_wifi_thread, "Wifi Thread", nx_wifi_thread_entry, 0,  
+    status = tx_thread_create(&nx_wifi_thread, (char*)"Wifi Thread", nx_wifi_thread_entry, 0,  
                               nx_wifi_thread_stack, NX_WIFI_STACK_SIZE, 
                               NX_WIFI_THREAD_PRIORITY, NX_WIFI_THREAD_PRIORITY, TX_NO_TIME_SLICE, TX_AUTO_START); 
      
@@ -248,6 +248,8 @@ UINT            status;
 NX_PACKET       *packet_ptr;
 NX_TCP_SOCKET   *tcp_socket;
 NX_UDP_SOCKET   *udp_socket;
+(void)thread_input;
+
 #ifdef NX_ENABLE_IP_PACKET_FILTER
 uint8_t         ip_address[4];
 #endif /* NX_ENABLE_IP_PACKET_FILTER */
@@ -677,6 +679,8 @@ UINT    start_time;
 ULONG   millisecond;
 USHORT  size;
 UINT    received_packet = NX_FALSE;
+(void)socket_type;
+
 #ifdef NX_ENABLE_IP_PACKET_FILTER
 NX_TCP_SOCKET *tcp_socket;
 NX_UDP_SOCKET *udp_socket;
@@ -893,6 +897,7 @@ UINT  nx_wifi_tcp_client_socket_connect(NX_TCP_SOCKET *socket_ptr,
   
 UINT    status ;
 UCHAR   entry_index;
+(void)wait_option;
   
     
     /* Obtain the IP internal mutex before processing the IP event.  */
@@ -996,7 +1001,7 @@ UINT  nx_wifi_tcp_socket_disconnect(NX_TCP_SOCKET *socket_ptr, ULONG wait_option
 {
   
 UCHAR   entry_index;
-
+(void)wait_option;
 
     /* Obtain the IP internal mutex before processing the IP event.  */
     tx_mutex_get(&(nx_wifi_ip -> nx_ip_protection), TX_WAIT_FOREVER);
@@ -1086,7 +1091,8 @@ USHORT      send_data_length;
 ULONG       packet_size;
 NX_PACKET   *current_packet;
 
-    
+(void)wait_option;
+
     /* Obtain the IP internal mutex before processing the IP event.  */
     tx_mutex_get(&(nx_wifi_ip -> nx_ip_protection), TX_WAIT_FOREVER);
         
@@ -1252,6 +1258,8 @@ UINT  nx_wifi_udp_socket_bind(NX_UDP_SOCKET *socket_ptr, UINT  port, ULONG wait_
 {
   
 UCHAR       entry_index;
+(void)wait_option;
+(void)port;
 
     /* Obtain the IP internal mutex before processing the IP event.  */
     tx_mutex_get(&(nx_wifi_ip -> nx_ip_protection), TX_WAIT_FOREVER);

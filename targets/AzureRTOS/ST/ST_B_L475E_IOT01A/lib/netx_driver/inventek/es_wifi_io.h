@@ -20,13 +20,20 @@
 #ifndef WIFI_IO_H
 #define WIFI_IO_H
 
+/* Includes ------------------------------------------------------------------*/
+// #include "stm32l4xx_hal.h"
+
+//#include <nanoHAL.h>
+//#include <targetPAL.h>
+typedef int HRESULT;
+#include <targetHAL.h>
+#include "nanoHAL_Spi.h"
+
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-    /* Includes ------------------------------------------------------------------*/
-    // #include "stm32l4xx_hal.h"
 
 /* Exported constants --------------------------------------------------------*/
 

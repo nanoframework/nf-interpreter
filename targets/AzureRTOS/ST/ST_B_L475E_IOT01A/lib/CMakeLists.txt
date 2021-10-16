@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-message(STATUS "--- LIBRARY -------------------------------------------------------  ST_B_L475E_IOT01A/lib/CMakeLists.txt START")
 
 # Define ThreadX user configuration
 set(TX_USER_FILE "${CMAKE_CURRENT_LIST_DIR}/threadx/tx_user.h" CACHE STRING "Enable TX user configuration")
@@ -22,6 +21,22 @@ if(RTOS_SOURCE_FOLDER)
     if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
         set(NO_RTOS_SOURCE_FOLDER FALSE)
     endif()
+endif()
+
+# AzureRTOS version
+set(RTOS_VERSION_EMPTY TRUE)
+
+# check if build was requested with a specifc AzureRTOS version
+if(DEFINED RTOS_VERSION)
+    if(NOT "${RTOS_VERSION}" STREQUAL "")
+        set(RTOS_VERSION_EMPTY FALSE)
+    endif()
+endif()
+
+# check if build was requested with a specifc AzureRTOS version
+if(RTOS_VERSION_EMPTY)
+    # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
+    set(RTOS_VERSION "v6.1.8_rel")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
@@ -96,23 +111,10 @@ endif()
 
 # Using a local copy of NetXDuo that has been customized for this boards WiFi module
 # not this custom library references some files from the main netxduo repository
-#FetchContent_MakeAvailable(azure_rtos_netxduo)
 if(NOT azure_rtos_netxduo_POPULATED)
   FetchContent_Populate(azure_rtos_netxduo)
-  # add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} ${azure_rtos_netxduo_BINARY_DIR})
 endif()
-
-# custom netxdu can include azure_sdk_for_c
-#fetched with netxduo above
-#FetchContent_Declare(
-#    azure_sdk_for_c
-#    GIT_REPOSITORY https://github.com/Azure/azure-sdk-for-c.git
-#    GIT_TAG "1.1.0"
-#)
-#FetchContent_Populate(azure_sdk_for_c)
 
 add_subdirectory(netxduo)
 add_subdirectory(netx_driver)
-
-message(STATUS "---------------------------------------------------------  ST_B_L475E_IOT01A/lib/CMakeLists.txt END")
 

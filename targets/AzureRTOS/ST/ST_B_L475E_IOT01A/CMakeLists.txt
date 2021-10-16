@@ -15,7 +15,7 @@ set(TX_USER_FILE ${TARGET_BASE_LOCATION}/tx_user.h)
 
 add_subdirectory(${azure_rtos_SOURCE_DIR} AzureSource)
 
-# netxduo, netx_driver (wifi), jsmn
+# netxduo, netx_driver (wifi)
 add_subdirectory(lib)
 
 nf_setup_target_build(
@@ -43,7 +43,6 @@ nf_setup_target_build(
 set(target ${NANOCLR_PROJECT_NAME})
 add_dependencies(${target}.elf azrtos::netxduo)
 add_dependencies(${target}.elf netx_driver)
-add_dependencies(${target}.elf jsmn)
 
 # make vars global
 set(TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_AZURERTOS_COMMON_SOURCES} CACHE INTERNAL "make global")

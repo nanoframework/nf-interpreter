@@ -21,14 +21,19 @@
 
 // clang-format off
 
-#ifdef __cplusplus
- extern "C" {
-#endif
+typedef int HRESULT;
 
 /* Includes ------------------------------------------------------------------*/
+#include <targetHAL.h>
+#include "CPU_SPI_decl.h"
+#include "nanoHAL_Spi.h"
 #include "es_wifi.h"
 #include "es_wifi_io.h"
 
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Exported constants --------------------------------------------------------*/
 #define WIFI_MAX_SSID_NAME            100

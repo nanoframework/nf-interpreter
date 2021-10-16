@@ -94,7 +94,7 @@ add_subdirectory(_include)
 add_subdirectory(_common)
 add_subdirectory(_nanoBooter)
 add_subdirectory(_nanoCLR)
-add_subdirectory(lib)
+
 
 message(STATUS "done adding platform dirs.")
 print_list(TARGET_AZURERTOS_COMMON_INCLUDE_DIRS)

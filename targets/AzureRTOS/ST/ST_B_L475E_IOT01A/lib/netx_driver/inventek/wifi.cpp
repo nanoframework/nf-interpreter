@@ -202,6 +202,7 @@ WIFI_Status_t WIFI_ConfigureAP(uint8_t *ssid, uint8_t *pass, WIFI_Ecn_t ecn, uin
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
   ES_WIFI_APConfig_t ApConfig;
+  (void)max_conn;
   
   strncpy((char*)ApConfig.SSID, (char*)ssid, ES_WIFI_MAX_SSID_NAME_SIZE);
   strncpy((char*)ApConfig.Pass, (char*)pass, ES_WIFI_MAX_PSWD_NAME_SIZE);
@@ -299,7 +300,7 @@ WIFI_Status_t WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t type, c
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
   ES_WIFI_Conn_t conn;
-  
+  (void)name;
   conn.Number = socket;
   conn.RemotePort = port;
   conn.LocalPort = local_port;
@@ -343,6 +344,7 @@ WIFI_Status_t WIFI_StartServer(uint32_t socket, WIFI_Protocol_t protocol, uint16
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
   ES_WIFI_Conn_t conn;
+  (void)name;
   conn.Number = socket;
   conn.LocalPort = port;
   conn.Type = (protocol == WIFI_TCP_PROTOCOL)? ES_WIFI_TCP_CONNECTION : ES_WIFI_UDP_CONNECTION;
@@ -561,6 +563,7 @@ WIFI_Status_t WIFI_SetModuleDefault(void)
   */
 WIFI_Status_t WIFI_ModuleFirmwareUpdate(const char *location)
 {
+  (void)location;
   return WIFI_STATUS_NOT_SUPPORTED;
 }
 
