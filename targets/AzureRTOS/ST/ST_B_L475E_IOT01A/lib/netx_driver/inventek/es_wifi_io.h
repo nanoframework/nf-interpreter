@@ -29,7 +29,6 @@ typedef int HRESULT;
 #include <targetHAL.h>
 #include "nanoHAL_Spi.h"
 
-
 #ifdef __cplusplus
 extern "C"
 {
