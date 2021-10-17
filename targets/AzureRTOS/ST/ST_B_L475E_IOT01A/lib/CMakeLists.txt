@@ -110,7 +110,7 @@ else()
 endif()
 
 # Using a local copy of NetXDuo that has been customized for this boards WiFi module
-# not this custom library references some files from the main netxduo repository
+# note this custom library references some files from the main netxduo repository
 if(NOT azure_rtos_netxduo_POPULATED)
   FetchContent_Populate(azure_rtos_netxduo)
 endif()
