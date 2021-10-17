@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include <hal.h>
-#include <hal_nf_community.h>
 //#include "sntp_client.h"
 #include "stm_networking.h"
 
@@ -15,10 +14,6 @@
 
 #include "azure_config.h"
 
-#include <targetHAL.h>
-#include <nanoHAL_v2.h>
-#include <nanoPAL_COM.h>
-#include <target_stdio_config.h>
 
 // Azure Thread
 #define AZURE_THREAD_STACK_SIZE 4096
@@ -30,9 +25,6 @@ void azure_thread_entry(ULONG parameter);
 void azure_thread_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
-
-    // systick_interval_set(TX_TIMER_TICKS_PER_SECOND);
-
     // Create Azure thread
     uint16_t status = tx_thread_create(
         &azure_thread,
