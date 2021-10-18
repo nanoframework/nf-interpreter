@@ -28,7 +28,7 @@ void Esp32_I2c_UnitializeAll()
     }
 }
 
-void SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
+bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
 {
     int busSpeed = config[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
 
@@ -42,8 +42,13 @@ void SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
     conf.scl_io_num = ClockPin;
     conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
     conf.master.clk_speed = (busSpeed == 0) ? 100000 : 400000;
+    conf.clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
 
-    i2c_param_config(bus, &conf);
+    esp_err_t err = i2c_param_config(bus, &conf);
+
+    ASSERT(err == ESP_OK);
+
+    return (err == ESP_OK);
 }
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
@@ -68,7 +73,10 @@ HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cDevice::NativeInit___V
         CLR_RT_HeapBlock *pConfig = pThis[FIELD___connectionSettings].Dereference();
 
         // Set the Bus parameters
-        SetConfig(bus, pConfig);
+        if (!SetConfig(bus, pConfig))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
 
         // If this is first devcie on Bus then init driver
         if (Esp_I2C_Initialised_Flag[bus] == 0)
