@@ -53,7 +53,7 @@ function Main {
         if ($null -eq $settings."cmake.configureSettings".CMAKE_MAKE_PROGRAM -or $force) {
             # need to replace forward slash for paths to work with GCC and CMake
             $ninjaPath = Join-Path -Path $env:NINJA_PATH -ChildPath 'ninja.exe'
-            $ninjaPath = $ninjaPath.Replace('\', '/') +
+            $ninjaPath = $ninjaPath.Replace('\', '/')
 
             $settings."cmake.configureSettings" | Add-Member -MemberType NoteProperty -Name 'CMAKE_MAKE_PROGRAM' -Value "$ninjaPath"
         
