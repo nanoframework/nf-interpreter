@@ -30,7 +30,7 @@ static CLR_UINT8 *heapEndingAddress = 0;
 bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8 *&graphicsStartingAddress, CLR_UINT8 *&graphicsEndingAddress)
 {
     // requesting 2MB
-    CLR_INT32 graphicsMemoryBlockSize = 2*1024*1024;
+    CLR_INT32 graphicsMemoryBlockSize = 2 * 1024 * 1024;
 
     CLR_INT32 memoryCaps = MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM;
 
