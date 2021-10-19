@@ -32,7 +32,7 @@ static int FindNextTimerIndex()
 static void HRtimer_callback(void* arg)
 {
     esp_timer_handle_t timer_handle = hrtimers[(int) arg];
-    PostManagedEvent( EVENT_CUSTOM, HighResTimerEventType::TimerExpired, 0, (uint32_t)timer_handle );
+    PostManagedEvent( EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType::TimerExpired, 0, (uint32_t)timer_handle );
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeEspTimerCreate___I4( CLR_RT_StackFrame& stack )
