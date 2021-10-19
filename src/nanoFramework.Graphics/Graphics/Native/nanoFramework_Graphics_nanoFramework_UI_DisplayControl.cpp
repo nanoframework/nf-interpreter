@@ -70,7 +70,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Clear___STATIC__VOID(CLR_RT_StackFrame &stack)
 {
-    NANOCLR_HEADER();    
+    NANOCLR_HEADER();
     {
         (void)stack;
         g_DisplayDriver.Clear();
@@ -89,38 +89,63 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         FAULT_ON_NULL(colors);
 
         writeData = (CLR_UINT32 *)colors->GetFirstElement();
-        g_DisplayDriver.BitBlt(stack.Arg0().NumericByRef().u2, stack.Arg1().NumericByRef().u2, stack.Arg2().NumericByRef().u2, stack.Arg3().NumericByRef().u2, writeData);
+        g_DisplayDriver.BitBlt(
+            stack.Arg0().NumericByRef().u2,
+            stack.Arg1().NumericByRef().u2,
+            stack.Arg2().NumericByRef().u2,
+            stack.Arg3().NumericByRef().u2,
+            writeData);
     }
     NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4(CLR_RT_StackFrame &stack)
+    NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4(
+        CLR_RT_StackFrame &stack)
 {
-    NANOCLR_HEADER();    
+    NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *spiconfig;
     CLR_RT_HeapBlock *screenconfig;
     CLR_INT32 desired;
     // Initialise Graphics after devices initialised
     DisplayInterfaceConfig displayConfig;
-   
+
     desired = stack.Arg2().NumericByRef().u4;
     g_GraphicsMemoryHeap.Initialize(desired);
 
     spiconfig = stack.Arg0().Dereference();
     screenconfig = stack.Arg1().Dereference();
     // Define SPI display configuration for the display
-    displayConfig.Spi.spiBus = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1;
-    displayConfig.Spi.chipSelect = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___chipSelect].NumericByRef().s4;
-    displayConfig.Spi.dataCommand = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___dataCommand].NumericByRef().s4;
-    displayConfig.Spi.reset = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___reset].NumericByRef().s4;
-    displayConfig.Spi.backLight = spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___backLight].NumericByRef().s4;
-    displayConfig.Screen.x = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___x].NumericByRef().u2;
-    displayConfig.Screen.y = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___y].NumericByRef().u2;
-    displayConfig.Screen.width = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___width].NumericByRef().u2;
-    displayConfig.Screen.height = screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___height].NumericByRef().u2;
-    g_DisplayInterface.Initialize(displayConfig);    
+    displayConfig.Spi.spiBus =
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1;
+    displayConfig.Spi.chipSelect =
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___chipSelect]
+            .NumericByRef()
+            .s4;
+    displayConfig.Spi.dataCommand =
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___dataCommand]
+            .NumericByRef()
+            .s4;
+    displayConfig.Spi.reset =
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___reset].NumericByRef().s4;
+    displayConfig.Spi.backLight =
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___backLight]
+            .NumericByRef()
+            .s4;
+    displayConfig.Screen.x =
+        screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___x].NumericByRef().u2;
+    displayConfig.Screen.y =
+        screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___y].NumericByRef().u2;
+    displayConfig.Screen.width =
+        screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___width]
+            .NumericByRef()
+            .u2;
+    displayConfig.Screen.height =
+        screenconfig[Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration::FIELD___height]
+            .NumericByRef()
+            .u2;
+    g_DisplayInterface.Initialize(displayConfig);
     g_DisplayDriver.Initialize();
 
     // TODO for touch
@@ -128,21 +153,22 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     // g_TouchDevice.Initialize();
 
     PalEvent_Initialize();
-    
+
     // TODO for touch
     // Gesture_Initialize();
     // Ink_Initialize();
 
     g_DisplayDriver.SetDefaultOrientation();
     g_DisplayDriver.Clear();
-    
+
     stack.SetResult_U4(g_GraphicsMemoryHeap.GetMaxBuffer());
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4(CLR_RT_StackFrame &stack)
+    NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -151,7 +177,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -160,10 +188,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         uint16_t y;
         uint16_t width;
         uint16_t height;
-        CLR_GFX_Font* font;
+        CLR_GFX_Font *font;
         uint32_t foregroundColor;
         uint32_t backgroundColor;
-        CLR_RT_HeapBlock_BinaryBlob* blob;
+        CLR_RT_HeapBlock_BinaryBlob *blob;
         CLR_GFX_FontCharacterInfo chr;
         CLR_UINT32 widthChar = 0;
         CLR_UINT32 heightChar = 0;
@@ -189,10 +217,11 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         rectangle.top = 0;
 
         // Get the font
-        CLR_RT_HeapBlock*  pThis = stack.Arg5().Dereference();
+        CLR_RT_HeapBlock *pThis = stack.Arg5().Dereference();
         blob = pThis[CLR_GFX_Font::FIELD__m_font].DereferenceBinaryBlob();
-        if (!blob || blob->DataType() != DATATYPE_BINARY_BLOB_HEAD) NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        font = (CLR_GFX_Font*)blob->GetData();
+        if (!blob || blob->DataType() != DATATYPE_BINARY_BLOB_HEAD)
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        font = (CLR_GFX_Font *)blob->GetData();
 
         // Create a bitmap
         CLR_GFX_Bitmap *bitmap;
@@ -200,7 +229,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         int size;
 
         // The bitmap need to be 1 more pixel width than the font
-        if (bm.BitmapDescription_Initialize(font->m_font.m_metrics.m_maxCharWidth + 1, font->m_font.m_metrics.m_height, CLR_GFX_BitmapDescription::c_NativeBpp) == false)
+        if (bm.BitmapDescription_Initialize(
+                font->m_font.m_metrics.m_maxCharWidth + 1,
+                font->m_font.m_metrics.m_height,
+                CLR_GFX_BitmapDescription::c_NativeBpp) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
@@ -247,7 +279,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
 
                 c = buf[0];
                 font->GetCharInfo(c, chr);
-                if (chr.isValid) 
+                if (chr.isValid)
                 {
                     widthChar = chr.width;
                     // Set the start for the character
@@ -259,14 +291,15 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
 
                     // set position using previous chars
                     posX += prevCharWidth;
-                    if(posY != prevCharHeight)
+                    if (posY != prevCharHeight)
                     {
                         posX = x;
                         prevCharHeight = posY;
                     }
 
                     // If there is a background, will fill the bitmap with it
-                    if (backgroundColor != 0) {
+                    if (backgroundColor != 0)
+                    {
                         rectangle.right = bm.m_width;
                         rectangle.bottom = bm.m_height;
                         bitmap->DrawRectangle(pen, brush, rectangle);

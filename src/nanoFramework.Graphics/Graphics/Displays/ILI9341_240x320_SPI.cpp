@@ -146,14 +146,18 @@ bool DisplayDriver::Initialize()
         0x0D,
         0x38,
         0x3A,
-        0x1F);    
-    g_DisplayInterface.SendCommand(5, Column_Address_Set, 
-        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.y >> 8), 
+        0x1F);
+    g_DisplayInterface.SendCommand(
+        5,
+        Column_Address_Set,
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.y >> 8),
         (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.y & 0xFF),
         (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.height - 1) >> 8),
         (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.height - 1) & 0xFF)); // Size = 239
-    g_DisplayInterface.SendCommand(5, Page_Address_Set, 
-    (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.x >> 8), 
+    g_DisplayInterface.SendCommand(
+        5,
+        Page_Address_Set,
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.x >> 8),
         (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.x & 0xFF),
         (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.width - 1) >> 8),
         (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.width - 1) & 0xFF)); // Size = 319
@@ -283,7 +287,7 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     CLR_UINT8 Page_Address_Set_Data[4];
     Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    Page_Address_Set_Data[2] = ((y2 +g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
@@ -307,9 +311,9 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
 
     // Position to offset in data[] for start of window
-    //CLR_UINT16 offset = (y * Attributes.Width) + x;
-    //CLR_UINT16 offset = y * width;
-    //StartOfLine_src += offset;
+    // CLR_UINT16 offset = (y * Attributes.Width) + x;
+    // CLR_UINT16 offset = y * width;
+    // StartOfLine_src += offset;
 
     CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
     CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;

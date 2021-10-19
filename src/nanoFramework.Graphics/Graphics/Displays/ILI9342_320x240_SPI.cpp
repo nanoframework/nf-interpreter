@@ -97,23 +97,51 @@ bool DisplayDriver::Initialize()
 
     SetupDisplayAttributes();
 
-    //Supposed to be this from the M5 Stack
+    // Supposed to be this from the M5 Stack
     g_DisplayInterface.SendCommand(4, External_Command, 0xFF, 0x93, 0X42);
     g_DisplayInterface.SendCommand(3, Power_Control_1, 0x12, 0x12);
     g_DisplayInterface.SendCommand(2, Power_Control_2, 0x03);
     g_DisplayInterface.SendCommand(2, VCOM_Control_1, 0xF2);
     g_DisplayInterface.SendCommand(2, Interface_Signal_Control, 0xE0);
     g_DisplayInterface.SendCommand(4, Interface_Control, 0x01, 0x00, 0X00);
-    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit    
+    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55); // 0x55 -> 16 bit
     g_DisplayInterface.SendCommand(
         16,
         Positive_Gamma_Correction,
-        0x00, 0x0C, 0x11, 0x04, 0x11, 0x08, 0x37, 0x89, 0x4C, 0x06, 0x0C, 0x0A, 0x2E, 0x34, 0x0F);
+        0x00,
+        0x0C,
+        0x11,
+        0x04,
+        0x11,
+        0x08,
+        0x37,
+        0x89,
+        0x4C,
+        0x06,
+        0x0C,
+        0x0A,
+        0x2E,
+        0x34,
+        0x0F);
     g_DisplayInterface.SendCommand(
         16,
         Negative_Gamma_Correction,
-        0x00, 0x0B, 0x11, 0x05, 0x13, 0x09, 0x33, 0x67, 0x48, 0x07, 0x0E, 0x0B, 0x2E, 0x33, 0x0F);
-    g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x08, 0x82, 0x1D, 0x04);   
+        0x00,
+        0x0B,
+        0x11,
+        0x05,
+        0x13,
+        0x09,
+        0x33,
+        0x67,
+        0x48,
+        0x07,
+        0x0E,
+        0x0B,
+        0x2E,
+        0x33,
+        0x0F);
+    g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x08, 0x82, 0x1D, 0x04);
     g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
     g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
     g_DisplayInterface.SendCommand(1, Memory_Write);
@@ -122,7 +150,7 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(1, Sleep_Out);
     OS_DELAY(20); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, Display_ON);
-    OS_DELAY(200);                           // Send Sleep Out command to display : no parameter
+    OS_DELAY(200);                          // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, NOP); // End of sequence
     OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
 
@@ -159,10 +187,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
         case LANDSCAPE180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
-            g_DisplayInterface.SendCommand(
-                2,
-                Memory_Access_Control,
-                (MADCTL_ML | MADCTL_BGR)); // Landscape  + BGR
+            g_DisplayInterface.SendCommand(2, Memory_Access_Control,
+                                           (MADCTL_ML | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;
@@ -245,7 +271,7 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     CLR_UINT8 Page_Address_Set_Data[4];
     Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    Page_Address_Set_Data[2] = ((y2 +g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
@@ -309,9 +335,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     if (transferBufferCount < Attributes.TransferBufferSize)
     {
         // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(
-            Attributes.TransferBuffer,
-            (Attributes.TransferBufferSize - transferBufferCount));
+        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
     }
 
     return;

@@ -101,7 +101,7 @@ bool DisplayDriver::Initialize()
     SetupDisplayAttributes();
 
     g_DisplayInterface.SendCommand(SOFTWARE_RESET);
-    OS_DELAY(50);    
+    OS_DELAY(50);
     g_DisplayInterface.SendCommand(1, Sleep_Out);
     OS_DELAY(500); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(4, Frame_Rate_Control_Normal, 0x01, 0x2C, 0x2D);
@@ -109,7 +109,7 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(7, Frame_Rate_Control_3, 0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D);
     g_DisplayInterface.SendCommand(2, Invert_On, 0x07);
     g_DisplayInterface.SendCommand(1, Invertion_On);
-    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55);      // 0x55 -> 16 bit   
+    g_DisplayInterface.SendCommand(2, Pixel_Format_Set, 0x55); // 0x55 -> 16 bit
     g_DisplayInterface.SendCommand(4, Power_Control_1, 0xA2, 0x02, 0x84);
     g_DisplayInterface.SendCommand(2, Power_Control_2, 0xC5);
     g_DisplayInterface.SendCommand(3, Power_Control_3, 0x0A, 0x00);
@@ -119,21 +119,45 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(
         17,
         Positive_Gamma_Correction,
-        0x02, 0x1c, 0x07, 0x12,
-        0x37, 0x32, 0x29, 0x2d,
-        0x29, 0x25, 0x2B, 0x39,
-        0x00, 0x01, 0x03, 0x10);
+        0x02,
+        0x1c,
+        0x07,
+        0x12,
+        0x37,
+        0x32,
+        0x29,
+        0x2d,
+        0x29,
+        0x25,
+        0x2B,
+        0x39,
+        0x00,
+        0x01,
+        0x03,
+        0x10);
     g_DisplayInterface.SendCommand(
         17,
         Negative_Gamma_Correction,
-        0x03, 0x1d, 0x07, 0x06,
-        0x2E, 0x2C, 0x29, 0x2D,
-        0x2E, 0x2E, 0x37, 0x3F,
-        0x00, 0x00, 0x02, 0x10);
+        0x03,
+        0x1d,
+        0x07,
+        0x06,
+        0x2E,
+        0x2C,
+        0x29,
+        0x2D,
+        0x2E,
+        0x2E,
+        0x37,
+        0x3F,
+        0x00,
+        0x00,
+        0x02,
+        0x10);
 
     g_DisplayInterface.SendCommand(1, Sleep_Out);
     g_DisplayInterface.SendCommand(1, Display_ON);
-    OS_DELAY(100);                           // Send Sleep Out command to display : no parameter
+    OS_DELAY(100);                          // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, NOP); // End of sequence
     OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
 
@@ -165,10 +189,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
         case LANDSCAPE180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
-            g_DisplayInterface.SendCommand(
-                2,
-                Memory_Access_Control,
-                (MADCTL_MX | MADCTL_BGR)); // Landscape  + BGR
+            g_DisplayInterface.SendCommand(2, Memory_Access_Control,
+                                           (MADCTL_MX | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;
@@ -251,7 +273,7 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     CLR_UINT8 Page_Address_Set_Data[4];
     Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    Page_Address_Set_Data[2] = ((y2 +g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
@@ -315,9 +337,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     if (transferBufferCount < Attributes.TransferBufferSize)
     {
         // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(
-            Attributes.TransferBuffer,
-            (Attributes.TransferBufferSize - transferBufferCount));
+        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
     }
 
     return;

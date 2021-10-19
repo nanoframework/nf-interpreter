@@ -818,7 +818,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration
     static const int FIELD___backLight = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration
@@ -829,7 +828,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration
     static const int FIELD___height = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
@@ -839,7 +837,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
     static const int FIELD___fastMode = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
@@ -854,13 +851,15 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_U2);
-    NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor);
+    NANOCLR_NATIVE_DECLARE(
+        Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
-    NANOCLR_NATIVE_DECLARE(NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
-    NANOCLR_NATIVE_DECLARE(NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4);
 
     //--//
-
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Ink
