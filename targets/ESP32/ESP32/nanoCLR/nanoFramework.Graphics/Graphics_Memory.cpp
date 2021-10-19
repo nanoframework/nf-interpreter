@@ -55,8 +55,8 @@ bool GraphicsMemory::GraphicsHeapLocation(
     CLR_INT32 spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
     if (spiramMaxSize == 0)
     {
-        // No SpiRam, try and allocate small block in normal ram to keep allocator happy for
-        // people tryig to run graphics on boards without Spiram
+        // No SPIRAM, try and allocate small block in normal ram to keep allocator happy for
+        // people trying to run graphics on boards without SPIRAM
         // Should be able to use with small screens
         memoryCaps ^= MALLOC_CAP_SPIRAM;
 
