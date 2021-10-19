@@ -19,8 +19,8 @@ bool GraphicsMemory::GraphicsHeapLocation(
     CLR_UINT8 *&graphicsEndingAddress)
 {
     (void)requested;
-    graphicsStartingAddress = (CLR_UINT8*)&GraphicsHeapBegin;
-    graphicsEndingAddress = (CLR_UINT8*)&GraphicsHeapEnd;
+    graphicsStartingAddress = (CLR_UINT8 *)&GraphicsHeapBegin;
+    graphicsEndingAddress = (CLR_UINT8 *)&GraphicsHeapEnd;
     return true;
 }
 #endif // GRAPHICS_MEMORY_SETUP
