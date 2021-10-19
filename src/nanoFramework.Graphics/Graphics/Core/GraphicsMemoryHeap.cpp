@@ -45,16 +45,16 @@ CLR_UINT32 SizeInBytes;
 
 const int blockHeaderSize = sizeof(struct BlockHeader);
 
-uint GraphicsMemoryHeap::GetMaxBuffer()
+uint32_t GraphicsMemoryHeap::GetMaxBuffer()
 {
     return SizeInBytes;
 }
 
-bool GraphicsMemoryHeap::Initialize(CLR_UINT32 desired)
+bool GraphicsMemoryHeap::Initialize(CLR_UINT32 requested)
 {
     GraphicsMemory gm;
 
-    if (gm.GraphicsHeapLocation(desired, graphicsHeapBeginAddress, graphicsHeapEndAddress))
+    if (gm.GraphicsHeapLocation(requested, graphicsHeapBeginAddress, graphicsHeapEndAddress))
     {
         SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
