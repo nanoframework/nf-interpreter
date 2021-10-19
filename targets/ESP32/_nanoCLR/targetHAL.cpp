@@ -81,11 +81,6 @@ void nanoHAL_Initialize()
     unsigned char *heapStart = NULL;
     unsigned int heapSize = 0;
 
-#if (NANOCLR_GRAPHICS == TRUE)
-    // need to allocate heap for UI before managed heap
-    g_GraphicsMemoryHeap.Initialize();
-#endif
-
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
@@ -99,30 +94,6 @@ void nanoHAL_Initialize()
 
 #if (HAL_USE_SPI == TRUE)
     nanoSPI_Initialize();
-#endif
-
-#if (NANOCLR_GRAPHICS == TRUE)
-    // Initialise Graphics after devices initialised
-    DisplayInterfaceConfig displayConfig;
-
-    // Define SPI display configuration for Wrover
-    displayConfig.Spi.spiBus = 1;                // Spi Bus
-    displayConfig.Spi.chipSelect = GPIO_NUM_22;  // CS_1     GPIO22   CS
-    displayConfig.Spi.dataCommand = GPIO_NUM_21; // D/CX_1   GPIO21   D/C
-    displayConfig.Spi.reset = GPIO_NUM_18;       // RST_1    GPIO18   RESET
-    displayConfig.Spi.backLight = GPIO_NUM_5;    // GPIO5    Backlight
-
-    g_DisplayInterface.Initialize(displayConfig);
-    g_DisplayDriver.Initialize();
-
-    // g_TouchInterface.Initialize();
-    // g_TouchDevice.Initialize();
-
-    PalEvent_Initialize();
-    // Gesture_Initialize();
-    // Ink_Initialize();
-
-    g_DisplayDriver.Clear();
 #endif
 
     // no PAL events required until now

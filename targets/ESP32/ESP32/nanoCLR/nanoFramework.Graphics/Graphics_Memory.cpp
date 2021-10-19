@@ -27,7 +27,10 @@ struct GraphicsMemory g_GraphicsMemory;
 static CLR_UINT8 *heapStartingAddress = 0;
 static CLR_UINT8 *heapEndingAddress = 0;
 
-bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8 *&graphicsStartingAddress, CLR_UINT8 *&graphicsEndingAddress)
+bool GraphicsMemory::GraphicsHeapLocation(
+    CLR_UINT32 requested,
+    CLR_UINT8 *&graphicsStartingAddress,
+    CLR_UINT8 *&graphicsEndingAddress)
 {
     // requesting 2MB
     CLR_INT32 graphicsMemoryBlockSize = 2 * 1024 * 1024;
@@ -41,25 +44,29 @@ bool GraphicsMemory::GraphicsHeapLocation(CLR_UINT8 *&graphicsStartingAddress, C
         return true;
     }
 
+    // We don't want to allocate upfront
+    if (requested == 0)
+    {
+        // We don't allocate anything here
+        return false;
+    }
+
     // Get Largest free block in SPIRam
     CLR_INT32 spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps);
     if (spiramMaxSize == 0)
     {
-        // No SPI RAM, try and allocate small block in normal ram to keep allocator happy for
-        // people trying to run graphics on boards without SPI RAM
+        // No SPIRAM, try and allocate small block in normal ram to keep allocator happy for
+        // people trying to run graphics on boards without SPIRAM
         // Should be able to use with small screens
         memoryCaps ^= MALLOC_CAP_SPIRAM;
 
-        // TODO: Have a parameter to govern this size as it may be enough for small display
-        spiramMaxSize = 20 * 1024;
+        spiramMaxSize = requested;
     }
 
-    // limit the size to what is available
-    if (spiramMaxSize < graphicsMemoryBlockSize)
+    if (spiramMaxSize < graphicsMemoryBlockSize) // limit the size to what is available
     {
         graphicsMemoryBlockSize = spiramMaxSize;
     }
-
     graphicsStartingAddress = (CLR_UINT8 *)heap_caps_malloc(graphicsMemoryBlockSize, memoryCaps);
     ASSERT(graphicsStartingAddress != NULL);
     graphicsEndingAddress = (CLR_UINT8 *)(graphicsStartingAddress + graphicsMemoryBlockSize);
