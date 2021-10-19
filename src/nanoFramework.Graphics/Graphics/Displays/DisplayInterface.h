@@ -9,7 +9,8 @@
 #include "nanoCLR_Types.h"
 
 // Display configuration
-struct DisplayInterfaceConfig {
+struct DisplayInterfaceConfig
+{
     union {
         struct
         {

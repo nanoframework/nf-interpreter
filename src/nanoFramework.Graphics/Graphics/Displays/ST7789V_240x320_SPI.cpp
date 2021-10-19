@@ -170,10 +170,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
         case LANDSCAPE180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
-            g_DisplayInterface.SendCommand(
-                2,
-                Memory_Access_Control,
-                (MADCTL_ML | MADCTL_BGR)); // Landscape  + BGR
+            g_DisplayInterface.SendCommand(2, Memory_Access_Control,
+                                           (MADCTL_ML | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;
@@ -255,7 +253,7 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     CLR_UINT8 Page_Address_Set_Data[4];
     Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    Page_Address_Set_Data[2] = ((y2 +g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
     Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
@@ -319,9 +317,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
     if (transferBufferCount < Attributes.TransferBufferSize)
     {
         // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(
-            Attributes.TransferBuffer,
-            (Attributes.TransferBufferSize - transferBufferCount));
+        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
     }
 
     return;
