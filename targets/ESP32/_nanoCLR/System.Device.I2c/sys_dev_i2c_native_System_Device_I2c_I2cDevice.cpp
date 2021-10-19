@@ -145,6 +145,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     slaveAddress = pConfig[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4;
 
+    cmd = i2c_cmd_link_create();
+
     // dereference the write and read SpanByte from the arguments
     writeSpanByte = stack.Arg1().Dereference();
     if (writeSpanByte != NULL)
@@ -159,8 +161,26 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             // use the span length as write size, only the elements defined by the span must be written
             writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
 
-            // grab the pointer to the array by starting and the offset specified in the span
-            writeBuffer = (uint8_t *)writeData->GetElement(writeOffset);
+            if (writeSize > 0)
+            {
+                // need to allocate buffer from internal memory
+                writeBuffer = (uint8_t *)heap_caps_malloc(writeSize, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+
+                if (writeBuffer == NULL)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
+
+                // copy buffer content
+                memcpy(writeBuffer, (uint8_t *)writeData->GetElement(writeOffset), writeSize);
+
+                // setup write transaction
+                i2c_master_start(cmd);
+                i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
+                opResult = i2c_master_write(cmd, writeBuffer, writeSize, true);
+
+                ASSERT(opResult == ESP_OK);
+            }
         }
     }
 
@@ -177,40 +197,29 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             // use the span length as read size, only the elements defined by the span must be read
             readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
 
-            // need to allocate buffer from internal memory to prevent
-            readBuffer = (uint8_t *)heap_caps_malloc(readSize, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
-
-            if (readBuffer == NULL)
+            if (readSize > 0)
             {
-                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                // need to allocate buffer from internal memory
+                readBuffer = (uint8_t *)heap_caps_malloc(readSize, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+
+                if (readBuffer == NULL)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
+
+                // clear allocated buffer
+                memset(readBuffer, 0, readSize);
+
+                // setup read transaction
+                i2c_master_start(cmd);
+                i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
+
+                // read all bytes with ACK except the last one
+                opResult = i2c_master_read(cmd, readBuffer, readSize, I2C_MASTER_LAST_NACK);
+
+                ASSERT(opResult == ESP_OK);
             }
-
-            memset(readBuffer, 0, readSize);
         }
-    }
-
-    cmd = i2c_cmd_link_create();
-
-    // handle write transaction,if any
-    if (writeSize != 0)
-    {
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_WRITE, ACK_CHECK_EN);
-        opResult = i2c_master_write(cmd, &writeBuffer[0], writeSize, true);
-
-        ASSERT(opResult == ESP_OK);
-    }
-
-    // setup read transaction, if any
-    if (readSize != 0)
-    {
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (slaveAddress << 1) | I2C_MASTER_READ, ACK_CHECK_EN);
-
-        // read all bytes with ACK except the last one
-        opResult = i2c_master_read(cmd, readBuffer, readSize, I2C_MASTER_LAST_NACK);
-
-        ASSERT(opResult == ESP_OK);
     }
 
     i2c_master_stop(cmd);
@@ -228,8 +237,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
     if (opResult != ESP_OK)
     {
-        transferResult = I2cTransferStatus_FullTransfer;
-
         // set the result field
         if (opResult == ESP_FAIL)
         {
@@ -265,6 +272,11 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
     }
 
     NANOCLR_CLEANUP();
+
+    if (writeBuffer)
+    {
+        platform_free(writeBuffer);
+    }
 
     if (readBuffer)
     {
