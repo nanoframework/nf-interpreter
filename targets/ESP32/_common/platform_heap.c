@@ -6,38 +6,20 @@
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
 
+// setting here the default malloc capabilities that will be used when performing malloc operations
+#define DEFAULT_MALLOC_CAPS MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL
+
 void *platform_malloc(size_t size)
 {
-
-    // need to undef in order to call the real function
-#undef malloc
-
-    return malloc(size);
-
-    // define back
-#define malloc YOU_SHALL_NOT_USE_malloc
+    return heap_caps_malloc(size, DEFAULT_MALLOC_CAPS);
 }
 
 void platform_free(void *ptr)
 {
-
-// need to undef in order to call the real function
-#undef free
-
-    free(ptr);
-
-    // define back
-#define free YOU_SHALL_NOT_USE_free
+    heap_caps_free(ptr);
 }
 
 void *platform_realloc(void *ptr, size_t size)
 {
-
-// need to undef in order to call the real function
-#undef realloc
-
-    return realloc(ptr, size);
-
-    // define back
-#define realloc YOU_SHALL_NOT_USE_realloc
+    return heap_caps_realloc(ptr, size, DEFAULT_MALLOC_CAPS);
 }
