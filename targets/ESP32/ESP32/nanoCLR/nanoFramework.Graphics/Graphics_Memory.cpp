@@ -28,7 +28,7 @@ static CLR_UINT8 *heapStartingAddress = 0;
 static CLR_UINT8 *heapEndingAddress = 0;
 
 bool GraphicsMemory::GraphicsHeapLocation(
-    CLR_UINT32 desired,
+    CLR_UINT32 requested,
     CLR_UINT8 *&graphicsStartingAddress,
     CLR_UINT8 *&graphicsEndingAddress)
 {
@@ -45,7 +45,7 @@ bool GraphicsMemory::GraphicsHeapLocation(
     }
 
     // We don't want to allocate upfront
-    if (desired == 0)
+    if (requested == 0)
     {
         // We don't allocate anything here
         return false;
@@ -60,7 +60,7 @@ bool GraphicsMemory::GraphicsHeapLocation(
         // Should be able to use with small screens
         memoryCaps ^= MALLOC_CAP_SPIRAM;
 
-        spiramMaxSize = desired;
+        spiramMaxSize = requested;
     }
 
     if (spiramMaxSize < graphicsMemoryBlockSize) // limit the size to what is available
