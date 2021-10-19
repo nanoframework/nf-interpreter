@@ -21,34 +21,37 @@ enum HighResTimerEventType
 
 static int FindNextTimerIndex()
 {
-    for( int index=0; index<MAX_HRTIMERS; index++)
+    for (int index = 0; index < MAX_HRTIMERS; index++)
     {
-        if ( hrtimers[index] == 0 ) return index;
+        if (hrtimers[index] == 0)
+            return index;
     }
 
     return -1;
 }
 
-static void HRtimer_callback(void* arg)
+static void HRtimer_callback(void *arg)
 {
-    esp_timer_handle_t timer_handle = hrtimers[(int) arg];
-    PostManagedEvent( EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType::TimerExpired, 0, (uint32_t)timer_handle );
+    esp_timer_handle_t timer_handle = hrtimers[(int)arg];
+    PostManagedEvent(EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType::TimerExpired, 0, (uint32_t)timer_handle);
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeEspTimerCreate___I4( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
+    NativeEspTimerCreate___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
         int index = FindNextTimerIndex();
-        if ( index < 0) NANOCLR_SET_AND_LEAVE(CLR_E_TOO_MANY_OPEN_HANDLES);
+        if (index < 0)
+            NANOCLR_SET_AND_LEAVE(CLR_E_TOO_MANY_OPEN_HANDLES);
 
         esp_timer_handle_t out_handle;
         esp_timer_create_args_t create_args = {};
         create_args.callback = &HRtimer_callback;
-        create_args.arg = (void*)index;
-        
+        create_args.arg = (void *)index;
+
         esp_err_t err = esp_timer_create(&create_args, &out_handle);
-        if ( err != ESP_OK)
+        if (err != ESP_OK)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -58,17 +61,19 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeEspTimerDispose___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
+    NativeEspTimerDispose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis); 
-        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[ FIELD___timerHandle ].NumericByRefConst().s4;
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[FIELD___timerHandle].NumericByRefConst().s4;
         esp_timer_delete(timer);
 
-        for( int index=0; index<MAX_HRTIMERS; index++)
+        for (int index = 0; index < MAX_HRTIMERS; index++)
         {
-            if ( hrtimers[index] == timer ) 
+            if (hrtimers[index] == timer)
             {
                 hrtimers[index] = 0;
                 break;
@@ -78,63 +83,70 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeStop___VOID( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeStop___VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis); 
-        if(pThis[FIELD___disposedValue ].NumericByRef().u1 != 0)
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[ FIELD___timerHandle ].NumericByRefConst().s4;
+        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[FIELD___timerHandle].NumericByRefConst().s4;
         esp_timer_stop(timer);
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeStartOneShot___VOID__U8( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
+    NativeStartOneShot___VOID__U8(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis); 
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
-        if(pThis[FIELD___disposedValue ].NumericByRef().u1 != 0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[ FIELD___timerHandle ].NumericByRefConst().s4;
+        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[FIELD___timerHandle].NumericByRefConst().s4;
         uint64_t timeout_us = (uint64_t)stack.Arg1().NumericByRef().u8;
-        
+
         esp_timer_stop(timer);
         esp_timer_start_once(timer, timeout_us);
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeStartPeriodic___VOID__U8( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
+    NativeStartPeriodic___VOID__U8(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock*  pThis = stack.This();  FAULT_ON_NULL(pThis); 
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
-        if(pThis[FIELD___disposedValue ].NumericByRef().u1 != 0)
+        if (pThis[FIELD___disposedValue].NumericByRef().u1 != 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[ FIELD___timerHandle ].NumericByRefConst().s4;
+        esp_timer_handle_t timer = (esp_timer_handle_t)pThis[FIELD___timerHandle].NumericByRefConst().s4;
         uint64_t period_us = (uint64_t)stack.Arg1().NumericByRef().u8;
- 
+
         esp_timer_stop(timer);
         esp_timer_start_periodic(timer, period_us);
     }
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::NativeGetCurrent___STATIC__U8( CLR_RT_StackFrame& stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
+    NativeGetCurrent___STATIC__U8(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
