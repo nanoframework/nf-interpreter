@@ -1,0 +1,327 @@
+# scheduled build
+schedules:
+- cron: "50 28 * * *"
+  branches:
+    include: [ develop ]
+  always: true
+  displayName: Nightly build at 23:58
+jobs:
+
+##############################
+- job: Check_Build_Options
+  pool:
+    vmImage: 'windows-2019'
+
+  variables:
+    DOTNET_NOLOGO: true
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  # check build options
+  - powershell: |
+
+      if($env:Build_Reason -eq "Schedule")
+      {
+          # scheduled daily build: get commit date 
+          
+          cd "nf-interpreter" > $null
+          $commitDate = git show -s --format=%cd --date=short
+          $commitDate = [DateTime]$commitDate
+          
+          if($commitDate -eq [System.DateTime]::UtcNow.Date)
+          {
+              # last commit is from today, build images
+              echo "##vso[task.setvariable variable=GO;isOutput=true]true"  
+              "**Commits from today: Build ALL**" | Write-Host
+          }
+          else
+          {
+            # last commit is older than today, skip build
+            "***************************************************" | Write-Host
+            "* Last commit is older than today, skipping build *" | Write-Host
+            "***************************************************" | Write-Host
+            echo "##vso[task.setvariable variable=GO;isOutput=true]false"
+          }
+      }
+      else
+      {
+          # build for other reasons: build depending on target tag
+          echo "##vso[task.setvariable variable=GO;isOutput=true]false"
+          "**build for other reasons**" | Write-Host  
+      }
+
+    name: BuildOptions
+    displayName: Get build options
+
+  # check what changed
+  - powershell: |
+      git config --global user.email "nfbot"
+      git config --global user.name "nanoframework@outlook.com"
+
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+      
+      if($env:StartReleaseCandidate -like "true")
+      {
+          # this is a release prep so NO build
+      }
+      else
+      {
+          $commitHistory = git log --name-status --since=1.day --format=
+
+          # filter removed files              
+          $files = $commitHistory.where{$_[0] -ne 'D'}
+
+          # get file names only
+          $files = $files | % {$_.SubString(2)}
+
+          Write-host "Files changed:"
+          $files | % { Write-host $_ }
+          Write-host ""
+
+          # set default values
+          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+
+          if( 
+              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+              (($files.where{$_.StartsWith('src')}).Count -gt 0)
+            )
+          {
+              # files at:
+              # - repo root
+              # - azure-pipelines-templates
+              # - CMake
+              # - src
+
+              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              
+              Write-host "Building ALL targets"
+          }
+
+
+          if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+          {
+              # files at ChibiOS folder
+              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+              Write-host "Building ChibiOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
+          {
+              # files at FreeRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
+
+              Write-host "Building FreeRTOS targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
+          {
+              # files at ESP32 folder
+              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+
+              Write-host "Building ESP32 targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
+          {
+              # files at TI_SimpleLink folder
+              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+
+              Write-host "Building TI SimpleLink targets"
+          }
+
+    name: TargetsToBuild
+    displayName: Get targets to build
+
+################
+# STM32
+- job: Build_STM32_targets
+  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true), , eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_CHIBIOS'], 'true'))
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-2019'
+
+  strategy:
+    matrix:
+      NETDUINO3_WIFI:
+        TargetBoard: NETDUINO3_WIFI
+        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: true
+        NeedsSRECORD: false
+      ORGPAL_PALTHREE:
+        TargetBoard: ORGPAL_PALTHREE
+        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: true
+        NeedsSRECORD: false
+      ST_NUCLEO64_F091RC:
+        TargetBoard: ST_NUCLEO64_F091RC
+        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=ChibiOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
+        GccArm_Version:
+        NeedsDFU: false
+        NeedsSRECORD: true
+
+  variables:
+    DOTNET_NOLOGO: true
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('STM32_versioncounter', 0)]
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-srecord.yml
+  - template: azure-pipelines-templates/download-hexdfu.yml
+  - template: azure-pipelines-templates/build-chibios-stm32.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
+# ESP32 targets
+- job: Build_ESP32_targets
+  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_ESP32'], 'true')) 
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-2019'
+
+  # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
+  strategy:
+    matrix:
+      ESP32_REV0:
+        TargetBoard: ESP32
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
+        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+        SDK_config: sdkconfig.default_nopsram.esp32
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_REV0
+      ESP32_PSRAM_REV3:
+        TargetBoard: ESP32
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
+        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+        SDK_config: sdkconfig.default_rev3.esp32
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_PSRAM_REV3
+      ESP32_PICO:
+        TargetBoard: ESP32
+        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=ESP32 -DNF_FEATURE_DEBUGGER=ON -DTARGET_SERIAL_BAUDRATE=115200 -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DAPI_Hardware.Esp32=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
+        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+        SDK_config: sdkconfig.default_pico
+        IDF_Target: esp32
+        TargetName: ESP32_PICO
+        PackageName: ESP32_PICO
+
+  variables:
+    DOTNET_NOLOGO: true
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('ESP32_versioncounter', 1000)]
+    IDF_PATH: 'D:/a/1/s/esp-idf'
+    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+
+  steps:
+  - checkout: self
+  - checkout: esp32_idf
+    fetchDepth: 1
+
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+  - template: azure-pipelines-templates/download-install-esp32-build-components.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/build-esp32.yml
+
+  - task: CopyFiles@1
+    condition: succeeded()
+    displayName: Copying bootloader
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
+      Contents: |
+        bootloader.bin
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      flattenFolders: true
+
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+    parameters:
+      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+
+#################
+# TI SimpleLink
+- job: Build_TI_SimpleLink_targets
+  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_TI'], 'true')) 
+
+  dependsOn:
+  - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-2019'
+
+  strategy:
+    matrix:
+      TI_CC1352R1_LAUNCHXL_868:
+        TargetBoard: TI_CC1352R1_LAUNCHXL
+        PackageName: TI_CC1352R1_LAUNCHXL_868
+        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=868 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
+        GccArm_Version:
+
+  variables:
+    DOTNET_NOLOGO: true
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('TI_versioncounter', 0)]
+    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/build-ti-simplelink.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+
+#################################
+# report build failure to Discord
+- job: Report_Build_Failure
+  dependsOn:
+  - Build_STM32_targets
+  - Build_ESP32_targets
+  - Build_TI_SimpleLink_targets
+  condition: or(failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_TI_SimpleLink_targets'))
+
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+
+  - checkout: self
+    fetchDepth: 1
+
+  # step from template @ nf-tools repo
+  - template: azure-pipelines-templates/discord-webhook.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''
