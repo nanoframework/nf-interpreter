@@ -1,3 +1,19 @@
+trigger: none
+pr: none
+
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+    - repository: esp32_idf
+      type: github
+      name: espressif/esp-idf
+      endpoint: nanoframework
+      ref: refs/tags/v4.3.1
+    
 # scheduled build
 schedules:
 - cron: "50 28 * * *"
