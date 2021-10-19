@@ -81,6 +81,11 @@ void nanoHAL_Initialize()
     unsigned char *heapStart = NULL;
     unsigned int heapSize = 0;
 
+#if (NANOCLR_GRAPHICS == TRUE)
+    // need to allocate heap for UI before managed heap
+    g_GraphicsMemoryHeap.Initialize();
+#endif
+
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
