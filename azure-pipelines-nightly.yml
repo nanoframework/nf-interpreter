@@ -16,7 +16,7 @@ resources:
     
 # scheduled build
 schedules:
-- cron: "50 28 * * *"
+- cron: "58 23 * * *"
   branches:
     include: [ develop ]
   always: true
@@ -153,14 +153,16 @@ jobs:
 
               Write-host "Building TI SimpleLink targets"
           }
+      }
 
     name: TargetsToBuild
     displayName: Get targets to build
+    condition: eq(variables['GO'], 'True')
 
 ################
 # STM32
 - job: Build_STM32_targets
-  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true), , eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_CHIBIOS'], 'true'))
+  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_CHIBIOS'], 'true'))
 
   dependsOn:
   - Check_Build_Options
