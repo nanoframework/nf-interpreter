@@ -47,18 +47,16 @@ bool WP_Initialise(COM_HANDLE port)
 
     ASSERT(WP_Port <= SOC_UART_NUM);
 
-    uart_config_t uart_config = {
-        // baudrate
-        .baud_rate = TARGET_SERIAL_BAUDRATE,
-        // baudrate
-        .data_bits = UART_DATA_8_BITS,
-        // parity mode
-        .parity = UART_PARITY_DISABLE,
-        // stop bit mode
-        .stop_bits = UART_STOP_BITS_1,
-        // hardware flow control(cts/rts)
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
-    };
+    uart_config_t uart_config = {// baudrate
+                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
+                                 // baudrate
+                                 .data_bits = UART_DATA_8_BITS,
+                                 // parity mode
+                                 .parity = UART_PARITY_DISABLE,
+                                 // stop bit mode
+                                 .stop_bits = UART_STOP_BITS_1,
+                                 // hardware flow control(cts/rts)
+                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
     uart_param_config(WP_Port, &uart_config);
 
@@ -70,7 +68,7 @@ bool WP_Initialise(COM_HANDLE port)
         UART_PIN_NO_CHANGE);
 
     // setup UART driver with UART queue
-    uart_driver_install(WP_Port, 256, 256, 0, NULL, 0);
+    uart_driver_install(WP_Port, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM);
 
     WP_Port_Intitialised = true;
 
