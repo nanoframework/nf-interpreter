@@ -668,7 +668,7 @@ macro(nf_add_idf_as_library)
 
     # set variables to mirror SDK CONFIG options
 
-    # need to read the supplied SDK CONFIG file and replace the appropriate options            
+    # need to read the supplied SDK CONFIG file        
     file(READ
         ${CMAKE_SOURCE_DIR}/sdkconfig
         SDKCONFIG_DEFAULT_CONTENTS)
@@ -704,7 +704,7 @@ macro(nf_add_idf_as_library)
     # set variable
     if(${CONFIG_BT_ENABLED_POS} GREATER -1)
         set(BLE_INFO ", support for BLE")
-    endif()
+    endif()    
 
 endmacro()
 
