@@ -96,15 +96,16 @@ typedef enum SLEEP_LEVEL
 // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#define EVENT_UNKNOWN 0
-#define EVENT_CUSTOM  10
-#define EVENT_GPIO    20
-#define EVENT_SERIAL  30
-#define EVENT_NETWORK 40
-#define EVENT_WIFI    50
-#define EVENT_CAN     60
-#define EVENT_STORAGE 70
-#define EVENT_RADIO   80
+#define EVENT_UNKNOWN               0
+#define EVENT_CUSTOM                10
+#define EVENT_GPIO                  20
+#define EVENT_SERIAL                30
+#define EVENT_NETWORK               40
+#define EVENT_WIFI                  50
+#define EVENT_CAN                   60
+#define EVENT_STORAGE               70
+#define EVENT_RADIO                 80
+#define EVENT_HIGH_RESOLUTION_TIMER 90
 
 #define EVENT_TOUCH   120
 #define EVENT_GESTURE 130
