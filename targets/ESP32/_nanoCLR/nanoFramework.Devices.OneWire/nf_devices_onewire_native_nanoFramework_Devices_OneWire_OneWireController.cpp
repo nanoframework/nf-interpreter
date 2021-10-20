@@ -50,7 +50,7 @@ bool oneWireInit()
             UART_PIN_NO_CHANGE,
             UART_PIN_NO_CHANGE) != ESP_OK)
         return false;
-    if (uart_driver_install(UartDriver, UART_FIFO_LEN * 2, 0, 0, NULL, 0) != ESP_OK)
+    if (uart_driver_install(UartDriver, UART_FIFO_LEN * 2, 0, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
         return false;
 
 #if (ONEWIRE_USE_MUTUAL_EXCLUSION == TRUE)

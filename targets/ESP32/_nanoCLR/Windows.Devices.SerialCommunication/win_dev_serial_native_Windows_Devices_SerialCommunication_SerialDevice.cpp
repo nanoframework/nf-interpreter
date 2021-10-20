@@ -326,12 +326,16 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     // Install driver
     esp_err = uart_driver_install(
         uart_num,
-        UART_BUFER_SIZE,            // rx_buffer_size,
-        0,                          // tx_buffer_size, not buffered
-        20,                         // queue_size
-        &(palUart->UartEventQueue), // QueueHandle_t *uart_queue ( none for now )
-        0                           // intr_alloc_flags
-    );
+        // rx_buffer_size,
+        UART_BUFER_SIZE,
+        // tx_buffer_size, not buffered
+        0,
+        // queue_size
+        20,
+        // QueueHandle_t *uart_queue ( none for now )
+        &(palUart->UartEventQueue),
+
+        ESP_INTR_FLAG_IRAM);
     if (esp_err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to install uart driver");
