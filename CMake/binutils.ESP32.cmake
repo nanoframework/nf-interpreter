@@ -528,6 +528,37 @@ macro(nf_add_idf_as_library)
 
     endif()
 
+    # option for automatic XTAL frequency detection
+    # (default is OFF which means that fixed default frequency will be used)
+    option(ESP32_XTAL_FREQ_26 "option to enable support for automatic XTAL frequency detection")
+    
+    if(ESP32_XTAL_FREQ_26)
+
+        message(STATUS "Support for automatic XTAL frequency detection is enabled")
+                
+        # need to read the supplied SDK CONFIG file and replace the appropriate options            
+        file(READ
+            "${SDKCONFIG_DEFAULTS_FILE}"
+            SDKCONFIG_DEFAULT_CONTENTS)
+
+        string(REPLACE
+            "CONFIG_ESP32_XTAL_FREQ_40"
+            "CONFIG_ESP32_XTAL_FREQ_26"
+            SDKCONFIG_DEFAULT_FINAL_CONTENTS
+            "${SDKCONFIG_DEFAULT_CONTENTS}")
+
+        # need to temporarilly allow changes in source files
+        set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+        file(WRITE 
+            ${SDKCONFIG_DEFAULTS_FILE} 
+            ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
+
+        set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+    else()
+        message(STATUS "Using default XTAL frequency")
+    endif()
+
     # create IDF static libraries
     idf_build_process(${TARGET_SERIES_SHORT}
         COMPONENTS 
