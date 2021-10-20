@@ -335,6 +335,10 @@ CONFIG_ESP32S2_RTC_CLK_CAL_CYCLES=576
 #
 # end of ADC-Calibration
 
+# config for XTAL freq
+# adding it here, so it can be overriden by our CMake
+CONFIG_ESP32_XTAL_FREQ_40=y
+
 #
 # Common ESP-related
 #
