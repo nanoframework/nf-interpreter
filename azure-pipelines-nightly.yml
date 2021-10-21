@@ -41,8 +41,6 @@ jobs:
       if($env:Build_Reason -eq "Schedule")
       {
           # scheduled daily build: get commit date 
-          
-          cd "nf-interpreter" > $null
           $commitDate = git show -s --format=%cd --date=short
           $commitDate = [DateTime]$commitDate
           
