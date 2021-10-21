@@ -16,7 +16,7 @@ steps:
     displayName: Downloading ARM GCC toolchain
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-arm-gcc-toolchain.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
         arguments: '-Version "$(GccArm_Version)"'
         failOnStderr: true
 

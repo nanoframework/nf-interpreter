@@ -15,7 +15,7 @@ steps:
     displayName: Download Ninja
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-ninja.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-ninja.ps1'
         failOnStderr: 'true'
 
   - task: ExtractFiles@1

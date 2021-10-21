@@ -16,7 +16,7 @@ steps:
     displayName: Install HEX2DFU
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-nf-hex2dfu.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-nf-hex2dfu.ps1'
         failOnStderr: 'true'
 
   - task: PowerShell@2
