@@ -530,11 +530,11 @@ macro(nf_add_idf_as_library)
 
     # option for automatic XTAL frequency detection
     # (default is OFF which means that fixed default frequency will be used)
-    option(ESP32_XTAL_FREQ_26 "option to enable support for automatic XTAL frequency detection")
+    option(ESP32_XTAL_FREQ_26 "option to set XTAL frequency to 26MHz")
     
     if(ESP32_XTAL_FREQ_26)
 
-        message(STATUS "Support for automatic XTAL frequency detection is enabled")
+        message(STATUS "Set XTAL frequency to 26MHz")
                 
         # need to read the supplied SDK CONFIG file and replace the appropriate options            
         file(READ
