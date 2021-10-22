@@ -29,7 +29,13 @@ static int PwmMapping[16] = {
     265984,
     266240};
 
+
+#if SOC_LEDC_SUPPORT_HS_MODE
 #define GetSpeedMode(timer) (ledc_mode_t)((timer > 3) ? LEDC_LOW_SPEED_MODE : LEDC_HIGH_SPEED_MODE)
+#else
+#define GetSpeedMode(timer) LEDC_LOW_SPEED_MODE
+#endif
+
 #define IDF_ERROR(result)                                                                                              \
     if (result != ESP_OK)                                                                                              \
     {                                                                                                                  \
@@ -217,7 +223,13 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     }
 
     timer = (ledc_timer_t)(timerId & 0x03);
+
+
+#if SOC_LEDC_SUPPORT_HS_MODE
     mode = (timerId <= 4) ? LEDC_HIGH_SPEED_MODE : LEDC_LOW_SPEED_MODE;
+#else
+    mode = LEDC_LOW_SPEED_MODE;
+#endif
 
     // Work out the optimal duty resolution based on current frequency, default to 1 if not found
     // Working from 15 bit duty resolution down until we have a valid divisor
