@@ -64,12 +64,12 @@ list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
 string(REPLACE "\\" "/" IDF_SOURCE_DIR_PATH "$ENV{IDF_PATH}")
 
 # check IDF_PATH environment variable
-if(NOT ${IDF_SOURCE_DIR_PATH} STREQUAL ${esp32_idf_SOURCE_DIR})
+if(NOT "${IDF_SOURCE_DIR_PATH}" STREQUAL "${esp32_idf_SOURCE_DIR}")
     
     # variable is set and it's different from the current location
     # can't continue
 
-    message(FATAL_ERROR "${IDF_SOURCE_DIR_PATH}\n-- ########################################\nFound environment variable IDF_PATH different from the current specified IDF location.\nIt's currently set to '$ENV{IDF_PATH}'.\nIf you have a local install and want to use it for the build, set the build option 'ESP32_IDF_PATH' to that location.\n########################################\n\n")
+    message(FATAL_ERROR "\n-- ########################################\nFound environment variable IDF_PATH different from the current specified IDF location.\nIt's currently set to '$ENV{IDF_PATH}'.\nIf you have a local install and want to use it for the build:\n1) Set the build option 'ESP32_IDF_PATH' to that location\n2) Make sure it's checked out at v${ESP32_IDF_TAG}\n########################################\n\n")
 
 else()
     message(STATUS "\n-- IDF_PATH is '${IDF_SOURCE_DIR_PATH}'\r")
