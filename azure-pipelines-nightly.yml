@@ -155,7 +155,7 @@ jobs:
 
     name: TargetsToBuild
     displayName: Get targets to build
-    condition: eq(variables['GO'], 'True')
+    condition: eq(variables['BuildOptions.GO'], 'True')
 
 ################
 # STM32
