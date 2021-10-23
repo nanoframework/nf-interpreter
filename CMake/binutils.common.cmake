@@ -456,7 +456,7 @@ macro(nf_setup_target_build_common)
         message(FATAL_ERROR "Need to provide BOOTER_LINKER_FILE argument when target has HAS_NANOBOOTER defined")
     endif()
     
-    if(NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL "")
+    if(NOT NFSTBC_CLR_LINKER_FILE OR "${NFSTBC_CLR_LINKER_FILE}" STREQUAL "")
         message(FATAL_ERROR "Need to provide CLR_LINKER_FILE argument")
     endif()
 
