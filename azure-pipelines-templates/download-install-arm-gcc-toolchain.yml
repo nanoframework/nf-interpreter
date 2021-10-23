@@ -2,15 +2,15 @@
 # See LICENSE file in the project root for full license information.
 
 steps:
-  - task: Cache@2
-    condition: eq(variables.GccArm_Version, '') # This should happen for all pipeline targets by default (unless a specific GCC version is specified).
-    displayName: Cache latest ARM GCC toolchain
-    inputs:
-      key: 'gcc-version | gccUpdateKey'
-      restoreKeys: gccUpdateKey
-      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
-      cacheHitVar: GCC_CACHE_RESTORED
-    continueOnError: true # this should only happen once on new version?!
+#   - task: Cache@2
+#     condition: eq(variables.GccArm_Version, '') # This should happen for all pipeline targets by default (unless a specific GCC version is specified).
+#     displayName: Cache latest ARM GCC toolchain
+#     inputs:
+#       key: 'gcc-version | gccUpdateKey'
+#       restoreKeys: gccUpdateKey
+#       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+#       cacheHitVar: GCC_CACHE_RESTORED
+#     continueOnError: true # this should only happen once on new version?!
 
   - task: PowerShell@2
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
