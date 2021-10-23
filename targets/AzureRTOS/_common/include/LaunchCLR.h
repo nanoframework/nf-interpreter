@@ -9,5 +9,4 @@
 void LaunchCLR(uint32_t address);
 bool CheckValidCLRImage(uint32_t address);
 
-#endif //LAUNCHCLR_H
-
+#endif // LAUNCHCLR_H

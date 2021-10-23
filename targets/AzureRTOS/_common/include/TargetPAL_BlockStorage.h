@@ -9,4 +9,4 @@
 
 #include <nanoPAL_BlockStorage.h>
 
-#endif  // _TARGET_PAL_BLOCKSTORAGE_H
+#endif // _TARGET_PAL_BLOCKSTORAGE_H
