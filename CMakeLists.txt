@@ -770,13 +770,13 @@ set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 
 # Define PLATFORM base path
-set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR})
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
 
 #######################
-# FreeRTOS
-if(RTOS_FREERTOS_CHECK)
+# FreeRTOS or AzureRTOS
+if(RTOS_FREERTOS_CHECK OR RTOS_AZURERTOS_CHECK)
 
-    add_subdirectory(targets/FreeRTOS)
+    add_subdirectory(${BASE_PATH_FOR_PLATFORM})
 
 #######################
 # ESP32
@@ -856,13 +856,6 @@ elseif(RTOS_ESP32_CHECK)
 
     nf_clear_output_files_nanoclr()
 
-#######################
-# AzureRTOS
-elseif(RTOS_AZURERTOS_CHECK)
-
-    add_subdirectory(targets/AzureRTOS)
-
-#######################
 # all other platforms
 else()
 

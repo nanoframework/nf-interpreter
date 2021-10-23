@@ -3,11 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _LAUNCHCLR_H_
-#define _LAUNCHCLR_H_
+#ifndef LAUNCHCLR_H
+#define LAUNCHCLR_H
 
 void LaunchCLR(uint32_t address);
 bool CheckValidCLRImage(uint32_t address);
 
-#endif //_LAUNCHCLR_H_
-
+#endif // LAUNCHCLR_H

@@ -369,5 +369,18 @@ macro(nf_setup_target_build)
 
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})
+endmacro()
 
+# macro to clear binary files related with nanoBooter from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanobooter)
+    nf_clear_common_output_files_nanobooter()
+    # other files specific to this platform should go here
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    nf_clear_common_output_files_nanoclr()
+    # other files specific to this platform should go here
 endmacro()
