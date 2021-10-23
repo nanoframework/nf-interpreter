@@ -6,7 +6,7 @@ steps:
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache ARM GCC toolchain
     inputs:
-      key: 'variables.GccArm_Version | gccUpdateKey'
+      key: '10.3-2021.10 | gccUpdateKey'
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
       cacheHitVar: GCC_CACHE_RESTORED
