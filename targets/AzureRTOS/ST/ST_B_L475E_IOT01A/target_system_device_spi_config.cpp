@@ -45,4 +45,4 @@ SPI_CONFIG_PINS(2, GPIOD, 1, GPIOD, 3, GPIOD, 4, 5)
 // port for SPI3_MOSI is: GPIOD_12 INTERNAL-SPI3_MOSI
 
 // GPIO alternate pin function is 5 (see alternate function mapping table in device datasheet)
-SPI_CONFIG_PINS(3, GPIOD, 10, GPIOD, 11, GPIOD, 12, 5)
+SPI_CONFIG_PINS(3, GPIOC, 10, GPIOC, 11, GPIOC, 12, 5)
