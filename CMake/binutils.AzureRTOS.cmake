@@ -175,7 +175,7 @@ macro(nf_add_platform_dependencies target)
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
-                ${CMAKE_SOURCE_DIR}/targets/AzureChibiOS/${TARGET_BOARD}
+                ${TARGET_BASE_LOCATION}
                 ${AZRTOS_INCLUDES})
         
         add_dependencies(NF_NativeAssemblies azrtos::threadx)
