@@ -11,6 +11,8 @@
 #ifndef TARGET_COMMON_H
 #define TARGET_COMMON_H
 
+#include <sdkconfig.h>
+
 ///////////////////////////////////////////////////////////////////////
 // RAM start address and size is filled @ HeapLocation() during boot //
 ///////////////////////////////////////////////////////////////////////
@@ -40,12 +42,10 @@
 #define PLATFORM_HAS_RNG TRUE
 /////////////////////////////////////
 
-//////////////////////////////////////////////
-// set Wire Protocol packet size
-// valid sizes are 1024, 512, 256, 128
-// check Monitor_Ping_Source_Flags enum
-#define WP_PACKET_SIZE                  512U
-//////////////////////////////////////////////
+// set Wire Protocol packet size to 512 if using embedded USB CDC
+#if CONFIG_USB_CDC_ENABLED
+#define WP_PACKET_SIZE 512U
+#endif
 
 /////////////////////////////////////
 // #define EVENTS_HEART_BEAT
