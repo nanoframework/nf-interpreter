@@ -54,6 +54,13 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/wear_level
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/include/${TARGET_SERIES_SHORT}/rom)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/include)
 
+# includes specific to ESP32S2
+if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/additions/include)
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/tinyusb/tinyusb/src)
+    list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/include/freertos)
+endif()
+
 # including here the CMake files for the source files specific to the target series
 include(${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 

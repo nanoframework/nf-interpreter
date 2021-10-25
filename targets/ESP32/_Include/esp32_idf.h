@@ -52,6 +52,12 @@
 #include <spiffs_config.h>
 #include <esp_spiffs.h>
 
+// includes specific for TinyUSB and CDC
+#if CONFIG_USB_CDC_ENABLED
+#include <tinyusb.h>
+#include <tusb_cdc_acm.h>
+#endif
+
 // Uncomment to support Ethernet
 //#define ESP32_ETHERNET_SUPPORT
 
