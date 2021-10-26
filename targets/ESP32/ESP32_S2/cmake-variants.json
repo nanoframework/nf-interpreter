@@ -114,9 +114,9 @@
           "API_nanoFramework.Devices.OneWire": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
-          "TOUCHPANEL_DEVICE": "",
+          "TOUCHPANEL_DEVICE": "XPT2046.cpp",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-          "TOUCHPANEL_INTERFACE": ""
+          "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
         }
       }
     }
