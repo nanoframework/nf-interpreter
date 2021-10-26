@@ -117,11 +117,11 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "OFF",
-          "API_nanoFramework.Graphics": "OFF",
-          "GRAPHICS_DISPLAY": "",
+          "API_nanoFramework.Graphics": "ON",
+          "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-          "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+          "TOUCHPANEL_INTERFACE": ""
         }
       }
     }
