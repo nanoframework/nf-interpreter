@@ -9,7 +9,7 @@
 extern int ets_printf(const char *fmt, ...);
 
 const DRAM_ATTR esp_partition_t *g_pFlashDriver_partition;
-const void *g_esp32_flash_start_ptr;
+const void *esp32_flash_start_ptr;
 spi_flash_mmap_handle_t g_esp32_flash_out_handle;
 
 // storing the CODE block start and size for quick access
@@ -27,7 +27,7 @@ static const char *TAG = "FlashDriver";
 // 2. with ESP32 platform we are only allowed to write to the DEPLOYMENT regions, therefore this implementation it's
 // based on that assumption
 // 3. no other validations or sanity checks are performed
-// 4. this driver only accesses the CODE and DEPLOYMENT regions
+// 4. this driver only accesses CODE and DEPLOYMENT regions
 // 5. there is only a single block for CODE and a single block for DEPLOYMENT
 
 //--//
@@ -53,7 +53,7 @@ bool Esp32FlashDriver_InitializeDevice(void *context)
 
     uint32_t rangeCount = 0;
     uint32_t rangeIndex = 0;
-    g_esp32_flash_start_ptr = NULL;
+    esp32_flash_start_ptr = NULL;
 
     // Find the application partition and save partition entry
     g_pFlashDriver_partition =
@@ -70,12 +70,15 @@ bool Esp32FlashDriver_InitializeDevice(void *context)
             0,
             g_pFlashDriver_partition->size,
             SPI_FLASH_MMAP_DATA,
-            &g_esp32_flash_start_ptr,
+            &esp32_flash_start_ptr,
             &g_esp32_flash_out_handle) != ESP_OK)
     {
         ESP_LOGE(TAG, "Map memory failed\n");
         return false;
     }
+
+    ESP_LOGI(TAG, "PartitionSize %d\n", g_pFlashDriver_partition->size);
+    ESP_LOGI(TAG, "Partition start pointer %X\n", (int32_t)esp32_flash_start_ptr);
 
     // go through the regions in order to grab the details on the block storage regions addresses and size
     MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = (MEMORY_MAPPED_NOR_BLOCK_CONFIG *)context;
@@ -115,6 +118,12 @@ bool Esp32FlashDriver_InitializeDevice(void *context)
         }
     }
 
+    ESP_LOGI(TAG, "CODE_Region_StartAddress %X\n", CODE_Region_StartAddress);
+    ESP_LOGI(TAG, "CODE_Region_Size %d\n", CODE_Region_Size);
+
+    ESP_LOGI(TAG, "DEPLOYMENT_Region_StartAddress %X\n", DEPLOYMENT_Region_StartAddress);
+    ESP_LOGI(TAG, "DEPLOYMENT_Region_Size %d\n", DEPLOYMENT_Region_Size);
+
     return true;
 }
 
@@ -123,10 +132,10 @@ bool Esp32FlashDriver_UninitializeDevice(void *context)
     (void)context;
 
     // Unmap the flash memory
-    if (g_esp32_flash_start_ptr != NULL)
+    if (esp32_flash_start_ptr != NULL)
     {
         spi_flash_munmap(g_esp32_flash_out_handle);
-        g_esp32_flash_start_ptr = NULL;
+        esp32_flash_start_ptr = NULL;
     }
 
     return true;
@@ -155,7 +164,7 @@ bool Esp32FlashDriver_Read(void *context, ByteAddress startAddress, unsigned int
     else if (AddressIn_DEPLOYMENT_Region(startAddress))
     {
         readAddress = startAddress - DEPLOYMENT_Region_StartAddress;
-        memStartAdr = (uint8_t *)g_esp32_flash_start_ptr + readAddress;
+        memStartAdr = (uint8_t *)esp32_flash_start_ptr + readAddress;
     }
     else
     {
@@ -183,6 +192,8 @@ bool Esp32FlashDriver_Write(
     // need to compute the address offset from the region (block) DEPLOYMENT block start address
     ByteAddress offsetAddress = startAddress - DEPLOYMENT_Region_StartAddress;
 
+    ESP_LOGI(TAG, "Writting  %dB @ %d\n", numBytes, offsetAddress);
+
     // write buffer to partition
     return (
         esp_partition_write(g_pFlashDriver_partition, offsetAddress, (const void *)buffer, (size_t)numBytes) == ESP_OK);
@@ -195,6 +206,8 @@ bool Esp32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, uns
     uint8_t *memStartAdr;
     uint8_t *memEndAdr;
 
+    ESP_LOGI(TAG, "IsBlockErased  %dB @ %X\n", length, blockAddress);
+
     // need to setup the start and end addresses to the region (block) boundaries
     if (AddressIn_CODE_Region(blockAddress))
     {
@@ -205,14 +218,17 @@ bool Esp32FlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, uns
     }
     else if (AddressIn_DEPLOYMENT_Region(blockAddress))
     {
-        memStartAdr = (unsigned char *)(g_esp32_flash_start_ptr + blockAddress - DEPLOYMENT_Region_StartAddress);
+        memStartAdr = (uint8_t *)(esp32_flash_start_ptr + blockAddress - DEPLOYMENT_Region_StartAddress);
         // end address
-        memEndAdr = (uint8_t *)(g_esp32_flash_start_ptr + g_pFlashDriver_partition->size);
+        memEndAdr = (uint8_t *)(esp32_flash_start_ptr + g_pFlashDriver_partition->size);
     }
     else
     {
+        ESP_LOGE(TAG, "Address is out of partition area\n");
         return false;
     }
+
+    ESP_LOGI(TAG, "IsBlockErased checking from %X to %X\n", (uint32_t)memStartAdr, (uint32_t)memEndAdr);
 
     // go through memory and check for content other than 0xFF (flash erased value)
     while (memStartAdr < memEndAdr)
@@ -262,7 +278,7 @@ bool Esp32FlashDriver_GetMemoryMappedAddress(
             break;
 
         case BlockUsage_DEPLOYMENT:
-            *address = (unsigned int)g_esp32_flash_start_ptr;
+            *address = (unsigned int)esp32_flash_start_ptr;
             break;
 
         default:

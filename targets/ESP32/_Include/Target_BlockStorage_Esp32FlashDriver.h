@@ -40,7 +40,4 @@ bool Esp32FlashDriver_GetMemoryMappedAddress(
     unsigned int blockRangeIndex,
     unsigned int *address);
 
-extern const DRAM_ATTR esp_partition_t *g_pFlashDriver_partition;
-extern const void *g_esp32_flash_start_ptr;
-
-#endif //TARGET_ESP32FLASH_DRIVER_H
+#endif // TARGET_ESP32FLASH_DRIVER_H
