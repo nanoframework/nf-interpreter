@@ -42,11 +42,6 @@
 #define PLATFORM_HAS_RNG TRUE
 /////////////////////////////////////
 
-// set Wire Protocol packet size to 512 if using embedded USB CDC
-#if CONFIG_USB_CDC_ENABLED
-#define WP_PACKET_SIZE 512U
-#endif
-
 /////////////////////////////////////
 // #define EVENTS_HEART_BEAT
 /////////////////////////////////////
