@@ -87,7 +87,7 @@ bool WP_Initialise(COM_HANDLE port)
     tinyusb_config_cdcacm_t amc_cfg = {
         .usb_dev = TINYUSB_USBDEV_0,
         .cdc_port = TINYUSB_CDC_ACM_0,
-        .rx_unread_buf_sz = 64,
+        .rx_unread_buf_sz = 1056,
         .callback_rx = &WP_Cdc_Rx_Callback,
         .callback_rx_wanted_char = NULL,
         .callback_line_state_changed = NULL,
