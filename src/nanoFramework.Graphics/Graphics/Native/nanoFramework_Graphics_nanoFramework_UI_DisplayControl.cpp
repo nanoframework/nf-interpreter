@@ -258,7 +258,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         int posX = x;
         int posY = y;
         int prevCharWidth = 0;
-        int prevCharHeight = 0;
         int textLength = uh.CountNumberOfCharacters();
         CLR_UINT16 c;
 
@@ -285,16 +284,16 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     // Set the start for the character
                     if (chr.height > heightChar)
                     {
+                        posY += chr.height - heightChar;
                         heightChar = chr.height;
-                        prevCharHeight = heightChar;
                     }
 
                     // set position using previous chars
                     posX += prevCharWidth;
-                    if (posY != prevCharHeight)
+                    if (posX + bm.m_width > width)
                     {
                         posX = x;
-                        prevCharHeight = posY;
+                        posY += heightChar;
                     }
 
                     // If there is a background, will fill the bitmap with it
@@ -315,16 +314,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
                     // Flush the character on the screen incrememting accordingly the position
                     // to fit into the rectangle.
-                    g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
-                    if (i + 1 < textLength)
+                    if (posY <= height)
                     {
-                        prevCharWidth = widthChar;
-                        if (posX >= width)
-                        {
-                            posX = x;
-                            posY += heightChar;
-                        }
+                        g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
                     }
+
+                    prevCharWidth = widthChar;
                 }
             }
         }
