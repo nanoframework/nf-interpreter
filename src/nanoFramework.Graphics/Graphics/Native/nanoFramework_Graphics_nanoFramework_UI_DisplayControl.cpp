@@ -277,7 +277,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                 }
 
                 c = buf[0];
-                font->GetCharInfo(c, chr);                
+                font->GetCharInfo(c, chr);
                 if (chr.isValid)
                 {
                     widthChar = chr.width;
@@ -318,8 +318,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     {
                         g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
                     }
-                    
-                    prevCharWidth = widthChar;                        
+
+                    prevCharWidth = widthChar;
                 }
             }
         }
