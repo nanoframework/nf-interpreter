@@ -180,7 +180,7 @@
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.IO.Ports": "ON",
           "API_Windows.Devices.Adc": "ON",
-          "API_Windows.Device.Dac": "ON",
+          "API_System.Device.Dac": "ON",
           "API_System.Net": "ON",
           "API_nanoFramework.Devices.OneWire": "OFF",
           "API_nanoFramework.Devices.Can": "OFF",
@@ -228,14 +228,20 @@
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.IO.Ports": "ON",
           "API_Windows.Devices.Adc": "ON",
-          "API_Windows.Device.Dac": "ON",
+          "API_System.Device.Dac": "ON",
           "API_System.Net": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Devices.Can": "ON",
           "API_Windows.Storage": "ON",
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",
-          "API_nanoFramework.System.Text": "ON"
+          "API_nanoFramework.System.Text": "ON",
+          "API_nanoFramework.Graphics": "ON",
+          "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+          "GRAPHICS_DISPLAY": "Otm8009a_DSI_Video_Mode.cpp",
+          "GRAPHICS_DISPLAY_INTERFACE": "DSI_To_Display_Video_Mode.cpp",
+          "TOUCHPANEL_DEVICE": "ft6x06_I2C.cpp",
+          "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp" 
         }
       },
       "NXP_MIMXRT1060_EVK": {
