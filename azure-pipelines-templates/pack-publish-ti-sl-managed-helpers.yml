@@ -34,7 +34,7 @@ steps:
     condition: succeeded()
     displayName: Check if managed helpers files were changed
 
-  - template: azure-pipelines-templates/download-logo.yml
+  - template: azure-pipelines-templates/download-logo.yml@templates
 
   - task: NuGetCommand@2
     inputs:

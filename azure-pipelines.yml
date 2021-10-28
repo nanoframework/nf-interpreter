@@ -538,7 +538,7 @@ jobs:
     continueOnError: true
     condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
 
-  - template: azure-pipelines-templates/download-logo.yml
+  - template: azure-pipelines-templates/download-logo.yml@templates
 
   - task: NuGetCommand@2
     condition: succeeded()
