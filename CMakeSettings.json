@@ -37,7 +37,7 @@
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/nftools/GNU_Tools_ARM_Embedded/9-2020-q2-update"
+          "value": "C:/nftools/GNU_Tools_ARM_Embedded/10.3-2021.10"
         },
         {
           "name": "TOOL_HEX2DFU_PREFIX",
