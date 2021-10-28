@@ -275,9 +275,11 @@ jobs:
       ST_STM32F429I_DISCOVERY:
         TargetBoard: ST_STM32F429I_DISCOVERY
         BuildOptions: >-
-          -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS
+          -DTARGET_SERIES=STM32F4xx
+          -DRTOS=ChibiOS
           -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
           -DAPI_System.Math=ON
           -DAPI_Hardware.Stm32=ON
           -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
@@ -298,9 +300,12 @@ jobs:
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
         BuildOptions: >-
-          -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS
+          -DTARGET_SERIES=STM32F7xx
+          -DRTOS=ChibiOS
           -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.Math=ON
           -DAPI_Hardware.Stm32=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -319,8 +324,12 @@ jobs:
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_MEMORY=Graphics_Memory.cpp -DGRAPHICS_DISPLAY=Otm8009a_DSI_Video_Mode.cpp
-          -DGRAPHICS_DISPLAY_INTERFACE=DSI_To_Display_Video_Mode.cpp -DTOUCHPANEL_DEVICE=ft6x06_I2C.cpp -DTOUCHPANEL_INTERFACE=I2C_To_TouchPanel.cpp
+          -DAPI_nanoFramework.Graphics=ON
+          -DGRAPHICS_MEMORY=Graphics_Memory.cpp
+          -DGRAPHICS_DISPLAY=Otm8009a_DSI_Video_Mode.cpp
+          -DGRAPHICS_DISPLAY_INTERFACE=DSI_To_Display_Video_Mode.cpp
+          -DTOUCHPANEL_DEVICE=ft6x06_I2C.cpp
+          -DTOUCHPANEL_INTERFACE=I2C_To_TouchPanel.cpp
 
         GccArm_Version:
         NeedsDFU: false
@@ -363,11 +372,15 @@ jobs:
       ESP32_PSRAM_REV0:
         TargetBoard: ESP32
         BuildOptions: >-
-          -DTARGET_SERIES=ESP32 -DRTOS=ESP32
-          -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          -DTARGET_SERIES=ESP32
+          -DRTOS=ESP32
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
           -DNF_SECURITY_MBEDTLS=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
+          -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
           -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
           -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
@@ -375,7 +388,8 @@ jobs:
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON
-          -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Net=ON
+          -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -489,15 +503,19 @@ jobs:
             -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
             -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
             -DAPI_Windows.Devices.Adc=ON
-            -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON
+            -DAPI_System.Net=ON
+            -DAPI_Windows.Devices.Wifi=ON
             -DAPI_Hardware.Esp32=ON
             -DAPI_nanoFramework.Devices.OneWire=ON
             -DAPI_nanoFramework.ResourceManager=ON
             -DAPI_nanoFramework.System.Collections=ON
             -DAPI_nanoFramework.System.Text=ON
             -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-            -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp" -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-            -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp" -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
+            -DAPI_nanoFramework.Graphics=ON
+            -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp"
+            -DTOUCHPANEL_DEVICE="XPT2046.cpp"
+            -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
+            -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
             -DAPI_System.Device.Dac=ON
 
          ToolchainFile: toolchain.xtensa-esp32-elf.cmake
@@ -508,12 +526,15 @@ jobs:
       ESP32_LILYGO:
         TargetBoard: ESP32
         BuildOptions: >-
-          -DTARGET_SERIES=ESP32 -DRTOS=ESP32
+          -DTARGET_SERIES=ESP32
+          -DRTOS=ESP32
           -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
           -DNF_SECURITY_MBEDTLS=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
+          -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
           -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
           -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
@@ -521,7 +542,8 @@ jobs:
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON
-          -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Net=ON
+          -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -539,7 +561,8 @@ jobs:
       FEATHER_S2:
         TargetBoard: ESP32_S2
         BuildOptions: >-
-          -DTARGET_SERIES=ESP32_S2 -DRTOS=ESP32
+          -DTARGET_SERIES=ESP32_S2
+          -DRTOS=ESP32
           -DESP32_USB_CDC=ON
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -553,7 +576,8 @@ jobs:
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON
-          -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Net=ON
+          -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -619,8 +643,12 @@ jobs:
       NXP_MIMXRT1060_EVK:
         TargetBoard: NXP_MIMXRT1060_EVK
         BuildOptions: >-
-          -DTARGET_SERIES=IMXRT10xx -DRTOS=FreeRTOS
-          -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON
+          -DTARGET_SERIES=IMXRT10xx
+          -DRTOS=FreeRTOS
+          -DSUPPORT_ANY_BASE_CONVERSION=ON
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.Math=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
           -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
@@ -696,10 +724,13 @@ jobs:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
         BuildOptions: >-
-          -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink
+          -DTARGET_SERIES=CC13x2_26x2
+          -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=915
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
-          -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_WATCHDOG=OFF
           -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
           -DAPI_Windows.Devices.Spi=OFF
           -DAPI_Windows.Devices.I2c=OFF
