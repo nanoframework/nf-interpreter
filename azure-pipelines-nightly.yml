@@ -172,7 +172,7 @@ jobs:
     matrix:
       NETDUINO3_WIFI:
         TargetBoard: NETDUINO3_WIFI
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON
@@ -195,7 +195,7 @@ jobs:
         NeedsSRECORD: false
       ORGPAL_PALTHREE:
         TargetBoard: ORGPAL_PALTHREE
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS
           -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON
@@ -219,7 +219,7 @@ jobs:
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=STM32F0xx -DRTOS=ChibiOS
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON
           -DAPI_Hardware.Stm32=ON
@@ -269,7 +269,7 @@ jobs:
     matrix:
       ESP32_REV0:
         TargetBoard: ESP32
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32 -DRTOS=ESP32
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON
@@ -296,7 +296,7 @@ jobs:
         PackageName: ESP32_REV0
       ESP32_PSRAM_REV3:
         TargetBoard: ESP32
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32 -DRTOS=ESP32
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON
@@ -325,7 +325,7 @@ jobs:
         PackageName: ESP32_PSRAM_REV3
       ESP32_PSRAM_XTAL26_REV0:
         TargetBoard: ESP32
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32 -DRTOS=ESP32
           -DESP32_XTAL_FREQ_26=ON
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
@@ -352,7 +352,7 @@ jobs:
         PackageName: ESP32_PSRAM_XTAL26_REV0
       ESP32_REV3:
         TargetBoard: ESP32
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32 -DRTOS=ESP32
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON
@@ -379,7 +379,7 @@ jobs:
         PackageName: ESP32_REV3
       ESP32_PICO:
         TargetBoard: ESP32
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32 -DRTOS=ESP32
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
@@ -405,7 +405,7 @@ jobs:
         PackageName: ESP32_PICO
       KALUGA_1:
         TargetBoard: ESP32_S2
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2 -DRTOS=ESP32
           -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_SECURITY_MBEDTLS=ON -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DAPI_System.Math=ON
@@ -482,7 +482,7 @@ jobs:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_868
-        BuildOptions: >
+        BuildOptions: >-
           -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
           -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF
