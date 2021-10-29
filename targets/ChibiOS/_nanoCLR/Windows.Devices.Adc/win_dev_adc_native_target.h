@@ -15,9 +15,9 @@ typedef struct
     stm32_gpio_t *portId;
     uint8_t pin;
     uint32_t adcChannel;
-} NF_PAL_ADC_PORT_PIN_CHANNEL;
+} NF_PAL_ADC_PORT_PIN_CHANNEL__;
 
-extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
-extern const int AdcChannelCount;
+extern const NF_PAL_ADC_PORT_PIN_CHANNEL__ AdcPortPinConfig__[];
+extern const int AdcChannelCount__;
 
 #endif //WIN_DEV_ADC_NATIVE_TARGET_H

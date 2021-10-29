@@ -20,13 +20,13 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeOpen
         int controllerId = pThis[FIELD___controllerId].NumericByRef().s4;
 
         // we are filling this below with the appropriate ADC port pin config and ADC driver
-        NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
+        NF_PAL_ADC_PORT_PIN_CHANNEL__ adcDefinition;
         ADCDriver* adcDriver = NULL;
 
         // only one ADC controller for now, but check it anyways
         if(controllerId == 1)
         {
-            adcDefinition = AdcPortPinConfig[channel];
+            adcDefinition = AdcPortPinConfig__[channel];
 
             // we should remove form the build the ADC options that aren't implemented
             // plus we have to use the default to catch invalid ADC Ids
@@ -84,7 +84,7 @@ HRESULT Library_win_dev_adc_native_Windows_Devices_Adc_AdcController::NativeGetC
         switch(controllerId)
         {
             case 1: 
-                channelCount = AdcChannelCount;
+                channelCount = AdcChannelCount__;
                 break;
 
             default: 

@@ -287,7 +287,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.Devices.Can=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -314,7 +314,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Device.Dac=ON
           -DAPI_System.Net=ON
           -DNF_SECURITY_MBEDTLS=ON
@@ -387,7 +387,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
@@ -427,7 +427,7 @@ jobs:
           # -DAPI_System.Device.Pwm=ON
           # -DAPI_Windows.Devices.SerialCommunication=ON
           # -DAPI_System.IO.Ports=ON
-          # -DAPI_Windows.Devices.Adc=ON
+          # -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           # -DAPI_System.Net=ON
           # -DAPI_Windows.Devices.Wifi=ON
           # -DAPI_Hardware.Esp32=ON
@@ -468,7 +468,7 @@ jobs:
           # -DAPI_System.Device.Pwm=ON
           # -DAPI_Windows.Devices.SerialCommunication=ON
           # -DAPI_System.IO.Ports=ON
-          # -DAPI_Windows.Devices.Adc=ON
+          # -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           # -DAPI_System.Net=ON
           # -DAPI_Windows.Devices.Wifi=ON
           # -DAPI_Hardware.Esp32=ON
@@ -502,7 +502,7 @@ jobs:
             -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
             -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
             -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-            -DAPI_Windows.Devices.Adc=ON
+            -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
             -DAPI_System.Net=ON
             -DAPI_Windows.Devices.Wifi=ON
             -DAPI_Hardware.Esp32=ON
@@ -541,7 +541,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
@@ -575,7 +575,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
           -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_Windows.Devices.Wifi=ON
           -DAPI_Hardware.Esp32=ON
@@ -714,7 +714,7 @@ jobs:
           #  -DAPI_Windows.Devices.Pwm=ON
           #  -DAPI_System.Device.Pwm=ON
           #  -DAPI_Windows.Devices.SerialCommunication=OFF
-          #  -DAPI_Windows.Devices.Adc=ON
+          #  -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           #  -DAPI_System.Net=ON
           #  -DAPI_nanoFramework.System.Collections=ON
           #  -DAPI_nanoFramework.System.Text=ON
@@ -736,7 +736,7 @@ jobs:
           -DAPI_Windows.Devices.I2c=OFF
           -DAPI_Windows.Devices.Pwm=OFF
           -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF
-          -DAPI_Windows.Devices.Adc=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
 
