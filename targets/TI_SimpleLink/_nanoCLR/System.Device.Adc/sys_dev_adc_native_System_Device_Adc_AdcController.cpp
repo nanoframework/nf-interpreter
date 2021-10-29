@@ -24,28 +24,10 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetCha
 {
     NANOCLR_HEADER();
 
-    int channelCount;
-    int controllerId;
-
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    controllerId = pThis[FIELD___controllerId].NumericByRefConst().s4;
-
-    switch (controllerId)
-    {
-        case 1:
-            channelCount = ADC_count;
-            break;
-
-        default:
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
     // Return value to the managed application
-    stack.SetResult_I4(channelCount);
+    stack.SetResult_I4(ADC_count);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMaxValue___I4(CLR_RT_StackFrame &stack)
