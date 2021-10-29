@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -12,8 +12,8 @@
 
 #include "sys_dev_adc_native.h"
 
-
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenChannel___VOID__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenChannel___VOID__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -22,7 +22,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetChannelCount___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetChannelCount___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -31,7 +31,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetCha
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMaxValue___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMaxValue___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -40,7 +40,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMax
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMinValue___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMinValue___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -49,7 +49,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetMin
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -58,7 +59,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeIsChan
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetResolutionInBits___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetResolutionInBits___I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -67,7 +69,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeGetRes
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
