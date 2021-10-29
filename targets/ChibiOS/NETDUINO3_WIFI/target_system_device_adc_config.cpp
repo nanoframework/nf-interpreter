@@ -5,9 +5,8 @@
 
 #include <sys_dev_adc_native_target.h>
 
-
 const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
-    
+
     // ADC1
     {1, GPIOC, 0, ADC_CHANNEL_IN10},
     {1, GPIOC, 1, ADC_CHANNEL_IN11},
