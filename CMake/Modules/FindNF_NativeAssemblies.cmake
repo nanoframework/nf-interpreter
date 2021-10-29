@@ -20,6 +20,7 @@ option(API_System.IO.FileSystem                 "option for System.IO.FileSystem
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
+option(API_System.Device.Adc                    "option for System.Device.Adc API")
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
@@ -279,6 +280,12 @@ endif()
 if(API_Windows.Devices.Adc)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.Adc")
+endif()
+
+# System.Device.Adc
+if(API_System.Device.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Adc")
 endif()
 
 # System.Device.Dac

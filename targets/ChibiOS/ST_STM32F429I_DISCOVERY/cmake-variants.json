@@ -26,8 +26,8 @@
         "short": "ST_STM32F429I_DISCOVERY",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
-          "BUILD_VERBOSE" : "OFF",
-          "CMAKE_TOOLCHAIN_FILE" : "CMake/toolchain.arm-none-eabi.cmake",
+          "BUILD_VERBOSE": "OFF",
+          "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "RTOS": "ChibiOS",
@@ -56,6 +56,7 @@
           "API_Windows.Devices.SerialCommunication": "ON",
           "API_System.IO.Ports": "ON",
           "API_Windows.Devices.Adc": "ON",
+          "API_System.Device.Adc": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Devices.Can": "ON",
           "API_nanoFramework.ResourceManager": "ON",
