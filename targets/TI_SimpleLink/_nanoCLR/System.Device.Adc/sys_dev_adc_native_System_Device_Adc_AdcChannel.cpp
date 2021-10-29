@@ -33,6 +33,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     uint32_t adcValue0MicroVolt;
     int_fast16_t res;
     double rawValue;
+    ADC_Handle adcHandler;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -43,7 +44,8 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
 
     ADC_Params params;
     ADC_Params_init(&params);
-    ADC_Handle adcHandler = ADC_open(channelNumber, &params);
+
+    adcHandler = ADC_open(channelNumber, &params);
     FAULT_ON_NULL(adcHandler);
 
     // sanity check
