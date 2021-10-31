@@ -12,13 +12,19 @@
 #include <nanoCLR_Checks.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack NativeMemory_MemoryType
+{
+    NativeMemory_MemoryType_All = 0,
+    NativeMemory_MemoryType_Internal = 1,
+    NativeMemory_MemoryType_SpiRam = 2,
+} NativeMemory_MemoryType;
+
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration
 {
     NANOCLR_NATIVE_DECLARE(NativeSetPinFunction___STATIC__VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetPinFunction___STATIC__I4__I4);
 
     //--//
-
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResEventListener
@@ -26,7 +32,6 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     static const int FIELD__HighResTimers = 1;
 
     //--//
-
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer
@@ -46,16 +51,14 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeGetCurrent___STATIC__U8);
 
     //--//
-
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimerEvent
 {
-    static const int FIELD__EventType = 1;
-    static const int FIELD__TimerHandle = 2;
+    static const int FIELD__EventType = 3;
+    static const int FIELD__TimerHandle = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging
@@ -63,14 +66,24 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeSetLogLevel___STATIC__VOID__STRING__I4);
 
     //--//
+};
 
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_NativeMemory
+{
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryTotalSize___STATIC__U4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryTotalFreeSize___STATIC__U4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryLargestFreeBlock___STATIC__U4__I4);
+
+    //--//
 };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep
 {
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTimer___STATIC__nanoFrameworkHardwareEsp32EspNativeError__U8);
-    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByPin___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
-    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
+    NANOCLR_NATIVE_DECLARE(
+        NativeEnableWakeupByPin___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartDeepSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
@@ -79,7 +92,6 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeGetWakeupTouchpad___STATIC__nanoFrameworkHardwareEsp32SleepTouchPad);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32;
