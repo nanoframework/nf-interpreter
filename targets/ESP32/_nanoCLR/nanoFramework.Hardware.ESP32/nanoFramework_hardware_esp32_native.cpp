@@ -50,6 +50,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging::NativeSetLogLevel___STATIC__VOID__STRING__I4,
     NULL,
     NULL,
+    Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_NativeMemory::NativeGetMemoryTotalSize___STATIC__U4__I4,
+    Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_NativeMemory::NativeGetMemoryTotalFreeSize___STATIC__U4__I4,
+    Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_NativeMemory::NativeGetMemoryLargestFreeBlock___STATIC__U4__I4,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -72,7 +77,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32 =
 {
     "nanoFramework.Hardware.Esp32",
-    0x1B75B894,
+    0xBE7FF253,
     method_lookup,
     { 100, 0, 7, 2 }
 };

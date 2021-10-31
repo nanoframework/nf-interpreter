@@ -12,6 +12,13 @@
 #include <nanoCLR_Checks.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack NativeMemory_MemoryType
+{
+    NativeMemory_MemoryType_All = 0,
+    NativeMemory_MemoryType_Internal = 1,
+    NativeMemory_MemoryType_SpiRam = 2,
+} NativeMemory_MemoryType;
+
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration
 {
     NANOCLR_NATIVE_DECLARE(NativeSetPinFunction___STATIC__VOID__I4__I4);
@@ -51,8 +58,8 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimerEvent
 {
-    static const int FIELD__EventType = 1;
-    static const int FIELD__TimerHandle = 2;
+    static const int FIELD__EventType = 3;
+    static const int FIELD__TimerHandle = 4;
 
     //--//
 
@@ -61,6 +68,16 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Logging
 {
     NANOCLR_NATIVE_DECLARE(NativeSetLogLevel___STATIC__VOID__STRING__I4);
+
+    //--//
+
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_NativeMemory
+{
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryTotalSize___STATIC__U4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryTotalFreeSize___STATIC__U4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetMemoryLargestFreeBlock___STATIC__U4__I4);
 
     //--//
 
