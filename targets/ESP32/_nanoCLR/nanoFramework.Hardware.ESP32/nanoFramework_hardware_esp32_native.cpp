@@ -79,7 +79,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp3
     "nanoFramework.Hardware.Esp32",
     0xBE7FF253,
     method_lookup,
-    { 100, 0, 7, 2 }
+    { 100, 0, 7, 3 }
 };
 
 // clang-format on
