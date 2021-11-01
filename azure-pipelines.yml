@@ -261,7 +261,15 @@ jobs:
 ################
 # STM32
 - job: Build_STM32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -357,7 +365,15 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -629,7 +645,15 @@ jobs:
 #################
 # NXP
 - job: Build_NXP_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -683,7 +707,15 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -762,7 +794,15 @@ jobs:
 #################
 # WIN32 
 - job: Build_WIN32_nanoCLR
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -810,7 +850,11 @@ jobs:
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign nanoCLR WIN32 EXE
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
 
   - template: azure-pipelines-templates/download-logo.yml@templates
 
@@ -900,7 +944,19 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: >-
+    and(
+      succeeded('Build_STM32_targets'),
+      succeeded('Build_ESP32_targets'),
+      succeeded('Build_NXP_targets'),
+      succeeded('Build_TI_SimpleLink_targets'),
+      not( eq(variables['Build.Reason'], 'PullRequest')
+    ),
+    or(
+      eq(variables['Build.SourceBranchName'], 'main'),
+      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
+      ne( variables['StartReleaseCandidate'], true )
+    )
 
   pool:
     vmImage: 'windows-2019'
@@ -929,7 +985,15 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['Build.Reason'], 'PullRequest'),
+        or(
+          eq(variables['Build.SourceBranchName'], 'main'),
+          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+        )
+      )
     displayName: Generate change log
 
   # generate change log without future version
@@ -937,7 +1001,17 @@ jobs:
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['Build.Reason'], 'PullRequest'),
+        not(
+          or(
+            eq(variables['Build.SourceBranchName'], 'main'),
+            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+          )
+        )
+      )
     displayName: Generate change log
 
   # push new changelog to GitHub repo
@@ -955,7 +1029,15 @@ jobs:
         $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), eq( variables['StartReleaseCandidate'], false ))
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        not(
+          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+        ),
+        eq( variables['StartReleaseCandidate'], false )
+      )
     continueOnError: true
     displayName: Push changelog to GitHub
 
@@ -970,7 +1052,21 @@ jobs:
   - Build_WIN32_nanoCLR
   - Generate_change_log
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: >-
+    and(
+      succeeded('Build_STM32_targets'),
+      succeeded('Build_ESP32_targets'),
+      succeeded('Build_NXP_targets'),
+      succeeded('Build_TI_SimpleLink_targets'),
+      succeeded('Generate_change_log'),
+      not(
+        eq(variables['Build.Reason'], 'PullRequest')
+      ),
+      or(
+        endsWith(variables['Build.SourceBranchName'], 'main'),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
+        ne( variables['StartReleaseCandidate'], true )
+      )
 
   pool:
     vmImage: 'windows-2019'
@@ -1016,7 +1112,18 @@ jobs:
   - Build_WIN32_nanoCLR
   - Generate_change_log
   - Check_Code_Style
-  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('Build_WIN32_nanoCLR'), failed('Generate_change_log')))
+  condition: >-
+    and(
+      ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
+      or(
+        failed('Build_STM32_targets'),
+        failed('Build_ESP32_targets'),
+        failed('Build_NXP_targets'),
+        failed('Build_TI_SimpleLink_targets'),
+        failed('Build_WIN32_nanoCLR'),
+        failed('Generate_change_log')
+      )
+    )
 
   pool:
     vmImage: 'windows-2019'

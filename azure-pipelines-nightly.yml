@@ -162,7 +162,14 @@ jobs:
 ################
 # STM32
 - job: Build_STM32_targets
-  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true), contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_CHIBIOS'], 'true'))
+  condition: >-
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      eq(variables['BUILD_ALL'], 'true'),
+      eq(variables['BUILD_CHIBIOS'], 'true')
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -274,7 +281,14 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_ESP32'], 'true')) 
+  condition: >-
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      eq(variables['BUILD_ALL'], 'true'),
+      eq(variables['BUILD_ESP32'], 'true')
+    ) 
 
   dependsOn:
   - Check_Build_Options
@@ -382,6 +396,7 @@ jobs:
           -DAPI_nanoFramework.System.Text=ON
           -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
           -DAPI_System.Device.Dac=ON
+
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config: sdkconfig.default.esp32
         IDF_Target: esp32
@@ -528,7 +543,14 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'), eq(variables['BUILD_ALL'], 'true'), eq(variables['BUILD_TI'], 'true')) 
+  condition: >-
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      eq(variables['BUILD_ALL'], 'true'),
+      eq(variables['BUILD_TI'], 'true')
+    ) 
 
   dependsOn:
   - Check_Build_Options
@@ -557,6 +579,7 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
+          
         GccArm_Version:
 
   variables:
@@ -583,7 +606,12 @@ jobs:
   - Build_STM32_targets
   - Build_ESP32_targets
   - Build_TI_SimpleLink_targets
-  condition: or(failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_TI_SimpleLink_targets'))
+  condition: >-
+    or(
+      failed('Build_STM32_targets'),
+      failed('Build_ESP32_targets'),
+      failed('Build_TI_SimpleLink_targets')
+    )
 
   pool:
     vmImage: 'windows-2019'
