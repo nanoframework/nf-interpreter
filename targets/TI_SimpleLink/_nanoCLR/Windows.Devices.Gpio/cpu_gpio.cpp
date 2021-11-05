@@ -393,7 +393,7 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 // Enable gpio pin for input
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
-    CLR_UINT64 debounceTimeMilliseconds,
+    uint32_t debounceTimeMilliseconds,
     GPIO_INTERRUPT_SERVICE_ROUTINE pinISR,
     void *isrParam,
     GPIO_INT_EDGE intEdge,
@@ -440,7 +440,7 @@ bool CPU_GPIO_EnableInputPin(
         pState->isrPtr = pinISR;
         pState->mode = intEdge;
         pState->param = isrParam;
-        pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+        pState->debounceMs = debounceTimeMilliseconds;
 
         // create timer if not there yet
         if (pState->debounceMs > 0 && pState->debounceTimer == NULL)
@@ -641,7 +641,7 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
     return pState->debounceMs;
 }
 
-bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMilliseconds)
 {
     gpio_input_state *pState = GetInputState(pinNumber);
 
@@ -649,7 +649,7 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMillisec
     // if not, doesn't matter, because the new debounce will be used next time it's required
     if (pState != NULL)
     {
-        pState->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+        pState->debounceMs = debounceTimeMilliseconds;
     }
 
     return true;

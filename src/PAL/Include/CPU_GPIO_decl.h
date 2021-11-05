@@ -7,11 +7,6 @@
 #ifndef DRIVERS_GPIO_DECL_H
 #define DRIVERS_GPIO_DECL_H
 
-#if defined(__GNUC__)
-#define __int64 long long
-#endif
-typedef unsigned __int64 CLR_UINT64;
-
 #define GPIO_PIN_NONE 0xFFFFFFFF
 
 #define GPIO_ATTRIBUTE_NONE        0x00
@@ -117,7 +112,7 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, GpioPinDr
 //
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
-    CLR_UINT64 debounceTimeMilliseconds,
+    uint32_t debounceTimeMilliseconds,
     GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR,
     void *isr_Param,
     GPIO_INT_EDGE intEdge,
@@ -154,7 +149,7 @@ int32_t CPU_GPIO_GetPinCount();
 
 // Get / Set the pin debounce time in millisecs
 uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN Pin);
-bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds);
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMilliseconds);
 
 // Validate pin and set drive mode
 // return true if pin ok
