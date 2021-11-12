@@ -431,66 +431,20 @@ struct CLR_RT_HeapBlock
 
                 operator double() const
                 {
-                    double ret_val;
+                    double ret_val = 0;
 
-#if defined(__GNUC__)
-                    ///
-                    /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-                    /// When the optimization level is greater than zero, the gcc compiler
-                    /// code will not work with the unsigned int* conversion, it requires you
-                    /// to copy byte by byte.
-                    ///
-                    CLR_UINT8 *tmp = (CLR_UINT8 *)&ret_val;
-                    CLR_UINT8 *src = (CLR_UINT8 *)&LL;
-                    uint32_t i;
-
-                    for (i = 0; i < sizeof(CLR_UINT32); i++)
-                    {
-                        *tmp++ = *src++;
-                    }
-
-                    src = (CLR_UINT8 *)&HH;
-                    for (i = 0; i < sizeof(CLR_UINT32); i++)
-                    {
-                        *tmp++ = *src++;
-                    }
-#else
                     CLR_UINT32 *tmp = (CLR_UINT32 *)&ret_val;
                     tmp[0] = LL;
                     tmp[1] = HH;
-#endif // defined(__GNUC__)
 
                     return ret_val;
                 }
 
                 R8 &operator=(const double num)
                 {
-#if defined(__GNUC__)
-                    ///
-                    /// UNDONE: FIXME: This code fixes an optimization problem with the gcc compiler.
-                    /// When the optimization level is greater than zero, the gcc compiler
-                    /// code will not work with the unsigned int* conversion, it requires you
-                    /// to copy byte by byte.
-                    ///
-                    CLR_UINT8 *src = (CLR_UINT8 *)&num;
-                    CLR_UINT8 *dst = (CLR_UINT8 *)&LL;
-                    uint32_t i;
-
-                    for (i = 0; i < sizeof(CLR_UINT32); i++)
-                    {
-                        *dst++ = *src++;
-                    }
-
-                    dst = (CLR_UINT8 *)&HH;
-                    for (i = 0; i < sizeof(CLR_UINT32); i++)
-                    {
-                        *dst++ = *src++;
-                    }
-#else
                     CLR_UINT32 *tmp = (CLR_UINT32 *)&num;
                     LL = (CLR_UINT32)tmp[0];
                     HH = (CLR_UINT32)tmp[1];
-#endif
 
                     return *this;
                 }

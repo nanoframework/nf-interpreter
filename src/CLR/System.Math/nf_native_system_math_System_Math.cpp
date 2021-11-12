@@ -19,13 +19,9 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     double y = stack.Arg1().NumericByRefConst().r8;
 
     // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x))
+    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
     {
-        stack.SetResult_R8(x);
-    }
-    else if (System::Double::IsNaN(y))
-    {
-        stack.SetResult_R8(y);
+        stack.SetResult_R8(NAN);
     }
     else
     {
@@ -40,13 +36,9 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     float y = (float)stack.Arg1().NumericByRefConst().r8;
 
     // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x))
+    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
     {
-        stack.SetResult_R8(x);
-    }
-    else if (System::Double::IsNaN(y))
-    {
-        stack.SetResult_R8(y);
+        stack.SetResult_R8(NAN);
     }
     else
     {
