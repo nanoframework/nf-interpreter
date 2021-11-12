@@ -27,10 +27,12 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     {
         stack.SetResult_R8(y);
     }
+    else
+    {
+        double res = x >= y ? x : y;
 
-    double res = x >= y ? x : y;
-
-    stack.SetResult_R8(res);
+        stack.SetResult_R8(res);
+    }
 
 #else
 
@@ -46,10 +48,12 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     {
         stack.SetResult_R8(y);
     }
+    else
+    {
+        float res = x >= y ? x : y;
 
-    float res = x >= y ? x : y;
-
-    stack.SetResult_R8(res);
+        stack.SetResult_R8(res);
+    }
 
 #endif
 
