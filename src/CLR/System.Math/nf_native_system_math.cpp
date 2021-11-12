@@ -55,5 +55,4 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
     { 100, 0, 5, 4 }
 };
 
-
 // clang-format on
