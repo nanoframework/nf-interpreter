@@ -178,6 +178,11 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_Wifi_Station;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_BLUETOOTH)
+    {
+        eventsCLR |= Event_Bluetooth;
+    }
+
     if (eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents(eventsCLR);

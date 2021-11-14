@@ -124,7 +124,7 @@
           "TARGET_SERIES": "ESP32",
           "TARGET_BOARD": "ESP32",
           "TARGET_NAME": "ESP32_BLE_REV0",
-          "SDK_CONFIG_FILE": "sdkconfig.default_ble.esp32",
+          "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_ble.esp32",
           "ESP32_IDF_PATH": "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>",
           "RTOS": "ESP32",
           "NF_BUILD_RTM": "OFF",
@@ -159,7 +159,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
-          "API_nanoFramework.Hardware.Esp32.Ble": "ON"
+          "API_nanoFramework.Device.Bluetooth": "ON"
         }
       },
       "ESP32_PICO": {
@@ -208,7 +208,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
-          "API_nanoFramework.Hardware.Esp32.Ble": "ON"
+          "API_nanoFramework.Device.Bluetooth": "ON"
         }
       },
       "ESP_WROVER_KIT": {
