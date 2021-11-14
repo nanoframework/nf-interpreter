@@ -392,11 +392,11 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
     // Post event to managed code
     PostManagedEvent(EVENT_BLUETOOTH, op, ble_event_data.characteristicId, ble_event_data.eventId);
 
-    debug_printf("xEventGroupWaitBits\n");
+//    debug_printf("xEventGroupWaitBits\n");
 
     // Wait for 500ms for event to be handled in managed code
     uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(500 / portTICK_PERIOD_MS));
-    debug_printf("xEventGroupWaitBits exit %d\n", uxBits);
+//    debug_printf("xEventGroupWaitBits exit %d\n", uxBits);
     if (uxBits & 1)
     {
         // Event handled in managed code

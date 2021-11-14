@@ -304,13 +304,13 @@ void ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     context.descriptorDefs = (ble_gatt_dsc_def *)platform_malloc(sizeof(ble_gatt_dsc_def) * descriptorCount);
     context.descriptorUuids = (ble_uuid_any_t *)platform_malloc(sizeof(ble_uuid_any_t) * descriptorCount);
 
-    debug_printf("characteristicsCount = %d\n ", CharacteristicsCount);
-    debug_printf("descriptorCount = %d\n ", descriptorCount);
-    debug_printf("characteristicsDefs %X  end %X\n", context.characteristicsDefs,  context.characteristicsDefs + (sizeof(ble_gatt_chr_def) * context.characteristicsCount) );
-    debug_printf("characteristicsUuids  %X  end %X\n", context.characteristicsUuids, context.characteristicsUuids + (sizeof(ble_uuid_any_t) * context.characteristicsCount));
-    debug_printf("attrHandles  %X  end %X\n", context.attrHandles, context.attrHandles + (sizeof(uint16_t) * context.characteristicsCount));
-    debug_printf("descriptorDefs  %X  end %X\n", context.descriptorDefs, context.descriptorDefs + (sizeof(ble_gatt_dsc_def) * context.descriptorCount));
-    debug_printf("descriptorUuids  %X  end %X\n", context.descriptorUuids, context.descriptorUuids + (sizeof(ble_uuid_any_t) * context.descriptorCount));
+    // debug_printf("characteristicsCount = %d\n ", CharacteristicsCount);
+    // debug_printf("descriptorCount = %d\n ", descriptorCount);
+    // debug_printf("characteristicsDefs %X  end %X\n", context.characteristicsDefs,  context.characteristicsDefs + (sizeof(ble_gatt_chr_def) * context.characteristicsCount) );
+    // debug_printf("characteristicsUuids  %X  end %X\n", context.characteristicsUuids, context.characteristicsUuids + (sizeof(ble_uuid_any_t) * context.characteristicsCount));
+    // debug_printf("attrHandles  %X  end %X\n", context.attrHandles, context.attrHandles + (sizeof(uint16_t) * context.characteristicsCount));
+    // debug_printf("descriptorDefs  %X  end %X\n", context.descriptorDefs, context.descriptorDefs + (sizeof(ble_gatt_dsc_def) * context.descriptorCount));
+    // debug_printf("descriptorUuids  %X  end %X\n", context.descriptorUuids, context.descriptorUuids + (sizeof(ble_uuid_any_t) * context.descriptorCount));
     
 
     // Build definitions require for Nimble
@@ -412,8 +412,8 @@ void ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     // Terminate characteristics
     context.characteristicsDefs[CharacteristicsCount - 1].uuid = NULL;
 
-    debug_printf("characteristics start %X last def %X \n ", context.characteristicsDefs, &context.characteristicsDefs[CharacteristicsCount-1]);
-    debug_printf("characteristics index %d  descriptor index %d\n",charIndex, descIndex);
+    // debug_printf("characteristics start %X last def %X \n ", context.characteristicsDefs, &context.characteristicsDefs[CharacteristicsCount-1]);
+    // debug_printf("characteristics index %d  descriptor index %d\n",charIndex, descIndex);
 
     context.gatt_service_def = BuildGattService(BLE_GATT_SVC_TYPE_PRIMARY, pUuid, context.characteristicsDefs, &context.serviceCount);
 }
