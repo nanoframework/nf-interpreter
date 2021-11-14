@@ -18,7 +18,6 @@ uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
 EventGroupHandle_t ble_event_waitgroup;
 
-
 //
 // Look up Attr_handle in characteristicsDefs table to find our characteristicsId
 // return 0xffff if not found otherwise characteristicsId
@@ -253,7 +252,7 @@ static void esp32_ble_on_sync(void)
         addr_val[0]);
 
     // Begin advertising
-    //debug_printf("Begin advertising\n");
+    // debug_printf("Begin advertising\n");
     esp32_ble_start_advertise(&blecontext);
 }
 
@@ -369,7 +368,7 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
 
     BluetoothEventType op;
 
-    //debug_printf("device_ble_callback attr %d op %d\n", attr_handle, ctxt->op);
+    // debug_printf("device_ble_callback attr %d op %d\n", attr_handle, ctxt->op);
 
     switch (ctxt->op)
     {
@@ -392,11 +391,11 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
     // Post event to managed code
     PostManagedEvent(EVENT_BLUETOOTH, op, ble_event_data.characteristicId, ble_event_data.eventId);
 
-//    debug_printf("xEventGroupWaitBits\n");
+    //    debug_printf("xEventGroupWaitBits\n");
 
     // Wait for 500ms for event to be handled in managed code
     uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(500 / portTICK_PERIOD_MS));
-//    debug_printf("xEventGroupWaitBits exit %d\n", uxBits);
+    //    debug_printf("xEventGroupWaitBits exit %d\n", uxBits);
     if (uxBits & 1)
     {
         // Event handled in managed code
