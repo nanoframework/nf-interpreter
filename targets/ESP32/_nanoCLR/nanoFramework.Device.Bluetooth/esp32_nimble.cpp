@@ -235,11 +235,19 @@ static void esp32_ble_on_sync(void)
     int rc;
 
     rc = ble_hs_id_infer_auto(0, &esp32_addr_type);
-    assert(rc == 0);
+    if (rc != 0)
+    {
+        ESP_LOGI(tag, "error ble_hs_id_infer_auto; rc=%d\n", rc);
+        return;
+    }
 
     uint8_t addr_val[6] = {0};
     rc = ble_hs_id_copy_addr(esp32_addr_type, addr_val, NULL);
-    assert(rc == 0);
+    if (rc != 0)
+    {
+        ESP_LOGI(tag, "error ble_hs_id_copy_addr; rc=%d\n", rc);
+        return;
+    }
 
     ESP_LOGI(
         tag,
