@@ -342,5 +342,4 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Blueto
     { 100, 0, 0, 1 }
 };
 
-
 // clang-format on
