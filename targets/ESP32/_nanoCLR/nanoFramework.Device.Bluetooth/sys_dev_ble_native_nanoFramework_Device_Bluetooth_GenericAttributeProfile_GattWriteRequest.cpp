@@ -6,7 +6,7 @@
 
 #include "sys_dev_ble_native.h"
 
-extern EventGroupHandle_t    ble_event_waitgroup;
+extern EventGroupHandle_t ble_event_waitgroup;
 
 //
 //  Get data written to an attribute
@@ -55,7 +55,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        //debug_printf("NativeWriteRespond\n");
+        // debug_printf("NativeWriteRespond\n");
         if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
         {
             ble_event_data.result = 0;
@@ -72,7 +72,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        //debug_printf("NativeWriteRespondWithProtocolError\n");
+        // debug_printf("NativeWriteRespondWithProtocolError\n");
 
         // Response to correct event, or is it too late
         // Otherwise ignore

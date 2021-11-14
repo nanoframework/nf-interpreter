@@ -18,36 +18,40 @@
 
 #pragma GCC diagnostic pop
 
-#define GATT_MANUFACTURER_NAME_UUID             0x2A29
-#define GATT_MODEL_NUMBER_UUID                  0x2A24
+#define GATT_MANUFACTURER_NAME_UUID 0x2A29
+#define GATT_MODEL_NUMBER_UUID      0x2A24
 
 static const char *manuf_name = "Nanoframework";
 static const char *model_num = "ESP32";
 
-static int
-gatt_svr_chr_access_device_info(uint16_t conn_handle, uint16_t attr_handle,
-    struct ble_gatt_access_ctxt *ctxt, void *arg);
+static int gatt_svr_chr_access_device_info(
+    uint16_t conn_handle,
+    uint16_t attr_handle,
+    struct ble_gatt_access_ctxt *ctxt,
+    void *arg);
 
-const struct ble_gatt_chr_def gatt_char_device_info[] =
-{
+const struct ble_gatt_chr_def gatt_char_device_info[] = {
     {
-        //* Characteristic:  Manufacturer name 
+        //* Characteristic:  Manufacturer name
         .uuid = BLE_UUID16_DECLARE(GATT_MANUFACTURER_NAME_UUID),
         .access_cb = gatt_svr_chr_access_device_info,
         .flags = BLE_GATT_CHR_F_READ,
-    }, {
+    },
+    {
         // Characteristic: Model number string
         .uuid = BLE_UUID16_DECLARE(GATT_MODEL_NUMBER_UUID),
         .access_cb = gatt_svr_chr_access_device_info,
         .flags = BLE_GATT_CHR_F_READ,
-    }, {
+    },
+    {
         0, /* No more characteristics in this service */
-    }
-};
+    }};
 
-static int
-gatt_svr_chr_access_device_info(uint16_t conn_handle, uint16_t attr_handle,
-    struct ble_gatt_access_ctxt *ctxt, void *arg)
+static int gatt_svr_chr_access_device_info(
+    uint16_t conn_handle,
+    uint16_t attr_handle,
+    struct ble_gatt_access_ctxt *ctxt,
+    void *arg)
 {
     (void)conn_handle;
     (void)attr_handle;
@@ -58,12 +62,14 @@ gatt_svr_chr_access_device_info(uint16_t conn_handle, uint16_t attr_handle,
 
     uuid = ble_uuid_u16(ctxt->chr->uuid);
 
-    if (uuid == GATT_MODEL_NUMBER_UUID) {
+    if (uuid == GATT_MODEL_NUMBER_UUID)
+    {
         rc = os_mbuf_append(ctxt->om, model_num, strlen(model_num));
         return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
     }
 
-    if (uuid == GATT_MANUFACTURER_NAME_UUID) {
+    if (uuid == GATT_MANUFACTURER_NAME_UUID)
+    {
         rc = os_mbuf_append(ctxt->om, manuf_name, strlen(manuf_name));
         return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
     }

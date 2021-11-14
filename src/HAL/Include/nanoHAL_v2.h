@@ -107,7 +107,7 @@ typedef enum SLEEP_LEVEL
 #define EVENT_STORAGE               70
 #define EVENT_RADIO                 80
 #define EVENT_HIGH_RESOLUTION_TIMER 90
-#define EVENT_BLUETOOTH            100
+#define EVENT_BLUETOOTH             100
 
 #define EVENT_TOUCH   120
 #define EVENT_GESTURE 130
