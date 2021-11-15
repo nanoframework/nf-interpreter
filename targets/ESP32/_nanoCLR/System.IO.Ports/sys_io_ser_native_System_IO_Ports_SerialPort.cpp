@@ -128,6 +128,13 @@ void uart_event_task_sys(void *pvParameters)
                     // Pattern detection used for the WatchChar
                     watchCharPos = uart_pattern_get_pos(palUart->UartNum);
 
+                    if (watchCharPos == 0)
+                    {
+                        // patter position has 0 index meaning that we are reading it now
+                        // pop it from the pattern queue
+                        uart_pattern_pop_pos(palUart->UartNum);
+                    }
+
                     // set flag
                     readData = true;
                     break;
@@ -1083,7 +1090,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
 
     // Enable pattern detection for the serial device
-    uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 10000, 10, 10);
+    uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 9, 0, 00);
     // Reset the pattern queue length to record at most 10 pattern positions.
     uart_pattern_queue_reset(uart_num, 10);
 
