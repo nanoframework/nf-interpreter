@@ -128,12 +128,12 @@ void uart_event_task_sys(void *pvParameters)
                     // Pattern detection used for the WatchChar
                     watchCharPos = uart_pattern_get_pos(palUart->UartNum);
 
-                    if(watchCharPos == 0)
+                    if (watchCharPos == 0)
                     {
                         // patter position has 0 index meaning that we are reading it now
                         // pop it from the pattern queue
                         uart_pattern_pop_pos(palUart->UartNum);
-                    }                   
+                    }
 
                     // set flag
                     readData = true;
