@@ -293,10 +293,10 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    
+
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
 #if !defined(CONFIG_USB_CDC_ENABLED)
-    if(uart_num == 0)
+    if (uart_num == 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
