@@ -32,7 +32,7 @@ static int gatt_svr_chr_access_device_info(
 
 const struct ble_gatt_chr_def gatt_char_device_info[] = {
     {
-        //* Characteristic:  Manufacturer name
+        // Characteristic:  Manufacturer name
         .uuid = BLE_UUID16_DECLARE(GATT_MANUFACTURER_NAME_UUID),
         .access_cb = gatt_svr_chr_access_device_info,
         .flags = BLE_GATT_CHR_F_READ,
