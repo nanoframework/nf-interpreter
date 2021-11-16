@@ -273,7 +273,9 @@ void ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
 
     CLR_INT32 CharacteristicsCount = pCharacteristics->GetSize();
 
-    CharacteristicsCount++; // +1 for Terminator definition
+
+    // +1 for Terminator definition
+    CharacteristicsCount++;
 
     // Allocate an array of Characteristics definitions + null definition and save in context
     context.characteristicsCount = CharacteristicsCount;
