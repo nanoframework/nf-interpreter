@@ -128,6 +128,13 @@ void uart_event_task_sys(void *pvParameters)
                     // Pattern detection used for the WatchChar
                     watchCharPos = uart_pattern_get_pos(palUart->UartNum);
 
+                    if (watchCharPos == 0)
+                    {
+                        // patter position has 0 index meaning that we are reading it now
+                        // pop it from the pattern queue
+                        uart_pattern_pop_pos(palUart->UartNum);
+                    }
+
                     // set flag
                     readData = true;
                     break;
@@ -549,18 +556,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
             // got one!
             eventResult = false;
         }
+        else
+        {
+            // get new line from field
+            newLine = pThis[FIELD___newLine].RecoverString();
+            newLineLength = hal_strlen_s(newLine);
+            // need to subtract one because we are 0 indexed
+            newLineLength--;
 
-        // get new line from field
-        newLine = pThis[FIELD___newLine].RecoverString();
-        newLineLength = hal_strlen_s(newLine);
-        // need to subtract one because we are 0 indexed
-        newLineLength--;
+            // set new line char as the last one in the string
+            // only if this one is found it will have a chance of the others being there
+            palUart->NewLineChar = newLine[newLineLength];
 
-        // set new line char as the last one in the string
-        // only if this one is found it will have a chance of the others being there
-        palUart->NewLineChar = newLine[newLineLength];
-
-        stack.m_customState = 2;
+            stack.m_customState = 2;
+        }
     }
 
     while (eventResult)
@@ -801,6 +810,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
+#if !defined(CONFIG_USB_CDC_ENABLED)
+    if (uart_num == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+#endif
 
     // call the configure and abort if not OK
     NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
@@ -1075,7 +1092,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar
     watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
 
     // Enable pattern detection for the serial device
-    uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 10000, 10, 10);
+    uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 9, 0, 00);
     // Reset the pattern queue length to record at most 10 pattern positions.
     uart_pattern_queue_reset(uart_num, 10);
 

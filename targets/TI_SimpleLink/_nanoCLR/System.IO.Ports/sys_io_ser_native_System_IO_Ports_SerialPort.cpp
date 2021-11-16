@@ -461,18 +461,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
             // got one!
             eventResult = false;
         }
+        else
+        {
+            // get new line from field
+            newLine = pThis[FIELD___newLine].RecoverString();
+            newLineLength = hal_strlen_s(newLine);
+            // need to subtract one because we are 0 indexed
+            newLineLength--;
 
-        // get new line from field
-        newLine = pThis[FIELD___newLine].RecoverString();
-        newLineLength = hal_strlen_s(newLine);
-        // need to subtract one because we are 0 indexed
-        newLineLength--;
+            // set new line char as the last one in the string
+            // only if this one is found it will have a chance of the others being there
+            palUart->NewLineChar = newLine[newLineLength];
 
-        // set new line char as the last one in the string
-        // only if this one is found it will have a chance of the others being there
-        palUart->NewLineChar = newLine[newLineLength];
-
-        stack.m_customState = 2;
+            stack.m_customState = 2;
+        }
     }
 
     while (eventResult)
