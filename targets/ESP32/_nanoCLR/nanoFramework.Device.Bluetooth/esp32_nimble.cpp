@@ -274,7 +274,7 @@ void esp32_ble_host_task(void *param)
     (void)param;
 
     ESP_LOGI(tag, "Bluetooth LE Host Task Started");
-    /* This function will return only when nimble_port_stop() is executed */
+    // This function will return only when nimble_port_stop() is execute
     nimble_port_run();
 
     nimble_port_freertos_deinit();
