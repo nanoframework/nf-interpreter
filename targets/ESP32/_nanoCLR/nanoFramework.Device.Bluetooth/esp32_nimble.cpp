@@ -77,7 +77,7 @@ static int esp32_gap_event(struct ble_gap_event *event, void *arg)
         case BLE_GAP_EVENT_DISCONNECT:
             ESP_LOGI(tag, "BLE_GAP_EVENT_DISCONNECT; reason=%d\n", event->disconnect.reason);
 
-            /* Connection terminated; resume advertising */
+            // Connection terminated; resume advertising
             esp32_ble_start_advertise(con);
             break;
 
