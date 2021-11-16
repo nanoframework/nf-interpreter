@@ -25,7 +25,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         CLR_RT_HeapBlock_Array *notifyBuffer;
         uint8_t *bufPtr;
         int bufLen;
-        int rc = 1; // error characteristicId not known
+        // error characteristicId not known
+        int rc = 1;
 
         connectionHandle = stack.Arg1().NumericByRef().u2;
         characteristicId = stack.Arg2().NumericByRef().u2;
