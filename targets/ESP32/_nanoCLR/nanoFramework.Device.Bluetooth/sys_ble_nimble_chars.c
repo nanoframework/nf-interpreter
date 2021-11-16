@@ -44,7 +44,8 @@ const struct ble_gatt_chr_def gatt_char_device_info[] = {
         .flags = BLE_GATT_CHR_F_READ,
     },
     {
-        0, /* No more characteristics in this service */
+        // No more characteristics in this service
+        0,
     }};
 
 static int gatt_svr_chr_access_device_info(
