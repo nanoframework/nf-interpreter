@@ -79,6 +79,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest::NativeWriteGetData___SZARRAY_U1__U2,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest::NativeWriteRespond___VOID__U2,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest::NativeWriteRespondWithProtocolError___VOID__U2__U1,
@@ -107,11 +108,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic::NativeNotifyClient___I4__U2__U2__SZARRAY_U1,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL,
     NULL,
@@ -337,7 +333,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth =
 {
     "nanoFramework.Device.Bluetooth",
-    0x31DF2CA2,
+    0xDC201B26,
     method_lookup,
     { 100, 0, 0, 1 }
 };
