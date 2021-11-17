@@ -123,12 +123,14 @@ set(CHIBIOS_HAL_SRCS
     
     hal_buffers.c
     hal_queues.c
+    hal_flash.c
     hal_mmcsd.c
     
     hal_adc.c
     hal_can.c
     hal_crypto.c
     hal_dac.c
+    hal_efl.c
     hal_gpt.c
     hal_i2c.c
     hal_i2s.c
