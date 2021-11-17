@@ -11,7 +11,7 @@ cd /sources/AzureRTOS
 git pull
 cd /
 rm -rf /sources/ChibiOs
-git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.6.x -rHEAD /sources/ChibiOs
+git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEAD /sources/ChibiOs
 cd /sources/ChibiOs-Contrib
 git pull origin nanoframework
 cd /sources/mbedtls

@@ -40,21 +40,21 @@ int _gettimeofday (struct timeval * tp, struct timezone * tzp)
   return 0;
 }
 
-extern void _exit(int status)
+extern void _exit(int status) //TODO?: this has been added in chibios
 {
 	(void)status;
 
 	for (;;);
 }
 
-extern void _kill(int pid, int sig)
+extern void _kill(int pid, int sig) //TODO?: this has been added and renamed (_kill_r) in chibios?!
 {
 	(void) pid;
 	(void) sig;
 	return;
 }
 
-extern int _getpid(void)
+extern int _getpid(void) //TODO?: this has been added in chibios
 {
 	return -1;
 }
