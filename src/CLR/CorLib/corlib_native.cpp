@@ -320,6 +320,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8,
     Library_corlib_native_System_Double::IsInfinity___STATIC__BOOLEAN__R8,
     Library_corlib_native_System_Double::IsNaN___STATIC__BOOLEAN__R8,
@@ -1070,6 +1071,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8,
     Library_corlib_native_System_Double::IsInfinity___STATIC__BOOLEAN__R8,
     Library_corlib_native_System_Double::IsNaN___STATIC__BOOLEAN__R8,
@@ -1490,18 +1492,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x132BDB6F,
+    0x1ED476B2,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x9F36C4A2,
+    0x8174E109,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 12 }
+    { 100, 5, 0, 14 }
 };
 
 // clang-format on
