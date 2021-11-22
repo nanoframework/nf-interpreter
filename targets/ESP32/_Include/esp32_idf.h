@@ -51,6 +51,8 @@
 #include <soc/uart_channel.h>
 #include <spiffs_config.h>
 #include <esp_spiffs.h>
+#include <esp_rom_crc.h>
+#include <esp_rom_caps.h>
 
 // includes specific for TinyUSB and CDC
 #if CONFIG_USB_CDC_ENABLED
