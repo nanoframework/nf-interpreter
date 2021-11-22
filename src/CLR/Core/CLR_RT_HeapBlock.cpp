@@ -1042,11 +1042,14 @@ void CLR_RT_HeapBlock::Promote()
 
 //--//
 
-CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc = 0)
+CLR_INT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_INT32 crc = 0)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (!ptr)
-        return 0;
+    {
+        return crc;
+    }
 
     switch (ptr->DataType())
     {
@@ -1056,14 +1059,17 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
         case DATATYPE_STRING:
         {
-            const char *szText = ptr->StringText();
-
-            crc = SUPPORT_ComputeCRC(szText, (int)hal_strlen_s(szText), crc);
+            const char *src = ptr->StringText();
+            crc = SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
         }
         break;
 
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
+        {
+            // always starts with the pointer to the object to fully disambiguate
+            crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+
             if (fRecurse)
             {
                 CLR_RT_TypeDef_Instance cls;
@@ -1072,17 +1078,14 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
                 if (totFields > 0)
                 {
-                    while (totFields-- > 0)
+                    do
                     {
-                        crc = GetHashCode(++ptr, false, crc);
-                    }
-                }
-                else
-                {
-                    crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+                        crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+                    } while (--totFields > 0);
                 }
             }
-            break;
+        }
+        break;
 
         case DATATYPE_DELEGATE_HEAD:
         {
@@ -1105,7 +1108,8 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         break;
 
         default:
-            crc = SUPPORT_ComputeCRC(&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+            crc = SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+
             break;
     }
 
