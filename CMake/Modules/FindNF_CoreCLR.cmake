@@ -75,7 +75,6 @@ set(NF_CoreCLR_SRCS
     TypeSystemLookup.cpp
     StringTableData.cpp
     TypeSystem.cpp
-    nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
     Various.cpp
 
@@ -158,6 +157,11 @@ set(NF_CoreCLR_SRCS
     COM_stubs.c
     GenericPort_stubs.c
 )
+
+# append CRC32, if not already included with Wire Protocol
+if(NOT WireProtocol_FOUND)
+    list(APPEND NF_CoreCLR_SRCS nanoSupport_CRC32.c)
+endif()
 
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)

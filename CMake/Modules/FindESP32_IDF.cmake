@@ -53,6 +53,7 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/wear_level
 
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/include/${TARGET_SERIES_SHORT}/rom)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/include)
+list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/esp_rom/${TARGET_SERIES_SHORT})
 
 # includes specific to ESP32S2
 if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
