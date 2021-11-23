@@ -681,6 +681,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::InitializeArray___STATIC__VOID__SystemArray__SystemRuntimeFieldHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::GetObjectValue___STATIC__OBJECT__OBJECT,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
@@ -1368,6 +1369,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::InitializeArray___STATIC__VOID__SystemArray__SystemRuntimeFieldHandle,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::GetObjectValue___STATIC__OBJECT__OBJECT,
     Library_corlib_native_System_Runtime_CompilerServices_RuntimeHelpers::RunClassConstructor___STATIC__VOID__SystemRuntimeTypeHandle,
@@ -1492,11 +1494,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x1ED476B2,
+    0xC5322585,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0x8174E109,
+    0xB0016E1F,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
