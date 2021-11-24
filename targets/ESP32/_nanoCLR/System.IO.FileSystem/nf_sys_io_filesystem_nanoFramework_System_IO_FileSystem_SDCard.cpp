@@ -53,7 +53,7 @@ void GetMMCPins(bool _1bit, int *count, int8_t **pPins)
 
 void UnReservePins(int count, int8_t *pPins)
 {
-    for (int index = count; index <= count; index++)
+    for (int index = count-1; index >= 0; index--)
     {
         CPU_GPIO_ReservePin((GPIO_PIN)pPins[index], false);
     }
