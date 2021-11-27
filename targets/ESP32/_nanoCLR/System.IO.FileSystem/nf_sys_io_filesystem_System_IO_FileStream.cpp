@@ -75,10 +75,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-
+    
     // sanity check for successfull malloc
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -212,10 +211,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-
+  
     // sanity check for successfull malloc
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -305,10 +303,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-
+    
     // sanity check for successfull mallocs
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
