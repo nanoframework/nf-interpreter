@@ -24,6 +24,9 @@ void CombinePathAndName(char *outpath, const char *path1, const char *path2)
 //  Converts from windows type path       "c:\folder\folder\file.ext"
 //  to linux type path used in ESP32 VFS  "/c/folder/folder/file.exe
 //  where /c is the mount point
+////////////////////////////////////////////
+// MAKE SURE TO FREE THE RETURNED POINTER //
+////////////////////////////////////////////
 //
 char *ConvertToVfsPath(const char *filepath)
 {
@@ -31,7 +34,18 @@ char *ConvertToVfsPath(const char *filepath)
     char *path = NULL;
 
     int pathlen = hal_strlen_s(filepath);
+    
+    /////////////////////////////////
+    // MAKE SURE TO FREE THIS POINTER
     startPath = (char *)platform_malloc(pathlen + 1);
+    
+    // sanity check for successfull malloc
+    if (startPath == NULL)
+    {
+        // failed to allocate memory
+        return NULL;
+    }
+    
     path = startPath;
     hal_strcpy_s(path, pathlen + 1, filepath);
 
