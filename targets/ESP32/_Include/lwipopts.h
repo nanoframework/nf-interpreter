@@ -255,13 +255,13 @@
    ------------------------------------
 */
 #ifdef CONFIG_LWIP_AUTOIP
-#define LWIP_AUTOIP                     1
+#define LWIP_AUTOIP                     0
 
 /**
 * LWIP_DHCP_AUTOIP_COOP==1: Allow DHCP and AUTOIP to be both enabled on
 * the same interface at the same time.
 */
-#define LWIP_DHCP_AUTOIP_COOP           1
+#define LWIP_DHCP_AUTOIP_COOP           0
 
 /**
 * LWIP_DHCP_AUTOIP_COOP_TRIES: Set to the number of DHCP DISCOVER probes
