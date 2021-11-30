@@ -12,7 +12,7 @@ param (
 
 # set default GNU GCC version
 if ([string]::IsNullOrEmpty($Version)) {
-    $Version = "9-2020-q2-update"
+    $Version = "10.3-2021.10"
 }
 
 
@@ -51,7 +51,7 @@ $gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/gcc-arm-none-eabi/versions/9-2020-q2-update/gcc-arm-none-eabi-$Version-win32.7z"
+    $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/gcc-arm-none-eabi/versions/$Version/gcc-arm-none-eabi-$Version-win32.7z"
     $output = "$zipRoot\gcc-arm.7z"
 
     # Don't download again if already exists

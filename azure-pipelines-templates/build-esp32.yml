@@ -45,11 +45,3 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_4mb.csv ${{ parameters.buildDirectory }}\partitions_4mb.bin'
-
-  - task: PythonScript@0
-    condition: succeeded()
-    displayName: Generate ESP32 Partition tables for 2MB flash
-    inputs:
-      scriptSource: 'filePath'
-      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
-      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_2mb.csv ${{ parameters.buildDirectory }}\partitions_2mb.bin'

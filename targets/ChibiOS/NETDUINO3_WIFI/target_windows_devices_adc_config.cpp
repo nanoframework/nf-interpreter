@@ -5,9 +5,8 @@
 
 #include <win_dev_adc_native_target.h>
 
+const NF_PAL_ADC_PORT_PIN_CHANNEL__ AdcPortPinConfig__[] = {
 
-const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
-    
     // ADC1
     {1, GPIOC, 0, ADC_CHANNEL_IN10},
     {1, GPIOC, 1, ADC_CHANNEL_IN11},
@@ -26,4 +25,4 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
     {1, NULL, 0, ADC_CHANNEL_VBAT},
 };
 
-const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+const int AdcChannelCount__ = ARRAYSIZE(AdcPortPinConfig__);

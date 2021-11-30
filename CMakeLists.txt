@@ -763,6 +763,10 @@ if(RTOS_FREERTOS_CHECK)
 # FreeRTOS ESP32
 elseif(RTOS_ESP32_CHECK)
 
+    # enables embedded USB CDC 
+    # (default is OFF so embedded USB CDC is NOT enabled)
+    option(ESP32_USB_CDC "option to enable USB Mass Storage")
+
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ESP32/_nanoCLR)
 

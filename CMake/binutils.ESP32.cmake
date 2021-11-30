@@ -528,6 +528,46 @@ macro(nf_add_idf_as_library)
 
     endif()
 
+    # handle specifics for ESP32S2 series
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+
+        if(ESP32_USB_CDC)
+
+            # add IDF components specific to ESP32S2 series
+            list(APPEND IDF_COMPONENTS_TO_ADD tinyusb)
+            list(APPEND IDF_LIBRARIES_TO_ADD idf::tinyusb)
+
+            message(STATUS "Support for embedded USB CDC enabled")
+
+            # SDKCONFIG for ESP32S2 has embedded USB CDC enabled as default
+
+        else()
+            message(STATUS "Support for embedded USB CDC **IS NOT** enabled")
+
+            # need to read the supplied SDK CONFIG file and replace the appropriate option
+            file(READ
+                "${SDKCONFIG_DEFAULTS_FILE}"
+                SDKCONFIG_DEFAULT_CONTENTS)
+
+            string(REPLACE
+                "CONFIG_USB_ENABLED=y"
+                "CONFIG_USB_ENABLED=n"
+                SDKCONFIG_DEFAULT_FINAL_CONTENTS
+                "${SDKCONFIG_DEFAULT_CONTENTS}")
+
+            # need to temporarilly allow changes in source files
+            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+            file(WRITE 
+                ${SDKCONFIG_DEFAULTS_FILE} 
+                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
+
+            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+
+        endif()
+
+    endif()
+
     # option for automatic XTAL frequency detection
     # (default is OFF which means that fixed default frequency will be used)
     option(ESP32_XTAL_FREQ_26 "option to set XTAL frequency to 26MHz")

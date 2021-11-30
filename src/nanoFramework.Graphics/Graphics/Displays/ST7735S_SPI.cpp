@@ -189,8 +189,10 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
         case LANDSCAPE180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
-            g_DisplayInterface.SendCommand(2, Memory_Access_Control,
-                                           (MADCTL_MX | MADCTL_BGR)); // Landscape  + BGR
+            g_DisplayInterface.SendCommand(
+                2,
+                Memory_Access_Control,
+                (MADCTL_MY | MADCTL_MX | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;

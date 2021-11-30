@@ -38,11 +38,13 @@
 //
 //  SPI2 - The pins are not assigned so need to be assigned.
 
+#include <targetHAL.h>
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
 #include <nanoCLR_Checks.h>
+
+#include <nanoHAL.h>
 #include <Esp32_DeviceMapping.h>
-#include <esp32_idf.h>
 
 // Max frequency over GPIO mux pins, full duplex
 #define MAX_CLOCK_FREQUENCY_GPIO_FULL 26000000
@@ -107,22 +109,16 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
         quadhd_io_num : -1,          // Quad Hold
         max_transfer_sz : 16384,     // max transfer size
         flags : 0,                   // SPICOMMON_BUSFLAG_* flags
-        intr_flags : 0               // Interrupt flags
+        intr_flags : ESP_INTR_FLAG_IRAM
     };
 
     // First available bus on ESP32 is HSPI_HOST(1)
     // Try with DMA first
-    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, spiBus + HSPI_HOST);
+    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK)
     {
-        // Try again without DMA
-        ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, 0);
-
-        if (ret != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus + HSPI_HOST, ret);
-            return false;
-        }
+        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus + HSPI_HOST, ret);
+        return false;
     }
 
     nf_pal_spi[spiBus].BusIndex = spiBus;
@@ -281,8 +277,8 @@ HRESULT CPU_SPI_nWrite_nRead(
 
     NANOCLR_HEADER();
     {
-        unsigned char *writeDataBuffer = NULL;
-        unsigned char *readDataBuffer = NULL;
+        uint8_t *writeDataBuffer = NULL;
+        uint8_t *readDataBuffer = NULL;
         bool async = (wrc.callback != 0);
         esp_err_t ret;
 
@@ -312,7 +308,9 @@ HRESULT CPU_SPI_nWrite_nRead(
             // for Half-duplex its the length of both items
             MaxElementlength = writeSize + readSize;
             if (readSize)
+            {
                 MaxElementlength += wrc.readOffset;
+            }
 
             int maxByteDatalength = (wrc.Bits16ReadWrite) ? MaxElementlength * 2 : MaxElementlength;
 
@@ -322,11 +320,15 @@ HRESULT CPU_SPI_nWrite_nRead(
                 // DMA. length included write data, any dummy bytes(readOffset) and read data size
                 writeDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (writeDataBuffer == 0)
+                {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
 
                 readDataBuffer = (unsigned char *)heap_caps_malloc(maxByteDatalength, MALLOC_CAP_DMA);
                 if (readDataBuffer == 0)
+                {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
 
                 memset(writeDataBuffer, 0, maxByteDatalength);
                 memcpy(writeDataBuffer, writeData, writeSize);
@@ -384,8 +386,8 @@ HRESULT CPU_SPI_nWrite_nRead(
                     case ESP_ERR_INVALID_ARG:
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
-                    default:
                     case ESP_ERR_INVALID_STATE:
+                    default:
                         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                 }
             }
@@ -502,7 +504,9 @@ uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
     }
 
     if (directPin)
+    {
         return MAX_CLOCK_FREQUENCY_NATIVE;
+    }
 
     return MAX_CLOCK_FREQUENCY_GPIO_HALF;
 }

@@ -25,7 +25,7 @@ steps:
 
         # find PR
         "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
-        $pr = Invoke-WebRequest "https://api.github.com/repos/nanoFramework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
 
         if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
         {
@@ -53,7 +53,7 @@ steps:
         "Working branch is $branchName" | Write-Host -ForegroundColor White
 
         # list PR files
-        $prFiles = Invoke-WebRequest "https://api.github.com/repos/nanoFramework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
+        $prFiles = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
 
         "Starting file check..." | Write-Host -ForegroundColor White
         
@@ -147,7 +147,7 @@ steps:
 
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/nanoframework/nf-interpreter/tree/$branchName."} | ConvertTo-Json
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName."} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
               throw "Error starting PR: $responseBody"

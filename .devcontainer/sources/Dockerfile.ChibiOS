@@ -6,7 +6,7 @@ RUN apt-get update \
     bzip2 \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
     && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \

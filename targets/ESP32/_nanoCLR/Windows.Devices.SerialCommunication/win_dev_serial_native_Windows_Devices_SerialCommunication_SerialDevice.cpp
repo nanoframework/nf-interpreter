@@ -294,6 +294,14 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
+#if !defined(CONFIG_USB_CDC_ENABLED)
+    if (uart_num == 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+#endif
+
     // call the configure and abort if not OK
     NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
 
@@ -1026,15 +1034,26 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
     GetDeviceSelector___STATIC__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
-        // COM1 is being used for VS debug, so it's not available
-        char deviceSelectorString[15] = "COM2,COM3";
 
-        // because the caller is expecting a result to be returned
-        // we need set a return result in the stack argument using the appropriate SetResult according to the variable
-        // type (a string here)
-        stack.SetResult_String(deviceSelectorString);
-    }
+    // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
+    // and init with the terminator
+    char deviceSelectorString[14 + 1] = {0};
+
+    // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
+#if defined(CONFIG_USB_CDC_ENABLED)
+    strcat(deviceSelectorString, "COM1,");
+#endif
+#if defined(UART_NUM_1)
+    strcat(deviceSelectorString, "COM2,");
+#endif
+#if defined(UART_NUM_2)
+    strcat(deviceSelectorString, "COM3,");
+#endif
+
+    // because the caller is expecting a result to be returned
+    // we need set a return result in the stack argument using the appropriate SetResult according to the variable
+    // type (a string here)
+    stack.SetResult_String(deviceSelectorString);
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -26,7 +26,7 @@
         "short": "TI_CC1352R1_LAUNCHXL",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
-          "BUILD_VERBOSE" : "OFF",
+          "BUILD_VERBOSE": "OFF",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.arm-none-eabi.cmake",
           "TOOLCHAIN_PREFIX": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>",
           "RTOS": "TI_SimpleLink",
@@ -51,6 +51,7 @@
           "API_System.Device.I2c": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Adc": "ON",
+          "API_System.Device.Adc": "ON",
           "API_Windows.Devices.SerialCommunication": "OFF",
           "API_System.IO.Ports": "OFF",
           "API_nanoFramework.ResourceManager": "OFF",

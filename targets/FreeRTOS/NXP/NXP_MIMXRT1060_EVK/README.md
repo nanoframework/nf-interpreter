@@ -52,6 +52,7 @@ Pre-configured cmake-variants.json for this board
           "API_Windows.Devices.Spi": "OFF",
           "API_Windows.Devices.I2c": "OFF",
           "API_Windows.Devices.Adc": "OFF",
+          "API_System.Device.Adc": "OFF",
           "API_Windows.Devices.Pwm": "OFF",
           "API_Windows.Devices.Wifi": "OFF",
           "API_System.Net": "OFF",

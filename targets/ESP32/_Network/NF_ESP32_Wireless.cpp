@@ -176,7 +176,7 @@ esp_err_t NF_ESP32_InitaliseWifi()
             return ec;
         }
 
-        // if need, config the AP 
+        // if need, config the AP
         // this can only be performed after Wi-Fi is started
         if (expectedWifiMode & WIFI_MODE_AP)
         {
@@ -525,5 +525,5 @@ int NF_ESP32_Wait_NetNumber(int num)
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 
-    return num;
+    return espNetif->lwip_netif->num;
 }

@@ -11,6 +11,7 @@
 #include <string.h>
 
 extern void CLRStartupThread(void const *argument);
+TaskHandle_t ReceiverTask;
 
 void receiver_task(void *pvParameter)
 {
@@ -61,7 +62,7 @@ void app_main()
     ESP_ERROR_CHECK(nvs_flash_init());
 
     // start receiver task
-    xTaskCreate(&receiver_task, "ReceiverThread", 2048, NULL, 5, NULL);
+    xTaskCreate(&receiver_task, "ReceiverThread", 3072, NULL, 5, &ReceiverTask);
 
     // start the CLR main task
     xTaskCreate(&main_task, "main_task", 15000, NULL, 5, NULL);

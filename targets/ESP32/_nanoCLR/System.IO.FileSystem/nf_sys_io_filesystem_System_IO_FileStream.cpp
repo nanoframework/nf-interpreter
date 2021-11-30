@@ -24,6 +24,9 @@ void CombinePathAndName(char *outpath, const char *path1, const char *path2)
 //  Converts from windows type path       "c:\folder\folder\file.ext"
 //  to linux type path used in ESP32 VFS  "/c/folder/folder/file.exe
 //  where /c is the mount point
+////////////////////////////////////////////
+// MAKE SURE TO FREE THE RETURNED POINTER //
+////////////////////////////////////////////
 //
 char *ConvertToVfsPath(const char *filepath)
 {
@@ -31,7 +34,18 @@ char *ConvertToVfsPath(const char *filepath)
     char *path = NULL;
 
     int pathlen = hal_strlen_s(filepath);
+
+    /////////////////////////////////
+    // MAKE SURE TO FREE THIS POINTER
     startPath = (char *)platform_malloc(pathlen + 1);
+
+    // sanity check for successfull malloc
+    if (startPath == NULL)
+    {
+        // failed to allocate memory
+        return NULL;
+    }
+
     path = startPath;
     hal_strcpy_s(path, pathlen + 1, filepath);
 
@@ -75,10 +89,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
     // sanity check for successfull malloc
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -212,10 +225,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
     // sanity check for successfull malloc
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -305,10 +317,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
 
     // setup file path
     filePath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
-    vfsPath = (char *)platform_malloc(2 * FF_LFN_BUF + 1);
 
     // sanity check for successfull mallocs
-    if (filePath == NULL || vfsPath == NULL)
+    if (filePath == NULL)
     {
         // failed to allocate memory
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
