@@ -1,11 +1,38 @@
 # Changelog
 
-## [v1.7.0.2](https://github.com/nanoframework/nf-interpreter/tree/v1.7.0.2) (2021-08-25)
+## [v1.7.2.5](https://github.com/nanoframework/nf-interpreter/tree/v1.7.2.5) (2021-11-30)
 
-[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.5.3...v1.7.0.2)
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.7.0.2...v1.7.2.5)
 
 **Implemented enhancements:**
 
+- Add processing for bad WP packets [\#2162](https://github.com/nanoframework/nf-interpreter/pull/2162)
+- ESP32 now uses IDF hardware implementation if available [\#2156](https://github.com/nanoframework/nf-interpreter/pull/2156)
+- Fix double implementation for GCC [\#2150](https://github.com/nanoframework/nf-interpreter/pull/2150)
+- Update System.Math [\#2148](https://github.com/nanoframework/nf-interpreter/pull/2148)
+- Add Get Native Memory Info on ESP32 [\#2140](https://github.com/nanoframework/nf-interpreter/pull/2140)
+- Rework ESP32 WP HAL interface [\#2132](https://github.com/nanoframework/nf-interpreter/pull/2132)
+- Fix S.D.Pwm for ESP32S2 [\#2123](https://github.com/nanoframework/nf-interpreter/pull/2123)
+- Add System.Device.Pwm to ESP32 [\#2118](https://github.com/nanoframework/nf-interpreter/pull/2118)
+- Fix UART driver install [\#2116](https://github.com/nanoframework/nf-interpreter/pull/2116)
+- Adding new event category EVENT\_HIGH\_RESOLUTION\_TIMER [\#2108](https://github.com/nanoframework/nf-interpreter/pull/2108)
+- Memory allocation is now using heap\_caps API [\#2107](https://github.com/nanoframework/nf-interpreter/pull/2107)
+- Improvements in ESP32 memory allocation [\#2104](https://github.com/nanoframework/nf-interpreter/pull/2104)
+- Improvements in ESP32 I2C [\#2103](https://github.com/nanoframework/nf-interpreter/pull/2103)
+- Adjusting Dockerfiles for ESP32 IDF4.3 [\#2101](https://github.com/nanoframework/nf-interpreter/pull/2101)
+- Mount and ESP32 System.IO.Filesystem support  [\#2096](https://github.com/nanoframework/nf-interpreter/pull/2096)
+- Fix implementation of GetCertificateStore and GetDeviceCertificate [\#2095](https://github.com/nanoframework/nf-interpreter/pull/2095)
+- Rework TLS to use new config manager API [\#2093](https://github.com/nanoframework/nf-interpreter/pull/2093)
+- Add API to get certificate store and device certificate [\#2092](https://github.com/nanoframework/nf-interpreter/pull/2092)
+- Use extern "C" to remove C++ name mangling [\#2085](https://github.com/nanoframework/nf-interpreter/pull/2085)
+- Rework Messaging [\#2082](https://github.com/nanoframework/nf-interpreter/pull/2082)
+- Fix potential memory leaks in S.IO.Ports code [\#2081](https://github.com/nanoframework/nf-interpreter/pull/2081)
+- Work on WP command handlers [\#2079](https://github.com/nanoframework/nf-interpreter/pull/2079)
+- Work on WP and messaging [\#2078](https://github.com/nanoframework/nf-interpreter/pull/2078)
+- Adding support for I2S pin configuration on ESP32 [\#2073](https://github.com/nanoframework/nf-interpreter/pull/2073)
+- Work in SPIFFS [\#2071](https://github.com/nanoframework/nf-interpreter/pull/2071)
+- Improvements in TRACE for Wire Protocol [\#2039](https://github.com/nanoframework/nf-interpreter/pull/2039)
+- PSRAM pins in ESP32 are now reserved only if needed [\#2022](https://github.com/nanoframework/nf-interpreter/pull/2022)
 - Add compiler definition to use memory allocation for larger debugger vars [\#2015](https://github.com/nanoframework/nf-interpreter/pull/2015)
 - Remove serial configuration from ST\_NUCLEO64\_F091RC [\#2013](https://github.com/nanoframework/nf-interpreter/pull/2013)
 - Fix RX in TI SimpleLink [\#2008](https://github.com/nanoframework/nf-interpreter/pull/2008)
@@ -357,6 +384,29 @@
 
 **Fixed bugs:**
 
+- Fix FileStream memory leak [\#2160](https://github.com/nanoframework/nf-interpreter/pull/2160)
+- Fix bug in unreserving GPIO pins for SD Card [\#2158](https://github.com/nanoframework/nf-interpreter/pull/2158)
+- Rework GetHashCode\(\) [\#2157](https://github.com/nanoframework/nf-interpreter/pull/2157)
+- Rework code handling ReadLine\(\) [\#2154](https://github.com/nanoframework/nf-interpreter/pull/2154)
+- Fix configuration for ESP32 UART pattern detection [\#2153](https://github.com/nanoframework/nf-interpreter/pull/2153)
+- Add check in NativeInit to prevent opening reserved COM port [\#2152](https://github.com/nanoframework/nf-interpreter/pull/2152)
+- Fix Math.Max\(\) [\#2149](https://github.com/nanoframework/nf-interpreter/pull/2149)
+- Fix network interface mapping for ESP-IDF [\#2145](https://github.com/nanoframework/nf-interpreter/pull/2145)
+- Rework CPU GPIO [\#2144](https://github.com/nanoframework/nf-interpreter/pull/2144)
+- Fix SPI implementation for ESP32 [\#2143](https://github.com/nanoframework/nf-interpreter/pull/2143)
+- Fix COM port enumeration for ESP32 [\#2134](https://github.com/nanoframework/nf-interpreter/pull/2134)
+- Fixing orientation for ST7735S and text write native function [\#2130](https://github.com/nanoframework/nf-interpreter/pull/2130)
+- Swap core assignment [\#2117](https://github.com/nanoframework/nf-interpreter/pull/2117)
+- Improvements in I2C handling [\#2106](https://github.com/nanoframework/nf-interpreter/pull/2106)
+- Fix wrong parameter in SpinWait::Spin [\#2099](https://github.com/nanoframework/nf-interpreter/pull/2099)
+- Fix serial implementation for TI [\#2086](https://github.com/nanoframework/nf-interpreter/pull/2086)
+- Fix CLR\_DBG\_Debugger::Monitor\_FlashSectorMap [\#2077](https://github.com/nanoframework/nf-interpreter/pull/2077)
+- Fix call to set native pin configuration [\#2072](https://github.com/nanoframework/nf-interpreter/pull/2072)
+- Fix PWM deviceSelectorString [\#2060](https://github.com/nanoframework/nf-interpreter/pull/2060)
+- Made trace variable visible [\#2046](https://github.com/nanoframework/nf-interpreter/pull/2046)
+- Fix ADC2 and tidy up [\#2043](https://github.com/nanoframework/nf-interpreter/pull/2043)
+- Fix mapping of ADC3 IN8 [\#2032](https://github.com/nanoframework/nf-interpreter/pull/2032)
+- Fix Serial receive in TI SimpleLink [\#2030](https://github.com/nanoframework/nf-interpreter/pull/2030)
 - Rework write operation on ST32 nanoHAL Flash v1 [\#2014](https://github.com/nanoframework/nf-interpreter/pull/2014)
 - Fix WireProtocol Receive processing [\#2012](https://github.com/nanoframework/nf-interpreter/pull/2012)
 - Fix memory leak when parsing X509 certs [\#2010](https://github.com/nanoframework/nf-interpreter/pull/2010)
@@ -644,6 +694,14 @@
 
 **Documentation and other chores:**
 
+- Update mscorlib [\#2155](https://github.com/nanoframework/nf-interpreter/pull/2155)
+- Update System.Math [\#2147](https://github.com/nanoframework/nf-interpreter/pull/2147)
+- Cherry pick \#2096 [\#2113](https://github.com/nanoframework/nf-interpreter/pull/2113)
+- Simpler top-level cmakelists [\#2083](https://github.com/nanoframework/nf-interpreter/pull/2083)
+- Fix declaration of Windows.Storage assembly [\#2069](https://github.com/nanoframework/nf-interpreter/pull/2069)
+- Fix spelling of "successful" in comments [\#2054](https://github.com/nanoframework/nf-interpreter/pull/2054)
+- Add missing diagnostic sources to CoreCLR [\#2029](https://github.com/nanoframework/nf-interpreter/pull/2029)
+- Work CI-CD [\#2027](https://github.com/nanoframework/nf-interpreter/pull/2027)
 - Update README.md [\#2000](https://github.com/nanoframework/nf-interpreter/pull/2000)
 - Update ChibiOS to v21.6 [\#1982](https://github.com/nanoframework/nf-interpreter/pull/1982)
 - Update for new ESP32 targets [\#1980](https://github.com/nanoframework/nf-interpreter/pull/1980)
@@ -909,6 +967,10 @@
 - Update corlib\_native\_System\_Number.cpp [\#550](https://github.com/nanoframework/nf-interpreter/pull/550)
 - Update corlib\_native\_System\_Number.cpp [\#549](https://github.com/nanoframework/nf-interpreter/pull/549)
 - Update targetHAL\_Time.cpp [\#548](https://github.com/nanoframework/nf-interpreter/pull/548)
+
+## [v1.7.0.2](https://github.com/nanoframework/nf-interpreter/tree/v1.7.0.2) (2021-08-25)
+
+[Full Changelog](https://github.com/nanoframework/nf-interpreter/compare/v1.6.5.3...v1.7.0.2)
 
 ## [v1.6.5.3](https://github.com/nanoframework/nf-interpreter/tree/v1.6.5.3) (2021-07-24)
 
