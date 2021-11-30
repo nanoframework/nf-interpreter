@@ -282,6 +282,7 @@ jobs:
     matrix:
       ST_STM32F429I_DISCOVERY:
         TargetBoard: ST_STM32F429I_DISCOVERY
+        TargetSeries: 'stm32f4xx'
         BuildOptions: >-
           -DTARGET_SERIES=STM32F4xx
           -DRTOS=ChibiOS
@@ -307,6 +308,7 @@ jobs:
         NeedsSRECORD: false
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
+        TargetSeries: 'stm32f7xx'
         BuildOptions: >-
           -DTARGET_SERIES=STM32F7xx
           -DRTOS=ChibiOS
@@ -349,6 +351,7 @@ jobs:
     REVISION: $[counter('STM32_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'stm32'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -387,6 +390,7 @@ jobs:
     matrix:
       ESP32_PSRAM_REV0:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -422,6 +426,7 @@ jobs:
       # BUILD FAILING ON IRAM0 overflow
       # ESP32_BLE_REV0:
       #   TargetBoard: ESP32
+      #   TargetSeries: 'esp32'
       #   BuildOptions: >-
           # -DTARGET_SERIES=ESP32
           # -DRTOS=ESP32
@@ -463,6 +468,7 @@ jobs:
       # BUILD FAILING ON IRAM0 overflow
       # ESP32_BLE_REV3:
       #   TargetBoard: ESP32
+      #   TargetSeries: 'esp32'
       #   BuildOptions: >-
           # -DTARGET_SERIES=ESP32
           # -DRTOS=ESP32
@@ -502,6 +508,7 @@ jobs:
       #   PackageName: ESP32_BLE_REV3
       ESP_WROVER_KIT:
          TargetBoard: ESP32
+         TargetSeries: 'esp32'
          BuildOptions: >-
             -DTARGET_SERIES=ESP32
             -DRTOS=ESP32
@@ -541,6 +548,7 @@ jobs:
          PackageName: ESP_WROVER_KIT
       ESP32_LILYGO:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -576,6 +584,7 @@ jobs:
         PackageName: ESP32_LILYGO
       FEATHER_S2:
         TargetBoard: ESP32_S2
+        TargetSeries: 'esp32_s2'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2
           -DRTOS=ESP32
@@ -613,6 +622,7 @@ jobs:
     REVISION: $[counter('ESP32_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+    TargetPlatform: 'esp32'
 
   steps:
   - checkout: self
@@ -666,6 +676,7 @@ jobs:
     matrix:
       NXP_MIMXRT1060_EVK:
         TargetBoard: NXP_MIMXRT1060_EVK
+        TargetSeries: 'imxrt10xx'
         BuildOptions: >-
           -DTARGET_SERIES=IMXRT10xx
           -DRTOS=FreeRTOS
@@ -692,6 +703,7 @@ jobs:
     REVISION: $[counter('NXP_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
+    TargetPlatform: 'freertos'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -729,6 +741,7 @@ jobs:
       # disabled: waiting to update SDK to latest version with Sys Config
       # TI_CC3220SF_LAUNCHXL:
       #   TargetBoard: TI_CC3220SF_LAUNCHXL
+      #   TargetSeries: 'cc32xx'
       #   BuildOptions: >-
           #  -DTARGET_SERIES=CC32xx
           #  -DRTOS=TI_SimpleLink
@@ -755,6 +768,7 @@ jobs:
       TI_CC1352R1_LAUNCHXL_915:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
+        TargetSeries: 'cc13x2_26x2'
         BuildOptions: >-
           -DTARGET_SERIES=CC13x2_26x2
           -DRTOS=TI_SimpleLink
@@ -780,6 +794,7 @@ jobs:
     REVISION: $[counter('TI_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'ti_simplelink'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
