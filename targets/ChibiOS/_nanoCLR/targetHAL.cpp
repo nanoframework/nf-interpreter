@@ -70,10 +70,6 @@ void nanoHAL_Initialize()
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
 
-#if (NANOCLR_GRAPHICS == TRUE)
-    g_GraphicsMemoryHeap.Initialize();
-#endif
-
     ConfigurationManager_Initialize();
 
     Events_Initialize();
@@ -119,27 +115,35 @@ void nanoHAL_Initialize()
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     Uart1_PAL.UartDriver = NULL;
+    Uart1_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     Uart2_PAL.UartDriver = NULL;
+    Uart2_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     Uart3_PAL.UartDriver = NULL;
+    Uart3_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     Uart4_PAL.UartDriver = NULL;
+    Uart4_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     Uart5_PAL.UartDriver = NULL;
+    Uart5_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     Uart6_PAL.UartDriver = NULL;
+    Uart6_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     Uart7_PAL.UartDriver = NULL;
+    Uart7_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     Uart8_PAL.UartDriver = NULL;
+    Uart8_PAL__.UartDriver = NULL;
 #endif
 
 #endif

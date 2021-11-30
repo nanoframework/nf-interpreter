@@ -119,7 +119,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::OpenFileNative___VOID
         }
         if (operationResult == FR_OK)
         {
-            // file created (or opened) succesfully
+            // file created (or opened) successfully
             // OK to close it
             f_close(&file);
         }
@@ -216,7 +216,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::ReadNative___I4__STRI
                 length = f_size(&file) - position;
             }
 
-            // file opened succesfully
+            // file opened successfully
             operationResult = f_read(&file, buffer, length, &readCount);
             if (operationResult != FR_OK)
             {
@@ -314,7 +314,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
                 NANOCLR_SET_AND_LEAVE(CLR_E_INDEX_OUT_OF_RANGE);
             }
 
-            // file opened succesfully
+            // file opened successfully
             CLR_UINT32 written = 0;
             operationResult = f_write(&file, buffer, length, &written);
             if (operationResult != FR_OK)
@@ -400,7 +400,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::GetLengthNative___I8_
 
         if (operationResult == FR_OK)
         {
-            // file opened succesfully
+            // file opened successfully
             length = f_size(&file);
 
             // OK to close it

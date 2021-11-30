@@ -168,6 +168,7 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_LWIP_INCLUDE_DIRS}
@@ -321,9 +322,25 @@ endmacro()
 # optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
 # optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
 # optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+# optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
+# optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
 
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})
 
+endmacro()
+
+# macro to clear binary files related with nanoBooter from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanobooter)
+    nf_clear_common_output_files_nanobooter()
+    # other files specific to this platform should go here
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    nf_clear_common_output_files_nanoclr()
+    # other files specific to this platform should go here
 endmacro()

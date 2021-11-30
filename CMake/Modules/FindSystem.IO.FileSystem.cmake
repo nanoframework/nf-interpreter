@@ -8,10 +8,6 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO
 
 
 # set include directories
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem)
 
@@ -20,7 +16,7 @@ set(System.IO.FileSystem_SRCS
 
     nf_sys_io_filesystem.cpp
 
-    
+    nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp
     nf_sys_io_filesystem_System_IO_Directory.cpp
     nf_sys_io_filesystem_System_IO_File.cpp
     nf_sys_io_filesystem_System_IO_FileStream.cpp

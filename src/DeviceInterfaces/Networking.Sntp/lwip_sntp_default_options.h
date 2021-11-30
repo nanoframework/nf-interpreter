@@ -8,7 +8,10 @@
 
 // update delay (default 1 hour)
 // (value in milliseconds)
+// can't use this for ESP32 build because IDF defines it's own
+#ifndef PLATFORM_ESP32
 #define SNTP_UPDATE_DELAY 3600000
+#endif
 
 // better have a startup delay because we can have DHCP enabled (default 15 seconds)
 // value in milliseconds

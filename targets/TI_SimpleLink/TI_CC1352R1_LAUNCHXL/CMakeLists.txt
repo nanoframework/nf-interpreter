@@ -22,7 +22,7 @@ nf_setup_target_build(
     CLR_LINKER_FILE 
         CC13x2_26x2_CLR
   
-    BOOTER_EXTRA_LINKMAP_PROPERTIES
+    CLR_EXTRA_LINK_FLAGS
         "-Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/configPkg/linker.cmd"
 
     CLR_EXTRA_LINKMAP_PROPERTIES

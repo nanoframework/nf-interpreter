@@ -63,3 +63,6 @@ CMake/Modules/FindINTEROP*.cmake
 # except build/, which is used as an MSBuild target.
 !**/packages/build/
 /targets/os/win32/.vs/nanoCLR/v16
+
+# ESP32 sdkconfig file
+sdkconfig

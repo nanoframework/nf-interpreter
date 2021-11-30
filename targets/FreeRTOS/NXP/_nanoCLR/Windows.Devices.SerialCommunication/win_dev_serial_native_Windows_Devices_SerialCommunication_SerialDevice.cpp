@@ -12,10 +12,10 @@
 static LPUART_Type *const lpuart_bases[] = LPUART_BASE_PTRS;
 
 // Static UART config/data structs.
-static NF_PAL_UART Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_PAL6, Uart_PAL7, Uart_PAL8;
+static NF_PAL_UART__ Uart_PAL1, Uart_PAL2, Uart_PAL3, Uart_PAL4, Uart_PAL5, Uart_PAL6, Uart_PAL7, Uart_PAL8;
 
 // Array of pointers to above config UART structs.
-NF_PAL_UART *const
+NF_PAL_UART__ *const
     Uart_PAL[]{NULL, &Uart_PAL1, &Uart_PAL2, &Uart_PAL3, &Uart_PAL4, &Uart_PAL5, &Uart_PAL6, &Uart_PAL7, &Uart_PAL8};
 
 // Task firing up event after receiving wanted amount of bytes
@@ -47,7 +47,7 @@ static void vWEvent(void *pvParameters)
     uint32_t ulNotifiedValue;
     uint8_t *uartNum_p = (uint8_t *)pvParameters;
     uint8_t uartNum = *uartNum_p;
-    NF_PAL_UART *palUart = Uart_PAL[uartNum];
+    NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
     while (1)
     {
@@ -71,7 +71,7 @@ static void vWEvent(void *pvParameters)
 //     NATIVE_INTERRUPT_START
 //     uint32_t status;
 //     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-//     NF_PAL_UART *palUart = Uart_PAL[uartNum];
+//     NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
 //     status = LPUART_GetStatusFlags(base);
 
@@ -167,11 +167,11 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
         // Free ring buffers memory
-        free(palUart->TxBuffer);
-        free(palUart->RxBuffer);
+        platform_free(palUart->TxBuffer);
+        platform_free(palUart->RxBuffer);
 
         // Deinitialize device and delete FreeRTOS idle tasks
         LPUART_Deinit(base);
@@ -205,19 +205,19 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
         // Allocate memory for TX and RX circular buffer
-        palUart->TxBuffer = (uint8_t *)malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
+        palUart->TxBuffer = (uint8_t *)platform_malloc(UART_TX_BUFER_SIZE * sizeof(uint8_t));
         if (palUart->TxBuffer == NULL)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
-        palUart->RxBuffer = (uint8_t *)malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+        palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
         if (palUart->RxBuffer == NULL)
         {
-            free(palUart->TxBuffer);
+            platform_free(palUart->TxBuffer);
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
@@ -300,7 +300,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
         }
 
         // Check RS485 mode is not selected as currently not supported
-        if ((SerialMode)pThis[FIELD___mode].NumericByRef().s4 != SerialMode_Normal)
+        if ((SerialMode__)pThis[FIELD___mode].NumericByRef().s4 != SerialMode___Normal)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
         }
@@ -399,7 +399,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
         // dereference the data buffer from the argument
         CLR_RT_HeapBlock_Array *dataBuffer = stack.Arg1().DereferenceArray();
@@ -447,7 +447,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
 {
     NANOCLR_HEADER();
     {
-        NF_PAL_UART *palUart = NULL;
+        NF_PAL_UART__ *palUart = NULL;
 
         size_t length = 0;
 
@@ -594,7 +594,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
         // get how many bytes are requested to read
         count = stack.Arg2().NumericByRef().s4;
@@ -749,7 +749,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
 
         // set watch char
         palUart->WatchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
@@ -782,7 +782,7 @@ HRESULT Library_win_dev_serial_native_Windows_Devices_SerialCommunication_Serial
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        NF_PAL_UART *palUart = Uart_PAL[uartNum];
+        NF_PAL_UART__ *palUart = Uart_PAL[uartNum];
         read_count = palUart->RxBytesToRead;
 
         stack.SetResult_U4(read_count);

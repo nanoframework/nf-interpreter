@@ -24,8 +24,11 @@ endif()
 if(NF_WP_TRACE_NODATA)
     math(EXPR WP_TRACE_MASK "${WP_TRACE_MASK} + 8")
 endif()
+if(NF_WP_TRACE_VERBOSE)
+    math(EXPR WP_TRACE_MASK "${WP_TRACE_MASK} + 16")
+endif()
 if(NF_WP_TRACE_ALL)
-    math(EXPR WP_TRACE_MASK "8 + 4 + 2 + 1")
+    math(EXPR WP_TRACE_MASK "16 + 8 + 4 + 2 + 1")
 endif()
 
 message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'") # debug helper
@@ -93,7 +96,7 @@ macro(nf_add_lib_wireprotocol)
             ${NFAWP_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
 
         nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 
@@ -107,7 +110,7 @@ macro(nf_add_lib_wireprotocol)
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFAWP_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

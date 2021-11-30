@@ -8,9 +8,7 @@ $repoRootPattern = "<path-to-the-repo-root-mind-the-forward-slash>"
 $openOcdPattern = "<absolute-path-to-openocd-mind-the-forward-slashes>"
 $esp32OpenOcdPattern = "<absolute-path-to-esp32-openocd-mind-the-forward-slashes>"
 $buildFolderPattern = "<absolute-path-to-the-build-folder-mind-the-forward-slashes>"
-$esp32BootloaderFolderPattern = "<absolute-path-to-the-esp32-bootloader-folder-mind-the-forward-slashes>"
 $esp32IdfFolderPattern = "<absolute-path-to-the-IDF-folder-mind-the-forward-slashes>"
-$esp32LibsFolderPattern = "<absolute-path-to-the-esp32-libs-folder-mind-the-forward-slashes>"
 $hex2dfuPattern = "<absolute-path-to-hex2dfu-mind-the-forward-slashes>"
 $srecordPattern = "<absolute-path-to-srecord-folder-mind-the-forward-slashes>"
 
@@ -61,12 +59,6 @@ function Update-Paths {
     {
         $content = $content -replace $esp32OpenOcdPattern, $env:ESP32_OPENOCD_PATH.Replace('\', '/')
     }
-    
-    if($env:ESP32_LIBS_PATH)
-    {
-        $content = $content -replace $esp32LibsFolderPattern, $env:ESP32_LIBS_PATH.Replace('\', '/')
-        $content = $content -replace $esp32BootloaderFolderPattern, $env:ESP32_LIBS_PATH.Replace('\', '/')
-    }
 
     if($env:ESP32_IDF_PATH)
     {
@@ -79,7 +71,6 @@ function Update-Paths {
     }
 
     $content = $content -replace $repoRootPattern, $(Get-RepoPath).Replace('\', '/')
-    $content = $content -replace $buildFolderPattern, "$(Get-RepoPath)\build".Replace('\', '/')
 
     # save back to the file
     $content | Out-File -FilePath $filePath -Encoding utf8 -Force

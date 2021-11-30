@@ -184,20 +184,6 @@ macro(nf_add_platform_include_directories target)
         ${TARGET_TI_SimpleLink_NANOCLR_INCLUDE_DIRS}
 
     )
-
-    target_link_libraries(
-        ${NANOCLR_PROJECT_NAME}.elf
-    
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/display/lib/gcc/m4f/display.a
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/grlib/lib/gcc/m4f/grlib.a
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/drivers/lib/gcc/m4f/drivers_cc13x2.a
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/ti/dpl/lib/gcc/m4f/dpl_cc13x2.a
-        
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
-        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
-    )
     
 endmacro()
 
@@ -348,9 +334,41 @@ endmacro()
 # optional CLR_EXTRA_COMPILE_DEFINITIONS extra nanoCLR compile definitions to pass to nf_set_compile_definitions() 
 # optional BOOTER_EXTRA_LINKMAP_PROPERTIES extra nanoBooter link map properties to pass to nf_set_link_map() 
 # optional CLR_EXTRA_LINKMAP_PROPERTIES extra nanoCLR link map properties to pass to nf_set_link_map() 
+# optional BOOTER_EXTRA_LINK_FLAGS extra nanoBooter link flags to pass to nf_set_link_options() 
+# optional CLR_EXTRA_LINK_FLAGS extra nanoCLR link flags to pass to nf_set_link_options() 
 macro(nf_setup_target_build)
+
+    # add extra libraries for SimpleLink
+    set(CLR_EXTRA_LIBRARIES
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/display/lib/gcc/m4f/display.a
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/grlib/lib/gcc/m4f/grlib.a
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/drivers/lib/gcc/m4f/drivers_cc13x2.a
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/ti/dpl/lib/gcc/m4f/dpl_cc13x2.a
+        
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
+        ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a
+    )
+
+    # add these to the ARGN list
+    list(APPEND ARGN CLR_EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
 
     # OK to pass ARGN, to have it perform it's parsings and validation 
     nf_setup_target_build_common(${ARGN})
 
+endmacro()
+
+# macro to clear binary files related with nanoBooter from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanobooter)
+    nf_clear_common_output_files_nanobooter()
+    # other files specific to this platform should go here
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    nf_clear_common_output_files_nanoclr()
+    # other files specific to this platform should go here
 endmacro()

@@ -42,3 +42,8 @@ endif()
 
 # make var global
 set(TARGET_TI_SimpleLink_COMMON_SOURCES ${TARGET_TI_SimpleLink_COMMON_SOURCES} CACHE INTERNAL "make global")
+
+list(APPEND TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+
+# make var global
+set(TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS ${TARGET_TI_SimpleLink_COMMON_INCLUDE_DIRS} CACHE INTERNAL "make global")

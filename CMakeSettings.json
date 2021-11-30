@@ -37,7 +37,7 @@
         },
         {
           "name": "TOOLCHAIN_PREFIX",
-          "value": "C:/nftools/GNU_Tools_ARM_Embedded/9-2020-q2-update"
+          "value": "C:/nftools/GNU_Tools_ARM_Embedded/10.3-2021.10"
         },
         {
           "name": "TOOL_HEX2DFU_PREFIX",
@@ -247,18 +247,6 @@
           "value": "${env.ESP32_TOOLS}"
         },
         {
-          "name": "TOOLCHAIN_PREFIX:PATH",
-          "value": "${env.ESP32_TOOLS}"
-        },
-        {
-          "name": "ESP32_IDF_PATH:PATH",
-          "value": "${env.ESP32_IDF}"
-        },
-        {
-          "name": "ESP32_LIBS_PATH:PATH",
-          "value": "${env.ESP32_LIB}"
-        },
-        {
           "name": "CMAKE_SYSTEM_NAME:STRING",
           "value": "Generic"
         },
@@ -296,7 +284,7 @@
         },
         {
           "name": "RTOS:STRING", //"Selected Operating system
-          "value": "FREERTOS_ESP32"
+          "value": "ESP32"
         },
         {
           "name": "NF_BUILD_RTM:BOOL", // OFF-default-ON-to-enable-RTM-build
@@ -316,6 +304,10 @@
         },
         {
           "name": "NF_WP_TRACE_NODATA:BOOL", //OFF-default-ON-to-enable-trace-no-data-messages-wire-protocol
+          "value": "OFF"
+        },
+        {
+          "name": "NF_WP_TRACE_VERBOSE:BOOL", //OFF-default-ON-to-enable-trace-verbose-state-messages-wire-protocol
           "value": "OFF"
         },
         {
@@ -373,10 +365,6 @@
         // LIBRARIES
         {
           "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_System.IO.FileSystem:BOOL",  //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

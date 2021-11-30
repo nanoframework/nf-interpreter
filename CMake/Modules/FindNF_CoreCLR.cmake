@@ -75,7 +75,6 @@ set(NF_CoreCLR_SRCS
     TypeSystemLookup.cpp
     StringTableData.cpp
     TypeSystem.cpp
-    nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
     Various.cpp
 
@@ -133,16 +132,11 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
     
     # Core stubs
-    Hardware_stub.cpp
-    InterruptHandler_stub.cpp
-    NativeEventDispatcher_stub.cpp
     RPC_stub.cpp
     BinaryFormatter_stub.cpp
 
     # CLR stubs
     Debugger_stub.cpp
-    Diagnostics_stub.cpp
-    Messaging_stub.cpp
     
     # Helpers
     nanoprintf.c
@@ -163,6 +157,11 @@ set(NF_CoreCLR_SRCS
     COM_stubs.c
     GenericPort_stubs.c
 )
+
+# append CRC32, if not already included with Wire Protocol
+if(NOT WireProtocol_FOUND)
+    list(APPEND NF_CoreCLR_SRCS nanoSupport_CRC32.c)
+endif()
 
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)
@@ -279,7 +278,8 @@ macro(nf_add_lib_coreclr)
 
     add_library(
         ${LIB_NAME} STATIC 
-            ${NF_CoreCLR_SOURCES})   
+            ${NF_CoreCLR_SOURCES}
+            ${NF_Diagnostics_SOURCES})   
 
     target_include_directories(
         ${LIB_NAME} 
@@ -288,7 +288,7 @@ macro(nf_add_lib_coreclr)
             ${NFALC_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
 
         nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 
@@ -302,7 +302,7 @@ macro(nf_add_lib_coreclr)
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALC_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

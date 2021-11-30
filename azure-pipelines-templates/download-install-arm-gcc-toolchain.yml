@@ -4,9 +4,9 @@
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
-    displayName: Cache ARM GCC toolchain
+    displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: '9-2020-q2-update | gccUpdateKey'
+      key: 'gcc-10_3_2021_10 | gccUpdateKey'
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
       cacheHitVar: GCC_CACHE_RESTORED
@@ -16,7 +16,7 @@ steps:
     displayName: Downloading ARM GCC toolchain
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-arm-gcc-toolchain.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
         arguments: '-Version "$(GccArm_Version)"'
         failOnStderr: true
 

@@ -27,6 +27,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
     const char *workingPath;
     char *workingBuffer = NULL;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
+
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -44,9 +49,15 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         // SPIFFS drive workflow
 
+        // get SPIFFS drive index...
+        driveIndex = GetInternalDriveIndex(workingDrive);
+        //... and pointer to the SPIFFS instance
+        driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
         // get file name removing the drive letter
         workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-        // sanity check for successfull malloc
+
+        // sanity check for successful malloc
         if (workingBuffer == NULL)
         {
             // failed to allocate memory
@@ -54,7 +65,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
         }
         memcpy(workingBuffer, (workingPath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-        if (SPIFFS_remove(&fs, workingBuffer) < 0)
+        if (SPIFFS_remove(driveFs, workingBuffer) < 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
         }
@@ -97,6 +108,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
     char *workingBuffer = NULL;
     char *workingBuffer1 = NULL;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
+
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -117,11 +133,17 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         // SPIFFS drive workflow
 
+        // get SPIFFS drive index...
+        driveIndex = GetInternalDriveIndex(workingDrive);
+        //... and pointer to the SPIFFS instance
+        driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
         // get origin and desired file names removing the drive letter
         // need to malloc these
         workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
         workingBuffer1 = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-        // sanity check for successfull malloc
+
+        // sanity check for successful malloc
         if ((workingBuffer == NULL) || (workingBuffer1 == NULL))
         {
             // failed to allocate memory
@@ -130,9 +152,9 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
         memcpy(workingBuffer, (workingPath + 3), SPIFFS_OBJ_NAME_LEN - 3);
         memcpy(workingBuffer1, (desiredPath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-        if (SPIFFS_rename(&fs, workingBuffer, workingBuffer1) < 0)
+        if (SPIFFS_rename(driveFs, workingBuffer, workingBuffer1) < 0)
         {
-            switch (SPIFFS_errno(&fs))
+            switch (SPIFFS_errno(driveFs))
             {
                 case SPIFFS_ERR_NOT_FOUND:
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
@@ -193,6 +215,11 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::
     const char *filePath;
     const char *fileName;
 
+#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+    spiffs *driveFs = NULL;
+    int32_t driveIndex;
+#endif
+
     // get a pointer to the file path
     filePath = stack.Arg0().DereferenceString()->StringText();
 
@@ -208,10 +235,15 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::
 #if (USE_SPIFFS_FOR_STORAGE == TRUE)
         // SPIFFS drive workflow
 
+        // get SPIFFS drive index...
+        driveIndex = GetInternalDriveIndex(workingDrive);
+        //... and pointer to the SPIFFS instance
+        driveFs = hal_spiffs_get_fs_from_index(driveIndex);
+
         // get file name removing the drive letter
         // need to malloc this
         workingBuffer = (char *)platform_malloc(SPIFFS_OBJ_NAME_LEN);
-        // sanity check for successfull malloc
+        // sanity check for successful malloc
         if (workingBuffer == NULL)
         {
             // failed to allocate memory
@@ -219,24 +251,24 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::
         }
         memcpy(workingBuffer, (filePath + 3), SPIFFS_OBJ_NAME_LEN - 3);
 
-        spiffs_file file = SPIFFS_open(&fs, workingBuffer, SPIFFS_RDONLY, 0);
+        spiffs_file file = SPIFFS_open(driveFs, workingBuffer, SPIFFS_RDONLY, 0);
         if (file < 0)
         {
-            switch (SPIFFS_errno(&fs))
+            switch (SPIFFS_errno(driveFs))
             {
                 case SPIFFS_ERR_NOT_FOUND:
-                    SPIFFS_close(&fs, file);
+                    SPIFFS_close(driveFs, file);
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
                     break;
 
                 default:
-                    SPIFFS_close(&fs, file);
+                    SPIFFS_close(driveFs, file);
                     NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
                     break;
             }
         }
 
-        SPIFFS_close(&fs, file);
+        SPIFFS_close(driveFs, file);
 
         // compose return object
         // find <StorageFile> type, don't bother checking the result as it exists for sure

@@ -3,28 +3,26 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(esp32_idf)
+
 # native code directory
-set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Hardware.Esp32.Ble")
+set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Hardware.Esp32.Ble)
 
 
 # set include directories
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Core")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/CLR/Include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/HAL/Include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/src/PAL/Include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 
-# set include directories for Esp32 IDF
-set(NIMBLE_COMPONENT_PATH "${ESP32_IDF_PATH}/components/nimble")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/port/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/esp-hci/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/porting/nimble/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/porting/npl/freertos/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/util/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/services/gap/include")
-list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH}/nimble/nimble/host/services/gatt/include")
+# set include directories for ESP32 IDF
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/port/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/esp-hci/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/porting/nimble/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/porting/npl/freertos/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/util/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/services/gap/include)
+list(APPEND nanoFramework.Hardware.Esp32.Ble_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/bt/host/nimble/nimble/nimble/host/services/gatt/include)
 
 # source files
 set(nanoFramework.Hardware.Esp32.Ble_SRCS

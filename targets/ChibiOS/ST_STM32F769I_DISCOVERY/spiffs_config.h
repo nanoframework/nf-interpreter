@@ -195,12 +195,12 @@ typedef uint8_t u8_t;
 // define this to enter a mutex if you're running on a multithreaded system
 #ifndef SPIFFS_LOCK
 extern void hal_spiffs_lock();
-#define SPIFFS_LOCK(fs) hal_spiffs_lock();
+#define SPIFFS_LOCK(fs) hal_spiffs_lock(fs);
 #endif
 // define this to exit a mutex if you're running on a multithreaded system
 #ifndef SPIFFS_UNLOCK
 extern void hal_spiffs_unlock();
-#define SPIFFS_UNLOCK(fs) hal_spiffs_unlock();
+#define SPIFFS_UNLOCK(fs) hal_spiffs_unlock(fs);
 #endif
 
 // Enable if only one spiffs instance with constant configuration will exist

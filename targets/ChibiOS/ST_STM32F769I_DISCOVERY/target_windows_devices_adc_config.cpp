@@ -5,15 +5,15 @@
 
 #include "win_dev_adc_native_target.h"
 
-const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
-    
+const NF_PAL_ADC_PORT_PIN_CHANNEL__ AdcPortPinConfig__[] = {
+
     // ADC1
     {1, GPIOA, 6, ADC_CHANNEL_IN6},
     {1, GPIOA, 4, ADC_CHANNEL_IN4},
     {1, GPIOC, 2, ADC_CHANNEL_IN12},
-    {1, GPIOF, 10, ADC_CHANNEL_IN8},
 
     // ADC3
+    {3, GPIOF, 10, ADC_CHANNEL_IN8},
     {3, GPIOF, 8, ADC_CHANNEL_IN6},
 
     // these are the internal sources, available only at ADC1
@@ -22,4 +22,4 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
     {1, NULL, 0, ADC_CHANNEL_VBAT},
 };
 
-const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+const int AdcChannelCount__ = ARRAYSIZE(AdcPortPinConfig__);

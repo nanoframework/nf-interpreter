@@ -8,6 +8,10 @@
 
 #include <nanoHAL.h>
 
+#ifdef PLATFORM_ESP32
+#include <esp32_idf.h>
+#endif
+
 #include <sockets_lwip.h>
 
 #include "mbedtls/platform.h"

@@ -148,7 +148,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::
 
             validPin = CPU_GPIO_EnableInputPin(
                 pinNumber,
-                debounceTimeoutMilsec,
+                (uint32_t)debounceTimeoutMilsec,
                 callbacksRegistered ? Gpio_Interupt_ISR : NULL,
                 NULL,
                 GPIO_INT_EDGE_BOTH,
@@ -195,7 +195,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::NativeSetDebou
         // developer note:
         // the following call will FAIL if the pin hasn't been previously setup as input
         // that's OK because the debounce timeout will be eventually set when the pin is configured
-        CPU_GPIO_SetPinDebounce(pinNumber, debounceTimeoutMilsec);
+        CPU_GPIO_SetPinDebounce(pinNumber, (uint32_t)debounceTimeoutMilsec);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -273,7 +273,7 @@ HRESULT Library_win_dev_gpio_native_Windows_Devices_Gpio_GpioPin::ExtractDebounc
         CLR_INT64 *debounceValue = Library_corlib_native_System_TimeSpan::GetValuePtr(timeSpanValue);
         FAULT_ON_NULL(debounceValue);
 
-        value = *(CLR_UINT64 *)debounceValue / TIME_CONVERSION__TO_MILLISECONDS;
+        value = (CLR_UINT64)(*debounceValue / TIME_CONVERSION__TO_MILLISECONDS);
     }
     NANOCLR_NOCLEANUP();
 }

@@ -74,7 +74,7 @@ macro(nf_add_lib_debugger)
             ${NFALD_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
 
         nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 
@@ -88,7 +88,7 @@ macro(nf_add_lib_debugger)
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALD_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

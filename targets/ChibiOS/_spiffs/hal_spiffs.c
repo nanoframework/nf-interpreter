@@ -3,38 +3,28 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <hal.h>
-#include <spiffs.h>
-#include <spiffs_config.h>
-#include <target_spiffs.h>
-#include <nanoHAL_v2.h>
+#include "hal_spiffs.h"
 
-extern s32_t hal_spiffs_erase(u32_t addr, u32_t size);
-extern s32_t hal_spiffs_read(u32_t addr, u32_t size, u8_t *dst);
-extern s32_t hal_spiffs_write(u32_t addr, u32_t size, u8_t *src);
+mutex_t spiffs_mutex[SPIFFS_INSTANCES_COUNT];
 
-extern uint8_t target_spiffs_init();
-
-mutex_t spiffs_mutex;
-
-spiffs fs;
-spiffs_config spiffs_cfg;
+spiffs fs[SPIFFS_INSTANCES_COUNT];
+spiffs_config spiffs_cfg[SPIFFS_INSTANCES_COUNT];
 bool spiffsFileSystemReady;
 
 #if defined(__GNUC__)
-__attribute__((aligned (32)))
+__attribute__((aligned(32)))
 #endif
-uint8_t spiffs_work_buffer[SPIFFS_WORK_BUFFER_SIZE];
+uint8_t spiffs_work_buffer[SPIFFS_INSTANCES_COUNT][SPIFFS_WORK_BUFFER_SIZE];
 
 #if defined(__GNUC__)
-__attribute__((aligned (32)))
+__attribute__((aligned(32)))
 #endif
-uint8_t spiffs_fd_space[SPIFFS_FILE_DESCRIPTORS_SPACE];
+uint8_t spiffs_fd_space[SPIFFS_INSTANCES_COUNT][SPIFFS_FILE_DESCRIPTORS_SPACE];
 
 #if defined(__GNUC__)
-__attribute__((aligned (32)))
+__attribute__((aligned(32)))
 #endif
-uint8_t spiffs_cache[SPIFFS_CACHE_SIZE];
+uint8_t spiffs_cache[SPIFFS_INSTANCES_COUNT][SPIFFS_CACHE_SIZE];
 
 // initialization of SPIFFS: configurations, data structures, drivers and lock
 uint8_t hal_spiffs_config()
@@ -44,85 +34,99 @@ uint8_t hal_spiffs_config()
     // low level hardware and drivers initializations
     target_spiffs_init();
 
-    osalMutexObjectInit(&spiffs_mutex);
-
-    // setup SPIFFS configurations
-    spiffs_cfg.phys_size = SPIFFS_TOTAL_SIZE;
-    spiffs_cfg.phys_addr = 0;
-    spiffs_cfg.phys_erase_block = SPIFFS_ERASE_BLOCK_SIZE;
-    spiffs_cfg.log_block_size = SPIFFS_LOGICAL_BLOCK_SIZE;
-    spiffs_cfg.log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
-
-    // setup pointers to HAL functions
-    spiffs_cfg.hal_erase_f = hal_spiffs_erase;
-    spiffs_cfg.hal_read_f = hal_spiffs_read;
-    spiffs_cfg.hal_write_f = hal_spiffs_write;
-
-    mountResult =  SPIFFS_mount(&fs,
-                                &spiffs_cfg,
-                                spiffs_work_buffer,
-                                spiffs_fd_space,
-                                SPIFFS_FILE_DESCRIPTORS_SPACE,
-                                spiffs_cache,
-                                SPIFFS_CACHE_SIZE,
-                                0);
-
-    if( mountResult != SPIFFS_OK &&
-        SPIFFS_errno(&fs) == SPIFFS_ERR_NOT_A_FS)
+    for (int i = 0; i < SPIFFS_INSTANCES_COUNT; i++)
     {
-        // looks like SPIFFS is not formated
-        
-        // need to unmount 1st
-        SPIFFS_unmount(&fs);
+        // init mutexes
+        osalMutexObjectInit(&spiffs_mutex[i]);
 
-        // now format
-        if (SPIFFS_format(&fs) != SPIFFS_OK)
+        // setup SPIFFS configurations
+
+        spiffs_cfg[i].phys_size = hal_spiffs_get_totalsize(i);
+        spiffs_cfg[i].phys_addr = 0;
+        spiffs_cfg[i].phys_erase_block = hal_spiffs_get_eraseblocksize(i);
+        spiffs_cfg[i].log_block_size = hal_spiffs_get_logicalblocksize(i);
+        spiffs_cfg[i].log_page_size = SPIFFS_LOGICAL_PAGE_SIZE;
+
+        // setup pointers to HAL functions
+        if (i == 0)
         {
-            return -1;
+            spiffs_cfg[0].hal_erase_f = hal_spiffs_erase_0;
+            spiffs_cfg[0].hal_read_f = hal_spiffs_read_0;
+            spiffs_cfg[0].hal_write_f = hal_spiffs_write_0;
+        }
+        else if (i == 1)
+        {
+            spiffs_cfg[1].hal_erase_f = hal_spiffs_erase_1;
+            spiffs_cfg[1].hal_read_f = hal_spiffs_read_1;
+            spiffs_cfg[1].hal_write_f = hal_spiffs_write_1;
         }
 
-        // finally try mounting it again
-        mountResult =  SPIFFS_mount(&fs,
-                                    &spiffs_cfg,
-                                    spiffs_work_buffer,
-                                    spiffs_fd_space,
-                                    SPIFFS_FILE_DESCRIPTORS_SPACE,
-                                    spiffs_cache,
-                                    SPIFFS_CACHE_SIZE,
-                                    0);      
+        mountResult = SPIFFS_mount(
+            &fs[i],
+            &spiffs_cfg[i],
+            spiffs_work_buffer[i],
+            spiffs_fd_space[i],
+            SPIFFS_FILE_DESCRIPTORS_SPACE,
+            spiffs_cache[i],
+            SPIFFS_CACHE_SIZE,
+            0);
+
+        if (mountResult != SPIFFS_OK && SPIFFS_errno(&fs[i]) == SPIFFS_ERR_NOT_A_FS)
+        {
+            // looks like SPIFFS is not formated
+
+            // need to unmount 1st
+            SPIFFS_unmount(&fs[i]);
+
+            // now format
+            if (SPIFFS_format(&fs[i]) != SPIFFS_OK)
+            {
+                return -1;
+            }
+
+            // finally try mounting it again
+            mountResult = SPIFFS_mount(
+                &fs[i],
+                &spiffs_cfg[i],
+                spiffs_work_buffer[i],
+                spiffs_fd_space[i],
+                SPIFFS_FILE_DESCRIPTORS_SPACE,
+                spiffs_cache,
+                SPIFFS_CACHE_SIZE,
+                0);
+        }
+
+#if !defined(BUILD_RTM)
+
+        ASSERT(mountResult == SPIFFS_OK);
+
+#endif
     }
-
-  #if !defined(BUILD_RTM)
-
-    ASSERT(mountResult == SPIFFS_OK)
-
-  #endif
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // // code block to assist testing SPIFFS
-    // char writeBuf[] = {"Hello! if you get this message, congratulations, that's because SPIFFS is working on your device!!"};
-    // char readBuf[sizeof(writeBuf)];
-    
+    // char writeBuf[] = {"Hello! if you get this message, congratulations, that's because SPIFFS is working on your
+    // device!!"}; char readBuf[sizeof(writeBuf)];
+
     // spiffs_file fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_CREAT | SPIFFS_TRUNC | SPIFFS_RDWR, 0);
     // if (SPIFFS_write(&fs, fd, writeBuf, sizeof(writeBuf)) < 0)
     // {
     //     return -1;
     // }
-    
-    // SPIFFS_close(&fs, fd);    
+
+    // SPIFFS_close(&fs, fd);
     // fd = SPIFFS_open(&fs, "file1.txt", SPIFFS_RDWR, 0);
     // if (SPIFFS_read(&fs, fd, readBuf, sizeof(readBuf)) < 0)
     // {
     //     return -1;
     // }
-    
+
     // SPIFFS_close(&fs, fd);
-    
+
     // uint32_t total = 0;
     // uint32_t used_space = 0;
     // SPIFFS_info(&fs, &total, &used_space);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     // mirror SPIFFS mount result into global flag
     spiffsFileSystemReady = (mountResult == SPIFFS_OK);
@@ -130,12 +134,105 @@ uint8_t hal_spiffs_config()
     return mountResult;
 }
 
-void hal_spiffs_lock()
+void hal_spiffs_lock(spiffs *fsInstance)
 {
-    osalMutexLock(&spiffs_mutex);
+    osalMutexLock(&spiffs_mutex[hal_spiffs_get_fs_index(fsInstance)]);
 }
 
-void hal_spiffs_unlock()
+void hal_spiffs_unlock(spiffs *fsInstance)
 {
-    osalMutexUnlock(&spiffs_mutex);
+    osalMutexUnlock(&spiffs_mutex[hal_spiffs_get_fs_index(fsInstance)]);
+}
+
+uint32_t hal_spiffs_get_totalsize(int spiffsIndex)
+{
+    switch (spiffsIndex)
+    {
+        case 0:
+            return SPIFFS0_TOTAL_SIZE;
+            break;
+
+#if SPIFFS_INSTANCES_COUNT > 0
+        case 1:
+            return SPIFFS1_TOTAL_SIZE;
+            break;
+#endif
+
+        default:
+            return 0;
+    }
+}
+
+uint32_t hal_spiffs_get_eraseblocksize(int spiffsIndex)
+{
+    switch (spiffsIndex)
+    {
+        case 0:
+            return SPIFFS0_ERASE_BLOCK_SIZE;
+            break;
+
+#if SPIFFS_INSTANCES_COUNT > 0
+        case 1:
+            return SPIFFS1_ERASE_BLOCK_SIZE;
+            break;
+#endif
+
+        default:
+            return 0;
+    }
+}
+
+uint32_t hal_spiffs_get_logicalblocksize(int spiffsIndex)
+{
+    switch (spiffsIndex)
+    {
+        case 0:
+            return SPIFFS0_LOGICAL_BLOCK_SIZE;
+            break;
+
+#if SPIFFS_INSTANCES_COUNT > 0
+        case 1:
+            return SPIFFS0_LOGICAL_BLOCK_SIZE;
+            break;
+#endif
+
+        default:
+            return 0;
+    }
+}
+
+int32_t hal_spiffs_get_fs_index(spiffs *fsInstance)
+{
+    if (fsInstance == &fs[0])
+    {
+        return 0;
+    }
+#if SPIFFS_INSTANCES_COUNT > 0
+    if (fsInstance == &fs[1])
+    {
+        return 1;
+    }
+#endif
+    else
+    {
+        HAL_AssertEx();
+        return -1;
+    }
+}
+
+spiffs *hal_spiffs_get_fs_from_index(int32_t index)
+{
+    return &fs[index];
+}
+
+int32_t hal_spiffs_get_instances_count()
+{
+    // there is at least one
+    int32_t count = 1;
+
+#if SPIFFS_INSTANCES_COUNT > 0
+    count++;
+#endif
+
+    return count;
 }

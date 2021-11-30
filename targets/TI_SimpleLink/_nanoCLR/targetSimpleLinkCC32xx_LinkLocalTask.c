@@ -570,7 +570,7 @@ void SimpleLinkNetAppRequestEventHandler(SlNetAppRequest_t *pNetAppRequest, SlNe
         return;
     }
 
-    netAppRequest = (SlNetAppRequest_t *)malloc(sizeof(SlNetAppRequest_t));
+    netAppRequest = (SlNetAppRequest_t *)platform_malloc(sizeof(SlNetAppRequest_t));
     if (NULL == netAppRequest)
     {
         NetAppRequestErrorResponse(pNetAppResponse);
@@ -587,11 +587,11 @@ void SimpleLinkNetAppRequestEventHandler(SlNetAppRequest_t *pNetAppRequest, SlNe
     /* Copy Metadata */
     if (pNetAppRequest->requestData.MetadataLen > 0)
     {
-        netAppRequest->requestData.pMetadata = (uint8_t *)malloc(pNetAppRequest->requestData.MetadataLen);
+        netAppRequest->requestData.pMetadata = (uint8_t *)platform_malloc(pNetAppRequest->requestData.MetadataLen);
         if (NULL == netAppRequest->requestData.pMetadata)
         {
             NetAppRequestErrorResponse(pNetAppResponse);
-            free(netAppRequest);
+            platform_free(netAppRequest);
             return;
         }
         sl_Memcpy(
@@ -608,16 +608,16 @@ void SimpleLinkNetAppRequestEventHandler(SlNetAppRequest_t *pNetAppRequest, SlNe
     /* Copy the payload */
     if (pNetAppRequest->requestData.PayloadLen > 0)
     {
-        netAppRequest->requestData.pPayload = (uint8_t *)malloc(pNetAppRequest->requestData.PayloadLen);
+        netAppRequest->requestData.pPayload = (uint8_t *)platform_malloc(pNetAppRequest->requestData.PayloadLen);
         if (NULL == netAppRequest->requestData.pPayload)
         {
             NetAppRequestErrorResponse(pNetAppResponse);
 
             if (netAppRequest->requestData.pMetadata != NULL)
             {
-                free(netAppRequest->requestData.pMetadata);
+                platform_free(netAppRequest->requestData.pMetadata);
             }
-            free(netAppRequest);
+            platform_free(netAppRequest);
             return;
         }
         sl_Memcpy(
@@ -2604,7 +2604,7 @@ void *linkLocalTask(void *pvParameters)
     // }
 
     /* Setup mutex operations for sensors reading */
-    sensorLockObj = malloc(sizeof(pthread_mutex_t));
+    sensorLockObj = platform_malloc(sizeof(pthread_mutex_t));
     pthread_mutex_init(sensorLockObj, (pthread_mutexattr_t *)NULL);
 
     /* initializes mailbox for http messages */
@@ -2685,13 +2685,13 @@ void *linkLocalTask(void *pvParameters)
 
         if (netAppRequest->requestData.MetadataLen > 0)
         {
-            free(netAppRequest->requestData.pMetadata);
+            platform_free(netAppRequest->requestData.pMetadata);
         }
         if (netAppRequest->requestData.PayloadLen > 0)
         {
-            free(netAppRequest->requestData.pPayload);
+            platform_free(netAppRequest->requestData.pPayload);
         }
 
-        free(netAppRequest);
+        platform_free(netAppRequest);
     }
 }

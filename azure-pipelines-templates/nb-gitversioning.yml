@@ -1,6 +1,9 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  repoDirectory: '$(Build.SourcesDirectory)'
+
 steps:
   - task: DotNetCoreCLI@2  
     condition: succeeded()
@@ -8,11 +11,12 @@ steps:
     inputs:
       command: custom
       custom: tool
-      arguments: install --tool-path . nbgv
+      arguments: install --tool-path ${{ parameters.repoDirectory }} nbgv
 
   - script: nbgv cloud -a -c
-    condition: succeeded()
     displayName: Set build number
+    condition: succeeded()
+    workingDirectory: ${{ parameters.repoDirectory }}
 
   # Force version number for PRs
   - task: PowerShell@2

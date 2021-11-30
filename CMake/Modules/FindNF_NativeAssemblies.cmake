@@ -20,12 +20,14 @@ option(API_System.IO.FileSystem                 "option for System.IO.FileSystem
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
 option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
+option(API_System.Device.Adc                    "option for System.Device.Adc API")
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
 option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
 option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
 option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
+option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
@@ -280,6 +282,12 @@ if(API_Windows.Devices.Adc)
     PerformSettingsForApiEntry("Windows.Devices.Adc")
 endif()
 
+# System.Device.Adc
+if(API_System.Device.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Adc")
+endif()
+
 # System.Device.Dac
 if(API_System.Device.Dac)
     ##### API name here (doted name)
@@ -314,6 +322,12 @@ endif()
 if(API_Windows.Devices.Pwm)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Devices.Pwm")
+endif()
+
+# System.Device.Pwm
+if(API_System.Device.Pwm)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.Pwm")
 endif()
 
 # Windows.Devices.SerialCommunication
@@ -425,21 +439,24 @@ macro(nf_add_lib_native_assemblies)
             ${NFALNA_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
-
-        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-
+    if(RTOS_ESP32_CHECK)
         # this is the only one different
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DPLATFORM_ESP32
-            ${NFALNA_EXTRA_COMPILER_DEFINITIONS}
-        )
+
+        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        nf_set_compile_definitions(
+            TARGET ${LIB_NAME} 
+            EXTRA_COMPILE_DEFINITIONS
+                -DPLATFORM_ESP32
+                ${NFALNA_EXTRA_COMPILE_DEFINITIONS} 
+            BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        nf_set_link_options(TARGET ${LIB_NAME})
 
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALNA_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_linker_options(TARGET ${LIB_NAME})
+        nf_set_link_options(TARGET ${LIB_NAME})
     endif()
 
     # add alias

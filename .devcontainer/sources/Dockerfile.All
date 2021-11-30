@@ -6,7 +6,7 @@ RUN apt-get update \
     bzip2 \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
     && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
@@ -16,27 +16,6 @@ ARG CMAKE_SCRIPT=https://cmake.org/files/v3.19/cmake-3.19.0-Linux-x86_64.sh
 RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
-
-ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.5.zip
-RUN curl -o /tmp/dc-downloads/esp-idf.zip $IDF_URI \
-    && unzip -d /tmp/dc-extracted/esp-idf /tmp/dc-downloads/esp-idf.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5/IDF_libs-v3.3.5.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_BLE/IDF_libs-v3.3.5_BLE.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs-ble.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs_BLE /tmp/dc-downloads/esp-idf-libs-ble.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_V3/IDF_libs-v3.3.5_V3.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs-v3.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs_V3 /tmp/dc-downloads/esp-idf-libs-v3.zip
-
-ARG XTENSA_URI=https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-97-gc752ad5-5.2.0.tar.gz
-RUN  mkdir -p /tmp/dc-extracted/xtensa \
-    && curl -o /tmp/dc-downloads/xtensa.tar.gz $XTENSA_URI \
-    && tar -xzf /tmp/dc-downloads/xtensa.tar.gz -C /tmp/dc-extracted/xtensa --strip-components 1
 
 # This is TI XDC tools for linux. Cheack all versions here: http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
 ARG TI_TOOL_URL=http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
@@ -66,11 +45,11 @@ RUN apt-get update \
     srecord \
     python3 \
     python3-pip \
-    nodejs
+    nodejs \
+    libffi-dev
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
-    && mkdir -p /usr/local/bin/xtensa \
     && mkdir -p /usr/local/bin/titools
 
 # Clone repos for STM32 including AzureRTOS
@@ -87,8 +66,16 @@ RUN git clone --branch mbedtls-2.26.0 https://github.com/ARMmbed/mbedtls.git --d
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5 \
-    && git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git --depth 1 ./sources/lwip \
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+
+# The certificate of this one is not prolely propagated in the base image, ignoring the verification of this clone
+ENV GIT_SSL_NO_VERIFY=1
+RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git --depth 1 ./sources/lwip
+ENV GIT_SSL_NO_VERIFY=0
+
+# Clone ESP-IDF
+RUN git clone --branch v4.3.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
     # you can't use the nanoFramework repository as it's Windows only
@@ -100,11 +87,6 @@ RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
-COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_BLE /sources/esp-idf-libs_BLE
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_V3 /sources/esp-idf-libs_V3
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
-COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/local/bin/titools
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
@@ -117,6 +99,12 @@ RUN mkdir -p /usr/local/bin/hex2dfu \
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
     && pip3 install pyserial
+
+# Install ESP-IDF
+ENV IDF_PATH=/sources/esp-idf
+RUN python -m pip install -r $IDF_PATH/requirements.txt
+RUN $IDF_PATH/install.sh
+ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r1-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r1-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
