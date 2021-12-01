@@ -17,7 +17,7 @@ void esp32_ble_start_advertise(ble_context *context);
 uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
 EventGroupHandle_t ble_event_waitgroup;
-
+bool ble_initialized = false;
 //
 // Look up Attr_handle in characteristicsDefs table to find our characteristicsId
 // return 0xffff if not found otherwise characteristicsId
@@ -295,17 +295,26 @@ void device_ble_dispose()
     }
 
     vEventGroupDelete(ble_event_waitgroup);
+
+    ble_initialized = false;
 }
 
-void device_ble_init()
+bool device_ble_init()
 {
+    // If already initialized then dispose first
+    // This can happen when you start debugger
+    if (ble_initialized)
+    {
+        device_ble_dispose();
+    }
+
     ble_event_waitgroup = xEventGroupCreate();
 
     //    ESP_ERROR_CHECK(esp_nimble_hci_and_controller_init());
     if (esp_nimble_hci_and_controller_init() != ESP_OK)
     {
         device_ble_dispose();
-        ESP_ERROR_CHECK(esp_nimble_hci_and_controller_init());
+        return false;
     }
 
     nimble_port_init();
@@ -313,6 +322,10 @@ void device_ble_init()
     // Initialize the NimBLE host configuration
     ble_hs_cfg.sync_cb = esp32_ble_on_sync;
     ble_hs_cfg.reset_cb = esp32_ble_on_reset;
+
+    ble_initialized = true;
+
+    return true;
 }
 
 int device_ble_start(ble_context *con)
@@ -401,14 +414,17 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
 
     //    debug_printf("xEventGroupWaitBits\n");
 
-    // Wait for 500ms for event to be handled in managed code
-    uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(500 / portTICK_PERIOD_MS));
+    // Wait for 1 second for event to be handled in managed code otherwise fail request
+    uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(1000 / portTICK_PERIOD_MS));
     //    debug_printf("xEventGroupWaitBits exit %d\n", uxBits);
     if (uxBits & 1)
     {
         // Event handled in managed code
         return ble_event_data.result;
     }
+
+    // Reset eventid so managed code callback doesn't try to do anything
+    ble_event_data.eventId = -1;
 
     // Event not handled in manged code, timeout
     // Return bluetooth error BLE_ATT_ERR_UNLIKELY

@@ -6,7 +6,7 @@
 
 #include "sys_dev_ble_native.h"
 
-extern void device_ble_init();
+extern bool device_ble_init();
 extern void device_ble_dispose();
 extern int device_ble_start(ble_context *context);
 extern int device_ble_callback(
@@ -466,6 +466,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
+        bool result;
+
         CLR_RT_HeapBlock *pThis = stack.This(); // ptr to GattServiceProvider
         FAULT_ON_NULL(pThis);
 
@@ -490,15 +492,17 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 
         ParseAndBuildNimbleDefinition(blecontext, pGattLocalService);
 
-        device_ble_init();
+        result = device_ble_init();
+        if (result)
+        {
+            // debug_printf("device_ble_init complete\n");
 
-        //        debug_printf("device_ble_init complete\n");
+            device_ble_start(&blecontext);
 
-        device_ble_start(&blecontext);
+            // debug_printf("device_ble_start complete\n");
+        }
 
-        //        debug_printf("device_ble_start complete\n");
-
-        stack.SetResult_Boolean(true);
+        stack.SetResult_Boolean(result);
     }
     NANOCLR_NOCLEANUP();
 }
