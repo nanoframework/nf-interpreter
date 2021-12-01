@@ -265,7 +265,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -518,7 +518,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('ESP32_1_7_3_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -597,7 +597,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('TI_1_7_3_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
