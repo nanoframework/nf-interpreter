@@ -181,6 +181,7 @@ jobs:
     matrix:
       NETDUINO3_WIFI:
         TargetBoard: NETDUINO3_WIFI
+        TargetSeries: 'stm32f4xx'
         BuildOptions: >-
           -DTARGET_SERIES=STM32F4xx
           -DRTOS=ChibiOS
@@ -207,6 +208,7 @@ jobs:
         NeedsSRECORD: false
       ORGPAL_PALTHREE:
         TargetBoard: ORGPAL_PALTHREE
+        TargetSeries: 'stm32f7xx'
         BuildOptions: >-
           -DTARGET_SERIES=STM32F7xx
           -DRTOS=ChibiOS
@@ -239,6 +241,7 @@ jobs:
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
+        TargetSeries: 'stm32f0xx'
         BuildOptions: >-
           -DTARGET_SERIES=STM32F0xx
           -DRTOS=ChibiOS
@@ -262,9 +265,10 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'stm32'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -301,6 +305,7 @@ jobs:
     matrix:
       ESP32_REV0:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -335,6 +340,7 @@ jobs:
         PackageName: ESP32_REV0
       ESP32_PSRAM_REV3:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -369,6 +375,7 @@ jobs:
         PackageName: ESP32_PSRAM_REV3
       ESP32_PSRAM_XTAL26_REV0:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -404,6 +411,7 @@ jobs:
         PackageName: ESP32_PSRAM_XTAL26_REV0
       ESP32_REV3:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -438,6 +446,7 @@ jobs:
         PackageName: ESP32_REV3
       ESP32_PICO:
         TargetBoard: ESP32
+        TargetSeries: 'esp32'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
@@ -470,6 +479,7 @@ jobs:
         PackageName: ESP32_PICO
       KALUGA_1:
         TargetBoard: ESP32_S2
+        TargetSeries: 'esp32_s2'
         BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2
           -DRTOS=ESP32
@@ -508,9 +518,10 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('ESP32_1_7_3_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+    TargetPlatform: 'esp32'
 
   steps:
   - checkout: self
@@ -563,6 +574,7 @@ jobs:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_868
+        TargetSeries: 'cc13x2_26x2'
         BuildOptions: >-
           -DTARGET_SERIES=CC13x2_26x2
           -DRTOS=TI_SimpleLink
@@ -585,9 +597,10 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_versioncounter_1_7_1', 1000)]
+    REVISION: $[counter('TI_1_7_3_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'ti_simplelink'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
