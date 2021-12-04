@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 // from the original source code file
 // Redistribution and use in source and binary forms, with or without modification, 
 // are permitted provided that the following conditions are met:
@@ -31,8 +33,6 @@
 // 
 // Author: Adam Dunkels <adam@sics.se>
 // Improved by Marc Boucher <marc@mbsi.ca> and David Haas <dhaas@alum.rpi.edu>
-
-// clang-format off
 
 #include <nanoHAL_Network.h>
 #include "lwip/opt.h"
