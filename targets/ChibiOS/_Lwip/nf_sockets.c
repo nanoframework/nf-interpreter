@@ -1109,6 +1109,7 @@ int lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
     {
         LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) operation in progress\n", s));
         sock_set_errno(sock, err_to_errno(err));
+        done_socket(sock);
         return -1;
     }
     // [END_NF_CHANGE]
@@ -4904,6 +4905,7 @@ static void lwip_socket_drop_registered_mld6_memberships(int s)
 uint32_t lwip_socket_get_err(int s)
 {
     struct lwip_sock *sock = get_socket(s);
+    done_socket(sock);
     return sock->err;
 }
 // [END_NF_CHANGE]

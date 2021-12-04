@@ -689,17 +689,20 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
   {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) operation in progress\n", s));
     sock_set_errno(sock, err_to_errno(err));
+    done_socket(sock);
     return -1;
   }
 
   if (err != ERR_OK) {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) failed, err=%d\n", s, err));
     sock_set_errno(sock, err_to_errno(err));
+    done_socket(sock);
     return -1;
   }
 
   LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) succeeded\n", s));
   sock_set_errno(sock, 0);
+  done_socket(sock);
   return 0;
 }
 
@@ -2851,6 +2854,7 @@ lwip_socket_drop_registered_memberships(int s)
 uint32_t lwip_socket_get_err(int s)
 {
   struct lwip_sock *sock = get_socket(s);
+  done_socket(sock);
   return sock->err;
 } 
 
