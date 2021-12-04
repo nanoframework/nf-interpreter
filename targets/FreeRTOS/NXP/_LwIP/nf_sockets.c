@@ -32,6 +32,7 @@
 // Author: Adam Dunkels <adam@sics.se>
 // Improved by Marc Boucher <marc@mbsi.ca> and David Haas <dhaas@alum.rpi.edu>
 
+// clang-format off
 
 #include <nanoHAL_Network.h>
 #include "lwip/opt.h"
@@ -2855,3 +2856,5 @@ uint32_t lwip_socket_get_err(int s)
 } 
 
 #endif /* LWIP_SOCKET */
+
+// clang-format on
