@@ -85,9 +85,8 @@ struct lwip_sock
 #endif
 
 #if ESP_LWIP_LOCK
-  sys_mutex_t lock;
+    sys_mutex_t lock;
 #endif
-
 };
 
 #ifndef set_errno
