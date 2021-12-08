@@ -146,7 +146,7 @@ set(CHIBIOS_HAL_SRCS
     hal_pal_lld.c
     hal_i2c_lld.c
     hal_rtc_lld.c
-    hal_spi_lld.c
+    hal_spi_v2_lld.c
     hal_st_lld.c
     hal_gpt_lld.c
     hal_icu_lld.c
