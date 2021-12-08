@@ -153,7 +153,7 @@ set(CHIBIOS_HAL_SRCS
     hal_rtc_lld.c
 
     hal_i2s_lld.c
-    hal_spi_lld.c
+    hal_spi_v2_lld.c
 
     hal_st_lld.c
     hal_gpt_lld.c

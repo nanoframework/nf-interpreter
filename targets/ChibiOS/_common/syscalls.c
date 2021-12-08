@@ -47,7 +47,7 @@ extern void _exit(int status) //TODO?: this has been added in chibios
 	for (;;);
 }
 
-extern void _kill(int pid, int sig) //TODO?: this has been added and renamed (_kill_r) in chibios?!
+extern void _kill(int pid, int sig) //TODO?: this has been added to chibios?!
 {
 	(void) pid;
 	(void) sig;
