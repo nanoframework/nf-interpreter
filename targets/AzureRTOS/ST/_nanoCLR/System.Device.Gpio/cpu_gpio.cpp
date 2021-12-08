@@ -132,10 +132,7 @@ void GpioEventCallback(void *arg)
 
                 TX_RESTORE
 
-                pGpio->isrPtr(
-                    pGpio->pinNumber,
-                    palReadLine(ioLine),
-                    pGpio->param);
+                pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine), pGpio->param);
 
                 TX_DISABLE
             }
@@ -315,7 +312,7 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 
 bool CPU_GPIO_EnableInputPin(
     GPIO_PIN pinNumber,
-    CLR_UINT64 debounceTimeMilliseconds,
+    uint32_t debounceTimeMilliseconds,
     GPIO_INTERRUPT_SERVICE_ROUTINE pinISR,
     void *isrParam,
     GPIO_INT_EDGE intEdge,
@@ -505,15 +502,13 @@ uint32_t CPU_GPIO_GetPinDebounce(GPIO_PIN pinNumber)
     return 0;
 }
 
-bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, CLR_UINT64 debounceTimeMilliseconds)
+bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMilliseconds)
 {
     gpio_input_state *ptr = GetInputState(pinNumber);
-
     if (ptr)
     {
-        ptr->debounceMs = (uint32_t)(debounceTimeMilliseconds);
+        ptr->debounceMs = debounceTimeMilliseconds;
         return true;
     }
-
     return false;
 }
