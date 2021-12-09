@@ -6,28 +6,28 @@ steps:
     condition: eq(variables['Build.Reason'], 'PullRequest')
     displayName: Cache LLVM
     inputs:
-      key: 'llvm_12_0_0_0 | llvmUpdateKey'
+      key: 'llvm_13_0_0_0 | llvmUpdateKey'
       restoreKeys: llvmUpdateKey
       path: $(Agent.TempDirectory)\llvm
       cacheHitVar: LLVM_CACHE_RESTORED
 
   - task: PowerShell@2
-    displayName: Downloading LLVM 12.0
+    displayName: Downloading LLVM
     condition: and(eq(variables['Build.Reason'], 'PullRequest'), ne(variables.LLVM_CACHE_RESTORED, 'true'))
     inputs:
         targetType: 'inline'
         script: |
-          $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/LLVM-12.0.0-win64.exe"
-          $output = "$(Agent.TempDirectory)\LLVM-12.0.0-win64.exe"
+          $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/LLVM-13.0.0-win64.exe"
+          $output = "$(Agent.TempDirectory)\LLVM-13.0.0-win64.exe"
           (New-Object Net.WebClient).DownloadFile($url, $output)
         errorActionPreference: 'stop'
         failOnStderr: 'true'
 
   - task: ExtractFiles@1
-    displayName: Install LLVM 12
+    displayName: Install LLVM
     condition: and(eq(variables['Build.Reason'], 'PullRequest'), ne(variables.LLVM_CACHE_RESTORED, 'true'))
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-12.0.0-win64.exe' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-13.0.0-win64.exe' 
       destinationFolder: '$(Agent.TempDirectory)\llvm'
   
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin"
