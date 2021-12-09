@@ -25,7 +25,7 @@ static const char *TAG = "Memory";
 
 // You can't go much bigger than this when allocating in internal memory to
 // get memory in one continuous lump.
-#if defined(HAL_USE_BLE)
+#if (HAL_USE_BLE == TRUE)
 #define INTERNAL_MEMORY_SIZE (54 * 1024) // Reduce Managed heap if using BLE without spiram
 #else
 #define INTERNAL_MEMORY_SIZE (84 * 1024)
