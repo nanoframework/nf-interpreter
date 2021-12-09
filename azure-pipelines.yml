@@ -782,7 +782,7 @@ jobs:
       ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
       or(
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
       )
     )
 
