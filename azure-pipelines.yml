@@ -110,7 +110,8 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
+          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
@@ -162,6 +163,14 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
               Write-host "Building TI SimpleLink targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+          {
+              # files at AzureRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+              Write-host "Building Azure RTOS targets"
           }
 
           if( ($files.where{$_.Contains('targets/win32')}).Count -gt 0)
@@ -767,7 +776,15 @@ jobs:
 #################
 # Azure RTOS
 - job: Build_Azure_RTOS_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -780,13 +797,38 @@ jobs:
     matrix:
       ST_B_L475E_IOT01A:
         TargetBoard: ST_B_L475E_IOT01A
-        BuildOptions: -DTARGET_SERIES=STM32L4xx -DRTOS=AzureRTOS -DCHIBIOS_HAL_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=OFF -DAPI_System.Math=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_System.Device.Gpio=ON -DAPI_System.Net=OFF -DAPI_Windows.Storage=OFF -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_nanoFramework.ResourceManager=OFF -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        TargetSeries: 'stm32l4xx'
+        BuildOptions: >-
+          -DTARGET_SERIES=STM32L4xx
+          -DRTOS=AzureRTOS
+          -DCHIBIOS_HAL_REQUIRED=ON
+          -DSUPPORT_ANY_BASE_CONVERSION=ON
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_SDCARD=OFF
+          -DAPI_System.Math=OFF
+          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Net=OFF
+          -DAPI_Windows.Storage=OFF
+          -DAPI_System.IO.Ports=ON
+          -DAPI_Windows.Devices.SerialCommunication=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_Windows.Devices.I2c=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_nanoFramework.ResourceManager=OFF
+          -DAPI_nanoFramework.System.Collections=ON
+          -DAPI_nanoFramework.System.Text=ON
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
 
   variables:
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'azure_rtos'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
