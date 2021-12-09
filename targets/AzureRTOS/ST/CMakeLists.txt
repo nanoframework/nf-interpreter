@@ -84,6 +84,50 @@ endif()
 FetchContent_GetProperties(chibios)
 FetchContent_Populate(chibios)
 
+if(CHIBIOS_CONTRIB_REQUIRED)
+
+    # check if CHIBIOS-Contrib_SOURCE was specified or if it's empty (default is empty)
+    set(NO_CHIBIOS_CONTRIB_SOURCE TRUE)
+    if(CHIBIOS_CONTRIB_SOURCE)
+        if(NOT ${CHIBIOS_CONTRIB_SOURCE} STREQUAL "")
+            set(NO_CHIBIOS_CONTRIB_SOURCE FALSE)
+        endif()
+    endif()
+
+    if(NO_CHIBIOS_CONTRIB_SOURCE)
+        # no CHIBIOS_CONTRIB source specified, download it from it's repo
+
+        FetchContent_Declare(
+            chibios-contrib
+            GIT_REPOSITORY https://github.com/nanoframework/ChibiOS-Contrib
+            GIT_TAG nanoframework
+        )
+
+        message(STATUS "ChibiOS-Contrib from GitHub repo")
+
+    else()
+        # ChibiOS-Contrib source was specified
+
+        # sanity check is source path exists
+        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/)
+            message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
+
+            FetchContent_Declare(
+                chibios-contrib
+                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
+            )
+
+        else()
+            message(FATAL_ERROR "Couldn't find ChibiOS-Contrib source at ${CHIBIOS_CONTRIB_SOURCE}/")
+        endif()
+
+    endif()
+
+    FetchContent_GetProperties(chibios-contrib)
+    FetchContent_Populate(chibios-contrib)
+
+endif()
+
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_include)
 
 # make vars global
