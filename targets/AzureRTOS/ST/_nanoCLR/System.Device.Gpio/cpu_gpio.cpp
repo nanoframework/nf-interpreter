@@ -103,8 +103,6 @@ void GpioEventCallback(void *arg)
 {
     NATIVE_INTERRUPT_START
 
-    TX_INTERRUPT_SAVE_AREA
-
     TX_DISABLE
 
     gpio_input_state *pGpio = (gpio_input_state *)arg;

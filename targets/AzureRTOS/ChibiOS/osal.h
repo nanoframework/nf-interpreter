@@ -553,7 +553,7 @@ typedef TX_MUTEX mutex_t;
 /*===========================================================================*/
 
 extern const char *osal_halt_msg;
-extern uint32_t interrupt_save;
+extern unsigned int interrupt_save;
 
 #ifdef __cplusplus
 extern "C"

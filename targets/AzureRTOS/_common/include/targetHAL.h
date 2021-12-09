@@ -71,9 +71,9 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
-#define GLOBAL_LOCK()                                                                                                  \
-    unsigned int interrupt_save __attribute__((unused));                                                               \
-    TX_DISABLE
+extern unsigned int interrupt_save;
+
+#define GLOBAL_LOCK()   TX_DISABLE
 #define GLOBAL_UNLOCK() TX_RESTORE
 
 #endif //_TARGET_HAL_H_

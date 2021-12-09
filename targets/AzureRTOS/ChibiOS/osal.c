@@ -20,7 +20,7 @@
  *          system halt caused by an unexpected error.
  */
 const char *osal_halt_msg;
-uint32_t interrupt_save;
+unsigned int interrupt_save;
 
 /*===========================================================================*/
 /* Module local types.                                                       */
