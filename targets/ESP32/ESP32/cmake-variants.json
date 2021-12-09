@@ -65,7 +65,8 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
-          "API_nanoFramework.Graphics": "OFF"
+          "API_nanoFramework.Graphics": "OFF",
+          "API_nanoFramework.Device.Bluetooth": "OFF"
         }
       },
       "ESP32_REV0": {
@@ -111,7 +112,8 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
-          "API_nanoFramework.Graphics": "OFF"
+          "API_nanoFramework.Graphics": "OFF",
+          "API_nanoFramework.Device.Bluetooth": "OFF"
         }
       },
       "ESP32_BLE_REV0": {
@@ -208,7 +210,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
-          "API_nanoFramework.Device.Bluetooth": "ON"
+          "API_nanoFramework.Device.Bluetooth": "OFF"
         }
       },
       "ESP_WROVER_KIT": {
@@ -253,6 +255,7 @@
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",
@@ -302,6 +305,7 @@
           "API_Windows.Storage": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",
@@ -356,7 +360,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
-          "API_nanoFramework.Hardware.Esp32.Ble": "OFF"
+          "API_nanoFramework.Device.Bluetooth": "OFF"
         }
       }
     }
