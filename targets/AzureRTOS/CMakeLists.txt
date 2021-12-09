@@ -8,6 +8,10 @@ include(binutils.common)
 include(binutils.arm-none-eabi)
 include(binutils.AzureRTOS)
 
+###############
+# build options
+option(AZURERTOS_USBX_REQUIRED "option to include Azure RTOS USBX")
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -66,6 +70,66 @@ else()
 endif()
 
 FetchContent_Populate(azure_rtos)
+
+if(AZURERTOS_USBX_REQUIRED)
+
+    # check if USBX_SOURCE_FOLDER was specified or if it's empty (default is empty)
+    set(NO_USBX_SOURCE_FOLDER TRUE)
+    if(USBX_SOURCE_FOLDER)
+        if(NOT "${USBX_SOURCE_FOLDER}" STREQUAL "")
+            set(NO_USBX_SOURCE_FOLDER FALSE)
+        endif()
+    endif()
+
+    # AzureRTOS USBX version
+    set(USBX_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc AzureRTOS USBX version
+    if(DEFINED USBX_VERSION)
+        if(NOT "${USBX_VERSION}" STREQUAL "")
+            set(USBX_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc AzureRTOS USBX version
+    if(USBX_VERSION_EMPTY)
+        # no AzureRTOS USBX version actualy specified, must be empty which is fine, we'll default to Azure RTOS version
+        set(USBX_VERSION ${RTOS_VERSION})
+    endif()
+
+    if(NO_USBX_SOURCE_FOLDER)
+        # no AzureRTOS USBX source specified, download it from it's repo
+
+        message(STATUS "AzureRTOS USBX ${USBX_VERSION} from GitHub repo")
+
+        FetchContent_Declare(
+            azure_rtos_usbx
+            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
+            GIT_TAG ${USBX_VERSION}
+        )
+
+    else()
+        # AzureRTOS USBX source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${USBX_SOURCE_FOLDER}/")
+            message(STATUS "AzureRTOS USBX ${USBX_VERSION} (source from: ${USBX_SOURCE_FOLDER})")
+
+            FetchContent_Declare(
+                azure_rtos_usbx
+                GIT_REPOSITORY $(USBX_SOURCE_FOLDER)
+                GIT_TAG ${USBX_VERSION}
+            )
+
+        else()
+            message(FATAL_ERROR "Couldn't find AzureRTOS USBX source at ${USBX_SOURCE_FOLDER}/")
+        endif()
+
+    endif()
+
+    FetchContent_Populate(azure_rtos_usbx)
+
+endif()
 
 # AzureRTOS common directories
 add_subdirectory(_common)
