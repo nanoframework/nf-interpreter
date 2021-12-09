@@ -822,6 +822,7 @@ jobs:
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
+
       ORGPAL_PALTHREE:
         TargetBoard: ORGPAL_PALTHREE
         TargetSeries: 'stm32f7xx'
@@ -829,7 +830,6 @@ jobs:
           -DTARGET_SERIES=STM32F7xx
           -DRTOS=AzureRTOS
           -DCHIBIOS_HAL_REQUIRED=ON
-          -DCHIBIOS_CONTRIB_REQUIRED=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON

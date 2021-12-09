@@ -35,8 +35,6 @@
           "TARGET_SERIES": "STM32F7xx",
           "RTOS_SOURCE_FOLDER": "",
           "TARGET_BOARD": "ORGPAL_PALTHREE",
-          "CHIBIOS_CONTRIB_REQUIRED": "OFF",
-          "CHIBIOS_CONTRIB_SOURCE": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "ON",
           "STM32_CUBE_PACKAGE_SOURCE": "",
           "CHIBIOS_HAL_REQUIRED": "ON",
