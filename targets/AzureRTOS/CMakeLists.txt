@@ -12,6 +12,7 @@ include(binutils.AzureRTOS)
 # build options
 option(AZURERTOS_USBX_REQUIRED "option to include Azure RTOS USBX")
 
+###########################
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -23,6 +24,7 @@ if(RTOS_SOURCE_FOLDER)
     endif()
 endif()
 
+###################
 # AzureRTOS version
 set(RTOS_VERSION_EMPTY TRUE)
 
@@ -71,6 +73,8 @@ endif()
 
 FetchContent_Populate(azure_rtos)
 
+###########################
+# Azure RTOS USBX
 if(AZURERTOS_USBX_REQUIRED)
 
     # check if USBX_SOURCE_FOLDER was specified or if it's empty (default is empty)
@@ -131,10 +135,12 @@ if(AZURERTOS_USBX_REQUIRED)
 
 endif()
 
+##############################
 # AzureRTOS common directories
 add_subdirectory(_common)
 add_subdirectory(_include)
 
+#############################################
 # try to find STM board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
