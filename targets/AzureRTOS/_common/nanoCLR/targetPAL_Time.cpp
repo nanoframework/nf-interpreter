@@ -27,7 +27,7 @@ HRESULT Time_Initialize()
             &nextEventTimer,
             (char *)"PAL Events Timer",
             NextEventTimer_Callback,
-            NULL,
+            0,
             1,
             0,
             TX_NO_ACTIVATE) == TX_SUCCESS)
