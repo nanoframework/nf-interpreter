@@ -8,7 +8,8 @@
 #define HALCONF_COMMUNITY_H
 
 // Enables the USBH subsystem
-#define HAL_USE_USBH TRUE
+// TODO
+#define HAL_USE_USBH FALSE
 
 /*===========================================================================*/
 /* USBH driver related settings.                                             */

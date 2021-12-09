@@ -3,9 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ch.h>
-#include "hal.h"
-#include "fsmc_sdram_lld.h"
+#include <hal.h>
+#include <fsmc_sdram_lld.h>
 
 
 // SDRAM Mode definition register defines

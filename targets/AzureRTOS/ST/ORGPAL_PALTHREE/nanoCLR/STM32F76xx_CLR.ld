@@ -142,3 +142,6 @@ INCLUDE rules_clr.ld
 
 /* boot clipboard rules inclusion.*/
 INCLUDE rules_bootclipboard.ld
+
+/* Set the RAM segment used end for threadx */
+__RAM_segment_used_end__ = 0; 

@@ -8,12 +8,11 @@
 // Any changes you make here will be overwritten when it's generated again. //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef TARGET_BOARD_NANOBOOTER_H
-#define TARGET_BOARD_NANOBOOTER_H
+#ifndef _TARGET_BOARD_NANOBOOTER_H_
+#define _TARGET_BOARD_NANOBOOTER_H_
 
 #include <target_common.h>
-#include <chversion.h>
 
-#define OEMSYSTEMINFOSTRING "nanoBooter running @ @TARGET_NAME@ built with ChibiOS v" CH_VERSION "." STR(CH_VERSION_MONTH)
+#define OEMSYSTEMINFOSTRING "nanoBooter running @ @TARGET_NAME@"
 
-#endif // TARGET_BOARD_NANOBOOTER_H
+#endif /* _TARGET_BOARD_NANOBOOTER_H_ */
