@@ -686,8 +686,7 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
     err = netconn_connect(sock->conn, &remote_addr, remote_port);
   }
 
-  if (err == ERR_INPROGRESS) 
-  {
+  if (err == ERR_INPROGRESS) {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) operation in progress\n", s));
     sock_set_errno(sock, err_to_errno(err));
     return -1;
