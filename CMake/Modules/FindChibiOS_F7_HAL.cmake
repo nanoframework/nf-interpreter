@@ -43,7 +43,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/hal/ports/STM32/LL
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CHIBIOS_BOARD_DEFINITIONS_PATH})
 
 # append dummy include directory when not using ChibiOS-Contrib
-if(NOT CHIBIOS_CONTRIB_REQUIRED)
+if(CHIBIOS_CONTRIB_REQUIRED)
     list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/include/dummy_includes)
 endif()
 
@@ -100,14 +100,13 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
 
 # set include path for OSHAL header
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${OSHAL_PATH})
-
 
 # source files for ChibiOS HAL
 set(CHIBIOS_HAL_SRCS

@@ -139,6 +139,7 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES})
 
@@ -149,6 +150,7 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES})
 
@@ -161,6 +163,7 @@ macro(nf_add_platform_dependencies target)
                 EXTRA_INCLUDES
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${azure_rtos_SOURCE_DIR}/common/inc
                     ${AZRTOS_INCLUDES})
 
@@ -174,6 +177,7 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${TARGET_BASE_LOCATION}
                 ${AZRTOS_INCLUDES})
@@ -221,15 +225,24 @@ macro(nf_add_platform_include_directories target)
     )
 
     if(CHIBIOS_HAL_REQUIRED)
+    # message(FATAL_ERROR ">>>>>>${CHIBIOS_HAL_INCLUDE_DIRS}")
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_HAL_INCLUDE_DIRS}
             ${ChibiOSnfOverlay_INCLUDE_DIRS}
+            ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
         )
     endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
             ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+        )
+    endif()
+
+    
+    if(CHIBIOS_CONTRIB_REQUIRED)
+        target_include_directories(${target}.elf PUBLIC
+            ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
         )
     endif()
     
