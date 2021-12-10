@@ -146,7 +146,7 @@ int main(void)
     {
         // if the USER/BOOT1 button is pressed, skip the check for a valid CLR image and remain in booter
         // the user button in this board has a pull-up resistor so the check has to be inverted
-        // if (palReadPad(GPIOK, GPIOK_BUTTON_BOOT))
+        if (palReadPad(GPIOK, GPIOK_BUTTON_BOOT))
         {
             // check for valid CLR image
             // we are checking for a valid image right after the configuration block
