@@ -12,7 +12,7 @@
 #if (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
 #endif
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
 #include <hal_spiffs.h>
 #endif
 
@@ -27,7 +27,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
     const char *workingPath;
     char *workingBuffer = NULL;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
@@ -46,7 +46,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::DeleteFileNative
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         // SPIFFS drive workflow
 
         // get SPIFFS drive index...
@@ -108,7 +108,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
     char *workingBuffer = NULL;
     char *workingBuffer1 = NULL;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
@@ -130,7 +130,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::RenameFileNative
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         // SPIFFS drive workflow
 
         // get SPIFFS drive index...
@@ -215,7 +215,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::
     const char *filePath;
     const char *fileName;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
@@ -232,7 +232,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFile::
 
     if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
     {
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         // SPIFFS drive workflow
 
         // get SPIFFS drive index...

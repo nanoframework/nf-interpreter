@@ -13,7 +13,7 @@
 #if (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
 #endif
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
 #include <hal_spiffs.h>
 #endif
 
@@ -24,7 +24,7 @@ extern bool sdCardFileSystemReady;
 #if (HAL_USBH_USE_MSD == TRUE)
 extern bool usbMsdFileSystemReady;
 #endif
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
 extern bool spiffsFileSystemReady;
 #endif
 
@@ -244,7 +244,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     CLR_RT_HeapBlock *hbObj;
     CLR_RT_HeapBlock &top = stack.PushValue();
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     // is the SPIFFS file system available and mounted?
     if (spiffsFileSystemReady)
     {
@@ -353,7 +353,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
             // failed to change drive
 
             // check if the working drive is the SPIFFS drive
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
             if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
             {
                 // this is the SPIFFS drive,
@@ -485,7 +485,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // SPIFFS doesn't support folders so return an empty collection
     CLR_RT_HeapBlock &top = stack.PushValue();
@@ -542,7 +542,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
     uint32_t maxItemsToRetrieve;
     uint32_t itemIndex = 0;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     spiffs *driveFs = NULL;
     int32_t driveIndex = -1;
 #endif
@@ -581,7 +581,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
     // check if the working drive is the SPIFFS drive and...
     // ... that the path is the drive root (because SPIFFS doesn't support folders)
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     if ((WORKING_DRIVE_IS_INTERNAL_DRIVE) && (hal_strlen_s(workingPath) == DRIVE_PATH_LENGTH - 1))
     {
         // get SPIFFS drive index...
@@ -842,7 +842,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     CLR_RT_HeapBlock &top = stack.PushValue();
 
@@ -975,7 +975,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
 
     CreationCollisionOption options;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     spiffs *driveFs = NULL;
     int32_t driveIndex;
 #endif
@@ -1034,7 +1034,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         if (operationResult == FR_INVALID_DRIVE)
         {
             // check if the working drive is the SPIFFS drive
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
             if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
             {
                 // this is the SPIFFS drive
@@ -1220,7 +1220,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1473,7 +1473,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::
         NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // throw not supported exception because folders aren't supported in SPIFFS
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
@@ -1556,7 +1556,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
     else if (operationResult != FR_OK)
     {
         // folder doesn't exist
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
             // this is the SPIFFS drive
@@ -1572,7 +1572,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::DeleteFolderNa
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // throw not supported exception because folders aren't supported in SPIFFS
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
@@ -1625,7 +1625,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNa
     else if (operationResult != FR_OK)
     {
         // folder doesn't exist
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
             // this is the SPIFFS drive
@@ -1641,7 +1641,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::RenameFolderNa
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // throw not supported exception because folders aren't supported in SPIFFS
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
@@ -1665,7 +1665,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     const char *workingPath;
     char *folderPath = NULL;
 
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
     char workingDrive[DRIVE_LETTER_LENGTH];
 #endif
 
@@ -1707,7 +1707,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
     if (operationResult != FR_OK)
     {
         // folder doesn't exist
-#if (USE_SPIFFS_FOR_STORAGE == TRUE)
+#if (NF_FEATURE_USE_SPIFFS_OPTION)
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
             // this is the SPIFFS drive
@@ -1763,7 +1763,7 @@ HRESULT Library_win_storage_native_Windows_Storage_StorageFolder::GetFolderNativ
         }
     }
 
-#elif (USE_SPIFFS_FOR_STORAGE == TRUE)
+#elif (NF_FEATURE_USE_SPIFFS_OPTION)
 
     // throw not supported exception because folders aren't supported in SPIFFS
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);

@@ -12,5 +12,3 @@
 // the following macro maps the USB mass storage device driver
 #define USB_MSD_DRIVER      USBHD2
 
-// includes SPIFFS in storage
-#define USE_SPIFFS_FOR_STORAGE  TRUE
