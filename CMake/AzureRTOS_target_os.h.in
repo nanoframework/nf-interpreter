@@ -11,6 +11,8 @@
 #ifndef TARGET_OS_H
 #define TARGET_OS_H
 
+#include <tx_api.h>
+
 #define STR_HELPER(x) #x
 #define STR(x)        STR_HELPER(x)
 
