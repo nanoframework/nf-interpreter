@@ -15,36 +15,6 @@ nf_set_stm32_target_series()
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-########################################################
-# check availability of hex2dfu tool if specified
-if(DEFINED TOOL_HEX2DFU_PREFIX)
-    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
-        message(STATUS "")
-        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
-        message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
-        message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
-        message(STATUS "")
-        message(FATAL_ERROR "hex2dfu tool not found")
-    else()
-        set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
-    endif()
-endif()
-
-########################################################
-# check availability of SRecord tool, if specified
-if(DEFINED TOOL_SRECORD_PREFIX)
-    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
-        message(STATUS "")
-        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
-        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
-        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
-        message(STATUS "")
-        message(FATAL_ERROR "srec_cat tool not found")
-    else()
-        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
-    endif()
-endif()
-
 # check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
 set(NO_RTOS_SOURCE_FOLDER TRUE)
 if(RTOS_SOURCE_FOLDER)
