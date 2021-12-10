@@ -26,6 +26,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 #########################################
 
+message(STATUS "\n\nINFO: Running CMake ${CMAKE_VERSION}\n\n")
 
 ########################################################
 # path to local CMake modules
