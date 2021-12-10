@@ -3,6 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 // At this time(Azure RTOS v6.1.7_rel) it's not possible to have a different tx_user file
 // for nanoBooter and another for nanoCLR.
@@ -204,3 +206,5 @@
 */
 
 #endif
+
+// clang-format on
