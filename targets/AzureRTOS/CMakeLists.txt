@@ -150,6 +150,9 @@ if(AZURERTOS_USBX_REQUIRED)
 
     endif()
 
+    # enable BSD layer in NetX Duo
+    set(NXD_ENABLE_BSD TRUE)
+
     FetchContent_Populate(azure_rtos_usbx)
 
 endif()

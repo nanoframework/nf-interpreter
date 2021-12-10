@@ -101,13 +101,33 @@ macro(nf_add_platform_packages)
 
         if(USE_NETWORKING_OPTION)
 
-            # find_package(NF_Network REQUIRED QUIET)
-            # find_package(CHIBIOS_LWIP REQUIRED QUIET)
+            find_package(NF_Network REQUIRED QUIET)
 
-            # # security provider is mbedTLS
-            # if(USE_SECURITY_MBEDTLS_OPTION)
-            #     find_package(mbedTLS REQUIRED QUIET)
-            # endif()
+            FetchContent_GetProperties(azure_rtos)
+
+            # need to add ThreadX extension in order to use BSD
+            if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
+                set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m7/gnu/inc/tx_port.h)
+            elseif("${TARGET_SERIES}" STREQUAL "STM32F7xx")
+                set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m7/gnu/inc/tx_port.h)
+            else()
+                message(FATAL_ERROR "Support for NetX Duo is not implemented for ${TARGET_SERIES}.")
+            endif()
+
+            # need to read the supplied TX_Port file and add TX_THREAD_EXTENSION_3
+            file(READ
+                "${TX_PORT_FILE}"
+                TX_PORT_FILE_CONTENTS)
+
+            string(REPLACE
+                "define TX_THREAD_EXTENSION_3"
+                "define  TX_THREAD_EXTENSION_3 int bsd_errno;"
+                TX_PORT_FILE_FINAL_CONTENTS
+                "${TX_PORT_FILE_CONTENTS}")
+
+            file(WRITE 
+                ${TX_PORT_FILE} 
+                "${TX_PORT_FILE_FINAL_CONTENTS}")
 
         endif()
 
@@ -128,8 +148,12 @@ macro(nf_add_platform_dependencies target)
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
             
         FetchContent_GetProperties(azure_rtos)
-
         get_target_property(AZRTOS_INCLUDES azrtos::threadx INCLUDE_DIRECTORIES)
+
+        if(USE_NETWORKING_OPTION)
+            FetchContent_GetProperties(azure_rtos_netxduo)
+            get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
+        endif()
 
         nf_add_lib_coreclr(
             EXTRA_INCLUDES
@@ -178,6 +202,7 @@ macro(nf_add_platform_dependencies target)
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
+                ${NETXDUO_INCLUDES}
                 ${TARGET_BASE_LOCATION}
                 ${AZRTOS_INCLUDES})
         
@@ -187,24 +212,30 @@ macro(nf_add_platform_dependencies target)
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
 
-            # nf_add_lib_network(
-            #     BUILD_TARGET
-            #         ${target}
-            #     EXTRA_SOURCES 
-            #         ${TARGET_LWIP_SOURCES}
-            #         ${CHIBIOS_LWIP_SOURCES}
-            #     EXTRA_INCLUDES 
-            #         ${CHIBIOS_INCLUDE_DIRS}
-            #         ${CHIBIOS_HAL_INCLUDE_DIRS}
-            #         ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-            #         ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-            #         ${CHIBIOS_LWIP_INCLUDE_DIRS}
-            #         ${ChibiOSnfOverlay_INCLUDE_DIRS}
-            #         ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-            #         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-            #     EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
+            nf_add_lib_network(
+                BUILD_TARGET
+                    ${target}
 
-            # add_dependencies(${target}.elf nano::NF_Network)
+                EXTRA_INCLUDES 
+                    ${AZRTOS_INCLUDES}
+                    ${NETXDUO_INCLUDES}
+                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+
+                EXTRA_COMPILE_DEFINITIONS 
+                    -DTX_INCLUDE_USER_DEFINE_FILE
+                    -DNX_INCLUDE_USER_DEFINE_FILE
+            )
+
+            add_dependencies(
+                ${target}.elf 
+                nano::NF_Network
+            )
+
+            add_dependencies(
+                NF_Network
+                azrtos::netxduo
+            )
 
         endif()
 
@@ -343,9 +374,10 @@ macro(nf_add_platform_sources target)
         )
 
         if(USE_NETWORKING_OPTION)
-            # target_link_libraries(${target}.elf
-            #     nano::NF_Network
-            # )
+            target_link_libraries(${target}.elf
+                nano::NF_Network
+                azrtos::netxduo
+            )
         endif()
 
     endif()

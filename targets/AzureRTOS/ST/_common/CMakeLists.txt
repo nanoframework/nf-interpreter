@@ -3,6 +3,11 @@
 # See LICENSE file in the project root for full license information.
 #
 
+# include Cube MX directory if Cube package was included
+if(STM32_CUBE_PACKAGE_REQUIRED)
+    add_subdirectory(CubeMX)
+endif()
+
 # Azure RTOS ST specific file
 list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/tx_initialize_low_level.S)
 list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_STM32FlashDriver.c)

@@ -84,6 +84,7 @@ void tx_application_define(void *first_unused_memory)
 
     if (status != TX_SUCCESS)
     {
+        // TODO replace with proper handling
         while (1)
         {
         }
@@ -111,6 +112,7 @@ void tx_application_define(void *first_unused_memory)
 
     if (status != TX_SUCCESS)
     {
+        // TODO replace with proper handling
         while (1)
         {
         }

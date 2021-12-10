@@ -127,6 +127,12 @@ SECTIONS
         . = ALIGN(4);
         __eth_end__ = .;
     } > ETH_RAM
+
+    .nx_data (NOLOAD):
+    {
+        *(.NetXPoolSection)  
+        
+    } >ram1 AT >RAM_INIT_FLASH_LMA 
 }
 
 /* Code rules inclusion.*/

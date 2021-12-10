@@ -22,7 +22,7 @@
 #define HAL_USE_ADC                 @HAL_USE_ADC_OPTION@
 #define HAL_USE_DAC                 @HAL_USE_DAC_OPTION@
 #define HAL_USE_UART                @HAL_USE_UART_OPTION@
-#define HAL_USE_MAC                 @HAL_USE_MAC_OPTION@
+// #define HAL_USE_MAC                 @HAL_USE_MAC_OPTION@
 #define HAL_USE_SDC                 @HAL_USE_SDC_OPTION@
 #define HAL_USE_WDG                 @HAL_USE_WDG_OPTION@
 #define HAL_USE_CAN                 @HAL_USE_CAN_OPTION@

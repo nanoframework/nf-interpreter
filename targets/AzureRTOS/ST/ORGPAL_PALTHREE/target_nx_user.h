@@ -49,10 +49,7 @@
 */
 
 /* If defined, the link driver is able to specify extra capability, such as checksum offloading features. */
-/*
 #define NX_ENABLE_INTERFACE_CAPABILITY
-*/
-
 
 /* Configuration options for IP */
 
@@ -68,9 +65,7 @@
 
 /* Defined, NX_ENABLE_IP_RAW_PACKET_FILTER allows an application to install a filter
    for incoming raw packets. This feature is disabled by default. */
-/*
 #define NX_ENABLE_IP_RAW_PACKET_FILTER
-*/
 
 /* This define specifies the maximum number of RAW packets can be queued for receive.  The default
    value is 20.  */
@@ -99,9 +94,7 @@
 /* Configuration options for IPv6 */
 
 /* Disable IPv6 processing in NetX Duo.  */
-/*
 #define NX_DISABLE_IPV6
-*/
 
 /* Define the number of entries in IPv6 address pool. */
 /*
@@ -371,9 +364,7 @@
 */
 
 /* This define specifies the maximum packets that are out of order. The default value is 8.  */
-/*
 #define NX_TCP_MAX_OUT_OF_ORDER_PACKETS 8
-*/
 
 /* This define specifies the maximum number of TCP server listen requests. The default value is 10.  */
 /*
@@ -689,9 +680,7 @@
    to NetX Duo API for notifying the application of socket events, such as TCP connection and disconnect
    completion.  These extended notify functions are mainly used by the BSD wrapper. The default is this
    feature is disabled.  */
-/*
 #define NX_ENABLE_EXTENDED_NOTIFY_SUPPORT
-*/
 
 /* Defined, ASSERT is disabled. The default is enabled. */
 /*

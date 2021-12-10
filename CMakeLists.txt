@@ -526,8 +526,8 @@ if( API_System.Net)
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
-    # set Security module to use
-    if(NF_SECURITY_MBEDTLS )
+    # set Security module to use (not applicable for Azure RTOS)
+    if(NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
@@ -680,11 +680,15 @@ endif()
 # handles Networking support at HAL level
 
 if(USE_NETWORKING_OPTION)
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+
+    if(RTOS_CHIBIOS_CHECK)
+        set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+    endif()
 
     if(NF_SECURITY_MBEDTLS)
         message(STATUS "Support for networking enabled with security from mbedTLS")
-    elseif(RTOS_TI_SIMPLELINK_CHECK)
+    elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
+        # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")
     else()
         message(STATUS "Support for networking enabled WITHOUT security")
@@ -692,6 +696,10 @@ if(USE_NETWORKING_OPTION)
 
     if(NF_NETWORKING_ENC28J60)
         message(STATUS "Support for ENC28j60 network driver enabled")
+    endif()
+
+    if(NETX_DRIVER)
+        message(STATUS "NetX Duo using '${NETX_DRIVER}' driver")
     endif()
 
     # sanity check for missing configuration block option

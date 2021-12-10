@@ -23,8 +23,8 @@
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
 
-// get number of sockets from lwIP options
-#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
+// get number of sockets from NetX BSD (NX_BSD_MAX_SOCKETS)
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 32
 
 #define LPCSTR const char *
 
