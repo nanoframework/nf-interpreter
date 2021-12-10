@@ -813,7 +813,6 @@ jobs:
           -DAPI_Windows.Storage=OFF
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.I2c=ON
           -DAPI_System.Device.I2c=ON
           -DAPI_nanoFramework.ResourceManager=OFF
@@ -845,7 +844,6 @@ jobs:
           -DAPI_Windows.Storage=OFF
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.I2c=ON
           -DAPI_System.Device.I2c=ON
           -DAPI_nanoFramework.ResourceManager=OFF
