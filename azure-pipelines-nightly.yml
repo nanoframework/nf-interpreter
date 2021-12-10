@@ -745,6 +745,8 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/download-install-esp32-build-components.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-esp32.yml
 
   - task: CopyFiles@1
