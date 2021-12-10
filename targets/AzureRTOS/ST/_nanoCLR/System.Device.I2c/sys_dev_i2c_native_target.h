@@ -6,7 +6,6 @@
 #ifndef SYS_DEV_I2C_NATIVE_TARGET_H
 #define SYS_DEV_I2C_NATIVE_TARGET_H
 
-//#include <ch.h>
 #include <hal.h>
 #include <targetPAL.h>
 #include <nanoHAL.h>
@@ -53,6 +52,8 @@ extern NF_PAL_I2C I2C4_PAL;
 // the following macro defines a function that configures the GPIO pins for a STM32 I2C peripheral
 // it gets called in the Windows_Devices_I2c_I2cDevice::NativeInit function
 // this is required because the I2C peripherals can use multiple GPIO configuration combinations
+#if defined(STM32F7XX)
+
 #define I2C_CONFIG_PINS(num, gpio_port_scl, gpio_port_sda, scl_pin, sda_pin, alternate_function)                       \
     void ConfigPins_I2C##num()                                                                                         \
     {                                                                                                                  \
@@ -65,6 +66,25 @@ extern NF_PAL_I2C I2C4_PAL;
             sda_pin,                                                                                                   \
             (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
     }
+
+#elif defined(STM32L4XX)
+
+#define I2C_CONFIG_PINS(num, gpio_port_scl, gpio_port_sda, scl_pin, sda_pin, alternate_function)                       \
+    void ConfigPins_I2C##num()                                                                                         \
+    {                                                                                                                  \
+        palSetPadMode(                                                                                                 \
+            gpio_port_scl,                                                                                             \
+            scl_pin,                                                                                                   \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGH | PAL_STM32_OTYPE_OPENDRAIN));             \
+        palSetPadMode(                                                                                                 \
+            gpio_port_sda,                                                                                             \
+            sda_pin,                                                                                                   \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGH | PAL_STM32_OTYPE_OPENDRAIN));             \
+    }
+
+#else
+#error "Series missing in macro definition"
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // when an I2C is defined the declarations below will have the real function/configuration //

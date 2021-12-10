@@ -3,10 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//#include <ch.h>
-#include <hal.h>
-#include <targetPAL.h>
-#include <nanoHAL.h>
 #include "win_dev_i2c_native_target.h"
 
 HRESULT Library_win_dev_i2c_native_Windows_Devices_I2c_I2cController::NativeInit___VOID(CLR_RT_StackFrame &stack)
