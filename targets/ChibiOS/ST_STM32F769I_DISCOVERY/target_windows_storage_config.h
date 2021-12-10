@@ -4,8 +4,7 @@
 //
 
 // maps the SD Card driver
-#define SD_CARD_DRIVER      SDCD2
+#define SD_CARD_DRIVER SDCD2
 
 // maps the SD Card detect GPIO definition (in Target_Windows_Storage.c) to board GPIO line (in board.h)
-#define SDCARD_LINE_DETECT  LINE_SD_DETECT
-
+#define SDCARD_LINE_DETECT LINE_SD_DETECT
