@@ -7,5 +7,8 @@
 #define _SYS_DEV_GPIO_NATIVE_TARGET_H_
 
 #include <sys_dev_gpio_native.h>
+#include <hal.h>
+#include <tx_api.h>
+#include <targetPAL.h>
 
 #endif //_SYS_DEV_GPIO_NATIVE_TARGET_H_

@@ -3,8 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <hal.h>
-#include <nanoHAL.h>
 #include "sys_io_ser_native_target.h"
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)

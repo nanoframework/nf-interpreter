@@ -3,8 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <hal.h>
-#include <nanoHAL.h>
 #include "win_dev_serial_native_target.h"
 
 /////////////////////////////////////////////////////////

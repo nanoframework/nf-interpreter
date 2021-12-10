@@ -3,11 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <hal.h>
-
 #include <tx_api.h>
-
-#include <targetPAL.h>
 #include "sys_dev_gpio_native_target.h"
 
 #define GPIO_MAX_PIN     256

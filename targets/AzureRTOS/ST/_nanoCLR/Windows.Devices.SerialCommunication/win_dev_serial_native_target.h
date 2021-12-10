@@ -9,6 +9,7 @@
 #include <target_windows_devices_serialcommunication_config.h>
 #include <win_dev_serial_native.h>
 #include <hal.h>
+#include <nanoHAL.h>
 
 // struct representing the UART
 typedef struct

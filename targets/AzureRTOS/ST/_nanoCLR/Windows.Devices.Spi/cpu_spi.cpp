@@ -3,15 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-//#include <ch.h>
-#include <hal.h>
-//#include <cmsis_os.h>
-#include <LaunchCLR.h>
-#include <string.h>
-#include <targetPAL.h>
-
-#include <win_dev_spi_native_target.h>
-#include <hal.h>
+#include "win_dev_spi_native_target.h"
 
 /////////////////////////////////////////////////////
 // SPI PAL strucs declared in win_dev_spi_native.h //
@@ -362,7 +354,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     llConfig->end_cb = SpiCallback;
 
     // make sure the CS pin is properly configured as GPIO, output & pushpull
-    palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGH | PAL_MODE_OUTPUT_PUSHPULL));
+    palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
 
     // being SPI CS active low, default it to high
     palSetPad(GPIO_PORT(csPin), csPin % 16);

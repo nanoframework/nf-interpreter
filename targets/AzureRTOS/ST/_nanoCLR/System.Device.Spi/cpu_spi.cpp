@@ -3,15 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ch.h>
-#include <hal.h>
-#include <cmsis_os.h>
-#include <LaunchCLR.h>
-#include <string.h>
-#include <targetPAL.h>
-
 #include <sys_dev_spi_native_target.h>
-#include <hal.h>
 
 /////////////////////////////////////////////////////
 // SPI PAL strucs declared in win_dev_spi_native.h //

@@ -8,7 +8,9 @@
 
 #include <sys_dev_spi_native.h>
 #include <hal.h>
-#include <sys_dev_gpio_native.h>
+#include <LaunchCLR.h>
+#include <string.h>
+#include <targetPAL.h>
 
 // struct representing the SPI bus
 // To uncomment once Windows.Devices.Spi will be removed

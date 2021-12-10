@@ -8,6 +8,9 @@
 
 #include <win_dev_spi_native.h>
 #include <hal.h>
+#include <LaunchCLR.h>
+#include <string.h>
+#include <targetPAL.h>
 
 // struct representing the SPI bus
 struct NF_PAL_SPI
@@ -45,17 +48,17 @@ struct NF_PAL_SPI
         palSetPadMode(                                                                                                 \
             gpio_port_sck,                                                                                             \
             sck_pin,                                                                                                   \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGH | PAL_STM32_PUPDR_FLOATING |               \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |               \
              PAL_STM32_OTYPE_PUSHPULL));                                                                               \
         palSetPadMode(                                                                                                 \
             gpio_port_miso,                                                                                            \
             miso_pin,                                                                                                  \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGH | PAL_STM32_PUPDR_FLOATING |               \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |               \
              PAL_STM32_OTYPE_PUSHPULL));                                                                               \
         palSetPadMode(                                                                                                 \
             gpio_port_mosi,                                                                                            \
             mosi_pin,                                                                                                  \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGH | PAL_STM32_PUPDR_FLOATING |               \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |               \
              PAL_STM32_OTYPE_PUSHPULL));                                                                               \
     }
 // HACK

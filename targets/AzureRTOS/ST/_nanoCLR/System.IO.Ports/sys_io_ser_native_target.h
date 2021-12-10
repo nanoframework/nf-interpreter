@@ -9,6 +9,7 @@
 #include <target_system_io_ports_config.h>
 #include <sys_io_ser_native.h>
 #include <hal.h>
+#include <nanoHAL.h>
 
 // struct representing the UART
 typedef struct
