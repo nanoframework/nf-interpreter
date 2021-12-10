@@ -50,8 +50,8 @@ int main(void)
 #endif
 
     //  Initializes a serial-over-USB CDC driver.
-    sduObjectInit(&SDU1);
-    sduStart(&SDU1, &serusbcfg);
+    sduObjectInit(&SERIAL_DRIVER);
+    sduStart(&SERIAL_DRIVER, &serusbcfg);
 
     // Activates the USB driver and then the USB bus pull-up on D+.
     // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
