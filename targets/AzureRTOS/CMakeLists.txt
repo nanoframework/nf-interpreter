@@ -11,6 +11,25 @@ include(binutils.AzureRTOS)
 ###############
 # build options
 option(AZURERTOS_USBX_REQUIRED "option to include Azure RTOS USBX")
+option(AZURERTOS_FILEX_REQUIRED "option to include Azure RTOS FileX")
+option(AZURERTOS_FILEX_REQUIRED "option to include Azure RTOS NetX Duo")
+option(USBX_FEATURE_CDC "option to use USBX CDC class")
+
+if(USBX_FEATURE_CDC)
+
+    set(USBX_FEATURE_CDC_OPTION TRUE CACHE INTERNAL "USBX_FEATURE_CDC_OPTION for USBX_FEATURE_CDC")
+    # requires:
+    # AZURERTOS_USBX_REQUIRED
+    set(AZURERTOS_USBX_REQUIRED ON CACHE INTERNAL "AZURERTOS_USBX_REQUIRED for USBX_FEATURE_CDC")
+    # AZURERTOS_FILEX_REQUIRED
+    set(AZURERTOS_FILEX_REQUIRED ON CACHE INTERNAL "AZURERTOS_FILEX_REQUIRED for USBX_FEATURE_CDC")
+    # AZURERTOS_NETXDUO_REQUIRED
+    set(AZURERTOS_NETXDUO_REQUIRED ON CACHE INTERNAL "AZURERTOS_NETXDUO_REQUIRED for USBX_FEATURE_CDC")
+
+else()
+    set(USBX_FEATURE_CDC_OPTION FALSE CACHE INTERNAL "USBX_FEATURE_CDC_OPTION for USBX_FEATURE_CDC")
+endif()
+
 
 ###########################
 # Define PLATFORM base path
@@ -132,6 +151,131 @@ if(AZURERTOS_USBX_REQUIRED)
     endif()
 
     FetchContent_Populate(azure_rtos_usbx)
+
+endif()
+
+###########################
+# Azure RTOS FileX
+if(AZURERTOS_FILEX_REQUIRED)
+
+    # check if FILEX_SOURCE_FOLDER was specified or if it's empty (default is empty)
+    set(NO_FILEX_SOURCE_FOLDER TRUE)
+    if(FILEX_SOURCE_FOLDER)
+        if(NOT "${FILEX_SOURCE_FOLDER}" STREQUAL "")
+            set(NO_FILEX_SOURCE_FOLDER FALSE)
+        endif()
+    endif()
+
+    # AzureRTOS FileX version
+    set(FILEX_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc AzureRTOS FileX version
+    if(DEFINED FILEX_VERSION)
+        if(NOT "${FILEX_VERSION}" STREQUAL "")
+            set(FILEX_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc AzureRTOS FileX version
+    if(FILEX_VERSION_EMPTY)
+        # no AzureRTOS FileX version actualy specified, must be empty which is fine, we'll default to Azure RTOS version
+        # version for this component is behind the others...
+        set(FILEX_VERSION "r6.1.8_rel")
+    endif()
+
+    if(NO_FILEX_SOURCE_FOLDER)
+        # no AzureRTOS FileX source specified, download it from it's repo
+
+        message(STATUS "AzureRTOS FileX ${FILEX_VERSION} from GitHub repo")
+
+        FetchContent_Declare(
+            azure_rtos_filex
+            GIT_REPOSITORY https://github.com/azure-rtos/filex.git
+            GIT_TAG ${FILEX_VERSION}
+        )
+
+    else()
+        # AzureRTOS FileX source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${FILEX_SOURCE_FOLDER}/")
+            message(STATUS "AzureRTOS FileX ${FILEX_VERSION} (source from: ${FILEX_SOURCE_FOLDER})")
+
+            FetchContent_Declare(
+                azure_rtos_filex
+                GIT_REPOSITORY $(FILEX_SOURCE_FOLDER)
+                GIT_TAG ${FILEX_VERSION}
+            )
+
+        else()
+            message(FATAL_ERROR "Couldn't find AzureRTOS FileX source at ${FILEX_SOURCE_FOLDER}/")
+        endif()
+
+    endif()
+
+    FetchContent_Populate(azure_rtos_filex)
+
+endif()
+
+###########################
+# Azure RTOS NetX Duo
+if(AZURERTOS_NETXDUO_REQUIRED)
+
+    # check if NETXDUO_SOURCE_FOLDER was specified or if it's empty (default is empty)
+    set(NO_NETXDUO_SOURCE_FOLDER TRUE)
+    if(NETXDUO_SOURCE_FOLDER)
+        if(NOT "${NETXDUO_SOURCE_FOLDER}" STREQUAL "")
+            set(NO_NETXDUO_SOURCE_FOLDER FALSE)
+        endif()
+    endif()
+
+    # AzureRTOS NetX Duo version
+    set(NETXDUO_VERSION_EMPTY TRUE)
+
+    # check if build was requested with a specifc AzureRTOS NetX Duo version
+    if(DEFINED NETXDUO_VERSION)
+        if(NOT "${NETXDUO_VERSION}" STREQUAL "")
+            set(NETXDUO_VERSION_EMPTY FALSE)
+        endif()
+    endif()
+
+    # check if build was requested with a specifc AzureRTOS NetX Duo version
+    if(NETXDUO_VERSION_EMPTY)
+        # no AzureRTOS NetX Duo version actualy specified, must be empty which is fine, we'll default to Azure RTOS version
+        set(NETXDUO_VERSION ${RTOS_VERSION})
+    endif()
+
+    if(NO_NETXDUO_SOURCE_FOLDER)
+        # no AzureRTOS NetX Duo source specified, download it from it's repo
+
+        message(STATUS "AzureRTOS NetX Duo ${NETXDUO_VERSION} from GitHub repo")
+
+        FetchContent_Declare(
+            azure_rtos_netxduo
+            GIT_REPOSITORY https://github.com/azure-rtos/netxduo.git
+            GIT_TAG ${NETXDUO_VERSION}
+        )
+
+    else()
+        # AzureRTOS NetX Duo source was specified
+
+        # sanity check is source path exists
+        if(EXISTS "${NETXDUO_SOURCE_FOLDER}/")
+            message(STATUS "AzureRTOS NetX Duo ${NETXDUO_VERSION} (source from: ${NETXDUO_SOURCE_FOLDER})")
+
+            FetchContent_Declare(
+                azure_rtos_netxduo
+                GIT_REPOSITORY $(NETXDUO_SOURCE_FOLDER)
+                GIT_TAG ${NETXDUO_VERSION}
+            )
+
+        else()
+            message(FATAL_ERROR "Couldn't find AzureRTOS NetX Duo source at ${NETXDUO_SOURCE_FOLDER}/")
+        endif()
+
+    endif()
+
+    FetchContent_Populate(azure_rtos_netxduo)
 
 endif()
 

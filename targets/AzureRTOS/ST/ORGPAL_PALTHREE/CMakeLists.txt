@@ -8,12 +8,23 @@ include(binutils.common)
 include(binutils.AzureRTOS)
 include(AzureRTOS_${TARGET_SERIES}_GCC_options)
 
+# sanity checks
+if(NOT USBX_FEATURE_CDC)
+    message(FATAL_ERROR "\n\nTarget requires USBX CDC. Make sure to enable USBX inclusion setting USBX_FEATURE_CDC build option to ON.\n\n")
+endif()
+
 # Azure RTOS settings and inclusion of build system
 set(THREADX_ARCH "cortex_m7" )
 set(THREADX_TOOLCHAIN "gnu" )
 set(TX_USER_FILE ${TARGET_BASE_LOCATION}/tx_user.h)
+set(UX_USER_FILE ${TARGET_BASE_LOCATION}/ux_user.h)
+set(NX_USER_FILE ${TARGET_BASE_LOCATION}/nx_user.h)
+set(FX_USER_FILE ${TARGET_BASE_LOCATION}/fx_user.h)
 
 add_subdirectory(${azure_rtos_SOURCE_DIR} AzureSource)
+add_subdirectory(${azure_rtos_filex_SOURCE_DIR} FileXSource)
+add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} NetXDuoSource)
+add_subdirectory(${azure_rtos_usbx_SOURCE_DIR} USBXSource)
 
 nf_setup_target_build(
     HAS_NANOBOOTER
