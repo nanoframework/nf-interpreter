@@ -829,6 +829,8 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=STM32F7xx
           -DRTOS=AzureRTOS
+          -DAZURERTOS_USBX_REQUIRED=ON
+          -DUSBX_FEATURE_CDC=ON
           -DCHIBIOS_HAL_REQUIRED=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_DEBUGGER=ON
