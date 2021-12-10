@@ -121,12 +121,8 @@ macro(nf_add_platform_dependencies target)
 
     nf_add_common_dependencies(${target})
 
-    if(CHIBIOS_HAL_REQUIRED)
-        # add_dependencies(${TARGET}.elf CHIBIOS_STARTUP_HAL)
-    endif()
-
     # add_dependencies(threadx SETUP_AZURERTOS)
-    add_dependencies(${target}.elf azrtos::threadx)
+    #add_dependencies(${target}.elf azrtos::threadx)
 
     # specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
@@ -140,6 +136,7 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES})
 
@@ -151,6 +148,7 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES})
 
@@ -164,6 +162,7 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                     ${ChibiOSnfOverlay_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
                     ${azure_rtos_SOURCE_DIR}/common/inc
                     ${AZRTOS_INCLUDES})
 
@@ -175,9 +174,9 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${TARGET_BASE_LOCATION}
                 ${AZRTOS_INCLUDES})
@@ -225,11 +224,9 @@ macro(nf_add_platform_include_directories target)
     )
 
     if(CHIBIOS_HAL_REQUIRED)
-    # message(FATAL_ERROR ">>>>>>${CHIBIOS_HAL_INCLUDE_DIRS}")
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_HAL_INCLUDE_DIRS}
             ${ChibiOSnfOverlay_INCLUDE_DIRS}
-            ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
         )
     endif()
 
