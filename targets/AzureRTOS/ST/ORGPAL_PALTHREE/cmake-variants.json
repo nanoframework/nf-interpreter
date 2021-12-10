@@ -32,6 +32,8 @@
           "TOOL_HEX2DFU_PREFIX": "<absolute-path-to-hex2dfu-mind-the-forward-slashes>",
           "RTOS": "AzureRTOS",
           "AZURERTOS_USBX_REQUIRED" : "ON",
+          "USBX_SOURCE_FOLDER": "",
+          "USBX_FEATURE_CDC": "ON",
           "TARGET_SERIES": "STM32F7xx",
           "RTOS_SOURCE_FOLDER": "",
           "TARGET_BOARD": "ORGPAL_PALTHREE",
