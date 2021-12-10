@@ -10,8 +10,7 @@
 #include <WireProtocol_Message.h>
 
 #if (HAL_USE_SERIAL_USB == TRUE)
-// TODO
-// #include "usbcfg.h"
+#include <usbcfg.h>
 #elif (HAL_USE_SERIAL == TRUE)
 #include <serialcfg.h>
 #endif
@@ -20,10 +19,6 @@
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
 extern uint32_t traceLoopCounter;
 #endif
-
-#if (HAL_USE_SERIAL_USB == TRUE)
-
-#elif (HAL_USE_SERIAL == TRUE)
 
 void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
@@ -82,10 +77,3 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     return operationResult;
 }
-
-#else
-
-#error                                                                                                                 \
-    "Wire Protocol needs a transport. Please make sure that HAL_USE_SERIAL and/or HAL_USE_SERIAL_USB are set to TRUE in 'halconf.h'"
-
-#endif

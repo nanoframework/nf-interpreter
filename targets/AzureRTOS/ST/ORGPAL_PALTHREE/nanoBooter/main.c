@@ -5,7 +5,6 @@
 
 #include <hal.h>
 #include <hal_nf_community.h>
-// #include <cmsis_os.h>
 
 #include <usbcfg.h>
 #include <targetHAL.h>
@@ -53,10 +52,6 @@ void tx_application_define(void *first_unused_memory)
 
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
-
-    // TODO
-    // starts the serial driver
-    // sdStart(&SERIAL_DRIVER, NULL);
 
 #if (HAL_NF_USE_STM32_CRC == TRUE)
     // startup crc
@@ -164,30 +159,17 @@ int main(void)
         }
     }
 
+    //  Initializes a serial-over-USB CDC driver.
+    sduObjectInit(&SERIAL_DRIVER);
+    sduStart(&SERIAL_DRIVER, &serusbcfg);
+
+    // Activates the USB driver and then the USB bus pull-up on D+.
+    // Note, a delay is inserted in order to not have to disconnect the cable after a reset.
+    usbDisconnectBus(serusbcfg.usbp);
+    osalThreadSleepS(OSAL_MS2I(100));
+    usbStart(serusbcfg.usbp, &usbcfg);
+    usbConnectBus(serusbcfg.usbp);
+
     // Enter the ThreadX kernel
     tx_kernel_enter();
 }
-
-// //  Application entry point.
-// int main(void)
-// {
-//     // in CLR this is called in nanoHAL_Initialize()
-//     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-//     BlockStorageList_Initialize();
-//     BlockStorage_AddDevices();
-
-//     // initialize configuration manager
-//     // in CLR this is called in nanoHAL_Initialize()
-//     // for nanoBooter we have to init it here to have access to network configuration blocks
-//     ConfigurationManager_Initialize();
-
-//     // report successfull nanoBooter execution
-//     ReportSuccessfullNanoBooter();
-
-//     //  Normal main() thread
-//     while (true)
-//     {
-//         palTogglePad(GPIOG, GPIOG_LED2);
-//         osDelay(500);
-//     }
-// }
