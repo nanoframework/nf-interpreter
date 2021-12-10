@@ -12,7 +12,7 @@
 #if (HAL_USBH_USE_MSD == TRUE)
 #include "usbh/dev/msd.h"
 #endif
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
 #include <hal_spiffs.h>
 #endif
 
@@ -398,7 +398,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -431,7 +431,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -598,7 +598,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -627,7 +627,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::WriteText___STATIC__V
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -790,7 +790,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -816,7 +816,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
@@ -1003,7 +1003,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
     FIL *fatFile = NULL;
     FRESULT operationResult;
 #endif
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
     spiffs_file *spiffsFile = NULL;
     spiffs *driveFs = NULL;
     int32_t driveIndex;
@@ -1029,7 +1029,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
 
         if (WORKING_DRIVE_IS_INTERNAL_DRIVE)
         {
-#if (NF_FEATURE_USE_SPIFFS_OPTION)
+#if NF_FEATURE_USE_SPIFFS_OPTION
             // SPIFFS drive workflow
 
             // get SPIFFS drive index...
