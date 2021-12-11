@@ -108,7 +108,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
         size_t largestFreeBlock;
 
         // check if we have any SPIRAM
-        size_t spiramMaxSize = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM);
+        size_t spiramMaxSize = heap_caps_get_largest_free_block(memoryCaps | MALLOC_CAP_SPIRAM);
 
         // Sanity check - Make sure there is at least managedHeapSize available in SPIRAM
         if (spiramMaxSize)
@@ -129,7 +129,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
             // allocate from internal RAM
 
             // find out how much can be allocated?
-            largestFreeBlock = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT);
+            largestFreeBlock = heap_caps_get_largest_free_block(memoryCaps);
 
             // get heap size to allocate
             managedHeapSize = largestFreeBlock - INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION;
