@@ -1,6 +1,9 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  repoDirectory: '$(Build.SourcesDirectory)'
+
 steps:
   - task: Cache@2
     inputs:
@@ -14,9 +17,9 @@ steps:
     condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
     displayName: Download Ninja
     inputs:
-        targetType: 'filePath'
-        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-ninja.ps1'
-        failOnStderr: 'true'
+      targetType: 'filePath'
+      filePath: '${{ parameters.repoDirectory }}\install-scripts\install-ninja.ps1'
+      failOnStderr: 'true'
 
   - task: ExtractFiles@1
     inputs:
