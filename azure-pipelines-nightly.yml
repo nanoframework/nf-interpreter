@@ -64,6 +64,12 @@ jobs:
             echo "##vso[task.setvariable variable=GO;isOutput=true]false"
           }
       }
+      elseif($env:Build_Reason -eq "PullRequest")
+      {
+          # build for PR
+          echo "##vso[task.setvariable variable=GO;isOutput=true]true"
+           "**build for pull request**" | Write-Host  
+      }
       else
       {
           # build for other reasons: build depending on target tag
