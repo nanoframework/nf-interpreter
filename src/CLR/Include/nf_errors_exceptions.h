@@ -169,4 +169,4 @@ typedef int HRESULT;
 
 // clang-format on
 
-#endif  // NF_ERRORS_H
+#endif // NF_ERRORS_H
