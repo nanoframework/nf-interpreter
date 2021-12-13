@@ -20,11 +20,13 @@ resources:
     
 # scheduled build
 schedules:
-- cron: "58 23 * * *"
-  branches:
-    include: [ develop ]
-  always: true
-  displayName: Nightly build at 23:58
+  - cron: "58 23 * * *"
+    branches:
+      include: [ develop ]
+    always: true
+    displayName: Nightly build at 23:58
+
+
 jobs:
 
 ##############################
@@ -64,6 +66,12 @@ jobs:
             "***************************************************" | Write-Host
             echo "##vso[task.setvariable variable=GO;isOutput=true]false"
           }
+      }
+      elseif($env:Build_Reason -eq "PullRequest")
+      {
+          # build for PR
+          echo "##vso[task.setvariable variable=GO;isOutput=true]true"
+           "**build for pull request**" | Write-Host  
       }
       else
       {
