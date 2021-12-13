@@ -3,6 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #ifndef NF_ERRORS_H
 #define NF_ERRORS_H
 
@@ -166,6 +167,6 @@ typedef int HRESULT;
 #define CLR_S_NO_THREADS                                MAKE_HRESULT(SEVERITY_SUCCESS, 0x0400, 0x0000)
 #define CLR_S_RESTART_EXECUTION                         MAKE_HRESULT(SEVERITY_SUCCESS, 0x0500, 0x0000)
 
-// clang-format off
+// clang-format on
 
 #endif  // NF_ERRORS_H
