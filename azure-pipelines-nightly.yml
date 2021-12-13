@@ -1,5 +1,9 @@
 trigger: none
-pr: none
+pr:
+  autoCancel: true
+  paths:
+    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md" ]
+
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
