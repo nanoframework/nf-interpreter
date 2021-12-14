@@ -1,5 +1,7 @@
 trigger: none
-pr: none
+
+pr:
+  autoCancel: true
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
@@ -21,6 +23,7 @@ schedules:
     include: [ develop ]
   always: true
   displayName: Nightly build at 23:58
+
 jobs:
 
 ##############################
@@ -84,13 +87,28 @@ jobs:
       }
       else
       {
-          $commitHistory = git log --name-status --since=1.day --format=
+          if($env:System_PullRequest_PullRequestId -ne $null)
+          {
+              # get files changed in PR, if this is a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-          # filter removed files              
-          $files = $commitHistory.where{$_[0] -ne 'D'}
+              # filter removed files              
+              $files = $commit.where{$_.status -ne 'removed'}
 
-          # get file names only
-          $files = $files | % {$_.SubString(2)}
+              # get file names only
+              $files = $files | % {$_.filename}
+          }
+          else
+          {
+              # scheduled build, grab repo history for the last day
+              $commitHistory = git log --name-status --since=1.day --format=
+
+              # filter removed files              
+              $files = $commitHistory.where{$_[0] -ne 'D'}
+
+              # get file names only
+              $files = $files | % {$_.SubString(2)}
+          }
 
           Write-host "Files changed:"
           $files | % { Write-host $_ }
@@ -120,7 +138,6 @@ jobs:
               
               Write-host "Building ALL targets"
           }
-
 
           if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
           {
