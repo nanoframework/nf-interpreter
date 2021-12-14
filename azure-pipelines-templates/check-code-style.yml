@@ -6,7 +6,7 @@ steps:
   - task: PowerShell@2
     name: Check_Code_Style
     displayName: Check code style
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       failOnStderr: false
       targetType: 'inline'
@@ -163,7 +163,7 @@ steps:
   - task: PowerShell@2
     name: Check_Code_Style_SKIP
     displayName: Check code style (SKIP)
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: eq(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       targetType: 'inline'
       script: exit 0

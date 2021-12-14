@@ -65,7 +65,7 @@ int main(void)
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
 
-#if NF_FEATURE_USE_SPIFFS
+#if (NF_FEATURE_USE_SPIFFS == TRUE)
     // config and init SPIFFS
     hal_spiffs_config();
 #endif
