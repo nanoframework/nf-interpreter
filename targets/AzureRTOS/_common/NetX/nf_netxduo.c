@@ -18,7 +18,7 @@ void _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 void  nx_stm32_eth_driver(NX_IP_DRIVER *driver_req_ptr);
 
 // byte pool for NetX Duo
-#define NX_APP_MEM_POOL_SIZE 1024 * 40
+#define NX_APP_MEM_POOL_SIZE 1024 * 15
 #if defined(__GNUC__)
 __attribute__((section(".NetXPoolSection")))
 #endif
