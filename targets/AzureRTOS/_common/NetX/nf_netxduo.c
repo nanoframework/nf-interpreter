@@ -95,7 +95,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
             ipAddress,
             networkMask,
             &pool_0,
-            nx_stm32_eth_driver,
+            NETXDUO_DRIVER,
             pointer,
             2 * DEFAULT_MEMORY_SIZE,
             DEFAULT_PRIORITY) != NX_SUCCESS)
