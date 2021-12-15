@@ -33,7 +33,7 @@ macro(nf_set_compile_options)
 
     # enable:
     # - FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE)
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE -DSTM32L4XX)
 
 endmacro()
 
