@@ -3,6 +3,8 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+
 #############################
 # network layer from NetX Duo
 if(RTOS_AZURERTOS_CHECK)
@@ -64,8 +66,11 @@ if(RTOS_AZURERTOS_CHECK)
         # need to replace some declarations and functions in STM32F4 HAL Cube package because they have a newer implementation 
         # in Azure RTOS package
         if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
-            set(ETH_INCLUDE_FILE ${stm32f7_cubepackage_SOURCE_DIR}/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_eth.h)
-            set(ETH_SOURCE_FILE ${stm32f7_cubepackage_SOURCE_DIR}/Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_eth.c)
+
+            FetchContent_GetProperties(stm32f7_hal_driver)
+
+            set(ETH_INCLUDE_FILE ${stm32f7_hal_driver_SOURCE_DIR}/Inc/stm32f7xx_hal_eth.h)
+            set(ETH_SOURCE_FILE ${stm32f7_hal_driver_SOURCE_DIR}/Src/stm32f7xx_hal_eth.c)
         else()
             message(FATAL_ERROR "Network support for NetX Duo is not implemented for ${TARGET_SERIES}.")
         endif()
@@ -232,18 +237,39 @@ if(RTOS_AZURERTOS_CHECK)
         "${BSD_INCLUDE_FILE}"
         BSD_INCLUDE_FILE_CONTENTS)
 
-    string(REPLACE
-        "/*
-        #define NX_BSD_ENABLE_DNS
-        */"
+    string(REGEX REPLACE
+        "\/\\*r?\n#define NX_BSD_ENABLE_DNS\r?\n\\*/"
         "#define NX_BSD_ENABLE_DNS"
         BSD_INCLUDE_FILE_FINAL_CONTENTS
         "${BSD_INCLUDE_FILE_CONTENTS}")
 
-    file(WRITE 
-        ${BSD_INCLUDE_FILE} 
+    # also need to replace this define here which is conflicting with another from STM32 HAL
+    string(REPLACE
+        "#define ERROR"
+        "#define NX_ERROR"
+        BSD_INCLUDE_FILE_FINAL_CONTENTS_2
         "${BSD_INCLUDE_FILE_FINAL_CONTENTS}")
 
+    file(WRITE 
+        ${BSD_INCLUDE_FILE} 
+        "${BSD_INCLUDE_FILE_FINAL_CONTENTS_2}")
+
+    # this requires also replacing it in nxd_bsd.c
+    set(BSD_SOURCE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.c)
+
+    file(READ
+        "${BSD_SOURCE_FILE}"
+        BSD_SOURCE_FILE_CONTENTS)
+
+    string(REPLACE
+        "(ERROR)"
+        "(NX_ERROR)"
+        BSD_SOURCE_FILE_FINAL_CONTENTS
+        "${BSD_SOURCE_FILE_CONTENTS}")
+
+    file(WRITE
+        ${BSD_SOURCE_FILE}
+        "${BSD_SOURCE_FILE_FINAL_CONTENTS}")
 
 #########################
 # network layer from lwIP
