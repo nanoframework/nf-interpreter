@@ -15,7 +15,6 @@ if(RTOS_AZURERTOS_CHECK)
     set(NF_Network_SRCS
 
         nf_netxduo.c
-        mx_eth_init.c
 
         #PAL Socket
         sockets_netx.cpp
@@ -42,6 +41,8 @@ if(RTOS_AZURERTOS_CHECK)
                 nx_stm32_eth_driver.c
                 nx_stm32_phy_driver.c
                 lan8742.c
+
+                mx_eth_init.c
 
                 stm32f7xx_hal_eth_extra.c
         )
@@ -109,6 +110,25 @@ if(RTOS_AZURERTOS_CHECK)
             ${ETH_SOURCE_FILE} 
             "${ETH_SOURCE_FILE_FINAL_CONTENTS_2}")
 
+    elseif("${NETX_DRIVER}" STREQUAL "ISM43362")
+
+        # add driver files to network sources
+        list(APPEND
+            NF_Network_SRCS
+  
+            es_wifi_io.c
+            es_wifi.c
+            wifi.c
+
+            nx_driver_stm32l4.c
+        )
+
+        # need this name in lower case
+        string(TOLOWER "${NETX_DRIVER}" NETX_DRIVER_1)
+
+        # add includes too
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
+
     elseif(NOT NETX_DRIVER OR "${NETX_DRIVER}" STREQUAL "")
         message(FATAL_ERROR "Need to set a driver for NetX Duo using NETX_DRIVER build option.")
     else()
@@ -136,6 +156,9 @@ if(RTOS_AZURERTOS_CHECK)
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_DRIVER_1}
+
+                # ISM43362
+                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek
 
                 ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
     
@@ -199,6 +222,27 @@ if(RTOS_AZURERTOS_CHECK)
 
     # endif()
 
+    FetchContent_GetProperties(azure_rtos_netxduo)
+
+    # need to replace definition to include BSDP in NetX Duo
+    set(BSD_INCLUDE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.h)
+
+    # need to read the supplied files and rename the call
+    file(READ
+        "${BSD_INCLUDE_FILE}"
+        BSD_INCLUDE_FILE_CONTENTS)
+
+    string(REPLACE
+        "/*
+        #define NX_BSD_ENABLE_DNS
+        */"
+        "#define NX_BSD_ENABLE_DNS"
+        BSD_INCLUDE_FILE_FINAL_CONTENTS
+        "${BSD_INCLUDE_FILE_CONTENTS}")
+
+    file(WRITE 
+        ${BSD_INCLUDE_FILE} 
+        "${BSD_INCLUDE_FILE_FINAL_CONTENTS}")
 
 
 #########################
