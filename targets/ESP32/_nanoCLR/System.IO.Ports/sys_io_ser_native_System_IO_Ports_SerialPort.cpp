@@ -63,6 +63,7 @@ void UnitializePalUart_sys(NF_PAL_UART *palUart)
         uart_event_t event;
         event.type = UART_EVENT_MAX;
         xQueueSend(palUart->UartEventQueue, &event, (portTickType)0);
+        palUart->UartEventTask = NULL;
 
         // free buffer memory
         platform_free(palUart->RxBuffer);
@@ -74,14 +75,6 @@ void UnitializePalUart_sys(NF_PAL_UART *palUart)
 
         // delete driver
         uart_driver_delete((uart_port_t)palUart->UartNum);
-
-        // delete task, if any
-        if (palUart->UartEventTask)
-        {
-            vTaskDelete(palUart->UartEventTask);
-        }
-
-        palUart->UartEventTask = NULL;
     }
 }
 
