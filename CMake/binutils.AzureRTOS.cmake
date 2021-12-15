@@ -84,7 +84,7 @@ macro(nf_add_platform_packages)
     endif()
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
-        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
+        # find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
     endif()
 
     if(MAXIM_MICROS_SDK_REQUIRED)
@@ -143,6 +143,13 @@ macro(nf_add_platform_dependencies target)
 
     # add_dependencies(threadx SETUP_AZURERTOS)
     #add_dependencies(${target}.elf azrtos::threadx)
+
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        # add library...
+        nf_add_stm32_cube()
+        #... and dependency
+        add_dependencies(${target}.elf nano::${TARGET_STM32_CUBE_PACKAGE}_CubePackage)
+    endif()
 
     # specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
@@ -220,7 +227,7 @@ macro(nf_add_platform_dependencies target)
                     ${AZRTOS_INCLUDES}
                     ${NETXDUO_INCLUDES}
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                    # ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
 
                 EXTRA_COMPILE_DEFINITIONS 
                     -DTX_INCLUDE_USER_DEFINE_FILE
@@ -254,6 +261,12 @@ macro(nf_add_platform_include_directories target)
         # ${SPIFFS_INCLUDE_DIRS}
     )
 
+    # if(STM32_CUBE_PACKAGE_REQUIRED)
+    #     target_include_directories(${target}.elf PUBLIC
+    #         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+    #     )
+    # endif()
+
     if(CHIBIOS_HAL_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_HAL_INCLUDE_DIRS}
@@ -261,13 +274,6 @@ macro(nf_add_platform_include_directories target)
         )
     endif()
 
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        target_include_directories(${target}.elf PUBLIC
-            ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-        )
-    endif()
-
-    
     if(CHIBIOS_CONTRIB_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
             ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
