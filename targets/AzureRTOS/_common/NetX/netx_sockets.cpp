@@ -204,67 +204,72 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
     // create m_interfaceNumber array
     int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
-    g_LWIP_SOCKETS_Driver.m_interfaces =
-        (LWIP_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA));
 
-    /* Initialize the target board lwIP stack */
-    nanoHAL_Network_Initialize();
-
-    for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
+    // sanity check for any interfaces
+    if(interfaceCount > 0)
     {
-        // load network interface configuration from storage
-        if (!ConfigurationManager_GetConfigurationBlock(
-                (void *)&networkConfiguration,
-                DeviceConfigurationOption_Network,
-                i))
+        g_LWIP_SOCKETS_Driver.m_interfaces =
+            (LWIP_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA));
+
+        /* Initialize the target board lwIP stack */
+        nanoHAL_Network_Initialize();
+
+        for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
         {
-            // failed to load configuration
-            // FIXME output error?
-            // move to the next, if any
-            continue;
-        }
-        _ASSERTE(networkConfiguration.StartupAddressMode > 0);
+            // load network interface configuration from storage
+            if (!ConfigurationManager_GetConfigurationBlock(
+                    (void *)&networkConfiguration,
+                    DeviceConfigurationOption_Network,
+                    i))
+            {
+                // failed to load configuration
+                // FIXME output error?
+                // move to the next, if any
+                continue;
+            }
+            _ASSERTE(networkConfiguration.StartupAddressMode > 0);
 
-        /* Bind and Open the Ethernet driver */
-        Network_Interface_Bind(i);
-        interfaceNumber = Network_Interface_Open(i);
+            /* Bind and Open the Ethernet driver */
+            Network_Interface_Bind(i);
+            interfaceNumber = Network_Interface_Open(i);
 
-        if (interfaceNumber == SOCK_SOCKET_ERROR)
-        {
-            DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
-            // FIXME			debug_printf("SocketError: %d\n", errorCode);
-            continue;
-        }
+            if (interfaceNumber == SOCK_SOCKET_ERROR)
+            {
+                DEBUG_HANDLE_SOCKET_ERROR("Network init", FALSE);
+                // FIXME			debug_printf("SocketError: %d\n", errorCode);
+                continue;
+            }
 
-        g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+            g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-        UpdateAdapterConfiguration(
-            i,
-            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
-            &networkConfiguration);
+            UpdateAdapterConfiguration(
+                i,
+                (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+                &networkConfiguration);
 
-        // TODO NETWORK
-        // netif_set_link_callback(networkInterface, Link_callback);
+            // TODO NETWORK
+            // netif_set_link_callback(networkInterface, Link_callback);
 
-        // if (netif_is_link_up(networkInterface))
-        // {
-        //     Link_callback(networkInterface);
-        // }
-        // netif_set_status_callback(networkInterface, Status_callback);
+            // if (netif_is_link_up(networkInterface))
+            // {
+            //     Link_callback(networkInterface);
+            // }
+            // netif_set_status_callback(networkInterface, Status_callback);
 
-        // if (netif_is_up(networkInterface))
-        // {
-        //     Status_callback(networkInterface);
-        // }
+            // if (netif_is_up(networkInterface))
+            // {
+            //     Status_callback(networkInterface);
+            // }
 
-        // default debugger interface
-        if (0 == i)
-        {
-            // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
-            //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2],
-            //                addr[3]);
-            // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1],
-            // addr[2], addr[3]);
+            // default debugger interface
+            if (0 == i)
+            {
+                // uint8_t* addr = (uint8_t*)&networkInterface->ip_addr.addr;
+                //                lcd_printf("\f\n\n\n\n\n\n\nip address: %d.%d.%d.%d\r\n", addr[0], addr[1], addr[2],
+                //                addr[3]);
+                // FIXME               debug_printf("ip address from interface info: %d.%d.%d.%d\r\n", addr[0], addr[1],
+                // addr[2], addr[3]);
+            }
         }
     }
 
