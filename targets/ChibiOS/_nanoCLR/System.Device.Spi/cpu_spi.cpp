@@ -337,10 +337,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     }
 
     // Create the low level configuration
-#if (SPI_SUPPORTS_CIRCULAR == TRUE)
-    llConfig->circular = SPI_USE_CIRCULAR;
-#endif
-    llConfig->end_cb = SpiCallback;
+    llConfig->data_cb = SpiCallback;
 
     // make sure the CS pin is properly configured as GPIO, output & pushpull
     palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
@@ -411,7 +408,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         // Clear callback if sync
         if (sync)
-            palSpi->Configuration.end_cb = NULL;
+            palSpi->Configuration.data_cb = NULL;
 
         if (writeBuffer != NULL)
         {
