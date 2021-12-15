@@ -9,6 +9,9 @@ include(STM32_CubePackage)
 # Set target series
 nf_set_stm32_target_series()
 
+# option to allow Wi-Fi support for STM32 targets
+option(STM32_WIFI_SUPPORT "Enable Wi-Fi support for STM32 targets")
+
 # (default is OFF so STM Cube package is NOT included)
 option(STM32_CUBE_PACKAGE_REQUIRED "option to include STM Cube package in the build")
 if(STM32_CUBE_PACKAGE_REQUIRED)

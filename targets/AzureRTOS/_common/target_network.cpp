@@ -7,6 +7,7 @@
 #include <nanoHAL.h>
 #include <nx_api.h>
 #include <nxd_bsd.h>
+#include <netxduo_options.h>
 
 // extern "C" struct netif *nf_getNetif();
 //

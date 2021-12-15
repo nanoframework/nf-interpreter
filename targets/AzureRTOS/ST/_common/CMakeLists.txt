@@ -28,6 +28,13 @@ if(NF_TRACE_TO_STDIO)
     list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_BASE_LOCATION}/target_stdio_config.c)
 endif()
 
+if(USE_NETWORKING_OPTION)
+
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/netxduo/netxduo_options.h.in
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/netxduo_options.h @ONLY)
+
+endif()
+
 # append hard fault handler if the build type is to include debug info
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     # list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hard_fault_handler.c)

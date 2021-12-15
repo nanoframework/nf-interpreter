@@ -39,6 +39,7 @@
           "CHIBIOS_HAL_REQUIRED": "ON",
           "CHIBIOS_HAL_SOURCE": "",
           "CHIBIOS_HAL_VERSION": "",
+          "STM32_WIFI_SUPPORT": "ON",
           "SWO_OUTPUT": "OFF",
           "SUPPORT_ANY_BASE_CONVERSION": "ON",
           "NF_FEATURE_DEBUGGER": "ON",
