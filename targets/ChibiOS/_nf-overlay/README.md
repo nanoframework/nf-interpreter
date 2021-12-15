@@ -3,7 +3,7 @@
 This folder contains code that _extends_ ChibiOS features/functionalities for the purpose of **nanoFramework**.
 ChibiOS core code is architecture to include seamless integration of third party code (HAL drivers, boards, etc). That is explained [here](http://wiki.chibios.org/dokuwiki/doku.php?id=chibios:community:guides:community_overlay).
 The structure below this folder mimics the structure and organization of ChibiOS Community overlay.
-Note that this is designed in a way that in order to use a specific driver, the only thing that a developer has to do is enable the corresponding define in the HAL configuration file at the target folder e.g. HAL_USE_STM32_FLASH in order to enable the flash driver.
+Note that this is designed in a way that in order to use a specific driver, the only thing that a developer has to do is enable the corresponding define in the HAL configuration file at the target folder e.g. HAL_NF_USE_STM32_FLASH in order to enable the flash driver.
 
 
 ## Adding components to **nanoFramework** overlay
