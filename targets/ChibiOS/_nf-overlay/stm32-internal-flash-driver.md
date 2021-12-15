@@ -4,7 +4,7 @@ This driver enables **nanoFramework** to access the internal flash for STM32 par
 
 In order to enable/use it the developer has to set HAL_NF_USE_STM32_FLASH to TRUE on the halconf_nf.h provided in the reference implementations.
 
-There are currently two versions of the driver:
+The following versions of the driver are available:
 - FLASHv1: suitable for F0 series
 - FLASHv2: suitable for F4 and F7 series
 - FLASHv3: suitable for L0 series

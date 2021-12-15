@@ -52,7 +52,7 @@ endif()
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the include directory(ies) below 
 ####################################################################################
 # component STM32_FLASH
-list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv3) ### TODO... Correct version???
+list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2)
 # component STM32_CRC
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1)
 # component STM32_RNG
@@ -73,7 +73,7 @@ list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-ove
 # WHEN ADDING A NEW CHIBIOS OVERLAY component add the source file(s) specific to this series below 
 ####################################################################################################
 # component STM32_FLASH
-list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv3/flash_lld.c) ### TODO... Correct version???
+list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/FLASHv2/flash_lld.c)
 # component STM32_CRC
 list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/ports/STM32/LLD/CRCv1/crc_lld.c)
 # component STM32_RNG
