@@ -51,8 +51,7 @@ else()
 
         FetchContent_Declare(
             CODALMicroBitV2
-            GIT_REPOSITORY ${CODAL_MICROBIT_V2_SOURCE_FOLDER}
-            GIT_TAG ${CODAL_MICROBIT_V2_VERSION}
+            SOURCE_DIR ${CODAL_MICROBIT_V2_SOURCE_FOLDER}
         )
 
     else()
@@ -108,8 +107,7 @@ else()
 
         FetchContent_Declare(
             CodalCore
-            GIT_REPOSITORY ${CODAL_CORE_SOURCE_FOLDER}
-            GIT_TAG ${CODAL_CORE_VERSION}
+            SOURCE_DIR ${CODAL_CORE_SOURCE_FOLDER}
         )
 
     else()
@@ -165,8 +163,7 @@ else()
 
         FetchContent_Declare(
             CodalNrf52
-            GIT_REPOSITORY ${CODAL_NRF52_SOURCE_FOLDER}
-            GIT_TAG ${CODAL_NRF52_VERSION}
+            SOURCE_DIR ${CODAL_NRF52_SOURCE_FOLDER}
         )
 
     else()
@@ -222,8 +219,7 @@ else()
 
         FetchContent_Declare(
             CodalMicrobitNrf5Sdk
-            GIT_REPOSITORY ${CODAL_MICROBIT_NRF5SDK_SOURCE_FOLDER}
-            GIT_TAG ${CODAL_MICROBIT_NRF5SDK_VERSION}
+            SOURCE_DIR ${CODAL_MICROBIT_NRF5SDK_SOURCE_FOLDER}
         )
 
     else()

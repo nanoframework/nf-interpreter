@@ -51,8 +51,7 @@ else()
 
         FetchContent_Declare(
             pico_sdk
-            GIT_REPOSITORY ${RPI_PICO_SDK_SOURCE_FOLDER}
-            GIT_TAG ${RPI_PICO_SDK_VERSION}
+            SOURCE_DIR ${RPI_PICO_SDK_SOURCE_FOLDER}
         )
 
     else()

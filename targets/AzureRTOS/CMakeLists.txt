@@ -83,8 +83,7 @@ else()
 
         FetchContent_Declare(
             azure_rtos
-            GIT_REPOSITORY $(RTOS_SOURCE_FOLDER)
-            GIT_TAG ${RTOS_VERSION}
+            SOURCE_DIR $(RTOS_SOURCE_FOLDER)
         )
 
     else()
@@ -130,8 +129,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_usbx
-            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
-            GIT_TAG ${USBX_VERSION}
+            SOURCE_DIR https://github.com/azure-rtos/usbx.git
         )
 
     else()
@@ -143,8 +141,7 @@ if(AZURERTOS_USBX_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_usbx
-                GIT_REPOSITORY $(USBX_SOURCE_FOLDER)
-                GIT_TAG ${USBX_VERSION}
+                SOURCE_DIR $(USBX_SOURCE_FOLDER)
             )
 
         else()
@@ -206,8 +203,7 @@ if(AZURERTOS_FILEX_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_filex
-                GIT_REPOSITORY $(FILEX_SOURCE_FOLDER)
-                GIT_TAG ${FILEX_VERSION}
+                SOURCE_DIR $(FILEX_SOURCE_FOLDER)
             )
 
         else()
@@ -268,8 +264,7 @@ if(AZURERTOS_NETXDUO_REQUIRED)
 
             FetchContent_Declare(
                 azure_rtos_netxduo
-                GIT_REPOSITORY $(NETXDUO_SOURCE_FOLDER)
-                GIT_TAG ${NETXDUO_VERSION}
+                SOURCE_DIR $(NETXDUO_SOURCE_FOLDER)
             )
 
         else()

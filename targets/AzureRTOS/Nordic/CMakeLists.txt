@@ -48,8 +48,7 @@ else()
 
         FetchContent_Declare(
             nRFConnectSdk
-            GIT_REPOSITORY ${NRF_CONNECT_SDK_SOURCE_FOLDER}
-            GIT_TAG ${NRF_CONNECT_SDK_VERSION}
+            SOURCE_DIR ${NRF_CONNECT_SDK_SOURCE_FOLDER}
         )
 
     else()

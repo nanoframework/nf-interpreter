@@ -53,8 +53,7 @@ else()
 
         FetchContent_Declare(
             maxim_micros_sdk
-            GIT_REPOSITORY ${MAXIM_MICROS_SDK_SOURCE_FOLDER}
-            GIT_TAG ${MAXIM_MICROS_SDK_VERSION}
+            SOURCE_DIR ${MAXIM_MICROS_SDK_SOURCE_FOLDER}
         )
 
     else()
@@ -117,8 +116,7 @@ else()
        
         FetchContent_Declare(
             cmsis
-            GIT_REPOSITORY ${CMSIS_SOURCE}
-            GIT_TAG ${CMSIS_GIT_TAG}
+            SOURCE_DIR ${CMSIS_SOURCE}
         )
     else()
         message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")

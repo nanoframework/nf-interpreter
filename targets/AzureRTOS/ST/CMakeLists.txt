@@ -70,8 +70,7 @@ else()
 
             FetchContent_Declare(
                 chibios
-                GIT_REPOSITORY ${CHIBIOS_HAL_SOURCE}
-                GIT_TAG master
+                SOURCE_DIR ${CHIBIOS_HAL_SOURCE}
             )
 
         endif()

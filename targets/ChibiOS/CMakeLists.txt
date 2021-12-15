@@ -45,6 +45,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE AzureRTOS\ST\CMakeLists.txt
     set(RTOS_VERSION "stable_21.6.x")
 endif()
 
