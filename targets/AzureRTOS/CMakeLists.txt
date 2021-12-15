@@ -12,7 +12,7 @@ include(binutils.AzureRTOS)
 # build options
 option(AZURERTOS_USBX_REQUIRED "option to include Azure RTOS USBX")
 option(AZURERTOS_FILEX_REQUIRED "option to include Azure RTOS FileX")
-option(AZURERTOS_FILEX_REQUIRED "option to include Azure RTOS NetX Duo")
+option(AZURERTOS_NETXDUO_REQUIRED "option to include Azure RTOS NetX Duo")
 option(USBX_FEATURE_CDC "option to use USBX CDC class")
 
 if(USBX_FEATURE_CDC)
@@ -30,6 +30,9 @@ else()
     set(USBX_FEATURE_CDC_OPTION FALSE CACHE INTERNAL "USBX_FEATURE_CDC_OPTION for USBX_FEATURE_CDC")
 endif()
 
+if(USE_NETWORKING_OPTION)
+    set(AZURERTOS_NETXDUO_REQUIRED ON CACHE INTERNAL "AZURERTOS_NETXDUO_REQUIRED for Networking")
+endif()
 
 ###########################
 # Define PLATFORM base path
@@ -149,9 +152,6 @@ if(AZURERTOS_USBX_REQUIRED)
         endif()
 
     endif()
-
-    # enable BSD layer in NetX Duo
-    set(NXD_ENABLE_BSD TRUE)
 
     FetchContent_Populate(azure_rtos_usbx)
 
@@ -277,6 +277,9 @@ if(AZURERTOS_NETXDUO_REQUIRED)
         endif()
 
     endif()
+
+    # enable BSD layer in NetX Duo
+    set(NXD_ENABLE_BSD TRUE)
 
     FetchContent_Populate(azure_rtos_netxduo)
 
