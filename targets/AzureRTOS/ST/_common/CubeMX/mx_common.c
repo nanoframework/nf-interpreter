@@ -6,11 +6,11 @@
 
 // clang-format off
 
-#include <mx_common.h>
+// #include <mx_common.h>
 
-void Error_Handler(void)
-{
-    HARD_Breakpoint();
-}
+// void Error_Handler(void)
+// {
+//     HARD_Breakpoint();
+// }
 
 // clang-format on

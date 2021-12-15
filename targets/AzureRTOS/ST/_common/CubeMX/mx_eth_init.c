@@ -71,4 +71,9 @@ void ETH_IRQHandler(void)
   /* USER CODE END ETH_IRQn 1 */
 }
 
+void Error_Handler(void)
+{
+    HARD_Breakpoint();
+}
+
 // clang-format on

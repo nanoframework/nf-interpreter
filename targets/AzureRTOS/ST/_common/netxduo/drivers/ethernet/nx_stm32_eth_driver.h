@@ -22,6 +22,13 @@
 extern   "C" {
 #endif
 
+#ifdef STM32L4XX
+#include <stm32l4xx_hal.h>
+#elif defined(STM32F7XX)
+#include <stm32f7xx_hal.h>
+#else
+#error "Missing define with series name"
+#endif
 
 /* Include ThreadX header file, if not already.  */
 

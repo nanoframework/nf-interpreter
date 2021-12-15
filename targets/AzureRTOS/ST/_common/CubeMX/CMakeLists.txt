@@ -3,10 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-if(STM32_CUBE_PACKAGE_REQUIRED)
-    list(APPEND TARGET_AZURERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mx_common.c)
-endif()
-
 # append include directory for target Azure RTOS
 list(APPEND TARGET_AZURERTOS_COMMON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 
