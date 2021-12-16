@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 /**
  * @file nanoHAL_Boot.h
  * @brief Bootloader
@@ -16,7 +15,7 @@
  * @defgroup nanoFramework interpreter Boot
  * @ingroup nanoFramework
  * @brief Boot interface.
- * 
+ *
  * @{
  */
 
@@ -52,7 +51,6 @@ typedef enum BootExecution_Options
     BootRequest_Error = 2,
 } BootExecution_Options;
 
-
 /**
  * @brief Holds the information to be passed to and from nanoCLR and nanoBooter
  * placed at a known fixed RAM address so both apps know where to look for it.
@@ -71,7 +69,7 @@ typedef struct __nfpack BootClipboard
     VersionInfo CLRVersion;
 
     /* padding to keep the struct aligned
-     * and keep space available for future expansion 
+     * and keep space available for future expansion
      */
     uint8_t padding[14];
 
