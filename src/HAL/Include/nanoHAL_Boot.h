@@ -3,8 +3,22 @@
 // See LICENSE file in the project root for full license information.
 //
 
+
+/**
+ * @file nanoHAL_Boot.h
+ * @brief Bootloader
+ * @ingroup nanoHAL
+ */
 #ifndef NANOHAL_BOOT_H
 #define NANOHAL_BOOT_H
+
+/**
+ * @defgroup nanoFramework interpreter Boot
+ * @ingroup nanoFramework
+ * @brief Boot interface.
+ * 
+ * @{
+ */
 
 #include <nanoCLR_Headers.h>
 #include <nanoPackStruct.h>
@@ -15,9 +29,12 @@
 #error "Can't find definition for TARGET_HAS_NANOBOOTER. Check the inclusion of 'target_os.h'"
 #endif
 
-// magic value to mark the limits of the boot clipboard data area
+/** @brief Magic value to mark the limits of the boot clipboard data area */
 #define BOOTCLIPBOARD_MAGIC_MARKER 0x4F41A583
 
+/**
+ * @brief Valid boot request options
+ */
 typedef enum BootRequest_Options
 {
     BootRequest_Invalid = 0,
@@ -25,6 +42,9 @@ typedef enum BootRequest_Options
     BootRequest_ProprietaryBootloader = 2,
 } BootRequest_Options;
 
+/**
+ * @brief Valid boot execution options
+ */
 typedef enum BootExecution_Options
 {
     BootExecution_Unknown = 0,
@@ -32,11 +52,14 @@ typedef enum BootExecution_Options
     BootRequest_Error = 2,
 } BootExecution_Options;
 
-// This struct holds the information to be passed to and from nanoCLR and nanoBooter
-// It's placed at a known fixed RAM address so both apps know where to look for it.
+
+/**
+ * @brief Holds the information to be passed to and from nanoCLR and nanoBooter
+ * placed at a known fixed RAM address so both apps know where to look for it.
+ */
 typedef struct __nfpack BootClipboard
 {
-    // to be hold the magic marker value
+    /* to be hold the magic marker value */
     uint32_t StartMarker;
 
     BootRequest_Options BootRequest;
@@ -47,11 +70,12 @@ typedef struct __nfpack BootClipboard
     VersionInfo BooterVersion;
     VersionInfo CLRVersion;
 
-    // padding to keep the struct aligned
-    // and keep space available for future expansion
+    /* padding to keep the struct aligned
+     * and keep space available for future expansion 
+     */
     uint8_t padding[14];
 
-    // to be hold the magic marker value
+    /* to be hold the magic marker value */
     uint32_t EndMarker;
 } BootClipboard;
 
@@ -64,28 +88,29 @@ extern "C"
 
     void InitBootClipboard();
 
-    // Launches the proprietary bootloader of the platform.
-    // Returns false in case it's not supported (which is considered the default).
-    // In case of a successfull call it won't return.
-    // Implemented as "weak" to allow it to be replaced with "hard" implementation at platform level.
+    /* Launches the proprietary bootloader of the platform.
+     * Returns false in case it's not supported (which is considered the default).
+     * In case of a successfull call it won't return.
+     * Implemented as "weak" to allow it to be replaced with "hard" implementation at platform level. */
     bool LaunchProprietaryBootloader();
 
-    // Returns true if the there is a request to remain in nanoBooter
+    /* Returns true if the there is a request to remain in nanoBooter */
     bool IsToRemainInBooter();
 
-    // Request to launch nanoBooter
-    // Returns false in case it's not supported (which is considered the default).
+    /* Request to launch nanoBooter
+     * Returns false in case it's not supported (which is considered the default). */
     bool RequestToLaunchNanoBooter();
 
-    // Request to launch proprietary bootloader
-    // Returns false in case it's not supported (which is considered the default).
+    /* Request to launch proprietary bootloader
+     * Returns false in case it's not supported (which is considered the default). */
     bool RequestToLaunchProprietaryBootloader();
 
-    // Report successfull nanoBooter execution
+    /* Report successfull nanoBooter execution. */
     void ReportSuccessfullNanoBooter();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // NANOHAL_BOOT_H
+/** @} */
+#endif /* NANOHAL_BOOT_H */
