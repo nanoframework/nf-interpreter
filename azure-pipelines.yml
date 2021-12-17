@@ -1071,7 +1071,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         or(
           eq(variables['Build.SourceBranchName'], 'main'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
@@ -1087,7 +1087,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         not(
           or(
             eq(variables['Build.SourceBranchName'], 'main'),
@@ -1144,9 +1144,7 @@ jobs:
       succeeded('Build_TI_SimpleLink_targets'),
       succeeded('Build_Azure_RTOS_targets'),
       succeeded('Generate_change_log'),
-      not(
-        eq(variables['Build.Reason'], 'PullRequest')
-      ),
+      eq(variables['System.PullRequest.PullRequestId'], ''),
       or(
         endsWith(variables['Build.SourceBranchName'], 'main'),
         startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
