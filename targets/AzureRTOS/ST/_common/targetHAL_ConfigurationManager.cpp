@@ -541,7 +541,7 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
 
 //  Default initialisation for wireless config block
 // it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
-__nfweak bool InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, uint32_t configurationIndex)
+__nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, uint32_t configurationIndex)
 {
     memset(config, 0, sizeof(HAL_Configuration_Wireless80211));
 
@@ -556,13 +556,11 @@ __nfweak bool InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *c
     //     (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect
     //     | Wireless80211Configuration_ConfigurationOptions_Enable |
     //     Wireless80211Configuration_ConfigurationOptions_SmartConfig);
-
-    return true;
 }
 
 //  Default initialisation for Network interface config blocks
 // it's implemented with 'weak' attribute so it can be replaced at target level if different configurations are intended
-__nfweak void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
+__nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, uint32_t configurationIndex)
 {
     (void)configurationIndex;
 
@@ -583,13 +581,14 @@ __nfweak void InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     WIFI_GetMAC_Address(config->MacAddress);
 #endif
 
+    return TRUE;
 #else
 
     (void)config;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
 
+    return FALSE;
 #endif
 
-    return;
 }
