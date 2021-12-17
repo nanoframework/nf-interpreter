@@ -142,7 +142,11 @@ void ConfigStorage_GetConfigFileName(
 //
 // Return :handle
 //
-FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool isWrite, bool isAppend)
+FILE *ConfigStorage_OpenFile(
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    bool isWrite,
+    bool isAppend)
 {
     // buffer for file name
     // add extra position for terminator
