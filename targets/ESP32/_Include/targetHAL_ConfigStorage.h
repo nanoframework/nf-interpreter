@@ -26,13 +26,14 @@ extern "C"
     // Parameters:-
     //   configuration      : Type of configuration block to open
     //   configurationIndex : Index of type to open
-    //   write              : True to create/overwrite file
+    //   isWrite            : flag to signal writting to the file
+    //   isAppend           : flag to signal appending to the file
     //
     // Return :-
     //    true  : returns handle
     //    false -1
     //
-    FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool write);
+    FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool isWrite, bool isAppend);
 
     //
     //  ConfigStorage_CloseFile - Close opened file / NVS system
@@ -71,6 +72,20 @@ extern "C"
     //    false- Error/Not found
     //
     bool ConfigStorage_WriteFile(FILE *handle, uint8_t *pData, int32_t writeSize);
+
+    //
+    //  ConfigStorage_AppendFile -  Append data to file system
+    //
+    // Parameters:-
+    //   handle    : Handle returned from ConfigStorage_OpenFile
+    //   pData     : Pointer data to write
+    //   writeSize : Size of data to write
+    //
+    // return:-
+    //    true - OK
+    //    false- Error/Not found
+    //
+    bool ConfigStorage_AppendFile(FILE *handle, uint8_t *pData, int32_t writeSize);
 
     //
     // ConfigStorage_ReadFile - Read the data from opened file
