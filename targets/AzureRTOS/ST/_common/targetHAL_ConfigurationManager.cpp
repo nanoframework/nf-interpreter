@@ -10,7 +10,7 @@
 #include <netxduo_options.h>
 
 #if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-#include <wifi.h>
+//#include <wifi.h>
 #endif
 
 uint32_t GetExistingConfigSize()
@@ -578,7 +578,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
 
 // get default MAC
 #if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-    WIFI_GetMAC_Address(config->MacAddress);
+//    WIFI_GetMAC_Address(config->MacAddress);
 #endif
 
     return TRUE;
