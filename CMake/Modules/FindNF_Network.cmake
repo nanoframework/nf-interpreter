@@ -229,7 +229,7 @@ if(RTOS_AZURERTOS_CHECK)
 
     FetchContent_GetProperties(azure_rtos_netxduo)
 
-    # need to replace definition to include BSDP in NetX Duo
+    # need to replace this define here which is conflicting with another from STM32 HAL
     set(BSD_INCLUDE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.h)
 
     # need to read the supplied files and rename the call
@@ -237,22 +237,15 @@ if(RTOS_AZURERTOS_CHECK)
         "${BSD_INCLUDE_FILE}"
         BSD_INCLUDE_FILE_CONTENTS)
 
-    string(REGEX REPLACE
-        "\/\\*r?\n#define NX_BSD_ENABLE_DNS\r?\n\\*/"
-        "#define NX_BSD_ENABLE_DNS"
-        BSD_INCLUDE_FILE_FINAL_CONTENTS
-        "${BSD_INCLUDE_FILE_CONTENTS}")
-
-    # also need to replace this define here which is conflicting with another from STM32 HAL
     string(REPLACE
         "#define ERROR"
         "#define NX_ERROR"
-        BSD_INCLUDE_FILE_FINAL_CONTENTS_2
-        "${BSD_INCLUDE_FILE_FINAL_CONTENTS}")
+        BSD_INCLUDE_FILE_FINAL_CONTENTS
+        "${BSD_INCLUDE_FILE_CONTENTS}")
 
     file(WRITE 
         ${BSD_INCLUDE_FILE} 
-        "${BSD_INCLUDE_FILE_FINAL_CONTENTS_2}")
+        "${BSD_INCLUDE_FILE_FINAL_CONTENTS}")
 
     # this requires also replacing it in nxd_bsd.c
     set(BSD_SOURCE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.c)

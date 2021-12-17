@@ -713,6 +713,8 @@
    NX_ENABLE_INTERFACE_CAPABILITY must be defined to enable this feature.  */
 #define NX_ENABLE_TCPIP_OFFLOAD
 
+#define NX_BSD_ENABLE_DNS
+
 #endif
 
 // clang-format on
