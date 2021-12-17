@@ -40,7 +40,7 @@ endif()
 if(CHIBIOS_HAL_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(CHIBIOS_HAL_VERSION "stable_21.6.x")
+    set(CHIBIOS_HAL_VERSION "stable_21.11.x")
 endif()
 
 if(NO_CHIBIOS_HAL_SOURCE)
