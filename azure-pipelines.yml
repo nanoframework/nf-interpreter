@@ -801,6 +801,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=STM32L4xx
           -DRTOS=AzureRTOS
+          -DNETX_DRIVER="ISM43362"
           -DCHIBIOS_HAL_REQUIRED=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_DEBUGGER=ON
@@ -809,7 +810,7 @@ jobs:
           -DAPI_System.Math=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
           -DAPI_System.Device.Gpio=ON
-          -DAPI_System.Net=OFF
+          -DAPI_System.Net=ON
           -DAPI_Windows.Storage=OFF
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.SerialCommunication=ON
@@ -831,6 +832,7 @@ jobs:
           -DSTM32_CUBE_PACKAGE_REQUIRED=ON
           -DAZURERTOS_USBX_REQUIRED=OFF
           -DUSBX_FEATURE_CDC=OFF
+          -DNETX_DRIVER="LAN8742"
           -DCHIBIOS_HAL_REQUIRED=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DNF_FEATURE_USE_SPIFFS=OFF
@@ -840,7 +842,7 @@ jobs:
           -DAPI_System.Math=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
           -DAPI_System.Device.Gpio=ON
-          -DAPI_System.Net=OFF
+          -DAPI_System.Net=ON
           -DAPI_Windows.Storage=OFF
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.SerialCommunication=ON
