@@ -158,7 +158,6 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_coreclr(
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
@@ -170,7 +169,6 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_wireprotocol(
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
@@ -184,7 +182,6 @@ macro(nf_add_platform_dependencies target)
             nf_add_lib_debugger(
                 EXTRA_INCLUDES
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${ChibiOSnfOverlay_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${CHIBIOS_HAL_INCLUDE_DIRS}
                     ${azure_rtos_SOURCE_DIR}/common/inc
