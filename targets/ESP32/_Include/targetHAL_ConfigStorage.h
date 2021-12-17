@@ -33,7 +33,11 @@ extern "C"
     //    true  : returns handle
     //    false -1
     //
-    FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool isWrite, bool isAppend);
+    FILE *ConfigStorage_OpenFile(
+        DeviceConfigurationOption configuration,
+        uint32_t configurationIndex,
+        bool isWrite,
+        bool isAppend);
 
     //
     //  ConfigStorage_CloseFile - Close opened file / NVS system
