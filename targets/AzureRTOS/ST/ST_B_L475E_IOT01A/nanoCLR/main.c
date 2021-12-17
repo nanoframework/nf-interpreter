@@ -55,6 +55,9 @@ void tx_application_define(void *first_unused_memory)
     // start watchdog
     Watchdog_Init();
 
+    // turn LED2 off
+    palClearPad(GPIOB, GPIOB_LD2);
+
 #if (HAL_NF_USE_STM32_CRC == TRUE)
     // startup crc
     crcStart(NULL);

@@ -117,7 +117,7 @@
 #define GPIOC_OTG_FS_OVCURR         10U
 #define GPIOC_OTG_FS_VBUS           11U
 #define GPIOC_OTG_FS_ID             12U
-#define GPIOC_MFX_IRQ_OUT           13U
+#define GPIOC_BUTTON_USER           13U
 #define GPIOC_OSC32_IN              14U
 #define GPIOC_OSC32_OUT             15U
 
@@ -256,7 +256,7 @@
 #define LINE_OTG_FS_OVCURR          PAL_LINE(GPIOC, 10U)
 #define LINE_OTG_FS_VBUS            PAL_LINE(GPIOC, 11U)
 #define LINE_OTG_FS_ID              PAL_LINE(GPIOC, 12U)
-#define LINE_MFX_IRQ_OUT            PAL_LINE(GPIOC, 13U)
+#define LINE_BUTTON_USER            PAL_LINE(GPIOC, 13U)
 #define LINE_OSC32_IN               PAL_LINE(GPIOC, 14U)
 #define LINE_OSC32_OUT              PAL_LINE(GPIOC, 15U)
 #define LINE_EXT_RST                PAL_LINE(GPIOD, 0U)
@@ -650,7 +650,7 @@
  * PC10 - OTG_FS_OVCURR             (input floating).
  * PC11 - OTG_FS_VBUS               (input floating).
  * PC12 - OTG_FS_ID                 (alternate 10).
- * PC13 - MFX_IRQ_OUT               (input pulldown).
+ * PC13 - BUTTON_USER               (input floating).
  * PC14 - OSC32_IN                  (input floating).
  * PC15 - OSC32_OUT                 (input floating).
  */
@@ -667,7 +667,7 @@
                                      PIN_MODE_INPUT(GPIOC_OTG_FS_OVCURR) |  \
                                      PIN_MODE_INPUT(GPIOC_OTG_FS_VBUS) |    \
                                      PIN_MODE_ALTERNATE(GPIOC_OTG_FS_ID) |  \
-                                     PIN_MODE_INPUT(GPIOC_MFX_IRQ_OUT) |    \
+                                     PIN_MODE_INPUT(GPIOC_BUTTON_USER) |    \
                                      PIN_MODE_INPUT(GPIOC_OSC32_IN) |       \
                                      PIN_MODE_INPUT(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOC_MAG_CS) |     \
@@ -683,7 +683,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_OVCURR) |\
                                      PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_VBUS) |\
                                      PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_ID) |  \
-                                     PIN_OTYPE_PUSHPULL(GPIOC_MFX_IRQ_OUT) |\
+                                     PIN_OTYPE_PUSHPULL(GPIOC_BUTTON_USER) |\
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_IN) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_OSPEEDR           (PIN_OSPEED_HIGH(GPIOC_MAG_CS) |        \
@@ -699,7 +699,7 @@
                                      PIN_OSPEED_HIGH(GPIOC_OTG_FS_OVCURR) | \
                                      PIN_OSPEED_HIGH(GPIOC_OTG_FS_VBUS) |   \
                                      PIN_OSPEED_HIGH(GPIOC_OTG_FS_ID) |     \
-                                     PIN_OSPEED_HIGH(GPIOC_MFX_IRQ_OUT) |   \
+                                     PIN_OSPEED_HIGH(GPIOC_BUTTON_USER) |   \
                                      PIN_OSPEED_VERYLOW(GPIOC_OSC32_IN) |   \
                                      PIN_OSPEED_VERYLOW(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_PUPDR             (PIN_PUPDR_PULLUP(GPIOC_MAG_CS) |       \
@@ -715,7 +715,7 @@
                                      PIN_PUPDR_FLOATING(GPIOC_OTG_FS_OVCURR) |\
                                      PIN_PUPDR_FLOATING(GPIOC_OTG_FS_VBUS) |\
                                      PIN_PUPDR_FLOATING(GPIOC_OTG_FS_ID) |  \
-                                     PIN_PUPDR_PULLDOWN(GPIOC_MFX_IRQ_OUT) |\
+                                     PIN_PUPDR_FLOATING(GPIOC_BUTTON_USER) |\
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_IN) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_ODR               (PIN_ODR_HIGH(GPIOC_MAG_CS) |           \
@@ -731,7 +731,7 @@
                                      PIN_ODR_HIGH(GPIOC_OTG_FS_OVCURR) |    \
                                      PIN_ODR_HIGH(GPIOC_OTG_FS_VBUS) |      \
                                      PIN_ODR_HIGH(GPIOC_OTG_FS_ID) |        \
-                                     PIN_ODR_HIGH(GPIOC_MFX_IRQ_OUT) |      \
+                                     PIN_ODR_HIGH(GPIOC_BUTTON_USER) |      \
                                      PIN_ODR_HIGH(GPIOC_OSC32_IN) |         \
                                      PIN_ODR_HIGH(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_AFRL              (PIN_AFIO_AF(GPIOC_MAG_CS, 0U) |        \
@@ -747,7 +747,7 @@
                                      PIN_AFIO_AF(GPIOC_OTG_FS_OVCURR, 0U) | \
                                      PIN_AFIO_AF(GPIOC_OTG_FS_VBUS, 0U) |   \
                                      PIN_AFIO_AF(GPIOC_OTG_FS_ID, 10U) |    \
-                                     PIN_AFIO_AF(GPIOC_MFX_IRQ_OUT, 0U) |   \
+                                     PIN_AFIO_AF(GPIOC_BUTTON_USER, 0U) |   \
                                      PIN_AFIO_AF(GPIOC_OSC32_IN, 0U) |      \
                                      PIN_AFIO_AF(GPIOC_OSC32_OUT, 0U))
 #define VAL_GPIOC_ASCR              (PIN_ASCR_DISABLED(GPIOC_MAG_CS) |      \
@@ -763,7 +763,7 @@
                                      PIN_ASCR_DISABLED(GPIOC_OTG_FS_OVCURR) |\
                                      PIN_ASCR_DISABLED(GPIOC_OTG_FS_VBUS) | \
                                      PIN_ASCR_DISABLED(GPIOC_OTG_FS_ID) |   \
-                                     PIN_ASCR_DISABLED(GPIOC_MFX_IRQ_OUT) | \
+                                     PIN_ASCR_DISABLED(GPIOC_BUTTON_USER) | \
                                      PIN_ASCR_DISABLED(GPIOC_OSC32_IN) |    \
                                      PIN_ASCR_DISABLED(GPIOC_OSC32_OUT))
 #define VAL_GPIOC_LOCKR             (PIN_LOCKR_DISABLED(GPIOC_MAG_CS) |     \
@@ -779,7 +779,7 @@
                                      PIN_LOCKR_DISABLED(GPIOC_OTG_FS_OVCURR) |\
                                      PIN_LOCKR_DISABLED(GPIOC_OTG_FS_VBUS) |\
                                      PIN_LOCKR_DISABLED(GPIOC_OTG_FS_ID) |  \
-                                     PIN_LOCKR_DISABLED(GPIOC_MFX_IRQ_OUT) |\
+                                     PIN_LOCKR_DISABLED(GPIOC_BUTTON_USER) |\
                                      PIN_LOCKR_DISABLED(GPIOC_OSC32_IN) |   \
                                      PIN_LOCKR_DISABLED(GPIOC_OSC32_OUT))
 

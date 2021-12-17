@@ -133,8 +133,7 @@ int main(void)
     if (!IsToRemainInBooter())
     {
         // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-        // TODO
-        // if (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
+        if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address
