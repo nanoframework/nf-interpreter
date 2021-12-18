@@ -208,7 +208,18 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: >-
+    and(
+      ne(variables['Build.Reason'], 'Schedule'),
+      not(
+        or(
+          eq(variables['BUILD_ALL'], 'true'),
+          eq(variables['BUILD_CHIBIOS'], 'true'),
+          eq(variables['BUILD_ESP32'], 'true'),
+          eq(variables['BUILD_TI'], 'true')
+        )
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
