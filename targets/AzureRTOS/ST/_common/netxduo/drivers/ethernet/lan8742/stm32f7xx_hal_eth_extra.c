@@ -5,7 +5,7 @@
 //
 
 // This was taken from the Azure RTOS Cube MX package.
-// Seems that this code hasn't been included in the SMT32F7 HAL package.
+// Seems that this code hasn't been included in the SMT32F7 HAL package. Waiting for version >=1.3.0
 
 #include "stm32f7xx_hal.h"
 
@@ -59,24 +59,21 @@ void HAL_ETH_SetMDIOClockRange(ETH_HandleTypeDef *heth)
 }
 
 /**
-  * @brief  Reads a PHY register
-  * @param  heth pointer to a ETH_HandleTypeDef structure that contains
-  *         the configuration information for ETHERNET module                  
-  * @param PHYReg PHY register address, is the index of one of the 32 PHY register. 
-  *                This parameter can be one of the following values: 
-  *                   PHY_BCR: Transceiver Basic Control Register, 
-  *                   PHY_BSR: Transceiver Basic Status Register.   
-  *                   More PHY register could be read depending on the used PHY
-  * @param RegValue PHY register value                  
+  * @brief  Read a PHY register
+  * @param  heth: pointer to a ETH_HandleTypeDef structure that contains
+  *         the configuration information for ETHERNET module
+  * @param  PHYAddr: PHY port address, must be a value from 0 to 31
+  * @param  PHYReg: PHY register address, must be a value from 0 to 31
+  * @param pRegValue: parameter to hold read value
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_ETH_ReadPHYRegister(ETH_HandleTypeDef *heth, uint16_t PHYReg, uint32_t *RegValue)
+HAL_StatusTypeDef HAL_ETH_ReadPHYRegister(ETH_HandleTypeDef *heth, uint32_t PHYAddr, uint32_t PHYReg, uint32_t *pRegValue)
 {
-  uint32_t tmpreg = 0;     
-  uint32_t tickstart = 0;
+  uint32_t tmpreg1 = 0U;
+  uint32_t tickstart = 0U;
   
   /* Check parameters */
-  assert_param(IS_ETH_PHY_ADDRESS(heth->Init.PhyAddress));
+  assert_param(IS_ETH_PHY_ADDRESS(PHYAddr));
   
   /* Check the ETH peripheral state */
   if(heth->State == HAL_ETH_STATE_BUSY_RD)
@@ -87,25 +84,25 @@ HAL_StatusTypeDef HAL_ETH_ReadPHYRegister(ETH_HandleTypeDef *heth, uint16_t PHYR
   heth->State = HAL_ETH_STATE_BUSY_RD;
   
   /* Get the ETHERNET MACMIIAR value */
-  tmpreg = heth->Instance->MACMIIAR;
+  tmpreg1 = heth->Instance->MACMIIAR;
   
   /* Keep only the CSR Clock Range CR[2:0] bits value */
-  tmpreg &= ~ETH_MACMIIAR_CR_MASK;
+  tmpreg1 &= ~ETH_MACMIIAR_CR_MASK;
   
   /* Prepare the MII address register value */
-  tmpreg |=(((uint32_t)heth->Init.PhyAddress << 11) & ETH_MACMIIAR_PA); /* Set the PHY device address   */
-  tmpreg |=(((uint32_t)PHYReg<<6) & ETH_MACMIIAR_MR);                   /* Set the PHY register address */
-  tmpreg &= ~ETH_MACMIIAR_MW;                                           /* Set the read mode            */
-  tmpreg |= ETH_MACMIIAR_MB;                                            /* Set the MII Busy bit         */
+  tmpreg1 |=((PHYAddr << 11U) & ETH_MACMIIAR_PA);                         /* Set the PHY device address   */
+  tmpreg1 |=(((uint32_t)PHYReg<<6U) & ETH_MACMIIAR_MR);                   /* Set the PHY register address */
+  tmpreg1 &= ~ETH_MACMIIAR_MW;                                            /* Set the read mode            */
+  tmpreg1 |= ETH_MACMIIAR_MB;                                             /* Set the MII Busy bit         */
   
   /* Write the result value into the MII Address register */
-  heth->Instance->MACMIIAR = tmpreg;
+  heth->Instance->MACMIIAR = tmpreg1;
   
   /* Get tick */
   tickstart = HAL_GetTick();
   
   /* Check for the Busy flag */
-  while((tmpreg & ETH_MACMIIAR_MB) == ETH_MACMIIAR_MB)
+  while((tmpreg1 & ETH_MACMIIAR_MB) == ETH_MACMIIAR_MB)
   {
     /* Check for the Timeout */
     if((HAL_GetTick() - tickstart ) > PHY_READ_TO)
@@ -118,11 +115,11 @@ HAL_StatusTypeDef HAL_ETH_ReadPHYRegister(ETH_HandleTypeDef *heth, uint16_t PHYR
       return HAL_TIMEOUT;
     }
     
-    tmpreg = heth->Instance->MACMIIAR;
+    tmpreg1 = heth->Instance->MACMIIAR;
   }
   
   /* Get MACMIIDR value */
-  *RegValue = (uint16_t)(heth->Instance->MACMIIDR);
+  *pRegValue = (uint16_t)(heth->Instance->MACMIIDR);
   
   /* Set ETH HAL State to READY */
   heth->State = HAL_ETH_STATE_READY;
@@ -133,22 +130,20 @@ HAL_StatusTypeDef HAL_ETH_ReadPHYRegister(ETH_HandleTypeDef *heth, uint16_t PHYR
 
 /**
   * @brief  Writes to a PHY register.
-  * @param  heth pointer to a ETH_HandleTypeDef structure that contains
-  *         the configuration information for ETHERNET module  
-  * @param  PHYReg PHY register address, is the index of one of the 32 PHY register. 
-  *          This parameter can be one of the following values: 
-  *             PHY_BCR: Transceiver Control Register.  
-  *             More PHY register could be written depending on the used PHY
-  * @param  RegValue the value to write
+  * @param  heth: pointer to a ETH_HandleTypeDef structure that contains
+  *         the configuration information for ETHERNET module
+  * @param  PHYAddr: PHY port address, must be a value from 0 to 31
+  * @param  PHYReg: PHY register address, must be a value from 0 to 31
+  * @param  RegValue: the value to write
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_ETH_WritePHYRegister(ETH_HandleTypeDef *heth, uint16_t PHYReg, uint32_t RegValue)
+HAL_StatusTypeDef HAL_ETH_WritePHYRegister(ETH_HandleTypeDef *heth, uint32_t PHYAddr, uint32_t PHYReg, uint32_t RegValue)
 {
-  uint32_t tmpreg = 0;
-  uint32_t tickstart = 0;
+  uint32_t tmpreg1 = 0U;
+  uint32_t tickstart = 0U;
   
   /* Check parameters */
-  assert_param(IS_ETH_PHY_ADDRESS(heth->Init.PhyAddress));
+  assert_param(IS_ETH_PHY_ADDRESS(PHYAddr));
   
   /* Check the ETH peripheral state */
   if(heth->State == HAL_ETH_STATE_BUSY_WR)
@@ -159,28 +154,28 @@ HAL_StatusTypeDef HAL_ETH_WritePHYRegister(ETH_HandleTypeDef *heth, uint16_t PHY
   heth->State = HAL_ETH_STATE_BUSY_WR;
   
   /* Get the ETHERNET MACMIIAR value */
-  tmpreg = heth->Instance->MACMIIAR;
+  tmpreg1 = heth->Instance->MACMIIAR;
   
   /* Keep only the CSR Clock Range CR[2:0] bits value */
-  tmpreg &= ~ETH_MACMIIAR_CR_MASK;
+  tmpreg1 &= ~ETH_MACMIIAR_CR_MASK;
   
   /* Prepare the MII register address value */
-  tmpreg |=(((uint32_t)heth->Init.PhyAddress<<11) & ETH_MACMIIAR_PA); /* Set the PHY device address */
-  tmpreg |=(((uint32_t)PHYReg<<6) & ETH_MACMIIAR_MR);                 /* Set the PHY register address */
-  tmpreg |= ETH_MACMIIAR_MW;                                          /* Set the write mode */
-  tmpreg |= ETH_MACMIIAR_MB;                                          /* Set the MII Busy bit */
+  tmpreg1 |=((PHYAddr << 11U) & ETH_MACMIIAR_PA);                       /* Set the PHY device address */
+  tmpreg1 |=(((uint32_t)PHYReg<<6U) & ETH_MACMIIAR_MR);                 /* Set the PHY register address */
+  tmpreg1 |= ETH_MACMIIAR_MW;                                           /* Set the write mode */
+  tmpreg1 |= ETH_MACMIIAR_MB;                                           /* Set the MII Busy bit */
   
   /* Give the value to the MII data register */
   heth->Instance->MACMIIDR = (uint16_t)RegValue;
   
   /* Write the result value into the MII Address register */
-  heth->Instance->MACMIIAR = tmpreg;
+  heth->Instance->MACMIIAR = tmpreg1;
   
   /* Get tick */
   tickstart = HAL_GetTick();
   
   /* Check for the Busy flag */
-  while((tmpreg & ETH_MACMIIAR_MB) == ETH_MACMIIAR_MB)
+  while((tmpreg1 & ETH_MACMIIAR_MB) == ETH_MACMIIAR_MB)
   {
     /* Check for the Timeout */
     if((HAL_GetTick() - tickstart ) > PHY_WRITE_TO)
@@ -193,7 +188,7 @@ HAL_StatusTypeDef HAL_ETH_WritePHYRegister(ETH_HandleTypeDef *heth, uint16_t PHY
       return HAL_TIMEOUT;
     }
     
-    tmpreg = heth->Instance->MACMIIAR;
+    tmpreg1 = heth->Instance->MACMIIAR;
   }
   
   /* Set ETH HAL State to READY */
