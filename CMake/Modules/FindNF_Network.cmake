@@ -266,7 +266,7 @@ if(RTOS_AZURERTOS_CHECK)
 
 #########################
 # network layer from lwIP
-elseif()
+else()
 
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
