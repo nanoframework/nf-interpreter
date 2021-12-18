@@ -201,6 +201,7 @@ macro(nf_add_platform_dependencies target)
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${NETXDUO_INCLUDES}
                 ${TARGET_BASE_LOCATION}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 ${AZRTOS_INCLUDES})
         
         add_dependencies(NF_NativeAssemblies azrtos::threadx)
