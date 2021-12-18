@@ -61,11 +61,11 @@ extern NF_PAL_I2C I2C4_PAL;
         palSetPadMode(                                                                                                 \
             gpio_port_scl,                                                                                             \
             scl_pin,                                                                                                   \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHESTEST | PAL_STM32_OTYPE_OPENDRAIN));          \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
         palSetPadMode(                                                                                                 \
             gpio_port_sda,                                                                                             \
             sda_pin,                                                                                                   \
-            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHESTEST | PAL_STM32_OTYPE_OPENDRAIN));          \
+            (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_OTYPE_OPENDRAIN));          \
     }
 
 #elif defined(STM32L4XX)
