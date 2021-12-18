@@ -202,7 +202,12 @@ macro(nf_add_platform_dependencies target)
                 ${NETXDUO_INCLUDES}
                 ${TARGET_BASE_LOCATION}
                 ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                ${AZRTOS_INCLUDES})
+                ${AZRTOS_INCLUDES}
+                
+            EXTRA_COMPILE_DEFINITIONS 
+                -DTX_INCLUDE_USER_DEFINE_FILE
+                -DNX_INCLUDE_USER_DEFINE_FILE            
+        )
         
         add_dependencies(NF_NativeAssemblies azrtos::threadx)
         add_dependencies(${target}.elf nano::NF_NativeAssemblies)
