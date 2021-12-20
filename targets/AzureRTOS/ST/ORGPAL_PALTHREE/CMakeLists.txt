@@ -22,6 +22,9 @@ set(NX_USER_FILE ${TARGET_BASE_LOCATION}/target_nx_user.h CACHE STRING "Enable N
 set(NXD_ENABLE_FILE_SERVERS OFF CACHE BOOL "Disable fileX dependency by netxduo")
 # set(FX_USER_FILE ${TARGET_BASE_LOCATION}/target_fx_user.h CACHE STRING "Enable FX user configuration")
 
+
+set(STM32_DRIVER_TARGET_DEVICE STM32F769xx CACHE BOOL "Set STM32 target for HAL Driver")
+
 add_subdirectory(${azure_rtos_SOURCE_DIR} threadx)
 # add_subdirectory(${azure_rtos_filex_SOURCE_DIR} FileXSource)
 add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)

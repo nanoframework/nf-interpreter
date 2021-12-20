@@ -59,7 +59,9 @@
 /*
  * MCU type as defined in the ST header.
  */
+#ifndef STM32L475xx
 #define STM32L475xx
+#endif
 
 // disable SysTick ISR from ChibiOS because Azure RTOS provides it's own
 #define STM32_SYSTICK_SUPPRESS_ISR

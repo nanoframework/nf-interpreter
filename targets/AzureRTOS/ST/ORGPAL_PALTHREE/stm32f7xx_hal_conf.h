@@ -9,8 +9,6 @@
 
 // clang-format off
 
-#define STM32F769xx
-
 #ifdef __cplusplus
 extern "C"
 {
