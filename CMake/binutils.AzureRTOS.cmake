@@ -208,16 +208,6 @@ macro(nf_add_platform_dependencies target)
                 -DTX_INCLUDE_USER_DEFINE_FILE
                 -DNX_INCLUDE_USER_DEFINE_FILE            
         )
-        
-        add_dependencies(NF_NativeAssemblies azrtos::threadx)
-        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
-        
-        if(STM32_CUBE_PACKAGE_REQUIRED)
-            # add library...
-            nf_add_stm32_cube()
-            #... and dependency
-            add_dependencies(${target}.elf nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
-        endif()
 
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
@@ -242,13 +232,36 @@ macro(nf_add_platform_dependencies target)
                 nano::NF_Network
             )
 
-            add_dependencies(
-                NF_Network
-                azrtos::netxduo
-            )
+            # add_dependencies(
+            #     NF_Network
+            #     azrtos::netxduo
+            # )
+
+            if(STM32_CUBE_PACKAGE_REQUIRED)
+
+                nf_add_stm32_cube(
+                    BUILD_TARGET
+                        ${target}
+                )
+
+                add_dependencies(
+                    ${target}.elf 
+                    nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
+                )
+
+                if(USE_NETWORKING_OPTION)
+                    add_dependencies(
+                        NF_Network
+                        nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
+                    )
+                endif()
+
+            endif()
         
         endif()
 
+        add_dependencies(NF_NativeAssemblies azrtos::threadx)
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
 
     endif()
 
@@ -326,7 +339,6 @@ macro(nf_add_platform_sources target)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
-        
         ${TARGET_AZURERTOS_COMMON_SOURCES}
     )
 
@@ -340,6 +352,12 @@ macro(nf_add_platform_sources target)
     if(MAXIM_MICROS_SDK_REQUIRED)
         target_sources(${target}.elf PUBLIC
             ${MaximMicrosSDK_SOURCES}
+        )
+    endif()
+         
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        target_link_libraries(${target}.elf
+            nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
         )
     endif()
 
@@ -376,7 +394,7 @@ macro(nf_add_platform_sources target)
             #     ${SPIFFS_SOURCES}
             # 
         )
-
+        
         if(USE_NETWORKING_OPTION)
             target_link_libraries(${target}.elf
                 nano::NF_Network
@@ -389,12 +407,6 @@ macro(nf_add_platform_sources target)
     target_link_libraries(${target}.elf
         azrtos::threadx
     )
-    
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        target_link_libraries(${target}.elf
-            nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
-        )
-    endif()
 
     # TODO
     # # mbed TLS requires a config file

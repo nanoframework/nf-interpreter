@@ -15,7 +15,7 @@
 #define BSD_STACK_SIZE      2048
 
 void _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
-void  nx_stm32_eth_driver(NX_IP_DRIVER *driver_req_ptr);
+VOID  nx_stm32_eth_driver(NX_IP_DRIVER *driver_req_ptr);
 
 // byte pool for NetX Duo
 #define NX_APP_MEM_POOL_SIZE 1024 * 15
