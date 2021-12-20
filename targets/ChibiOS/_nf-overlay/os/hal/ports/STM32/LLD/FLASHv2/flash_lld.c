@@ -30,6 +30,8 @@ STM32FlashDriver STM32FLASH;
 // Driver local functions.                                                   //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef USE_HAL_DRIVER
+
 // Unlock the FLASH control register access
 bool HAL_FLASH_Unlock(void)
 {
@@ -81,6 +83,8 @@ bool FLASH_WaitForLastOperation(uint32_t timeout)
     // If there is no error flag set
     return true;
 }
+
+#endif
 
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) ||                    \
     defined(STM32F469xx) || defined(STM32F479xx) || defined(STM32F405xx) || defined(STM32F415xx) ||                    \

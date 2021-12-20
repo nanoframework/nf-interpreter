@@ -67,6 +67,28 @@ endforeach()
 
 list(REMOVE_DUPLICATES STM32L4_CubePackage_INCLUDE_DIRS)
 
+# remove duplicated defines that clash with ChibiOS defines (when used along with)
+if(${CHIBIOS_HAL_REQUIRED})
+
+    set(HAL_INCLUDE_FILE ${stm32l4_hal_driver_SOURCE_DIR}/Inc/Legacy/stm32_hal_legacy.h)
+
+    # need to read the supplied files and rename the call
+    file(READ
+        "${HAL_INCLUDE_FILE}"
+        HAL_INCLUDE_FILE_CONTENTS)
+
+    string(REPLACE
+        "KR_KEY_"
+        "KR_KEY__DUMMY_FOR_NANO_BUILD"
+        HAL_INCLUDE_FILE_FINAL_CONTENTS
+        "${HAL_INCLUDE_FILE_CONTENTS}")
+        
+    file(WRITE 
+        ${HAL_INCLUDE_FILE} 
+        "${HAL_INCLUDE_FILE_FINAL_CONTENTS}")
+
+endif()
+
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(STM32L4_CubePackage DEFAULT_MSG STM32L4_CubePackage_INCLUDE_DIRS STM32L4_CubePackage_SOURCES)

@@ -21,6 +21,7 @@ set(STM32F7_CubePackage_SRCS
     stm32f7xx_hal.c
     stm32f7xx_hal_cortex.c
     stm32f7xx_hal_eth.c
+    stm32f7xx_hal_flash.c
     stm32f7xx_hal_gpio.c
     stm32f7xx_hal_rcc.c
 
@@ -52,6 +53,28 @@ foreach(SRC_FILE ${STM32F7_CubePackage_SRCS})
 endforeach()
 
 list(REMOVE_DUPLICATES STM32F7_CubePackage_INCLUDE_DIRS)
+
+# remove duplicated defines that clash with ChibiOS defines (when used along with)
+if(${CHIBIOS_HAL_REQUIRED})
+
+    set(HAL_INCLUDE_FILE ${stm32f7_hal_driver_SOURCE_DIR}/Inc/Legacy/stm32_hal_legacy.h)
+
+    # need to read the supplied files and rename the call
+    file(READ
+        "${HAL_INCLUDE_FILE}"
+        HAL_INCLUDE_FILE_CONTENTS)
+
+    string(REPLACE
+        "KR_KEY_"
+        "KR_KEY__DUMMY_FOR_NANO_BUILD"
+        HAL_INCLUDE_FILE_FINAL_CONTENTS
+        "${HAL_INCLUDE_FILE_CONTENTS}")
+        
+    file(WRITE 
+        ${HAL_INCLUDE_FILE} 
+        "${HAL_INCLUDE_FILE_FINAL_CONTENTS}")
+
+endif()
  
 include(FindPackageHandleStandardArgs)
 
