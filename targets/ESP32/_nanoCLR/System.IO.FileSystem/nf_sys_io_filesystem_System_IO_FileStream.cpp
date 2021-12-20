@@ -334,8 +334,8 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_FileStream::WriteNative___VOID__S
     // Convert to ESP32 VFS path
     vfsPath = ConvertToVfsPath(filePath);
 
-    // open file for write
-    file = fopen(vfsPath, "w");
+    // open file for write / read 
+    file = fopen(vfsPath, "a+");
     if (file != NULL)
     {
         // Change to actual position in file to start write
