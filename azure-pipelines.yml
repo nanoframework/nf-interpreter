@@ -801,6 +801,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=STM32L4xx
           -DRTOS=AzureRTOS
+          -DSTM32_WIFI_SUPPORT=ON
           -DNETX_DRIVER="ISM43362"
           -DCHIBIOS_HAL_REQUIRED=ON
           -DSTM32_CUBE_PACKAGE_REQUIRED=ON
