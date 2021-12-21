@@ -202,6 +202,7 @@ macro(nf_add_common_sources)
     if(${NFACS_TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_link_libraries(${NFACS_TARGET}.elf
+        PUBLIC
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
             nano::NF_Debugger
