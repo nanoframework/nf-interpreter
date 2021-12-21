@@ -131,6 +131,8 @@ extern "C"
 
     // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target
     // needs to be free to implement the storage of the configuration block as they see fit
+    // X509 certs can be large and are usually received in chunks. In this case, the block size parameter is the size of
+    // the current chunck.
     bool ConfigurationManager_StoreConfigurationBlock(
         void *configurationBlock,
         DeviceConfigurationOption configuration,

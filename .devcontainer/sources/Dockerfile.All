@@ -58,7 +58,7 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
     && git clone --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
-    && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.6.x -rHEAD ./sources/ChibiOs \
+    && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 # Clone mbedtls and fatfs
 RUN git clone --branch mbedtls-2.26.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
@@ -74,7 +74,7 @@ RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/
 ENV GIT_SSL_NO_VERIFY=0
 
 # Clone ESP-IDF
-RUN git clone --branch v4.3.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.3.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
