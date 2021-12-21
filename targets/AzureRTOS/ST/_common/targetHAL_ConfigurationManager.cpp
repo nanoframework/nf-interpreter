@@ -117,6 +117,12 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
 
+        // find X509 device certificate blocks
+        HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificates = (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)
+            ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(
+                (uint32_t)&__nanoConfig_start__,
+                (uint32_t)&__nanoConfig_end__);
+
         // alloc memory for g_TargetConfiguration
         // because this is a struct of structs that use flexible members the memory has to be allocated from the heap
         // the malloc size for each struct is computed separately
@@ -127,6 +133,8 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
         uint32_t sizeOfX509CertificateStore = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
                                               certificateStore->Count * sizeof(certificateStore->Certificates[0]);
+        uint32_t sizeOfX509DeviceCertificate = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
+                                               deviceCertificates->Count * sizeof(deviceCertificates->Certificates[0]);
 
         g_TargetConfiguration.NetworkInterfaceConfigs =
             (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
@@ -134,6 +142,8 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
         g_TargetConfiguration.CertificateStore =
             (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
+        g_TargetConfiguration.DeviceCertificates =
+            (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)platform_malloc(sizeOfX509DeviceCertificate);
 
         // copy structs to g_TargetConfiguration
         memcpy(
@@ -148,11 +158,16 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_X509_CERTIFICATE *)g_TargetConfiguration.CertificateStore,
             certificateStore,
             sizeOfX509CertificateStore);
+        memcpy(
+            (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)g_TargetConfiguration.DeviceCertificates,
+            deviceCertificates,
+            sizeOfX509DeviceCertificate);
 
         // now free the memory of the original structs
         platform_free(networkConfigs);
         platform_free(networkWirelessConfigs);
         platform_free(certificateStore);
+        platform_free(deviceCertificates);
     }
     else
     {
@@ -218,6 +233,22 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
         // because X509 certificate has a variable length need to compute the block size in two steps
         sizeOfBlock = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
         sizeOfBlock += ((HAL_Configuration_X509CaRootBundle *)blockAddress)->CertificateSize;
+    }
+    else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+    {
+        if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
+        {
+            return FALSE;
+        }
+
+        // get block address
+        blockAddress = (uint8_t *)g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex];
+
+        // set block size
+        // because X509 certificate has a variable length need to compute the block size in two steps
+        sizeOfBlock = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+        sizeOfBlock += ((HAL_Configuration_X509DeviceCertificate *)blockAddress)->CertificateSize;
     }
 
     // copy the config block content to the pointer in the argument
@@ -348,6 +379,56 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
                 sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1));
         }
     }
+    else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
+    {
+        // compute block size
+        // because X509 certificate has a variable length need to compute the block size in two steps
+        blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+        blockSize += ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+
+        //
+        if (g_TargetConfiguration.DeviceCertificates->Count == 0)
+        {
+            // there is nothing at the certificate store
+            // find size of existing config blocks
+            storageAddress = (uint32_t)&__nanoConfig_start__ + GetExistingConfigSize();
+        }
+        else
+        {
+            // set storage address from block address, plus the requested offset
+            storageAddress =
+                (ByteAddress)g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex] + offset;
+        }
+
+        if (g_TargetConfiguration.DeviceCertificates == NULL ||
+            (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+             (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count))
+        {
+            // there is no block stored
+            // check if there is room for it
+            if (((uint32_t)&__nanoConfig_end__ - storageAddress) < blockSize)
+            {
+                // not enough room
+                return FALSE;
+            }
+
+            // now check if memory is erase, so the block can be stored
+            if (!STM32FlashDriver_IsBlockErased(NULL, storageAddress, blockSize))
+            {
+                // memory not erased, can't store
+                return FALSE;
+            }
+        }
+
+        // make sure the config block marker is set, ONLY required on the 1st chunk
+        if (offset == 0)
+        {
+            memcpy(
+                configurationBlock,
+                c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
+                sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1));
+        }
+    }
     else if (configuration == DeviceConfigurationOption_All)
     {
         // particular situation where we are receiving the full configuration block
@@ -374,6 +455,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         platform_free(g_TargetConfiguration.NetworkInterfaceConfigs);
         platform_free(g_TargetConfiguration.Wireless80211Configs);
         platform_free(g_TargetConfiguration.CertificateStore);
+        platform_free(g_TargetConfiguration.DeviceCertificates);
 
         // perform enumeration of configuration blocks
         ConfigurationManager_EnumerateConfigurationBlocks();
@@ -500,6 +582,37 @@ __nfweak bool ConfigurationManager_UpdateConfigurationBlock(
             blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
             blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
         }
+        else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
+        {
+            // make sure the config block marker is set
+            memcpy(
+                configurationBlock,
+                c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
+                sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1));
+
+            // check if certificate is the same
+            if (ConfigurationManager_CheckExistingConfigurationBlock(
+                    g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex]->Certificate,
+                    ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->Certificate,
+                    g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex]->CertificateSize,
+                    ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize))
+            {
+                // block is the same
+                // free memory
+                platform_free(configSectorCopy);
+
+                // operation is successfull (nothing to update)
+                return TRUE;
+            }
+
+            // storage address from block address
+            storageAddress = (ByteAddress)g_TargetConfiguration.DeviceCertificates->Certificates[configurationIndex];
+
+            // set block size, in case it's not already set
+            // because X509 certificate has a variable length need to compute the block size in two steps
+            blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
+            blockSize += ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+        }
         else
         {
             // this not a valid configuration option to update, quit
@@ -590,5 +703,4 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
 
     return FALSE;
 #endif
-
 }
