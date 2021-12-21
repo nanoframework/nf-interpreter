@@ -4,13 +4,14 @@
 #
 
 include(binutils.common)
+# include(ChibiOS_HAL)
 
 function(nf_set_optimization_options target) 
 
     target_compile_options(${target} PRIVATE
         $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:MinSizeRel>:-Os>
         $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
     )
 
@@ -86,6 +87,10 @@ macro(nf_add_platform_packages)
     if(MAXIM_MICROS_SDK_REQUIRED)
         find_package(MaximMicrosSDK REQUIRED QUIET)
     endif()    
+
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+        find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
+    endif()
     
     # packages specific for nanoBooter
     if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
@@ -94,10 +99,6 @@ macro(nf_add_platform_packages)
 
     # packages specific for nanoCRL
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-
-        if(STM32_CUBE_PACKAGE_REQUIRED)
-            find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
-        endif()
 
         if(USE_NETWORKING_OPTION)
 
@@ -146,117 +147,27 @@ macro(nf_add_platform_dependencies target)
 
     # specific to nanoCRL
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-            
-        FetchContent_GetProperties(azure_rtos)
-        get_target_property(AZRTOS_INCLUDES azrtos::threadx INCLUDE_DIRECTORIES)
-
-        if(USE_NETWORKING_OPTION)
-            FetchContent_GetProperties(azure_rtos_netxduo)
-            get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
-        endif()
-
-        nf_add_lib_coreclr(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${AZRTOS_INCLUDES})
 
         add_dependencies(NF_CoreCLR azrtos::threadx)
         add_dependencies(${target}.elf nano::NF_CoreCLR)
-
-        nf_add_lib_wireprotocol(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${AZRTOS_INCLUDES})
 
         add_dependencies(WireProtocol azrtos::threadx)
         add_dependencies(${target}.elf nano::WireProtocol)
 
         if(NF_FEATURE_DEBUGGER)
 
-            nf_add_lib_debugger(
-                EXTRA_INCLUDES
-                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                    ${CHIBIOS_HAL_INCLUDE_DIRS}
-                    ${azure_rtos_SOURCE_DIR}/common/inc
-                    ${AZRTOS_INCLUDES})
-
             add_dependencies(NF_Debugger azrtos::threadx)
             add_dependencies(${target}.elf nano::NF_Debugger)
 
         endif()
 
-        nf_add_lib_native_assemblies(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${ChibiOSnfOverlay_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${NETXDUO_INCLUDES}
-                ${TARGET_BASE_LOCATION}
-                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                ${AZRTOS_INCLUDES}
-                
-            EXTRA_COMPILE_DEFINITIONS 
-                -DTX_INCLUDE_USER_DEFINE_FILE
-                -DNX_INCLUDE_USER_DEFINE_FILE            
-        )
-
         # nF feature: networking
         if(USE_NETWORKING_OPTION)
-
-            nf_add_lib_network(
-                BUILD_TARGET
-                    ${target}
-
-                EXTRA_INCLUDES 
-                    ${AZRTOS_INCLUDES}
-                    ${NETXDUO_INCLUDES}
-                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-
-                EXTRA_COMPILE_DEFINITIONS 
-                    -DTX_INCLUDE_USER_DEFINE_FILE
-                    -DNX_INCLUDE_USER_DEFINE_FILE
-            )
 
             add_dependencies(
                 ${target}.elf 
                 nano::NF_Network
             )
-
-            # add_dependencies(
-            #     NF_Network
-            #     azrtos::netxduo
-            # )
-
-            if(STM32_CUBE_PACKAGE_REQUIRED)
-
-                nf_add_stm32_cube(
-                    BUILD_TARGET
-                        ${target}
-                )
-
-                add_dependencies(
-                    ${target}.elf 
-                    nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
-                )
-
-                if(USE_NETWORKING_OPTION)
-                    add_dependencies(
-                        NF_Network
-                        nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
-                    )
-                endif()
-
-            endif()
         
         endif()
 
@@ -272,17 +183,20 @@ endmacro()
 macro(nf_add_platform_include_directories target)
 
     target_include_directories(${target}.elf PUBLIC
-
         ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-        # ${CHIBIOS_LWIP_INCLUDE_DIRS}
-        # ${SPIFFS_INCLUDE_DIRS}
     )
 
-    # if(STM32_CUBE_PACKAGE_REQUIRED)
-    #     target_include_directories(${target}.elf PUBLIC
-    #         ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-    #     )
-    # endif()
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+
+        FetchContent_GetProperties(stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target})
+        get_target_property(STM32_CUBE_PACKAGE_INCLUDE_DIRECTORIES stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target} INCLUDE_DIRECTORIES)
+
+        target_include_directories(${target}.elf PUBLIC
+            ${AZRTOS_INCLUDES}
+            ${STM32_CUBE_PACKAGE_INCLUDE_DIRECTORIES}
+        )
+
+    endif()
 
     if(CHIBIOS_HAL_REQUIRED)
         target_include_directories(${target}.elf PUBLIC
@@ -307,9 +221,7 @@ macro(nf_add_platform_include_directories target)
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
-
-            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}
-    
+            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}  
         )
 
     endif()
@@ -318,20 +230,16 @@ macro(nf_add_platform_include_directories target)
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
-
             ${TARGET_AZURERTOS_NANOCLR_INCLUDE_DIRS}
-            # ${CHIBIOS_FATFS_INCLUDE_DIRS}
         )
 
     endif()
-
 
 endmacro()
 
 # Add Azure RTOS platform target sources to a specific CMake target
 # To be called from target CMakeList.txt
 macro(nf_add_platform_sources target)
-
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
@@ -341,6 +249,9 @@ macro(nf_add_platform_sources target)
     target_sources(${target}.elf PUBLIC
         ${TARGET_AZURERTOS_COMMON_SOURCES}
     )
+
+    FetchContent_GetProperties(azure_rtos)
+    get_target_property(AZRTOS_INCLUDES azrtos::threadx INCLUDE_DIRECTORIES)
 
     if(CHIBIOS_HAL_REQUIRED)
         target_sources(${target}.elf PUBLIC
@@ -352,12 +263,6 @@ macro(nf_add_platform_sources target)
     if(MAXIM_MICROS_SDK_REQUIRED)
         target_sources(${target}.elf PUBLIC
             ${MaximMicrosSDK_SOURCES}
-        )
-    endif()
-         
-    if(STM32_CUBE_PACKAGE_REQUIRED)
-        target_link_libraries(${target}.elf
-            nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver
         )
     endif()
 
@@ -385,36 +290,118 @@ macro(nf_add_platform_sources target)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
                        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
-        # TODO
         target_sources(${target}.elf PUBLIC
-
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
-            #     ${CHIBIOS_FATFS_SOURCES}
-            #     ${CHIBIOS_LWIP_SOURCES}
-            #     ${SPIFFS_SOURCES}
-            # 
         )
-        
+
         if(USE_NETWORKING_OPTION)
-            target_link_libraries(${target}.elf
+            FetchContent_GetProperties(azure_rtos_netxduo)
+            get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
+        endif()
+
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${AZRTOS_INCLUDES}
+        )
+
+        add_dependencies(WireProtocol azrtos::threadx)
+        add_dependencies(${target}.elf nano::WireProtocol)
+
+        if(NF_FEATURE_DEBUGGER)
+
+            nf_add_lib_debugger(
+                EXTRA_INCLUDES
+                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${azure_rtos_SOURCE_DIR}/common/inc
+                    ${AZRTOS_INCLUDES}
+            )
+
+        endif()
+
+        nf_add_lib_native_assemblies(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${NETXDUO_INCLUDES}
+                ${TARGET_BASE_LOCATION}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${AZRTOS_INCLUDES}
+                
+            EXTRA_COMPILE_DEFINITIONS 
+                -DTX_INCLUDE_USER_DEFINE_FILE
+                -DNX_INCLUDE_USER_DEFINE_FILE            
+        )
+
+        if(USE_NETWORKING_OPTION)
+
+            nf_add_lib_network(
+                BUILD_TARGET
+                    ${target}
+
+                EXTRA_INCLUDES 
+                    ${AZRTOS_INCLUDES}
+                    ${NETXDUO_INCLUDES}
+                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+
+                EXTRA_COMPILE_DEFINITIONS 
+                    -DTX_INCLUDE_USER_DEFINE_FILE
+                    -DNX_INCLUDE_USER_DEFINE_FILE
+                    -DUSE_HAL_DRIVER
+                    -D${STM32_DRIVER_TARGET_DEVICE}
+
+            )
+                
+            target_link_libraries(${target}.elf PUBLIC
                 nano::NF_Network
                 azrtos::netxduo
             )
+
         endif()
 
-    endif()
+        nf_add_lib_coreclr(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${AZRTOS_INCLUDES}
+        )
+                        
+        add_dependencies(NF_CoreCLR azrtos::threadx)
+        add_dependencies(${target}.elf nano::NF_CoreCLR)
 
-    target_link_libraries(${target}.elf
+    endif()
+   
+    target_link_libraries(${target}.elf PUBLIC
         azrtos::threadx
     )
 
-    # TODO
-    # # mbed TLS requires a config file
-    # if(USE_SECURITY_MBEDTLS_OPTION)
-    #     # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-    #     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-    #     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-    # endif()
+    if(STM32_CUBE_PACKAGE_REQUIRED)
+
+        nf_add_stm32_cube(
+            BUILD_TARGET
+                ${target}
+
+            EXTRA_COMPILE_DEFINITIONS
+                -DUSE_HAL_DRIVER
+                -D${STM32_DRIVER_TARGET_DEVICE}
+        )
+
+        target_link_libraries(${target}.elf PUBLIC
+            nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target}
+        )
+
+    endif()
 
 endmacro()
 
