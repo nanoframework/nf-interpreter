@@ -28,6 +28,7 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
     wifi_mode_t mode = WIFI_MODE_NULL;
 
     HAL_Configuration_Wireless80211 *wirelessConfig = NULL;
+    HAL_Configuration_WirelessAP *wirelessAPConfig = NULL;
 
     HAL_Configuration_NetworkInterface *networkConfig =
         (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
@@ -69,11 +70,12 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
             // Wireless Config with SSID setup
             if (networkConfig->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_WirelessAP)
             {
-                wirelessConfig = ConfigurationManager_GetWirelessConfigurationFromId(networkConfig->SpecificConfigId);
+                wirelessAPConfig =
+                    ConfigurationManager_GetWirelessAPConfigurationFromId(networkConfig->SpecificConfigId);
 
-                if (wirelessConfig != NULL)
+                if (wirelessAPConfig != NULL)
                 {
-                    if (wirelessConfig->Options & WirelessAPConfiguration_ConfigurationOptions_Enable)
+                    if (wirelessAPConfig->Options & WirelessAPConfiguration_ConfigurationOptions_Enable)
                     {
                         // Use STATION + AP or just AP
                         mode = (mode == WIFI_MODE_STA) ? WIFI_MODE_APSTA : WIFI_MODE_AP;
