@@ -53,7 +53,7 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.3.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.3.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
