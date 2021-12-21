@@ -5,6 +5,9 @@
 
 include(CMakeForceCompiler)
 
+# this makes the test compiles use static library option so that we don't need to pre-set linker flags and scripts
+#set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
 # set toolchain directories
 set(TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
 set(TOOLCHAIN_INC_DIR ${TOOLCHAIN_PREFIX}/arm-none-eabi/include)
@@ -35,6 +38,11 @@ endif()
 if(NOT CMAKE_ASM_COMPILER)
     SET_COMPILER_VAR(ASM_COMPILER gcc)
     SET_COMPILER_VAR(ASM-ATT_COMPILER as)
+endif()
+
+# setup archiving tool
+if(NOT CMAKE_AR)
+    SET_COMPILER_VAR(AR gcc-ar)
 endif()
 
 # other toolchain configurations
