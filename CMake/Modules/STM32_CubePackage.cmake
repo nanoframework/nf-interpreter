@@ -169,10 +169,16 @@ endmacro()
 macro(nf_add_stm32_cube)
    
     # parse arguments
-    cmake_parse_arguments(NFSTMPKG "" "" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+    cmake_parse_arguments(NFSTMPKG "" "BUILD_TARGET" "EXTRA_INCLUDES;EXTRA_COMPILE_DEFINITIONS" ${ARGN})
+    
+    if("${NFSTMPKG_BUILD_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+        set(CONFIG_FILES_PATH "${TARGET_BASE_LOCATION}/nanoBooter")
+    elseif("${NFSTMPKG_BUILD_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+        set(CONFIG_FILES_PATH "${TARGET_BASE_LOCATION}/nanoCLR")
+    endif()
 
     # add THESE has a library
-    set(LIB_NAME stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver)
+    set(LIB_NAME stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${NFSTMPKG_BUILD_TARGET})
 
     add_library(
         ${LIB_NAME} STATIC 
