@@ -2,7 +2,7 @@ name: Build and push ESP32 image
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-esp32
-  GCR_VERSION: v2.1
+  GCR_VERSION: v2.2
   GCR_FILE: .devcontainer/sources/Dockerfile.ESP32
 
 # Controls when the action will run. 
