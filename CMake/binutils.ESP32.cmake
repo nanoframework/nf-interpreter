@@ -308,7 +308,7 @@ macro(nf_setup_target_build)
         ${NF_HALCore_SOURCES}
     )
 
-    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         NF_CoreCLR
         NF_NativeAssemblies
         NF_Debugger
@@ -697,7 +697,7 @@ macro(nf_add_idf_as_library)
     )
 
     # Link the static libraries to the executable
-    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf 
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${IDF_LIBRARIES_TO_ADD}
     )
 

@@ -254,7 +254,7 @@ macro(nf_add_platform_sources target)
         )
 
         if(USE_NETWORKING_OPTION)
-            target_link_libraries(${target}.elf
+            target_link_libraries(${target}.elf PUBLIC
                 nano::NF_Network
             )
         endif()
