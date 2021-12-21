@@ -70,7 +70,8 @@ wifi_mode_t NF_ESP32_CheckExpectedWifiMode()
             // Wireless Config with SSID setup
             if (networkConfig->InterfaceType == NetworkInterfaceType::NetworkInterfaceType_WirelessAP)
             {
-                wirelessAPConfig = ConfigurationManager_GetWirelessAPConfigurationFromId(networkConfig->SpecificConfigId);
+                wirelessAPConfig =
+                    ConfigurationManager_GetWirelessAPConfigurationFromId(networkConfig->SpecificConfigId);
 
                 if (wirelessAPConfig != NULL)
                 {
