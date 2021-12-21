@@ -227,7 +227,12 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 // move to the next, if any
                 continue;
             }
-            _ASSERTE(networkConfiguration.StartupAddressMode > 0);
+
+            // sanity check
+            if(networkConfiguration.StartupAddressMode == 0)
+            {
+                return FALSE;
+            }
 
             /* Bind and Open the Ethernet driver */
             Network_Interface_Bind(i);
