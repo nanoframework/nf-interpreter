@@ -439,10 +439,6 @@ extern "C"
     bool HAL_FLASH_Unlock(void);
     void HAL_FLASH_Lock(void);
     bool FLASH_WaitForLastOperation(uint32_t timeout);
-#else
-    HAL_StatusTypeDef HAL_FLASH_Unlock(void);
-    HAL_StatusTypeDef HAL_FLASH_Lock(void);
-    HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout);
 #endif
 
     void flash_lld_init();
