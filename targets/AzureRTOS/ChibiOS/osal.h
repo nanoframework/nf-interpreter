@@ -553,12 +553,14 @@ typedef TX_MUTEX mutex_t;
 /*===========================================================================*/
 
 extern const char *osal_halt_msg;
-extern unsigned int interrupt_save;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+    extern unsigned int interrupt_save;
+
     void osalInit(void);
     void osalSysHalt(const char *reason);
     void osalSysPolledDelayX(rtcnt_t cycles);

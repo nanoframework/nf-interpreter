@@ -71,7 +71,16 @@ extern uint32_t __nanoConfig_end__;
 extern uint32_t __deployment_start__;
 extern uint32_t __deployment_end__;
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 extern unsigned int interrupt_save;
+
+#ifdef __cplusplus
+}
+#endif
 
 #define GLOBAL_LOCK()   TX_DISABLE
 #define GLOBAL_UNLOCK() TX_RESTORE
