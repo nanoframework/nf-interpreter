@@ -10,7 +10,7 @@
 #define DEFAULT_PRIORITY    5
 #define DEFAULT_MEMORY_SIZE 1024
 #define PACKET_PAYLOAD_SIZE 1536
-#define NX_PACKET_POOL_SIZE ((1536 + sizeof(NX_PACKET)) * 10)
+#define NX_PACKET_POOL_SIZE ((1536 + sizeof(NX_PACKET)) * 3)
 #define ARP_CACHE_SIZE      1024
 #define BSD_STACK_SIZE      2048
 
