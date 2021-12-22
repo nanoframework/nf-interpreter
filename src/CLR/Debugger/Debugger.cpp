@@ -17,9 +17,6 @@
 
 //--//
 
-extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
-extern uint16_t g_CLR_InteropAssembliesCount;
-
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
 BlockStorageDevice *CLR_DBG_Debugger::m_deploymentStorageDevice = NULL;
