@@ -160,7 +160,12 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
     }
 
     // unlock the FLASH
+
+#ifdef USE_HAL_DRIVER
+    if (HAL_FLASH_Unlock() == HAL_OK)
+#else
     if (HAL_FLASH_Unlock())
+#endif
     {
         // Clear pending flags (if any)
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
@@ -218,7 +223,11 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
             }
 
             // wait 500ms for any flash operation to be completed
+#ifdef USE_HAL_DRIVER
+            success = FLASH_WaitForLastOperation(500) == HAL_OK;
+#else
             success = FLASH_WaitForLastOperation(500);
+#endif            
 
             if (!success)
             {
@@ -345,7 +354,11 @@ int flash_lld_erase(uint32_t address)
     bool success = false;
 
     // unlock the FLASH
+#ifdef USE_HAL_DRIVER
+    if (HAL_FLASH_Unlock() == HAL_OK)
+#else
     if (HAL_FLASH_Unlock())
+#endif
     {
         // Clear pending flags (if any)
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
