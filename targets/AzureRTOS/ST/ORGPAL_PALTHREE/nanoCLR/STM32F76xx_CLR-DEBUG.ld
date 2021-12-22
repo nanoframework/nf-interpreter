@@ -132,7 +132,7 @@ SECTIONS
     {
         *(.NetXPoolSection)  
         
-    } >ram1 AT >RAM_INIT_FLASH_LMA 
+    } >ram2 AT >RAM_INIT_FLASH_LMA 
 }
 
 /* Code rules inclusion.*/
