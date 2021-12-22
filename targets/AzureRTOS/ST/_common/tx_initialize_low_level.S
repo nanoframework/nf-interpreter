@@ -220,6 +220,7 @@ SysTick_Handler:
     BL      _tx_execution_isr_enter             @ Call the ISR enter function
 #endif
     BL      _tx_timer_interrupt
+    BL      HAL_IncTick
 #ifdef TX_ENABLE_EXECUTION_CHANGE_NOTIFY
     BL      _tx_execution_isr_exit              @ Call the ISR exit function
 #endif
