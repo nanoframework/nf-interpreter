@@ -47,6 +47,7 @@ if(RTOS_AZURERTOS_CHECK)
                 mx_eth_init.c
 
                 stm32f7xx_hal_eth_extra.c
+                stm32${TARGET_SERIES_SHORT_LOWER}xx_hal_msp_eth.c
         )
 
         # need this name in lower case
@@ -161,6 +162,7 @@ if(RTOS_AZURERTOS_CHECK)
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_DRIVER_1}
+                ${TARGET_BASE_LOCATION}/common/CubeMX
 
                 # ISM43362
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek

@@ -28,6 +28,8 @@ set(STM32F7_CubePackage_SRCS
     # SPIFFS
     stm32f7xx_hal_dma.c
     stm32f7xx_hal_qspi.c
+
+    stm32f7xx_hal_msp.c
 )
 
 # add exception to compiler warnings as errors
@@ -41,6 +43,7 @@ foreach(SRC_FILE ${STM32F7_CubePackage_SRCS})
         PATHS 
 
             ${stm32f7_hal_driver_SOURCE_DIR}/Src
+            ${TARGET_BASE_LOCATION}/common/CubeMX
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
