@@ -39,6 +39,8 @@ option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.Hardware.Esp32.EspNow  "option for nanoFramework.Hardware.Esp32.EspNow")
+
 
 
 # Stm32 only
@@ -175,6 +177,12 @@ endif()
 if(API_nanoFramework.Hardware.Esp32.Rmt)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
+endif()
+
+# nanoFramework.Hardware.Esp32.EspNow
+if(API_nanoFramework.Hardware.Esp32.EspNow)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.EspNow")
 endif()
 
 # nanoFramework.Device.Bluetooth
