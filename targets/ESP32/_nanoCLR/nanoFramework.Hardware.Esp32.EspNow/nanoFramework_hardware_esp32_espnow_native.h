@@ -56,7 +56,11 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
     NANOCLR_NATIVE_DECLARE(NativeEspNowAddPeer___I4__SZARRAY_U1__U1);
 
     //--//
+    static CLR_RT_HeapBlock_Delegate *onRecvDelegate;
+    static CLR_RT_HeapBlock_Delegate *onSentDelegate;
 
+    static void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+    static void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_EspNow;

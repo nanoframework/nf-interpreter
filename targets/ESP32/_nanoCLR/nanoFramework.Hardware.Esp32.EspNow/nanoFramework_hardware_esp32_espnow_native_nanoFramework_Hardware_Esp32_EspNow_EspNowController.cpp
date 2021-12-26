@@ -12,6 +12,33 @@
 
 #include "nanoFramework_hardware_esp32_espnow_native.h"
 
+void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+    OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) 
+{
+  //if (status != ESP_NOW_SEND_SUCCESS) 
+  {
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***Sending status:\t%d\r\n", status);
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+  }
+}
+
+void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+    OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) 
+{
+  //memcpy(&recvData, incomingData, sizeof(recvData));
+
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***-> Recv %d bytes from:\t%d\r\n", len, incomingData[0]);
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+
+}
+
+
 HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
     NativeEspNowInit___I4(CLR_RT_StackFrame &stack)
 {
@@ -34,6 +61,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
             if (ret == ESP_OK)
             {
                 ret = esp_now_init();
+                if (ret == ESP_OK)
+                {
+                    ret = esp_now_register_recv_cb(OnDataRecv);
+                    if (ret == ESP_OK)
+                    {
+                    ret = esp_now_register_send_cb(OnDataSent);
+                    }
+                }
             }
         }
     }
@@ -60,6 +95,11 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 {
     NANOCLR_HEADER();
 
+    onRecvDelegate = stack.Arg1().DereferenceDelegate();
+
+    
+
+
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
     // NANOCLR_NOCLEANUP_NOLABEL();
@@ -82,6 +122,7 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
 
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
