@@ -21,9 +21,10 @@ if(RTOS_AZURERTOS_CHECK)
         #PAL Socket
         sockets_netx.cpp
 
-        #NetX Duo 
+        #NetX Duo
         netx_sockets.cpp
         netx_sockets_functions.cpp 
+        netx_thread.c
 
         # platform specific
         target_network.cpp
@@ -40,14 +41,16 @@ if(RTOS_AZURERTOS_CHECK)
         # add driver files to network sources
         list(APPEND
             NF_Network_SRCS
-                nx_stm32_eth_driver.c
-                nx_stm32_phy_driver.c
-                lan8742.c
+                # nx_stm32_eth_driver.c
+                # nx_stm32_phy_driver.c
+                nx_chibios_eth_driver.c
+                nx_chibios_phy_driver.c
+                # lan8742.c
 
-                mx_eth_init.c
+                # mx_eth_init.c
 
-                stm32f7xx_hal_eth_extra.c
-                stm32${TARGET_SERIES_SHORT_LOWER}xx_hal_msp_eth.c
+                # stm32f7xx_hal_eth_extra.c
+                # stm32${TARGET_SERIES_SHORT_LOWER}xx_hal_msp_eth.c
         )
 
         # need this name in lower case
@@ -55,7 +58,12 @@ if(RTOS_AZURERTOS_CHECK)
 
         # add includes too
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet)
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742)
+        # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CHIBIOS_HAL_INCLUDE_DIRS})
+
+        SET(NX_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/chibios)
+        SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
+
 
         # add exception to compiler warnings as errors
         SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742/lan8742.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
@@ -153,19 +161,21 @@ if(RTOS_AZURERTOS_CHECK)
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
                 # ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
                 
+                ${NX_THREAD_LOCATION}
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX
 
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
 
                 # drivers
+                ${NX_DRIVER_LOCATION}
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_DRIVER_1}
                 ${TARGET_BASE_LOCATION}/common/CubeMX
 
                 # ISM43362
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek
+                # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek
 
                 ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
     

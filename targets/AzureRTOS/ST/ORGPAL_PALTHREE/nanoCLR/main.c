@@ -41,6 +41,10 @@ TX_THREAD receiverThread;
 uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ReceiverThread_entry(uint32_t parameter);
 
+TX_THREAD netxDuoThread;
+uint32_t netxDuoThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
+extern void NetXDuoThread_entry(uint32_t parameter);
+
 // CLR thread
 #define CLR_THREAD_STACK_SIZE 4096
 #define CLR_THREAD_PRIORITY   5
@@ -85,6 +89,26 @@ void tx_application_define(void *first_unused_memory)
     if (status != TX_SUCCESS)
     {
         // TODO replace with proper handling
+        while (1)
+        {
+        }
+    }
+
+    // Create NetX Duo thread
+    status = tx_thread_create(
+        & netxDuoThread,
+        "NetXDuo Thread",
+        NetXDuoThread_entry,
+        0,
+        netxDuoThreadStack,
+        RECEIVER_THREAD_STACK_SIZE,
+        RECEIVER_THREAD_PRIORITY,
+        RECEIVER_THREAD_PRIORITY,
+        TX_NO_TIME_SLICE,
+        TX_AUTO_START);
+
+    if (status != TX_SUCCESS)
+    {
         while (1)
         {
         }

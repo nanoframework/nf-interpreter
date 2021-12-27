@@ -11,19 +11,19 @@
 #include <nxd_dhcp_client.h>
 #include <nxd_bsd.h>
 
-#ifdef STM32L4XX
+// #ifdef STM32L4XX
 
-#include <nx_driver_stm32l4.h>
-#define NETXDUO_DRIVER nx_driver_stm32l4
+// #include <nx_driver_stm32l4.h>
+// #define NETXDUO_DRIVER nx_driver_stm32l4
 
-#elif defined(STM32F7XX)
+// #elif defined(STM32F7XX)
 
-#include <nx_stm32_eth_driver.h>
-#define NETXDUO_DRIVER nx_stm32_eth_driver
+// #include <nx_chibios_eth_driver.h>
+// #define NETXDUO_DRIVER nx_chibios_eth_driver
 
-#else
-#error "Missing define with series name"
-#endif
+// #else
+// #error "Missing define with series name"
+// #endif
 
 #ifdef __cplusplus
 extern "C"

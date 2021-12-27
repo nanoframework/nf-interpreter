@@ -20,7 +20,7 @@ set(STM32F7_CubePackage_SRCS
     # add HAL files here as required
     stm32f7xx_hal.c
     stm32f7xx_hal_cortex.c
-    stm32f7xx_hal_eth.c
+    # stm32f7xx_hal_eth.c
     stm32f7xx_hal_flash.c
     stm32f7xx_hal_gpio.c
     stm32f7xx_hal_rcc.c
