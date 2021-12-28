@@ -51,4 +51,11 @@ extern void debug_printf(const char *format, ...);
 #endif
 #define LWIP_NETIF_API 1
 
+// disable byte order functions 
+#define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS
+#define htons(x) __builtin_bswap16(x)
+#define ntohs(x) __builtin_bswap16(x)
+#define htonl(x) __builtin_bswap32(x)
+#define ntohl(x) __builtin_bswap32(x)
+
 #endif // CC_H

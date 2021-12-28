@@ -418,7 +418,7 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #if !defined LWIP_RAW
-#define LWIP_RAW 1
+#define LWIP_RAW 0
 #endif
 
 /*
