@@ -21,7 +21,6 @@ InteropAssemblies/*
 .vscode/.cmaketools.json
 .vscode/settings.json
 .vscode/tasks.json
-.vscode/extensions.json
 .vscode/c_cpp_properties.json
 .vscode/cmake-kits.json
 .vscode/ipch
