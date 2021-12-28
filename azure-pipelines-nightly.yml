@@ -724,7 +724,7 @@ jobs:
         TargetName: M5StickCPlus
         PackageName: M5StickCPlus
 
-      M5Stack:
+      M5Core:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
@@ -761,8 +761,8 @@ jobs:
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config: sdkconfig.default_nopsram.esp32 
         IDF_Target: esp32
-        TargetName: M5Stack
-        PackageName: M5Stack
+        TargetName: M5Core
+        PackageName: M5Core
 
       M5Core2:
         TargetBoard: ESP32
