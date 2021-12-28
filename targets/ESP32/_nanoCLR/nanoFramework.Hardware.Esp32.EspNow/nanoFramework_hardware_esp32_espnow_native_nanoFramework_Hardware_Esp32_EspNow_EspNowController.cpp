@@ -13,34 +13,39 @@
 #include "nanoFramework_hardware_esp32_espnow_native.h"
 
 void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) 
+    DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status) 
 {
-  //if (status != ESP_NOW_SEND_SUCCESS) 
-  {
     {
-      char temporaryStringBuffer[64];
-      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***Sending status:\t%d\r\n", status);
-      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+        char temporaryStringBuffer[64];
+        int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***Sending status:\t%d\r\n", status);
+        CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
     }
-  }
+
+    memcpy(dataSentEventData.peer_mac, mac_addr, ESP_NOW_ETH_ALEN);
+    dataSentEventData.status = status;
+
+    PostManagedEvent(EVENT_ESP32_ESPNOW, 0, EVENT_ESP32_ESPNOW_DATASENT, (CLR_UINT32)&dataSentEventData);
 }
 
 void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) 
+    DataRecvCb(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
 {
-  //memcpy(&recvData, incomingData, sizeof(recvData));
-
     {
       char temporaryStringBuffer[64];
       int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***-> Recv %d bytes from:\t%d\r\n", len, incomingData[0]);
       CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
     }
 
+    memcpy(dataRecvEventData.peer_mac, mac_addr, ESP_NOW_ETH_ALEN);
+    memcpy(dataRecvEventData.data, incomingData, len);
+    dataRecvEventData.dataLen = len;
+
+    PostManagedEvent(EVENT_ESP32_ESPNOW, 0, EVENT_ESP32_ESPNOW_DATARECV, (CLR_UINT32)&dataRecvEventData);
+
 }
 
-
 HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowInit___I4(CLR_RT_StackFrame &stack)
+    NativeInitialize___I4( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -63,10 +68,10 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
                 ret = esp_now_init();
                 if (ret == ESP_OK)
                 {
-                    ret = esp_now_register_recv_cb(OnDataRecv);
+                    ret = esp_now_register_recv_cb(DataRecvCb);
                     if (ret == ESP_OK)
                     {
-                    ret = esp_now_register_send_cb(OnDataSent);
+                        ret = esp_now_register_send_cb(DataSentCb);
                     }
                 }
             }
@@ -79,67 +84,17 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowDeinit___I4(CLR_RT_StackFrame &stack)
+    NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
-    esp_err_t ret = esp_now_deinit();
-    stack.SetResult_I4((int32_t)ret);
+    esp_now_unregister_recv_cb();
+    esp_now_unregister_send_cb();
+    esp_now_deinit();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowRegisterRecvCb___I4__nanoFrameworkHardwareEsp32EspNowEspNowControllerRegisterRecvDelegate(
-        CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    onRecvDelegate = stack.Arg1().DereferenceDelegate();
-
-    
-
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    // NANOCLR_NOCLEANUP_NOLABEL();
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowUnregisterRecvCb___I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    esp_err_t ret = esp_now_unregister_recv_cb();
-    stack.SetResult_I4((int32_t)ret);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowRegisterSendCb___I4__nanoFrameworkHardwareEsp32EspNowEspNowControllerRegisterSendDelegate(
-        CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    // NANOCLR_NOCLEANUP_NOLABEL();
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowUnregisterSendCb___I4(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    esp_err_t ret = esp_now_unregister_send_cb();
-    stack.SetResult_I4((int32_t)ret);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
 
 HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
     NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4(CLR_RT_StackFrame &stack)

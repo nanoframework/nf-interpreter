@@ -1581,6 +1581,9 @@ struct CLR_RT_WellKnownTypes
 
     CLR_RT_TypeDef_Index m_RmtCommand;
 
+    CLR_RT_TypeDef_Index m_Esp32EspNowDataRecvEvent;
+    CLR_RT_TypeDef_Index m_Esp32EspNowDataSentEvent;
+
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
 

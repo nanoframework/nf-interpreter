@@ -22,6 +22,7 @@ set(nanoFramework.Hardware.Esp32.EspNow_SRCS
 
 
     nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController.cpp
+    nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__EspNowEventHandler.cpp
 
 )
 
