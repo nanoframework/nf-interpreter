@@ -2,7 +2,7 @@ trigger:
   branches:
     include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md" ]
+    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md", ".github", ".devcontainer" ]
 
 pr:
   autoCancel: true
