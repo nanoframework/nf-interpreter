@@ -21,6 +21,8 @@
 #include <esp_wifi.h>
 #include <esp_now.h>
 
+#define DEBUG_ESPNOW 1
+
 #define EVENT_ESP32_ESPNOW_DATASENT 1
 #define EVENT_ESP32_ESPNOW_DATARECV 2
 

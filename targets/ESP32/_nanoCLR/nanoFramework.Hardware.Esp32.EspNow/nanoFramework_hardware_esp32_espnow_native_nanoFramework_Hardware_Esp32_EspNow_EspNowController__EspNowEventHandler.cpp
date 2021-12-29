@@ -17,6 +17,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 {
     NANOCLR_HEADER();
 
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler CopyByteArrayToCLRArray entry\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
+
     CLR_UINT8* firstTargetByte;
     CLR_RT_HeapBlock_Array * targetArray;
 
@@ -34,6 +42,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     firstTargetByte = targetArray->GetFirstElement();
     memcpy( firstTargetByte, src, length ); 
 
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler CopyByteArrayToCLRArray exit\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -41,6 +57,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     ProcessEvent_DataSent( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
+
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent_DataSent entry\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
 
     EspNowDataSentEventData *sentEventData = (EspNowDataSentEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataSentEvent;
@@ -67,6 +91,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     dataSentEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataSentEventInternal::FIELD__Status].SetInteger(sentEventData->status);
 
 
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent_DataSent exit\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -74,6 +106,15 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     ProcessEvent_DataRecv( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
+
+
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent_DataRecv entry\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
 
     EspNowDataRecvEventData *recvEventData = (EspNowDataRecvEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataRecvEvent;
@@ -106,6 +147,13 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     // clrRet.DataLen
     dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataRecvEventInternal::FIELD__DataLen].SetInteger(recvEventData->dataLen);
 
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent_DataRecv exit\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
 
     NANOCLR_NOCLEANUP();}
 
@@ -113,6 +161,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     ProcessEvent___nanoFrameworkRuntimeEventsBaseEvent__U4__U4__SystemDateTime( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
+
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent entry\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
 
     CLR_UINT32 data1 = stack.Arg1().NumericByRef().u4;
     CLR_UINT32 subEvent = data1 >> 16;
@@ -128,6 +184,15 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
         default:
             NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
     }
+
+#ifdef DEBUG_ESPNOW
+    {
+      char temporaryStringBuffer[64];
+      int realStringSize=snprintf(temporaryStringBuffer, sizeof(temporaryStringBuffer), "\r\n***EspNowEventHandler ProcessEvent exit\r\n");
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching );
+    }
+#endif
+
 
     NANOCLR_NOCLEANUP();
 }
