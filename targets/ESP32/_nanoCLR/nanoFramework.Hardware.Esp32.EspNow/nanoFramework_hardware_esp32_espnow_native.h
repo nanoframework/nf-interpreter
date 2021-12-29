@@ -84,9 +84,8 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
     static const int FIELD__DataSent = 1;
     static const int FIELD__DataReceived = 2;
-    static const int FIELD__isInitialized = 3;
-    static const int FIELD__isDisposed = 4;
-    static const int FIELD__eventHandler = 5;
+    static const int FIELD__isDisposed = 3;
+    static const int FIELD__eventHandler = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeInitialize___I4);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__BOOLEAN);
