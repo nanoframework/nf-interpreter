@@ -1,5 +1,7 @@
 trigger: none
-pr: none
+
+pr:
+  autoCancel: true
 
 # add nf-tools repo to resources (for Azure Pipelines templates)
 resources:
@@ -12,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.3.1
+      ref: refs/tags/v4.3.2
     
 # scheduled build
 schedules:
@@ -21,6 +23,7 @@ schedules:
     include: [ develop ]
   always: true
   displayName: Nightly build at 23:58
+
 jobs:
 
 ##############################
@@ -78,19 +81,36 @@ jobs:
 
       $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
       
+      $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
+
       if($env:StartReleaseCandidate -like "true")
       {
           # this is a release prep so NO build
       }
       else
       {
-          $commitHistory = git log --name-status --since=1.day --format=
+          if($buildingPr)
+          {
+              # get files changed in PR, if this is a PR
+              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-          # filter removed files              
-          $files = $commitHistory.where{$_[0] -ne 'D'}
+              # filter removed files              
+              $files = $commit.where{$_.status -ne 'removed'}
 
-          # get file names only
-          $files = $files | % {$_.SubString(2)}
+              # get file names only
+              $files = $files | % {$_.filename}
+          }
+          else
+          {
+              # scheduled build, grab repo history for the last day
+              $commitHistory = git log --name-status --since=1.day --format=
+
+              # filter removed files              
+              $files = $commitHistory.where{$_[0] -ne 'D'}
+
+              # get file names only
+              $files = $files | % {$_.SubString(2)}
+          }
 
           Write-host "Files changed:"
           $files | % { Write-host $_ }
@@ -98,12 +118,11 @@ jobs:
 
           # set default values
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
-          if( 
+          if(
               (($files.where{$_.Contains('/')}).Count -eq 0) -Or
               (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
               (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
@@ -116,29 +135,55 @@ jobs:
               # - CMake
               # - src
 
-              echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              if($buildingPr)
+              {
+                  # ChibiOS targets are the only ones needing to be build on a global change
+                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+              }
+              else
+              {
+                  echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+              }
               
               Write-host "Building ALL targets"
           }
 
-
-          if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+          if($buildingPr)
           {
-              # files at ChibiOS folder
-              echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+              if( 
+                  ($files.where{$_.Contains('targets/ChibiOS/_common')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_include')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_Lwip')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_nanoBooter')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
+                  ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
+                )
+              {
+                  # files at ChibiOS global folders or targets being built with this pipeline
+                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-              Write-host "Building ChibiOS targets"
+                  Write-host "Building ChibiOS targets"
+              }
+          }
+          else
+          {
+              if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+              {
+                  # files at ChibiOS folder
+                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+
+                  Write-host "Building ChibiOS targets"
+              }
           }
 
-          if( ($files.where{$_.Contains('targets/FreeRTOS')}).Count -gt 0)
-          {
-              # files at FreeRTOS folder
-              echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]true"
-
-              Write-host "Building FreeRTOS targets"
-          }
-
-          if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
+          if(
+            !$buildingPr -And 
+            ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
           {
               # files at ESP32 folder
               echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
@@ -146,7 +191,9 @@ jobs:
               Write-host "Building ESP32 targets"
           }
 
-          if( ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
+          if(
+            !$buildingPr -And
+            ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
           {
               # files at TI_SimpleLink folder
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
@@ -159,20 +206,51 @@ jobs:
     displayName: Get targets to build
     condition: eq(variables['BuildOptions.GO'], 'True')
 
-################
-# STM32
-- job: Build_STM32_targets
+##############################
+- job: Check_Code_Style
   condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      eq(variables['BUILD_ALL'], 'true'),
-      eq(variables['BUILD_CHIBIOS'], 'true')
+    and(
+      ne(variables['Build.Reason'], 'Schedule'),
+      not(
+        or(
+          eq(variables['BUILD_ALL'], 'true'),
+          eq(variables['BUILD_CHIBIOS'], 'true'),
+          eq(variables['BUILD_ESP32'], 'true'),
+          eq(variables['BUILD_TI'], 'true')
+        )
+      )
     )
 
   dependsOn:
   - Check_Build_Options
+
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - template: azure-pipelines-templates/download-install-llvm.yml
+  - template: azure-pipelines-templates/check-code-style.yml
+
+################
+# STM32
+- job: Build_STM32_targets
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(variables['BUILD_ALL'], 'true'),
+        eq(variables['BUILD_CHIBIOS'], 'true')
+      )
+    )
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'windows-2019'
@@ -646,7 +724,7 @@ jobs:
         TargetName: M5StickCPlus
         PackageName: M5StickCPlus
 
-      M5Stack:
+      M5Core:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
@@ -683,8 +761,8 @@ jobs:
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config: sdkconfig.default_nopsram.esp32 
         IDF_Target: esp32
-        TargetName: M5Stack
-        PackageName: M5Stack
+        TargetName: M5Core
+        PackageName: M5Core
 
       M5Core2:
         TargetBoard: ESP32

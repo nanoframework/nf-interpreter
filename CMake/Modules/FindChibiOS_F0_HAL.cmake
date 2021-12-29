@@ -107,12 +107,14 @@ set(CHIBIOS_HAL_SRCS
     
     hal_buffers.c
     hal_queues.c
+    hal_flash.c
     hal_mmcsd.c
     
     hal_adc.c
     hal_can.c
     hal_crypto.c
     hal_dac.c
+    hal_efl.c
     hal_gpt.c
     hal_i2c.c
     hal_i2s.c
@@ -144,7 +146,7 @@ set(CHIBIOS_HAL_SRCS
     hal_pal_lld.c
     hal_i2c_lld.c
     hal_rtc_lld.c
-    hal_spi_lld.c
+    hal_spi_v2_lld.c
     hal_st_lld.c
     hal_gpt_lld.c
     hal_icu_lld.c

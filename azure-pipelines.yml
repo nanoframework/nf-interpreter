@@ -2,7 +2,7 @@ trigger:
   branches:
     include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md" ]
+    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md", ".github", ".devcontainer" ]
 
 pr:
   autoCancel: true
@@ -18,7 +18,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.3.1
+      ref: refs/tags/v4.3.2
       
 jobs:
 
@@ -923,12 +923,12 @@ jobs:
       succeeded('Build_ESP32_targets'),
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
-      not( eq(variables['Build.Reason'], 'PullRequest')
-    ),
-    or(
-      eq(variables['Build.SourceBranchName'], 'main'),
-      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
-      ne( variables['StartReleaseCandidate'], true )
+      eq(variables['System.PullRequest.PullRequestId'], ''),
+      or(
+        eq(variables['Build.SourceBranchName'], 'main'),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      ),
+      ne(variables['StartReleaseCandidate'], true)
     )
 
   pool:
@@ -961,7 +961,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         or(
           eq(variables['Build.SourceBranchName'], 'main'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
@@ -977,7 +977,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         not(
           or(
             eq(variables['Build.SourceBranchName'], 'main'),
@@ -1032,9 +1032,7 @@ jobs:
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
       succeeded('Generate_change_log'),
-      not(
-        eq(variables['Build.Reason'], 'PullRequest')
-      ),
+      eq(variables['System.PullRequest.PullRequestId'], ''),
       or(
         endsWith(variables['Build.SourceBranchName'], 'main'),
         startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),

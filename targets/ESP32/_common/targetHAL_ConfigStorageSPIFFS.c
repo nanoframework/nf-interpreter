@@ -21,7 +21,8 @@ typedef enum ConfigIoType
 {
     ConfigIoType_Read,
     ConfigIoType_Write,
-    ConfigIoType_GetSize
+    ConfigIoType_GetSize,
+    ConfigIoType_Append,
 } ConfigIoType;
 
 // Initialise SPIFFS
@@ -136,10 +137,16 @@ void ConfigStorage_GetConfigFileName(
 // Parameters:-
 //   configuration      : Type of configuration block to open
 //   configurationIndex : Index of type to open
+//   isWrite            : flag to signal writting to the file
+//   isAppend           : flag to signal appending to the file
 //
 // Return :handle
 //
-FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t configurationIndex, bool write)
+FILE *ConfigStorage_OpenFile(
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    bool isWrite,
+    bool isAppend)
 {
     // buffer for file name
     // add extra position for terminator
@@ -148,7 +155,7 @@ FILE *ConfigStorage_OpenFile(DeviceConfigurationOption configuration, uint32_t c
     ConfigStorage_GetConfigFileName(configuration, configurationIndex, fileName);
 
     // Open SPIFFS config storage
-    FILE *file = fopen(fileName, write ? "wb" : "rb");
+    FILE *file = fopen(fileName, isWrite ? (isAppend ? "a" : "w") : "r");
 
     if (file != NULL)
     {
@@ -250,6 +257,16 @@ int32_t Config_IO(FILE *handle, ConfigIoType ioType, uint8_t *pData, int32_t siz
 
             break;
         }
+        else if (ioType == ConfigIoType_Append)
+        {
+            // get to the end of the file
+            fseek(file, 0, SEEK_END);
+
+            // append more data
+            result = fwrite((const void *)pData, 1, (size_t)size, file);
+
+            break;
+        }
         else
         {
             break;
@@ -289,6 +306,23 @@ int32_t ConfigStorage_FileSize(FILE *handle)
 bool ConfigStorage_WriteFile(FILE *handle, uint8_t *pData, int32_t writeSize)
 {
     return (Config_IO(handle, ConfigIoType_Write, pData, writeSize) == writeSize);
+}
+
+//
+//  ConfigStorage_AppendFile -  Append data to NVS system
+//
+// Parameters:-
+//   handle    : Handle returned from ConfigStorage_OpenFile
+//   pData     : Pointer data to write
+//   writeSize : Size of data to write
+//
+// return:-
+//    true - OK
+//    false- Error/Not found
+//
+bool ConfigStorage_AppendFile(FILE *handle, uint8_t *pData, int32_t writeSize)
+{
+    return (Config_IO(handle, ConfigIoType_Append, pData, writeSize) == writeSize);
 }
 
 //
@@ -449,7 +483,7 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
     DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
-    uint32_t configCount = 0;
+    uint32_t certCount = 0;
 
     // 1st pass, count the config files
     for (;;)
@@ -464,7 +498,7 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
 
         if (strstr(dirInfo->d_name, (const char *)c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1))
         {
-            configCount++;
+            certCount++;
 
             // there is only one CA root bundle, so we're good here
             break;
@@ -472,7 +506,8 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
     }
 
     // allocate config struct
-    int32_t allocationSize = sizeof(HAL_Configuration_X509CaRootBundle);
+    int32_t allocationSize = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
+                             certCount * sizeof(HAL_Configuration_X509CaRootBundle *);
 
     // allocate config struct
     HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
@@ -488,17 +523,45 @@ HAL_CONFIGURATION_X509_CERTIFICATE *ConfigStorage_FindX509CertificateConfigurati
     memset(certificateStore, 0, allocationSize);
 
     // set collection count
-    certificateStore->Count = configCount;
+    certificateStore->Count = certCount;
+
+    if (certCount > 0)
+    {
+        // allocate cert struct
+        HAL_Configuration_X509CaRootBundle *certificate =
+            (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeof(HAL_Configuration_X509CaRootBundle));
+
+        // check allocation
+        if (certificate == NULL)
+        {
+            return NULL;
+        }
+
+        // clear memory
+        memset(certificate, 0, sizeof(HAL_Configuration_X509CaRootBundle));
+
+        // make sure the config block marker is set
+        memcpy(
+            certificate,
+            c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1,
+            sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1));
+
+        // get size of certificate
+        certificate->CertificateSize =
+            ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509CaRootBundle, 0);
+
+        certificateStore->Certificates[0] = certificate;
+    }
 
     return certificateStore;
 }
 
-HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks()
+HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *IRAM_ATTR ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks()
 {
     DIR *dir = opendir(NANO_SPIFFS_BASE_PATH);
     struct dirent *dirInfo = {0};
 
-    uint32_t configCount = 0;
+    uint32_t certCount = 0;
 
     // 1st pass, count the config files
     for (;;)
@@ -513,7 +576,7 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertifica
 
         if (strstr(dirInfo->d_name, (const char *)c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1))
         {
-            configCount++;
+            certCount++;
 
             // there is only one device cert, so we're good here
             break;
@@ -521,7 +584,8 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertifica
     }
 
     // allocate config struct
-    int32_t allocationSize = sizeof(HAL_Configuration_X509DeviceCertificate);
+    int32_t allocationSize = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
+                             certCount * sizeof(HAL_Configuration_X509DeviceCertificate *);
 
     // allocate config struct
     HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *deviceCertificate =
@@ -537,7 +601,35 @@ HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *ConfigStorage_FindX509DeviceCertifica
     memset(deviceCertificate, 0, allocationSize);
 
     // set collection count
-    deviceCertificate->Count = configCount;
+    deviceCertificate->Count = certCount;
+
+    if (certCount > 0)
+    {
+        // allocate cert struct
+        HAL_Configuration_X509DeviceCertificate *certificate =
+            (HAL_Configuration_X509DeviceCertificate *)platform_malloc(sizeof(HAL_Configuration_X509DeviceCertificate));
+
+        // check allocation
+        if (certificate == NULL)
+        {
+            return NULL;
+        }
+
+        // clear memory
+        memset(certificate, 0, sizeof(HAL_Configuration_X509DeviceCertificate));
+
+        // make sure the config block marker is set
+        memcpy(
+            certificate,
+            c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
+            sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1));
+
+        // get size of certificate
+        certificate->CertificateSize =
+            ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509DeviceCertificates, 0);
+
+        deviceCertificate->Certificates[0] = certificate;
+    }
 
     return deviceCertificate;
 }
@@ -555,7 +647,7 @@ bool ConfigurationManager_GetConfigurationBlockFromStorage(
     ets_printf("GetConfigFromStorage %d, %d\n", (int)configuration, configurationIndex);
 #endif
 
-    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
+    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false, false);
 
     if (handle != NULL)
     {
@@ -578,7 +670,7 @@ int32_t ConfigurationManager_GetConfigurationBlockSize(
     FILE *handle;
     int32_t readSize = 0;
 
-    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
+    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false, false);
 
     if (handle != NULL)
     {
