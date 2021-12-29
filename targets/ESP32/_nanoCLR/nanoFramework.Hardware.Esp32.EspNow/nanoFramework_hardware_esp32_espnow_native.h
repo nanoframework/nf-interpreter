@@ -135,6 +135,14 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 };
 
 
+struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowException
+{
+    static const int FIELD__esp_err = 5;
+
+    //--//
+
+};
+
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_EspNow;
 
 #endif  //_NANOFRAMEWORK_HARDWARE_ESP32_ESPNOW_NATIVE_H_
