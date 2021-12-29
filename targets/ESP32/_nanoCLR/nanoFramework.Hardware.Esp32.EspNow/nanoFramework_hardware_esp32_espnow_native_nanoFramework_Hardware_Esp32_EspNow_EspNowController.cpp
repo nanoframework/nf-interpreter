@@ -64,7 +64,11 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 
     esp_wifi_stop();
     esp_wifi_deinit();
-    esp_netif_create_default_wifi_sta();
+
+    esp_netif_init();
+    //esp_netif_create_default_wifi_sta();
+    //esp_netif_create_default_wifi_ap();
+    esp_event_loop_create_default();
 
     DEBUG_WRITELINE("WiFi init");
 
@@ -73,27 +77,33 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     if (ret == ESP_OK)
     {
 
-        DEBUG_WRITELINE("WiFi mode set");
+        DEBUG_WRITELINE("set WiFi mode");
 
         ret = esp_wifi_set_mode(WIFI_MODE_STA);
         if (ret == ESP_OK)
         {
+            DEBUG_WRITELINE("start WiFi");
 
-            DEBUG_WRITELINE("ESPNOW init");
-
-            ret = esp_now_init();
+            ret = esp_wifi_start();
             if (ret == ESP_OK)
             {
 
-                DEBUG_WRITELINE("ESPNOW reg recvcb");
+                DEBUG_WRITELINE("ESPNOW init");
 
-                ret = esp_now_register_recv_cb(DataRecvCb);
+                ret = esp_now_init();
                 if (ret == ESP_OK)
                 {
 
-                    DEBUG_WRITELINE("ESPNOW reg sendcb");
+                    DEBUG_WRITELINE("ESPNOW reg recvcb");
 
-                    ret = esp_now_register_send_cb(DataSentCb);
+                    ret = esp_now_register_recv_cb(DataRecvCb);
+                    if (ret == ESP_OK)
+                    {
+
+                        DEBUG_WRITELINE("ESPNOW reg sendcb");
+
+                        ret = esp_now_register_send_cb(DataSentCb);
+                    }
                 }
             }
         }
@@ -140,7 +150,7 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 
     int32_t dataLen = stack.Arg3().NumericByRef().s4;
 
-    DEBUG_WRITELINE("sending %d bytes", dataLen);
+    DEBUG_WRITELINE("sending %d: bytes to peer mac: %x:%x:%x:%x:%x:%x, data[0]: %x", dataLen, peerMac[0], peerMac[1], peerMac[2], peerMac[3], peerMac[4], peerMac[5], data[0]);
 
     ret = esp_now_send((const uint8_t *)peerMac, (const uint8_t *)data, dataLen);
 
@@ -163,14 +173,16 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     CLR_RT_HeapBlock_Array *peerMacArg = stack.Arg1().DereferenceArray();
     char *peerMac = (char *)peerMacArg->GetFirstElement();
 
-    uint8_t channel = (uint8_t)stack.Arg1().NumericByRef().u1;
+    uint8_t channel = (uint8_t)stack.Arg2().NumericByRef().u1;
 
     esp_now_peer_info_t peerInfo;
-    memcpy(peerInfo.peer_addr, peerMac, 6);
+    memset((void*)&peerInfo, 0, sizeof(peerInfo));
+    memcpy(peerInfo.peer_addr, peerMac, ESP_NOW_ETH_ALEN);
+    peerInfo.ifidx = WIFI_IF_STA;
     peerInfo.channel = channel;
     peerInfo.encrypt = false;
 
-    DEBUG_WRITELINE("add_peer[0]: %d", peerMac[0]);
+    DEBUG_WRITELINE("add_peer, mac: %x:%x:%x:%x:%x:%x, ch: %d", peerMac[0], peerMac[1], peerMac[2], peerMac[3], peerMac[4], peerMac[5], channel);
 
     ret = esp_now_add_peer(&peerInfo);
 
