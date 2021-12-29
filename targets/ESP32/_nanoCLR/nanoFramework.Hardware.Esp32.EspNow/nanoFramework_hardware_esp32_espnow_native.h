@@ -27,7 +27,7 @@
 #define DEBUG_FEXIT() DEBUG_WRITELINE("exit")
 #define DEBUG_FEXIT_RET(v) DEBUG_WRITELINE("return: %d", v)
 
-#ifdef DEBUG_ESPNOW
+#if defined(DEBUG_ESPNOW)
     #define DEBUG_WRITELINE(...) \
     {   \
       char temporaryStringBuffer1[64]; \
