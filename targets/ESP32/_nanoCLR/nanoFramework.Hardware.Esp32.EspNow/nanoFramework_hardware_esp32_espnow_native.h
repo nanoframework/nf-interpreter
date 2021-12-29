@@ -59,6 +59,8 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController
 {
+    static const int FIELD_STATIC__BROADCASTMAC = 0;
+
     static const int FIELD__DataSent = 1;
     static const int FIELD__DataReceived = 2;
     static const int FIELD__isDisposed = 3;
