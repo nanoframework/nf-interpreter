@@ -53,7 +53,7 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.3.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.3.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
@@ -68,7 +68,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 ENV IDF_PATH=/sources/esp-idf
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r1-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r1-8.4.0/riscv32-esp-elf/bin
+ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
