@@ -18,6 +18,7 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
+#include <esp_interface.h>
 #include <esp_wifi.h>
 #include <esp_now.h>
 
@@ -30,9 +31,9 @@
 #if defined(DEBUG_ESPNOW)
     #define DEBUG_WRITELINE(...) \
     {   \
-      char temporaryStringBuffer1[64]; \
+      char temporaryStringBuffer1[128]; \
       snprintf(temporaryStringBuffer1, sizeof(temporaryStringBuffer1), __VA_ARGS__); \
-      char temporaryStringBuffer2[64]; \
+      char temporaryStringBuffer2[256]; \
       int realStringSize=snprintf(temporaryStringBuffer2, sizeof(temporaryStringBuffer2), "\r\n*** [%s] %s\r\n", __func__, temporaryStringBuffer1); \
       CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer2, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching ); \
     }
