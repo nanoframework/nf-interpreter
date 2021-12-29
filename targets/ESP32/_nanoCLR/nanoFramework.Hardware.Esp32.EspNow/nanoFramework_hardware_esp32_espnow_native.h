@@ -23,6 +23,25 @@
 
 #define DEBUG_ESPNOW 1
 
+#define DEBUG_FENTER() DEBUG_WRITELINE("entry")
+#define DEBUG_FEXIT() DEBUG_WRITELINE("exit")
+#define DEBUG_FEXIT_RET(v) DEBUG_WRITELINE("return: %d", v)
+
+#ifdef DEBUG_ESPNOW
+    #define DEBUG_WRITELINE(...) \
+    {   \
+      char temporaryStringBuffer1[64]; \
+      snprintf(temporaryStringBuffer1, sizeof(temporaryStringBuffer1), __VA_ARGS__); \
+      char temporaryStringBuffer2[64]; \
+      int realStringSize=snprintf(temporaryStringBuffer2, sizeof(temporaryStringBuffer2), "\r\n*** [%s] %s\r\n", __func__, temporaryStringBuffer1); \
+      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer2, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching ); \
+    }
+
+#else 
+    #define DEBUG_WRITELINE(...) ;
+#endif
+
+
 #define EVENT_ESP32_ESPNOW_DATASENT 1
 #define EVENT_ESP32_ESPNOW_DATARECV 2
 
