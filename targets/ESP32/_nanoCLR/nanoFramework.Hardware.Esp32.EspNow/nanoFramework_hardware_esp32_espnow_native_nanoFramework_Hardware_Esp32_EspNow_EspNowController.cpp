@@ -12,6 +12,12 @@
 
 #include "nanoFramework_hardware_esp32_espnow_native.h"
 
+EspNowDataSentEventData Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+    dataSentEventData;
+EspNowDataRecvEventData Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+    dataRecvEventData;
+
+
 void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
     DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status) 
 {

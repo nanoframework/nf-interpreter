@@ -17,19 +17,22 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 {
     NANOCLR_HEADER();
 
+    CLR_UINT8* firstTargetByte;
+    CLR_RT_HeapBlock_Array * targetArray;
+
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         target,
-        6,
+        length,
         g_CLR_RT_WellKnownTypes.m_UInt8));
 
-    CLR_RT_HeapBlock_Array * peerMacArray = target.DereferenceArray();
-    if (!peerMacArray)
+    targetArray = target.DereferenceArray();
+    if (!targetArray)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
-    CLR_UINT8* buf = peerMacArray->GetFirstElement();
-    memcpy( buf, src, length ); 
+    firstTargetByte = targetArray->GetFirstElement();
+    memcpy( firstTargetByte, src, length ); 
 
     NANOCLR_NOCLEANUP();
 }
@@ -40,12 +43,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     NANOCLR_HEADER();
 
     EspNowDataSentEventData *sentEventData = (EspNowDataSentEventData *)stack.Arg2().NumericByRef().u4;
+    CLR_RT_HeapBlock *dataSentEvent;
                 
     // create nanoFramework.Hardware.Esp32.EspNow.EspNowController.DataSentEventInternal instance to return
     CLR_RT_HeapBlock &clrRet = stack.PushValue();
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(clrRet, g_CLR_RT_WellKnownTypes.m_Esp32EspNowDataSentEvent));
-    CLR_RT_HeapBlock *dataSentEvent = clrRet.Dereference();
+    
+    dataSentEvent = clrRet.Dereference();
     if (!dataSentEvent)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
@@ -71,12 +76,14 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     NANOCLR_HEADER();
 
     EspNowDataRecvEventData *recvEventData = (EspNowDataRecvEventData *)stack.Arg2().NumericByRef().u4;
+    CLR_RT_HeapBlock *dataRecvEvent;
                 
     // create nanoFramework.Hardware.Esp32.EspNow.EspNowController.DataRecvEventInternal instance to return
     CLR_RT_HeapBlock &clrRet = stack.PushValue();
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(clrRet, g_CLR_RT_WellKnownTypes.m_Esp32EspNowDataRecvEvent));
-    CLR_RT_HeapBlock *dataRecvEvent = clrRet.Dereference();
+    
+    dataRecvEvent = clrRet.Dereference();
     if (!dataRecvEvent)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
