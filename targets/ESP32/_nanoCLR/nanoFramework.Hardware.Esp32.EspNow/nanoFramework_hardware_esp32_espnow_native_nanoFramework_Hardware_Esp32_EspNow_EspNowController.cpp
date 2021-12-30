@@ -65,49 +65,77 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     esp_wifi_stop();
     esp_wifi_deinit();
 
-    esp_netif_init();
-    //esp_netif_create_default_wifi_sta();
-    //esp_netif_create_default_wifi_ap();
-    esp_event_loop_create_default();
+    // DEBUG_WRITELINE("NVS init");
 
-    DEBUG_WRITELINE("WiFi init");
+    // ret = nvs_flash_init();
+    //     DEBUG_WRITELINE("nvs init: %d", ret);
+    // if (ret == ESP_OK)
+    // {
+        DEBUG_WRITELINE("netif init");
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ret = esp_wifi_init(&cfg);
-    if (ret == ESP_OK)
-    {
-
-        DEBUG_WRITELINE("set WiFi mode");
-
-        ret = esp_wifi_set_mode(WIFI_MODE_STA);
+        ret = esp_netif_init();
         if (ret == ESP_OK)
         {
-            DEBUG_WRITELINE("start WiFi");
+            // DEBUG_WRITELINE("create defaults");
 
-            ret = esp_wifi_start();
+            // esp_netif_create_default_wifi_sta();
+            // esp_netif_create_default_wifi_ap();
+
             if (ret == ESP_OK)
             {
 
-                DEBUG_WRITELINE("ESPNOW init");
+                DEBUG_WRITELINE("WiFi init");
 
-                ret = esp_now_init();
+                wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+                //cfg.nvs_enable = false; // overrides CONFIG_ESP32_WIFI_NVS_ENABLED
+
+
+                ret = esp_wifi_init(&cfg);
                 if (ret == ESP_OK)
                 {
 
-                    DEBUG_WRITELINE("ESPNOW reg recvcb");
+                    DEBUG_WRITELINE("set WiFi storage");
 
-                    ret = esp_now_register_recv_cb(DataRecvCb);
+                    ret = esp_wifi_set_storage(WIFI_STORAGE_RAM);
                     if (ret == ESP_OK)
                     {
 
-                        DEBUG_WRITELINE("ESPNOW reg sendcb");
+                        DEBUG_WRITELINE("set WiFi mode");
 
-                        ret = esp_now_register_send_cb(DataSentCb);
+                        ret = esp_wifi_set_mode(WIFI_MODE_STA);
+                        if (ret == ESP_OK)
+                        {
+
+                            DEBUG_WRITELINE("start WiFi");
+
+                            ret = esp_wifi_start();
+                            if (ret == ESP_OK)
+                            {
+
+                                DEBUG_WRITELINE("ESPNOW init");
+
+                                ret = esp_now_init();
+                                if (ret == ESP_OK)
+                                {
+
+                                    DEBUG_WRITELINE("ESPNOW reg recvcb");
+
+                                    ret = esp_now_register_recv_cb(DataRecvCb);
+                                    if (ret == ESP_OK)
+                                    {
+
+                                        DEBUG_WRITELINE("ESPNOW reg sendcb");
+
+                                        ret = esp_now_register_send_cb(DataSentCb);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
+//    }
 
     DEBUG_FEXIT_RET(ret);
 
