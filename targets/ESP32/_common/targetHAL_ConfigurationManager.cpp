@@ -438,10 +438,10 @@ bool ConfigurationManager_GetConfigurationBlock(
         // set block size
         sizeOfBlock = ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509CaRootBundle, 0);
     }
-    else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+    else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
     {
-        if (g_TargetConfiguration.CertificateStore->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
+        if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
         {
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig XC exit false\n");
