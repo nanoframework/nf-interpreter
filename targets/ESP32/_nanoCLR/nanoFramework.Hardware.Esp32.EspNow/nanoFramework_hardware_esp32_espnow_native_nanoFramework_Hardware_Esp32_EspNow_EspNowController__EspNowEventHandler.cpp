@@ -52,9 +52,10 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
 
     EspNowDataSentEventData *sentEventData = (EspNowDataSentEventData *)stack.Arg2().NumericByRef().u4;
     CLR_RT_HeapBlock *dataSentEvent;
-                
+
     // create nanoFramework.Hardware.Esp32.EspNow.EspNowController.DataSentEventInternal instance to return
-    CLR_RT_HeapBlock &clrRet = stack.PushValue();
+    CLR_RT_HeapBlock &clrRet = stack.PushValueAndClear();
+
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(clrRet, g_CLR_RT_WellKnownTypes.m_Esp32EspNowDataSentEvent));
     
@@ -67,12 +68,12 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     // clrRet.PeerMac
     NANOCLR_CHECK_HRESULT(
         CopyByteArrayToCLRArray(
-            dataSentEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataSentEventInternal::FIELD__PeerMac],
+            dataSentEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventInternal::FIELD__PeerMac],
             sentEventData->peer_mac, 
             6));
 
     // clrRet.Status
-    dataSentEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataSentEventInternal::FIELD__Status].SetInteger(sentEventData->status);
+    dataSentEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventInternal::FIELD__Status].SetInteger(sentEventData->status);
 
     DEBUG_FEXIT();
 
@@ -103,19 +104,19 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     // clrRet.PeerMac
     NANOCLR_CHECK_HRESULT(
         CopyByteArrayToCLRArray(
-            dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataRecvEventInternal::FIELD__PeerMac],
+            dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataRecvEventInternal::FIELD__PeerMac],
             recvEventData->peer_mac, 
             6));
 
     // clrRet.Data
     NANOCLR_CHECK_HRESULT(
         CopyByteArrayToCLRArray(
-            dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataRecvEventInternal::FIELD__Data],
+            dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataRecvEventInternal::FIELD__Data],
             recvEventData->data, 
             recvEventData->dataLen));
 
     // clrRet.DataLen
-    dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataRecvEventInternal::FIELD__DataLen].SetInteger(recvEventData->dataLen);
+    dataRecvEvent[Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataRecvEventInternal::FIELD__DataLen].SetInteger(recvEventData->dataLen);
 
     DEBUG_FEXIT();
 
@@ -143,6 +144,11 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
             break;
         default:
             NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    }
+
+    if (FAILED(hr))
+    {
+        DEBUG_WRITELINE("failed hr: %x", hr);
     }
 
     DEBUG_FEXIT();

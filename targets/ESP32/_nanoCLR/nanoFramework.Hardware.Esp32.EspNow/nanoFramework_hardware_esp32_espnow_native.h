@@ -31,10 +31,10 @@
 #if defined(DEBUG_ESPNOW)
     #define DEBUG_WRITELINE(...) \
     {   \
-      char temporaryStringBuffer1[128]; \
+      char temporaryStringBuffer1[64]; \
       snprintf(temporaryStringBuffer1, sizeof(temporaryStringBuffer1), __VA_ARGS__); \
-      char temporaryStringBuffer2[256]; \
-      int realStringSize=snprintf(temporaryStringBuffer2, sizeof(temporaryStringBuffer2), "\r\n*** [%s] %s\r\n", __func__, temporaryStringBuffer1); \
+      char temporaryStringBuffer2[128]; \
+      int realStringSize=snprintf(temporaryStringBuffer2, sizeof(temporaryStringBuffer2), "\r\n[%s] %s\r\n", __func__, temporaryStringBuffer1); \
       CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer2, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching ); \
     }
 
@@ -70,10 +70,29 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
+struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataRecvEventInternal
+{
+    static const int FIELD__PeerMac = 3;
+    static const int FIELD__Data = 4;
+    static const int FIELD__DataLen = 5;
+
+    //--//
+
+};
+
 struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventArgs
 {
     static const int FIELD__PeerMac = 1;
     static const int FIELD__Status = 2;
+
+    //--//
+
+};
+
+struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventInternal
+{
+    static const int FIELD__PeerMac = 3;
+    static const int FIELD__Status = 4;
 
     //--//
 
@@ -101,24 +120,6 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
     static void DataRecvCb(const uint8_t * mac, const uint8_t *incomingData, int len);
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataRecvEventInternal
-{
-    static const int FIELD__PeerMac = 3;
-    static const int FIELD__Data = 4;
-    static const int FIELD__DataLen = 5;
-
-    //--//
-
-};
-
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__DataSentEventInternal
-{
-    static const int FIELD__PeerMac = 3;
-    static const int FIELD__Status = 4;
-
-    //--//
-
-};
 
 struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__EspNowEventHandler
 {
