@@ -219,6 +219,7 @@ int Monitor_UpdateConfiguration(WP_Message *message)
         case DeviceConfigurationOption_Network:
         case DeviceConfigurationOption_Wireless80211Network:
         case DeviceConfigurationOption_X509CaRootBundle:
+        case DeviceConfigurationOption_X509DeviceCertificates:
         case DeviceConfigurationOption_All:
             if (ConfigurationManager_StoreConfigurationBlock(
                     cmd->Data,

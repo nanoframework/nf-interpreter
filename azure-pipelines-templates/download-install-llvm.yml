@@ -3,7 +3,7 @@
 
 steps:
   - task: Cache@2
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
     displayName: Cache LLVM
     inputs:
       key: 'llvm_13_0_0_0 | llvmUpdateKey'
@@ -13,7 +13,7 @@ steps:
 
   - task: PowerShell@2
     displayName: Downloading LLVM
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), ne(variables.LLVM_CACHE_RESTORED, 'true'))
+    condition: and(ne(variables['System.PullRequest.PullRequestId'], ''), ne(variables.LLVM_CACHE_RESTORED, 'true'))
     inputs:
         targetType: 'inline'
         script: |
@@ -25,11 +25,11 @@ steps:
 
   - task: ExtractFiles@1
     displayName: Install LLVM
-    condition: and(eq(variables['Build.Reason'], 'PullRequest'), ne(variables.LLVM_CACHE_RESTORED, 'true'))
+    condition: and(ne(variables['System.PullRequest.PullRequestId'], ''), ne(variables.LLVM_CACHE_RESTORED, 'true'))
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)\LLVM-13.0.0-win64.exe' 
       destinationFolder: '$(Agent.TempDirectory)\llvm'
   
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\llvm\bin"
     displayName: Add LLVM to PATH
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
