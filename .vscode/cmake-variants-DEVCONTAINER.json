@@ -347,7 +347,7 @@
           "TARGET_SERIES": "ESP32",
           "TARGET_BOARD": "ESP32",
           "TARGET_NAME": "ESP32_REV0",
-          "SDK_CONFIG_FILE": "",
+          "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
           "ESP32_IDF_PATH": "/sources/esp-idf",
           "RTOS": "ESP32",
           "NF_BUILD_RTM": "OFF",
