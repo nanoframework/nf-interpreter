@@ -22,7 +22,7 @@
 #include <esp_wifi.h>
 #include <esp_now.h>
 
-#define DEBUG_ESPNOW 1
+//#define DEBUG_ESPNOW 1
 
 #define DEBUG_FENTER() DEBUG_WRITELINE("entry")
 #define DEBUG_FEXIT() DEBUG_WRITELINE("exit")
