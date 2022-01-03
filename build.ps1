@@ -3,7 +3,7 @@
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
-    [Parameter(HelpMessage = "Please enter the target name [e.g. ESP32_WROOM_32 or ST_STM32F429I_DISCOVERY or NETDUINO3_WIFI].")][string]$TargetBoard,
+    [Parameter(HelpMessage = "Please enter the target name [e.g. ESP32_WROOM_32 or ST_STM32F429I_DISCOVERY].")][string]$TargetBoard,
     [Parameter(HelpMessage = "Enter the path to the folder where the tools should be installed.")][string]$Path = "C:\nftools"
 )
 
@@ -15,8 +15,7 @@ Set-Location "build" | Out-Null
 
 "Running CMake build preparation..." | Write-Host -ForegroundColor White
 
-If ($TargetBoard -eq "NETDUINO3_WIFI" -or
-    $TargetBoard -eq "ORGPAL_PALTHREE" -or
+If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
     $TargetBoard -eq "ST_NUCLEO64_F091RC" -or
     $TargetBoard -eq "ST_STM32F429I_DISCOVERY" -or
     $TargetBoard -eq "ST_STM32F769I_DISCOVERY") {
@@ -24,11 +23,7 @@ If ($TargetBoard -eq "NETDUINO3_WIFI" -or
     # run the install tools to have the build vars filled
     Invoke-Expression "$PSScriptRoot\install-scripts\install-stm32-tools.ps1 -Path $Path"
 
-    If ($TargetBoard -eq "NETDUINO3_WIFI") {
-
-        $cmakeOptions = " -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON"
-    }
-    elseif ($TargetBoard -eq "ORGPAL_PALTHREE") {
+    If ($TargetBoard -eq "ORGPAL_PALTHREE") {
 
         $cmakeOptions = " -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH -DTARGET_SERIES=STM32F7xx -DRTOS=CHIBIOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DSWO_OUTPUT=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON"
     }
@@ -83,7 +78,8 @@ elseif ($TargetBoard -eq "NXP_MIMXRT1060_EVK") {
 
     Exit 1
 }
-elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or 
+elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
+    $TargetBoard -eq "NETDUINO3_WIFI" -or
     $TargetBoard -eq "I2M_ELECTRON_NF" -or
     $TargetBoard -eq "I2M_OXYGEN_NF" -or
     $TargetBoard -eq "ST_NUCLEO64_F401RE_NF" -or
@@ -101,6 +97,9 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
     # community targets with STM32
     If ($TargetBoard -eq "GHI_FEZ_CERB40_NF") {
         $cmakeOptions = " -DTARGET_SERIES=STM32F4xx -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON"
+    }
+    elseif ($TargetBoard -eq "NETDUINO3_WIFI") {
+        $cmakeOptions = " -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH -DTARGET_SERIES=STM32F4xx -DRTOS=CHIBIOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_Windows.Storage=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON"
     }
     elseif ($TargetBoard -eq "I2M_ELECTRON_NF") {
         $cmakeOptions = " -DTARGET_SERIES=STM32F4xx -DNF_FEATURE_DEBUGGER=ON -DUSE_RNG=OFF -DNF_FEATURE_RTC=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_Windows.Devices.Adc=ON"
