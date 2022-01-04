@@ -366,7 +366,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -401,7 +401,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -437,7 +437,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -472,7 +472,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -506,7 +506,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -538,7 +538,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -582,7 +582,7 @@ jobs:
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -618,7 +618,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -657,7 +657,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -698,7 +698,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -738,7 +738,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -778,7 +778,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON

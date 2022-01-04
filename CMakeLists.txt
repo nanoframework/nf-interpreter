@@ -520,11 +520,6 @@ if( API_System.Net)
         set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
     endif()
 
-   if(API_Windows.Devices.Wifi)
-        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
-    else()
-        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
-    endif()
 else()
     # need to force SNTP to OFF
     set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")

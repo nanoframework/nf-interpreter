@@ -114,7 +114,8 @@
           "API_Hardware.Stm32": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.TI.EasyLink": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.Hardware.Esp32.Rmt": "OFF-default-ON-to-add-this-API",
-          "API_nanoFramework.Device.Bluetooth": "OFF-default-ON-to-add-this-API"
+          "API_nanoFramework.Device.Bluetooth": "OFF-default-ON-to-add-this-API",
+          "API_System.Device.WiFi": "OFF-default-ON-to-add-this-API"
         }
       }
     }

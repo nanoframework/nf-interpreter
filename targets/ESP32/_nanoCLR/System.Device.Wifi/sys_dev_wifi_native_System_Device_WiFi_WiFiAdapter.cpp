@@ -4,12 +4,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_wifi_native.h"
-#include "nf_rt_events_native.h"
-#include "esp_wifi_types.h"
+#include <sys_dev_wifi_native.h>
+#include <nf_rt_events_native.h>
+#include <esp_wifi_types.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.WiFi (in managed code) !!! //
+// !!! KEEP IN SYNC WITH System.Device.WiFi (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
 struct ScanRecord
 {
@@ -20,40 +20,7 @@ struct ScanRecord
     uint8_t cypherType;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.WiFi (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-enum WiFiConnectionStatus
-{
-    AccessRevoked = 0,
-    InvalidCredential,
-    NetworkNotAvailable,
-    Success,
-    Timeout,
-    UnspecifiedFailure,
-    UnsupportedAuthenticationProtocol
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.WiFi (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-enum WiFiNetworkKind
-{
-    Adhoc = 0,
-    Any,
-    Infrastructure
-};
-
-///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.WiFi (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
-enum WiFiReconnectionKind
-{
-    Automatic = 0,
-    Manual
-};
-
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::DisposeNative___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     (void)stack;
@@ -61,7 +28,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::DisposeNat
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeInit___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     (void)stack;
@@ -72,7 +39,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeInit
 //
 //  Pickup Net interface index and do checks
 //
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNetInterfaceIndex(
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNetInterfaceIndex(
     CLR_RT_StackFrame &stack,
     int *pNetIndex)
 {
@@ -81,7 +48,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNetInte
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        if (pThis[Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::FIELD___disposedValue]
+        if (pThis[Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::FIELD___disposedValue]
                 .NumericByRef()
                 .u1 != 0)
         {
@@ -96,8 +63,8 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNetInte
 //
 // Connect to Wireless connection to passed SSID / passPhase
 //
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
-    NativeConnect___WindowsDevicesWiFiWiFiConnectionStatus__STRING__STRING__WindowsDevicesWiFiWiFiReconnectionKind(
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
+    NativeConnect___SystemDeviceWiFiWiFiConnectionStatus__STRING__STRING__SystemDeviceWiFiWiFiReconnectionKind(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -110,7 +77,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
         CLR_RT_HeapBlock hbTimeout;
         CLR_INT64 *timeout;
         bool eventResult = true;
-        WiFiConnectionStatus Status = UnspecifiedFailure;
+        WiFiConnectionStatus Status = WiFiConnectionStatus_UnspecifiedFailure;
 
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
 
@@ -135,7 +102,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
             res = (esp_err_t)Network_Interface_Start_Connect(netIndex, szSsid, szPassPhase, reconnectionKind);
             if (res != ESP_OK)
             {
-                Status = UnspecifiedFailure;
+                Status = WiFiConnectionStatus_UnspecifiedFailure;
                 eventResult = false;
             }
         }
@@ -150,11 +117,11 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
                 switch (connectResult)
                 {
                     case 0:
-                        Status = Success;
+                        Status = WiFiConnectionStatus_Success;
                         break;
 
                     case WIFI_REASON_NO_AP_FOUND:
-                        Status = NetworkNotAvailable;
+                        Status = WiFiConnectionStatus_NetworkNotAvailable;
                         break;
 
                     case WIFI_REASON_AUTH_EXPIRE:
@@ -163,11 +130,11 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
                     case WIFI_REASON_AUTH_FAIL:
                     case WIFI_REASON_ASSOC_FAIL:
                     case WIFI_REASON_HANDSHAKE_TIMEOUT:
-                        Status = InvalidCredential;
+                        Status = WiFiConnectionStatus_InvalidCredential;
                         break;
 
                     default:
-                        Status = UnspecifiedFailure;
+                        Status = WiFiConnectionStatus_UnspecifiedFailure;
                         break;
                 }
                 break;
@@ -183,7 +150,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
             if (!eventResult)
             {
                 // Timeout
-                Status = Timeout;
+                Status = WiFiConnectionStatus_Timeout;
                 break;
             }
         }
@@ -197,7 +164,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::
 //
 //  Disconnect WiFi connection
 //
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeDisconnect___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeDisconnect___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -210,7 +177,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeDisc
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -236,7 +203,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeScan
 //  unit8_t     RSSI
 //
 //  Return : length in pTarget
-int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount)
+int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount)
 {
     int index;
 
@@ -263,7 +230,7 @@ int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16
 }
 
 // private extern WiFiNetworkReport NativeNetworkReport();
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1(
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -321,7 +288,7 @@ HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::GetNativeS
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_win_dev_wifi_native_Windows_Devices_WiFi_WiFiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1(
+HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
