@@ -25,7 +25,7 @@ static const char *TAG = "Memory";
 
 #if HAL_USE_BLE
 // Reduce Managed heap if using BLE without spiram
-#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (20 * 1024)
+#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (30 * 1024)
 #else
 // Space to leave free in internal RAM for allocation by IDF malloc
 // no need to leave any RAM free at this time
