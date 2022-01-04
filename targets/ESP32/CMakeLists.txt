@@ -120,7 +120,7 @@ if(NF_SECURITY_MBEDTLS)
         # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
 
         # sanity check is source path exists
-        if(EXISTS ${MBEDTLS_SOURCE}/)
+        if(IS_DIRECTORY ${MBEDTLS_SOURCE})
 
         message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
