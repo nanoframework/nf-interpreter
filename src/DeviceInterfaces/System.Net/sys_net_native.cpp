@@ -99,6 +99,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties::GetIPAddress___STATIC__SystemNetIPAddress,
     NULL,
     NULL,
@@ -333,7 +334,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Net =
 {
     "System.Net",
-    0x8974F0F8,
+    0x1171EDEC,
     method_lookup,
     { 100, 1, 4, 0 }
 };
