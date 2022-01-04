@@ -203,7 +203,10 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAs
 //  unit8_t     RSSI
 //
 //  Return : length in pTarget
-int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount)
+int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsToString(
+    uint8_t *pTarget,
+    wifi_ap_record_t *apRecords,
+    uint16_t recordCount)
 {
     int index;
 
