@@ -7,7 +7,6 @@
             "request": "launch",
             "MIMode": "gdb",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
-            "targetArchitecture": "ARM",
             "program": "${workspaceRoot}/build/nanoCLR.elf",
             "setupCommands": [
                 {

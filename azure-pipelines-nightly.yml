@@ -208,18 +208,6 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: >-
-    and(
-      ne(variables['Build.Reason'], 'Schedule'),
-      not(
-        or(
-          eq(variables['BUILD_ALL'], 'true'),
-          eq(variables['BUILD_CHIBIOS'], 'true'),
-          eq(variables['BUILD_ESP32'], 'true'),
-          eq(variables['BUILD_TI'], 'true')
-        )
-      )
-    )
 
   dependsOn:
   - Check_Build_Options
@@ -337,16 +325,20 @@ jobs:
 # ESP32 targets
 - job: Build_ESP32_targets
   condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      eq(variables['BUILD_ALL'], 'true'),
-      eq(variables['BUILD_ESP32'], 'true')
-    ) 
+    and(
+      succeeded('Check_Code_Style'),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(variables['BUILD_ALL'], 'true'),
+        eq(variables['BUILD_ESP32'], 'true')
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'windows-2019'
@@ -846,16 +838,20 @@ jobs:
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-      eq(variables['BUILD_ALL'], 'true'),
-      eq(variables['BUILD_TI'], 'true')
-    ) 
+    and(
+      succeeded('Check_Code_Style'),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+        eq(variables['BUILD_ALL'], 'true'),
+        eq(variables['BUILD_TI'], 'true')
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
+  - Check_Code_Style
 
   pool:
     vmImage: 'windows-2019'
