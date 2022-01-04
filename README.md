@@ -10,20 +10,20 @@ Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
 
 ## Build status
 
-| Component | Build Status | Build Status (develop) |
+| Component | Stable (branch: main) | Preview (branch: develop) |
 |:-|---|---|
 | nanoBooter + nanoCLR | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=develop)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=develop) |
 | Win32 test project | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=develop)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=develop) |
 
 ## Firmware for reference boards
 
-Each of the following ZIP files contains the image files for nanoBooter and nanoCLR in various formats (HEX, BIN and DFU). They should be flashed in the target boards using an appropriate software utility.
+Each of the following ZIP files contain the firmware binaries for nanoBooter (if applicable) and nanoCLR in various formats (HEX, BIN and DFU). They should be flashed to the target board using an appropriate software utility.
 
-The **stable** versions are RTM builds with the smallest possible size. They include the latest stable version. The debugging feature is disabled and only minimal (or none) error messages.
+The **stable** firmware versions are `RTM` builds that are updated as per our stable release mandate. These are released with compiler optimizations and the smallest possible size. For these builds, the debugging features are also disabled and only contain no (or minimal) detailed error messages.
 
-The **preview** versions are continuous builds of the reference targets. They include the latest version of all features and bug corrections. They also have the debugging feature enabled along with detailed error messages.
+The **preview** firmware versions are the latest available builds of the reference targets. They include the latest bug fixes and features, but are more susceptible to breaking changes and a high release candence. For these builds, debugging features are enabled along with detailed error messages.
 
-We have a [Community Targets](https://github.com/nanoframework/nf-Community-Targets) repository where you can find firmware images for several other popular boards.
+We also have a [Community Targets](https://github.com/nanoframework/nf-Community-Targets) repository where you can find firmware images for several other popular boards that have been contibuted by the community, although limited support is provided.
 
 ### ESP32 modules and boards
 
