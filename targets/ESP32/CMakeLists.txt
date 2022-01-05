@@ -40,7 +40,7 @@ else()
     # ESP32 IDF source was specified
 
     # sanity check if source path exists
-    if(EXISTS "${ESP32_IDF_PATH}/")
+    if(IS_DIRECTORY ${ESP32_IDF_PATH})
         message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
 
         FetchContent_Declare(
@@ -55,7 +55,10 @@ else()
 endif()
 
 FetchContent_GetProperties(esp32_idf)
-FetchContent_Populate(esp32_idf)
+if(NOT esp32_idf_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(esp32_idf)
+endif()
 
 # add IDF CMake dir to modules path
 list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
@@ -136,7 +139,10 @@ if(NF_SECURITY_MBEDTLS)
     endif()
 
     FetchContent_GetProperties(mbedtls)
-    FetchContent_Populate(mbedtls)
+    if(NOT mbedtls_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(mbedtls)
+    endif()
 
     set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
     set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
