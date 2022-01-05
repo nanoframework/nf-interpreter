@@ -208,7 +208,7 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: ne(variables['System.PullRequest.PullRequestId', '')
+  condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
   dependsOn:
   - Check_Build_Options
