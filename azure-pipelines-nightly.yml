@@ -208,7 +208,13 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: ne(variables['System.PullRequest.PullRequestId'], '')
+  condition: >-
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+    )
 
   dependsOn:
   - Check_Build_Options
