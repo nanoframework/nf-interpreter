@@ -47,13 +47,12 @@ else()
     # FatFS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${FATFS_SOURCE}/")
+    if(IS_DIRECTORY ${FATFS_SOURCE})
         message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
         FetchContent_Declare(
             fatfs
-            GIT_REPOSITORY ${FATFS_SOURCE}
-            GIT_TAG ${FATFS_VERSION_TAG}
+            SOURCE_DIR ${FATFS_SOURCE}
         )
     else()
         message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
@@ -62,7 +61,10 @@ else()
 endif()
 
 FetchContent_GetProperties(fatfs)
-FetchContent_Populate(fatfs)
+if(NOT fatfs_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(fatfs)
+endif()
 
 # have to delete the ffconf.h template from the repo
 execute_process(
@@ -110,13 +112,12 @@ else()
     # LWIP source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${LWIP_SOURCE}/")
+    if(IS_DIRECTORY ${LWIP_SOURCE})
         message(STATUS "lwIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
 
         FetchContent_Declare(
             lwip
-            GIT_REPOSITORY ${LWIP_SOURCE}
-            GIT_TAG ${LWIP_GIT_TAG}
+            SOURCE_DIR ${LWIP_SOURCE}
         )
     
     else()
@@ -126,7 +127,10 @@ else()
 endif()
 
 FetchContent_GetProperties(lwip)
-FetchContent_Populate(lwip)
+if(NOT lwip_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(lwip)
+endif()
 
 # append FatFS files
 if(USE_FILESYSTEM_OPTION)
