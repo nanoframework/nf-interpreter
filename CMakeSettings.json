@@ -432,7 +432,7 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Wifi:BOOL",
+          "name": "API_System.Device.WiFi:BOOL",
           "value": "True"
         },
         {

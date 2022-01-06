@@ -38,13 +38,12 @@ macro(ProcessSTM32CubePackage)
         # STM32 Cube package source was specified
 
         # sanity check is source path exists
-        if(EXISTS "${STM32_CUBE_PACKAGE_SOURCE}/")
-            message(STATUS "STM32 Cube package source from: ${STM32_CUBE_PACKAGE_SOURCE}")
+        if(IS_DIRECTORY ${STM32_CUBE_PACKAGE_SOURCE})
+            message(STATUS "STM32 Cube package (source from: ${STM32_CUBE_PACKAGE_SOURCE})")
 
             FetchContent_Declare(
                 stm32${TARGET_SERIES_SHORT}_cubepackage
-                GIT_REPOSITORY ${STM32_CUBE_PACKAGE_SOURCE}
-                GIT_TAG nf-build
+                SOURCE_DIR ${STM32_CUBE_PACKAGE_SOURCE}
             )
     
         else()
