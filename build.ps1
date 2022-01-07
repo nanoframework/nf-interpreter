@@ -25,7 +25,7 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 
     If ($TargetBoard -eq "ORGPAL_PALTHREE") {
 
-        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$($:env:HEX2DFU_PATH)
         -DTARGET_SERIES=STM32F7xx
         -DRTOS=CHIBIOS
         -DCHIBIOS_CONTRIB_REQUIRED=ON
@@ -57,7 +57,7 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
     }
     elseif ($TargetBoard -eq "ST_NUCLEO64_F091RC") {
     
-    $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+    $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$($:env:HEX2DFU_PATH)
         -DTARGET_SERIES=stm32f0xx
         -DTARGET_SERIES=STM32F0xx
         -DRTOS=ChibiOS
@@ -136,11 +136,11 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
     # CMake prep
     $cmakePrep = @' -G Ninja 
     -DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+    -DTOOLCHAIN_PREFIX="$($env:GNU_GCC_TOOLCHAIN_PATH)"
     -DCMAKE_BUILD_TYPE=Debug
     -DBUILD_VERSION=9.9.99.99
     -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
+    $($cmakeOptions)
     ..
     '@
 }
@@ -185,9 +185,9 @@ elseif ($TargetBoard -eq "ESP32_WROOM_32") {
     -DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.xtensa-esp32-elf.cmake"
     -DCMAKE_BUILD_TYPE=Debug
     -DBUILD_VERSION=9.99.999
-    -DTARGET_BOARD=$TargetBoard
-    -DTARGET_NAME=$TargetBoard
-    $cmakeOptions
+    -DTARGET_BOARD=$($TargetBoard)
+    -DTARGET_NAME=$($TargetBoard)
+    $($cmakeOptions)
     ..
     '@
 }
@@ -222,10 +222,11 @@ elseif ($TargetBoard -eq "TI_CC1352R1_LAUNCHXL") {
     # CMake prep
     $cmakePrep = @' -G Ninja 
     -DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+    -DTOOLCHAIN_PREFIX="$($env:GNU_GCC_TOOLCHAIN_PATH)"
     -DCMAKE_BUILD_TYPE=Debug
     -DBUILD_VERSION=9.99.999
-    -DTARGET_BOARD=$TargetBoard $cmakeOptions
+    -DTARGET_BOARD=$($TargetBoard)
+    $($cmakeOptions)
     ..
     '@
 }
@@ -265,7 +266,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
         '@
     }
     elseif ($TargetBoard -eq "NETDUINO3_WIFI") {
-        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$($:env:HEX2DFU_PATH)
         -DTARGET_SERIES=STM32F4xx
         -DRTOS=CHIBIOS
         -DSUPPORT_ANY_BASE_CONVERSION=ON
@@ -436,7 +437,7 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
     }
     elseif ( $TargetBoard -eq "MBN_QUAIL" ) {
 
-        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+        $cmakeOptions = @' -DTOOL_HEX2DFU_PREFIX=$($:env:HEX2DFU_PATH)
         -DTARGET_SERIES=STM32F4xx
         -DRTOS=CHIBIOS
         -DSUPPORT_ANY_BASE_CONVERSION=ON
@@ -459,11 +460,11 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
     # CMake prep
     $cmakePrep = @' -G Ninja
     -DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+    -DTOOLCHAIN_PREFIX="$($env:GNU_GCC_TOOLCHAIN_PATH)"
     -DCMAKE_BUILD_TYPE=Debug
     -DBUILD_VERSION=9.9.99.99
-    -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
+    -DTARGET_BOARD=$($TargetBoard)
+    $($cmakeOptions)
     ..
     '@
 }
@@ -487,11 +488,11 @@ elseif ($TargetBoard -eq "TI_CC1352P1_LAUNCHXL") {
     # CMake prep
     $cmakePrep = @' -G Ninja
     -DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+    -DTOOLCHAIN_PREFIX="$($env:GNU_GCC_TOOLCHAIN_PATH)"
     -DCMAKE_BUILD_TYPE=Debug
     -DBUILD_VERSION=9.9.99.99
-    -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
+    -DTARGET_BOARD=$($TargetBoard)
+    $($cmakeOptions)
     ..
     '@
 }
