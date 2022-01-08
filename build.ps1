@@ -26,127 +26,127 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
     If ($TargetBoard -eq "ORGPAL_PALTHREE") {
 
         $cmakeOptions = @"
-        -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
-        -DTARGET_SERIES=STM32F7xx
-        -DRTOS=CHIBIOS
-        -DCHIBIOS_CONTRIB_REQUIRED=ON
-        -DSTM32_CUBE_PACKAGE_REQUIRED=ON
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_HAS_USB_MSD=ON
-        -DNF_FEATURE_HAS_SDCARD=ON
-        -DNF_FEATURE_USE_SPIFFS=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_System.Device.Dac=OFF
-        -DAPI_System.Net=ON
-        -DNF_SECURITY_MBEDTLS=ON
-        -DAPI_Windows.Storage=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+-DTARGET_SERIES=STM32F7xx
+-DRTOS=CHIBIOS
+-DCHIBIOS_CONTRIB_REQUIRED=ON
+-DSTM32_CUBE_PACKAGE_REQUIRED=ON
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_USB_MSD=ON
+-DNF_FEATURE_HAS_SDCARD=ON
+-DNF_FEATURE_USE_SPIFFS=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Device.Dac=OFF
+-DAPI_System.Net=ON
+-DNF_SECURITY_MBEDTLS=ON
+-DAPI_Windows.Storage=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO64_F091RC") {
     
     $cmakeOptions = @"
-        -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
-        -DTARGET_SERIES=stm32f0xx
-        -DTARGET_SERIES=STM32F0xx
-        -DRTOS=ChibiOS
-        -DNF_FEATURE_DEBUGGER=ON
-        -DNF_FEATURE_RTC=ON
-        -DUSE_RNG=OFF
-        -DNF_PLATFORM_NO_CLR_TRACE=ON
-        -DNF_CLR_NO_IL_INLINE=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_System.Device.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_System.Device.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_System.Device.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_System.Device.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_System.IO.Ports=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+-DTARGET_SERIES=stm32f0xx
+-DTARGET_SERIES=STM32F0xx
+-DRTOS=ChibiOS
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DUSE_RNG=OFF
+-DNF_PLATFORM_NO_CLR_TRACE=ON
+-DNF_CLR_NO_IL_INLINE=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_STM32F429I_DISCOVERY") {
 
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DRTOS=CHIBIOS
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
-        -DAPI_nanoFramework.Devices.Can=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTARGET_SERIES=STM32F4xx
+-DRTOS=CHIBIOS
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Devices.Can=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_STM32F769I_DISCOVERY") {
 
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F7xx
-        -DRTOS=CHIBIOS
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_HAS_SDCARD=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_System.Device.Dac=ON
-        -DAPI_System.Net=ON
-        -DNF_SECURITY_MBEDTLS=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
-        -DAPI_nanoFramework.Devices.Can=ON
-        -DAPI_Windows.Storage=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTARGET_SERIES=STM32F7xx
+-DRTOS=CHIBIOS
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_SDCARD=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Device.Dac=ON
+-DAPI_System.Net=ON
+-DNF_SECURITY_MBEDTLS=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Devices.Can=ON
+-DAPI_Windows.Storage=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
-    $cmakeOptions = $cmakeOptions -replace "`r`n",' '
+    
     # CMake prep
     $cmakePrep = @"
-    -G Ninja 
-    "-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake""
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
-    -DCMAKE_BUILD_TYPE=Debug
-    -DBUILD_VERSION=9.9.99.99
-    -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
-    ..
+-G Ninja 
+-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
+-DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+-DCMAKE_BUILD_TYPE=Debug
+-DBUILD_VERSION=9.9.99.99
+-DTARGET_BOARD=$TargetBoard
+$cmakeOptions
+..
 "@
 }
 elseif ($TargetBoard -eq "ESP32_WROOM_32") {
@@ -155,47 +155,47 @@ elseif ($TargetBoard -eq "ESP32_WROOM_32") {
     Invoke-Expression "$PSScriptRoot\install-scripts\install-esp32-tools.ps1 -Path $Path"
 
     $cmakeOptions = @"
-    -DTARGET_SERIES=ESP32
-    -DRTOS=ESP32
-    -DNF_FEATURE_DEBUGGER=ON
-    -DNF_FEATURE_RTC=ON
-    -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-    -DNF_FEATURE_HAS_SDCARD=ON
-    -DAPI_System.IO.FileSystem=ON
-    -DAPI_System.Math=ON
-    -DAPI_Windows.Devices.Gpio=ON
-    -DAPI_System.Device.Gpio=ON
-    -DAPI_Windows.Devices.Spi=ON
-    -DAPI_System.Device.Spi=ON
-    -DAPI_Windows.Devices.I2c=ON
-    -DAPI_System.Device.I2c=ON
-    -DAPI_Windows.Devices.Pwm=ON
-    -DAPI_Windows.Devices.SerialCommunication=ON
-    -DAPI_System.IO.Ports=ON 
-    -DAPI_Windows.Devices.Adc=ON
-    -DAPI_System.Net=ON
-    -DAPI_System.Device.WiFi=ON
-    -DNF_SECURITY_MBEDTLS=ON
-    -DAPI_Hardware.Esp32=ON
-    -DSUPPORT_ANY_BASE_CONVERSION=ON
-    -DAPI_nanoFramework.Devices.OneWire=ON
-    -DAPI_nanoFramework.ResourceManager=ON
-    -DAPI_nanoFramework.System.Collections=ON
-    -DAPI_nanoFramework.System.Text=ON
-    -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-    -DAPI_System.Device.Dac=ON
+-DTARGET_SERIES=ESP32
+-DRTOS=ESP32
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+-DNF_FEATURE_HAS_SDCARD=ON
+-DAPI_System.IO.FileSystem=ON
+-DAPI_System.Math=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_System.IO.Ports=ON 
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Net=ON
+-DAPI_System.Device.WiFi=ON
+-DNF_SECURITY_MBEDTLS=ON
+-DAPI_Hardware.Esp32=ON
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
+-DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+-DAPI_System.Device.Dac=ON
 "@
-    $cmakeOptions = $cmakeOptions -replace "`r`n",' '
+    
     # CMake prep
     $cmakePrep = @"
-    -G Ninja
-    "-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.xtensa-esp32-elf.cmake""
-    -DCMAKE_BUILD_TYPE=Debug
-    -DBUILD_VERSION=9.99.999
-    -DTARGET_BOARD=$TargetBoard
-    -DTARGET_NAME=$TargetBoard
-    $cmakeOptions
-    ..
+-G Ninja
+"-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.xtensa-esp32-elf.cmake""
+-DCMAKE_BUILD_TYPE=Debug
+-DBUILD_VERSION=9.99.999
+-DTARGET_BOARD=$TargetBoard
+-DTARGET_NAME=$TargetBoard
+$cmakeOptions
+..
 "@
 }
 elseif ($TargetBoard -eq "TI_CC3220SF_LAUNCHXL") {
@@ -211,32 +211,31 @@ elseif ($TargetBoard -eq "TI_CC1352R1_LAUNCHXL") {
 
     If ( $TargetBoard -eq "TI_CC1352R1_LAUNCHXL" ) {
         $cmakeOptions = @"
-
-        -DTARGET_SERIES=CC13x2_26x2
-        -DRTOS=TI_SIMPLELINK
-        -DSUPPORT_ANY_BASE_CONVERSION=OFF
-        -DNF_FEATURE_DEBUGGER=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_WATCHDOG=OFF
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=OFF
-        -DAPI_Windows.Devices.I2c=OFF
-        -DAPI_Windows.Devices.Pwm=OFF
-        -DAPI_Windows.Devices.SerialCommunication=OFF
-        -DAPI_Windows.Devices.Adc=OFF
-        -DAPI_nanoFramework.TI.EasyLink=ON
+-DTARGET_SERIES=CC13x2_26x2
+-DRTOS=TI_SIMPLELINK
+-DSUPPORT_ANY_BASE_CONVERSION=OFF
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_WATCHDOG=OFF
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=OFF
+-DAPI_Windows.Devices.I2c=OFF
+-DAPI_Windows.Devices.Pwm=OFF
+-DAPI_Windows.Devices.SerialCommunication=OFF
+-DAPI_Windows.Devices.Adc=OFF
+-DAPI_nanoFramework.TI.EasyLink=ON
 "@
     }
-    $cmakeOptions = $cmakeOptions -replace "`r`n",' '
+    
     # CMake prep
     $cmakePrep = @"
-    -G Ninja 
-    "-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake""
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
-    -DCMAKE_BUILD_TYPE=Debug
-    -DBUILD_VERSION=9.99.999
-    -DTARGET_BOARD=$TargetBoard $cmakeOptions
-    ..
+-G Ninja 
+-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
+-DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+-DCMAKE_BUILD_TYPE=Debug
+-DBUILD_VERSION=9.99.999
+-DTARGET_BOARD=$TargetBoard $cmakeOptions
+..
 "@
 }
 elseif ($TargetBoard -eq "NXP_MIMXRT1060_EVK") {
@@ -264,260 +263,260 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
     # community targets with STM32
     If ($TargetBoard -eq "GHI_FEZ_CERB40_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "NETDUINO3_WIFI") {
         $cmakeOptions = @"
-        -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
-        -DTARGET_SERIES=STM32F4xx
-        -DRTOS=CHIBIOS
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_HAS_SDCARD=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_System.Device.Dac=OFF
-        -DAPI_nanoFramework.Devices.OneWire=ON
-        -DAPI_Windows.Storage=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+-DTARGET_SERIES=STM32F4xx
+-DRTOS=CHIBIOS
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_SDCARD=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Device.Dac=OFF
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_Windows.Storage=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "I2M_ELECTRON_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DUSE_RNG=OFF
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DUSE_RNG=OFF
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "I2M_OXYGEN_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DUSE_RNG=OFF
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DUSE_RNG=OFF
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO64_F401RE_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DUSE_RNG=OFF
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DUSE_RNG=OFF
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO64_F411RE_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DUSE_RNG=OFF
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DUSE_RNG=OFF
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_STM32F411_DISCOVERY") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DUSE_RNG=OFF
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON 
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DUSE_RNG=OFF
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON 
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO144_F412ZG_NF") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=OFF
-        -DAPI_Windows.Devices.Adc=ON
+-DTARGET_SERIES=STM32F4xx
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=OFF
+-DAPI_Windows.Devices.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO144_F746ZG") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F7xx
-        -DRTOS=CHIBIOS
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_HAS_CONFIG_BLOCK=ON 
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_System.Net=ON
-        -DNF_SECURITY_MBEDTLS=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
+-DTARGET_SERIES=STM32F7xx
+-DRTOS=CHIBIOS
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_CONFIG_BLOCK=ON 
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Net=ON
+-DNF_SECURITY_MBEDTLS=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_STM32F4_DISCOVERY") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DRTOS=CHIBIOS
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
-        -DAPI_nanoFramework.Devices.Can=ON
+-DTARGET_SERIES=STM32F4xx
+-DRTOS=CHIBIOS
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.Devices.Can=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO144_F439ZI") {
         $cmakeOptions = @"
-        -DTARGET_SERIES=STM32F4xx
-        -DRTOS=CHIBIOS
-        -DNF_FEATURE_DEBUGGER=ON
-        -DSWO_OUTPUT=ON
-        -DNF_FEATURE_RTC=ON
-        -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_Windows.Devices.Adc=ON
-        -DAPI_System.Net=ON
-        -DNF_SECURITY_MBEDTLS=ON
+-DTARGET_SERIES=STM32F4xx
+-DRTOS=CHIBIOS
+-DNF_FEATURE_DEBUGGER=ON
+-DSWO_OUTPUT=ON
+-DNF_FEATURE_RTC=ON
+-DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_Windows.Devices.Adc=ON
+-DAPI_System.Net=ON
+-DNF_SECURITY_MBEDTLS=ON
 "@
     }
     elseif ( $TargetBoard -eq "MBN_QUAIL" ) {
 
         $cmakeOptions = @"
-        -DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
-        -DTARGET_SERIES=STM32F4xx
-        -DRTOS=CHIBIOS
-        -DSUPPORT_ANY_BASE_CONVERSION=ON
-        -DNF_FEATURE_DEBUGGER=ON
-        -DNF_FEATURE_RTC=ON
-        -DAPI_System.Math=ON
-        -DAPI_Hardware.Stm32=ON
-        -DAPI_Windows.Devices.Gpio=ON
-        -DAPI_Windows.Devices.Spi=ON
-        -DAPI_Windows.Devices.I2c=ON
-        -DAPI_Windows.Devices.Pwm=ON
-        -DAPI_Windows.Devices.SerialCommunication=ON
-        -DAPI_nanoFramework.Devices.OneWire=ON
-        -DAPI_nanoFramework.ResourceManager=ON
-        -DAPI_nanoFramework.System.Collections=ON
-        -DAPI_nanoFramework.System.Text=ON
+-DTOOL_HEX2DFU_PREFIX=$:env:HEX2DFU_PATH
+-DTARGET_SERIES=STM32F4xx
+-DRTOS=CHIBIOS
+-DSUPPORT_ANY_BASE_CONVERSION=ON
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON
+-DAPI_System.Math=ON
+-DAPI_Hardware.Stm32=ON
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=ON
+-DAPI_Windows.Devices.I2c=ON
+-DAPI_Windows.Devices.Pwm=ON
+-DAPI_Windows.Devices.SerialCommunication=ON
+-DAPI_nanoFramework.Devices.OneWire=ON
+-DAPI_nanoFramework.ResourceManager=ON
+-DAPI_nanoFramework.System.Collections=ON
+-DAPI_nanoFramework.System.Text=ON
 "@
     }
-    $cmakeOptions = $cmakeOptions -replace "`r`n",' '
+    
     # CMake prep
     $cmakePrep = @"
-    -G Ninja
-    "-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake""
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
-    -DCMAKE_BUILD_TYPE=Debug
-    -DBUILD_VERSION=9.9.99.99
-    -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
-    ..
+-G Ninja
+-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
+-DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+-DCMAKE_BUILD_TYPE=Debug
+-DBUILD_VERSION=9.9.99.99
+-DTARGET_BOARD=$TargetBoard
+$cmakeOptions
+..
 "@
 }
 elseif ($TargetBoard -eq "TI_CC1352P1_LAUNCHXL") {
     # community targets with TI CC13xx
     $cmakeOptions = @"
-    -DTARGET_SERIES=CC13x2_26x2
-    -DRTOS=TI_SIMPLELINK
-    -DSUPPORT_ANY_BASE_CONVERSION=OFF
-    -DNF_FEATURE_DEBUGGER=ON
-    -DNF_FEATURE_RTC=ON 
-    -DNF_FEATURE_WATCHDOG=OFF
-    -DAPI_Windows.Devices.Gpio=ON
-    -DAPI_Windows.Devices.Spi=OFF
-    -DAPI_Windows.Devices.I2c=OFF
-    -DAPI_Windows.Devices.Pwm=OFF 
-    -DAPI_Windows.Devices.SerialCommunication=OFF
-    -DAPI_Windows.Devices.Adc=OFF
-    -DAPI_nanoFramework.TI.EasyLink=ON
+-DTARGET_SERIES=CC13x2_26x2
+-DRTOS=TI_SIMPLELINK
+-DSUPPORT_ANY_BASE_CONVERSION=OFF
+-DNF_FEATURE_DEBUGGER=ON
+-DNF_FEATURE_RTC=ON 
+-DNF_FEATURE_WATCHDOG=OFF
+-DAPI_Windows.Devices.Gpio=ON
+-DAPI_Windows.Devices.Spi=OFF
+-DAPI_Windows.Devices.I2c=OFF
+-DAPI_Windows.Devices.Pwm=OFF 
+-DAPI_Windows.Devices.SerialCommunication=OFF
+-DAPI_Windows.Devices.Adc=OFF
+-DAPI_nanoFramework.TI.EasyLink=ON
 "@
-    $cmakeOptions = $cmakeOptions -replace "`r`n",' '
+    
     # CMake prep
     $cmakePrep = @"
-    -G Ninja
-    "-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake""
-    -DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
-    -DCMAKE_BUILD_TYPE=Debug
-    -DBUILD_VERSION=9.9.99.99
-    -DTARGET_BOARD=$TargetBoard
-    $cmakeOptions
-    ..
+-G Ninja
+-DCMAKE_TOOLCHAIN_FILE="CMake/toolchain.arm-none-eabi.cmake"
+-DTOOLCHAIN_PREFIX="$env:GNU_GCC_TOOLCHAIN_PATH"
+-DCMAKE_BUILD_TYPE=Debug
+-DBUILD_VERSION=9.9.99.99
+-DTARGET_BOARD=$TargetBoard
+$cmakeOptions
+..
 "@
 }
 else {
@@ -568,7 +567,7 @@ if ($buildProcess.ExitCode -ne 0) {
 .DESCRIPTION
     Power Shell Script to build of a nanoFramework target, installing all the required tools and libraries. 
 .PARAMETER Target
-	The name of teh target to build [e.g. ESP32_WROOM_32 or ST_STM32F429I_DISCOVERY].
+	The name of teh target to build [e.g. ESP32_WROOM_32 or ST_STM32F429I_DISCOVERY or NETDUINO3_WIFI].
 .EXAMPLE
    .\build.ps1 -Target ST_STM32F429I_DISCOVERY
 .NOTES
