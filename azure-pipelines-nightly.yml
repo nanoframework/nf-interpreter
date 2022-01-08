@@ -52,8 +52,8 @@ jobs:
           if($commitDate -eq [System.DateTime]::UtcNow.Date)
           {
               # last commit is from today, build images
-              echo "##vso[task.setvariable variable=GO;isOutput=true]true"  
-              "**Commits from today: Build ALL**" | Write-Host
+              echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
+              "**Commits from today. Go and check what changed.**" | Write-Host
           }
           else
           {
@@ -61,13 +61,13 @@ jobs:
             "***************************************************" | Write-Host
             "* Last commit is older than today, skipping build *" | Write-Host
             "***************************************************" | Write-Host
-            echo "##vso[task.setvariable variable=GO;isOutput=true]false"
+            echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
           }
       }
       else
       {
           # build for other reasons: build depending on target tag
-          echo "##vso[task.setvariable variable=GO;isOutput=true]false"
+          echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
           "**build for other reasons**" | Write-Host  
       }
 
@@ -204,10 +204,17 @@ jobs:
 
     name: TargetsToBuild
     displayName: Get targets to build
-    condition: eq(variables['BuildOptions.GO'], 'True')
+    condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
 
 ##############################
 - job: Check_Code_Style
+  condition: >-
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+    )
 
   dependsOn:
   - Check_Build_Options
