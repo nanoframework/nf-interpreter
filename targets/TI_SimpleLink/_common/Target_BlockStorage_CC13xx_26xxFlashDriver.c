@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Target_BlockStorage_CC13x2_26x2FlashDriver.h>
+#include <Target_BlockStorage_CC13xx_26xxFlashDriver.h>
 
 // includes from SimpleLink
 #include <driverlib/flash.h>
@@ -18,7 +18,7 @@
 static uint8_t DisableCache();
 static void EnableCache( uint8_t state );
 
-bool CC13x2_26x2FlashDriver_InitializeDevice(void* context)
+bool CC13xx_26xxFlashDriver_InitializeDevice(void* context)
 {
 	(void)context;
 
@@ -26,7 +26,7 @@ bool CC13x2_26x2FlashDriver_InitializeDevice(void* context)
 	return true;
 }
 
-bool CC13x2_26x2FlashDriver_UninitializeDevice(void* context)
+bool CC13xx_26xxFlashDriver_UninitializeDevice(void* context)
 {
 	(void)context;
 
@@ -34,14 +34,14 @@ bool CC13x2_26x2FlashDriver_UninitializeDevice(void* context)
 	return true;
 }
 
-DeviceBlockInfo* CC13x2_26x2FlashDriver_GetDeviceInfo(void* context)
+DeviceBlockInfo* CC13xx_26xxFlashDriver_GetDeviceInfo(void* context)
 {
     MEMORY_MAPPED_NOR_BLOCK_CONFIG* config = context;
     
     return config->BlockConfig.BlockDeviceInformation;  
 }
 
-bool CC13x2_26x2FlashDriver_Read(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer)
+bool CC13xx_26xxFlashDriver_Read(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer)
 {
 	(void)context;
 
@@ -52,7 +52,7 @@ bool CC13x2_26x2FlashDriver_Read(void* context, ByteAddress startAddress, unsign
     return true;
 }
 
-bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
+bool CC13xx_26xxFlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
 {
 	(void)context;
 	(void)readModifyWrite;
@@ -82,7 +82,7 @@ bool CC13x2_26x2FlashDriver_Write(void* context, ByteAddress startAddress, unsig
 	return result;
 }
 
-bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, unsigned int length)
+bool CC13xx_26xxFlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, unsigned int length)
 {
 	(void)context;
 
@@ -104,7 +104,7 @@ bool CC13x2_26x2FlashDriver_IsBlockErased(void* context, ByteAddress blockAddres
     return true;
 }
 
-bool CC13x2_26x2FlashDriver_EraseBlock(void* context, ByteAddress address)
+bool CC13xx_26xxFlashDriver_EraseBlock(void* context, ByteAddress address)
 {
 	(void)context;
 
