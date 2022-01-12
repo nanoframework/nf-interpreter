@@ -46,24 +46,20 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     else()
         # TI SimpleLink CC32xx SDK source was specified
 
-        # sanity check is source path exists
-        if(EXISTS "${TI_SL_CC32xx_SDK_SOURCE}/")
-            message(STATUS "TI SimpleLink CC32xx SDK ${TI_SL_CC32xx_SDK_TAG} source from: ${TI_SL_CC32xx_SDK_SOURCE}")
+        message(STATUS "TI SimpleLink CC32xx SDK ${TI_SL_CC32xx_SDK_TAG} source from: ${TI_SL_CC32xx_SDK_SOURCE}")
 
-            FetchContent_Declare(
-                simplelinkcc32xxsdk
-                GIT_REPOSITORY ${TI_SL_CC32xx_SDK_SOURCE}
-                GIT_TAG ${TI_SL_CC32xx_SDK_TAG}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI SimpleLink CC32xx SDK source at ${TI_SL_CC32xx_SDK_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            simplelinkcc32xxsdk
+            SOURCE_DIR ${TI_SL_CC32xx_SDK_SOURCE}
+        )
 
     endif()
     
     FetchContent_GetProperties(simplelinkcc32xxsdk)
-    FetchContent_Populate(simplelinkcc32xxsdk)
+    if(NOT simplelinkcc32xxsdk_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(simplelinkcc32xxsdk)
+endif()
 
     # check if TI_XDCTOOLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_TI_XDCTOOLS_SOURCE TRUE)
@@ -100,24 +96,20 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     else()
         # TI XDCTools source was specified
 
-        # sanity check is source path exists
-        if(EXISTS "${TI_XDCTOOLS_SOURCE}/")
-            message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION} (source from: ${TI_XDCTOOLS_SOURCE})")
 
-            FetchContent_Declare(
-                ti_xdctools
-                GIT_REPOSITORY ${TI_XDCTOOLS_SOURCE}
-                GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI XDCTools source at ${TI_XDCTOOLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_xdctools
+            SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
+        )
 
     endif()
     
     FetchContent_GetProperties(ti_xdctools)
-    FetchContent_Populate(ti_xdctools)
+    if(NOT ti_xdctools_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(ti_xdctools)
+    endif()
 
     set(TI_XDCTools_INCLUDE_DIR ${ti_xdctools_SOURCE_DIR}/packages/ PARENT_SCOPE)
 
@@ -155,25 +147,20 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI SimpleLink CC13x2_26x2 SDK source was specified
 
+        message(STATUS "TI SimpleLink CC13x2_26x2 SDK ${TI_SL_CC13x2_26x2_SDK_TAG} source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
 
-        # sanity check is source path exists
-        if(EXISTS "${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
-            message(STATUS "TI SimpleLink CC13x2_26x2 SDK ${TI_SL_CC13x2_26x2_SDK_TAG} source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
-
-            FetchContent_Declare(
-                simplelinkcc13x2_26x2sdk
-                GIT_REPOSITORY ${TI_SL_CC13x2_26x2_SDK_SOURCE}
-                GIT_TAG ${TI_SL_CC13x2_26x2_SDK_TAG}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI SimpleLink CC13x2_26x2 SDK source at ${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            simplelinkcc13x2_26x2sdk
+            SOURCE_DIR ${TI_SL_CC13x2_26x2_SDK_SOURCE}
+        )
 
     endif()
 
     FetchContent_GetProperties(simplelinkcc13x2_26x2sdk)
-    FetchContent_Populate(simplelinkcc13x2_26x2sdk)
+    if(NOT simplelinkcc13x2_26x2sdk_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(simplelinkcc13x2_26x2sdk)
+    endif()
     
     # check if TI_SYSCONFIG_SOURCE was specified or if it's empty (default is empty)
     set(NO_TI_SYSCONFIG_SOURCE TRUE)
@@ -210,24 +197,18 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI SysConfig source was specified
 
-        # sanity check is source path exists
-        if(EXISTS "${TI_SYSCONFIG_SOURCE}/")
-            message(STATUS "TI SysConfig ${TI_SYSCONFIG_VERSION_TAG} (source from: ${TI_SYSCONFIG_SOURCE})")
-           
-            FetchContent_Declare(
-                ti_sysconfig
-                GIT_REPOSITORY ${TI_SYSCONFIG_SOURCE}
-                GIT_TAG ${TI_SYSCONFIG_VERSION_TAG}
-            )
-    
-        else()
-            message(FATAL_ERROR "Couldn't find TI SysConfig source at ${TI_SYSCONFIG_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_sysconfig
+            SOURCE_DIR ${TI_SYSCONFIG_SOURCE}
+        )
 
     endif()
 
     FetchContent_GetProperties(ti_sysconfig)
-    FetchContent_Populate(ti_sysconfig)
+    if(NOT ti_sysconfig_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(ti_sysconfig)
+    endif()
         
     # check if TI_XDCTOOLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_TI_XDCTOOLS_SOURCE TRUE)
@@ -264,24 +245,20 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI XDCTools source was specified
 
-        # sanity check is source path exists
-        if(EXISTS "${TI_XDCTOOLS_SOURCE}/")
-            message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION_TAG} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION_TAG} (source from: ${TI_XDCTOOLS_SOURCE})")
 
-            FetchContent_Declare(
-                ti_xdctools
-                SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
-                # GIT_TAG ${TI_XDCTOOLS_VERSION_TAG}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI XDCTools source at ${TI_XDCTOOLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_xdctools
+            SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
+        )
 
     endif()
     
     FetchContent_GetProperties(ti_xdctools)
-    FetchContent_Populate(ti_xdctools)
+    if(NOT ti_xdctools_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(ti_xdctools)
+    endif()
 
     set(TI_XDCTools_INCLUDE_DIR ${ti_xdctools_SOURCE_DIR}/packages/ PARENT_SCOPE)
      
