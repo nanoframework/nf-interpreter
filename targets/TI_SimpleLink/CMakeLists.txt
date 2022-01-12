@@ -46,18 +46,12 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     else()
         # TI SimpleLink CC32xx SDK source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${TI_SL_CC32xx_SDK_SOURCE})
-            message(STATUS "TI SimpleLink CC32xx SDK ${TI_SL_CC32xx_SDK_TAG} source from: ${TI_SL_CC32xx_SDK_SOURCE}")
+        message(STATUS "TI SimpleLink CC32xx SDK ${TI_SL_CC32xx_SDK_TAG} source from: ${TI_SL_CC32xx_SDK_SOURCE}")
 
-            FetchContent_Declare(
-                simplelinkcc32xxsdk
-                SOURCE_DIR ${TI_SL_CC32xx_SDK_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI SimpleLink CC32xx SDK source at ${TI_SL_CC32xx_SDK_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            simplelinkcc32xxsdk
+            SOURCE_DIR ${TI_SL_CC32xx_SDK_SOURCE}
+        )
 
     endif()
     
@@ -102,18 +96,12 @@ endif()
     else()
         # TI XDCTools source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${TI_XDCTOOLS_SOURCE})
-            message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION} (source from: ${TI_XDCTOOLS_SOURCE})")
 
-            FetchContent_Declare(
-                ti_xdctools
-                SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI XDCTools source at ${TI_XDCTOOLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_xdctools
+            SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
+        )
 
     endif()
     
@@ -159,19 +147,12 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI SimpleLink CC13x2_26x2 SDK source was specified
 
+        message(STATUS "TI SimpleLink CC13x2_26x2 SDK ${TI_SL_CC13x2_26x2_SDK_TAG} source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${TI_SL_CC13x2_26x2_SDK_SOURCE})
-            message(STATUS "TI SimpleLink CC13x2_26x2 SDK ${TI_SL_CC13x2_26x2_SDK_TAG} source from: ${TI_SL_CC13x2_26x2_SDK_SOURCE}")
-
-            FetchContent_Declare(
-                simplelinkcc13x2_26x2sdk
-                SOURCE_DIR ${TI_SL_CC13x2_26x2_SDK_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI SimpleLink CC13x2_26x2 SDK source at ${TI_SL_CC13x2_26x2_SDK_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            simplelinkcc13x2_26x2sdk
+            SOURCE_DIR ${TI_SL_CC13x2_26x2_SDK_SOURCE}
+        )
 
     endif()
 
@@ -216,18 +197,10 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI SysConfig source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${TI_SYSCONFIG_SOURCE})
-            message(STATUS "TI SysConfig ${TI_SYSCONFIG_VERSION_TAG} (source from: ${TI_SYSCONFIG_SOURCE})")
-           
-            FetchContent_Declare(
-                ti_sysconfig
-                SOURCE_DIR ${TI_SYSCONFIG_SOURCE}
-            )
-    
-        else()
-            message(FATAL_ERROR "Couldn't find TI SysConfig source at ${TI_SYSCONFIG_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_sysconfig
+            SOURCE_DIR ${TI_SYSCONFIG_SOURCE}
+        )
 
     endif()
 
@@ -272,18 +245,12 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13x2_26x2" )
     else()
         # TI XDCTools source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${TI_XDCTOOLS_SOURCE})
-            message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION_TAG} (source from: ${TI_XDCTOOLS_SOURCE})")
+        message(STATUS "TI XDCTools ${TI_XDCTOOLS_VERSION_TAG} (source from: ${TI_XDCTOOLS_SOURCE})")
 
-            FetchContent_Declare(
-                ti_xdctools
-                SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find TI XDCTools source at ${TI_XDCTOOLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            ti_xdctools
+            SOURCE_DIR ${TI_XDCTOOLS_SOURCE}
+        )
 
     endif()
     
