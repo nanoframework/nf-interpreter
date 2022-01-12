@@ -37,20 +37,16 @@ macro(ProcessSTM32CubePackage)
     else()
         # STM32 Cube package source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${STM32_CUBE_PACKAGE_SOURCE})
-            message(STATUS "STM32 Cube package (source from: ${STM32_CUBE_PACKAGE_SOURCE})")
+        message(STATUS "STM32 Cube package (source from: ${STM32_CUBE_PACKAGE_SOURCE})")
 
-            FetchContent_Declare(
-                stm32${TARGET_SERIES_SHORT}_cubepackage
-                SOURCE_DIR ${STM32_CUBE_PACKAGE_SOURCE}
-            )
+        FetchContent_Declare(
+            stm32${TARGET_SERIES_SHORT}_cubepackage
+            SOURCE_DIR ${STM32_CUBE_PACKAGE_SOURCE}
+        )
     
-        else()
-            message(FATAL_ERROR "Couldn't find STM32 Cube package source at ${STM32_CUBE_PACKAGE_SOURCE}/")
-        endif()
 
     endif()
+
     # Check if population has already been performed
     FetchContent_GetProperties(stm32${TARGET_SERIES_SHORT}_cubepackage)
     if(NOT stm32${TARGET_SERIES_SHORT}_cubepackage_POPULATED)
