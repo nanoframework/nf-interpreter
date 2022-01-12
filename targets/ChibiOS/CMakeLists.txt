@@ -398,8 +398,7 @@ if(NF_FEATURE_USE_SPIFFS)
 
         FetchContent_Declare(
             spiffs
-            GIT_REPOSITORY ${SPIFFS_SOURCE}
-            GIT_TAG "nf-build"
+            SOURCE_DIR ${SPIFFS_SOURCE}
         )
 
     endif()
