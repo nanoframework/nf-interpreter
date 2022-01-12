@@ -39,18 +39,12 @@ if(NO_ESP32_IDF_PATH)
 else()
     # ESP32 IDF source was specified
 
-    # sanity check if source path exists
-    if(IS_DIRECTORY ${ESP32_IDF_PATH})
-        message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
+    message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
 
-        FetchContent_Declare(
-            esp32_idf
-            SOURCE_DIR ${ESP32_IDF_PATH}
-        )
-
-    else()
-        message(FATAL_ERROR "Couldn't find ESP32 IDF source at ${ESP32_IDF_PATH}/")
-    endif()
+    FetchContent_Declare(
+        esp32_idf
+        SOURCE_DIR ${ESP32_IDF_PATH}
+    )
 
 endif()
 
@@ -120,21 +114,13 @@ if(NF_SECURITY_MBEDTLS)
 
     else()
         # mbedTLS source was specified
-        # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
-
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${MBEDTLS_SOURCE})
 
         message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
-            FetchContent_Declare(
-                mbedtls
-                SOURCE_DIR ${MBEDTLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            mbedtls
+            SOURCE_DIR ${MBEDTLS_SOURCE}
+        )
 
     endif()
 
