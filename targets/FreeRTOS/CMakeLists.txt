@@ -63,18 +63,12 @@ if(NO_RTOS_SOURCE_FOLDER)
 else()
     # FreeRTOS source was specified
 
-    # sanity check is source path exists
-    if(IS_DIRECTORY ${RTOS_SOURCE_FOLDER})
-        message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
-        
-        FetchContent_Declare(
-            freertos
-            SOURCE_DIR ${RTOS_SOURCE_FOLDER}
-        )
-
-    else()
-        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${RTOS_SOURCE_FOLDER}/")
-    endif()
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    
+    FetchContent_Declare(
+        freertos
+        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+    )
 
 endif()
 
@@ -125,17 +119,12 @@ if(NO_CMSIS_SOURCE)
 else()
     # CMSIS source was specified
 
-    # sanity check is source path exists
-    if(IS_DIRECTORY ${CMSIS_SOURCE})
-        message(STATUS "CMSIS v${CMSIS_GIT_TAG} (source from: ${CMSIS_SOURCE})")
-       
-        FetchContent_Declare(
-            cmsis
-            SOURCE_DIR ${CMSIS_SOURCE}
-        )
-    else()
-        message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
-    endif()
+    message(STATUS "CMSIS v${CMSIS_GIT_TAG} (source from: ${CMSIS_SOURCE})")
+    
+    FetchContent_Declare(
+        cmsis
+        SOURCE_DIR ${CMSIS_SOURCE}
+    )
 
 endif()
 
