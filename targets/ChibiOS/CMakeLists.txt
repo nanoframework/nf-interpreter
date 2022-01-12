@@ -91,18 +91,13 @@ if(NO_RTOS_SOURCE_FOLDER)
 else()
     # ChibiOS source was specified
 
-    # sanity check is source path exists
-    if(IS_DIRECTORY ${RTOS_SOURCE_FOLDER})
 
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
-            FetchContent_Declare(
-                chibios
-                SOURCE_DIR ${RTOS_SOURCE_FOLDER}
-            )
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    FetchContent_Declare(
+        chibios
+        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+    )
 
-    else()
-        message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
-    endif()
 
 endif()
 
@@ -128,18 +123,12 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     else()
         # ChibiOS-Contrib source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${CHIBIOS_CONTRIB_SOURCE})
-            message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
+        message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
-            FetchContent_Declare(
-                chibios-contrib
-                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find ChibiOS-Contrib source at ${CHIBIOS_CONTRIB_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            chibios-contrib
+            SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
+        )
 
     endif()
 
@@ -196,18 +185,12 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     else()
         # FatFS source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${FATFS_SOURCE})
-            message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
+        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
-            FetchContent_Declare(
-                fatfs
-                SOURCE_DIR ${FATFS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            fatfs
+            SOURCE_DIR ${FATFS_SOURCE}
+        )
 
     endif()
 
@@ -256,21 +239,13 @@ if(NF_SECURITY_MBEDTLS)
 
     else()
         # mbedTLS source was specified
-        # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
-
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${MBEDTLS_SOURCE})
 
         message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
-            FetchContent_Declare(
-                mbedtls
-                SOURCE_DIR ${MBEDTLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            mbedtls
+            SOURCE_DIR ${MBEDTLS_SOURCE}
+        )
 
     endif()
 
@@ -419,19 +394,13 @@ if(NF_FEATURE_USE_SPIFFS)
     else()
         # SPIFFS source was specified
 
-        # sanity check is source path exists
-        if(IS_DIRECTORY ${SPIFFS_SOURCE})
-            message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
+        message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
 
-            FetchContent_Declare(
-                spiffs
-                GIT_REPOSITORY ${SPIFFS_SOURCE}
-                GIT_TAG "nf-build"
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find SPIFFS source at ${SPIFFS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            spiffs
+            GIT_REPOSITORY ${SPIFFS_SOURCE}
+            GIT_TAG "nf-build"
+        )
 
     endif()
 
