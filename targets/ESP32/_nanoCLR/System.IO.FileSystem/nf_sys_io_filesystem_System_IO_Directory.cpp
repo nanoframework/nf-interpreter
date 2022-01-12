@@ -204,6 +204,8 @@ int CountEntries(const char *folderPath, int type)
         }
     }
 
+    closedir(currentDirectory);
+
     return count;
 }
 
@@ -211,11 +213,11 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
 {
     char *stringBuffer = NULL;
     char *workingBuffer = NULL;
+    DIR *currentDirectory = NULL;
 
     NANOCLR_HEADER();
     {
         CLR_RT_HeapBlock *pathEntry;
-        DIR *currentDirectory;
         struct dirent *fileInfo;
 
         // get a pointer to the first object in the array (which is of type <String>)
@@ -271,11 +273,17 @@ HRESULT BuildPathsArray(const char *vfsFolderPath, const char *folderPath, CLR_R
     }
     NANOCLR_CLEANUP();
 
-    if (stringBuffer == NULL)
+    if (currentDirectory != NULL)
+    {
+        closedir(currentDirectory);
+    }
+
+    if (stringBuffer != NULL)
     {
         platform_free(stringBuffer);
     }
-    if (workingBuffer == NULL)
+
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }
