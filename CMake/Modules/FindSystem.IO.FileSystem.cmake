@@ -6,9 +6,10 @@
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO.FileSystem)
 
-
 # set include directories
+set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/${RTOS}/_common)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem)
 
 # source files
@@ -21,6 +22,7 @@ set(System.IO.FileSystem_SRCS
     nf_sys_io_filesystem_System_IO_File.cpp
     nf_sys_io_filesystem_System_IO_FileStream.cpp
 
+    Target_Windows_Storage.c
 )
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
@@ -31,6 +33,7 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
+            ${PROJECT_COMMON_PATH}
             ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
