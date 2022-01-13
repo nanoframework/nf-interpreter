@@ -42,7 +42,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
     // Get current Gpio pins used by SPI device
     spiBus--; // Spi devnumber 0 & 1
 
-    // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised 
+    // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
     // Ignore errors as it may already been opened by managed code if trying to share bus
     CPU_SPI_Initialize(spiBus);
 
