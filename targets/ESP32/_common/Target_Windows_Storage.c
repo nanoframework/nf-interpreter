@@ -39,9 +39,7 @@
 #include <Target_Windows_Storage.h>
 #include <nanoHAL_Windows_Storage.h>
 
-
 static const char *TAG = "SDCard";
-
 
 #if defined(HAL_USE_SDC)
 
@@ -53,7 +51,7 @@ bool Storage_UnMountSDCard()
     if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
     {
         return false;
-    }   
+    }
     return true;
 }
 
@@ -162,16 +160,15 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = false,
         .max_files = 5,
-        .allocation_unit_size = 16 * 1024
-    };
+        .allocation_unit_size = 16 * 1024};
 
-    sdmmc_card_t* card;
+    sdmmc_card_t *card;
 
     // This initializes the slot without card detect (CD) and write protect (WP) signals.
     // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config.gpio_cs = (gpio_num_t)csPin;
-    slot_config.host_id = (spi_host_device_t )host.slot;
+    slot_config.host_id = (spi_host_device_t)host.slot;
 
     errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
     if (errCode == ESP_ERR_INVALID_STATE)
@@ -186,5 +183,3 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
 }
 
 #endif
-
-
