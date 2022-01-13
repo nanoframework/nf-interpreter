@@ -4,6 +4,7 @@
 
 # ignore build folder
 /build/
+/out/
 /build/.gitkeep
 
 # ignore cmake-variants file (will change per user/board setup, developers should derive content from cmake-variants.TEMPLATE.json)

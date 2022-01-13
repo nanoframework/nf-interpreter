@@ -727,26 +727,43 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
 
             switch (optname)
             {
-                // If linger value negative then linger off
-                // otherwise enabled and linger value is number of seconds
                 case SOCK_SOCKO_LINGER:
                 {
                     int lingerValue = *(int *)optval;
-                    if (lingerValue >= 0)
+
+                    if (lingerValue < 0)
                     {
-                        lopt.l_onoff = 1;
-                        lopt.l_linger = abs(lingerValue);
+                        // invalid value, not supported
+                        return SOCK_SOCKET_ERROR;
                     }
+                    else
+                    {
+                        // set linger to ON
+                        lopt.l_onoff = 1;
+                        // set linger value
+                        lopt.l_linger = lingerValue;
+                    }
+
+                    // set option value pointer and length
                     pNativeOptionValue = (char *)&lopt;
                     optlen = sizeof(lopt);
                 }
                 break;
 
                 case SOCK_SOCKO_DONTLINGER:
+                    // set linger to OFF
+                    lopt.l_onoff = 0;
+
+                    // set option value pointer and length
+                    pNativeOptionValue = (char *)&lopt;
+                    optlen = sizeof(lopt);
+                    break;
+
                 case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
                     nativeIntValue = !*(int *)optval;
                     pNativeOptionValue = (char *)&nativeIntValue;
                     break;
+
                 default:
                     break;
             }
@@ -757,7 +774,9 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             break;
     }
 
-    return lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
+    // developer note: consider success if return is 0, because this can return a lwIP error code for some options
+    errorCode = lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
+    return errorCode == 0 ? 0 : SOCK_SOCKET_ERROR;
 }
 
 int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
@@ -766,7 +785,6 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
     int nativeLevel;
     int nativeOptionName;
     char *pNativeOptval = optval;
-    int ret;
 
     switch (level)
     {
@@ -792,9 +810,10 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             break;
     }
 
-    ret = lwip_getsockopt(socket, nativeLevel, nativeOptionName, pNativeOptval, (u32_t *)optlen);
+    // developer note: consider success if return is 0, because this can return a lwIP error code for some options
+    errorCode = lwip_getsockopt(socket, nativeLevel, nativeOptionName, pNativeOptval, (u32_t *)optlen);
 
-    if (ret == 0)
+    if (errorCode == 0)
     {
         switch (level)
         {
@@ -816,7 +835,7 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
         }
     }
 
-    return ret;
+    return errorCode == 0 ? 0 : SOCK_SOCKET_ERROR;
 }
 
 int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)

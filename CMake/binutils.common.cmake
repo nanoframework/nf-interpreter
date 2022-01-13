@@ -352,11 +352,11 @@ function(nf_set_linker_options_and_file target linker_file_name)
 endfunction()
 
 # check if a directory exists
-# going throuhg the directory to find if it's not empty takes a lot of time because it sweeps all files
+# going through the directory to find if it's not empty takes a lot of time because it sweeps all files
 # simplifying this now to speed up local builds
 macro(nf_directory_exists_not_empty path pathExists)
 
-    if(EXISTS "${path}")
+    if(IS_DIRECTORY "${path}")
         set(${pathExists} TRUE)
     else()
         set(${pathExists} FALSE)
