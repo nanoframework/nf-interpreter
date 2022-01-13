@@ -1042,7 +1042,7 @@ void CLR_RT_HeapBlock::Promote()
 
 //--//
 
-CLR_INT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_INT32 crc = 0)
+CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc = 0)
 {
     NATIVE_PROFILE_CLR_CORE();
 
