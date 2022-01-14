@@ -726,9 +726,9 @@ jobs:
       TI_CC1352R1_LAUNCHXL_915:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
-        TargetSeries: 'cc13xx_26xx'
+        TargetSeries: 'CC13X2'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13xx_26xx
+          -DTARGET_SERIES=CC13X2
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=915
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
