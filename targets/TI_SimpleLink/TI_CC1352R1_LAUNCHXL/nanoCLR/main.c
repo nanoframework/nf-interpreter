@@ -63,7 +63,6 @@ void TestTaskExec(UArg arg0, UArg arg1)
     }
 }
 
-
 /////////////////////////////////////////////////
 
 int main(void)
@@ -108,9 +107,9 @@ int main(void)
 
     // setup CLR task
     taskParams.arg0 = (UArg)&clrSettings;
-    taskParams.stackSize = 2*THREADSTACKSIZE;
+    taskParams.stackSize = 2 * THREADSTACKSIZE;
     taskParams.priority = 4;
-    
+
     Task_construct(&clrTask, CLRStartupThread, &taskParams, Error_IGNORE);
 
     BIOS_start();

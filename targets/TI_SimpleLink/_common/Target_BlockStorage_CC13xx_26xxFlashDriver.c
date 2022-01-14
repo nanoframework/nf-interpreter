@@ -12,38 +12,38 @@
 #include <ti/sysbios/knl/Swi.h>
 
 // local defines
-#define FLASH_ERASED_WORD        0x0FFFFFFFFU
+#define FLASH_ERASED_WORD 0x0FFFFFFFFU
 
 // need these prototypes here
 static uint8_t DisableCache();
-static void EnableCache( uint8_t state );
+static void EnableCache(uint8_t state);
 
-bool CC13xx_26xxFlashDriver_InitializeDevice(void* context)
+bool CC13xx_26xxFlashDriver_InitializeDevice(void *context)
 {
-	(void)context;
+    (void)context;
 
     // SimpleLink driver takes care of this, so always true
-	return true;
+    return true;
 }
 
-bool CC13xx_26xxFlashDriver_UninitializeDevice(void* context)
+bool CC13xx_26xxFlashDriver_UninitializeDevice(void *context)
 {
-	(void)context;
+    (void)context;
 
     // SimpleLink driver takes care of this, so always true
-	return true;
+    return true;
 }
 
-DeviceBlockInfo* CC13xx_26xxFlashDriver_GetDeviceInfo(void* context)
+DeviceBlockInfo *CC13xx_26xxFlashDriver_GetDeviceInfo(void *context)
 {
-    MEMORY_MAPPED_NOR_BLOCK_CONFIG* config = context;
-    
-    return config->BlockConfig.BlockDeviceInformation;  
+    MEMORY_MAPPED_NOR_BLOCK_CONFIG *config = context;
+
+    return config->BlockConfig.BlockDeviceInformation;
 }
 
-bool CC13xx_26xxFlashDriver_Read(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer)
+bool CC13xx_26xxFlashDriver_Read(void *context, ByteAddress startAddress, unsigned int numBytes, unsigned char *buffer)
 {
-	(void)context;
+    (void)context;
 
     // direct read from memory...
     memcpy(buffer, (void *)startAddress, (size_t)numBytes);
@@ -52,10 +52,15 @@ bool CC13xx_26xxFlashDriver_Read(void* context, ByteAddress startAddress, unsign
     return true;
 }
 
-bool CC13xx_26xxFlashDriver_Write(void* context, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite)
+bool CC13xx_26xxFlashDriver_Write(
+    void *context,
+    ByteAddress startAddress,
+    unsigned int numBytes,
+    unsigned char *buffer,
+    bool readModifyWrite)
 {
-	(void)context;
-	(void)readModifyWrite;
+    (void)context;
+    (void)readModifyWrite;
 
     // uint_least16_t swiState;
     // uint_least16_t hwiState;
@@ -68,45 +73,45 @@ bool CC13xx_26xxFlashDriver_Write(void* context, ByteAddress startAddress, unsig
 
     state = DisableCache();
 
-	if(FlashProgram((unsigned long*)buffer, (unsigned long) startAddress, (unsigned long) numBytes) == 0)
-	{
-		result = true;
-	}
+    if (FlashProgram((unsigned long *)buffer, (unsigned long)startAddress, (unsigned long)numBytes) == 0)
+    {
+        result = true;
+    }
 
     EnableCache(state);
-    
+
     // // exit critical section
     // Hwi_restore(hwiState);
     // Swi_restore(swiState);
-	
-	return result;
+
+    return result;
 }
 
-bool CC13xx_26xxFlashDriver_IsBlockErased(void* context, ByteAddress blockAddress, unsigned int length)
+bool CC13xx_26xxFlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, unsigned int length)
 {
-	(void)context;
+    (void)context;
 
-    unsigned long* cursor = (unsigned long *)blockAddress;
-    unsigned long* endAddress = (unsigned long *)(blockAddress + length);
+    unsigned long *cursor = (unsigned long *)blockAddress;
+    unsigned long *endAddress = (unsigned long *)(blockAddress + length);
 
     // an erased flash address has to read FLASH_ERASED_WORD
     // OK to check by word (32 bits) because the erase is performed by 'block' whose size is word multiple
-    while(cursor < endAddress)
+    while (cursor < endAddress)
     {
-        if(*cursor++ != FLASH_ERASED_WORD)
+        if (*cursor++ != FLASH_ERASED_WORD)
         {
             // found an address with something other than FLASH_ERASED_WORD!!
             return false;
         }
     }
-    
+
     // reached here so the block must be erased
     return true;
 }
 
-bool CC13xx_26xxFlashDriver_EraseBlock(void* context, ByteAddress address)
+bool CC13xx_26xxFlashDriver_EraseBlock(void *context, ByteAddress address)
 {
-	(void)context;
+    (void)context;
 
     // uint_least16_t swiState;
     // uint_least16_t hwiState;
@@ -118,11 +123,11 @@ bool CC13xx_26xxFlashDriver_EraseBlock(void* context, ByteAddress address)
     // hwiState = Hwi_disable();
 
     state = DisableCache();
-    
-	if(FlashSectorErase((unsigned long) address) == 0)
-	{
-		result = true;
-	}
+
+    if (FlashSectorErase((unsigned long)address) == 0)
+    {
+        result = true;
+    }
 
     EnableCache(state);
 
@@ -130,34 +135,34 @@ bool CC13xx_26xxFlashDriver_EraseBlock(void* context, ByteAddress address)
     // Hwi_restore(hwiState);
     // Swi_restore(swiState);
 
-	return result;
+    return result;
 }
 
 // Disable Flash data caching
-static void EnableCache( uint8_t state )
+static void EnableCache(uint8_t state)
 {
-    if ( state != VIMS_MODE_DISABLED )
+    if (state != VIMS_MODE_DISABLED)
     {
         // Enable the Cache.
-        VIMSModeSet( VIMS_BASE, VIMS_MODE_ENABLED );
+        VIMSModeSet(VIMS_BASE, VIMS_MODE_ENABLED);
     }
 }
 
 // Restore the Flash data caching and instruction pre-fetching.
 static uint8_t DisableCache()
 {
-    uint8_t state = VIMSModeGet( VIMS_BASE );
-    
+    uint8_t state = VIMSModeGet(VIMS_BASE);
+
     // Check VIMS state
-    if( state != VIMS_MODE_DISABLED )
+    if (state != VIMS_MODE_DISABLED)
     {
         // Invalidate cache
-        VIMSModeSet( VIMS_BASE, VIMS_MODE_DISABLED );
-    
+        VIMSModeSet(VIMS_BASE, VIMS_MODE_DISABLED);
+
         // Wait for disabling to be complete
-        while( VIMSModeGet( VIMS_BASE ) != VIMS_MODE_DISABLED ); 
-        
+        while (VIMSModeGet(VIMS_BASE) != VIMS_MODE_DISABLED)
+            ;
     }
-    
+
     return state;
 }
