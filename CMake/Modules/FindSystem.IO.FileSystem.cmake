@@ -6,8 +6,13 @@
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO.FileSystem)
 
+if(RTOS_FREERTOS_CHECK)
+    set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/_common)
+else()
+    set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/${RTOS}/_common)
+endif()
+
 # set include directories
-set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/${RTOS}/_common)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem)
