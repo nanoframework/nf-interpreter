@@ -9,17 +9,23 @@
 #include <nanoPAL_BlockStorage.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-bool CC13xx_26xxFlashDriver_InitializeDevice(void*);
-bool CC13xx_26xxFlashDriver_UninitializeDevice(void*);
-DeviceBlockInfo* CC13xx_26xxFlashDriver_GetDeviceInfo(void*);
-bool CC13xx_26xxFlashDriver_Read(void*, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer);
-bool CC13xx_26xxFlashDriver_Write(void*, ByteAddress startAddress, unsigned int numBytes, unsigned char* buffer, bool readModifyWrite);
-bool CC13xx_26xxFlashDriver_IsBlockErased(void*, ByteAddress blockAddress, unsigned int length);
-bool CC13xx_26xxFlashDriver_EraseBlock(void*, ByteAddress address);
-void CC13xx_26xxFlashDriver_SetPowerState(void*, unsigned int state);
+    bool CC13xx_26xxFlashDriver_InitializeDevice(void *);
+    bool CC13xx_26xxFlashDriver_UninitializeDevice(void *);
+    DeviceBlockInfo *CC13xx_26xxFlashDriver_GetDeviceInfo(void *);
+    bool CC13xx_26xxFlashDriver_Read(void *, ByteAddress startAddress, unsigned int numBytes, unsigned char *buffer);
+    bool CC13xx_26xxFlashDriver_Write(
+        void *,
+        ByteAddress startAddress,
+        unsigned int numBytes,
+        unsigned char *buffer,
+        bool readModifyWrite);
+    bool CC13xx_26xxFlashDriver_IsBlockErased(void *, ByteAddress blockAddress, unsigned int length);
+    bool CC13xx_26xxFlashDriver_EraseBlock(void *, ByteAddress address);
+    void CC13xx_26xxFlashDriver_SetPowerState(void *, unsigned int state);
 
 #ifdef __cplusplus
 }
