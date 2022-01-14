@@ -7,7 +7,7 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 
-#include <targetHAL_ConfigurationManager_CC13x2_26x2.h>
+#include <targetHAL_ConfigurationManager_CC13xx_26xx.h>
 #include <ti/drivers/net/wifi/simplelink.h>
 
 typedef struct
@@ -16,12 +16,12 @@ typedef struct
     char fileName[SL_FS_MAX_FILE_NAME_LENGTH];
 } slGetfileList_t;
 
-// This configuration manager implementation is valid for CC13x2_26x2 devices.
+// This configuration manager implementation is valid for CC13xx_26xx devices.
 // Because everything that is meant to be stored in the configure block is handled by the SimpleLink
 // persistent storage, this code is either empty or acts as a proxy to the SimpleLink API
 
 // network configuration blocks are stored as files in file storage
-void *ConfigurationManagerCC13x2_26x2_FindNetworkConfigurationBlocks()
+void *ConfigurationManagerCC13xx_26xx_FindNetworkConfigurationBlocks()
 {
     int32_t ret = 1;
     int32_t retGetFileList = 1;
@@ -81,7 +81,7 @@ void *ConfigurationManagerCC13x2_26x2_FindNetworkConfigurationBlocks()
 }
 
 // wireless profiles are stored as SimpleLink WLAN profile
-void *ConfigurationManagerCC13x2_26x2_FindNetworkWireless80211ConfigurationBlocks()
+void *ConfigurationManagerCC13xx_26xx_FindNetworkWireless80211ConfigurationBlocks()
 {
     int16_t index, status;
     signed char name[32];
@@ -128,7 +128,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 {
     // find network configuration blocks
     HAL_CONFIGURATION_NETWORK *networkConfigs =
-        (HAL_CONFIGURATION_NETWORK *)ConfigurationManagerCC13x2_26x2_FindNetworkConfigurationBlocks();
+        (HAL_CONFIGURATION_NETWORK *)ConfigurationManagerCC13xx_26xx_FindNetworkConfigurationBlocks();
 
     // check network configs count
     if (networkConfigs->Count == 0)
@@ -149,7 +149,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
             // have to enumerate again to pick it up
             networkConfigs =
-                (HAL_CONFIGURATION_NETWORK *)ConfigurationManagerCC13x2_26x2_FindNetworkConfigurationBlocks();
+                (HAL_CONFIGURATION_NETWORK *)ConfigurationManagerCC13xx_26xx_FindNetworkConfigurationBlocks();
         }
 
         platform_free(networkConfig);
@@ -157,7 +157,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
 
     // find wireless 80211 network configuration blocks
     HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
-        ConfigurationManagerCC13x2_26x2_FindNetworkWireless80211ConfigurationBlocks();
+        ConfigurationManagerCC13xx_26xx_FindNetworkWireless80211ConfigurationBlocks();
 
     // // find X509 certificate blocks
     // HAL_CONFIGURATION_X509_CERTIFICATE* certificateStore =
@@ -532,7 +532,7 @@ bool ConfigurationManager_UpdateConfigurationBlock(
     DeviceConfigurationOption configuration,
     uint32_t configurationIndex)
 {
-    // CC13x2_26x2 stores the config blocks on the file system so we don't care about sizes
+    // CC13xx_26xx stores the config blocks on the file system so we don't care about sizes
 
     switch (configuration)
     {

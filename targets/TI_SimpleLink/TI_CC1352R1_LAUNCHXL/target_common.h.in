@@ -11,7 +11,7 @@
 #ifndef TARGET_COMMON_H
 #define TARGET_COMMON_H
 
-#define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with TI CC13x2_26x2 SDK v@TI_SL_CC13x2_26x2_SDK_TAG@"
+#define TARGETINFOSTRING "@CMAKE_BUILD_TYPE@ build with TI CC13xx_26xx SDK v@TI_SL_CC13xx_26xx_SDK_TAG@"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // The following addresses and sizes should be filled in according to the SoC data-sheet
@@ -48,7 +48,7 @@
 
 /////////////////////////////////////
 #if defined(DEBUG)
-    #define MANAGED_HEAP_SIZE       (23*1024)
+    #define MANAGED_HEAP_SIZE       (31*1024)
 #else
     #define MANAGED_HEAP_SIZE       (36*1024)
 #endif

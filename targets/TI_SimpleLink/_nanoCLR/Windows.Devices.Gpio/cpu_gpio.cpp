@@ -11,36 +11,16 @@
 #include <xdc/runtime/Error.h>
 #include <ti/drivers/gpio/GPIOCC26XX.h>
 #include <ti/drivers/PIN.h>
-
-#define GPIO_MAX_PINS 16
+#include <ti_drivers_config.h>
 
 // SimpleLink doesn't follow the port&pin design pattern, there are no ports, just GPIO pins
 #define TOTAL_GPIO_PORTS 1
 
-#define EMPTY_PIN 0xFFFF
-
 // Array of Pin configurations
-GPIO_PinConfig gpioPinConfigs[] = {
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-    GPIO_DO_NOT_CONFIG | EMPTY_PIN,
-};
+extern "C" GPIO_PinConfig gpioPinConfigs[];
 
 // Array of callback function pointers
-GPIO_CallbackFxn gpioCallbackFunctions[GPIO_MAX_PINS];
+extern "C" GPIO_CallbackFxn gpioCallbackFunctions[];
 
 // Gpio input state structure
 struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
@@ -121,9 +101,9 @@ gpio_input_state *GetInputStateByConfigIndex(uint8_t pinConfigIndex)
 // find a free slot in the pin config array
 int8_t FindFreePinConfig()
 {
-    for (uint8_t index = 0; index < GPIO_MAX_PINS; index++)
+    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
     {
-        if ((uint16_t)gpioPinConfigs[index] == EMPTY_PIN)
+        if ((uint16_t)gpioPinConfigs[index] == GPIO_CFG_NO_DIR)
         {
             // found a free slot!
             return index;
@@ -136,7 +116,7 @@ int8_t FindFreePinConfig()
 // find a pin number in the pin config array
 int8_t FindPinConfig(GPIO_PIN pinNumber)
 {
-    for (uint8_t index = 0; index < GPIO_MAX_PINS; index++)
+    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
     {
         // need to mask the gpioPinConfigs item to get only the 8 LSbits where the pin number is stored
         if ((uint8_t)gpioPinConfigs[index] == pinNumber)
@@ -279,13 +259,13 @@ bool CPU_GPIO_Initialize()
     gpioInputList.Initialize();
 
     // clear GPIO pin configs
-    for (uint8_t index = 0; index < GPIO_MAX_PINS; index++)
+    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
     {
-        gpioPinConfigs[index] == GPIO_DO_NOT_CONFIG | EMPTY_PIN;
+        gpioPinConfigs[index] == GPIO_CFG_NO_DIR;
     }
 
     // clear callbacks
-    memset(gpioCallbackFunctions, 0, sizeof(gpioCallbackFunctions));
+    memset(gpioCallbackFunctions, 0, (GPIO_pinUpperBound + 1) * sizeof(GPIO_CallbackFxn));
 
     return true;
 }
@@ -335,7 +315,7 @@ bool CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
     }
     else
     {
-        gpioPinConfigs[index] == GPIO_DO_NOT_CONFIG | EMPTY_PIN;
+        gpioPinConfigs[index] == GPIO_CFG_NO_DIR;
     }
 
     GLOBAL_UNLOCK();
@@ -352,7 +332,7 @@ bool CPU_GPIO_PinIsBusy(GPIO_PIN pinNumber)
 // Return maximum number of pins
 int32_t CPU_GPIO_GetPinCount()
 {
-    return GPIO_MAX_PINS;
+    return GPIO_pinUpperBound + 1;
 }
 
 // Get current state of pin
