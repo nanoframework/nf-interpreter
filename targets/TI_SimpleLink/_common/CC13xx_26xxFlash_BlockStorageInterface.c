@@ -7,8 +7,7 @@
 #include <Target_BlockStorage_CC13xx_26xxFlashDriver.h>
 
 // map here the Block Storage Interface to the CC13xx_26xx driver
-IBlockStorageDevice CC13xx_26xxFlash_BlockStorageInterface =
-{
+IBlockStorageDevice CC13xx_26xxFlash_BlockStorageInterface = {
     &CC13xx_26xxFlashDriver_InitializeDevice,
     &CC13xx_26xxFlashDriver_UninitializeDevice,
     &CC13xx_26xxFlashDriver_GetDeviceInfo,
@@ -18,5 +17,4 @@ IBlockStorageDevice CC13xx_26xxFlash_BlockStorageInterface =
     &CC13xx_26xxFlashDriver_IsBlockErased,
     &CC13xx_26xxFlashDriver_EraseBlock,
     NULL,
-    NULL
-};
+    NULL};
