@@ -861,9 +861,9 @@ jobs:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_868
-        TargetSeries: 'cc13x2_26x2'
+        TargetSeries: 'cc13xx_26xx'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13x2_26x2
+          -DTARGET_SERIES=CC13xx_26xx
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
           -DSUPPORT_ANY_BASE_CONVERSION=OFF

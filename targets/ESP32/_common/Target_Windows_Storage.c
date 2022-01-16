@@ -33,78 +33,59 @@
 #include <sdmmc_host.h>
 #include <sdspi_host.h>
 #include <include/sdmmc_cmd.h>
+
 #include <target_platform.h>
 
 #include <Target_Windows_Storage.h>
+#include <nanoHAL_Windows_Storage.h>
 
 static const char *TAG = "SDCard";
 
-// Pin mapping when using SPI mode.
-// With this mapping, SD card can be used both in SPI and 1-line SD mode.
-// Note that a pull-up on CS line is required in SD mode.
-//#define PIN_NUM_MISO 2
-//#define PIN_NUM_MOSI 15
-//#define PIN_NUM_CLK  14
-//#define PIN_NUM_CS  13
-
 #if defined(HAL_USE_SDC)
 
+//
+//  Unmount SD card ( MMC/SDIO or SPI)
+//
 bool Storage_UnMountSDCard()
 {
     if (esp_vfs_fat_sdmmc_unmount() != ESP_OK)
+    {
         return false;
-
+    }
     return true;
 }
 
-//
-//	Mount the SDCard device as a FAT device on the VFS
-//
-bool Storage_MountSDCard(char *vfsName, sdmmc_host_t *host, void *slot_config, bool formatOnMount, int maxFiles)
+bool LogMountResult(esp_err_t errCode)
 {
-
-    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-        .format_if_mount_failed = formatOnMount,
-        .max_files = maxFiles,
-        .allocation_unit_size = 16 * 1024};
-
-    sdmmc_card_t *card;
-    esp_err_t ret = esp_vfs_fat_sdmmc_mount(vfsName, host, (sdmmc_slot_config_t *)slot_config, &mount_config, &card);
-    if (ret == ESP_ERR_INVALID_STATE)
+    if (errCode != ESP_OK)
     {
-        // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
-        // and the code has already run & mounted
-        Storage_UnMountSDCard();
-        ret = esp_vfs_fat_sdmmc_mount(vfsName, host, (sdmmc_slot_config_t *)slot_config, &mount_config, &card);
-    }
-
-    if (ret != ESP_OK)
-    {
-        if (ret == ESP_FAIL)
+        if (errCode == ESP_FAIL)
         {
             ESP_LOGE(TAG, "Failed to mount filesystem. ");
         }
         else
         {
-            ESP_LOGE(TAG, "Failed to initialize the card (%s).  ", esp_err_to_name(ret));
+            ESP_LOGE(TAG, "Failed to initialize the card (%s).  ", esp_err_to_name(errCode));
         }
         return false;
     }
-
     return true;
 }
-
-//  Storage_InitSDCardMMC
-//	Initial the SD card Slot 1 - 4/1 bit ( hs2_* signals )
 //
-//  vfsName - Name of disk for vfs - i.e "/SDSPI"
-//  maxFiles- Maximum number of open files
+// Mount SDcard on MMC/SDIO bus
+//
 //  bit1Mode- true to use 1 bit MMC interface
+//  driveIndex =  0 = first drive
 //
-//  return true if OK
-//
-bool Storage_InitSDCardMMC(char *vfsName, int maxFiles, bool bit1Mode)
+bool Storage_MountMMC(bool bit1Mode, int driveIndex)
 {
+    esp_err_t errCode;
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
+
+    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
+    mountPoint[1] = mountPoint[0] + driveIndex;
+    mountPoint[0] = '/';
+
     ESP_LOGI(TAG, "Initializing MMC SD card");
 
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
@@ -123,39 +104,82 @@ bool Storage_InitSDCardMMC(char *vfsName, int maxFiles, bool bit1Mode)
     // GPIOs 15, 2, 4, 12, 13 should have external 10k pull-ups.
     // Internal pull-ups are not sufficient. However, enabling internal pull-ups
     // does make a difference some boards, so we do that here.
-    gpio_set_pull_mode(15, GPIO_PULLUP_ONLY); // CMD, needed in 4- and 1- line modes
-    gpio_set_pull_mode(2, GPIO_PULLUP_ONLY);  // D0, needed in 4- and 1-line modes
+    gpio_set_pull_mode((gpio_num_t)15, GPIO_PULLUP_ONLY); // CMD, needed in 4- and 1- line modes
+    gpio_set_pull_mode((gpio_num_t)2, GPIO_PULLUP_ONLY);  // D0, needed in 4- and 1-line modes
 
     if (!bit1Mode)
     {
-        gpio_set_pull_mode(4, GPIO_PULLUP_ONLY);  // D1, needed in 4-line mode only
-        gpio_set_pull_mode(12, GPIO_PULLUP_ONLY); // D2, needed in 4-line mode only
-        gpio_set_pull_mode(13, GPIO_PULLUP_ONLY); // D3, needed in 4-line modes only
+        gpio_set_pull_mode((gpio_num_t)4, GPIO_PULLUP_ONLY);  // D1, needed in 4-line mode only
+        gpio_set_pull_mode((gpio_num_t)12, GPIO_PULLUP_ONLY); // D2, needed in 4-line mode only
+        gpio_set_pull_mode((gpio_num_t)13, GPIO_PULLUP_ONLY); // D3, needed in 4-line modes only
     }
 
-    return Storage_MountSDCard(vfsName, &host, &slot_config, false, maxFiles);
+    //	Mount the SDCard device as a FAT device on the VFS
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = SDC_MAX_OPEN_FILES,
+        .allocation_unit_size = 16 * 1024};
+
+    sdmmc_card_t *card;
+    errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    if (errCode == ESP_ERR_INVALID_STATE)
+    {
+        // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
+        // and the code has already run & mounted
+        Storage_UnMountSDCard();
+        errCode = esp_vfs_fat_sdmmc_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    }
+
+    return LogMountResult(errCode);
 }
 
-//  Storage_InitSDCardSPI
-//	Initial the SD card connected by SPI)
 //
-//  vfsName - Name of disk for vfs - i.e "/SDSPI"
-//  maxFiles- Maximum number of open files
+// Mount card on SPI bus
+// Expects SPI bus to be already initialised
+//
+//  spiBus     -  SPI bus index (0 based)
+//  csPin      - Chip select pin for SD card
+//  driveIndex - 0 = first drive
 //
 //  return true if OK
 //
-bool Storage_InitSDCardSPI(char *vfsName, int maxFiles, int pin_Miso, int pin_Mosi, int pin_Clk, int pin_Cs)
+bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
 {
+    esp_err_t errCode;
+    char mountPoint[] = INDEX0_DRIVE_LETTER;
+
+    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VFS
+    mountPoint[1] = mountPoint[0] + driveIndex;
+    mountPoint[0] = '/';
+
     ESP_LOGI(TAG, "Initializing SPI SD card");
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-    sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
-    slot_config.gpio_miso = pin_Miso;
-    slot_config.gpio_mosi = pin_Mosi;
-    slot_config.gpio_sck = pin_Clk;
-    slot_config.gpio_cs = pin_Cs;
+    host.slot = spiBus + HSPI_HOST;
 
-    return Storage_MountSDCard(vfsName, &host, &slot_config, false, maxFiles);
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+        .allocation_unit_size = 16 * 1024};
+
+    sdmmc_card_t *card;
+
+    // This initializes the slot without card detect (CD) and write protect (WP) signals.
+    // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
+    sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
+    slot_config.gpio_cs = (gpio_num_t)csPin;
+    slot_config.host_id = (spi_host_device_t)host.slot;
+
+    errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    if (errCode == ESP_ERR_INVALID_STATE)
+    {
+        // Invalid state means its already mounted, this can happen if you are trying to debug mount from managed code
+        // and the code has already run & mounted
+        Storage_UnMountSDCard();
+        errCode = esp_vfs_fat_sdspi_mount(mountPoint, &host, &slot_config, &mount_config, &card);
+    }
+
+    return LogMountResult(errCode);
 }
 
 #endif
