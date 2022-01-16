@@ -10,8 +10,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef _NANOFRAMEWORK_HARDWARE_ESP32_ESPNOW_NATIVE_H_
-#define _NANOFRAMEWORK_HARDWARE_ESP32_ESPNOW_NATIVE_H_
+#ifndef _NANOFRAMEWORK_ESPNOW_NATIVE_H_
+#define _NANOFRAMEWORK_ESPNOW_NATIVE_H_
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -60,7 +60,8 @@ struct EspNowDataRecvEventData
     int dataLen;
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataReceivedEventArgs
+
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataReceivedEventArgs
 {
     static const int FIELD__PeerMac = 1;
     static const int FIELD__Data = 2;
@@ -70,7 +71,7 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataRecvEventInternal
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataRecvEventInternal
 {
     static const int FIELD__PeerMac = 3;
     static const int FIELD__Data = 4;
@@ -80,7 +81,7 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventArgs
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventArgs
 {
     static const int FIELD__PeerMac = 1;
     static const int FIELD__Status = 2;
@@ -89,7 +90,7 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_DataSentEventInternal
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventInternal
 {
     static const int FIELD__PeerMac = 3;
     static const int FIELD__Status = 4;
@@ -98,7 +99,7 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController
 {
     static const int FIELD_STATIC__BROADCASTMAC = 0;
 
@@ -118,10 +119,10 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
     static void DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status);
     static void DataRecvCb(const uint8_t * mac, const uint8_t *incomingData, int len);
+
 };
 
-
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController__EspNowEventHandler
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController__EspNowEventHandler
 {
     static const int FIELD__controllerInstance = 1;
 
@@ -135,8 +136,7 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-
-struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowException
+struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowException
 {
     static const int FIELD__esp_err = 5;
 
@@ -144,6 +144,6 @@ struct Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware
 
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_EspNow;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Espnow;
 
-#endif  //_NANOFRAMEWORK_HARDWARE_ESP32_ESPNOW_NATIVE_H_
+#endif  //_NANOFRAMEWORK_ESPNOW_NATIVE_H_

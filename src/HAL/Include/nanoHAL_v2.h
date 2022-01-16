@@ -112,8 +112,8 @@ typedef enum SLEEP_LEVEL
 #define EVENT_TOUCH   120
 #define EVENT_GESTURE 130
 
-// keep in sync with nanoFramework.Hardware.Esp32.EspNow.EspNowController
-#define EVENT_ESP32_ESPNOW 140
+// keep in sync with nanoFramework.Espnow.EspNowController
+#define EVENT_ESPNOW 140
 
 
 #define PAL_EVENT_TOUCH 0x1

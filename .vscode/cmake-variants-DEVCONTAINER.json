@@ -336,7 +336,7 @@
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON"
+          "API_nanoFramework.Espnow": "ON"
         }
       },
       "ESP32_REV0_BLE": {
@@ -384,7 +384,7 @@
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "ON",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON"
+          "API_nanoFramework.Espnow": "ON"
         }
       },
       "ESP32_PICO": {
@@ -433,7 +433,7 @@
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON"
+          "API_nanoFramework.Espnow": "ON"
         }
       },
       "ESP_WROVER_KIT": {
@@ -480,7 +480,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -533,7 +533,7 @@
           "API_nanoFramework.Devices.OneWire": "OFF",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON"
+          "API_nanoFramework.Espnow": "ON"
         }
       },
       "KALUGA_1": {
@@ -581,7 +581,7 @@
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Devices.OneWire": "OFF",
           "API_nanoFramework.Graphics": "ON",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -632,7 +632,7 @@
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Graphics": "ON",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON",
+          "API_nanoFramework.Espnow": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
           "TOUCHPANEL_DEVICE": "XPT2046.cpp",
           "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
@@ -686,7 +686,7 @@
           "API_nanoFramework.Devices.OneWire": "ON",
           "API_nanoFramework.Graphics": "OFF",
           "API_nanoFramework.Device.Bluetooth": "OFF",
-          "API_nanoFramework.Hardware.Esp32.EspNow": "ON"
+          "API_nanoFramework.Espnow": "ON"
         }
       },
       "TI_CC1352R1_LAUNCHXL": {

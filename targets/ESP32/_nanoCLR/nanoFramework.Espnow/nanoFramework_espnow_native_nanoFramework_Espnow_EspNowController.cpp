@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! **
+//                   ** WARNING! ** 
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -10,15 +10,15 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "nanoFramework_hardware_esp32_espnow_native.h"
+#include "nanoFramework_espnow_native.h"
 
-EspNowDataSentEventData Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+EspNowDataSentEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     dataSentEventData;
-EspNowDataRecvEventData Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+EspNowDataRecvEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     dataRecvEventData;
 
 
-void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status) 
 {
     DEBUG_FENTER();
@@ -30,12 +30,12 @@ void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_E
 
     DEBUG_WRITELINE("Posting managed SENT event");
 
-    PostManagedEvent(EVENT_ESP32_ESPNOW, 0, EVENT_ESP32_ESPNOW_DATASENT, (CLR_UINT32)&dataSentEventData);
+    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATASENT, (CLR_UINT32)&dataSentEventData);
 
     DEBUG_FEXIT();
 }
 
-void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DataRecvCb(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
 {
     DEBUG_FENTER();
@@ -48,13 +48,12 @@ void Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_E
 
     DEBUG_WRITELINE("Posting managed RECV event");
 
-    PostManagedEvent(EVENT_ESP32_ESPNOW, 0, EVENT_ESP32_ESPNOW_DATARECV, (CLR_UINT32)&dataRecvEventData);
+    PostManagedEvent(EVENT_ESPNOW, 0, EVENT_ESPNOW_DATARECV, (CLR_UINT32)&dataRecvEventData);
 
     DEBUG_FEXIT();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeInitialize___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeInitialize___I4( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -126,8 +125,7 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -142,9 +140,7 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
@@ -171,8 +167,7 @@ HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardwar
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_espnow_native_nanoFramework_Hardware_Esp32_EspNow_EspNowController::
-    NativeEspNowAddPeer___I4__SZARRAY_U1__U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeEspNowAddPeer___I4__SZARRAY_U1__U1( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
