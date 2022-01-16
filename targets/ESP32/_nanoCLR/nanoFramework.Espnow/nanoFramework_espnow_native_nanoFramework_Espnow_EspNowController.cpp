@@ -61,60 +61,21 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
 
     esp_err_t ret;
 
-    esp_wifi_stop();
-    esp_wifi_deinit();
+    DEBUG_WRITELINE("ESPNOW init");
 
-    DEBUG_WRITELINE("netif init");
-
-    ret = esp_netif_init();
+    ret = esp_now_init();
     if (ret == ESP_OK)
     {
 
-        DEBUG_WRITELINE("WiFi init");
+        DEBUG_WRITELINE("ESPNOW reg recvcb");
 
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        ret = esp_wifi_init(&cfg);
+        ret = esp_now_register_recv_cb(DataRecvCb);
         if (ret == ESP_OK)
         {
 
-            DEBUG_WRITELINE("set WiFi storage");
+            DEBUG_WRITELINE("ESPNOW reg sendcb");
 
-            ret = esp_wifi_set_storage(WIFI_STORAGE_RAM);
-            if (ret == ESP_OK)
-            {
-
-                DEBUG_WRITELINE("set WiFi mode");
-
-                ret = esp_wifi_set_mode(WIFI_MODE_STA);
-                if (ret == ESP_OK)
-                {
-
-                    DEBUG_WRITELINE("start WiFi");
-
-                    ret = esp_wifi_start();
-                    if (ret == ESP_OK)
-                    {
-
-                        DEBUG_WRITELINE("ESPNOW init");
-
-                        ret = esp_now_init();
-                        if (ret == ESP_OK)
-                        {
-
-                            DEBUG_WRITELINE("ESPNOW reg recvcb");
-
-                            ret = esp_now_register_recv_cb(DataRecvCb);
-                            if (ret == ESP_OK)
-                            {
-
-                                DEBUG_WRITELINE("ESPNOW reg sendcb");
-
-                                ret = esp_now_register_send_cb(DataSentCb);
-                            }
-                        }
-                    }
-                }
-            }
+            ret = esp_now_register_send_cb(DataSentCb);
         }
     }
 
