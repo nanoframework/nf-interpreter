@@ -51,7 +51,6 @@
 #define DEBUG_WRITELINE(...) ;
 #endif
 
-
 #define EVENT_ESPNOW_DATASENT 1
 #define EVENT_ESPNOW_DATARECV 2
 
@@ -67,7 +66,6 @@ struct EspNowDataRecvEventData
     uint8_t data[ESP_NOW_MAX_DATA_LEN];
     int dataLen;
 };
-
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataReceivedEventArgs
 {
@@ -123,7 +121,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController
 
     static void DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status);
     static void DataRecvCb(const uint8_t *mac, const uint8_t *incomingData, int len);
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController__EspNowEventHandler
@@ -148,4 +145,4 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowException
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Espnow;
 
-#endif  //_NANOFRAMEWORK_ESPNOW_NATIVE_H_
+#endif //_NANOFRAMEWORK_ESPNOW_NATIVE_H_
