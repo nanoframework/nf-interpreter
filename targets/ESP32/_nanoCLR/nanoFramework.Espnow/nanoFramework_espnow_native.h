@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -24,38 +24,46 @@
 
 //#define DEBUG_ESPNOW 1
 
-#define DEBUG_FENTER() DEBUG_WRITELINE("entry")
-#define DEBUG_FEXIT() DEBUG_WRITELINE("exit")
+#define DEBUG_FENTER()     DEBUG_WRITELINE("entry")
+#define DEBUG_FEXIT()      DEBUG_WRITELINE("exit")
 #define DEBUG_FEXIT_RET(v) DEBUG_WRITELINE("return: %d", v)
 
 #if defined(DEBUG_ESPNOW)
-    #define DEBUG_WRITELINE(...) \
-    {   \
-      char temporaryStringBuffer1[64]; \
-      snprintf(temporaryStringBuffer1, sizeof(temporaryStringBuffer1), __VA_ARGS__); \
-      char temporaryStringBuffer2[128]; \
-      int realStringSize=snprintf(temporaryStringBuffer2, sizeof(temporaryStringBuffer2), "\r\n[%s] %s\r\n", __func__, temporaryStringBuffer1); \
-      CLR_EE_DBG_EVENT_BROADCAST( CLR_DBG_Commands_c_Monitor_Message, realStringSize, temporaryStringBuffer2, WP_Flags_c_NonCritical | WP_Flags_c_NoCaching ); \
+#define DEBUG_WRITELINE(...)                                                                                           \
+    {                                                                                                                  \
+        char temporaryStringBuffer1[64];                                                                               \
+        snprintf(temporaryStringBuffer1, sizeof(temporaryStringBuffer1), __VA_ARGS__);                                 \
+        char temporaryStringBuffer2[128];                                                                              \
+        int realStringSize = snprintf(                                                                                 \
+            temporaryStringBuffer2,                                                                                    \
+            sizeof(temporaryStringBuffer2),                                                                            \
+            "\r\n[%s] %s\r\n",                                                                                         \
+            __func__,                                                                                                  \
+            temporaryStringBuffer1);                                                                                   \
+        CLR_EE_DBG_EVENT_BROADCAST(                                                                                    \
+            CLR_DBG_Commands_c_Monitor_Message,                                                                        \
+            realStringSize,                                                                                            \
+            temporaryStringBuffer2,                                                                                    \
+            WP_Flags_c_NonCritical | WP_Flags_c_NoCaching);                                                            \
     }
 
-#else 
-    #define DEBUG_WRITELINE(...) ;
+#else
+#define DEBUG_WRITELINE(...) ;
 #endif
 
 
 #define EVENT_ESPNOW_DATASENT 1
 #define EVENT_ESPNOW_DATARECV 2
 
-
 struct EspNowDataSentEventData
 {
-    uint8_t peer_mac[ESP_NOW_ETH_ALEN]; 
+    uint8_t peer_mac[ESP_NOW_ETH_ALEN];
     esp_now_send_status_t status;
 };
 
 struct EspNowDataRecvEventData
 {
-    uint8_t peer_mac[ESP_NOW_ETH_ALEN]; 
+    uint8_t peer_mac[ESP_NOW_ETH_ALEN];
     uint8_t data[ESP_NOW_MAX_DATA_LEN];
     int dataLen;
 };
@@ -68,7 +76,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataReceivedEven
     static const int FIELD__DataLen = 3;
 
     //--//
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataRecvEventInternal
@@ -78,7 +85,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataRecvEventInt
     static const int FIELD__DataLen = 5;
 
     //--//
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventArgs
@@ -87,7 +93,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventArg
     static const int FIELD__Status = 2;
 
     //--//
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventInternal
@@ -96,7 +101,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_DataSentEventInt
     static const int FIELD__Status = 4;
 
     //--//
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController
@@ -118,7 +122,7 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController
     static EspNowDataRecvEventData dataRecvEventData;
 
     static void DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status);
-    static void DataRecvCb(const uint8_t * mac, const uint8_t *incomingData, int len);
+    static void DataRecvCb(const uint8_t *mac, const uint8_t *incomingData, int len);
 
 };
 
@@ -133,7 +137,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController
     static HRESULT CopyByteArrayToCLRArray(CLR_RT_HeapBlock &target, uint8_t *src, CLR_UINT32 length);
     static HRESULT ProcessEvent_DataSent(CLR_RT_StackFrame &stack);
     static HRESULT ProcessEvent_DataRecv(CLR_RT_StackFrame &stack);
-
 };
 
 struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowException
@@ -141,7 +144,6 @@ struct Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowException
     static const int FIELD__esp_err = 5;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Espnow;
