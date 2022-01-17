@@ -43,8 +43,8 @@
 #endif
 
 
-#define EVENT_ESP32_ESPNOW_DATASENT 1
-#define EVENT_ESP32_ESPNOW_DATARECV 2
+#define EVENT_ESPNOW_DATASENT 1
+#define EVENT_ESPNOW_DATARECV 2
 
 
 struct EspNowDataSentEventData
