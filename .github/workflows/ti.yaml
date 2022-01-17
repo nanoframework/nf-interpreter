@@ -2,7 +2,7 @@ name: Build and push image for TI
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-ti
-  GCR_VERSION: v1.0
+  GCR_VERSION: v1.1
   GCR_FILE: .devcontainer/sources/Dockerfile.TI
 
 # Controls when the action will run. 
