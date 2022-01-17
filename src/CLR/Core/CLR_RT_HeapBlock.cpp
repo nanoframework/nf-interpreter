@@ -1042,7 +1042,7 @@ void CLR_RT_HeapBlock::Promote()
 
 //--//
 
-CLR_INT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_INT32 crc = 0)
+CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc = 0)
 {
     NATIVE_PROFILE_CLR_CORE();
 
@@ -1159,12 +1159,18 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
     bool fSameReference)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (&pArgLeft == &pArgRight)
-        return true;
 
-    if (pArgLeft.DataType() == pArgRight.DataType())
+    if (&pArgLeft == &pArgRight)
     {
-        switch (pArgLeft.DataType())
+        return true;
+    }
+
+    CLR_DataType leftDataType = pArgLeft.DataType();
+    CLR_DataType rightDataType = pArgRight.DataType();
+
+    if (leftDataType == rightDataType)
+    {
+        switch (leftDataType)
         {
             case DATATYPE_VALUETYPE:
                 if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
@@ -1190,13 +1196,18 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             {
                 CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
                 CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+
                 if (objLeft == objRight)
+                {
                     return true;
+                }
 
                 if (objLeft && objRight)
                 {
                     if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
+                    {
                         return ObjectsEqual(*objLeft, *objRight, false);
+                    }
                 }
             }
             break;
@@ -1226,10 +1237,14 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     }
                 }
                 break;
+
             case DATATYPE_REFLECTION:
                 if (pArgLeft.SameHeader(pArgRight))
+                {
                     return true;
+                }
                 break;
+
             default:
                 if (fSameReference == false)
                 {
@@ -1246,6 +1261,44 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     }
                 }
                 break;
+        }
+    }
+    else
+    {
+        if ((leftDataType == DATATYPE_BYREF && rightDataType == DATATYPE_OBJECT))
+        {
+            // this is to handle the special case for calls to callvirt with constrained type
+            // namely with Objects, ValueType and Enum.
+            // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+
+            CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
+            CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
+
+            if (rightObj->DataType() == DATATYPE_VALUETYPE)
+            {
+                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_HeapBlock *obj;
+
+                if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
+                {
+                }
+
+                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                {
+                    // boxed primitive or enum type
+                    obj = &rightObj[1];
+                }
+
+                return ObjectsEqual(*leftObj, *obj, false);
+            }
+            else
+            {
+                return ObjectsEqual(*leftObj, *rightObj, false);
+            }
+        }
+        else
+        {
+            _ASSERTE(false);
         }
     }
 

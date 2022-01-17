@@ -1307,7 +1307,7 @@ struct CLR_RT_HeapBlock
     bool IsZero() const;
     void Promote();
 
-    static CLR_INT32 GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_INT32 crc);
+    static CLR_UINT32 GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc);
     static bool ObjectsEqual(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSameReference);
 
     static CLR_INT32 Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned);

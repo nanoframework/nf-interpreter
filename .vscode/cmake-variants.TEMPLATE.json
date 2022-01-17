@@ -49,7 +49,7 @@
           "STM32_CUBE_PACKAGE_REQUIRED": "<OFF-default-ON-to-include_STM-cube-package-in-the-build>",
           "STM32_CUBE_PACKAGE_SOURCE": "<path-to-stm32-cubemx-package-mind-the-forward-slash>",
           "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
-          "TI_SL_CC13x2_26x2_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13x2_26x2-SDK-source-mind-the-forward-slash>",
+          "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
           "RADIO_FREQUENCY": "<radio-frequency-for-target-with-configurable-radio-valid-values-868-915>",

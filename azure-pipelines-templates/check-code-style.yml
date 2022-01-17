@@ -130,7 +130,8 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please click $($result.html_url), review the changes if you want and merge it.`n`nMake sure to follow the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html) on how it works and the tools required to help you with that."} | ConvertTo-Json
+              # include TAG comment that allows github nfbot to remove it after branch is merged
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please click $($result.html_url), review the changes if you want and merge it.`n`nMake sure to follow the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html) on how it works and the tools required to help you with that.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
@@ -147,7 +148,8 @@ steps:
 
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName."} | ConvertTo-Json
+              # include TAG comment that allows github nfbot to remove it after branch is merged
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
               throw "Error starting PR: $responseBody"

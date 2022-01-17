@@ -67,7 +67,7 @@ jobs:
       else
       {
           # build for other reasons: build depending on target tag
-          echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]false"
+          echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
           "**build for other reasons**" | Write-Host  
       }
 
@@ -208,14 +208,6 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
-    )
-
   dependsOn:
   - Check_Build_Options
 
@@ -868,9 +860,9 @@ jobs:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_868
-        TargetSeries: 'cc13x2_26x2'
+        TargetSeries: 'cc13xx_26xx'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13x2_26x2
+          -DTARGET_SERIES=CC13xx_26xx
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
