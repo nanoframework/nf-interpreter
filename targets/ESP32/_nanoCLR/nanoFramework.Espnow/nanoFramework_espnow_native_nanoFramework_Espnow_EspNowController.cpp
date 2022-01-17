@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -12,15 +12,12 @@
 
 #include "nanoFramework_espnow_native.h"
 
-EspNowDataSentEventData 
-    Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-        dataSentEventData;
-EspNowDataRecvEventData 
-    Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-        dataRecvEventData;
+EspNowDataSentEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::dataSentEventData;
+EspNowDataRecvEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::dataRecvEventData;
 
-void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status) 
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::DataSentCb(
+    const uint8_t *mac_addr,
+    esp_now_send_status_t status)
 {
     DEBUG_FENTER();
 
@@ -36,8 +33,10 @@ void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DEBUG_FEXIT();
 }
 
-void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    DataRecvCb(const uint8_t *mac_addr, const uint8_t *incomingData, int len) 
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::DataRecvCb(
+    const uint8_t *mac_addr,
+    const uint8_t *incomingData,
+    int len)
 {
     DEBUG_FENTER();
 
@@ -54,8 +53,8 @@ void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DEBUG_FEXIT();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    NativeInitialize___I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeInitialize___I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -88,8 +87,8 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    NativeDispose___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeDispose___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
