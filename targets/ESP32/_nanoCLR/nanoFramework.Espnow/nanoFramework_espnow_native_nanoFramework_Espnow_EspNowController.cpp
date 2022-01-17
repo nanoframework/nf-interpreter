@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
+//                   ** WARNING! **
 //    This file was generated automatically by a tool.
 //    Re-running the tool will overwrite this file.
 //    You should copy this file to a custom location
@@ -12,14 +12,12 @@
 
 #include "nanoFramework_espnow_native.h"
 
-EspNowDataSentEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    dataSentEventData;
-EspNowDataRecvEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    dataRecvEventData;
+EspNowDataSentEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::dataSentEventData;
+EspNowDataRecvEventData Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::dataRecvEventData;
 
-
-void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    DataSentCb(const uint8_t *mac_addr, esp_now_send_status_t status) 
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::DataSentCb(
+    const uint8_t *mac_addr,
+    esp_now_send_status_t status)
 {
     DEBUG_FENTER();
 
@@ -35,8 +33,10 @@ void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DEBUG_FEXIT();
 }
 
-void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
-    DataRecvCb(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
+void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::DataRecvCb(
+    const uint8_t *mac_addr,
+    const uint8_t *incomingData,
+    int len)
 {
     DEBUG_FENTER();
 
@@ -53,7 +53,8 @@ void Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
     DEBUG_FEXIT();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeInitialize___I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeInitialize___I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -86,7 +87,8 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeDispose___VOID__BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeDispose___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -101,7 +103,8 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
+    NativeEspNowSend___I4__SZARRAY_U1__SZARRAY_U1__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -117,7 +120,16 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
 
     int32_t dataLen = stack.Arg3().NumericByRef().s4;
 
-    DEBUG_WRITELINE("sending %d: bytes to peer mac: %x:%x:%x:%x:%x:%x, data[0]: %x", dataLen, peerMac[0], peerMac[1], peerMac[2], peerMac[3], peerMac[4], peerMac[5], data[0]);
+    DEBUG_WRITELINE(
+        "sending %d: bytes to peer mac: %x:%x:%x:%x:%x:%x, data[0]: %x",
+        dataLen,
+        peerMac[0],
+        peerMac[1],
+        peerMac[2],
+        peerMac[3],
+        peerMac[4],
+        peerMac[5],
+        data[0]);
 
     ret = esp_now_send((const uint8_t *)peerMac, (const uint8_t *)data, dataLen);
 
@@ -128,7 +140,8 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::NativeEspNowAddPeer___I4__SZARRAY_U1__U1( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowController::
+    NativeEspNowAddPeer___I4__SZARRAY_U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -142,13 +155,21 @@ HRESULT Library_nanoFramework_espnow_native_nanoFramework_Espnow_EspNowControlle
     uint8_t channel = (uint8_t)stack.Arg2().NumericByRef().u1;
 
     esp_now_peer_info_t peerInfo;
-    memset((void*)&peerInfo, 0, sizeof(peerInfo));
+    memset((void *)&peerInfo, 0, sizeof(peerInfo));
     memcpy(peerInfo.peer_addr, peerMac, ESP_NOW_ETH_ALEN);
     peerInfo.ifidx = WIFI_IF_STA;
     peerInfo.channel = channel;
     peerInfo.encrypt = false;
 
-    DEBUG_WRITELINE("add_peer, mac: %x:%x:%x:%x:%x:%x, ch: %d", peerMac[0], peerMac[1], peerMac[2], peerMac[3], peerMac[4], peerMac[5], channel);
+    DEBUG_WRITELINE(
+        "add_peer, mac: %x:%x:%x:%x:%x:%x, ch: %d",
+        peerMac[0],
+        peerMac[1],
+        peerMac[2],
+        peerMac[3],
+        peerMac[4],
+        peerMac[5],
+        channel);
 
     ret = esp_now_add_peer(&peerInfo);
 
