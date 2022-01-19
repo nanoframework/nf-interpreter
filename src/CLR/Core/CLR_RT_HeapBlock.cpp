@@ -1277,7 +1277,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             if (rightObj->DataType() == DATATYPE_VALUETYPE)
             {
                 CLR_RT_TypeDef_Instance inst;
-                CLR_RT_HeapBlock *obj;
+                CLR_RT_HeapBlock *obj = NULL;
 
                 if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
                 {
