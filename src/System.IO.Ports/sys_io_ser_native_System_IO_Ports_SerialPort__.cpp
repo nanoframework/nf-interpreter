@@ -129,7 +129,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
                 if (newLineIndex == 0)
                 {
                     // found and nothing else to compare
-                    index++
+                    index++;
                     break;
                 }
                 else
