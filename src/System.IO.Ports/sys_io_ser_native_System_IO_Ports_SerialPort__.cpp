@@ -114,7 +114,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
         newLineIndex = newLineLength - 1;
 
         // better optimize to speed up search
-        ringBuffer->OptimizeSequence(); 
+        ringBuffer->OptimizeSequence();
 
         // grab pointer to buffer start
         buffer = ringBuffer->Reader();
