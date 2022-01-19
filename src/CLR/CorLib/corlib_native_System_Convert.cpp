@@ -247,12 +247,12 @@ HRESULT Library_corlib_native_System_Convert::
     stack.Arg6().Dereference()->NumericByRef().u1 = (hr == S_OK);
 
     // should we throw an exception?
-    if(hr != S_OK && !throwOnFailure)
+    if (hr != S_OK && !throwOnFailure)
     {
         // nope! so clear the exception
-        hr = S_OK;        
+        hr = S_OK;
     }
-    
+
     NANOCLR_CLEANUP_END();
 }
 
@@ -282,7 +282,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 #endif
 
     char *str = (char *)stack.Arg0().RecoverString();
-    
+
     // grab parameter with flag to throw on failure
     bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
 
@@ -494,12 +494,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
     stack.Arg2().Dereference()->NumericByRef().u1 = (hr == S_OK);
 
     // should we throw an exception?
-    if(hr != S_OK && !throwOnFailure)
+    if (hr != S_OK && !throwOnFailure)
     {
         // nope! so clear the exception
-        hr = S_OK;        
+        hr = S_OK;
     }
-    
+
     NANOCLR_CLEANUP_END();
 }
 

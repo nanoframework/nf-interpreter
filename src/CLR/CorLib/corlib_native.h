@@ -1207,4 +1207,4 @@ struct Library_corlib_native_System_WeakReference
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
-#endif //CORLIB_NATIVE_H
+#endif // CORLIB_NATIVE_H
