@@ -19,11 +19,14 @@ HRESULT Library_corlib_native_System_Convert::
 
     char *endptr;
     int64_t result = 0;
-    uint64_t intPart = 0;
-    uint64_t lastValue = 0;
 
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
     // convert via strtoll / strtoull
     int error_code;
+#else
+    uint64_t intPart = 0;
+    uint64_t lastValue = 0;
+#endif
 
     char *str = (char *)stack.Arg0().RecoverString();
     signed int radix = stack.Arg4().NumericByRef().s4;
@@ -251,6 +254,9 @@ HRESULT Library_corlib_native_System_Convert::
     {
         // nope! so clear the exception
         hr = S_OK;
+
+        // set return value with minimum value
+        stack.SetResult_I8(minValue);
     }
 
     NANOCLR_CLEANUP_END();
@@ -261,10 +267,13 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 {
     NANOCLR_HEADER();
 
-    char *endptr;
     double returnValue;
 
-#if (SUPPORT_ANY_BASE_CONVERSION != TRUE)
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+
+    char *endptr;
+
+#else
 
     int endOrExponentialPart;
     int exponent;
@@ -276,7 +285,6 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
     int exponentialSign = -1;
     bool hasMinusExponentialSign = false;
     bool hasPlusExponentialSign = false;
-    double returnValue = 0.0;
     char *temp;
 
 #endif
@@ -493,6 +501,18 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
     // set parameter reporting conversion success/failure
     stack.Arg2().Dereference()->NumericByRef().u1 = (hr == S_OK);
 
+    // should we throw an exception?
+    if (hr != S_OK && !throwOnFailure)
+    {
+        // nope! so clear the exception
+        hr = S_OK;
+
+        // need to set result value to 0
+        stack.SetResult_R8(returnValue);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
     // should we throw an exception?
     if (hr != S_OK && !throwOnFailure)
     {
