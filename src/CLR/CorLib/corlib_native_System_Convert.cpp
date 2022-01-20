@@ -589,7 +589,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
         hr = S_OK;
     }
 
-NANOCLR_CLEANUP_END();
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN(

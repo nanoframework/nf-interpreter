@@ -59,7 +59,8 @@ uint64_t HAL_Time_ConvertFromSystemTimeWithTicks(const SYSTEMTIME *systemTime, c
           systemTime->wSecond) *
              MILLISECONDS_TO_SECONDS +
          systemTime->wMilliseconds) *
-        TIMEUNIT_TO_MILLISECONDS + extraTicks;
+            TIMEUNIT_TO_MILLISECONDS +
+        extraTicks;
 
     return r;
 }
