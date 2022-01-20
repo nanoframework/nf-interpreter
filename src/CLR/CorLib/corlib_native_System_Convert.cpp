@@ -490,12 +490,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
         {
             returnValue = returnValue / outExponent;
         }
-
-        // get the exponential part
-        exponent = GetIntegerPart((str + exponentialSign + 1), (length - exponentialSign - 1));
-        outExponent = pow(10, exponent);
-
-        if (hasMinusExponentialSign)
+        else
         {
             returnValue = returnValue * outExponent;
         }
