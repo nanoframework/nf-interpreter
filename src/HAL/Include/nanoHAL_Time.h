@@ -105,6 +105,13 @@ extern "C"
     /// <returns>Time value.</returns>
     uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME *systemTime);
 
+    /// <summary>
+    /// Converts SYSTEMTIME structure to 64bit time, which is assumed as an offset from 1/1/1601:00:00:00.000 in 100ns.
+    /// Allows adding extra ticks which will be added to the time value.
+    /// </summary>
+    /// <returns>Time value.</returns>
+    uint64_t HAL_Time_ConvertFromSystemTimeWithTicks(const SYSTEMTIME *systemTime, const uint32_t extraTicks);
+
     /// APIs to convert between types
     bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len);
     const char *HAL_Time_CurrentDateTimeToString();

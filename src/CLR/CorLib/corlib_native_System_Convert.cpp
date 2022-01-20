@@ -1,6 +1,7 @@
 //
 // Copyright (c) .NET Foundation and Contributors
-// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// Portions Copyright (c) Microsoft Corporation. All rights reserved.
+// Portions Copyright (C) 2002-2019 Free Software Foundation, Inc. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -11,6 +12,9 @@
 // when running with lwip the use of errno is affected by _REENT_ONLY - see below.  LWIP is included via corlib_native.h
 // and lower (HAL).  Win32 does not use it
 #include <cerrno>
+
+// remap this namespace to have better code readability
+typedef Library_corlib_native_System_DateTime DateTime;
 
 HRESULT Library_corlib_native_System_Convert::
     NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN(CLR_RT_StackFrame &stack)
@@ -519,6 +523,75 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
     NANOCLR_CLEANUP_END();
 }
 
+HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDescriptor dtType;
+    CLR_INT64 *pRes;
+
+    char *str = (char *)stack.Arg0().RecoverString();
+    char *conversionResult = NULL;
+    // char *str = (char *)"1999-10-31 10:00:00Z";
+    uint64_t ticks;
+
+    // grab parameter with flag to throw on failure
+    bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
+
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    // check string parameter for null
+    FAULT_ON_NULL_ARG(str);
+
+    // initialize <DateTime> type descriptor
+    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+
+    // create an instance of <DateTime>
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
+
+    pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+
+    // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
+    conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
+    if (conversionResult == NULL)
+    {
+        // try 'o/O' Round Trip ISO 8601 compatible (yyyy-MM-ddTHH:mm:ss.fffffff)
+        conversionResult = Nano_strptime(str, "%Y-%m-%dT%H:%M:%S.%f", &ticks);
+    }
+
+    if (conversionResult == NULL)
+    {
+        // try 'r/R' RFC 1123 date (ddd, dd MMM yyyy HH:mm:ss)
+        conversionResult = Nano_strptime(str, "%a, %d %b %Y %H:%M:%S", &ticks);
+    }
+
+    if (conversionResult == NULL)
+    {
+        // failed to parse string
+
+        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+    }
+    else
+    {
+        *pRes = ticks;
+    }
+
+    NANOCLR_CLEANUP();
+
+    // set parameter reporting conversion success/failure
+    stack.Arg2().Dereference()->NumericByRef().u1 = (hr == S_OK);
+
+    // should we throw an exception?
+    if (hr != S_OK && !throwOnFailure)
+    {
+        // nope! so clear the exception
+        hr = S_OK;
+    }
+
+NANOCLR_CLEANUP_END();
+}
+
 HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
@@ -790,4 +863,249 @@ int64_t Library_corlib_native_System_Convert::GetIntegerFromHexString(char *str)
     }
 
     return returnValue;
+}
+
+/////////////////////////////////////////////////////////////
+// support functions for string to date/time conversion    //
+// heavily inspired in the strptime from the GNU C library //
+/////////////////////////////////////////////////////////////
+
+static const char *abday[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+static const char *abmon[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+static int nano_strncasecmp(const char *s1, const char *s2, size_t n)
+{
+    if (n != 0)
+    {
+        const unsigned char *us1 = (const unsigned char *)s1;
+        const unsigned char *us2 = (const unsigned char *)s2;
+
+        do
+        {
+            if (tolower(*us1) != tolower(*us2++))
+            {
+                return tolower(*us1) - tolower(*--us2);
+            }
+
+            if (*us1++ == '\0')
+            {
+                break;
+            }
+
+        } while (--n != 0);
+    }
+
+    return 0;
+}
+
+static int nano_conv_num(const char **buf, int *dest, int lowerLimit, int upperLimit)
+{
+    int result = 0;
+
+    // The limit also determines the number of valid digits
+    int runningLimit = upperLimit;
+
+    if (**buf < '0' || **buf > '9')
+    {
+        return 0;
+    }
+
+    do
+    {
+        result *= 10;
+        result += *(*buf)++ - '0';
+        runningLimit /= 10;
+    } while ((result * 10 <= upperLimit) && runningLimit && **buf >= '0' && **buf <= '9');
+
+    if (result < lowerLimit || result > upperLimit)
+    {
+        return 0;
+    }
+
+    *dest = result;
+
+    return (1);
+}
+
+char *Library_corlib_native_System_Convert::Nano_strptime(const char *buf, const char *format, uint64_t *ticks)
+{
+    char c;
+    const char *bufPointer;
+    size_t len = 0;
+    int i, value = 0;
+    int extraTicks = 0;
+    SYSTEMTIME st;
+
+    memset(&st, 0, sizeof(SYSTEMTIME));
+
+    // reset this so it doesn't return wrong values in case of error
+    *ticks = 0;
+
+    bufPointer = buf;
+
+    while ((c = *format) != '\0')
+    {
+        // consume white-space
+        if (isspace((int)c))
+        {
+            while (isspace((int)*bufPointer))
+            {
+                bufPointer++;
+            }
+
+            format++;
+            continue;
+        }
+
+        if ((c = *format++) != '%')
+        {
+            goto literal;
+        }
+
+        switch (c = *format++)
+        {
+            // "%%" is converted to "%"
+            case '%':
+            literal:
+                if (c != *bufPointer++)
+                {
+                    return NULL;
+                }
+                break;
+
+            // "Elementary" conversion rules.
+            // day of week (abbreviation)
+            case 'a':
+                for (i = 0; i < 7; i++)
+                {
+                    // Full name not implemented
+
+                    // Abbreviated name
+                    len = hal_strlen_s(abday[i]);
+                    if (nano_strncasecmp(abday[i], bufPointer, len) == 0)
+                    {
+                        break;
+                    }
+                }
+
+                // no match
+                if (i == 7)
+                {
+                    return NULL;
+                }
+
+                st.wDayOfWeek = i;
+                bufPointer += len;
+                break;
+
+            // month (2 digits)
+            case 'b':
+                for (i = 0; i < 12; i++)
+                {
+                    // Full name not implemented
+
+                    // Abbreviated name
+                    len = hal_strlen_s(abmon[i]);
+                    if (nano_strncasecmp(abmon[i], bufPointer, len) == 0)
+                    {
+                        break;
+                    }
+                }
+
+                // no match
+                if (i == 12)
+                {
+                    return NULL;
+                }
+
+                st.wMonth = i + 1;
+                bufPointer += len;
+                break;
+
+            // day of month (2 digits)
+            case 'd':
+                if (!(nano_conv_num(&bufPointer, &value, 1, 31)))
+                {
+                    return NULL;
+                }
+                st.wDay = value;
+                break;
+
+            // hour (24-hour)
+            case 'H':
+                if (!(nano_conv_num(&bufPointer, &value, 0, 23)))
+                {
+                    return NULL;
+                }
+                st.wHour = value;
+                break;
+
+            // minutes (2 digits)
+            case 'M':
+                if (!(nano_conv_num(&bufPointer, &value, 0, 59)))
+                {
+                    return NULL;
+                }
+                st.wMinute = value;
+                break;
+
+            // month (2 digits)
+            case 'm':
+                if (!(nano_conv_num(&bufPointer, &value, 1, 12)))
+                {
+                    return NULL;
+                }
+                st.wMonth = value;
+                break;
+
+            // seconds (2 digits)
+            case 'S':
+                if (!(nano_conv_num(&bufPointer, &value, 0, 59)))
+                {
+                    return NULL;
+                }
+                st.wSecond = value;
+                break;
+
+            // year (4 digits)
+            case 'Y':
+                if (!(nano_conv_num(&bufPointer, &value, 0, 9999)))
+                {
+                    return NULL;
+                }
+
+                st.wYear = value;
+                break;
+
+            // ticks (any length)
+            case 'f':
+                if (!(nano_conv_num(&bufPointer, &value, 0, 9999999)))
+                {
+                    return NULL;
+                }
+
+                extraTicks = value;
+                break;
+
+            // Miscellaneous conversions
+            // Any kind of white-space
+            case 'n':
+            case 't':
+                while (isspace((int)*bufPointer))
+                {
+                    bufPointer++;
+                }
+                break;
+
+                // Unknown/unsupported conversion
+            default:
+                return NULL;
+        }
+    }
+
+    // convert to .NET ticks
+    *ticks = HAL_Time_ConvertFromSystemTimeWithTicks(&st, extraTicks);
+
+    // return whatever is left on the buffer
+    return ((char *)bufPointer);
 }
