@@ -513,14 +513,14 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 
     NANOCLR_CLEANUP_END();
 }
-    // should we throw an exception?
-    if (hr != S_OK && !throwOnFailure)
-    {
-        // nope! so clear the exception
-        hr = S_OK;
-    }
+// should we throw an exception?
+if (hr != S_OK && !throwOnFailure)
+{
+    // nope! so clear the exception
+    hr = S_OK;
+}
 
-    NANOCLR_CLEANUP_END();
+NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN(
