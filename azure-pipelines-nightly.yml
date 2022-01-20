@@ -512,6 +512,7 @@ jobs:
           -DAPI_nanoFramework.System.Text=ON
           -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
           -DAPI_System.Device.Dac=ON
+          -DAPI_Windows.Storage=ON
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config: sdkconfig.default_pico
         IDF_Target: esp32
