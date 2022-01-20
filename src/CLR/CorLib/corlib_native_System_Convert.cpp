@@ -12,456 +12,506 @@
 // and lower (HAL).  Win32 does not use it
 #include <cerrno>
 
-HRESULT Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_corlib_native_System_Convert::
+    NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        int64_t result = 0;
 
-        char *str = (char *)stack.Arg0().RecoverString();
-        signed int radix = stack.Arg4().NumericByRef().s4;
-        bool isUInt64 = false;
-
-        bool isSigned = (bool)stack.Arg1().NumericByRef().u1;
-        bool negReturnExpected = false;
-
-        long long minValue = stack.Arg2().NumericByRef().s8;
-        long long maxValue = stack.Arg3().NumericByRef().s8;
-        if (minValue == 0 && maxValue == 0)
-        {
-            isUInt64 = true;
-            isSigned = false;
-        }
-
-        // allow spaces before digits
-        while (*str == ' ')
-        {
-            str++;
-        }
-        char *endptr = NULL;
-
-        // empty string gets a format exception
-        if (*str == 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
+    char *endptr;
+    int64_t result = 0;
 
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
-        // suport for conversion from any base
+    // convert via strtoll / strtoull
+    int error_code;
+#else
+    uint64_t intPart = 0;
+    uint64_t lastValue = 0;
+#endif
 
-        if (*str == '-')
-        {
-            negReturnExpected = true;
-        }
+    char *str = (char *)stack.Arg0().RecoverString();
+    signed int radix = stack.Arg4().NumericByRef().s4;
+    bool isUInt64 = false;
 
-        // convert via strtoll / strtoull
-        int error_code;
+    bool isSigned = (bool)stack.Arg1().NumericByRef().u1;
+    bool negReturnExpected = false;
 
-        // Have to use reentrant version of strtoll because lwip sets _REENT_ONLY to require all stdlib calls
-        // to be reentrant
+    long long minValue = stack.Arg2().NumericByRef().s8;
+    long long maxValue = stack.Arg3().NumericByRef().s8;
+    if (minValue == 0 && maxValue == 0)
+    {
+        isUInt64 = true;
+        isSigned = false;
+    }
+
+    // grab parameter with flag to throw on failure
+    bool throwOnFailure = (bool)stack.Arg5().NumericByRefConst().u1;
+
+    // check string parameter for null
+    FAULT_ON_NULL_ARG(str);
+
+    // allow spaces before digits
+    while (*str == ' ')
+    {
+        str++;
+    }
+    endptr = NULL;
+
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+    // support for conversion from any base
+
+    if (*str == '-')
+    {
+        negReturnExpected = true;
+    }
+
+    // Have to use reentrant version of strtoll because lwip sets _REENT_ONLY to require all stdlib calls
+    // to be reentrant
 #ifdef _REENT_ONLY
 
-        _reent reent_data;
-        reent_data._errno = 0;
-        result = isSigned ? _strtoll_r(&reent_data, str, &endptr, radix)
-                          : (long long)_strtoull_r(&reent_data, str, &endptr, radix);
-        error_code = (int)reent_data._errno;
+    _reent reent_data;
+    reent_data._errno = 0;
+    result = isSigned ? _strtoll_r(&reent_data, str, &endptr, radix)
+                      : (long long)_strtoull_r(&reent_data, str, &endptr, radix);
+    error_code = (int)reent_data._errno;
 
 #else
 
-        errno = 0;
-        result = isSigned ? strtoll(str, &endptr, radix) : (long long)strtoull(str, &endptr, radix);
-        error_code = errno;
+    errno = 0;
+    result = isSigned ? strtoll(str, &endptr, radix) : (long long)strtoull(str, &endptr, radix);
+    error_code = errno;
 
 #endif //_REENT_ONLY
 
-        // catch the case of exceeding signed/unsigned int64. Catch formatting errors in the next statement
-        if (error_code == ERANGE)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        }
-
-        // if no valid conversion endptr is equal str
-        if (str == endptr)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
-
-        // allow spaces after digits
-        while (*endptr == ' ')
-        {
-            endptr++;
-        }
-
-        // should reach end of string no aditional chars
-        if (*endptr != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
-
-        // the signed values for SByte, Int16 and Int32 are always positive for base 2, 8 or 16 conversions
-        // because the 64-bit function strtoll is used; need the post process the value
-        // if the result is greater max and smaller (max + 1) * 2 this value should be subtracted
-        if (radix == 2 || radix == 8 || radix == 16)
-        {
-            if (isSigned && result > maxValue && result < (maxValue + 1) * 2)
-            {
-                result -= (maxValue + 1) * 2;
-            }
-        }
-
-        if (negReturnExpected && isSigned == false && result != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        }
-
-        // Check min and max values for the smaller integers - the stroll and stroull will catch int64 excesses
-        if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        }
-        else if (!isUInt64 && (result > maxValue || result < minValue))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-        }
-        else
-        {
-            stack.SetResult_I8(result);
-        }
-    }
-    NANOCLR_NOCLEANUP();
-#else
-        // support for conversion from base 10 and 16 (partial)
-        if (radix == 10)
-        {
-            // conversion from base 10
-
-            // check for minus sign
-            if (*str == '-')
-            {
-                negReturnExpected = true;
-                str++;
-            }
-            else if (*str == '+')
-            {
-                str++;
-            }
-
-            uint64_t intPart = 0;
-            uint64_t lastValue = 0;
-
-            // guess at no more than 99 characters
-            for (int i = 0; i < 99; i++)
-            {
-                if (*str < '0' || *str > '9')
-                {
-                    endptr = str;
-
-                    // allow spaces after digits
-                    while (*endptr == ' ')
-                    {
-                        endptr++;
-                    }
-
-                    // should reach end of string no aditional chars
-                    if (*endptr == 0)
-                    {
-                        break;
-                    }
-
-                    // non-numeric (and not trailing space)
-                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                }
-
-                // advance the digits and add the current number
-                intPart = (intPart * 10) + (*str - '0');
-
-                if (intPart < lastValue)
-                {
-                    // the above operation overflowed the value
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-
-                lastValue = intPart;
-
-                str++;
-                if (*str == '\0')
-                {
-                    break;
-                }
-            }
-
-            // intPart now holds a positive number from the string.
-            if (negReturnExpected)
-            {
-                // it's ok to use -0 even for unsigned types, but otherwise - NO.
-                if (isSigned == false && intPart > 0)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-
-                // too big to make a negative value?
-                if (intPart > (uint64_t)(minValue * -1))
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-
-                result = intPart * -1;
-            }
-            else
-            {
-                // result will be negative for large uints, and we checked for overflow above
-                if (isUInt64 == false && intPart > (uint64_t)maxValue)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
-                }
-
-                // this MAY have made the result negative by overflowing the buffer - which we do
-                // for uint64 logic.  The c# code will cast the int64 to uint64 removing the sign
-                result = (int64_t)intPart;
-            }
-        }
-        else if (radix == 16)
-        {
-            // conversion from base 16
-            result = GetIntegerFromHexString(str);
-            //??? check against min/max?  Signed possible?
-        }
-        else
-        {
-            // all other bases are not supported
-            return stack.NotImplementedStub();
-        }
-
-        stack.SetResult_I8(result);
-        NANOCLR_NOCLEANUP();
-    }
-
-#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
-}
-
-HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
+    // catch the case of exceeding signed/unsigned int64. Catch formatting errors in the next statement
+    if (error_code == ERANGE)
     {
-        char *str = (char *)stack.Arg0().RecoverString();
-        // skip spaces before digits
-        while (*str == ' ')
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // if no valid conversion endptr is equal str
+    if (str == endptr)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+    }
+
+    // allow spaces after digits
+    while (*endptr == ' ')
+    {
+        endptr++;
+    }
+
+    // should reach end of string no aditional chars
+    if (*endptr != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+    }
+
+    // the signed values for SByte, Int16 and Int32 are always positive for base 2, 8 or 16 conversions
+    // because the 64-bit function strtoll is used; need the post process the value
+    // if the result is greater max and smaller (max + 1) * 2 this value should be subtracted
+    if (radix == 2 || radix == 8 || radix == 16)
+    {
+        if (isSigned && result > maxValue && result < (maxValue + 1) * 2)
+        {
+            result -= (maxValue + 1) * 2;
+        }
+    }
+
+    if (negReturnExpected && isSigned == false && result != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // Check min and max values for the smaller integers - the stroll and stroull will catch int64 excesses
+    if (!isUInt64 && !isSigned && (uint64_t)result > (uint64_t)maxValue)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+    else if (!isUInt64 && (result > maxValue || result < minValue))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+    else
+    {
+        stack.SetResult_I8(result);
+    }
+
+#else
+
+    // support for conversion from base 10 and 16 (partial)
+    if (radix == 10)
+    {
+        // conversion from base 10
+
+        // check for minus sign
+        if (*str == '-')
+        {
+            negReturnExpected = true;
+            str++;
+        }
+        else if (*str == '+')
         {
             str++;
         }
 
-        // empty string gets a format exception
-        if (*str == 0)
+        intPart = 0;
+        lastValue = 0;
+
+        // guess at no more than 99 characters
+        for (int i = 0; i < 99; i++)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
-
-#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
-        // suport for conversion from any base
-
-        char *endptr = str;
-
-        // notice we don't try to catch errno=ERANGE - IEEE574 says overflows should just convert to infinity values
-        double returnValue = strtod(str, &endptr);
-
-        if (endptr == str)
-        {
-            // didn't parse the string completely
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
-
-        // allow spaces after digits
-        while (*endptr == ' ')
-        {
-            endptr++;
-        }
-
-        // should reach end of string no aditional chars
-        if (*endptr != 0)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-        }
-
-        stack.SetResult_R8(returnValue);
-    }
-    NANOCLR_NOCLEANUP();
-
-#else
-        // support for conversion from base 10 and 16 (partial)
-        // in this particular function the base isn't relevant
-
-        int length = 0;
-        bool hasMinusSign = false;
-        bool hasPlusSign = false;
-        int decimalPoint = -1;
-        int exponentialSign = -1;
-        bool hasMinusExponentialSign = false;
-        bool hasPlusExponentialSign = false;
-        double returnValue = 0.0;
-
-        // first pass, get count of decimal places, integer part and check for valid chars
-        char *temp = str;
-        while (*temp != '\0')
-        {
-            switch (*temp)
+            if (*str < '0' || *str > '9')
             {
-                case '-':
-                    if (exponentialSign == -1)
-                    {
-                        if (length == 0 && hasMinusSign == false)
-                        {
-                            hasMinusSign = true;
+                endptr = str;
 
-                            // point past the leading sign
-                            str++;
+                // allow spaces after digits
+                while (*endptr == ' ')
+                {
+                    endptr++;
+                }
 
-                            // don't count this in the length
-                            length--;
-                        }
-                        else
-                        {
-                            // found a minus signal NOT at the start of the string
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                        }
-                    }
-                    else
-                    {
-                        if (length == exponentialSign + 1)
-                        {
-                            hasMinusExponentialSign = true;
-                        }
-                        else
-                        {
-                            // found a minus signal NOT at the start of the exponent
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                        }
-                    }
+                // should reach end of string no aditional chars
+                if (*endptr == 0)
+                {
                     break;
+                }
 
-                case '+':
-                    if (exponentialSign == -1)
-                    {
-                        if (length == 0 && hasPlusSign == false)
-                        {
-                            hasPlusSign = true;
-
-                            // point past the leading sign
-                            str++;
-
-                            // don't count this in the length
-                            length--;
-                        }
-                        else
-                        {
-                            // found a plus signal NOT at the start of the string
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                        }
-                    }
-                    else
-                    {
-                        if (length == exponentialSign + 1)
-                        {
-                            hasPlusExponentialSign = true;
-                        }
-                        else
-                        {
-                            // found a plus signal NOT at the start of the exponent
-                            NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                        }
-                    }
-                    break;
-
-                case '.':
-                    if (decimalPoint == -1)
-                    {
-                        decimalPoint = length;
-                    }
-                    else
-                    {
-                        // already found a decimal point, can't have another
-                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                    }
-                    break;
-
-                case 'e':
-                case 'E':
-                    if (exponentialSign == -1)
-                    {
-                        exponentialSign = length;
-                    }
-                    else
-                    {
-                        // already found a exponential sign, can't have another
-                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                    }
-                    break;
-
-                default:
-                    if (*temp < '0' || *temp > '9')
-                    {
-                        // there is an invalid char in the string
-                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
-                    }
+                // non-numeric (and not trailing space)
+                NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
             }
-            length++;
-            temp++;
+
+            // advance the digits and add the current number
+            intPart = (intPart * 10) + (*str - '0');
+
+            if (intPart < lastValue)
+            {
+                // the above operation overflowed the value
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
+
+            lastValue = intPart;
+
+            str++;
+            if (*str == '\0')
+            {
+                break;
+            }
         }
 
-        //  now parse the string according to it's format
-        int endOrExponentialPart = exponentialSign == -1 ? length : exponentialSign;
-        if (decimalPoint == -1)
+        // intPart now holds a positive number from the string.
+        if (negReturnExpected)
         {
-            // string doesn't have fractional part, treat as integer
-            returnValue = GetIntegerPart(str, endOrExponentialPart);
-        }
-        else if (decimalPoint == 0)
-        {
-            // string starts with the decimal point, only has fractional part
-            returnValue = GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
+            // it's ok to use -0 even for unsigned types, but otherwise - NO.
+            if (isSigned == false && intPart > 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
+
+            // too big to make a negative value?
+            if (intPart > (uint64_t)(minValue * -1))
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+            }
+
+            result = intPart * -1;
         }
         else
         {
-            // string has integer and fractional parts
-            returnValue = GetIntegerPart(str, decimalPoint);
-            returnValue = returnValue +
-                          GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
-            if (hasMinusSign)
+            // result will be negative for large uints, and we checked for overflow above
+            if (isUInt64 == false && intPart > (uint64_t)maxValue)
             {
-                returnValue *= -1;
+                NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
             }
-        }
 
-        // exponential part found?
-        if (exponentialSign != -1)
+            // this MAY have made the result negative by overflowing the buffer - which we do
+            // for uint64 logic.  The c# code will cast the int64 to uint64 removing the sign
+            result = (int64_t)intPart;
+        }
+    }
+    else if (radix == 16)
+    {
+        // conversion from base 16
+        result = GetIntegerFromHexString(str);
+        //??? check against min/max?  Signed possible?
+    }
+    else
+    {
+        // all other bases are not supported
+        return stack.NotImplementedStub();
+    }
+
+    stack.SetResult_I8(result);
+
+#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+
+    NANOCLR_CLEANUP();
+
+    // set parameter reporting conversion success/failure
+    stack.Arg6().Dereference()->NumericByRef().u1 = (hr == S_OK);
+
+    // should we throw an exception?
+    if (hr != S_OK && !throwOnFailure)
+    {
+        // nope! so clear the exception
+        hr = S_OK;
+
+        // set return value with minimum value
+        stack.SetResult_I8(minValue);
+    }
+
+    NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    double returnValue;
+
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+
+    char *endptr;
+
+#else
+
+    int endOrExponentialPart;
+    int exponent;
+    double outExponent;
+    int length = 0;
+    bool hasMinusSign = false;
+    bool hasPlusSign = false;
+    int decimalPoint = -1;
+    int exponentialSign = -1;
+    bool hasMinusExponentialSign = false;
+    bool hasPlusExponentialSign = false;
+    char *temp;
+
+#endif
+
+    char *str = (char *)stack.Arg0().RecoverString();
+
+    // grab parameter with flag to throw on failure
+    bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
+
+    // check string parameter for null
+    FAULT_ON_NULL_ARG(str);
+
+    // skip spaces before digits
+    while (*str == ' ')
+    {
+        str++;
+    }
+
+#if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
+    // support for conversion from any base
+
+    endptr = str;
+
+    // notice we don't try to catch errno=ERANGE - IEEE574 says overflows should just convert to infinity values
+    returnValue = strtod(str, &endptr);
+
+    if (endptr == str)
+    {
+        // didn't parse the string completely
+        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+    }
+
+    // allow spaces after digits
+    while (*endptr == ' ')
+    {
+        endptr++;
+    }
+
+    // should reach end of string no aditional chars
+    if (*endptr != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+    }
+
+    stack.SetResult_R8(returnValue);
+
+#else
+
+    // support for conversion from base 10 and 16 (partial)
+    // in this particular function the base isn't relevant
+
+    // first pass, get count of decimal places, integer part and check for valid chars
+    temp = str;
+
+    while (*temp != '\0')
+    {
+        switch (*temp)
         {
-            // advance by one if a sign (+ or -) is after the exponential sign
-            if (hasMinusExponentialSign || hasPlusExponentialSign)
-            {
-                exponentialSign++;
-            }
+            case '-':
+                if (exponentialSign == -1)
+                {
+                    if (length == 0 && hasMinusSign == false)
+                    {
+                        hasMinusSign = true;
 
-            // get the exponential part
-            int exponent = GetIntegerPart((str + exponentialSign + 1), (length - exponentialSign - 1));
-            double outExponent = pow(10, exponent);
+                        // point past the leading sign
+                        str++;
 
-            if (hasMinusExponentialSign)
-            {
-                returnValue = returnValue / outExponent;
-            }
-            else
-            {
-                returnValue = returnValue * outExponent;
-            }
+                        // don't count this in the length
+                        length--;
+                    }
+                    else
+                    {
+                        // found a minus signal NOT at the start of the string
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                    }
+                }
+                else
+                {
+                    if (length == exponentialSign + 1)
+                    {
+                        hasMinusExponentialSign = true;
+                    }
+                    else
+                    {
+                        // found a minus signal NOT at the start of the exponent
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                    }
+                }
+                break;
+
+            case '+':
+                if (exponentialSign == -1)
+                {
+                    if (length == 0 && hasPlusSign == false)
+                    {
+                        hasPlusSign = true;
+
+                        // point past the leading sign
+                        str++;
+
+                        // don't count this in the length
+                        length--;
+                    }
+                    else
+                    {
+                        // found a plus signal NOT at the start of the string
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                    }
+                }
+                else
+                {
+                    if (length == exponentialSign + 1)
+                    {
+                        hasPlusExponentialSign = true;
+                    }
+                    else
+                    {
+                        // found a plus signal NOT at the start of the exponent
+                        NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                    }
+                }
+                break;
+
+            case '.':
+                if (decimalPoint == -1)
+                {
+                    decimalPoint = length;
+                }
+                else
+                {
+                    // already found a decimal point, can't have another
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                }
+                break;
+
+            case 'e':
+            case 'E':
+                if (exponentialSign == -1)
+                {
+                    exponentialSign = length;
+                }
+                else
+                {
+                    // already found a exponential sign, can't have another
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                }
+                break;
+
+            default:
+                if (*temp < '0' || *temp > '9')
+                {
+                    // there is an invalid char in the string
+                    NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
+                }
+        }
+        length++;
+        temp++;
+    }
+
+    //  now parse the string according to it's format
+    endOrExponentialPart = exponentialSign == -1 ? length : exponentialSign;
+    if (decimalPoint == -1)
+    {
+        // string doesn't have fractional part, treat as integer
+        returnValue = GetIntegerPart(str, endOrExponentialPart);
+    }
+    else if (decimalPoint == 0)
+    {
+        // string starts with the decimal point, only has fractional part
+        returnValue = GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
+    }
+    else
+    {
+        // string has integer and fractional parts
+        returnValue = GetIntegerPart(str, decimalPoint);
+        returnValue =
+            returnValue + GetDoubleFractionalPart((str + decimalPoint + 1), (endOrExponentialPart - decimalPoint - 1));
+        if (hasMinusSign)
+        {
+            returnValue *= -1;
+        }
+    }
+
+    // exponential part found?
+    if (exponentialSign != -1)
+    {
+        // advance by one if a sign (+ or -) is after the exponential sign
+        if (hasMinusExponentialSign || hasPlusExponentialSign)
+        {
+            exponentialSign++;
         }
 
+        // get the exponential part
+        exponent = GetIntegerPart((str + exponentialSign + 1), (length - exponentialSign - 1));
+        outExponent = pow(10, exponent);
+
+        if (hasMinusExponentialSign)
+        {
+            returnValue = returnValue / outExponent;
+        }
+        else
+        {
+            returnValue = returnValue * outExponent;
+        }
+    }
+
+    stack.SetResult_R8(returnValue);
+
+#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+
+    NANOCLR_CLEANUP();
+
+    // set parameter reporting conversion success/failure
+    stack.Arg2().Dereference()->NumericByRef().u1 = (hr == S_OK);
+
+    // should we throw an exception?
+    if (hr != S_OK && !throwOnFailure)
+    {
+        // nope! so clear the exception
+        hr = S_OK;
+
+        // need to set result value to 0
         stack.SetResult_R8(returnValue);
     }
 
-    NANOCLR_NOCLEANUP();
-
-#endif // defined(SUPPORT_ANY_BASE_CONVERSION)
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN(

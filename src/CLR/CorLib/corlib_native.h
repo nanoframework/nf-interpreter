@@ -487,8 +487,8 @@ struct Library_corlib_native_System_Double
 
 struct Library_corlib_native_System_Convert
 {
-    NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4);
-    NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING);
+    NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64String___STATIC__SZARRAY_U1__STRING);
 
@@ -1207,4 +1207,4 @@ struct Library_corlib_native_System_WeakReference
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib;
 
-#endif //CORLIB_NATIVE_H
+#endif // CORLIB_NATIVE_H

@@ -106,6 +106,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_String::CompareTo___I4__OBJECT,
     NULL,
     Library_corlib_native_System_String::get_Chars___CHAR__I4,
@@ -290,6 +295,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Collections_ArrayList::get_Item___OBJECT__I4,
     Library_corlib_native_System_Collections_ArrayList::set_Item___VOID__I4__OBJECT,
     Library_corlib_native_System_Collections_ArrayList::Add___I4__OBJECT,
@@ -318,9 +324,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8,
     Library_corlib_native_System_Double::IsInfinity___STATIC__BOOLEAN__R8,
     Library_corlib_native_System_Double::IsNaN___STATIC__BOOLEAN__R8,
@@ -328,8 +331,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Double::IsPositiveInfinity___STATIC__BOOLEAN__R8,
     NULL,
     NULL,
-    Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4,
-    Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING,
+    Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN,
+    Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -488,6 +491,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING,
     Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__STRING,
     NULL,
@@ -537,6 +541,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_GC::SuppressFinalize___STATIC__VOID__OBJECT,
     Library_corlib_native_System_GC::ReRegisterForFinalize___STATIC__VOID__OBJECT,
     Library_corlib_native_System_Globalization_DateTimeFormat::FormatDigits___STATIC__STRING__I4__I4,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -732,6 +738,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Threading_AutoResetEvent::_ctor___VOID__BOOLEAN,
     Library_corlib_native_System_Threading_AutoResetEvent::Reset___BOOLEAN,
     Library_corlib_native_System_Threading_AutoResetEvent::Set___BOOLEAN,
@@ -783,6 +790,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_corlib_native_System_Threading_WaitHandle::WaitMultiple___STATIC__I4__SZARRAY_SystemThreadingWaitHandle__I4__BOOLEAN__BOOLEAN,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -854,6 +862,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Object::MemberwiseClone___OBJECT,
     NULL,
     Library_corlib_native_System_Object::ReferenceEquals___STATIC__BOOLEAN__OBJECT__OBJECT,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -1044,6 +1057,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Collections_ArrayList::get_Item___OBJECT__I4,
     Library_corlib_native_System_Collections_ArrayList::set_Item___VOID__I4__OBJECT,
     Library_corlib_native_System_Collections_ArrayList::Add___I4__OBJECT,
@@ -1070,9 +1084,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
     Library_corlib_native_System_Double::CompareTo___STATIC__I4__R8__R8,
     Library_corlib_native_System_Double::IsInfinity___STATIC__BOOLEAN__R8,
     Library_corlib_native_System_Double::IsNaN___STATIC__BOOLEAN__R8,
@@ -1080,8 +1091,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Double::IsPositiveInfinity___STATIC__BOOLEAN__R8,
     NULL,
     NULL,
-    Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4,
-    Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING,
+    Library_corlib_native_System_Convert::NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN,
+    Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -1290,6 +1301,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_Guid::GenerateNewGuid___STATIC__SZARRAY_U1,
     NULL,
     NULL,
@@ -1406,6 +1419,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Threading_AutoResetEvent::_ctor___VOID__BOOLEAN,
     Library_corlib_native_System_Threading_AutoResetEvent::Reset___BOOLEAN,
     Library_corlib_native_System_Threading_AutoResetEvent::Set___BOOLEAN,
@@ -1467,6 +1481,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
     Library_corlib_native_System_ValueType::Equals___BOOLEAN__OBJECT,
     NULL,
     NULL,
@@ -1494,18 +1510,18 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xC5322585,
+    0xBCBD2417,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xB0016E1F,
+    0xD835946B,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
 #endif
 
     method_lookup,
-    { 100, 5, 0, 14 }
+    { 100, 5, 0, 15 }
 };
 
 // clang-format on
