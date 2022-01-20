@@ -489,6 +489,7 @@ struct Library_corlib_native_System_Convert
 {
     NANOCLR_NATIVE_DECLARE(NativeToInt64___STATIC__I8__STRING__BOOLEAN__I8__I8__I4__BOOLEAN__BYREF_BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeToDouble___STATIC__R8__STRING__BOOLEAN__BYREF_BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeToDateTime___STATIC__SystemDateTime__STRING__BOOLEAN__BYREF_BOOLEAN);
     NANOCLR_NATIVE_DECLARE(ToBase64String___STATIC__STRING__SZARRAY_U1__I4__I4__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(FromBase64String___STATIC__SZARRAY_U1__STRING);
 
@@ -497,6 +498,7 @@ struct Library_corlib_native_System_Convert
     static double GetDoubleFractionalPart(char *str, int length);
     static int64_t GetIntegerPart(char *str, int length);
     static int64_t GetIntegerFromHexString(char *str);
+    static char *Nano_strptime(const char *buf, const char *fmt, uint64_t *ticks);
 };
 
 struct Library_corlib_native_System_Globalization_DateTimeFormatInfo
