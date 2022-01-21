@@ -271,7 +271,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDouble___STATIC__R8__STRIN
 {
     NANOCLR_HEADER();
 
-    double returnValue;
+    double returnValue = 0;
 
 #if (SUPPORT_ANY_BASE_CONVERSION == TRUE)
 
