@@ -54,4 +54,4 @@ extern "C"
 }
 #endif
 
-#endif //TARGET_WINDOWS_STORAGE_H
+#endif // TARGET_WINDOWS_STORAGE_H
