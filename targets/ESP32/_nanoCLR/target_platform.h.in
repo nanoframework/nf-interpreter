@@ -11,7 +11,7 @@
 #define HAL_USE_SDC       @HAL_USE_SDC_OPTION@
 #define HAL_USE_BLE       @HAL_USE_BLE_OPTION@
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 #define SDC_MAX_OPEN_FILES 5
 #endif
 

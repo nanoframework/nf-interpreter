@@ -41,7 +41,7 @@
 
 static const char *TAG = "SDCard";
 
-#if defined(HAL_USE_SDC)
+#if #if (HAL_USE_SDC == TRUE)
 
 //
 //  Unmount SD card ( MMC/SDIO or SPI)
