@@ -864,7 +864,7 @@ jobs:
         PackageName: TI_CC1352R1_LAUNCHXL_868
         TargetSeries: 'cc13xx_26xx'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13xx_26xx
+          -DTARGET_SERIES=CC13X2
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
@@ -879,7 +879,7 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
-          
+
         GccArm_Version:
 
   variables:
