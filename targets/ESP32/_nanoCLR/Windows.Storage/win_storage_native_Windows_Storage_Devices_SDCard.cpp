@@ -14,7 +14,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNativ
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
     bool bit1Mode = stack.Arg0().NumericByRef().s4;
     if (!Storage_MountMMC(bit1Mode, 0))
     {
@@ -32,7 +32,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
     // Get passed SPi bus number 1 or 2
     int spiBus = stack.Arg0().NumericByRef().s4;
 
@@ -64,7 +64,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative
     NANOCLR_HEADER();
     (void)stack;
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     // Unmount SPI device
     if (!Storage_UnMountSDCard())
