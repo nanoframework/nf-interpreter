@@ -35,6 +35,9 @@
     <ClCompile Include="nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="nf_rt_native_System_Environment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="nf_rt_native.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
