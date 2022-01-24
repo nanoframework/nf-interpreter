@@ -135,24 +135,24 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeF
 {
     NANOCLR_HEADER();
     {
-        FloatingPoint floatingPointOption = FloatingPoint_None;
+        SystemInfo_FloatingPoint floatingPointOption = SystemInfo_FloatingPoint_None;
 
 #if !defined(NANOCLR_EMULATED_FLOATINGPOINT)
 
 #if (USE_FPU == TRUE)
 
 #if (DP_FLOATINGPOINT == TRUE)
-        floatingPointOption = FloatingPoint_DoublePrecisionHardware;
+        floatingPointOption = SystemInfo_FloatingPoint_DoublePrecisionHardware;
 #else
-        floatingPointOption = FloatingPoint_SinglePrecisionHardware;
+        floatingPointOption = SystemInfo_FloatingPoint_SinglePrecisionHardware;
 #endif
 
 #else
 
 #if (DP_FLOATINGPOINT == TRUE)
-        floatingPointOption = FloatingPoint_DoublePrecisionSoftware;
+        floatingPointOption = SystemInfo_FloatingPoint_DoublePrecisionSoftware;
 #else
-        floatingPointOption = FloatingPoint_SinglePrecisionSoftware;
+        floatingPointOption = SystemInfo_FloatingPoint_SinglePrecisionSoftware;
 #endif
 
 #endif // (USE_FPU == TRUE)
