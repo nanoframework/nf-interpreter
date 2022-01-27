@@ -100,6 +100,22 @@ HRESULT Library_corlib_native_System_Type::GetConstructor___SystemReflectionCons
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemReflectionConstructorInfo(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(GetMethods(
+        stack,
+        NULL,
+        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public | c_BindingFlags_NonPublic,
+        NULL,
+        0,
+        true));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING__SZARRAY_SystemType(
     CLR_RT_StackFrame &stack)
 {
