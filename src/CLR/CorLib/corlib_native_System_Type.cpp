@@ -100,6 +100,22 @@ HRESULT Library_corlib_native_System_Type::GetConstructor___SystemReflectionCons
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemReflectionConstructorInfo(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(GetMethods(
+        stack,
+        NULL,
+        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public | c_BindingFlags_NonPublic,
+        NULL,
+        0,
+        true));
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING__SZARRAY_SystemType(
     CLR_RT_StackFrame &stack)
 {
@@ -523,10 +539,15 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
     bool staticInstanceOnly = false;
 
     if (bindingFlags == c_BindingFlags_Default)
+    {
         bindingFlags = c_BindingFlags_DefaultLookup;
+    }
+
     // in default lookup mode we want the static methods only from the instance not from the base classes
     if (bindingFlags == c_BindingFlags_DefaultLookup)
+    {
         staticInstanceOnly = true;
+    }
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, tdArg));
 
@@ -565,23 +586,31 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 if (md->flags & CLR_RECORD_METHODDEF::MD_Static)
                 {
                     if ((bindingFlags & c_BindingFlags_Static) == 0)
+                    {
                         continue;
+                    }
                 }
                 else
                 {
                     if ((bindingFlags & c_BindingFlags_Instance) == 0)
+                    {
                         continue;
+                    }
                 }
 
                 if ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
                 {
                     if ((bindingFlags & c_BindingFlags_Public) == 0)
+                    {
                         continue;
+                    }
                 }
                 else
                 {
                     if ((bindingFlags & c_BindingFlags_NonPublic) == 0)
+                    {
                         continue;
+                    }
                 }
 
                 //--//
@@ -589,15 +618,21 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 if (md->flags & CLR_RECORD_METHODDEF::MD_Constructor)
                 {
                     if ((bindingFlags & c_BindingFlags_CreateInstance) == 0)
+                    {
                         continue;
+                    }
                 }
                 else
                 {
                     if ((bindingFlags & c_BindingFlags_CreateInstance) != 0)
+                    {
                         continue;
+                    }
 
                     if (szText != NULL && !strcmp(assm->GetString(md->name), szText) == false)
+                    {
                         continue;
+                    }
                 }
 
                 if (pParams)
@@ -614,7 +649,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     NANOCLR_CHECK_HRESULT(parserLeft.Advance(res));
 
                     if (CLR_RT_TypeSystem::MatchSignatureDirect(parserLeft, parserRight, true) == false)
+                    {
                         continue;
+                    }
                 }
 
                 CLR_RT_MethodDef_Index idx;
@@ -632,6 +669,10 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.m_MethodInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
+
+                        // store token for type
+                        hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
+                            idx.m_data;
                     }
 
                     iMethod++;
@@ -688,9 +729,14 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                                 //  matches pParams
 
                                 if (fLeftBetterMatchT && !fRightBetterMatchT)
+                                {
                                     fLeftBetterMatch = true;
+                                }
+
                                 if (!fLeftBetterMatchT && fRightBetterMatchT)
+                                {
                                     fRightBetterMatch = true;
+                                }
                             }
 
                             if (fLeftBetterMatch && fRightBetterMatch)
@@ -703,7 +749,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                             // If they are identical signatures, the first one wins (subclass takes precendence)
                             // Only if Right is better do we have a strictly better match
                             if (!fRightBetterMatch)
+                            {
                                 continue;
+                            }
 
                             // Found a better match
                         }
@@ -715,17 +763,26 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_MethodInfo));
                     hbObj = top.Dereference();
                     hbObj->SetReflection(inst);
+
+                    // store token for type
+                    hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
+                        inst.m_data;
                 }
             }
 
             if (bindingFlags & (c_BindingFlags_DeclaredOnly | c_BindingFlags_CreateInstance))
+            {
                 break;
+            }
+
         } while (td.SwitchToParent());
 
         if (pass == 0)
         {
             if (!fAllMatches)
+            {
                 NANOCLR_SET_AND_LEAVE(S_OK);
+            }
 
             NANOCLR_CHECK_HRESULT(
                 CLR_RT_HeapBlock_Array::CreateInstance(top, iMethod, g_CLR_RT_WellKnownTypes.m_MethodInfo));
