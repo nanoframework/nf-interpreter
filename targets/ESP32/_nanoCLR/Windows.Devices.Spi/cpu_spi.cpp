@@ -102,13 +102,29 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
     }
 
     spi_bus_config_t bus_config{
-        mosi_io_num : (int)mosiPin,  // mosi pin
-        miso_io_num : (int)misoPin,  // miso pin
-        sclk_io_num : (int)clockPin, // Clock
-        quadwp_io_num : -1,          // Quad Write protect
-        quadhd_io_num : -1,          // Quad Hold
-        max_transfer_sz : 16384,     // max transfer size
-        flags : 0,                   // SPICOMMON_BUSFLAG_* flags
+
+        // mosi pin
+        mosi_io_num : (int)mosiPin,
+        // miso pin
+        miso_io_num : (int)misoPin,
+        // Clock
+        sclk_io_num : (int)clockPin,
+        // Quad Write protect (-1 not used)
+        quadwp_io_num : -1,
+        // Quad Hold
+        quadhd_io_num : -1,
+        // GPIO pin for spi data4 signal in octal mode, -1 if not used.
+        data4_io_num : -1,
+        // GPIO pin for spi data5 signal in octal mode, // -1 if not used.
+        data5_io_num : -1,
+        // GPIO pin for spi data6 signal in octal mode, // -1 if not used.
+        data6_io_num : -1,
+        // GPIO pin for spi data7 signal in octal mode, //-1 if not used.
+        data7_io_num : -1,
+        // max transfer size
+        max_transfer_sz : 16384,
+        // SPICOMMON_BUSFLAG_* flags
+        flags : 0,
         intr_flags : ESP_INTR_FLAG_IRAM
     };
 

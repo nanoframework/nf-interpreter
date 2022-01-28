@@ -165,10 +165,15 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES 
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
+                ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
         )
 
         add_dependencies(${target}.elf nano::NF_Network)
 
+        # security provider is mbedTLS
+        if(USE_SECURITY_MBEDTLS_OPTION)
+            add_dependencies(NF_Network mbedtls)
+        endif()
     endif()
 
     # if(USE_FILESYSTEM_OPTION)
@@ -241,6 +246,14 @@ macro(nf_add_platform_sources target)
             ${ESP32_IDF_SOURCES}
         )
 
+    endif()
+
+    if(USE_SECURITY_MBEDTLS_OPTION)
+        target_link_libraries(${target}.elf
+        mbedtls
+        )
+
+        add_dependencies(NF_Network mbedtls)
     endif()
 
 endmacro()
@@ -657,24 +670,6 @@ macro(nf_add_idf_as_library)
             TARGET __idf_lwip 
             PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
         )
-
-        message(STATUS "Adding byteorder functions")
-                
-        # need to read the supplied SDK CONFIG file and replace the appropriate options
-        set(ARCH_CC_FILE "${esp32_idf_SOURCE_DIR}/components/lwip/port/esp32/include/arch/cc.h")       
-        file(READ
-            ${ARCH_CC_FILE}
-            ARCH_CC_CONTENTS)
-
-        string(REPLACE
-            "#endif // BYTE_ORDER"
-            "#endif // __BYTE_ORDER\n\n#define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS\n#define htons(x) __builtin_bswap16(x)\n#define ntohs(x) __builtin_bswap16(x)\n#define htonl(x) __builtin_bswap32(x)\n#define ntohl(x) __builtin_bswap32(x)\n"
-            ARCH_CC_FINAL_CONTENTS
-            "${ARCH_CC_CONTENTS}")
-
-        file(WRITE 
-            ${ARCH_CC_FILE} 
-            "${ARCH_CC_FINAL_CONTENTS}")
 
     endif()
 
