@@ -116,6 +116,7 @@ struct Library_corlib_native_System_Type
     NANOCLR_NATIVE_DECLARE(
         InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT);
     NANOCLR_NATIVE_DECLARE(GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType);
+    NANOCLR_NATIVE_DECLARE(GetConstructors___SZARRAY_SystemReflectionConstructorInfo);
     NANOCLR_NATIVE_DECLARE(GetMethod___SystemReflectionMethodInfo__STRING__SZARRAY_SystemType);
     NANOCLR_NATIVE_DECLARE(GetMethod___SystemReflectionMethodInfo__STRING);
     NANOCLR_NATIVE_DECLARE(get_IsNotPublic___BOOLEAN);
@@ -859,6 +860,7 @@ struct Library_corlib_native_System_Reflection_MemberTypes
 
 struct Library_corlib_native_System_Reflection_MethodBase
 {
+    static const int FIELD___token = 1;
 
     NANOCLR_NATIVE_DECLARE(get_Name___STRING);
     NANOCLR_NATIVE_DECLARE(get_DeclaringType___SystemType);
@@ -868,6 +870,7 @@ struct Library_corlib_native_System_Reflection_MethodBase
     NANOCLR_NATIVE_DECLARE(get_IsVirtual___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(get_IsAbstract___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Invoke___OBJECT__OBJECT__SZARRAY_OBJECT);
+    NANOCLR_NATIVE_DECLARE(GetParametersNative___SZARRAY_SystemReflectionParameterInfo);
 
     //--//
 
@@ -879,6 +882,15 @@ struct Library_corlib_native_System_Reflection_MethodBase
     static HRESULT CheckFlags(CLR_RT_StackFrame &stack, CLR_UINT32 mask, CLR_UINT32 flag);
 #endif // NANOCLR_REFLECTION
 };
+
+#if (NANOCLR_REFLECTION == TRUE)
+struct Library_corlib_native_System_Reflection_ParameterInfo
+{
+    static const int FIELD___parameterType = 1;
+
+    //--//
+};
+#endif // NANOCLR_REFLECTION
 
 struct Library_corlib_native_System_Reflection_ProcessorArchitecture
 {

@@ -71,6 +71,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_corlib_native_System_Type::InvokeMember___OBJECT__STRING__SystemReflectionBindingFlags__SystemReflectionBinder__OBJECT__SZARRAY_OBJECT,
     Library_corlib_native_System_Type::GetConstructor___SystemReflectionConstructorInfo__SZARRAY_SystemType,
+    Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemReflectionConstructorInfo,
     Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING__SZARRAY_SystemType,
     Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInfo__STRING,
     NULL,
@@ -663,6 +664,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING,
     Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___SystemType,
     Library_corlib_native_System_Reflection_MethodBase::get_IsPublic___BOOLEAN,
@@ -671,10 +673,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_MethodBase::get_IsVirtual___BOOLEAN,
     Library_corlib_native_System_Reflection_MethodBase::get_IsAbstract___BOOLEAN,
     Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJECT__SZARRAY_OBJECT,
+    Library_corlib_native_System_Reflection_MethodBase::GetParametersNative___SZARRAY_SystemReflectionParameterInfo,
+    NULL,
+    NULL,
     NULL,
     NULL,
     Library_corlib_native_System_Reflection_PropertyInfo::GetValue___OBJECT__OBJECT__SZARRAY_OBJECT,
     Library_corlib_native_System_Reflection_PropertyInfo::SetValue___VOID__OBJECT__OBJECT__SZARRAY_OBJECT,
+    NULL,
     NULL,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_Name___STRING,
@@ -683,6 +689,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJECT__OBJECT,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnType___SystemType,
+    NULL,
     NULL,
     Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttributesNative___SZARRAY_OBJECT__BOOLEAN,
     NULL,
@@ -1518,7 +1525,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0x21A4595E,
+    0xE7505F22,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
@@ -1529,7 +1536,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 #endif
 
     method_lookup,
-    { 100, 5, 0, 15 }
+    { 100, 5, 0, 16 }
 };
 
 // clang-format on
