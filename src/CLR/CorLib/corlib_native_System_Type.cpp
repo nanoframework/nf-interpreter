@@ -669,6 +669,10 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.m_MethodInfo));
                         hbObj = elem->Dereference();
                         NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
+
+                        // store token for type
+                        hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
+                            idx.m_data;
                     }
 
                     iMethod++;
@@ -759,6 +763,10 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_MethodInfo));
                     hbObj = top.Dereference();
                     hbObj->SetReflection(inst);
+
+                    // store token for type
+                    hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
+                        inst.m_data;
                 }
             }
 

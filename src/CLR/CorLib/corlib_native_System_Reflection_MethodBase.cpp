@@ -188,3 +188,77 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(
 
     NANOCLR_NOCLEANUP();
 }
+
+HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative___SZARRAY_SystemReflectionParameterInfo(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_MethodDef_Instance inst;
+    CLR_RT_MethodDef_Index idx;
+    CLR_RT_SignatureParser sigParser;
+    CLR_RT_TypeDef_Index paramInfoTypeDef;
+    CLR_RT_SignatureParser::Element paramElement;
+    CLR_RT_HeapBlock *hbObj;
+    CLR_RT_HeapBlock *paramInfoElement;
+
+    uint32_t paramCount = 0;
+
+    CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+
+    CLR_RT_HeapBlock *hbMethodInfo = stack.Arg0().Dereference();
+
+    idx.m_data = hbMethodInfo[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4;
+    inst.InitializeFromIndex(idx);
+
+    // 1st pass: get the number of parameters
+    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+
+    // discard return value
+    sigParser.Advance(paramElement);
+
+    // loop through all the parameters
+    while (sigParser.Available() > 0)
+    {
+        paramCount++;
+
+        sigParser.Advance(paramElement);
+    }
+
+    // find <ParameterInfo> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef("ParameterInfo", "System.Reflection", paramInfoTypeDef);
+
+    // create return array with the appropriate type
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, paramCount, paramInfoTypeDef));
+    paramInfoElement = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+
+    // 2nd pass: get the actual type of each parameter
+    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+
+    // discard return value
+    sigParser.Advance(paramElement);
+
+    while (sigParser.Available() > 0)
+    {
+        sigParser.Advance(paramElement);
+
+        // create a new instance of <ParameterInfo>
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*paramInfoElement, paramInfoTypeDef));
+        hbObj = paramInfoElement->Dereference();
+
+        // get reference to the <ParameterInfo> instance
+        CLR_RT_HeapBlock &paraTypeHB =
+            hbObj[Library_corlib_native_System_Reflection_ParameterInfo::FIELD___parameterType];
+
+        // create a new instance of the parameter type
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        hbObj = paraTypeHB.Dereference();
+        hbObj->SetReflection(paramElement.m_cls);
+
+        // move pointer to the next element
+        paramInfoElement++;
+    }
+
+    NANOCLR_NOCLEANUP();
+}
