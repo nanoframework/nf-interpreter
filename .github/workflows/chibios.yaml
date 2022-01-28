@@ -2,7 +2,7 @@ name: Build and push ChibiOS image
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-chibios
-  GCR_VERSION: v1.2
+  GCR_VERSION: v1.3
   GCR_FILE: .devcontainer/sources/Dockerfile.ChibiOS
 
 # Controls when the action will run. 
