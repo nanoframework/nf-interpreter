@@ -108,7 +108,7 @@ HRESULT Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemRefle
     NANOCLR_SET_AND_LEAVE(GetMethods(
         stack,
         NULL,
-        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public | c_BindingFlags_NonPublic,
+        c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public,
         NULL,
         0,
         true));
