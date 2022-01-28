@@ -2,7 +2,7 @@ name: Build and push image for Azure RTOS
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-azure-rtos
-  GCR_VERSION: v1.0
+  GCR_VERSION: v1.1
   GCR_FILE: .devcontainer/sources/Dockerfile.AzureRTOS
 
 # Controls when the action will run. 

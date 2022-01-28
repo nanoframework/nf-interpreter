@@ -97,7 +97,7 @@ if(NF_SECURITY_MBEDTLS)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.28.0")
 
     # set options for mbed TLS
     option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
