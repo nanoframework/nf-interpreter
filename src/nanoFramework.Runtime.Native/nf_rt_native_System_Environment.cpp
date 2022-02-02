@@ -10,11 +10,9 @@ HRESULT Library_nf_rt_native_System_Environment::get_TickCount64___STATIC__I8(CL
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
+    int64_t ticksValue = CLR_RT_ExecutionEngine::GetUptime();
 
-    // get pointer to object pushed to the stack
-    // and set with value from EE
-    ref.Dereference()->NumericByRef().s8 = CLR_RT_ExecutionEngine::GetUptime();
+    stack.SetResult_I8(ticksValue);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
