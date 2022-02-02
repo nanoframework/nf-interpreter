@@ -117,7 +117,7 @@ steps:
 
           Write-Host "Uploading $(PUBLISHING_PACKAGE_NAME) v$(PACKAGE_VERSION)"
 
-          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) --tags $(TargetPlatform),$(TargetSeries) -k $(CLOUDSMITH_KEY)
+          cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Agent.TempDirectory)\$(PUBLISHING_PACKAGE_NAME).zip --name $(TargetPublishName) --version $(PACKAGE_VERSION) --tags $(TargetPlatform),$(TargetSeries) --republish -k $(CLOUDSMITH_KEY)
 
       errorActionPreference: 'stop'
       failOnStderr: 'false'
