@@ -69,7 +69,7 @@ endif()
 # optionally add custom logic in the last section of this CMakeLists.txt 
 # to perform custom add_subdirectory() actions.
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/${RTOS})
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/${RTOS})
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
     string(TOUPPER ${RTOS} RTOS_UPPERCASE)
     set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
@@ -520,11 +520,6 @@ if( API_System.Net)
         set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
     endif()
 
-   if(API_Windows.Devices.Wifi)
-        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
-    else()
-        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
-    endif()
 else()
     # need to force SNTP to OFF
     set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")
@@ -771,12 +766,12 @@ elseif(RTOS_ESP32_CHECK)
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ESP32/_nanoCLR)
 
     # Only used by ESP32 at the moment
-    if(API_nanoFramework.Hardware.Esp32.Ble)
-        set(HAL_USE_BLE TRUE CACHE INTERNAL "BLE Support")
-        message(STATUS "Support for BLE enabled")
+    if(API_nanoFramework.Device.Bluetooth)
+        set(HAL_USE_BLE_OPTION TRUE CACHE INTERNAL "Bluetooth Support")
+        message(STATUS "Support for Bluetooth enabled")
     else()
-        set(HAL_USE_BLE FALSE CACHE INTERNAL "No BLE Support")
-        message(STATUS "Support for BLE disabled")
+        set(HAL_USE_BLE_OPTION FALSE CACHE INTERNAL "No Bluetooth Support")
+        message(STATUS "Support for Bluetooth disabled")
     endif()
 
     if(ESP32_ETHERNET_SUPPORT)
@@ -794,7 +789,7 @@ elseif(RTOS_ESP32_CHECK)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
@@ -806,7 +801,7 @@ elseif(RTOS_ESP32_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
 
             # set target base location
             set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
@@ -815,18 +810,9 @@ elseif(RTOS_ESP32_CHECK)
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${TARGET_BASE_LOCATION}")
 
-            # Only used by ESP32 at the moment
-            if(API_nanoFramework.Hardware.Esp32.Ble)
-                set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
-                message(STATUS "Support for BLE enabled")
-            else()
-                set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
-                message(STATUS "Support for BLE disabled")
+        else()
             # board NOT found in targets folder
-                # board NOT found in targets folder
-                message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-            endif()
-
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
 
@@ -852,7 +838,7 @@ else()
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
@@ -862,7 +848,7 @@ else()
         message(STATUS "${TARGET_BASE_LOCATION}")
 
     # try to find board in the Community targets folder
-    elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
+    elseif(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
             
         # set flag for this being a community board
         set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")

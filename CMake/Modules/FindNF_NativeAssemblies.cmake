@@ -34,12 +34,11 @@ option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi 
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
-
+option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
-option(API_nanoFramework.Hardware.Esp32.Ble     "option for nanoFramework.Hardware.Esp32.Ble")
 
 
 # Stm32 only
@@ -178,10 +177,10 @@ if(API_nanoFramework.Hardware.Esp32.Rmt)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
-# nanoFramework.Hardware.Esp32.Ble
-if(API_nanoFramework.Hardware.Esp32.Ble)
+# nanoFramework.Device.Bluetooth
+if(API_nanoFramework.Device.Bluetooth)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Ble")
+    PerformSettingsForApiEntry("nanoFramework.Device.Bluetooth")
 endif()
 
 # Hardware.Stm32
@@ -354,10 +353,10 @@ if(API_System.Device.Spi)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
-# Windows.Devices.Wifi
-if(API_Windows.Devices.Wifi)
+# System.Device.WiFi
+if(API_System.Device.WiFi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Wifi")
+    PerformSettingsForApiEntry("System.Device.WiFi")
 endif()
 
 # Windows.Storage

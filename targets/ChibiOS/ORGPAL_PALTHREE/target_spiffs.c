@@ -10,14 +10,16 @@
 #ifdef SPIFFS_SPI1
 
 static const SPIConfig spiConfig = {
-    false,
-    NULL,
-    PAL_PORT(LINE_FLASH_SPI1_CS),
-    PAL_PAD(LINE_FLASH_SPI1_CS),
+    .circular = false,
+    .slave = false,
+    .data_cb = NULL,
+    .error_cb = NULL,
+    .ssport = PAL_PORT(LINE_FLASH_SPI1_CS),
+    .sspad = PAL_PAD(LINE_FLASH_SPI1_CS),
     // CPHA=0, CPOL=0, MSb first
-    0, // SPI_CR1_CPOL | SPI_CR1_BR_0,
+    .cr1 = 0U, // SPI_CR1_CPOL | SPI_CR1_BR_0,
     // transfer length to 8bit
-    SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
+    .cr2 = SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0};
 
 #if defined(__GNUC__)
 __attribute__((aligned(32)))

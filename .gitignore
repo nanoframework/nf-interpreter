@@ -4,6 +4,7 @@
 
 # ignore build folder
 /build/
+/out/
 /build/.gitkeep
 
 # ignore cmake-variants file (will change per user/board setup, developers should derive content from cmake-variants.TEMPLATE.json)
@@ -21,7 +22,6 @@ InteropAssemblies/*
 .vscode/.cmaketools.json
 .vscode/settings.json
 .vscode/tasks.json
-.vscode/extensions.json
 .vscode/c_cpp_properties.json
 .vscode/cmake-kits.json
 .vscode/ipch

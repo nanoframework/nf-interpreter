@@ -73,6 +73,7 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_SOCKET         0x00004000
 #define SYSTEM_EVENT_FLAG_ONEWIRE_MASTER 0x00008000
 #define SYSTEM_EVENT_FLAG_RADIO          0x00010000
+#define SYSTEM_EVENT_FLAG_BLUETOOTH      0x00020000
 
 //#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
 //#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000
@@ -106,6 +107,7 @@ typedef enum SLEEP_LEVEL
 #define EVENT_STORAGE               70
 #define EVENT_RADIO                 80
 #define EVENT_HIGH_RESOLUTION_TIMER 90
+#define EVENT_BLUETOOTH             100
 
 #define EVENT_TOUCH   120
 #define EVENT_GESTURE 130

@@ -2,7 +2,7 @@ name: Build and push image for all RTOS
 
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-all
-  GCR_VERSION: v2.1
+  GCR_VERSION: v2.5
   GCR_FILE: .devcontainer/sources/Dockerfile.All
 
 # Controls when the action will run. 

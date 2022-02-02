@@ -454,7 +454,7 @@ macro(nf_add_idf_as_library)
                 # found it
                 set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${SDK_CONFIG_FILE})
             else()
-                message(FATAL_ERROR "Couldn't find IDF SDK CONFIG file '${ESP32_IDF_SOURCE}'. Please check the SDK_CONFIG_FILE build option.")
+                message(FATAL_ERROR "Couldn't find IDF SDK CONFIG file '${SDK_CONFIG_FILE}'. Please check the SDK_CONFIG_FILE build option.")
             endif()
         endif()
     else()
@@ -484,7 +484,7 @@ macro(nf_add_idf_as_library)
         idf::fatfs
     )
 
-    if(HAL_USE_BLE)
+    if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::bt)
     endif()
@@ -612,7 +612,6 @@ macro(nf_add_idf_as_library)
     )
 
     if(USE_NETWORKING_OPTION)
-
         
         FetchContent_GetProperties(esp32_idf)
 
@@ -670,6 +669,24 @@ macro(nf_add_idf_as_library)
             TARGET __idf_lwip 
             PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
         )
+
+        message(STATUS "Adding byteorder functions")
+                
+        # need to read the supplied SDK CONFIG file and replace the appropriate options
+        set(ARCH_CC_FILE "${esp32_idf_SOURCE_DIR}/components/lwip/port/esp32/include/arch/cc.h")       
+        file(READ
+            ${ARCH_CC_FILE}
+            ARCH_CC_CONTENTS)
+
+        string(REPLACE
+            "#endif // BYTE_ORDER"
+            "#endif // __BYTE_ORDER\n\n#define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS\n#define htons(x) __builtin_bswap16(x)\n#define ntohs(x) __builtin_bswap16(x)\n#define htonl(x) __builtin_bswap32(x)\n#define ntohl(x) __builtin_bswap32(x)\n"
+            ARCH_CC_FINAL_CONTENTS
+            "${ARCH_CC_CONTENTS}")
+
+        file(WRITE 
+            ${ARCH_CC_FILE} 
+            "${ARCH_CC_FINAL_CONTENTS}")
 
     endif()
 

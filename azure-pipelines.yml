@@ -2,7 +2,7 @@ trigger:
   branches:
     include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md" ]
+    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md", ".github", ".devcontainer" ]
 
 pr:
   autoCancel: true
@@ -18,7 +18,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.3.1
+      ref: refs/tags/v4.3.2
       
 jobs:
 
@@ -409,7 +409,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -423,89 +423,47 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
-      # BUILD FAILING ON IRAM0 overflow
-      # ESP32_BLE_REV0:
-      #   TargetBoard: ESP32
-      #   TargetSeries: 'esp32'
-      #   BuildOptions: >-
-          # -DTARGET_SERIES=ESP32
-          # -DRTOS=ESP32
-          # -DNF_FEATURE_DEBUGGER=ON
-          # -DNF_FEATURE_RTC=ON
-          # -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          # -DNF_SECURITY_MBEDTLS=ON
-          # -DSUPPORT_ANY_BASE_CONVERSION=ON
-          # -DNF_FEATURE_HAS_SDCARD=ON
-          # -DAPI_System.IO.FileSystem=ON
-          # -DAPI_System.Math=ON
-          # -DAPI_Windows.Devices.Gpio=ON
-          # -DAPI_System.Device.Gpio=ON
-          # -DAPI_Windows.Devices.Spi=ON
-          # -DAPI_System.Device.Spi=ON
-          # -DAPI_Windows.Devices.I2c=ON
-          # -DAPI_System.Device.I2c=ON
-          # -DAPI_Windows.Devices.Pwm=ON
-          # -DAPI_System.Device.Pwm=ON
-          # -DAPI_Windows.Devices.SerialCommunication=ON
-          # -DAPI_System.IO.Ports=ON
-          # -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          # -DAPI_System.Net=ON
-          # -DAPI_Windows.Devices.Wifi=ON
-          # -DAPI_Hardware.Esp32=ON
-          # -DAPI_nanoFramework.Devices.OneWire=ON
-          # -DAPI_nanoFramework.ResourceManager=ON
-          # -DAPI_nanoFramework.System.Collections=ON
-          # -DAPI_nanoFramework.System.Text=ON
-          # -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          # -DAPI_System.Device.Dac=ON
-          # -DAPI_nanoFramework.Hardware.Esp32.Ble=ON
+      ESP32_BLE_REV0:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: >-
+          -DTARGET_SERIES=ESP32
+          -DRTOS=ESP32
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          -DNF_SECURITY_MBEDTLS=ON
+          -DSUPPORT_ANY_BASE_CONVERSION=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
+          -DAPI_System.IO.FileSystem=ON
+          -DAPI_System.Math=ON
+          -DAPI_Windows.Devices.Gpio=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_Windows.Devices.Spi=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_Windows.Devices.I2c=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_Windows.Devices.Pwm=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_Windows.Devices.SerialCommunication=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Net=ON
+          -DAPI_System.Device.WiFi=ON
+          -DAPI_Hardware.Esp32=ON
+          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.ResourceManager=ON
+          -DAPI_nanoFramework.System.Collections=ON
+          -DAPI_nanoFramework.System.Text=ON
+          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+          -DAPI_System.Device.Dac=ON
+          -DAPI_nanoFramework.Device.Bluetooth=ON
 
-      #   ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-      #   SDK_config: sdkconfig.default_ble.esp32
-      #   IDF_Target: esp32
-      #   TargetName: ESP32
-      #   PackageName: ESP32_BLE_REV0
-      # BUILD FAILING ON IRAM0 overflow
-      # ESP32_BLE_REV3:
-      #   TargetBoard: ESP32
-      #   TargetSeries: 'esp32'
-      #   BuildOptions: >-
-          # -DTARGET_SERIES=ESP32
-          # -DRTOS=ESP32
-          # -DNF_FEATURE_DEBUGGER=ON
-          # -DNF_FEATURE_RTC=ON
-          # -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          # -DNF_SECURITY_MBEDTLS=ON
-          # -DSUPPORT_ANY_BASE_CONVERSION=ON
-          # -DNF_FEATURE_HAS_SDCARD=ON
-          # -DAPI_System.IO.FileSystem=ON
-          # -DAPI_System.Math=ON
-          # -DAPI_Windows.Devices.Gpio=ON
-          # -DAPI_System.Device.Gpio=ON
-          # -DAPI_Windows.Devices.Spi=ON
-          # -DAPI_System.Device.Spi=ON
-          # -DAPI_Windows.Devices.I2c=ON
-          # -DAPI_System.Device.I2c=ON
-          # -DAPI_Windows.Devices.Pwm=ON
-          # -DAPI_System.Device.Pwm=ON
-          # -DAPI_Windows.Devices.SerialCommunication=ON
-          # -DAPI_System.IO.Ports=ON
-          # -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          # -DAPI_System.Net=ON
-          # -DAPI_Windows.Devices.Wifi=ON
-          # -DAPI_Hardware.Esp32=ON
-          # -DAPI_nanoFramework.Devices.OneWire=ON
-          # -DAPI_nanoFramework.ResourceManager=ON
-          # -DAPI_nanoFramework.System.Collections=ON
-          # -DAPI_nanoFramework.System.Text=ON
-          # -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          # -DAPI_System.Device.Dac=ON
-
-      #   ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-      #   SDK_config: sdkconfig.default_ble_rev3.esp32
-      #   IDF_Target: esp32
-      #   TargetName: ESP32
-      #   PackageName: ESP32_BLE_REV3
+        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+        SDK_config: sdkconfig.default_nopsram_ble.esp32
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_BLE_REV0
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
@@ -527,7 +485,7 @@ jobs:
             -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
             -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
             -DAPI_System.Net=ON
-            -DAPI_Windows.Devices.Wifi=ON
+            -DAPI_System.Device.WiFi=ON
             -DAPI_Hardware.Esp32=ON
             -DAPI_nanoFramework.Devices.OneWire=ON
             -DAPI_nanoFramework.ResourceManager=ON
@@ -567,7 +525,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -602,7 +560,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -768,9 +726,9 @@ jobs:
       TI_CC1352R1_LAUNCHXL_915:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
-        TargetSeries: 'cc13x2_26x2'
+        TargetSeries: 'CC13X2'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13x2_26x2
+          -DTARGET_SERIES=CC13X2
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=915
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
@@ -871,8 +829,6 @@ jobs:
         eq(variables['System.PullRequest.PullRequestId'], '')
       )
 
-  - template: azure-pipelines-templates/download-logo.yml@templates
-
   - task: NuGetCommand@2
     condition: succeeded()
     displayName: Pack nanoCLR WIN32
@@ -965,12 +921,12 @@ jobs:
       succeeded('Build_ESP32_targets'),
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
-      not( eq(variables['Build.Reason'], 'PullRequest')
-    ),
-    or(
-      eq(variables['Build.SourceBranchName'], 'main'),
-      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
-      ne( variables['StartReleaseCandidate'], true )
+      eq(variables['System.PullRequest.PullRequestId'], ''),
+      or(
+        eq(variables['Build.SourceBranchName'], 'main'),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      ),
+      ne(variables['StartReleaseCandidate'], true)
     )
 
   pool:
@@ -1003,7 +959,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         or(
           eq(variables['Build.SourceBranchName'], 'main'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
@@ -1019,7 +975,7 @@ jobs:
     condition: >-
       and(
         succeeded(),
-        ne(variables['Build.Reason'], 'PullRequest'),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
         not(
           or(
             eq(variables['Build.SourceBranchName'], 'main'),
@@ -1074,9 +1030,7 @@ jobs:
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
       succeeded('Generate_change_log'),
-      not(
-        eq(variables['Build.Reason'], 'PullRequest')
-      ),
+      eq(variables['System.PullRequest.PullRequestId'], ''),
       or(
         endsWith(variables['Build.SourceBranchName'], 'main'),
         startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),

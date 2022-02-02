@@ -219,8 +219,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
     for (int interfaceIndex = 0; interfaceIndex < g_TargetConfiguration.NetworkInterfaceConfigs->Count;
          interfaceIndex++)
     {
-        NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LinkStatus(interfaceIndex, &networkIsAvailable));
-
+        SOCK_CONFIGURATION_LinkStatus(interfaceIndex, &networkIsAvailable);
         if (networkIsAvailable)
         {
             // network interface is UP, no need to check any other
@@ -230,7 +229,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::G
 
     stack.SetResult_Boolean(networkIsAvailable);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::GetNetworkInterfaceCount___STATIC__I4(

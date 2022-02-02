@@ -34,8 +34,6 @@ steps:
     condition: succeeded()
     displayName: Check if managed helpers files were changed
 
-  - template: azure-pipelines-templates/download-logo.yml@templates
-
   - task: NuGetCommand@2
     inputs:
       command: 'custom' 
@@ -60,5 +58,5 @@ steps:
       nuGetFeedType: external
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-$(System.TeamProject)'
-    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), ne(variables['Build.Reason'], 'PullRequest') )
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true), eq(variables['System.PullRequest.PullRequestId'], '') )
     displayName: Push managed helpers NuGet packages to NuGet

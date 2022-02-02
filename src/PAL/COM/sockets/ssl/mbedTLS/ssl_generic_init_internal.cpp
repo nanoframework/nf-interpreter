@@ -207,9 +207,9 @@ bool ssl_generic_init_internal(
             certificate = (const char *)deviceCert->Certificate;
             certLength = deviceCert->CertificateSize;
 
-            // clear private keys, just in case
-            privateKey = NULL;
-            privateKeyLength = 0;
+            // the private key is also part of the device certificate
+            privateKey = (const uint8_t *)deviceCert->Certificate;
+            privateKeyLength = deviceCert->CertificateSize;
         }
     }
 

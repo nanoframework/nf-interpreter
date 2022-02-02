@@ -129,6 +129,7 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
                 if (newLineIndex == 0)
                 {
                     // found and nothing else to compare
+                    index++;
                     break;
                 }
                 else
@@ -168,16 +169,16 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
         {
             // allocate memory for the string, including the new line char(s)
             // the new line char allow enough room in the buffer for for the terminator
-            line = (uint8_t *)platform_malloc(index + newLineLength);
+            line = (uint8_t *)platform_malloc(index);
 
             if (line != NULL)
             {
                 // pop string AND new line from buffer
-                ringBuffer->Pop(line, index + newLineLength);
+                ringBuffer->Pop(line, index);
 
                 // the returned string DOES NOT include the new line char(s)
                 // put a terminator at index 0 where the new line char(s) are, so the real string ends there
-                line[index] = 0;
+                line[index - newLineLength] = 0;
             }
         }
     }

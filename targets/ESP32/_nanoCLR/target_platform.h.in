@@ -9,9 +9,9 @@
 #define NANOCLR_GRAPHICS  @NANOCLR_GRAPHICS@
 #define HAL_USE_SPI       @HAL_USE_SPI_OPTION@
 #define HAL_USE_SDC       @HAL_USE_SDC_OPTION@
-#define NANOCLR_ESP32_BLE @HAL_USE_BLE@
+#define HAL_USE_BLE       @HAL_USE_BLE_OPTION@
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 #define SDC_MAX_OPEN_FILES 5
 #endif
 

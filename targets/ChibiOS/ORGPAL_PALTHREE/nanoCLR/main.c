@@ -96,14 +96,14 @@ int main(void)
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
 
-#if NF_FEATURE_USE_SPIFFS
+#if (NF_FEATURE_USE_SPIFFS == TRUE)
     // config and init SPIFFS
     hal_spiffs_config();
 #endif
 
     //  Initializes a serial-over-USB CDC driver.
-    sduObjectInit(&SDU1);
-    sduStart(&SDU1, &serusbcfg);
+    sduObjectInit(&SERIAL_DRIVER);
+    sduStart(&SERIAL_DRIVER, &serusbcfg);
 
     // Activates the USB driver and then the USB bus pull-up on D+.
     // Note, a delay is inserted in order to not have to disconnect the cable after a reset

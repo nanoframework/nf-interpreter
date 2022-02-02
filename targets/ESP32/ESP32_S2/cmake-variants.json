@@ -53,7 +53,7 @@
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",
           "API_nanoFramework.System.Text": "ON",
-          "API_Windows.Devices.Wifi": "ON",
+          "API_System.Device.WiFi": "ON",
           "API_Windows.Devices.Adc": "ON",
           "API_System.Device.Adc": "ON",
           "API_System.Device.Dac": "ON",
@@ -69,7 +69,8 @@
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
           "API_nanoFramework.Devices.OneWire": "OFF",
-          "API_nanoFramework.Graphics": "OFF"
+          "API_nanoFramework.Graphics": "OFF",
+          "API_nanoFramework.Device.Bluetooth": "OFF"
         }
       },
       "KALUGA_1": {
@@ -98,7 +99,7 @@
           "API_nanoFramework.ResourceManager": "ON",
           "API_nanoFramework.System.Collections": "ON",
           "API_nanoFramework.System.Text": "ON",
-          "API_Windows.Devices.Wifi": "ON",
+          "API_System.Device.WiFi": "ON",
           "API_Windows.Devices.Adc": "ON",
           "API_System.Device.Adc": "ON",
           "API_System.Device.Dac": "ON",
@@ -113,6 +114,7 @@
           "API_System.Device.Spi": "ON",
           "API_Hardware.Esp32": "ON",
           "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+          "API_nanoFramework.Device.Bluetooth": "OFF",
           "API_nanoFramework.Devices.OneWire": "OFF",
           "API_nanoFramework.Graphics": "ON",
           "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",

@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 // from the original source code file
 // Redistribution and use in source and binary forms, with or without modification, 
 // are permitted provided that the following conditions are met:
@@ -31,7 +33,6 @@
 // 
 // Author: Adam Dunkels <adam@sics.se>
 // Improved by Marc Boucher <marc@mbsi.ca> and David Haas <dhaas@alum.rpi.edu>
-
 
 #include <nanoHAL_Network.h>
 #include "lwip/opt.h"
@@ -685,8 +686,7 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
     err = netconn_connect(sock->conn, &remote_addr, remote_port);
   }
 
-  if (err == ERR_INPROGRESS) 
-  {
+  if (err == ERR_INPROGRESS) {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) operation in progress\n", s));
     sock_set_errno(sock, err_to_errno(err));
     return -1;
@@ -2855,3 +2855,5 @@ uint32_t lwip_socket_get_err(int s)
 } 
 
 #endif /* LWIP_SOCKET */
+
+// clang-format on

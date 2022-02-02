@@ -352,11 +352,11 @@ function(nf_set_linker_options_and_file target linker_file_name)
 endfunction()
 
 # check if a directory exists
-# going throuhg the directory to find if it's not empty takes a lot of time because it sweeps all files
+# going through the directory to find if it's not empty takes a lot of time because it sweeps all files
 # simplifying this now to speed up local builds
 macro(nf_directory_exists_not_empty path pathExists)
 
-    if(EXISTS "${path}")
+    if(IS_DIRECTORY "${path}")
         set(${pathExists} TRUE)
     else()
         set(${pathExists} FALSE)
@@ -548,7 +548,7 @@ macro(nf_setup_target_build_common)
     nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
     # set compile options
-    nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_OPTIONS})
+    nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_CLR_EXTRA_COMPILE_OPTIONS})
 
     # set compile definitions
     nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_CLR_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME} )

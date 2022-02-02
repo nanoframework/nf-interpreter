@@ -5,7 +5,7 @@ The CC1352R1 LaunchPad board contains a TI CC1352R1 device.
 ## Documentation
 
 - Detailed documentation for this target reference can be found [here](http://docs.nanoframework.net/content/reference-targets/ti-cc1352r1-launchxlhtml).
-- Instructions on how to flash the CC1352R1 LaunchPad can be found [here](http://docs.nanoframework.net/content/ti-simplelink/flash-nanoclr-cc13x2_26x2.html)
+- Instructions on how to flash the CC1352R1 LaunchPad can be found [here](http://docs.nanoframework.net/content/ti-simplelink/flash-nanoclr-cc13xx_26xx.html)
 
 ## Jumper Settings
 

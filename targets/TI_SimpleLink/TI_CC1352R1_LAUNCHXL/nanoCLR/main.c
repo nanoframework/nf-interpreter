@@ -23,8 +23,8 @@
 // Stack size in bytes
 #define THREADSTACKSIZE 2048
 
-Task_Handle receiverHandle;
-Task_Handle clrHandle;
+Task_Struct receiverTask;
+Task_Struct clrTask;
 
 CLR_SETTINGS clrSettings;
 
@@ -36,15 +36,34 @@ extern GPIO_PinConfig gpioPinConfigs[GPIO_MAX_PINS];
 extern GPIO_CallbackFxn gpioCallbackFunctions[GPIO_MAX_PINS];
 
 // this has to be define in a C file, otherwise the linker can't replace the weak one declared in the SDK driver library
-const GPIOCC26XX_Config GPIOCC26XX_config = {
-    .pinConfigs = (GPIO_PinConfig *)gpioPinConfigs,
-    .callbacks = (GPIO_CallbackFxn *)gpioCallbackFunctions,
-    .numberOfPinConfigs = GPIO_MAX_PINS,
-    .numberOfCallbacks = GPIO_MAX_PINS,
-    .intPriority = (~0)};
+// const GPIOCC26XX_Config GPIOCC26XX_config = {
+//     .pinConfigs = (GPIO_PinConfig *)gpioPinConfigs,
+//     .callbacks = (GPIO_CallbackFxn *)gpioCallbackFunctions,
+//     .numberOfPinConfigs = GPIO_MAX_PINS,
+//     .numberOfCallbacks = GPIO_MAX_PINS,
+//     .intPriority = (~0)};
 
 extern void ReceiverThread(UArg arg0, UArg arg1);
 extern void CLRStartupThread(UArg arg0, UArg arg1);
+
+/////////////////////////////////////////////////
+
+Task_Struct testTask;
+
+void TestTaskExec(UArg arg0, UArg arg1)
+{
+    (void)arg0;
+    (void)arg1;
+
+    // loop forever
+    while (1)
+    {
+        // Allow other tasks a chance to run
+        Task_sleep(100);
+    }
+}
+
+/////////////////////////////////////////////////
 
 int main(void)
 {
@@ -61,18 +80,23 @@ int main(void)
     ADC_init();
     ConfigUART();
 
+    // ////////////////////////////////////////////////////////////////////
+    // *** FOR DEBUG RUNS, PLEASE KEEP THIS CODE ***
+    // // setup Test task
+    // Task_Params_init(&taskParams);
+    // taskParams.stackSize = THREADSTACKSIZE;
+    // taskParams.priority = 4;
+    // // create task
+    // Task_construct(&testTask, TestTaskExec, &taskParams, Error_IGNORE);
+    // ////////////////////////////////////////////////////////////////////
+
     // setup Task thread
     Task_Params_init(&taskParams);
     taskParams.stackSize = THREADSTACKSIZE;
     taskParams.priority = 4;
 
     // create Receiver
-    receiverHandle = Task_create((Task_FuncPtr)ReceiverThread, &taskParams, Error_IGNORE);
-    if (receiverHandle == NULL)
-    {
-        while (1)
-            ;
-    }
+    Task_construct(&receiverTask, ReceiverThread, &taskParams, Error_IGNORE);
 
     // CLR settings to launch CLR thread
     (void)memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
@@ -83,27 +107,12 @@ int main(void)
 
     // setup CLR task
     taskParams.arg0 = (UArg)&clrSettings;
-    taskParams.stackSize = THREADSTACKSIZE;
+    taskParams.stackSize = 2 * THREADSTACKSIZE;
     taskParams.priority = 4;
-    clrHandle = Task_create(CLRStartupThread, &taskParams, Error_IGNORE);
-    if (clrHandle == NULL)
-    {
-        while (1)
-            ;
-    }
+
+    Task_construct(&clrTask, CLRStartupThread, &taskParams, Error_IGNORE);
 
     BIOS_start();
 
     return (0);
-}
-
-///////////////////////////////////////////////////////////////////////
-// need this dummy implementation here (started with SDK 4.20.01.04) //
-///////////////////////////////////////////////////////////////////////
-void __attribute__((naked)) _exit(int code)
-{
-    (void)code;
-
-    for (;;)
-        ;
 }

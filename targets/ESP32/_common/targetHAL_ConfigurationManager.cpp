@@ -15,11 +15,6 @@
 
 // #define DEBUG_CONFIG        1
 
-// Saves the remaining bundle size for multiple block cert configs
-static int32_t savedBundleSize;
-static int32_t remainingBundleSize;
-static int32_t savedBundleOffset;
-
 #ifdef DEBUG_CONFIG
 void PrintBlock(char *pBlock, int bsize)
 {
@@ -77,7 +72,7 @@ int32_t ConfigurationManager_FindConfigurationBlockSize(
     FILE *handle;
     int32_t configSize = 0;
 
-    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false);
+    handle = ConfigStorage_OpenFile(configuration, configurationIndex, false, false);
     if (handle != NULL)
     {
         configSize = ConfigStorage_FileSize(handle);
@@ -99,7 +94,7 @@ bool StoreConfigBlock(
     bool result = false;
     FILE *fileHandle;
 
-    fileHandle = ConfigStorage_OpenFile(configType, configurationIndex, true);
+    fileHandle = ConfigStorage_OpenFile(configType, configurationIndex, true, false);
     if (fileHandle != NULL)
     {
         result = ConfigStorage_WriteFile(fileHandle, (uint8_t *)configBlock, writeSize);
@@ -111,6 +106,36 @@ bool StoreConfigBlock(
             writeSize,
             (int)result);
 #endif
+        ConfigStorage_CloseFile(fileHandle);
+    }
+
+    return result;
+}
+
+bool AppendConfigBlock(
+    DeviceConfigurationOption configType,
+    uint32_t configurationIndex,
+    void *configBlock,
+    size_t writeSize)
+{
+    bool result = false;
+    FILE *fileHandle;
+
+    fileHandle = ConfigStorage_OpenFile(configType, configurationIndex, true, true);
+
+    if (fileHandle != NULL)
+    {
+        result = ConfigStorage_AppendFile(fileHandle, (uint8_t *)configBlock, writeSize);
+
+#ifdef DEBUG_CONFIG
+        ets_printf(
+            "store type %d index %d, length %d result %d\n",
+            (int)configType,
+            configurationIndex,
+            writeSize,
+            (int)result);
+#endif
+
         ConfigStorage_CloseFile(fileHandle);
     }
 
@@ -413,10 +438,10 @@ bool ConfigurationManager_GetConfigurationBlock(
         // set block size
         sizeOfBlock = ConfigurationManager_GetConfigurationBlockSize(DeviceConfigurationOption_X509CaRootBundle, 0);
     }
-    else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
+    else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
     {
-        if (g_TargetConfiguration.CertificateStore->Count == 0 ||
-            (configurationIndex + 1) > g_TargetConfiguration.CertificateStore->Count)
+        if (g_TargetConfiguration.DeviceCertificates->Count == 0 ||
+            (configurationIndex + 1) > g_TargetConfiguration.DeviceCertificates->Count)
         {
 #ifdef DEBUG_CONFIG
             ets_printf("GetConfig XC exit false\n");
@@ -445,260 +470,45 @@ bool ConfigurationManager_GetConfigurationBlock(
         sizeOfBlock);
 }
 
-DeviceConfigurationOption GetConfigOption(char *config)
+bool ConfigurationManager_StoreConfigurationBlockCertificate(
+    DeviceConfigurationOption configuration,
+    uint32_t configurationIndex,
+    void *configurationBlock,
+    uint32_t blockSize,
+    uint32_t offset)
 {
-    if (!memcmp(c_MARKER_CONFIGURATION_NETWORK_V1, config, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1)))
+    if (offset == 0)
     {
-        return DeviceConfigurationOption_Network;
-    }
-    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS80211_V1, config, sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1)))
-    {
-        return DeviceConfigurationOption_Wireless80211Network;
-    }
-    else if (!memcmp(c_MARKER_CONFIGURATION_WIRELESS_AP_V1, config, sizeof(c_MARKER_CONFIGURATION_WIRELESS_AP_V1)))
-    {
-        return DeviceConfigurationOption_WirelessNetworkAP;
-    }
-    else if (!memcmp(
-                 c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1,
-                 config,
-                 sizeof(c_MARKER_CONFIGURATION_X509CAROOTBUNDLE_V1)))
-    {
-        return DeviceConfigurationOption_X509CaRootBundle;
-    }
-    else if (!memcmp(
-                 c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1,
-                 config,
-                 sizeof(c_MARKER_CONFIGURATION_X509DEVICECERTIFICATE_V1)))
-    {
-        return DeviceConfigurationOption_X509DeviceCertificates;
-    }
-    else
-    {
-        // shouldn't EVER EVER get here
-        ASSERT(false);
-        return (DeviceConfigurationOption)0;
-    }
-}
-
-bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, uint32_t blockSize, uint32_t offset)
-{
-    size_t chunkSize = 0;
-    uint32_t certificateIndex = 0;
-    bool result = false;
-    uint32_t configurationIndex = 0;
-
-    // All configuration blocks in one block
-    // Separate and update
-
-#ifdef DEBUG_CONFIG
-    ets_printf("Block size %d\n", blockSize);
-
-    ets_printf("sizeof HAL_Configuration_NetworkInterface %d\n", sizeof(HAL_Configuration_NetworkInterface));
-    ets_printf("sizeof HAL_Configuration_Wireless80211 %d\n", sizeof(HAL_Configuration_Wireless80211));
-    ets_printf("sizeof of X509Certificate varies\n");
-#endif
-
-    configurationIndex = 0;
-
-    char *config = (char *)configurationBlock;
-    char *pEndConfig = (config + blockSize);
-    DeviceConfigurationOption currentConfigType;
-
-    while (config < pEndConfig)
-    {
-        int remainingBlockSize = pEndConfig - config;
-
-#ifdef DEBUG_CONFIG
-        ets_printf("Parse block %d:%d\n", config, pEndConfig);
-        PrintBlock((char *)config, 16);
-#endif
-        currentConfigType = GetConfigOption(config);
-
-        // X509 certificate block ?
-        if (currentConfigType == DeviceConfigurationOption_X509CaRootBundle)
+        // if this is the 1st chunk of data for a certificate, delete the existing one, if that exists
+        if (ConfigStorage_DeleteFile(configuration, configurationIndex))
         {
-            if (offset == 0)
+            if (configuration == DeviceConfigurationOption_X509CaRootBundle)
             {
-                HAL_Configuration_X509CaRootBundle *pX509Certificate = (HAL_Configuration_X509CaRootBundle *)config;
-
-                // First block of certificate bundle
-                // set total bundle size including header
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                savedBundleSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-                savedBundleSize += pX509Certificate->CertificateSize;
-                remainingBundleSize = savedBundleSize;
-                savedBundleOffset = 0;
-
-                // Free if already allocated ( could be different size )
-                if (g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] != 0)
+                // need to free memory before enumerating again
+                if (g_TargetConfiguration.CertificateStore->Count > 0)
                 {
-                    platform_free((void *)g_TargetConfiguration.CertificateStore->Certificates);
+                    platform_free(g_TargetConfiguration.CertificateStore->Certificates[0]);
                 }
+                platform_free(g_TargetConfiguration.CertificateStore);
 
-                g_TargetConfiguration.CertificateStore->Certificates[certificateIndex] =
-                    (HAL_Configuration_X509CaRootBundle *)platform_malloc(savedBundleSize);
-
-#ifdef DEBUG_CONFIG
-                ets_printf("X509 certificate block total size:%d\n", pX509Certificate->CertificateSize);
-#endif
+                g_TargetConfiguration.CertificateStore = ConfigStorage_FindX509CertificateConfigurationBlocks();
             }
-
-            // The current chunk size is what remains in current block
-            // we can't use offset as it relates to flash memory offset, not useful
-            chunkSize = remainingBlockSize;
-
-            // Copy into correct position in memory
-            memcpy(
-                (void *)(g_TargetConfiguration.CertificateStore->Certificates[0] + savedBundleOffset),
-                (const void *)config,
-                chunkSize);
-#ifdef DEBUG_CONFIG
-            ets_printf("X509 certificate chunksize:%d reminaing:%d\n", chunkSize, savedBundleSize);
-            PrintBlock((char *)config, 32);
-#endif
-            config += chunkSize;
-            remainingBundleSize -= chunkSize;
-            savedBundleOffset += chunkSize;
-            // Return true for partial blocks
-            result = true;
-
-            if (remainingBundleSize <= 0)
+            else if (configuration == DeviceConfigurationOption_X509DeviceCertificates)
             {
-                // Save Certificate Bundle to storage
-                result = StoreConfigBlock(
-                    DeviceConfigurationOption_X509CaRootBundle,
-                    certificateIndex,
-                    (void *)g_TargetConfiguration.CertificateStore->Certificates[certificateIndex],
-                    savedBundleSize);
-                certificateIndex++;
-#ifdef DEBUG_CONFIG
-                ets_printf("X509 certificate complete, saving\n");
-#endif
-            }
-
-#ifdef DEBUG_CONFIG
-            ets_printf("X509 certificate block ret:%d\n", result);
-#endif
-        }
-        // X509 device certificate block ?
-        else if (currentConfigType == DeviceConfigurationOption_X509DeviceCertificates)
-        {
-            if (offset == 0)
-            {
-                HAL_Configuration_X509DeviceCertificate *deviceCertificate =
-                    (HAL_Configuration_X509DeviceCertificate *)config;
-
-                // First block of certificate bundle
-                // set total bundle size including header
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                savedBundleSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
-                savedBundleSize += deviceCertificate->CertificateSize;
-                remainingBundleSize = savedBundleSize;
-                savedBundleOffset = 0;
-
-                // Free if already allocated ( could be different size )
-                if (g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] != 0)
+                // need to free memory before enumerating again
+                if (g_TargetConfiguration.DeviceCertificates->Count > 0)
                 {
-                    platform_free((void *)g_TargetConfiguration.DeviceCertificates->Certificates);
+                    platform_free(g_TargetConfiguration.DeviceCertificates->Certificates[0]);
                 }
+                platform_free(g_TargetConfiguration.DeviceCertificates);
 
-                g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex] =
-                    (HAL_Configuration_X509DeviceCertificate *)platform_malloc(savedBundleSize);
-
-#ifdef DEBUG_CONFIG
-                ets_printf("Device certificate block total size:%d\n", deviceCertificate->CertificateSize);
-#endif
+                g_TargetConfiguration.DeviceCertificates =
+                    ConfigStorage_FindX509DeviceCertificatesConfigurationBlocks();
             }
-
-            // The current chunk size is what remains in current block
-            // we can't use offset as it relates to flash memory offset, not useful
-            chunkSize = remainingBlockSize;
-
-            // Copy into correct position in memory
-            memcpy(
-                (void *)(g_TargetConfiguration.DeviceCertificates->Certificates[0] + savedBundleOffset),
-                (const void *)config,
-                chunkSize);
-#ifdef DEBUG_CONFIG
-            ets_printf("Device certificate chunksize:%d reminaing:%d\n", chunkSize, savedBundleSize);
-            PrintBlock((char *)config, 32);
-#endif
-            config += chunkSize;
-            remainingBundleSize -= chunkSize;
-            savedBundleOffset += chunkSize;
-            // Return true for partial blocks
-            result = true;
-
-            if (remainingBundleSize <= 0)
-            {
-                // Save Certificate Bundle to storage
-                result = StoreConfigBlock(
-                    DeviceConfigurationOption_X509CaRootBundle,
-                    certificateIndex,
-                    (void *)g_TargetConfiguration.DeviceCertificates->Certificates[certificateIndex],
-                    savedBundleSize);
-                certificateIndex++;
-#ifdef DEBUG_CONFIG
-                ets_printf("Device certificate complete, saving\n");
-#endif
-            }
-
-#ifdef DEBUG_CONFIG
-            ets_printf("X509 certificate block ret:%d\n", result);
-#endif
         }
-        // Network interface block ?
-        else if (currentConfigType == DeviceConfigurationOption_Network)
-        {
-            HAL_Configuration_NetworkInterface *pNetConfig = (HAL_Configuration_NetworkInterface *)config;
-            config += sizeof(HAL_Configuration_NetworkInterface);
+    }
 
-            result = StoreConfigBlock(
-                currentConfigType,
-                configurationIndex,
-                (void *)pNetConfig,
-                sizeof(HAL_Configuration_NetworkInterface));
-            configurationIndex++;
-
-#ifdef DEBUG_CONFIG
-            ets_printf("Network block %X %X ret:%d\n", pNetConfig->InterfaceType, pNetConfig->SpecificConfigId, result);
-            PrintBlock((char *)pNetConfig, sizeof(HAL_Configuration_NetworkInterface));
-#endif
-        }
-        // Wireless block ?
-        else if (currentConfigType == DeviceConfigurationOption_Wireless80211Network)
-        {
-            HAL_Configuration_Wireless80211 *pWirelessConfig = (HAL_Configuration_Wireless80211 *)config;
-            config += sizeof(HAL_Configuration_Wireless80211);
-
-            result = StoreConfigBlock(
-                currentConfigType,
-                pWirelessConfig->Id,
-                (void *)pWirelessConfig,
-                sizeof(HAL_Configuration_Wireless80211));
-
-#ifdef DEBUG_CONFIG
-            ets_printf(
-                "Wireless block %d ssid:%s password:%s ret:%d\n",
-                pWirelessConfig->Id,
-                pWirelessConfig->Ssid,
-                pWirelessConfig->Password,
-                result);
-            PrintBlock((char *)pWirelessConfig, sizeof(HAL_Configuration_Wireless80211));
-#endif
-        }
-        else
-        {
-            break;
-        }
-
-    } // while
-
-#ifdef DEBUG_CONFIG
-    ets_printf("StoreConfig ALL exit %d\n", (int)result);
-#endif
-    return result;
+    return AppendConfigBlock(configuration, configurationIndex, configurationBlock, blockSize);
 }
 
 //
@@ -709,8 +519,8 @@ bool ConfigurationManager_StoreConfigurationBlockAll(void *configurationBlock, u
 //   configuration      : Type of configuration block to store or All for block with multiple types
 //   configurationIndex : Index of type to store ( not used for All )
 //   blockSize          : Size of data pointed to by configurationBlock
-//   offset             : Offset of data when multiple blocks ( currently Certificate Bundles only ), For single type
-//   this is offset withing the type
+//   offset             : Offset of data when multiple blocks (used for X502 CA Root and device certificate).
+//                        For remaining types this should be zero.
 //                        For ALL type blocks this is the offset in the total data of multiple types.
 // Return:-
 //    true - OK
@@ -738,10 +548,8 @@ bool ConfigurationManager_StoreConfigurationBlock(
 
     if (configuration == DeviceConfigurationOption_All)
     {
-        result = ConfigurationManager_StoreConfigurationBlockAll(configurationBlock, blockSize, offset);
-
-        // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
-        requiresEnumeration = (result && done);
+        // not supported
+        return false;
     }
     else
     {
@@ -765,10 +573,18 @@ bool ConfigurationManager_StoreConfigurationBlock(
             // check for 0 size on certificate
             if (((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize)
             {
-                // set blockSize size ( Total size of  X509 certificate )
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate);
-                blockSize += ((HAL_Configuration_X509CaRootBundle *)configurationBlock)->CertificateSize;
+                result = ConfigurationManager_StoreConfigurationBlockCertificate(
+                    configuration,
+                    configurationIndex,
+                    configurationBlock,
+                    blockSize,
+                    offset);
+
+                // reset blockSize because storing has been handled
+                blockSize = 0;
+
+                // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
+                requiresEnumeration = (result && done);
             }
             else
             {
@@ -780,11 +596,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 {
                     // reset this
                     blockSize = 0;
+
+                    // enumeration is required
+                    requiresEnumeration = true;
                 }
             }
-
-            // removing or adding a config, enumeration is required
-            requiresEnumeration = true;
 
 #ifdef DEBUG_CONFIG
             ets_printf(
@@ -798,10 +614,18 @@ bool ConfigurationManager_StoreConfigurationBlock(
             // check for 0 size on certificate
             if (((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize)
             {
-                // set blockSize size ( Total size of  X509 certificate )
-                // because X509 certificate has a variable length need to compute the block size in two steps
-                blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate);
-                blockSize += ((HAL_Configuration_X509DeviceCertificate *)configurationBlock)->CertificateSize;
+                result = ConfigurationManager_StoreConfigurationBlockCertificate(
+                    configuration,
+                    configurationIndex,
+                    configurationBlock,
+                    blockSize,
+                    offset);
+
+                // reset blockSize because storing has been handled
+                blockSize = 0;
+
+                // enumeration is required after we are DONE with SUCCESSFULLY storing all the config chunks
+                requiresEnumeration = (result && done);
             }
             else
             {
@@ -813,11 +637,11 @@ bool ConfigurationManager_StoreConfigurationBlock(
                 {
                     // reset this
                     blockSize = 0;
+
+                    // enumeration is required
+                    requiresEnumeration = true;
                 }
             }
-
-            // removing or adding a config, enumeration is required
-            requiresEnumeration = true;
 
 #ifdef DEBUG_CONFIG
             ets_printf(
@@ -999,7 +823,7 @@ HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
 
 HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
 {
-    if (g_TargetConfiguration.CertificateStore->Count)
+    if (g_TargetConfiguration.DeviceCertificates->Count)
     {
         // get cert store size
         int32_t certSize =
