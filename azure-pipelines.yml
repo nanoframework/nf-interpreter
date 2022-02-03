@@ -1,8 +1,37 @@
 trigger:
   branches:
-    include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
+    include: 
+      - main
+      - develop*
+      - release-*
+      - refs/tags/*
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md", ".github", ".devcontainer" ]
+    exclude:
+      - .clang-format
+      - .github_changelog_generator
+      - .gitignore
+      - .typo-ci.yml
+      - build.ps1
+      - CHANGELOG.md
+      - CMakeSettings.json
+      - CMakeSettings.SAMPLE.json
+      - LICENSE.md
+      - nf.props
+      - nfcore.vssettings
+      - README.md
+      - README.zh-cn.md
+      - RunCmd.bat
+      - sd1.bat
+      - SetNFRoot.bat
+      - startocd.bat
+      - .github/*
+      - .devcontainer/*
+      - .vscode/*
+      - .vs/*
+      - assets/*
+      - config/*
+      - install-scripts/*
+      - VisualStudioDevelopment/*
 
 pr:
   autoCancel: true
