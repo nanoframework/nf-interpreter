@@ -948,7 +948,7 @@ jobs:
   - task: UseRubyVersion@0
     condition: succeeded()
     inputs:
-      versionSpec: '= 2.7' 
+      versionSpec: '= 3.0'
       addToPath: true
 
   # generate change log including future version
