@@ -289,7 +289,7 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     // Set default to Auto Connect + Enable + WirelessFlags_SmartConfig so station can be started by default
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable Wi-Fi to save power etc
-    // if Ethernet enable then disable 
+    // if Ethernet enable then disable
     if (ethernetEnabled)
     {
         config->Options = Wireless80211Configuration_ConfigurationOptions_Disable;
@@ -297,7 +297,7 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     else
     {
         config->Options =
-        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+            (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
     }
 }
 

@@ -78,7 +78,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #elif defined(ESP32_ETHERNET_PHY_RTL8201)
     esp_eth_phy_t *phy = esp_eth_phy_new_rtl8201(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_LAN8720)
-    ESP_LOGI("ETH","Ethernet Lan8720 phy, phy adr %d power %d\n", ETH_PHY_ADDR, ETH_PHY_RST_GPIO);
+    ESP_LOGI("ETH", "Ethernet Lan8720 phy, phy adr %d power %d\n", ETH_PHY_ADDR, ETH_PHY_RST_GPIO);
     esp_eth_phy_t *phy = esp_eth_phy_new_lan8720(&phy_config);
 #elif defined(ESP32_ETHERNET_PHY_DP83848)
     esp_eth_phy_t *phy = esp_eth_phy_new_dp83848(&phy_config);
@@ -102,15 +102,14 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     ESP_ERROR_CHECK(spi_bus_initialize(CONFIG_EXAMPLE_ETH_SPI_HOST, &buscfg, 1));
 
     // Define SPI interface to use
- #if (ESP32_ETHERNET_SPI_MODULE == DM9051)
+#if (ESP32_ETHERNET_SPI_MODULE == DM9051)
     spi_device_interface_config_t devcfg = {
         .command_bits = 1,
         .address_bits = 7,
         .mode = 0,
         .clock_speed_hz = ESP32_ETHERNET_SPI_CLOCK_MHZ * 1000 * 1000,
         .spics_io_num = ESP32_ETHERNET_SPI_CS,
-        .queue_size = 20
-    };
+        .queue_size = 20};
     ESP_ERROR_CHECK(spi_bus_add_device(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg, &spi_handle));
     /* dm9051 ethernet driver is based on spi driver */
     eth_dm9051_config_t dm9051_config = ETH_DM9051_DEFAULT_CONFIG(spi_handle);
@@ -125,8 +124,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         .mode = 0,
         .clock_speed_hz = ESP32_ETHERNET_SPI_CLOCK_MHZ * 1000 * 1000,
         .spics_io_num = ESP32_ETHERNET_SPI_CS,
-        .queue_size = 20
-    };
+        .queue_size = 20};
     ESP_ERROR_CHECK(spi_bus_add_device(CONFIG_EXAMPLE_ETH_SPI_HOST, &devcfg, &spi_handle));
     // w5500 ethernet driver is based on spi driver
     eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(spi_handle);
@@ -135,7 +133,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     esp_eth_phy_t *phy = esp_eth_phy_new_w5500(&phy_config);
 #else
     // No SPI module defined
-    
+
 #endif
 #endif // CONFIG_ETH_USE_SPI_ETHERNET
 
@@ -146,7 +144,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #ifndef ESP32_ETHERNET_INTERNAL
     // The SPI Ethernet module might doesn't have a burned factory MAC address, we have to set it manually.
     // Supplied in the config
-    ESP_ERROR_CHECK(esp_eth_ioctl(eth_handle, ETH_CMD_S_MAC_ADDR, pMacAdr ));
+    ESP_ERROR_CHECK(esp_eth_ioctl(eth_handle, ETH_CMD_S_MAC_ADDR, pMacAdr));
 #endif
 
     // attach Ethernet driver to TCP/IP stack
