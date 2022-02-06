@@ -10,6 +10,8 @@
 #include <targetHAL_ConfigStorage.h>
 #include <target_platform.h>
 
+bool ethernetEnabled = false;
+
 // NVS parameters for Interface config
 #define NVS_NAMESPACE "nanoF"
 
@@ -158,6 +160,7 @@ void ConfigurationManager_EnumerateConfigurationBlocks()
         // ESP32 can have has much as 3 network interfaces: Wireless Station, Wireless AP and Ethernet
 #ifdef ESP32_ETHERNET_SUPPORT
         networkCount = 3;
+        ethernetEnabled = true;
 #else
         networkCount = 2;
 #endif
@@ -286,8 +289,16 @@ void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *config, ui
     // Set default to Auto Connect + Enable + WirelessFlags_SmartConfig so station can be started by default
     // Once smart config has run will start up automatically and reconnect of disconnected
     // Application will have to disable Wi-Fi to save power etc
-    config->Options =
+    // if Ethernet enable then disable 
+    if (ethernetEnabled)
+    {
+        config->Options = Wireless80211Configuration_ConfigurationOptions_Disable;
+    }
+    else
+    {
+        config->Options =
         (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable | Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+    }
 }
 
 //  Default initialisation of wireless config blocks for ESP32 targets
