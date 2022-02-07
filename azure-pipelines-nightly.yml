@@ -350,6 +350,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -385,6 +386,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -420,6 +422,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DESP32_XTAL_FREQ_26=ON
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -456,6 +459,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -491,6 +495,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -525,6 +530,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -562,6 +568,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -603,6 +610,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -641,6 +649,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_RTC=ON
@@ -682,6 +691,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_RTC=ON
@@ -723,6 +733,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -763,6 +774,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
