@@ -7,12 +7,17 @@
 #define MBEDTLS_H
 
 #include <nanoHAL.h>
+#include "nf_mbedtls_config.h"
 
 #ifdef PLATFORM_ESP32
 #include <esp32_idf.h>
 #endif
 
 #include <sockets_lwip.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "mbedtls/platform.h"
 #include "mbedtls/net_sockets.h"
@@ -41,10 +46,6 @@ void mbedtls_net_free( mbedtls_net_context *ctx );
 
 // debug output declaration 
 void nf_debug( void *ctx, int level, const char *file, int line, const char *str );
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // function returning the system date and time in Unix Epoch 
 time_t nf_get_unix_epoch();
