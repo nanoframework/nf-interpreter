@@ -102,11 +102,6 @@ macro(nf_add_platform_packages)
 
             find_package(NF_Network REQUIRED QUIET)
 
-            # security provider is mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED QUIET)
-            endif()
-
         endif()
 
     endif()
@@ -246,13 +241,6 @@ macro(nf_add_platform_sources target)
             ${ESP32_IDF_SOURCES}
         )
 
-    endif()
-
-    # mbed TLS requires a config file
-    if(USE_SECURITY_MBEDTLS_OPTION)
-        # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
     endif()
 
 endmacro()
