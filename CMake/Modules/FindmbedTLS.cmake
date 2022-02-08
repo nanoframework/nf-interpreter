@@ -40,7 +40,6 @@ set(src_crypto
     asn1parse.c
     asn1write.c
     base64.c
-    bignum.c
     blowfish.c
     camellia.c
     ccm.c
@@ -90,12 +89,13 @@ set(src_crypto
     version.c
     version_features.c
     xtea.c
-    
+
 )
 
 if(NOT RTOS_ESP32_CHECK)
     # platform implementation of hardware random provider
     list(APPEND src_crypto mbedtls_entropy_hardware_pool.c)
+    list(APPEND src_crypto bignum.c)
 endif()
 
 foreach(SRC_FILE ${src_crypto})
@@ -103,7 +103,7 @@ foreach(SRC_FILE ${src_crypto})
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
-        PATHS 
+        PATHS
             ${mbedtls_SOURCE_DIR}/library
 
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/
@@ -118,6 +118,10 @@ foreach(SRC_FILE ${src_crypto})
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
 
 endforeach()
+
+if(RTOS_ESP32_CHECK)
+    list(APPEND mbedTLS_SOURCES ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/library/bignum.c)
+endif()
 
 # unset this warning as error required for this source file
 SET_SOURCE_FILES_PROPERTIES( ${mbedtls_SOURCE_DIR}/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
@@ -140,7 +144,7 @@ foreach(SRC_FILE ${src_x509})
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
-        PATHS 
+        PATHS
             ${mbedtls_SOURCE_DIR}/library
 
         CMAKE_FIND_ROOT_PATH_BOTH
@@ -172,7 +176,7 @@ foreach(SRC_FILE ${src_tls})
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
 
     find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
-        PATHS 
+        PATHS
             ${mbedtls_SOURCE_DIR}/library
 
         CMAKE_FIND_ROOT_PATH_BOTH
@@ -193,7 +197,6 @@ if(RTOS_ESP32_CHECK)
     set(src_platform_specific
 
         mbedtls_debug.c
-        
         esp_hardware.c
         esp_mem.c
         esp_timing.c
@@ -202,26 +205,13 @@ if(RTOS_ESP32_CHECK)
         esp_aes_common.c
         esp_aes.c
         sha.c
-        esp_bignum.c
-        bignum.c
         esp_sha1.c
         esp_sha256.c
         esp_sha512.c
         esp_md.c
     )
- 
-else()
-
-    # other platforms use the official sources
-
-    set(src_platform_specific
-
-        net_sockets.c
-    )
-
-endif()
-
-foreach(SRC_FILE ${src_platform_specific})
+        
+    foreach(SRC_FILE ${src_platform_specific})
 
     set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
 
@@ -233,8 +223,42 @@ foreach(SRC_FILE ${src_platform_specific})
             ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/sha/
             ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/aes
             ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/aes/block
-            ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/${TARGET_SERIES_SHORT}
+            
             ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/md
+
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF
+
+        CMAKE_FIND_ROOT_PATH_BOTH
+    )
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${MBEDTLS_SRC_FILE}")
+    endif()
+
+    list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
+
+    endforeach()
+
+    if(CONFIG_MBEDTLS_HARDWARE_MPI)
+        list(APPEND mbedTLS_SOURCES ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/esp_bignum.c)
+        list(APPEND src_platform_specific ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/${TARGET_SERIES_SHORT}/bignum.c)
+    endif()
+
+else()
+
+    # other platforms use the official sources
+
+    set(src_platform_specific
+
+        net_sockets.c
+    )
+
+    foreach(SRC_FILE ${src_platform_specific})
+
+    set(MBEDTLS_SRC_FILE SRC_FILE -NOTFOUND)
+
+    find_file(MBEDTLS_SRC_FILE ${SRC_FILE}
+        PATHS
 
             ${mbedtls_SOURCE_DIR}/library
 
@@ -247,7 +271,9 @@ foreach(SRC_FILE ${src_platform_specific})
 
     list(APPEND mbedTLS_SOURCES ${MBEDTLS_SRC_FILE})
 
-endforeach()
+    endforeach()
+
+endif()
 
 include(FindPackageHandleStandardArgs)
 

@@ -7,10 +7,11 @@
 #define MBEDTLS_H
 
 #include <nanoHAL.h>
-#include "nf_mbedtls_config.h"
 
 #ifdef PLATFORM_ESP32
 #include <esp32_idf.h>
+#else
+#include "nf_mbedtls_config.h"
 #endif
 
 #include <sockets_lwip.h>

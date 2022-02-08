@@ -74,7 +74,7 @@ RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/
 ENV GIT_SSL_NO_VERIFY=0
 
 # Clone ESP-IDF
-RUN git clone --branch v4.3.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
@@ -104,7 +104,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 ENV IDF_PATH=/sources/esp-idf
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-8.4.0/riscv32-esp-elf/bin
+ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch2-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch2-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch2-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

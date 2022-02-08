@@ -69,7 +69,7 @@ void WP_Cdc_Rx_Callback(int itf, cdcacm_event_t *event)
     BaseType_t shouldWakeHigherPriorityTask = pdFALSE;
 
     // signal data received
-    vTaskNotifyGiveFromISR(&ReceiverTask, &shouldWakeHigherPriorityTask);
+    vTaskNotifyGiveFromISR(ReceiverTask, &shouldWakeHigherPriorityTask);
 
     portYIELD_FROM_ISR(shouldWakeHigherPriorityTask);
 }
