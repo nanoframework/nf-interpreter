@@ -49,6 +49,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -93,9 +95,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0x564F2452,
+    0xA67E6317,
     method_lookup,
-    { 100, 1, 2, 0 }
+    { 100, 1, 3, 0 }
 };
 
 // clang-format on

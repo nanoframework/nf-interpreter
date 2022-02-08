@@ -94,6 +94,8 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     static const int FIELD___newLine = 18;
 
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
+    NANOCLR_NATIVE_DECLARE(get_InvertSignalLevels___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(set_InvertSignalLevels___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(ReadExisting___STRING);
     NANOCLR_NATIVE_DECLARE(ReadLine___STRING);
