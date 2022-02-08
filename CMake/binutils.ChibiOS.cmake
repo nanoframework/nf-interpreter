@@ -245,16 +245,21 @@ macro(nf_add_platform_include_directories target)
         )
 
                 
-        # need to add extra include directories for mbedTLS
-        target_include_directories(
-            mbedcrypto PUBLIC
-            ${CHIBIOS_HAL_INCLUDE_DIRS}
-            ${CHIBIOS_INCLUDE_DIRS}
-            ${ChibiOSnfOverlay_INCLUDE_DIRS}
-            ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-            ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
-            ${CHIBIOS_LWIP_INCLUDE_DIRS}
-        )
+        if(USE_SECURITY_MBEDTLS_OPTION)
+
+            # need to add extra include directories for mbedTLS
+            target_include_directories(
+                mbedcrypto PUBLIC
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_LWIP_INCLUDE_DIRS}
+            )
+
+        endif()
 
     endif()
 
