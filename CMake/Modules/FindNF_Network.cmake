@@ -3,14 +3,19 @@
 # See LICENSE file in the project root for full license information.
 #
 
+include(FetchContent)
+FetchContent_GetProperties(mbedtls)
+
 # set include directories for nanoFramework network
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Lwip)
+list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL)
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
+    list(APPEND NF_Network_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
 endif()
 
 if(USE_ENC28J60_DRIVER_OPTION)
@@ -181,7 +186,6 @@ macro(nf_add_lib_network)
     add_library(
         ${LIB_NAME} STATIC 
             ${NF_Network_SOURCES}
-            ${mbedTLS_SOURCES}
             ${NFALN_EXTRA_SOURCES})
 
     target_include_directories(
@@ -189,7 +193,6 @@ macro(nf_add_lib_network)
         PUBLIC 
             ${NF_Network_INCLUDE_DIRS}
             ${NF_CoreCLR_INCLUDE_DIRS}
-            ${mbedTLS_INCLUDE_DIRS}
             ${NFALN_EXTRA_INCLUDES})
 
     # TODO can be removed later

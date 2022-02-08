@@ -256,8 +256,12 @@ if(NF_SECURITY_MBEDTLS)
         FetchContent_Populate(mbedtls)
     endif()
 
-    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
-    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
+    # don't include tests or programs, only build libraries
+    set(ENABLE_TESTING CACHE BOOL OFF)
+    set(ENABLE_PROGRAMS CACHE BOOL OFF)
+
+    cmake_policy(SET CMP0048 NEW)
+    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
 
 endif()
 
