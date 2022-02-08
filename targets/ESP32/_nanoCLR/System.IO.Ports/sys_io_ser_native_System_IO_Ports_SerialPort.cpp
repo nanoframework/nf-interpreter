@@ -293,6 +293,76 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    stack.SetResult_Boolean(palUart->SignalLevelsInverted);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // check if UART it's already opened
+    if (palUart->SerialDevice)
+    {
+        // it is opened, so we can't change the signal levels
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    palUart->SignalLevelsInverted = (bool)stack.Arg1().NumericByRef().u1;
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -839,6 +909,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
     palUart->NewLineChar = 0;
+    palUart->SignalLevelsInverted = 0;
 
     // Install driver
     esp_err = uart_driver_install(
@@ -1013,6 +1084,33 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             // First time make sure UART is reset so use uart_param_config.
             // If you call this once driver installed it resets UART and stop events ISR being called.
             if (uart_param_config(uart_num, &uart_config) != ESP_OK)
+            {
+                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            ////////////////////////////////////////////////////////////////////////////
+            // signal level inversion can only be configured when UART is not running //
+            ////////////////////////////////////////////////////////////////////////////
+
+            // default is to not invert
+            uart_signal_inv_t inversionMmask = UART_SIGNAL_INV_DISABLE;
+
+            // get pointer to PAL UART
+            NF_PAL_UART *palUart = GetPalUartFromUartNum_sys(uart_num);
+            if (palUart == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
+            // check if signal levels are to be inverted
+            if (palUart->SignalLevelsInverted)
+            {
+                inversionMmask = (uart_signal_inv_t)(UART_SIGNAL_RXD_INV | UART_SIGNAL_TXD_INV);
+            }
+
+            // config signal inversion (or not)
+            if (uart_set_line_inverse(uart_num, inversionMmask) != ESP_OK)
             {
                 ESP_LOGE(TAG, "Failed to set UART parameters configuration");
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

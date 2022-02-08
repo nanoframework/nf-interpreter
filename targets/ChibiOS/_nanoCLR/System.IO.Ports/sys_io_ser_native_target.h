@@ -25,6 +25,9 @@ typedef struct
 
     uint8_t WatchChar;
     uint8_t NewLineChar;
+
+    bool SignalLevelsInverted;
+
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
@@ -115,6 +118,7 @@ extern uint8_t Uart8_RxBuffer[];
         Uart##num##_PAL.RxRingBuffer.Initialize(Uart##num##_PAL.RxBuffer, rx_buffer_size);                             \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
+        Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
     }
 
 #else
@@ -136,6 +140,7 @@ extern uint8_t Uart8_RxBuffer[];
         Uart##num##_PAL.RxRingBuffer.Initialize(Uart##num##_PAL.RxBuffer, rx_buffer_size);                             \
         Uart##num##_PAL.WatchChar = 0;                                                                                 \
         Uart##num##_PAL.NewLineChar = 0;                                                                               \
+        Uart##num##_PAL.SignalLevelsInverted = false;                                                                  \
     }
 
 #endif
