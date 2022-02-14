@@ -741,7 +741,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
         // check if this is a long running operation
         palUart->IsLongRunning = IsLongRunningOperation_sys(
-            length,
+            count,
             (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
             (uint32_t &)estimatedDurationMiliseconds);
 
@@ -755,13 +755,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             // this is a long running operation and
 
             // push to the stack how many bytes bytes where buffered for Tx
-            stack.PushValueI4(length);
+            stack.PushValueI4(count);
 
             // store pointer
             palUart->TxBuffer = data;
 
             // set TX count
-            palUart->TxOngoingCount = length;
+            palUart->TxOngoingCount = count;
 
             // Create a task to handle UART event from ISR
             char task_name[16];
@@ -783,7 +783,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
             // Write data to ring buffer to start sending
             // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)data, length);
+            uart_write_bytes(uart_num, (const char *)data, count);
         }
     }
 
