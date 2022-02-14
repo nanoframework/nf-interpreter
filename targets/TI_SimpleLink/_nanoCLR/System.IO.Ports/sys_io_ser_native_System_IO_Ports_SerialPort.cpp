@@ -605,7 +605,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
         // check if this is a long running operation
         palUart->IsLongRunning = IsLongRunningOperation(
-            length,
+            count,
             (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
             (uint32_t &)estimatedDurationMiliseconds);
 
@@ -621,14 +621,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             if (stack.m_customState == 1)
             {
                 // push to the stack how many bytes bytes where buffered for TX
-                stack.PushValueI4(length);
+                stack.PushValueI4(count);
 
                 // set TX count
-                palUart->TxOngoingCount = length;
+                palUart->TxOngoingCount = count;
 
                 // Write data to start sending
                 // by design: don't bother checking the return value
-                UART2_write(palUart->UartDriver, (const void *)data, length, NULL);
+                UART2_write(palUart->UartDriver, (const void *)data, count, NULL);
 
                 // bump custom state so the read value above is pushed only once
                 stack.m_customState = 2;
@@ -641,7 +641,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
             // Write data to ring buffer to start sending
             // by design: don't bother checking the return value
-            UART2_write(palUart->UartDriver, (const void *)data, length, NULL);
+            UART2_write(palUart->UartDriver, (const void *)data, count, NULL);
         }
     }
 
@@ -661,7 +661,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         {
             // event occurred
             // get from the eval stack how many bytes were buffered to Tx
-            length = stack.m_evalStack[1].NumericByRef().s4;
+            count = stack.m_evalStack[1].NumericByRef().s4;
 
             // reset Tx ongoing count
             palUart->TxOngoingCount = 0;
@@ -677,14 +677,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
     if (palUart->IsLongRunning)
     {
-        // pop "length" heap block from stack
+        // pop "count" heap block from stack
         stack.PopValue();
 
         // pop "hbTimeout" heap block from stack
         stack.PopValue();
     }
 
-    stack.SetResult_U4(length);
+    stack.SetResult_U4(count);
 
     NANOCLR_NOCLEANUP();
 }

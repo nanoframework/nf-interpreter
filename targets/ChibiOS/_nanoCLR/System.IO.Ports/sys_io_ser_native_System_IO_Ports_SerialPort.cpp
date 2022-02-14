@@ -721,23 +721,23 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         data = dataBuffer->GetElement(offset);
 
         // push onto the eval stack how many bytes are being pushed to the UART
-        stack.PushValueI4(length - offset);
+        stack.PushValueI4(count);
 
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
-        cacheBufferFlush(data, length - offset);
+        cacheBufferFlush(data, count);
 
         // store pointer
         palUart->TxBuffer = data;
 
         // set TX ongoing count
-        palUart->TxOngoingCount = length - offset;
+        palUart->TxOngoingCount = count;
 
         // because the UART can be accessed from several threads need to get exclusive access to it
         uartAcquireBus(palUart->UartDriver);
 
         // start sending data (DMA will read from the ring buffer)
-        uartStartSend(palUart->UartDriver, length - offset, (uint8_t *)data);
+        uartStartSend(palUart->UartDriver, count, (uint8_t *)data);
 
         // bump custom state
         stack.m_customState = 2;
@@ -756,7 +756,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         {
             // event occurred
             // get from the eval stack how many bytes were buffered to Tx
-            length = stack.m_evalStack[1].NumericByRef().s4;
+            count = stack.m_evalStack[1].NumericByRef().s4;
 
             // done here
             break;
@@ -767,13 +767,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    // pop "length" heap block from stack
+    // pop "count" heap block from stack
     stack.PopValue();
 
     // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
-    stack.SetResult_U4(length);
+    stack.SetResult_U4(count);
 
     // null pointers and vars
     pThis = NULL;
