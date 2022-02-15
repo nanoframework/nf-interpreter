@@ -9,8 +9,10 @@ env:
 
 on:
   push:
-    branches: [ develop ]
-    paths: [ .devcontainer/sources/Dockerfile.AzureRTOS ]
+    branches:
+      - develop
+    paths:
+      - '**Dockerfile.AzureRTOS'
     
   workflow_dispatch:
 

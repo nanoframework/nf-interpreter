@@ -9,8 +9,10 @@ env:
 
 on:
   push:
-    branches: [ develop ]
-    paths: [ .devcontainer/sources/Dockerfile.ESP32 ]
+    branches:
+      - develop
+    paths:
+      - '**Dockerfile.ESP32'
     
   workflow_dispatch:
 

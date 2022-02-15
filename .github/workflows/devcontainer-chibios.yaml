@@ -9,8 +9,10 @@ env:
 
 on:
   push:
-    branches: [ develop ]
-    paths: [ .devcontainer/sources/Dockerfile.ChibiOS ]
+    branches:
+      - develop
+    paths:
+      - '**Dockerfile.ChibiOS'
     
   workflow_dispatch:
 
