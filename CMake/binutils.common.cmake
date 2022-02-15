@@ -352,11 +352,11 @@ function(nf_set_linker_options_and_file target linker_file_name)
 endfunction()
 
 # check if a directory exists
-# going throuhg the directory to find if it's not empty takes a lot of time because it sweeps all files
+# going through the directory to find if it's not empty takes a lot of time because it sweeps all files
 # simplifying this now to speed up local builds
 macro(nf_directory_exists_not_empty path pathExists)
 
-    if(EXISTS "${path}")
+    if(IS_DIRECTORY "${path}")
         set(${pathExists} TRUE)
     else()
         set(${pathExists} FALSE)
@@ -549,6 +549,45 @@ macro(nf_setup_target_build_common)
 
     # set compile options
     nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_CLR_EXTRA_COMPILE_OPTIONS})
+
+    if(USE_SECURITY_MBEDTLS_OPTION AND NOT RTOS_ESP32_CHECK)
+
+        # mbedTLS requires setting a compiler definition in order to pass a config file
+        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h\"")
+        
+        # need to add extra include directories for mbedTLS
+        target_include_directories(
+            mbedcrypto PUBLIC
+            ${CMAKE_SOURCE_DIR}/src/CLR/Include
+            ${CMAKE_SOURCE_DIR}/src/HAL/Include
+            ${CMAKE_SOURCE_DIR}/src/PAL
+            ${CMAKE_SOURCE_DIR}/src/PAL/Include
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR
+            ${TARGET_BASE_LOCATION}
+        )
+
+        # target_sources(mbedcrypto PUBLIC ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/ssl_generic.cpp)
+        # target_sources(mbedcrypto PRIVATE  ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/mbed_network.c)
+       
+        if(NOT RTOS_ESP32_CHECK)
+            # platform implementation of hardware random provider
+            target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
+        endif()
+
+        nf_set_compile_options(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+    endif()
 
     # set compile definitions
     nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_CLR_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME} )

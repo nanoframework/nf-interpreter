@@ -32,12 +32,12 @@ if("${TARGET_SERIES}" STREQUAL "CC32xx")
     list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sockets_simplelink.cpp")
     list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/ssl_simplelink.cpp")
 
-elseif("${TARGET_SERIES}" STREQUAL "CC13x2_26x2")
+elseif("${TARGET_SERIES}" STREQUAL "CC13X2")
     
-    list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/CC13x2_26x2Flash_BlockStorageInterface.c")
+    list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/CC13xx_26xxFlash_BlockStorageInterface.c")
 
-    list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_CC13x2_26x2FlashDriver.c")
-    # list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager_CC13x2_26x2.cpp")
+    list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_CC13xx_26xxFlashDriver.c")
+    # list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager_CC13xx_26xx.cpp")
 endif()
 
 # make var global

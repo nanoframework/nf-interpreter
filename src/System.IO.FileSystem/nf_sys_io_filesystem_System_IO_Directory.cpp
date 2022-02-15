@@ -231,15 +231,17 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 }
             }
         }
+
+        f_closedir(&currentDirectory);
     }
 
     NANOCLR_CLEANUP();
 
-    if (stringBuffer == NULL)
+    if (stringBuffer != NULL)
     {
         platform_free(stringBuffer);
     }
-    if (workingBuffer == NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }

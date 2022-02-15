@@ -7,6 +7,8 @@
 #ifndef DRIVERS_GPIO_DECL_H
 #define DRIVERS_GPIO_DECL_H
 
+#include <nanoPackStruct.h>
+
 #define GPIO_PIN_NONE 0xFFFFFFFF
 
 #define GPIO_ATTRIBUTE_NONE        0x00

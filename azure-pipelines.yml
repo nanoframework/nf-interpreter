@@ -1,8 +1,37 @@
 trigger:
   branches:
-    include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
+    include: 
+      - main
+      - develop*
+      - release-*
+      - refs/tags/*
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md", "README.zh-cn.md", ".github", ".devcontainer" ]
+    exclude:
+      - .clang-format
+      - .github_changelog_generator
+      - .gitignore
+      - .typo-ci.yml
+      - build.ps1
+      - CHANGELOG.md
+      - CMakeSettings.json
+      - CMakeSettings.SAMPLE.json
+      - LICENSE.md
+      - nf.props
+      - nfcore.vssettings
+      - README.md
+      - README.zh-cn.md
+      - RunCmd.bat
+      - sd1.bat
+      - SetNFRoot.bat
+      - startocd.bat
+      - .github/*
+      - .devcontainer/*
+      - .vscode/*
+      - .vs/*
+      - assets/*
+      - config/*
+      - install-scripts/*
+      - VisualStudioDevelopment/*
 
 pr:
   autoCancel: true
@@ -18,7 +47,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.3.2
+      ref: refs/tags/v4.4
       
 jobs:
 
@@ -348,7 +377,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_7_4_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -394,6 +423,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -409,7 +439,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -429,6 +459,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -449,7 +480,7 @@ jobs:
           -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.Devices.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
@@ -468,48 +499,9 @@ jobs:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
          BuildOptions: >-
-            -DTARGET_SERIES=ESP32
-            -DRTOS=ESP32
-            -DNF_FEATURE_DEBUGGER=ON
-            -DNF_FEATURE_RTC=ON
-            -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-            -DNF_SECURITY_MBEDTLS=ON
-            -DSUPPORT_ANY_BASE_CONVERSION=ON
-            -DNF_FEATURE_HAS_SDCARD=ON
-            -DAPI_System.IO.FileSystem=ON
-            -DAPI_System.Math=ON
-            -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-            -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-            -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-            -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-            -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-            -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-            -DAPI_System.Net=ON
-            -DAPI_Windows.Devices.Wifi=ON
-            -DAPI_Hardware.Esp32=ON
-            -DAPI_nanoFramework.Devices.OneWire=ON
-            -DAPI_nanoFramework.ResourceManager=ON
-            -DAPI_nanoFramework.System.Collections=ON
-            -DAPI_nanoFramework.System.Text=ON
-            -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-            -DAPI_nanoFramework.Graphics=ON
-            -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp"
-            -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-            -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-            -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-            -DAPI_System.Device.Dac=ON
-
-         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-         SDK_config:
-         IDF_Target: esp32
-         TargetName: ESP_WROVER_KIT
-         PackageName: ESP_WROVER_KIT
-      ESP32_LILYGO:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -525,7 +517,48 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
+          -DAPI_Hardware.Esp32=ON
+          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.ResourceManager=ON
+          -DAPI_nanoFramework.System.Collections=ON
+          -DAPI_nanoFramework.System.Text=ON
+          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
+          -DAPI_nanoFramework.Graphics=ON
+          -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp"
+          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
+          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
+          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
+          -DAPI_System.Device.Dac=ON
+
+         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+         SDK_config:
+         IDF_Target: esp32
+         TargetName: ESP_WROVER_KIT
+         PackageName: ESP_WROVER_KIT
+      ESP32_LILYGO:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: >-
+          -DTARGET_SERIES=ESP32
+          -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
+          -DNF_FEATURE_DEBUGGER=ON
+          -DNF_FEATURE_RTC=ON
+          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          -DNF_SECURITY_MBEDTLS=ON
+          -DSUPPORT_ANY_BASE_CONVERSION=ON
+          -DNF_FEATURE_HAS_SDCARD=ON
+          -DAPI_System.IO.FileSystem=ON
+          -DAPI_System.Math=ON
+          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
+          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
+          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
+          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
+          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
+          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Net=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -546,6 +579,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DESP32_USB_CDC=ON
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -560,7 +594,7 @@ jobs:
           -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
-          -DAPI_Windows.Devices.Wifi=ON
+          -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
@@ -577,7 +611,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_7_4_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -658,7 +692,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('NXP_1_7_4_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
@@ -726,9 +760,9 @@ jobs:
       TI_CC1352R1_LAUNCHXL_915:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
-        TargetSeries: 'cc13x2_26x2'
+        TargetSeries: 'CC13X2'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13x2_26x2
+          -DTARGET_SERIES=CC13X2
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=915
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
@@ -749,7 +783,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('TI_1_7_4_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
@@ -788,7 +822,7 @@ jobs:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_7_4_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -828,8 +862,6 @@ jobs:
         succeeded(),
         eq(variables['System.PullRequest.PullRequestId'], '')
       )
-
-  - template: azure-pipelines-templates/download-logo.yml@templates
 
   - task: NuGetCommand@2
     condition: succeeded()
@@ -950,7 +982,7 @@ jobs:
   - task: UseRubyVersion@0
     condition: succeeded()
     inputs:
-      versionSpec: '= 2.7' 
+      versionSpec: '= 3.0'
       addToPath: true
 
   # generate change log including future version

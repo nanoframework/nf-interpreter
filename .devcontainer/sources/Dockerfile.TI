@@ -47,15 +47,12 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc \
     && mkdir -p /usr/local/bin/titools
 
-# Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.26.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
-    && git clone --branch R0.14 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
     # you can't use the nanoFramework repository as it's Windows only
     # && git clone --branch 3.61.00.16 https://github.com/nanoframework/TI_XDCTools.git --depth 1 ./sources/TI_XDCTools \
-    && git clone --branch 5.10.00.48 https://github.com/nanoframework/SimpleLink_CC13x2_26x2_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
-    && git clone --branch 1.8.1 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
+    && git clone --branch 5.30.01.01 https://github.com/nanoframework/SimpleLink_CC13xx_26xx_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
+    && git clone --branch 1.10.0 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
     && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
 
 # Copy from our other container

@@ -9,12 +9,16 @@
 #include "lwIP_Sockets.h"
 #include "apps/sntp.h"
 #include <target_lwip_sntp_opts.h>
+#include "target_platform.h"
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
 //#define 	PRINT_NET_EVENT 	1
+
+// buffer with host name
+char hostName[18] = "nanodevice_";
 
 //
 // Call-back from LWIP on event
@@ -77,6 +81,24 @@ static void initialize_sntp()
     sntp_init();
 }
 
+static void compose_esp32_hostname()
+{
+    // compose host name with nanodevice and last 3 bytes of MAC address
+    // nanodevice_XXXXXX
+    uint8_t mac[6];
+    char *macPosition = hostName + 11;
+
+    // get MAC address
+    esp_efuse_mac_get_default(mac);
+
+    // copy over last 3 bytes of MAC address
+    for (int index = 3; index < 6; index++)
+    {
+        sprintf(macPosition, "%02X", (int)mac[index]);
+        macPosition += 2;
+    }
+}
+
 //
 // Network event loop handler
 //
@@ -84,6 +106,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 {
     esp_err_t result;
     int stationIndex;
+    esp_netif_t *espNetif;
     wifi_event_ap_staconnected_t *apConnectedEvent;
     wifi_event_ap_stadisconnected_t *apDisconnectedEvent;
     wifi_event_sta_disconnected_t *staDisconnectedEvent;
@@ -101,6 +124,12 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("WIFI_EVENT_STA_START\n");
 #endif
+
+                // get Netif for STA
+                espNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+
+                // set host name for STA
+                esp_netif_set_hostname(espNetif, hostName);
 
                 if (NF_ESP32_IsToConnect)
                 {
@@ -271,6 +300,12 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 #ifdef PRINT_NET_EVENT
                 ets_printf("ETHERNET_EVENT_START\n");
 #endif
+                // get Netif for ETH
+                espNetif = esp_netif_get_handle_from_ifkey("ETH_DEF");
+
+                // set host name for ETH
+                esp_netif_set_hostname(espNetif, hostName);
+
                 break;
 
             case ETHERNET_EVENT_STOP:
@@ -306,6 +341,9 @@ void nanoHAL_Network_Initialize()
 
     // initialize network interface
     ESP_ERROR_CHECK(esp_netif_init());
+
+    // set hostname
+    compose_esp32_hostname();
 
     // create the default event loop
     ESP_ERROR_CHECK(esp_event_loop_create_default());

@@ -45,15 +45,11 @@ RUN apt-get update \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.26.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+RUN git clone --branch mbedtls-2.28.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.14 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
-# Clone FreeRTOS and what is needed for ESP32
-RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
-    && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5 \
-    && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.3.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
@@ -68,7 +64,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 ENV IDF_PATH=/sources/esp-idf
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH:/$IDF_PATH/components/esptool_py/esptool:/$IDF_PATH/components/espcoredump:/$IDF_PATH/components/partition_table/:/$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-8.4.0/riscv32-esp-elf/bin
+ENV PATH=$PATH:$IDF_PATH/components/esptool_py/esptool:$IDF_PATH/components/espcoredump:$IDF_PATH/components/partition_table/:$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

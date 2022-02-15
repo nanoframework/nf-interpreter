@@ -48,6 +48,23 @@ uint64_t HAL_Time_ConvertFromSystemTime(const SYSTEMTIME *systemTime)
     return r;
 }
 
+/// <summary>
+/// Converts a SYSTEMTIME value to HAL time value, with extra ticks
+/// </summary>
+uint64_t HAL_Time_ConvertFromSystemTimeWithTicks(const SYSTEMTIME *systemTime, const uint32_t extraTicks)
+{
+    uint64_t r =
+        YEARS_TO_DAYS(systemTime->wYear) + MONTH_TO_DAYS(systemTime->wYear, systemTime->wMonth) + systemTime->wDay - 1;
+    r = (((((r * HOURS_TO_DAY) + systemTime->wHour) * MINUTES_TO_HOUR + systemTime->wMinute) * SECONDS_TO_MINUTES +
+          systemTime->wSecond) *
+             MILLISECONDS_TO_SECONDS +
+         systemTime->wMilliseconds) *
+            TIMEUNIT_TO_MILLISECONDS +
+        extraTicks;
+
+    return r;
+}
+
 bool HAL_Time_ToSystemTime(uint64_t time, SYSTEMTIME *systemTime)
 {
     uint32_t ytd = 0;

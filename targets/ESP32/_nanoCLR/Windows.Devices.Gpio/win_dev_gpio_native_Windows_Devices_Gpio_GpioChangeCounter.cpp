@@ -6,6 +6,7 @@
 
 #include "win_dev_gpio_native.h"
 #include <Core.h>
+#include <hal/pcnt_hal.h>
 
 // need to define this if not already defined by IDF
 #ifndef PCNT_STATUS_H_LIM_M

@@ -239,7 +239,7 @@
           "type": "BOOL"
         },
         {
-          "name": "API_Windows.Devices.Wifi",
+          "name": "API_System.Device.WiFi",
           "value": "True",
           "type": "BOOL"
         },

@@ -142,10 +142,24 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface
     //--//
 };
 
+struct Library_sys_net_native_nanoFramework_Networking_NetworkHelper
+{
+    static const int FIELD_STATIC___ipAddressAvailable = 0;
+    static const int FIELD_STATIC___networkReady = 1;
+    static const int FIELD_STATIC___requiresDateTime = 2;
+    static const int FIELD_STATIC___networkHelperStatus = 3;
+    static const int FIELD_STATIC___helperException = 4;
+    static const int FIELD_STATIC___workingNetworkInterface = 5;
+    static const int FIELD_STATIC___ipConfiguration = 6;
+    static const int FIELD_STATIC___helperInstanciated = 7;
+
+    //--//
+};
+
 struct Library_sys_net_native_System_Net_IPAddress
 {
-    static const int FIELD_STATIC__Any = 0;
-    static const int FIELD_STATIC__Loopback = 1;
+    static const int FIELD_STATIC__Any = 8;
+    static const int FIELD_STATIC__Loopback = 9;
 
     static const int FIELD__Address = 1;
     static const int FIELD___family = 2;
@@ -196,9 +210,9 @@ struct Library_sys_net_native_System_Net_NetworkInformation_NetworkAvailabilityE
 
 struct Library_sys_net_native_System_Net_NetworkInformation_NetworkChange
 {
-    static const int FIELD_STATIC__NetworkAddressChanged = 2;
-    static const int FIELD_STATIC__NetworkAvailabilityChanged = 3;
-    static const int FIELD_STATIC__NetworkAPStationChanged = 4;
+    static const int FIELD_STATIC__NetworkAddressChanged = 10;
+    static const int FIELD_STATIC__NetworkAvailabilityChanged = 11;
+    static const int FIELD_STATIC__NetworkAPStationChanged = 12;
 
     //--//
 };

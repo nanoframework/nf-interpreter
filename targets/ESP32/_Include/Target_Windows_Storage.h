@@ -13,8 +13,8 @@ extern "C"
 
 #include <esp_vfs.h>
 
-    bool Storage_InitSDCardSPI(char *vfsName, int maxFiles, int pin_Miso, int pin_Mosi, int pin_Clk, int pin_Cs);
-    bool Storage_InitSDCardMMC(char *vfsName, int maxFiles, bool bit1Mode);
+    bool Storage_MountMMC(bool bit1Mode, int driveIndex);
+    bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
     bool Storage_UnMountSDCard();
 
 #ifdef __cplusplus

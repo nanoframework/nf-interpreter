@@ -105,7 +105,6 @@ extern "C"
 /* mbed TLS modules */
 #define MBEDTLS_AESNI_C
 #define MBEDTLS_AES_C
-#define MBEDTLS_ARC4_C
 #define MBEDTLS_ASN1_PARSE_C
 #define MBEDTLS_ASN1_WRITE_C
 
@@ -113,9 +112,6 @@ extern "C"
 
 #define MBEDTLS_BIGNUM_C
 
-#define MBEDTLS_BLOWFISH_C
-
-#define MBEDTLS_CAMELLIA_C
 #define MBEDTLS_CCM_C
 
 #define MBEDTLS_CIPHER_C
@@ -135,8 +131,6 @@ extern "C"
 
 #define MBEDTLS_GCM_C
 
-#define MBEDTLS_HKDF_C
-
 #define MBEDTLS_HMAC_DRBG_C
 
 #define MBEDTLS_MD_C
@@ -155,8 +149,6 @@ extern "C"
 #define MBEDTLS_PKCS12_C
 
 #define MBEDTLS_PLATFORM_C
-
-#define MBEDTLS_POLY1305_C
 
 #define MBEDTLS_RIPEMD160_C
 
