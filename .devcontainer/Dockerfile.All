@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-all:v2.7
+FROM ghcr.io/nanoframework/dev-container-all:v2.8
