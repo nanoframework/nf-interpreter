@@ -16,7 +16,7 @@ list(APPEND System.Device.WiFi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Dev
 set(System.Device.WiFi_SRCS
 
     sys_dev_wifi_native.cpp
-    sys_dev_wifi_native_System_Device_WiFi_WifiAdapter.cpp
+    sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter.cpp
 )
 
 foreach(SRC_FILE ${System.Device.WiFi_SRCS})

@@ -202,7 +202,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     SDCard_SDInterfaceType cardType;
 
@@ -281,7 +281,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     SDCard_SDInterfaceType cardType;
 
@@ -331,7 +331,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     int cardDetectPin;
     CLR_RT_HeapBlock *pThis = stack.This();

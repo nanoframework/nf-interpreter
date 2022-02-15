@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.3.2
+      ref: refs/tags/v4.4
     
 # scheduled build
 schedules:
@@ -303,7 +303,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_7_4_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -350,6 +350,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -385,6 +386,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -420,6 +422,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DESP32_XTAL_FREQ_26=ON
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -456,6 +459,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -491,6 +495,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
@@ -512,6 +517,7 @@ jobs:
           -DAPI_nanoFramework.System.Text=ON
           -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
           -DAPI_System.Device.Dac=ON
+          -DAPI_Windows.Storage=ON
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
         SDK_config: sdkconfig.default_pico
         IDF_Target: esp32
@@ -524,6 +530,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32_S2
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -561,6 +568,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -602,6 +610,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -640,6 +649,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_RTC=ON
@@ -681,6 +691,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DTARGET_SERIAL_BAUDRATE=115200
           -DNF_FEATURE_RTC=ON
@@ -722,6 +733,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -762,6 +774,7 @@ jobs:
         BuildOptions: >-
           -DTARGET_SERIES=ESP32
           -DRTOS=ESP32
+          -DNF_TARGET_HAS_NANOBOOTER=OFF
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
@@ -789,8 +802,9 @@ jobs:
           -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
           -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
           -DAPI_System.Device.Dac=ON
+          -DAPI_nanoFramework.Device.Bluetooth=ON
         ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_rev3.esp32 
+        SDK_config: sdkconfig.default_ble_rev3.esp32
         IDF_Target: esp32
         TargetName: M5Core2
         PackageName: M5Core2
@@ -798,7 +812,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_7_4_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -862,7 +876,7 @@ jobs:
         PackageName: TI_CC1352R1_LAUNCHXL_868
         TargetSeries: 'cc13xx_26xx'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13xx_26xx
+          -DTARGET_SERIES=CC13X2
           -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
           -DSUPPORT_ANY_BASE_CONVERSION=OFF
@@ -877,13 +891,13 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
-          
+
         GccArm_Version:
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('TI_1_7_4_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'

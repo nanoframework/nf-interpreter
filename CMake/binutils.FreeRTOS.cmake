@@ -70,11 +70,6 @@ macro(nf_add_platform_packages)
             find_package(NF_Network REQUIRED QUIET)
             find_package(LWIP REQUIRED QUIET)
 
-            # security provider is mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED QUIET)
-            endif()
-
         endif()
 
     endif()

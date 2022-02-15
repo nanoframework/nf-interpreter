@@ -25,6 +25,7 @@ typedef struct
     uint16_t RxBytesToRead;
 
     bool IsLongRunning;
+    bool SignalLevelsInverted;
 
     uint8_t NewLineChar;
 } NF_PAL_UART;

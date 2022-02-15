@@ -109,7 +109,7 @@ HRESULT ConfigureAndStart(CLR_RT_HeapBlock *pThis, bool create, bool noStart)
         // Work out the duty Cycle for the current duty resolution
         dutyCycle = CalculateDuty(timerId, dutyCycle, polarity);
 
-        ledc_channel_config_t ledc_conf{pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0};
+        ledc_channel_config_t ledc_conf{pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, 0};
 
         // Configure Channel which will also start it
         IDF_ERROR(ledc_channel_config(&ledc_conf));
