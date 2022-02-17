@@ -89,9 +89,9 @@ macro(nf_add_platform_packages)
         # no packages for booter
     endif()
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-        # no packages for nanoCRL
+        # no packages for nanoCLR
     endif()
 
 endmacro()
@@ -102,7 +102,7 @@ macro(nf_add_platform_dependencies target)
     
     nf_add_common_dependencies(${target})
 
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
@@ -205,7 +205,7 @@ macro(nf_add_platform_sources target)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_sources(${target}.elf PUBLIC

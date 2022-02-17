@@ -91,7 +91,7 @@ macro(nf_add_common_dependencies target)
 
     endif()
     
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
     
         configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
@@ -132,7 +132,7 @@ macro(nf_add_common_include_directories target)
 
     endif()
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -193,7 +193,7 @@ macro(nf_add_common_sources)
 
     endif()
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${NFACS_TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_link_libraries(${NFACS_TARGET}.elf
