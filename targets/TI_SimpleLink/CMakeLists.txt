@@ -131,7 +131,7 @@ elseif( "${TARGET_SERIES}" STREQUAL "CC13X2" )
     endif()
 
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(TI_SL_CC13xx_26xx_SDK_TAG "5.30.01.01" CACHE INTERNAL "TI CC13xx_26xx SDK tag")
+    set(TI_SL_CC13xx_26xx_SDK_TAG "5.40.00.40" CACHE INTERNAL "TI CC13xx_26xx SDK tag")
 
     if(NO_TI_SL_CC13xx_26xx_SDK_SOURCE)
         # no TI SimpleLink CC13xx_26xx SDK source specified, download it from our repo
