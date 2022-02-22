@@ -777,7 +777,7 @@ jobs:
           -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
-
+          -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
 
   variables:
