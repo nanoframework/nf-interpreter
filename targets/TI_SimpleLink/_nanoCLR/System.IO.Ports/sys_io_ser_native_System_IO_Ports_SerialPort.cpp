@@ -713,8 +713,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     {
         NF_PAL_UART *palUart;
         uint8_t uartNum;
-        uint16_t txBufferSize;
-        uint16_t rxBufferSize;
+        int32_t bufferSize;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -738,10 +737,14 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         }
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
+
         // assign buffers, if not already done
         if (palUart->RxBuffer == NULL)
         {
-            palUart->RxBuffer = (uint8_t *)platform_malloc(UART1_TX_SIZE);
+            // alloc buffer memory
+            bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+
+            palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
             // check allocation
             if (palUart->RxBuffer == NULL)
@@ -750,8 +753,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             }
 
             // init buffer
-            palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART1_RX_SIZE);
+            palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
         }
+
 #endif
 
         // all the rest
@@ -760,6 +764,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         palUart->RxBytesToRead = 0;
         palUart->TxOngoingCount = 0;
     }
+
     NANOCLR_NOCLEANUP();
 }
 

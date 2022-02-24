@@ -855,6 +855,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart;
+    int32_t bufferSize;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -924,6 +925,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
             break;
     }
+
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
+
+    // sanity check
+    if (palUart->RxBuffer == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // init buffer
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
 
     // configure UART handlers
     palUart->Uart_cfg.txend1_cb = TxEnd1;
