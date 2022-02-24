@@ -201,7 +201,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
     // if clock frequency is unset use the maximum frequency
     if (clockHz == 0)
     {
-        clockHz = CPU_SPI_MaxClockFrequency(spiDeviceConfig.Spi_Bus);
+        CPU_SPI_MaxClockFrequency(spiDeviceConfig.Spi_Bus, &clockHz);
     }
 
     uint32_t flags =
@@ -480,12 +480,17 @@ void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GP
 }
 
 // Return SPI minimum clock frequency
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    (void)spi_bus;
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
     // TODO check what is minimum ( Min clock that can be configured on chip)
-    return 20000000 / 256;
+    *frequency = 20000000 / 256;
+
+    return S_OK;
 }
 
 // Return SPI maximum clock frequency
@@ -494,25 +499,34 @@ uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
 // If using native SPI pins then maximum is 80mhz
 // if SPI pins are routed over GPIO matrix then 40mhz half duplex 26mhz full
 
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
     bool directPin = false;
 
     GPIO_PIN clockPin, misoPin, mosiPin;
 
-    CPU_SPI_GetPins(spi_bus, clockPin, misoPin, mosiPin);
+    CPU_SPI_GetPins(spiBus, clockPin, misoPin, mosiPin);
 
     // Check if direct pins being used
     switch (clockPin)
     {
         case 14:
             if (misoPin == 12 && mosiPin == 13)
+            {
                 directPin = true;
+            }
             break;
 
         case 18:
             if (misoPin == 19 && mosiPin == 23)
+            {
                 directPin = true;
+            }
             break;
 
         default:
@@ -521,10 +535,12 @@ uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
 
     if (directPin)
     {
-        return MAX_CLOCK_FREQUENCY_NATIVE;
+        *frequency = MAX_CLOCK_FREQUENCY_NATIVE;
     }
 
-    return MAX_CLOCK_FREQUENCY_GPIO_HALF;
+    *frequency = MAX_CLOCK_FREQUENCY_GPIO_HALF;
+
+    return S_OK;
 }
 
 //

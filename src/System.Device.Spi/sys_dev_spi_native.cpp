@@ -12,9 +12,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeChipSelectLineCount___I4,
     Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMaxClockFrequency___I4,
     Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo::NativeMinClockFrequency___I4,
     NULL,
@@ -63,9 +60,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi =
 {
     "System.Device.Spi",
-    0x48031DC5,
+    0x3F6E2A7E,
     method_lookup,
-    { 100, 1, 0, 0 }
+    { 100, 1, 1, 0 }
 };
 
 // clang-format on
