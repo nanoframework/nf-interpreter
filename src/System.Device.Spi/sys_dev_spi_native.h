@@ -31,7 +31,6 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiBusInfo
 {
     static const int FIELD___controllerId = 1;
 
-    NANOCLR_NATIVE_DECLARE(NativeChipSelectLineCount___I4);
     NANOCLR_NATIVE_DECLARE(NativeMaxClockFrequency___I4);
     NANOCLR_NATIVE_DECLARE(NativeMinClockFrequency___I4);
 
@@ -73,4 +72,4 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiDevice
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi;
 
-#endif //SYS_DEV_SPI_NATIVE_H
+#endif // SYS_DEV_SPI_NATIVE_H
