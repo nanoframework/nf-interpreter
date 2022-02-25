@@ -566,9 +566,7 @@ macro(nf_setup_target_build_common)
             ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
-            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR
-            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}
-            ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR
+            ${TARGET_BASE_LOCATION}/nanoCLR
             ${TARGET_BASE_LOCATION}
         )
 
