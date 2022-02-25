@@ -40,8 +40,7 @@ static THD_FUNCTION(OneWireFindNextWorkingThread, arg)
     chThdExit(deviceFound);
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -279,8 +278,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
