@@ -4,7 +4,7 @@
 //
 
 #include "nf_devices_onewire_native_target.h"
-#include "target_nf_devices_onewire_config.h"
+#include <target_nf_devices_onewire_config.h>
 #include <Esp32_DeviceMapping.h>
 
 // struct for working threads
@@ -15,9 +15,6 @@ static uint8_t LastDiscrepancy;
 static uint8_t LastFamilyDiscrepancy;
 static uint8_t LastDevice;
 static uint8_t SerialNum[8];
-
-// UART to use for 1-Wire comm
-static uart_port_t UartDriver;
 
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
@@ -37,8 +34,9 @@ HRESULT oneWireInit()
     };
 
     // get GPIO pins configured for UART assigned to 1-Wire
-    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Tx);
-    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Rx);
+    // need to subtract one to get the correct index of UART in mapped device pins
+    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Tx);
+    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Rx);
 
     // check if TX, RX pins have been previously set
     if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
@@ -75,7 +73,7 @@ HRESULT oneWireInit()
 void oneWireStop()
 {
     // stop UART
-    uart_driver_delete(UartDriver);
+    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
 
     // driver is stopped
     DriverState = ONEWIRE_STOP;
@@ -87,15 +85,15 @@ uint8_t oneWireTouchReset(void)
     uint8_t presence;
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
     // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
-    uart_set_baudrate(UartDriver, 9600);
+    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 9600);
 
-    uart_write_bytes(UartDriver, (const char *)&reset, 1);
-    uart_read_bytes(UartDriver, &presence, 1, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&reset, 1);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_RATE_MS);
 
     // set UART baud rate to 115200bps (normal comm is performed at this baud rate)
-    uart_set_baudrate(UartDriver, 115200);
+    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 115200);
 
     // check for presence pulse
     return (presence != reset);
@@ -108,10 +106,10 @@ bool oneWireTouchBit(bool sendbit)
     uint8_t reply;
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(UartDriver, (const char *)&write, 1);
-    uart_read_bytes(UartDriver, &reply, 1, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&write, 1);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_RATE_MS);
 
     // interpret 1-Wire reply
     return (reply == IWIRE_RD);
@@ -134,10 +132,10 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     };
 
     // flush DMA buffer to ensure cache coherency
-    uart_flush(UartDriver);
+    uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(UartDriver, (const char *)writeBuffer, 8);
-    uart_read_bytes(UartDriver, readBuffer, 8, 20 / portTICK_RATE_MS);
+    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)writeBuffer, 8);
+    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_RATE_MS);
 
     // reset send mask to interpret the reply
     send_mask = 0x01;
