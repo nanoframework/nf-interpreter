@@ -368,7 +368,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -404,7 +404,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -441,7 +441,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -477,7 +477,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -591,7 +591,7 @@ jobs:
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Devices.OneWire=ON
+          -DAPI_nanoFramework.Device.OneWire=ON
           -DAPI_nanoFramework.ResourceManager=ON
           -DAPI_nanoFramework.System.Collections=ON
           -DAPI_nanoFramework.System.Text=ON
