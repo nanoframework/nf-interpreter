@@ -16,7 +16,7 @@ list(APPEND nanoFramework.Device.OneWire_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/na
 # source files
 set(nanoFramework.Device.OneWire_SRCS
 
-    nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster.cpp
+    nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost.cpp
     nf_dev_onewire.cpp
 
     target_nf_dev_onewire_config.cpp

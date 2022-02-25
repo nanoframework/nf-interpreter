@@ -10,13 +10,13 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoHAL.h>
 
-struct Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster
+struct Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost
 {
     static const int FIELD_STATIC__s_opened = 0;
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___serialNumber = 2;
-    static const int FIELD___disposedValue = 3;
+    static const int FIELD___disposed = 3;
 
     NANOCLR_NATIVE_DECLARE(TouchReset___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(TouchBit___BOOLEAN__BOOLEAN);

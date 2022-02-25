@@ -495,7 +495,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
 
         // get a pointer to the serial number field in the OneWireController instance
         CLR_RT_HeapBlock_Array *serialNumberField =
-            pThis[Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FIELD___serialNumber]
+            pThis[Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FIELD___serialNumber]
                 .DereferenceArray();
 
         _ASSERTE(serialNumberField->m_numOfElements == 8);
@@ -515,7 +515,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     return S_OK;
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchReset___BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -525,7 +525,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchBit___BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchBit___BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -535,7 +535,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -544,7 +544,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -556,7 +556,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Write
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::ReadByte___U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::ReadByte___U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -565,7 +565,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::ReadB
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -575,7 +575,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindF
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     (void)stack;
@@ -587,7 +587,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindN
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::NativeDispose___VOID(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
     CLR_RT_StackFrame &stack)
 {
     (void)stack;
@@ -599,7 +599,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Nativ
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::NativeInit___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 

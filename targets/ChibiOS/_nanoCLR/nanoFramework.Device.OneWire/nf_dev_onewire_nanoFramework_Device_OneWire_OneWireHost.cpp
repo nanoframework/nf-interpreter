@@ -40,7 +40,7 @@ static THD_FUNCTION(OneWireFindNextWorkingThread, arg)
     chThdExit(deviceFound);
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchReset___BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -51,7 +51,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchBit___BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchBit___BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -63,7 +63,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -74,7 +74,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Touch
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -85,7 +85,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Write
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::ReadByte___U1(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::ReadByte___U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -95,7 +95,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::ReadB
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -144,7 +144,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindF
 
         // non-blocking wait allowing other threads to run while we wait for the 1-Wire operations to complete
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_OneWireMaster, eventResult));
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_OneWireHost, eventResult));
     }
 
     if (eventResult)
@@ -187,7 +187,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindF
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -236,7 +236,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindN
 
         // non-blocking wait allowing other threads to run while we wait for the 1-Wire operations to complete
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_OneWireMaster, eventResult));
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_OneWireHost, eventResult));
     }
 
     if (eventResult)
@@ -279,7 +279,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::FindN
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::NativeDispose___VOID(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
     CLR_RT_StackFrame &stack)
 {
     (void)stack;
@@ -291,7 +291,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::Nativ
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireMaster::NativeInit___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
