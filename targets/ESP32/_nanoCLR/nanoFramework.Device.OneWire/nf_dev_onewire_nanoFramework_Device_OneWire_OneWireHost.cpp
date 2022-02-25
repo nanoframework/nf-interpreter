@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_devices_onewire_native_target.h"
-#include <target_nf_devices_onewire_config.h>
+#include "nf_dev_onewire_target.h"
+#include <target_nf_dev_onewire_config.h>
 #include <Esp32_DeviceMapping.h>
 
 // struct for working threads
@@ -448,17 +448,6 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     TaskHandle_t task;
     HRESULT result;
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        result = oneWireInit();
-
-        if (result != S_OK)
-        {
-            return result;
-        }
-    }
-
     // set an infinite timeout to wait forever for the operation to complete
     // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
     hbTimeout.SetInteger((CLR_INT64)-1);
@@ -506,8 +495,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
 
         // get a pointer to the serial number field in the OneWireController instance
         CLR_RT_HeapBlock_Array *serialNumberField =
-            pThis[Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-                      FIELD___serialNumber]
+            pThis[Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FIELD___serialNumber]
                 .DereferenceArray();
 
         _ASSERTE(serialNumberField->m_numOfElements == 8);
@@ -527,91 +515,58 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     return S_OK;
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchReset___BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        NANOCLR_CHECK_HRESULT(oneWireInit());
-    }
 
     stack.SetResult_Boolean(oneWireTouchReset());
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchBit___BOOLEAN__BOOLEAN(
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchBit___BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        NANOCLR_CHECK_HRESULT(oneWireInit());
-    }
 
     stack.SetResult_Boolean(oneWireTouchBit(stack.Arg1().NumericByRefConst().u1 != 0));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::TouchByte___U1__U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        NANOCLR_CHECK_HRESULT(oneWireInit());
-    }
-
     stack.SetResult_U1(oneWireTouchByte((uint8_t)stack.Arg1().NumericByRefConst().u1));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::WriteByte___U1__U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::WriteByte___U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     uint8_t sendbyte;
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        NANOCLR_CHECK_HRESULT(oneWireInit());
-    }
-
     sendbyte = (uint8_t)stack.Arg1().NumericByRefConst().u1;
     stack.SetResult_U1(oneWireTouchByte(sendbyte) == sendbyte ? TRUE : FALSE);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::ReadByte___U1(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::ReadByte___U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    // ensure the device is initialized
-    if (DriverState != ONEWIRE_READY)
-    {
-        NANOCLR_CHECK_HRESULT(oneWireInit());
-    }
-
     stack.SetResult_U1(oneWireTouchByte(0xFF));
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-    FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFirstDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -620,12 +575,35 @@ HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireC
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_onewire_native_nanoFramework_Devices_OneWire_OneWireController::
-    FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
+    (void)stack;
+
     NANOCLR_HEADER();
 
     NANOCLR_CHECK_HRESULT(FindOneDevice(stack, false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
+    CLR_RT_StackFrame &stack)
+{
+    (void)stack;
+
+    NANOCLR_HEADER();
+
+    oneWireStop();
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_CHECK_HRESULT(oneWireInit());
 
     NANOCLR_NOCLEANUP();
 }
