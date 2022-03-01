@@ -4,19 +4,6 @@
 #
 
 include(FetchContent)
-FetchContent_GetProperties(mbedtls)
-
-# set include directories for nanoFramework network
-list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
-list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
-list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Lwip)
-list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL)
-list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
-
-if(USE_SECURITY_MBEDTLS_OPTION)
-    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
-    list(APPEND NF_Network_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
-endif()
 
 #############################
 # network layer from NetX Duo
@@ -153,6 +140,9 @@ if(RTOS_AZURERTOS_CHECK)
         # need this name in lower case
         string(TOLOWER "${NETX_DRIVER}" NETX_DRIVER_1)
 
+        SET(NX_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
+        SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
+
         # add includes too
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
 
@@ -179,9 +169,11 @@ if(RTOS_AZURERTOS_CHECK)
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX
 
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/CubeMX
+                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo
 
                 # drivers
                 ${NX_DRIVER_LOCATION}
+                ${NX_DRIVER_LOCATION}/..
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_DRIVER_1}
@@ -293,6 +285,8 @@ if(RTOS_AZURERTOS_CHECK)
 # network layer from lwIP
 else()
 
+    FetchContent_GetProperties(mbedtls)
+
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
@@ -301,6 +295,7 @@ else()
 
     if(USE_SECURITY_MBEDTLS_OPTION)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
+        list(APPEND NF_Network_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
     endif()
 
     if(USE_ENC28J60_DRIVER_OPTION)
