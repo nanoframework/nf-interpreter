@@ -25,15 +25,19 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMaxCloc
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
+    int32_t controllerID;
+    int32_t maxClockFrequency;
 
-        int32_t controllerID =
-            pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-        stack.SetResult_I4(CPU_SPI_MaxClockFrequency(controllerID));
-    }
+    controllerID =
+        pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+
+    NANOCLR_CHECK_HRESULT(CPU_SPI_MaxClockFrequency(controllerID, &maxClockFrequency));
+
+    stack.SetResult_I4(maxClockFrequency);
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -41,14 +45,19 @@ HRESULT Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::NativeMinCloc
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
 
-        int32_t controllerID =
-            pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+    int32_t controllerID;
+    int32_t minClockFrequency;
 
-        stack.SetResult_I4(CPU_SPI_MinClockFrequency(controllerID));
-    }
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    controllerID =
+        pThis[Library_win_dev_spi_native_Windows_Devices_Spi_SpiBusInfo::FIELD___controllerId].NumericByRef().s4;
+
+    NANOCLR_CHECK_HRESULT(CPU_SPI_MinClockFrequency(controllerID, &minClockFrequency));
+
+    stack.SetResult_I4(minClockFrequency);
+
     NANOCLR_NOCLEANUP();
 }

@@ -70,7 +70,7 @@ endif()
 # optionally add custom logic in the last section of this CMakeLists.txt 
 # to perform custom add_subdirectory() actions.
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/${RTOS})
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/${RTOS})
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
     string(TOUPPER ${RTOS} RTOS_UPPERCASE)
     set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
@@ -511,14 +511,14 @@ endif()
 # for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
-if( API_nanoFramework.Devices.OneWire OR
+if( API_nanoFramework.Device.OneWire OR
     API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports)
 
-    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 
 else()
-    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 endif()
 
 if( API_System.Net)
@@ -537,11 +537,6 @@ if( API_System.Net)
         set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
     endif()
 
-   if(API_Windows.Devices.Wifi)
-        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
-    else()
-        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
-    endif()
 else()
     # need to force SNTP to OFF
     set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")
@@ -619,10 +614,10 @@ else()
 endif()
 
 
-if(API_nanoFramework.Devices.OneWire)
-    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+if(API_nanoFramework.Device.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 else()
-    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################
@@ -651,7 +646,7 @@ endif()
 #################################################################
 
 # include nanoFramework.Runtime.Events API
-if( API_nanoFramework.Devices.OneWire OR 
+if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR
@@ -852,7 +847,7 @@ elseif(RTOS_ESP32_CHECK)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
@@ -864,7 +859,7 @@ elseif(RTOS_ESP32_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
 
             # set target base location
             set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
@@ -900,7 +895,7 @@ else()
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
 
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
@@ -910,7 +905,7 @@ else()
         message(STATUS "${TARGET_BASE_LOCATION}")
 
     # try to find board in the Community targets folder
-    elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
+    elseif(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
             
         # set flag for this being a community board
         set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")

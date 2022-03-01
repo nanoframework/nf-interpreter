@@ -131,6 +131,7 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
+    nf_rt_native_System_Environment.cpp
     
     # Core stubs
     RPC_stub.cpp

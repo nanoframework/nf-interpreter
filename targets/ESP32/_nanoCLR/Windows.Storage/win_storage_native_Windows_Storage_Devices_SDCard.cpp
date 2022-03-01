@@ -9,54 +9,14 @@
 #include <target_platform.h>
 #include <Esp32_DeviceMapping.h>
 
-#if defined(HAL_USE_SDC)
-
-bool Storage_MountMMC(bool bit1Mode, int driveIndex = 0)
-{
-    char mountPoint[] = INDEX0_DRIVE_LETTER;
-
-    // Change fatfs drive letter to mount point  D: -> /D
-    mountPoint[1] = mountPoint[0] + driveIndex;
-    mountPoint[0] = '/';
-
-    // Try mounting
-    if (!Storage_InitSDCardMMC(mountPoint, SDC_MAX_OPEN_FILES, bit1Mode))
-    {
-        return false;
-    }
-    return true;
-}
-
-bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex = 0)
-{
-    char mountPoint[] = INDEX0_DRIVE_LETTER;
-
-    // Change fatfs drive letter to mount point  D: -> /D for ESP32 VTFS
-    mountPoint[1] = mountPoint[0] + driveIndex;
-    mountPoint[0] = '/';
-
-    int mosiPin = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 0);
-    int misoPin = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 1);
-    int clockPin = Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spiBus, 2);
-
-    // Try mounting
-    if (!Storage_InitSDCardSPI(mountPoint, SDC_MAX_OPEN_FILES, misoPin, mosiPin, clockPin, CSPin))
-    {
-        return false;
-    }
-    return true;
-}
-
-#endif
-
 HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountMMCNative___STATIC__VOID__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
     bool bit1Mode = stack.Arg0().NumericByRef().s4;
-    if (!Storage_MountMMC(bit1Mode))
+    if (!Storage_MountMMC(bit1Mode, 0))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
@@ -72,7 +32,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
     // Get passed SPi bus number 1 or 2
     int spiBus = stack.Arg0().NumericByRef().s4;
 
@@ -82,7 +42,11 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
     // Get current Gpio pins used by SPI device
     spiBus--; // Spi devnumber 0 & 1
 
-    if (!Storage_MountSpi(spiBus, CSPin))
+    // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
+    // Ignore errors as it may already been opened by managed code if trying to share bus
+    CPU_SPI_Initialize(spiBus);
+
+    if (!Storage_MountSpi(spiBus, CSPin, 0))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }
@@ -100,7 +64,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative
     NANOCLR_HEADER();
     (void)stack;
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     // Unmount SPI device
     if (!Storage_UnMountSDCard())

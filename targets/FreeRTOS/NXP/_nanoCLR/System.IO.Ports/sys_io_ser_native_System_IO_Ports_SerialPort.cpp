@@ -182,6 +182,29 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -560,17 +583,17 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         data = dataBuffer->GetElement(offset);
 
         // push onto the eval stack how many bytes are being pushed to the UART
-        stack.PushValueI4(length - offset);
+        stack.PushValueI4(count);
 
         // store pointer
         palUart->TxBuffer = data;
 
         // set TX ongoing count
-        palUart->TxOngoingCount = length - offset;
+        palUart->TxOngoingCount = count;
 
         // Set transfer structure to nano ring buffer
         palUart->xfer.data = (uint8_t *)palUart->TxBuffer;
-        palUart->xfer.dataSize = length;
+        palUart->xfer.dataSize = count;
 
         // Notify task that we want to transmit data.
         xTaskNotify(palUart->xWTaskToNotify, 0x01, eSetBits);
@@ -589,7 +612,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         {
             // event occurred
             // get from the eval stack how many bytes were buffered to TX
-            length = stack.m_evalStack[1].NumericByRef().s4;
+            count = stack.m_evalStack[1].NumericByRef().s4;
 
             // reset TX ongoing count
             palUart->TxOngoingCount = 0;
@@ -604,13 +627,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    // pop "length" heap block from stack
+    // pop "count" heap block from stack
     stack.PopValue();
 
     // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
-    stack.SetResult_U4(length);
+    stack.SetResult_U4(count);
 
     // null pointers and vars
     pThis = NULL;
@@ -666,6 +689,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     LPUART_Type *base = NULL;
     NF_PAL_UART *palUart = NULL;
     BaseType_t xReturned;
+    int32_t bufferSize;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -683,14 +707,17 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart = Uart_PAL[uartNum];
 
     // Allocate memory for RX circular buffer
-    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_RX_BUFER_SIZE * sizeof(uint8_t));
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize * sizeof(uint8_t));
+
     if (palUart->RxBuffer == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
     }
 
     // Initialize RX buffer
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_RX_BUFER_SIZE);
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
     palUart->RxBytesToRead = 0;
 
     // now all the rest

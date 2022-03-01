@@ -55,7 +55,7 @@
           "STM32_CMSIS_CORE_SOURCE": "<path-to-stm32-cmsis-core-mind-the-forward-slash>",
           "STM32_WIFI_SUPPORT": "OFF-default-ON-to-enable-wifi-support-for-STM32",
           "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
-          "TI_SL_CC13x2_26x2_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13x2_26x2-SDK-source-mind-the-forward-slash>",
+          "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
           "RADIO_FREQUENCY": "<radio-frequency-for-target-with-configurable-radio-valid-values-868-915>",
@@ -100,7 +100,7 @@
           "NF_SECURITY_MBEDTLS": "OFF-default-ON-to-add-network-security-from-mbedTLS",
           "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
           "API_nanoFramework.Devices.Can": "OFF-default-ON-to-add-this-API",
-          "API_nanoFramework.Devices.OneWire": "OFF-default-ON-to-add-this-API",
+          "API_nanoFramework.Device.OneWire": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.ResourceManager": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Collections": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Text": "OFF-default-ON-to-add-this-API",
@@ -123,7 +123,8 @@
           "API_Hardware.Stm32": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.TI.EasyLink": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.Hardware.Esp32.Rmt": "OFF-default-ON-to-add-this-API",
-          "API_nanoFramework.Device.Bluetooth": "OFF-default-ON-to-add-this-API"
+          "API_nanoFramework.Device.Bluetooth": "OFF-default-ON-to-add-this-API",
+          "API_System.Device.WiFi": "OFF-default-ON-to-add-this-API"
         }
       }
     }

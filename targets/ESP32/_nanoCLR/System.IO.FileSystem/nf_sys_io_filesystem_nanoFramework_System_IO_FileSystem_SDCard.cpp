@@ -5,14 +5,6 @@
 
 #include "nf_sys_io_filesystem.h"
 
-// these live at targets\FreeRTOS_ESP32\_nanoCLR\Windows.Storage\win_storage_native_Windows_Storage_Devices_SDCard.cpp
-// TODO move code here after removing Windows.Storage.Devices
-bool Storage_MountMMC(bool bit1Mode, int driveIndex);
-bool Storage_MountSpi(int spiBus, uint32_t CSPin, int driveIndex);
-bool Storage_InitSDCardSPI(char *vfsName, int maxFiles, int pin_Miso, int pin_Mosi, int pin_Clk, int pin_Cs);
-bool Storage_InitSDCardMMC(char *vfsName, int maxFiles, bool bit1Mode);
-bool Storage_UnMountSDCard();
-
 StorageEventType GetStorageEventType(bool pinState)
 {
     // Low means card inserted
@@ -210,7 +202,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     SDCard_SDInterfaceType cardType;
 
@@ -251,6 +243,10 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
             // Get current Gpio pins used by SPI device
             spiBus--; // Spi devnumber 0 & 1
 
+            // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
+            // Ignore errors as it may already been opened by managed code if trying to share bus
+            CPU_SPI_Initialize(spiBus);
+
             // Try mount twice
             if (!Storage_MountSpi(spiBus, chipSelectPin, 0))
             {
@@ -285,7 +281,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     SDCard_SDInterfaceType cardType;
 
@@ -335,7 +331,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 {
     NANOCLR_HEADER();
 
-#if defined(HAL_USE_SDC)
+#if (HAL_USE_SDC == TRUE)
 
     int cardDetectPin;
     CLR_RT_HeapBlock *pThis = stack.This();

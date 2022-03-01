@@ -23,7 +23,7 @@ if(ESP32_IDF_PATH)
 endif()
 
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.3.1" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo
@@ -39,23 +39,20 @@ if(NO_ESP32_IDF_PATH)
 else()
     # ESP32 IDF source was specified
 
-    # sanity check if source path exists
-    if(EXISTS "${ESP32_IDF_PATH}/")
-        message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
+    message(STATUS "ESP32 IDF v${ESP32_IDF_TAG} source from: ${ESP32_IDF_PATH}")
 
-        FetchContent_Declare(
-            esp32_idf
-            SOURCE_DIR ${ESP32_IDF_PATH}
-        )
-
-    else()
-        message(FATAL_ERROR "Couldn't find ESP32 IDF source at ${ESP32_IDF_PATH}/")
-    endif()
+    FetchContent_Declare(
+        esp32_idf
+        SOURCE_DIR ${ESP32_IDF_PATH}
+    )
 
 endif()
 
 FetchContent_GetProperties(esp32_idf)
-FetchContent_Populate(esp32_idf)
+if(NOT esp32_idf_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(esp32_idf)
+endif()
 
 # add IDF CMake dir to modules path
 list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
@@ -86,62 +83,8 @@ endif()
 
 # target folder was added in main CMakeList
 
-# if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
-
-    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDTLS_SOURCE TRUE)
-
-    if(MBEDTLS_SOURCE)
-        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
-            set(NO_MBEDTLS_SOURCE FALSE)
-        endif()
-    endif()
-
-    # set tag for currently supported version
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
-
-    # set options for mbed TLS
-    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
-
-    if(NO_MBEDTLS_SOURCE)
-        # no mbed TLS source specified, download it from it's repo
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
-
-        FetchContent_Declare(
-            mbedtls
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
-            GIT_TAG ${MBEDTLS_GIT_TAG}
-        )
-
-    else()
-        # mbedTLS source was specified
-        # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
-
-        # sanity check is source path exists
-        if(EXISTS ${MBEDTLS_SOURCE}/)
-
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
-            
-            FetchContent_Declare(
-                mbedtls
-                SOURCE_DIR ${MBEDTLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
-        endif()
-
-    endif()
-
-    FetchContent_GetProperties(mbedtls)
-    FetchContent_Populate(mbedtls)
-
-    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
-    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-endif()
+# force this to ON
+set(NF_SECURITY_MBEDTLS ON CACHE INTERNAL "mbedTLS must be ON for IDF build")
 
 # add platform dirs
 add_subdirectory(_common)

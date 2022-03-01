@@ -160,7 +160,7 @@ void CLR_HW_Hardware::ProcessActivity()
 
     if (events & SYSTEM_EVENT_FLAG_ONEWIRE_MASTER)
     {
-        eventsCLR |= Event_OneWireMaster;
+        eventsCLR |= Event_OneWireHost;
     }
 
     if (events & SYSTEM_EVENT_FLAG_STORAGE_IO)

@@ -207,9 +207,9 @@ bool ssl_generic_init_internal(
             certificate = (const char *)deviceCert->Certificate;
             certLength = deviceCert->CertificateSize;
 
-            // clear private keys, just in case
-            privateKey = NULL;
-            privateKeyLength = 0;
+            // the private key is also part of the device certificate
+            privateKey = (const uint8_t *)deviceCert->Certificate;
+            privateKeyLength = deviceCert->CertificateSize;
         }
     }
 
@@ -287,7 +287,7 @@ bool ssl_generic_init_internal(
 
     // setup debug stuff
     // only required if output debug is enabled in mbedtls_config.h
-#ifdef MBEDTLS_DEBUG_C
+#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
     mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
     mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
 #endif

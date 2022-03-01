@@ -229,7 +229,7 @@ uint32_t CPU_SPI_PortsMap()
 }
 
 // Return SPI minimum clock frequency
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spi_bus, int32_t *frequency)
 {
     (void)spi_bus;
 
@@ -238,7 +238,7 @@ uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
 }
 
 // Return SPI maximum clock frequency
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spi_bus, int32_t *frequency)
 {
     return 40000000;
 }

@@ -4,7 +4,7 @@
 #
 
 include(FetchContent)
-FetchContent_GetProperties(simplelinkcc13x2_26x2sdk)
+FetchContent_GetProperties(simplelinkcc13xx_26xxsdk)
 
 ###################################################################################################################################
 # WHEN ADDING A NEW series add the respective name to the list below along with the CMake files with GCC options and source files
@@ -12,7 +12,7 @@ FetchContent_GetProperties(simplelinkcc13x2_26x2sdk)
 
 # check if the series name is supported 
 
-set(TI_SIMPLELINK_SUPPORTED_SERIES "CC13x2_26x2" "CC32xx" CACHE INTERNAL "supported TI series names")
+set(TI_SIMPLELINK_SUPPORTED_SERIES "CC13X2" "CC32xx" CACHE INTERNAL "supported TI series names")
 
 list(FIND TI_SIMPLELINK_SUPPORTED_SERIES ${TARGET_SERIES} TARGET_SERIES_NAME_INDEX)
 if(TI_SIMPLELINK_SUPPORTED_SERIES EQUAL -1)
@@ -31,5 +31,5 @@ include(TI_SimpleLink_${TARGET_SERIES}_sources)
 include(TI_SimpleLink_${TARGET_SERIES}_GCC_options)
 
 # includes for TI_RTOS
-list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages)
-list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13x2_26x2sdk_SOURCE_DIR}/kernel/tirtos/packages/ti/sysbios)
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages)
+list(APPEND TI_SimpleLink_INCLUDE_DIRS ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/ti/sysbios)

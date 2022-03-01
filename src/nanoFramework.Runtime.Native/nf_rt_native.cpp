@@ -6,6 +6,7 @@
 
 #include "nf_rt_native.h"
 
+// clang-format off
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
@@ -35,12 +36,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::get_Platform___STATIC__STRING,
     NULL,
     Library_nf_rt_native_nanoFramework_Runtime_Native_SystemInfo::GetNativeFloatingPointSupport___STATIC__U1,
+    Library_nf_rt_native_System_Environment::get_TickCount64___STATIC__I8,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Runtime_Native =
 {
     "nanoFramework.Runtime.Native",
-    0x2307A8F3,
+    0x109F6F22,
     method_lookup,
-    { 100, 0, 8, 0 }
+    { 100, 0, 9, 0 }
 };
+
+// clang-format on
