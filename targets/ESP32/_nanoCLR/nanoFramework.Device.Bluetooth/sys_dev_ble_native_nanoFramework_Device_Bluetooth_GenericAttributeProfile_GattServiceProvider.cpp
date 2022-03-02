@@ -196,13 +196,14 @@ void AssignDescriptor(ble_gatt_dsc_def *pDsc, CLR_RT_HeapBlock *pPfItem, ble_uui
 
     pDsc->att_flags = BLE_ATT_F_READ;
 
-    if ( pPfItem[GattLocalDescriptor::FIELD__WriteRequested].Dereference() != NULL )
+    if (pPfItem[GattLocalDescriptor::FIELD__WriteRequested].Dereference() != NULL)
     {
         pDsc->att_flags |= BLE_ATT_F_WRITE;
 
         // Write protection - Authentication & Encryption
-        GattProtectionLevel writeProtectLevel =  (GattProtectionLevel)pPfItem[GattLocalDescriptor::FIELD___writeProtectionLevel].NumericByRef().u4;
-        switch(writeProtectLevel)
+        GattProtectionLevel writeProtectLevel =
+            (GattProtectionLevel)pPfItem[GattLocalDescriptor::FIELD___writeProtectionLevel].NumericByRef().u4;
+        switch (writeProtectLevel)
         {
             case GattProtectionLevel_AuthenticationRequired:
                 pDsc->att_flags += BLE_ATT_F_WRITE_AUTHEN;
@@ -219,8 +220,9 @@ void AssignDescriptor(ble_gatt_dsc_def *pDsc, CLR_RT_HeapBlock *pPfItem, ble_uui
     }
 
     // Read protection - Authentication & Encryption
-    GattProtectionLevel readProtectLevel =  (GattProtectionLevel)pPfItem[GattLocalCharacteristic::FIELD___readProtectionLevel].NumericByRef().u4;
-    switch(readProtectLevel)
+    GattProtectionLevel readProtectLevel =
+        (GattProtectionLevel)pPfItem[GattLocalCharacteristic::FIELD___readProtectionLevel].NumericByRef().u4;
+    switch (readProtectLevel)
     {
         case GattProtectionLevel_AuthenticationRequired:
             pDsc->att_flags += BLE_ATT_F_READ_AUTHEN;
@@ -390,8 +392,9 @@ void ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
             ble_gatt_chr_flags flags = 0;
 
             // Write protection - Authentication & Encryption
-            GattProtectionLevel writeProtectLevel =  (GattProtectionLevel)pItem[GattLocalCharacteristic::FIELD___writeProtectionLevel].NumericByRef().u4;
-            switch(writeProtectLevel)
+            GattProtectionLevel writeProtectLevel =
+                (GattProtectionLevel)pItem[GattLocalCharacteristic::FIELD___writeProtectionLevel].NumericByRef().u4;
+            switch (writeProtectLevel)
             {
                 case GattProtectionLevel_AuthenticationRequired:
                     flags += BLE_GATT_CHR_F_WRITE_AUTHEN;
@@ -407,8 +410,9 @@ void ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
             }
 
             // Read protection - Authentication & Encryption
-            GattProtectionLevel readProtectLevel =  (GattProtectionLevel)pItem[GattLocalCharacteristic::FIELD___readProtectionLevel].NumericByRef().u4;
-            switch(readProtectLevel)
+            GattProtectionLevel readProtectLevel =
+                (GattProtectionLevel)pItem[GattLocalCharacteristic::FIELD___readProtectionLevel].NumericByRef().u4;
+            switch (readProtectLevel)
             {
                 case GattProtectionLevel_AuthenticationRequired:
                     flags += BLE_GATT_CHR_F_READ_AUTHEN;
