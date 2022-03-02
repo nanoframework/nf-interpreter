@@ -30,20 +30,32 @@ typedef struct
 
 struct ble_context
 {
+    // The service definition is discoverable
     bool isDiscoverable;
+    // The service can be connected to
     bool isConnectable;
+    // The device name
     char *pDeviceName;
 
+    // Number of services in service definition
     int serviceCount;
+    // Ptr to service definition
     ble_gatt_svc_def *gatt_service_def;
 
+    // Number of items in characteristics definitions/Uuid array & Attribute handles
     int characteristicsCount;
+    // Ptr to characteristics definitions array
     ble_gatt_chr_def *characteristicsDefs;
+    // Ptr to characteristics Uuid array
     ble_uuid_any_t *characteristicsUuids;
+    // Ptr to array of attribute handles
     uint16_t *attrHandles;
 
+    // Number of items in array of descriptor definitions & descriptor UUID
     int descriptorCount;
+    // Ptr to descriptor definitions array
     ble_gatt_dsc_def *descriptorDefs;
+    // Ptr to descriptor Uuid array
     ble_uuid_any_t *descriptorUuids;
 };
 
