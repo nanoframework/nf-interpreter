@@ -21,16 +21,8 @@
 // STM32F427xx and STM32F429xx datasheet)
 // UART_CONFIG_PINS(3, GPIOD, GPIOD, 8, 9, 7)
 
-// buffers
-// buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
-// because of issues with cache coherency and DMA (this is particularly important with Cortex-M7 because of cache)
-//#if defined(__GNUC__)
-//__attribute__((aligned(32)))
-//#endif
-// uint8_t Uart3_RxBuffer[UART3_RX_SIZE];
-
 // initialization for UART3
-// UART_INIT(3, UART3_RX_SIZE)
+// UART_INIT(3)
 
 // un-initialization for UART3
 // UART_UNINIT(3)
@@ -49,16 +41,8 @@
 // GPIO alternate pin function is 8
 UART_CONFIG_PINS(4, GPIOA, GPIOA, 0, 1, 8)
 
-// buffers
-// buffers that are R/W by DMA are recommended to be aligned with 32 bytes cache page size boundary
-// because of issues with cache coherency and DMA (this is particularly important with Cortex-M7 because of cache)
-#if defined(__GNUC__)
-__attribute__((aligned(32)))
-#endif
-uint8_t Uart4_RxBuffer[UART4_RX_SIZE];
-
 // initialization for UART3
-UART_INIT(4, UART4_RX_SIZE)
+UART_INIT(4)
 
 // un-initialization for UART3
 UART_UNINIT(4)

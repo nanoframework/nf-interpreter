@@ -10,17 +10,9 @@
 // enable USART3
 //#define NF_SERIAL_COMM_STM32_UART_USE_USART3 TRUE
 
-// buffers size
-// rx buffer size: 256 bytes
-//#define UART3_RX_SIZE 256
-
 ///////////
 // UART4 //
 ///////////
 
 // enable UART4
 #define NF_SERIAL_COMM_STM32_UART_USE_UART4 TRUE
-
-// buffers size
-// rx buffer size: 256 bytes
-#define UART4_RX_SIZE 256

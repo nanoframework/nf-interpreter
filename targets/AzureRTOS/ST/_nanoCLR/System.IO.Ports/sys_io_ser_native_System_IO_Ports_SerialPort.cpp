@@ -280,6 +280,83 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    NF_PAL_UART *palUart = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // get the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    stack.SetResult_Boolean(palUart->SignalLevelsInverted);
+
+#else
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+#endif
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    NF_PAL_UART *palUart = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // get the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    palUart->SignalLevelsInverted = (bool)stack.Arg1().NumericByRef().u1;
+
+    // call config
+    NativeConfig___VOID(stack);
+#else
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+#endif
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY_U1__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -774,6 +851,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart;
+    int32_t bufferSize;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -844,6 +922,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             break;
     }
 
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
+
+    // sanity check
+    if (palUart->RxBuffer == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // init buffer
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
+
     // configure UART handlers
     palUart->Uart_cfg.txend1_cb = TxEnd1;
     palUart->Uart_cfg.rxchar_cb = RxChar;
@@ -902,6 +993,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1;
             break;
     }
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    // configure TX, RX signal levels
+    if (palUart->SignalLevelsInverted)
+    {
+        palUart->Uart_cfg.cr2 |= USART_CR2_TXINV | USART_CR2_RXINV;
+    }
+    else
+    {
+        palUart->Uart_cfg.cr2 &= ~(USART_CR2_TXINV | USART_CR2_RXINV);
+    }
+
+#endif
 
     // baud rate
     palUart->Uart_cfg.speed = (int)pThis[FIELD___baudRate].NumericByRef().s4;
