@@ -15,7 +15,7 @@
 #define BSD_STACK_SIZE      2048
 
 void _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
-VOID  nx_stm32_eth_driver(NX_IP_DRIVER *driver_req_ptr);
+VOID  nx_driver_stm32l4(NX_IP_DRIVER *driver_req_ptr);
 
 // byte pool for NetX Duo
 #define NX_APP_MEM_POOL_SIZE 1024 * 15
@@ -95,7 +95,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
             ipAddress,
             networkMask,
             &pool_0,
-            NETXDUO_DRIVER,
+            nx_driver_stm32l4,
             pointer,
             2 * DEFAULT_MEMORY_SIZE,
             DEFAULT_PRIORITY) != NX_SUCCESS)
