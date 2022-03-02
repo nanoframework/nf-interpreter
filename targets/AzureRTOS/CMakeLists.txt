@@ -60,7 +60,7 @@ endif()
 # check if build was requested with a specifc AzureRTOS version
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(RTOS_VERSION "v6.1.9_rel")
+    set(RTOS_VERSION "v6.1.10_rel")
 endif()
 
 if(NO_RTOS_SOURCE_FOLDER)
@@ -179,8 +179,7 @@ if(AZURERTOS_FILEX_REQUIRED)
     # check if build was requested with a specifc AzureRTOS FileX version
     if(FILEX_VERSION_EMPTY)
         # no AzureRTOS FileX version actualy specified, must be empty which is fine, we'll default to Azure RTOS version
-        # version for this component is behind the others...
-        set(FILEX_VERSION "r6.1.8_rel")
+        set(FILEX_VERSION ${RTOS_VERSION})
     endif()
 
     if(NO_FILEX_SOURCE_FOLDER)
