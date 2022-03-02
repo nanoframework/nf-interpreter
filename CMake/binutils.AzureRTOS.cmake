@@ -351,6 +351,7 @@ macro(nf_add_platform_sources target)
                     ${AZRTOS_INCLUDES}
                     ${NETXDUO_INCLUDES}
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
 
                 EXTRA_COMPILE_DEFINITIONS 

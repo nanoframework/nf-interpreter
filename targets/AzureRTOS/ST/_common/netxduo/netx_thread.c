@@ -9,6 +9,9 @@
 #include <nxd_dns.h>
 #include <targetHAL.h>
 
+// only need this when using ETH with ChibiOS MAC driver
+#if HAL_USE_MAC == TRUE
+
 __attribute__((noreturn)) void NetXDuoThread_entry(uint32_t parameter)
 {
     (void)parameter;
@@ -22,3 +25,5 @@ __attribute__((noreturn)) void NetXDuoThread_entry(uint32_t parameter)
 
     // this never returns
 }
+
+#endif
