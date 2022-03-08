@@ -202,9 +202,9 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
     FAULT_ON_NULL(pThis);
 
     key = stack.Arg1().Dereference();
+    FAULT_ON_NULL_ARG(key);
 
     newValue = stack.Arg2().Dereference();
-    FAULT_ON_NULL_ARG(newValue);
 
     add = (bool)stack.Arg3().NumericByRef().u1;
 
