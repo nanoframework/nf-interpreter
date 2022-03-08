@@ -1315,6 +1315,10 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 }
                 break;
 
+            case DATATYPE_STRING:
+                return Compare_Values(pArgLeft, pArgRight, false) == 0;
+                break;
+
             default:
                 if (fSameReference == false)
                 {
