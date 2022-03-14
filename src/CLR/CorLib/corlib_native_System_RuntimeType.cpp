@@ -394,7 +394,6 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         returnArray++;
 
                         // load the constructor parameter
-                        // TODO: improve this to be able to handle constuctors with multiple parameters
                         returnArray->LoadFromReference(val->m_value);
                     }
                 }
