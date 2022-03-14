@@ -2031,6 +2031,13 @@ struct CLR_RT_AttributeParser
 
     HRESULT Next(Value *&res);
 
+    HRESULT ReadNumericValue(
+        CLR_RT_HeapBlock *&value,
+        const CLR_DataType dt,
+        const CLR_RT_TypeDef_Index *m_cls,
+        const CLR_UINT32 size);
+    HRESULT ReadString(CLR_RT_HeapBlock *&value);
+
   private:
     const char *GetString();
 };
