@@ -21,22 +21,22 @@ bool ble_initialized = false;
 //
 // Look up Attr_handle in characteristicsDefs table to find our characteristicsId
 // return 0xffff if not found otherwise characteristicsId
-uint16_t FindIdFromHandle(ble_services_context * context, uint16_t attr_handle)
+uint16_t FindIdFromHandle(ble_services_context *context, uint16_t attr_handle)
 {
     bool found = false;
     uint16_t id = 0xffff;
 
-    for(int service=0; service < context->serviceCount; service++)
+    for (int service = 0; service < context->serviceCount; service++)
     {
-        ble_context * srv = &context->bleSrvContexts[service];
-        ble_gatt_chr_def * characteristicsDefs = srv->characteristicsDefs;
+        ble_context *srv = &context->bleSrvContexts[service];
+        ble_gatt_chr_def *characteristicsDefs = srv->characteristicsDefs;
 
         // Check all characteristics except terminator (-1)
-        for (int index = 0; index < (srv->characteristicsCount-1); index++)
+        for (int index = 0; index < (srv->characteristicsCount - 1); index++)
         {
             // ESP_LOGI(tag, "FindIdFromHandle; find ah=%d  - vh %d arg %d\n", attr_handle,
             // *(characteristicsDefs[index].val_handle), (uint32_t)characteristicsDefs[index].arg );
-            uint16_t * pValue = characteristicsDefs[index].val_handle;
+            uint16_t *pValue = characteristicsDefs[index].val_handle;
             if (pValue != 0 && *pValue == attr_handle)
             {
                 id = (uint16_t)(uint32_t)characteristicsDefs[index].arg;
@@ -58,10 +58,10 @@ uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characterist
     bool found = false;
     uint16_t handle = 0xffff;
 
-    for(int service=0; service < context.serviceCount; service++)
+    for (int service = 0; service < context.serviceCount; service++)
     {
-        ble_context * srv = &context.bleSrvContexts[service];
-        ble_gatt_chr_def * characteristicsDefs = srv->characteristicsDefs;
+        ble_context *srv = &context.bleSrvContexts[service];
+        ble_gatt_chr_def *characteristicsDefs = srv->characteristicsDefs;
 
         for (int index = 0; index < srv->characteristicsCount; index++)
         {
@@ -117,8 +117,7 @@ static int esp32_gap_event(struct ble_gap_event *event, void *arg)
             BluetoothEventType op = BluetoothEventType_Read;
 
             // Find characteristicId from attr_handle
-            uint16_t characteristicId =
-                FindIdFromHandle(con, event->subscribe.attr_handle);
+            uint16_t characteristicId = FindIdFromHandle(con, event->subscribe.attr_handle);
 
             ESP_LOGI(
                 tag,
