@@ -34,21 +34,21 @@ typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 ble_services_context bleContext;
 
 #ifdef BLE_NANO_DEBUG
-void PrintBytes(uint8_t * pc, int len)
+void PrintBytes(uint8_t *pc, int len)
 {
-    for(int x=0; x<len; x++)
+    for (int x = 0; x < len; x++)
     {
-        debug_printf( "%0X ", (int)*pc );
+        debug_printf("%0X ", (int)*pc);
         pc++;
     }
     debug_printf("\n");
 }
 
-void PrintUuid(const ble_uuid_t * puuid)
+void PrintUuid(const ble_uuid_t *puuid)
 {
-    ble_uuid_any_t * pu = (ble_uuid_any_t *)puuid;
+    ble_uuid_any_t *pu = (ble_uuid_any_t *)puuid;
 
-    switch(pu->u.type)
+    switch (pu->u.type)
     {
         case BLE_UUID_TYPE_16:
 
@@ -61,9 +61,9 @@ void PrintUuid(const ble_uuid_t * puuid)
 
         case BLE_UUID_TYPE_128:
             debug_printf("uuid128:%x ");
-            for(int x=0; x<16; x++)
+            for (int x = 0; x < 16; x++)
             {
-                debug_printf( "%X", (int)pu->u128.value[x] );
+                debug_printf("%X", (int)pu->u128.value[x]);
             }
             debug_printf("\n");
             break;
@@ -93,17 +93,17 @@ static void FreeContext(ble_services_context &srvContext)
         platform_free((void *)srvContext.gatt_service_def);
         srvContext.gatt_service_def = NULL;
     }
- 
+
     // For each Service free up memory
-    for(int i=0; i<srvContext.serviceCount; i++ )
+    for (int i = 0; i < srvContext.serviceCount; i++)
     {
-        ble_context * context = &srvContext.bleSrvContexts[i];
+        ble_context *context = &srvContext.bleSrvContexts[i];
         if (context->serviceUuid)
         {
             platform_free(context->characteristicsDefs);
             context->serviceUuid = NULL;
         }
-    
+
         if (context->characteristicsDefs)
         {
             platform_free(context->characteristicsDefs);
@@ -169,8 +169,8 @@ void BuildUUID(uint8_t *pUuid, ble_uuid_any_t *pUany)
     // Order of last 12 bytes saved in a Guuid ( reverse )
     uint8_t BlueSig[12] = {0, 0, 0, 0x10, 0x80, 0, 0, 0x80, 0x5f, 0x9b, 0x34, 0xfb};
 
-    // Is it a standard BlueSig 16 or 32 bit pattern 
-    if (memcmp(pUuid+4, BlueSig, sizeof(BlueSig)) == 0)
+    // Is it a standard BlueSig 16 or 32 bit pattern
+    if (memcmp(pUuid + 4, BlueSig, sizeof(BlueSig)) == 0)
     {
         // 16 Bit
         if (pUuid[2] == 0 && pUuid[3] == 0)
@@ -206,11 +206,10 @@ ble_uuid_any_t *BuildUuidAlloc(uint8_t *pUuid)
     return pUany;
 }
 
-
-bool BuildGattServices(ble_services_context & context)
+bool BuildGattServices(ble_services_context &context)
 {
     int srvCount = context.serviceCount;
-    ble_context * def = context.bleSrvContexts;
+    ble_context *def = context.bleSrvContexts;
 
     // Define all services and null service(end)
     int svcDefSize = sizeof(ble_gatt_svc_def) * (srvCount + 1);
@@ -220,10 +219,10 @@ bool BuildGattServices(ble_services_context & context)
         return false;
     }
 
-    memset(svcDef, 0,  svcDefSize);
+    memset(svcDef, 0, svcDefSize);
     context.gatt_service_def = svcDef;
 
-    while(srvCount>0)
+    while (srvCount > 0)
     {
         svcDef->type = BLE_GATT_SVC_TYPE_PRIMARY;
         svcDef->uuid = def->serviceUuid;
@@ -376,7 +375,7 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
         (ble_gatt_chr_def *)platform_malloc(sizeof(ble_gatt_chr_def) * context.characteristicsCount);
     if (context.characteristicsDefs == NULL)
     {
-        //Out of memory
+        // Out of memory
         return false;
     }
 
@@ -408,11 +407,9 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
 
             // Plus terminator
             descriptorCount++;
-    
+
             // debug_printf("characteristics index=%d descriptorCount=%d\n ", index,  descriptorCount);
         }
-    
-
     }
 
     context.descriptorCount = descriptorCount;
@@ -421,7 +418,7 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     context.attrHandles = (uint16_t *)platform_malloc(sizeof(uint16_t) * context.characteristicsCount);
     if (context.attrHandles == NULL)
     {
-        //Out of memory
+        // Out of memory
         return false;
     }
 
@@ -430,7 +427,7 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
         (ble_uuid_any_t *)platform_malloc(sizeof(ble_uuid_any_t) * context.characteristicsCount);
     if (context.characteristicsUuids == NULL)
     {
-        //Out of memory
+        // Out of memory
         return false;
     }
 
@@ -438,33 +435,35 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     context.descriptorDefs = (ble_gatt_dsc_def *)platform_malloc(sizeof(ble_gatt_dsc_def) * descriptorCount);
     if (context.descriptorDefs == NULL)
     {
-        //Out of memory
+        // Out of memory
         return false;
     }
     context.descriptorUuids = (ble_uuid_any_t *)platform_malloc(sizeof(ble_uuid_any_t) * descriptorCount);
     if (context.descriptorUuids == NULL)
     {
-        //Out of memory
+        // Out of memory
         return false;
     }
 
     // Left in for the moment as this is still work in progress
     // debug_printf("characteristicsCount = %d size=%X\n ", CharacteristicsCount, sizeof(ble_gatt_chr_def));
     // debug_printf("descriptorCount = %d  size=%X\n ", descriptorCount, sizeof(ble_gatt_dsc_def));
-    // debug_printf("characteristicsDefs %X  end %X\n", 
-    //                 context.characteristicsDefs,  
-    //                 ((uint8_t *)context.characteristicsDefs) + (sizeof(ble_gatt_chr_def) * context.characteristicsCount)); 
-    // debug_printf("characteristicsUuids  %X  end %X\n", 
-    //                 context.characteristicsUuids, 
-    //                 ((uint8_t *)context.characteristicsUuids) + (sizeof(ble_uuid_any_t) * context.characteristicsCount)); 
-    // debug_printf("attrHandles  %X  end %X\n", 
+    // debug_printf("characteristicsDefs %X  end %X\n",
+    //                 context.characteristicsDefs,
+    //                 ((uint8_t *)context.characteristicsDefs) + (sizeof(ble_gatt_chr_def) *
+    //                 context.characteristicsCount));
+    // debug_printf("characteristicsUuids  %X  end %X\n",
+    //                 context.characteristicsUuids,
+    //                 ((uint8_t *)context.characteristicsUuids) + (sizeof(ble_uuid_any_t) *
+    //                 context.characteristicsCount));
+    // debug_printf("attrHandles  %X  end %X\n",
     //                 context.attrHandles,
-    //                 ((uint8_t *)context.attrHandles) + (sizeof(uint16_t) * context.characteristicsCount)); 
-    // debug_printf("descriptorDefs  %X  end %X\n", 
-    //                 context.descriptorDefs, 
+    //                 ((uint8_t *)context.attrHandles) + (sizeof(uint16_t) * context.characteristicsCount));
+    // debug_printf("descriptorDefs  %X  end %X\n",
+    //                 context.descriptorDefs,
     //                 ((uint8_t *)context.descriptorDefs) + (sizeof(ble_gatt_dsc_def) * context.descriptorCount));
-    // debug_printf("descriptorUuids  %X  end %X\n", 
-    //                 context.descriptorUuids, 
+    // debug_printf("descriptorUuids  %X  end %X\n",
+    //                 context.descriptorUuids,
     //                 ((uint8_t *)context.descriptorUuids) + (sizeof(ble_uuid_any_t) * context.descriptorCount));
 
     // Build definitions require for Nimble
@@ -608,7 +607,8 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
             // );
 
             // debug_printf("Characteristic item %d\n", index);
-            // debug_printf("writeProtectionLevel %d CharacteristicHandle:%d\n", writeProtectionLevel, CharacteristicHandle);
+            // debug_printf("writeProtectionLevel %d CharacteristicHandle:%d\n", writeProtectionLevel,
+            // CharacteristicHandle);
         }
     }
 
@@ -623,13 +623,13 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
 }
 
 #ifdef BLE_NANO_DEBUG
-void PrintChars(const ble_gatt_chr_def * pchars)
+void PrintChars(const ble_gatt_chr_def *pchars)
 {
-    ble_gatt_chr_def * pchar = (ble_gatt_chr_def *)pchars;
+    ble_gatt_chr_def *pchar = (ble_gatt_chr_def *)pchars;
 
     debug_printf("==Characteristics definitions==\n");
 
-    while(pchar->uuid != NULL)
+    while (pchar->uuid != NULL)
     {
         debug_printf("==characteristic==\n");
         PrintUuid(pchar->uuid);
@@ -637,7 +637,7 @@ void PrintChars(const ble_gatt_chr_def * pchars)
         debug_printf("flags %X CB %X val %X\n", pchar->flags, pchar->access_cb, pchar->val_handle);
         if (pchar->val_handle != 0)
         {
-            debug_printf("ATT handle %d\n", *(pchar->val_handle) );
+            debug_printf("ATT handle %d\n", *(pchar->val_handle));
         }
         pchar++;
     }
@@ -647,20 +647,19 @@ void PrintChars(const ble_gatt_chr_def * pchars)
 void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 {
 
-    ble_gatt_svc_def * pSDef = svcDef;
-    
+    ble_gatt_svc_def *pSDef = svcDef;
+
     debug_printf("==Services definition==\n");
 
-    while(pSDef->type != 0 )
+    while (pSDef->type != 0)
     {
         debug_printf("==Service==\n");
         PrintUuid(pSDef->uuid);
         PrintChars(pSDef->characteristics);
         pSDef++;
     }
-   
-    debug_printf("==End services definition==\n");
 
+    debug_printf("==End services definition==\n");
 }
 #endif
 
@@ -693,12 +692,11 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         memcpy(bleContext.pDeviceName, pDeviceName, deviceNameLen);
         bleContext.pDeviceName[deviceNameLen] = 0;
 
-
         pArrayServices = (CLR_RT_HeapBlock_ArrayList *)pThis[GattServiceProvider::FIELD___services].Dereference();
         bleContext.serviceCount = pArrayServices->GetSize();
 
         // Allocate contexts for all service definitions
-        size_t bleContextSize = sizeof(ble_context) *  bleContext.serviceCount;
+        size_t bleContextSize = sizeof(ble_context) * bleContext.serviceCount;
         bleContext.bleSrvContexts = (ble_context *)platform_malloc(bleContextSize);
         if (bleContext.bleSrvContexts == NULL)
         {
@@ -713,9 +711,9 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         {
             if (SUCCEEDED(pArrayServices->GetItem(i, serviceItem)))
             {
-                if ( !ParseAndBuildNimbleDefinition(bleContext.bleSrvContexts[i], serviceItem) )
+                if (!ParseAndBuildNimbleDefinition(bleContext.bleSrvContexts[i], serviceItem))
                 {
-                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
             }
             else
@@ -739,13 +737,13 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         }
 
         device_ble_start(bleContext);
-        
+
         stack.SetResult_Boolean(result);
     }
 
     NANOCLR_CLEANUP();
 
-    if(!result)
+    if (!result)
     {
         FreeContext(bleContext);
     }

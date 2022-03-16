@@ -66,10 +66,8 @@ struct ble_services_context
     ble_gatt_svc_def *gatt_service_def;
 
     // Array of ble contexts, 1 per service
-    ble_context * bleSrvContexts;
+    ble_context *bleSrvContexts;
 };
-
-
 
 extern ble_services_context bleContext;
 extern device_ble_event_data ble_event_data;
