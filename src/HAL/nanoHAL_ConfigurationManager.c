@@ -337,14 +337,5 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
         return false;
     }
 
-    while (existingConfigBlockSize--)
-    {
-        if (*cursor1++ != *cursor2++)
-        {
-            // content is different!!
-            return false;
-        }
-    }
-
-    return true;
+    return memcmp(cursor1, cursor2, existingConfigBlockSize) == 0;
 }
