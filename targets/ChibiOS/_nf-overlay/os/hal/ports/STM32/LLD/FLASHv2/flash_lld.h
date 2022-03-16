@@ -53,6 +53,10 @@ typedef struct STM32FlashDriver
 #define FLASH_OPT_KEY2 ((uint32_t)0x4C5D6E7FU)
 #define SECTOR_MASK    ((uint32_t)0xFFFFFF07)
 
+#ifndef HAL_OK
+#define HAL_OK 0x00U
+#endif
+
 // FLASH_Error_Code FLASH Error Code
 #define HAL_FLASH_ERROR_NONE      ((uint32_t)0x00000000U) /*!< No error                      */
 #define HAL_FLASH_ERROR_ERS       ((uint32_t)0x00000002U) /*!< Programming Sequence error    */
@@ -98,17 +102,6 @@ typedef struct STM32FlashDriver
     (FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)
 
 #endif // FLASH_SR_RDERR
-
-/**
- * @brief  HAL Status structures definition
- */
-typedef enum
-{
-    HAL_OK = 0x00U,
-    HAL_ERROR = 0x01U,
-    HAL_BUSY = 0x02U,
-    HAL_TIMEOUT = 0x03U
-} HAL_StatusTypeDef;
 
 //---------------------------------- STM32F7xx ------------------------------//
 #elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                  \
