@@ -99,6 +99,17 @@ typedef struct STM32FlashDriver
 
 #endif // FLASH_SR_RDERR
 
+/**
+ * @brief  HAL Status structures definition
+ */
+typedef enum
+{
+    HAL_OK = 0x00U,
+    HAL_ERROR = 0x01U,
+    HAL_BUSY = 0x02U,
+    HAL_TIMEOUT = 0x03U
+} HAL_StatusTypeDef;
+
 //---------------------------------- STM32F7xx ------------------------------//
 #elif defined(STM32F756xx) || defined(STM32F746xx) || defined(STM32F745xx) || defined(STM32F765xx) ||                  \
     defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx) ||                    \
