@@ -6,7 +6,7 @@
 
 #include "sys_dev_ble_native.h"
 
-extern uint16_t FindHandleIdFromId(ble_gatt_chr_def *characteristicsDefs, int countDefs, uint16_t characteristicId);
+extern uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characteristicId);
 
 //
 //  Notify a Client
@@ -38,9 +38,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         bufLen = notifyBuffer->m_numOfElements;
 
         // Find attr handle from Characteristic ID
-        attHandle =
-            FindHandleIdFromId(blecontext.characteristicsDefs, blecontext.characteristicsCount, characteristicId);
-
+        attHandle = FindHandleIdFromId(bleContext, characteristicId);
         if (attHandle != 0xffff)
         {
             // Send Notify buffer

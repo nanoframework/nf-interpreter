@@ -100,6 +100,12 @@ typedef enum __nfpack Utilities_GattNativeDescriptorUuid
     Utilities_GattNativeDescriptorUuid_ValidRange = 10502,
     Utilities_GattNativeDescriptorUuid_ExternalReportReference = 10503,
     Utilities_GattNativeDescriptorUuid_ReportReference = 10504,
+    Utilities_GattNativeDescriptorUuid_NumberDigitals = 10505,
+    Utilities_GattNativeDescriptorUuid_ValueTriggerSetting = 10506,
+    Utilities_GattNativeDescriptorUuid_EssConfiguration = 10507,
+    Utilities_GattNativeDescriptorUuid_EssMeasurement = 10508,
+    Utilities_GattNativeDescriptorUuid_EssTriggerSetting = 10509,
+    Utilities_GattNativeDescriptorUuid_TimeTriggerSetting = 10510,
 } Utilities_GattNativeDescriptorUuid;
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothDeviceId
@@ -320,7 +326,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 {
     static const int FIELD_STATIC___bluetoothEventManager = 3;
 
-    static const int FIELD___service = 1;
+    static const int FIELD___services = 1;
     static const int FIELD___status = 2;
     static const int FIELD___deviceName = 3;
     static const int FIELD___isDiscoverable = 4;
