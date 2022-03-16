@@ -149,9 +149,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     NANOCLR_HEADER();
 
     HAL_Configuration_NetworkInterface config, storageConfig;
-    bool configChanged;
     CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
     _ASSERTE(pConfig != NULL);
+
     CLR_UINT32 interfaceIndex = pConfig[FIELD___interfaceIndex].NumericByRefConst().u4;
     CLR_UINT32 updateFlags = stack.Arg1().NumericByRef().u4;
     CLR_RT_HeapBlock_Array *pMACAddress = pConfig[FIELD___macAddress].DereferenceArray();
@@ -191,13 +191,10 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    // save the configuration only if there has been a change
-    configChanged = (config != storageConfig);
-
     // store configuration, updating the configuration block
-    if (configChanged &&
-        ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) !=
-            TRUE)
+    // it's up to the configuration manager to decide if the config actually needs to be updated
+    if (ConfigurationManager_UpdateConfigurationBlock(&config, DeviceConfigurationOption_Network, interfaceIndex) !=
+        TRUE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
