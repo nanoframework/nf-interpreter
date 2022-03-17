@@ -93,12 +93,12 @@ macro(nf_add_platform_packages)
     endif()
     
     # packages specific for nanoBooter
-    if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
+    if(NFAPP_TARGET STREQUAL ${NANOBOOTER_PROJECT_NAME})
         # no packages for booter
     endif()
 
     # packages specific for nanoCRL
-    if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
+    if(NFAPP_TARGET STREQUAL ${NANOCLR_PROJECT_NAME})
 
         if(USE_NETWORKING_OPTION)
 
@@ -142,37 +142,96 @@ macro(nf_add_platform_dependencies target)
 
     nf_add_common_dependencies(${target})
 
-    # add_dependencies(threadx SETUP_AZURERTOS)
-    #add_dependencies(${target}.elf azrtos::threadx)
-
     # specific to nanoCRL
-    if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-
-        add_dependencies(NF_CoreCLR azrtos::threadx)
+    if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
+       
+        nf_add_lib_coreclr(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${AZRTOS_INCLUDES}
+        )
+                        
+        # add_dependencies(NF_CoreCLR azrtos::threadx)
         add_dependencies(${target}.elf nano::NF_CoreCLR)
 
-        add_dependencies(WireProtocol azrtos::threadx)
+
+        if(USE_NETWORKING_OPTION)
+            FetchContent_GetProperties(azure_rtos_netxduo)
+            get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
+        endif()
+
+        nf_add_lib_wireprotocol(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${AZRTOS_INCLUDES}
+        )
+
         add_dependencies(${target}.elf nano::WireProtocol)
 
         if(NF_FEATURE_DEBUGGER)
 
-            add_dependencies(NF_Debugger azrtos::threadx)
+            nf_add_lib_debugger(
+                EXTRA_INCLUDES
+                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${azure_rtos_SOURCE_DIR}/common/inc
+                    ${AZRTOS_INCLUDES}
+            )
+
             add_dependencies(${target}.elf nano::NF_Debugger)
 
         endif()
 
-        # nF feature: networking
+        nf_add_lib_native_assemblies(
+            EXTRA_INCLUDES
+                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${azure_rtos_SOURCE_DIR}/common/inc
+                ${NETXDUO_INCLUDES}
+                ${TARGET_BASE_LOCATION}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${AZRTOS_INCLUDES}
+                
+            EXTRA_COMPILE_DEFINITIONS 
+                -DTX_INCLUDE_USER_DEFINE_FILE
+                -DNX_INCLUDE_USER_DEFINE_FILE            
+        )
+        
+        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
+
         if(USE_NETWORKING_OPTION)
 
-            add_dependencies(
-                ${target}.elf 
-                nano::NF_Network
+            nf_add_lib_network(
+                BUILD_TARGET
+                    ${target}
+
+                EXTRA_INCLUDES 
+                    ${AZRTOS_INCLUDES}
+                    ${NETXDUO_INCLUDES}
+                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                    ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+
+                EXTRA_COMPILE_DEFINITIONS 
+                    -DTX_INCLUDE_USER_DEFINE_FILE
+                    -DNX_INCLUDE_USER_DEFINE_FILE
+                    -DUSE_HAL_DRIVER
+                    -D${STM32_DRIVER_TARGET_DEVICE}
+
             )
         
-        endif()
+            add_dependencies(${target}.elf nano::NF_Network)
 
-        add_dependencies(NF_NativeAssemblies azrtos::threadx)
-        add_dependencies(${target}.elf nano::NF_NativeAssemblies)
+        endif()
 
     endif()
 
@@ -294,98 +353,14 @@ macro(nf_add_platform_sources target)
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
         )
 
-        if(USE_NETWORKING_OPTION)
-            FetchContent_GetProperties(azure_rtos_netxduo)
-            get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
-        endif()
-
-        nf_add_lib_wireprotocol(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${AZRTOS_INCLUDES}
-        )
-
-        add_dependencies(WireProtocol azrtos::threadx)
-        add_dependencies(${target}.elf nano::WireProtocol)
-
-        if(NF_FEATURE_DEBUGGER)
-
-            nf_add_lib_debugger(
-                EXTRA_INCLUDES
-                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                    ${CHIBIOS_HAL_INCLUDE_DIRS}
-                    ${azure_rtos_SOURCE_DIR}/common/inc
-                    ${AZRTOS_INCLUDES}
-            )
-
-        endif()
-
-        nf_add_lib_native_assemblies(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${ChibiOSnfOverlay_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${NETXDUO_INCLUDES}
-                ${TARGET_BASE_LOCATION}
-                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-                ${AZRTOS_INCLUDES}
-                
-            EXTRA_COMPILE_DEFINITIONS 
-                -DTX_INCLUDE_USER_DEFINE_FILE
-                -DNX_INCLUDE_USER_DEFINE_FILE            
-        )
-
-        if(USE_NETWORKING_OPTION)
-
-            nf_add_lib_network(
-                BUILD_TARGET
-                    ${target}
-
-                EXTRA_INCLUDES 
-                    ${AZRTOS_INCLUDES}
-                    ${NETXDUO_INCLUDES}
-                    ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                    ${CHIBIOS_HAL_INCLUDE_DIRS}
-                    ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
-
-                EXTRA_COMPILE_DEFINITIONS 
-                    -DTX_INCLUDE_USER_DEFINE_FILE
-                    -DNX_INCLUDE_USER_DEFINE_FILE
-                    -DUSE_HAL_DRIVER
-                    -D${STM32_DRIVER_TARGET_DEVICE}
-
-            )
-                
-            target_link_libraries(${target}.elf PUBLIC
+        if(USE_NETWORKING_OPTION)         
+            target_link_libraries(${target}.elf
                 nano::NF_Network
                 azrtos::netxduo
             )
-
         endif()
 
-        nf_add_lib_coreclr(
-            EXTRA_INCLUDES
-                ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
-                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
-                ${CHIBIOS_HAL_INCLUDE_DIRS}
-                ${azure_rtos_SOURCE_DIR}/common/inc
-                ${AZRTOS_INCLUDES}
-        )
-                        
-        add_dependencies(NF_CoreCLR azrtos::threadx)
-        add_dependencies(${target}.elf nano::NF_CoreCLR)
-
     endif()
-   
-    target_link_libraries(${target}.elf PUBLIC
-        azrtos::threadx
-    )
 
     if(STM32_CUBE_PACKAGE_REQUIRED)
 
@@ -398,14 +373,17 @@ macro(nf_add_platform_sources target)
                 -D${STM32_DRIVER_TARGET_DEVICE}
         )
 
-        target_link_libraries(${target}.elf PUBLIC
+        target_link_libraries(${target}.elf
             nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target}
         )
 
     endif()
 
-endmacro()
+    target_link_libraries(${target}.elf
+        azrtos::threadx
+    )
 
+endmacro()
 
 # macro to setup the build for a target
 # mandatory HAS_NANOBOOTER specifing if the target implements nanoBooter
