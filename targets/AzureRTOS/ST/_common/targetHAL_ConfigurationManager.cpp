@@ -10,7 +10,7 @@
 #include <netxduo_options.h>
 
 #if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-//#include <wifi.h>
+#include <wifi.h>
 #endif
 
 uint32_t GetExistingConfigSize()
@@ -664,11 +664,8 @@ __nfweak void InitialiseWirelessDefaultConfig(HAL_Configuration_Wireless80211 *c
     // Wireless station
     config->Id = configurationIndex;
 
-    // TOD NETWORK
-    // config->Options =
-    //     (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect
-    //     | Wireless80211Configuration_ConfigurationOptions_Enable |
-    //     Wireless80211Configuration_ConfigurationOptions_SmartConfig);
+    config->Options =
+        (Wireless80211Configuration_ConfigurationOptions)(Wireless80211Configuration_ConfigurationOptions_AutoConnect | Wireless80211Configuration_ConfigurationOptions_Enable);
 }
 
 //  Default initialisation for Network interface config blocks
@@ -684,17 +681,23 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     // make sure the config block marker is set
     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
+    // currently only Wireless station is supported
     config->InterfaceType = NetworkInterfaceType_Wireless80211;
     config->StartupAddressMode = AddressMode_DHCP;
     config->AutomaticDNS = 1;
     config->SpecificConfigId = 0;
 
+    // fill in MAX with 0xFF to allow it updating it later
+    memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
+
 // get default MAC
 #if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-//    WIFI_GetMAC_Address(config->MacAddress);
+    // OK to ignore the return value, no harm done if it fails
+    WIFI_GetMAC_Address(config->MacAddress);
 #endif
 
     return TRUE;
+
 #else
 
     (void)config;

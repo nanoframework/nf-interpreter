@@ -7,18 +7,19 @@
 
 #include <nanoHAL.h>
 #include <nf_netxduo.h>
-//#include <lwipthread.h>
+#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#include <wifi.h>
+#endif
 
-
-// this is the declaration for the callback implement in nf_sys_arch.c 
-//extern "C" void set_signal_sock_function( void (*funcPtr)() );
+// this is the declaration for the callback implement in nf_sys_arch.c
+// extern "C" void set_signal_sock_function( void (*funcPtr)() );
 
 //
 // Callback from lwIP on event
 //
 void sys_signal_sock_event()
 {
-     Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
 }
 
 void nanoHAL_Network_Initialize()
@@ -28,18 +29,19 @@ void nanoHAL_Network_Initialize()
     // set_signal_sock_function( &sys_signal_sock_event );
 
     // get network configuration, if available
-    if(g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
+    if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0)
     {
         // there is no networking configuration block, can't proceed
         return;
     }
 
     HAL_Configuration_NetworkInterface networkConfig;
-    
-    if(ConfigurationManager_GetConfigurationBlock((void *)&networkConfig, DeviceConfigurationOption_Network, 0) == true)
+
+    if (ConfigurationManager_GetConfigurationBlock((void *)&networkConfig, DeviceConfigurationOption_Network, 0) ==
+        true)
     {
         // TODO NETWORK
-        // // build lwIP configuration 
+        // // build lwIP configuration
         // lwipthread_opts lwipOptions;
 
         // // init config
@@ -74,6 +76,27 @@ void nanoHAL_Network_Initialize()
         // Start lwIP thread in ChibiOS bindings using the above options
         // lwipInit(&lwipOptions);
 
-        NF_NetXDuo_Init(&networkConfig);
+        if (NF_NetXDuo_Init(&networkConfig) == NX_SUCCESS)
+        {
+
+#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+            // check if we have the MAC address stored in the configuration block
+            if (networkConfig.MacAddress[0] == 0xFF)
+            {
+                // OK to ignore the return value, no harm done if it fails
+                if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
+                {
+                    // store the MAC address in the configuration block
+                    ConfigurationManager_StoreConfigurationBlock(
+                        &networkConfig,
+                        DeviceConfigurationOption_Network,
+                        0,
+                        sizeof(HAL_Configuration_NetworkInterface),
+                        0,
+                        false);
+                }
+            }
+#endif
+        }
     }
 }
