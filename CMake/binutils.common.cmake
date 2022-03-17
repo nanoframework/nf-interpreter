@@ -202,7 +202,6 @@ macro(nf_add_common_sources)
     if(${NFACS_TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_link_libraries(${NFACS_TARGET}.elf
-        PUBLIC
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
             nano::NF_Debugger
@@ -496,9 +495,10 @@ macro(nf_setup_target_build_common)
         )
 
         nf_add_platform_packages(TARGET ${NANOBOOTER_PROJECT_NAME})
+        nf_add_platform_dependencies(${NANOBOOTER_PROJECT_NAME})
+
         nf_add_common_sources(TARGET ${NANOBOOTER_PROJECT_NAME})
         nf_add_platform_sources(${NANOBOOTER_PROJECT_NAME})
-        nf_add_platform_dependencies(${NANOBOOTER_PROJECT_NAME})
 
         # include directories for nanoBooter
         nf_add_common_include_directories(${NANOBOOTER_PROJECT_NAME})
@@ -543,9 +543,10 @@ macro(nf_setup_target_build_common)
     )
 
     nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
+    nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
+
     nf_add_common_sources(TARGET ${NANOCLR_PROJECT_NAME} EXTRA_LIBRARIES ${CLR_EXTRA_LIBRARIES})
     nf_add_platform_sources(${NANOCLR_PROJECT_NAME})
-    nf_add_platform_dependencies(${NANOCLR_PROJECT_NAME})
 
     # include directories for nanoCLR
     nf_add_common_include_directories(${NANOCLR_PROJECT_NAME})
