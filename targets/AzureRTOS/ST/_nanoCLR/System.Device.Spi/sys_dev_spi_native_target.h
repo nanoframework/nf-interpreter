@@ -8,8 +8,6 @@
 
 #include <sys_dev_spi_native.h>
 #include <hal.h>
-#include <LaunchCLR.h>
-#include <string.h>
 #include <targetPAL.h>
 
 // struct representing the SPI bus

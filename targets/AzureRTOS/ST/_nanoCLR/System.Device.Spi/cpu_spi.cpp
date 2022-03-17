@@ -349,10 +349,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     }
 
     // Create the low level configuration
-#if (SPI_SUPPORTS_CIRCULAR == TRUE)
-    llConfig->circular = SPI_USE_CIRCULAR;
-#endif
-    llConfig->end_cb = SpiCallback;
+    llConfig->data_cb = SpiCallback;
 
     // make sure the CS pin is properly configured as GPIO, output & pushpull
     palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
@@ -423,7 +420,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         // Clear callback if sync
         if (sync)
-            palSpi->Configuration.end_cb = NULL;
+            palSpi->Configuration.data_cb = NULL;
 
         if (writeBuffer != NULL)
         {
@@ -767,19 +764,33 @@ void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &
 }
 
 // Minimum and Maximum clock frequency available based on bus and configured pins
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
     // Max prescaler value = 256
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    return (spi_bus == 2 or spi_bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
+    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
+
+    return S_OK;
 }
 
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
     // According to STM : "At a minimum, the clock frequency should be twice the required communication frequency."
     // So maximum useable frequency is CoreClock / 2.
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    return (spi_bus == 2 or spi_bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
+    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
+
+    return S_OK;
 }
 
 // Maximum number of SPI devices that can be opened on a bus
