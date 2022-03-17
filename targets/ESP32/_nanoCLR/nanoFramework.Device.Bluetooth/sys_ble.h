@@ -30,17 +30,8 @@ typedef struct
 
 struct ble_context
 {
-    // The service definition is discoverable
-    bool isDiscoverable;
-    // The service can be connected to
-    bool isConnectable;
-    // The device name
-    char *pDeviceName;
-
-    // Number of services in service definition
-    int serviceCount;
-    // Ptr to service definition
-    ble_gatt_svc_def *gatt_service_def;
+    // Service UUID
+    ble_uuid_t *serviceUuid;
 
     // Number of items in characteristics definitions/Uuid array & Attribute handles
     int characteristicsCount;
@@ -59,7 +50,26 @@ struct ble_context
     ble_uuid_any_t *descriptorUuids;
 };
 
-extern ble_context blecontext;
+struct ble_services_context
+{
+    // The service definition is discoverable
+    bool isDiscoverable;
+    // The service can be connected to
+    bool isConnectable;
+    // The device name
+    char *pDeviceName;
+
+    // Number of services in service definition
+    int serviceCount;
+
+    // Ptr to NIMBLE service definition
+    ble_gatt_svc_def *gatt_service_def;
+
+    // Array of ble contexts, 1 per service
+    ble_context *bleSrvContexts;
+};
+
+extern ble_services_context bleContext;
 extern device_ble_event_data ble_event_data;
 
 #endif // SYS_BLE_H

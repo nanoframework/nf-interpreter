@@ -346,6 +346,18 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::NativeInitService___BOOLEAN,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::NativeStartAdvertising___BOOLEAN,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::NativeStopAdvertising___VOID,
@@ -421,9 +433,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth =
 {
     "nanoFramework.Device.Bluetooth",
-    0x9D2D4094,
+    0xE7B47C83,
     method_lookup,
-    { 100, 0, 0, 1 }
+    { 100, 0, 0, 2 }
 };
 
 // clang-format on

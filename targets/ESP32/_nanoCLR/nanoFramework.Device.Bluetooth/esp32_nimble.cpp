@@ -12,7 +12,7 @@
 static const char *tag = "BLE";
 static uint8_t esp32_addr_type;
 
-void esp32_ble_start_advertise(ble_context *context);
+void esp32_ble_start_advertise(ble_services_context *context);
 
 uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
@@ -21,17 +21,31 @@ bool ble_initialized = false;
 //
 // Look up Attr_handle in characteristicsDefs table to find our characteristicsId
 // return 0xffff if not found otherwise characteristicsId
-uint16_t FindIdFromHandle(ble_gatt_chr_def *characteristicsDefs, int countDefs, uint16_t attr_handle)
+uint16_t FindIdFromHandle(ble_services_context *context, uint16_t attr_handle)
 {
+    bool found = false;
     uint16_t id = 0xffff;
 
-    for (int index = 0; index < countDefs; index++)
+    for (int service = 0; service < context->serviceCount; service++)
     {
-        // ESP_LOGI(tag, "FindIdFromHandle; find ah=%d  - vh %d arg %d\n", attr_handle,
-        // *(characteristicsDefs[index].val_handle), (uint32_t)characteristicsDefs[index].arg );
-        if (*(characteristicsDefs[index].val_handle) == attr_handle)
+        ble_context *srv = &context->bleSrvContexts[service];
+        ble_gatt_chr_def *characteristicsDefs = srv->characteristicsDefs;
+
+        // Check all characteristics except terminator (-1)
+        for (int index = 0; index < (srv->characteristicsCount - 1); index++)
         {
-            id = (uint16_t)(uint32_t)characteristicsDefs[index].arg;
+            // ESP_LOGI(tag, "FindIdFromHandle; find ah=%d  - vh %d arg %d\n", attr_handle,
+            // *(characteristicsDefs[index].val_handle), (uint32_t)characteristicsDefs[index].arg );
+            uint16_t *pValue = characteristicsDefs[index].val_handle;
+            if (pValue != 0 && *pValue == attr_handle)
+            {
+                id = (uint16_t)(uint32_t)characteristicsDefs[index].arg;
+                found = true;
+                break;
+            }
+        }
+        if (found)
+        {
             break;
         }
     }
@@ -39,17 +53,30 @@ uint16_t FindIdFromHandle(ble_gatt_chr_def *characteristicsDefs, int countDefs, 
     return id;
 }
 
-uint16_t FindHandleIdFromId(ble_gatt_chr_def *characteristicsDefs, int countDefs, uint16_t characteristicId)
+uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characteristicId)
 {
+    bool found = false;
     uint16_t handle = 0xffff;
 
-    for (int index = 0; index < countDefs; index++)
+    for (int service = 0; service < context.serviceCount; service++)
     {
-        // ESP_LOGI(tag, "FindHandleIdFromId; find ah=%d  - vh %d arg %d\n", attr_handle,
-        // *(characteristicsDefs[index].val_handle), (uint32_t)characteristicsDefs[index].arg );
-        if ((uint32_t)characteristicsDefs[index].arg == (uint32_t)characteristicId)
+        ble_context *srv = &context.bleSrvContexts[service];
+        ble_gatt_chr_def *characteristicsDefs = srv->characteristicsDefs;
+
+        for (int index = 0; index < srv->characteristicsCount; index++)
         {
-            handle = *(characteristicsDefs[index].val_handle);
+            // ESP_LOGI(tag, "FindHandleIdFromId; find ah=%d  - vh %d arg %d\n", attr_handle,
+            // *(characteristicsDefs[index].val_handle), (uint32_t)characteristicsDefs[index].arg );
+            if ((uint32_t)characteristicsDefs[index].arg == (uint32_t)characteristicId)
+            {
+                handle = *(characteristicsDefs[index].val_handle);
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+        {
             break;
         }
     }
@@ -59,7 +86,7 @@ uint16_t FindHandleIdFromId(ble_gatt_chr_def *characteristicsDefs, int countDefs
 
 static int esp32_gap_event(struct ble_gap_event *event, void *arg)
 {
-    ble_context *con = (ble_context *)arg;
+    ble_services_context *con = (ble_services_context *)arg;
 
     switch (event->type)
     {
@@ -90,8 +117,7 @@ static int esp32_gap_event(struct ble_gap_event *event, void *arg)
             BluetoothEventType op = BluetoothEventType_Read;
 
             // Find characteristicId from attr_handle
-            uint16_t characteristicId =
-                FindIdFromHandle(con->characteristicsDefs, con->characteristicsCount, event->subscribe.attr_handle);
+            uint16_t characteristicId = FindIdFromHandle(con, event->subscribe.attr_handle);
 
             ESP_LOGI(
                 tag,
@@ -171,7 +197,7 @@ static int esp32_gap_event(struct ble_gap_event *event, void *arg)
 //     o General discoverable mode
 //     o Undirected connectable mode
 //
-void esp32_ble_start_advertise(ble_context *context)
+void esp32_ble_start_advertise(ble_services_context *context)
 {
     struct ble_gap_adv_params adv_params;
     struct ble_hs_adv_fields fields;
@@ -222,7 +248,7 @@ void esp32_ble_start_advertise(ble_context *context)
     {
         adv_params.conn_mode |= BLE_GAP_DISC_MODE_GEN;
     }
-    rc = ble_gap_adv_start(esp32_addr_type, NULL, BLE_HS_FOREVER, &adv_params, esp32_gap_event, (void *)&blecontext);
+    rc = ble_gap_adv_start(esp32_addr_type, NULL, BLE_HS_FOREVER, &adv_params, esp32_gap_event, (void *)&bleContext);
     if (rc != 0)
     {
         ESP_LOGI(tag, "error enabling advertisement; rc=%d\n", rc);
@@ -261,7 +287,7 @@ static void esp32_ble_on_sync(void)
 
     // Begin advertising
     // debug_printf("Begin advertising\n");
-    esp32_ble_start_advertise(&blecontext);
+    esp32_ble_start_advertise(&bleContext);
 }
 
 static void esp32_ble_on_reset(int reason)
@@ -328,10 +354,10 @@ bool device_ble_init()
     return true;
 }
 
-int device_ble_start(ble_context *con)
+int device_ble_start(ble_services_context &con)
 {
     int rc;
-    ble_gatt_svc_def *gatt_svr_svcs = con->gatt_service_def;
+    ble_gatt_svc_def *gatt_svr_svcs = con.gatt_service_def;
 
     ble_svc_gap_init();
     ble_svc_gatt_init();
@@ -349,7 +375,7 @@ int device_ble_start(ble_context *con)
     }
 
     // Set the default device name
-    rc = ble_svc_gap_device_name_set(con->pDeviceName);
+    rc = ble_svc_gap_device_name_set(con.pDeviceName);
     assert(rc == 0);
 
     // Start the BLE task
