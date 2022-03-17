@@ -16,6 +16,7 @@ macro(nf_common_compiler_definitions)
     endif()
    
     if(NOT NFCCF_TARGET OR "${NFCCF_TARGET}" STREQUAL "")
+        message(AUTHOR_WARNING "No TARGET argument specified when calling nf_common_compiler_definitions(), defaulting to '${BUILD_TARGET}'")
         set(NFCCF_TARGET ${NFCCF_BUILD_TARGET})
     endif()
 
