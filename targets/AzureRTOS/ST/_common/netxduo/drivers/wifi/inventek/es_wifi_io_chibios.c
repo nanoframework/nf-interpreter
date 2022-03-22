@@ -26,7 +26,6 @@ SPIDriver *spiDriver;
 static int volatile spi_rx_event = 0;
 static int volatile spi_tx_event = 0;
 static int volatile cmddata_rdy_rising_event = 0;
-SPIConfig spiConfiguration = {0};
 
 TX_EVENT_FLAGS_GROUP wifiEvents;
 
@@ -36,8 +35,6 @@ static void SPI_WIFI_DelayUs(uint32_t);
 //  Initialize SPI3
 int8_t SPI_WIFI_Init(uint16_t mode)
 {
-    uint16_t status;
-
     if (mode == ES_WIFI_INIT)
     {
         // config GPIOs
@@ -51,7 +48,7 @@ int8_t SPI_WIFI_Init(uint16_t mode)
         // configure SPI driver
         spiDriver = &SPID3;
 
-        //SPIConfig spiConfiguration = {0};
+        SPIConfig spiConfiguration = {0};
 
         // prescaller
         spiConfiguration.cr1 = SPI_CR1_BR_0;
