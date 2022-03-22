@@ -33,3 +33,10 @@ __nfweak TARGET_IFU_CAPABLE(false);
 // STM32 default capabiliy is JTAG update
 // declared as "weak" to allow targets to provide hard implementation
 __nfweak GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate);
+
+// STM32 targets can change their MAC address
+// Implemented as "weak" to allow it to be replaced with "hard" implementation at target level.
+__nfweak bool Target_CanChangeMacAddress()
+{
+    return true;
+}
