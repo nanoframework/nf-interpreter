@@ -24,3 +24,9 @@ HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
 // this target can use both JTAG and DFU for updates
 inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate | TargetCapabilities_DfuUpdate);
+
+// This target can have it's MAC address changed
+bool Target_CanChangeMacAddress()
+{
+    return true;
+}
