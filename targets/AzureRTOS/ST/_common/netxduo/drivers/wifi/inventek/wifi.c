@@ -23,7 +23,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-ES_WIFIObject_t    EsWifiObj;
+ES_WIFIObject_t    EsWifiObj = {0};
 
 /* Private functions ---------------------------------------------------------*/
 /**
@@ -127,6 +127,12 @@ WIFI_Status_t WIFI_GetMAC_Address(uint8_t  *mac)
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR;
   
+  // sanity check for WiFi object initilized
+  if(EsWifiObj.Product_ID[0] == 0)
+  {
+    return ret;
+  }
+
   if(ES_WIFI_GetMACAddress(&EsWifiObj, mac) == ES_WIFI_STATUS_OK)
   {
     ret = WIFI_STATUS_OK;

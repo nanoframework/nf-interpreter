@@ -23,7 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "es_wifi.h"
-#include "es_wifi_io.h"
+#include "es_wifi_io_stm.h"
 #include <string.h>
 #include "es_wifi_conf.h"
 #include <core_cm4.h>

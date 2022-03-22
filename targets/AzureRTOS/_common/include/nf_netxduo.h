@@ -10,6 +10,11 @@
 #include <nxd_dns.h>
 #include <nxd_dhcp_client.h>
 #include <nxd_bsd.h>
+#include <netxduo_options.h>
+
+#if defined(NETX_DRIVER_ISM43362)
+#include <wifi.h>
+#endif
 
 // #ifdef STM32L4XX
 

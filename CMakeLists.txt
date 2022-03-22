@@ -531,6 +531,11 @@ if( API_System.Net)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
+    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND ${NETX_DRIVER} STREQUAL "ISM43362")
+        set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
+        set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
+    endif()
+
     if(NF_NETWORKING_ENC28J60)
         set(USE_ENC28J60_DRIVER_OPTION TRUE CACHE INTERNAL "NF ENC28J60 network driver")
     else()

@@ -16,6 +16,7 @@
 
 void _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 VOID  nx_driver_stm32l4(NX_IP_DRIVER *driver_req_ptr);
+static uint8_t wifi_init();
 
 // byte pool for NetX Duo
 #define NX_APP_MEM_POOL_SIZE 1024 * 15
@@ -50,6 +51,13 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 
     // init NetXDuo
     nx_system_initialize();
+
+    // Initialize Wifi
+    if (wifi_init() != NX_SUCCESS)
+    {
+        HAL_AssertEx();
+        return NX_NOT_ENABLED;
+    }
 
     // allocate the Ethernet packet pool
     if (tx_byte_allocate(&nx_app_byte_pool, (void **)&pointer, NX_PACKET_POOL_SIZE, TX_NO_WAIT) != NX_SUCCESS)
@@ -175,6 +183,21 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
         }
     }
 
+
+    return NX_SUCCESS;
+}
+
+static uint8_t wifi_init()
+{
+
+#if defined(NETX_DRIVER_ISM43362)
+
+    if (WIFI_Init() != WIFI_STATUS_OK)
+    {
+        return NX_NOT_SUCCESSFUL;
+    }
+
+#endif
 
     return NX_SUCCESS;
 }

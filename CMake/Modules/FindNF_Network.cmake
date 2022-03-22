@@ -130,12 +130,25 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND
             NF_Network_SRCS
   
-            es_wifi_io.c
             es_wifi.c
             wifi.c
 
             nx_driver_stm32l4.c
         )
+
+        if(${CHIBIOS_HAL_REQUIRED})
+            # driver specific to ChibiOS HAL
+            list(APPEND
+                NF_Network_SRCS
+                es_wifi_io_chibios.c
+            )
+        else()
+            # drivers specific to STM HAL
+            list(APPEND
+                NF_Network_SRCS
+                es_wifi_io_stm.c
+            )
+        endif()
 
         # need this name in lower case
         string(TOLOWER "${NETX_DRIVER}" NETX_DRIVER_1)
@@ -145,6 +158,9 @@ if(RTOS_AZURERTOS_CHECK)
 
         # add includes too
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/System.Device.Spi)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/Windows.Devices.Spi)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
 
     elseif(NOT NETX_DRIVER OR "${NETX_DRIVER}" STREQUAL "")
         message(FATAL_ERROR "Need to set a driver for NetX Duo using NETX_DRIVER build option.")

@@ -22,4 +22,6 @@ typedef enum NetxDuoDriver
 
 #define NETX_DRIVER_@NETX_DRIVER@
 
+#cmakedefine01 CHIBIOS_HAL_REQUIRED
+
 #endif // NETXDUO_OPTIONS_H
