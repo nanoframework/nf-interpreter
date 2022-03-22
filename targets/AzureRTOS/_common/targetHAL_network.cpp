@@ -87,13 +87,10 @@ void nanoHAL_Network_Initialize()
                 if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
                 {
                     // store the MAC address in the configuration block
-                    ConfigurationManager_StoreConfigurationBlock(
+                    ConfigurationManager_UpdateConfigurationBlock(
                         &networkConfig,
                         DeviceConfigurationOption_Network,
-                        0,
-                        sizeof(HAL_Configuration_NetworkInterface),
-                        0,
-                        false);
+                        0);
                 }
             }
 #endif
