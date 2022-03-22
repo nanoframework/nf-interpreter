@@ -209,6 +209,8 @@ struct CLR_DBG_Commands
         static const CLR_UINT32 c_CapabilityFlags_HasNanoBooter             = 0x00001000;
         /////////////////////////////////////////////////////////////////////////////////
 
+        static const CLR_UINT32 c_CapabilityFlags_CanChangeMacAddress       = 0x00002000;
+
         static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_0       = 0x01000000;
         static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_1       = 0x02000000;
         static const CLR_UINT32 c_CapabilityFlags_PlatformCapabiliy_2       = 0x04000000;

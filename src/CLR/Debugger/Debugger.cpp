@@ -1555,6 +1555,12 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
                     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_HasNanoBooter;
             }
 
+            if (::Target_CanChangeMacAddress())
+            {
+                reply.u_capsFlags |=
+                    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_CanChangeMacAddress;
+            }
+
             reply.u_capsFlags |=
                 (::GetPlatformCapabilities() &
                  CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_PlatformCapabiliy_Mask);
