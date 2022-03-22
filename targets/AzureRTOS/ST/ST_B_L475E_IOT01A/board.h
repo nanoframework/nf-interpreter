@@ -101,8 +101,8 @@
 #define GPIOB_I2C2_SCL              10U
 #define GPIOB_MFX_I2C_SDA           11U
 #define GPIOB_I2C2_SDA              11U
-#define GPIOB_LCD_SEG20             12U
-#define GPIOB_LCD_SEG3              13U
+#define GPIOB_ISM43362_BOOT0        12U
+#define GPIOB_ISM43362_WAKEUP       13U
 #define GPIOB_LD2                   14U
 #define GPIOB_LCD_SEG4              15U
 
@@ -116,9 +116,9 @@
 #define GPIOC_LCD_SEG9              7U
 #define GPIOC_LCD_SEG13             8U
 #define GPIOC_OTG_FS_PSON           9U
-#define GPIOC_OTG_FS_OVCURR         10U
-#define GPIOC_OTG_FS_VBUS           11U
-#define GPIOC_OTG_FS_ID             12U
+#define GPIOC_SPI3_CLK              10U
+#define GPIOC_SPI3_MISO             11U
+#define GPIOC_SPI3_MOSI             12U
 #define GPIOC_BUTTON_USER           13U
 #define GPIOC_OSC32_IN              14U
 #define GPIOC_OSC32_OUT             15U
@@ -140,15 +140,15 @@
 #define GPIOD_LCD_SEG15             14U
 #define GPIOD_LCD_SEG8              15U
 
-#define GPIOE_XL_CS                 0U
-#define GPIOE_XL_INT                1U
+#define GPIOE_ISM43362_CS           0U
+#define GPIOE_ISM43362_CMDTRDY      1U
 #define GPIOE_SAI1_MCK              2U
 #define GPIOE_AUDIO_RST             3U
 #define GPIOE_SAI1_FS               4U
 #define GPIOE_SAI1_SCK              5U
 #define GPIOE_SAI1_SD               6U
 #define GPIOE_AUDIO_DIN             7U
-#define GPIOE_LED_GREEN             8U
+#define GPIOE_ISM43362_RST          8U
 #define GPIOE_AUDIO_CLK             9U
 #define GPIOE_QSPI_CLK              10U
 #define GPIOE_QSPI_CS               11U
@@ -241,8 +241,8 @@
 #define LINE_I2C2_SCL               PAL_LINE(GPIOB, 10U)
 #define LINE_MFX_I2C_SDA            PAL_LINE(GPIOB, 11U)
 #define LINE_I2C2_SDA               PAL_LINE(GPIOB, 11U)
-#define LINE_LCD_SEG20              PAL_LINE(GPIOB, 12U)
-#define LINE_LCD_SEG3               PAL_LINE(GPIOB, 13U)
+#define LINE_ISM43362_BOOT0         PAL_LINE(GPIOB, 12U)
+#define LINE_ISM43362_WAKEUP        PAL_LINE(GPIOB, 13U)
 #define LINE_LD2                    PAL_LINE(GPIOB, 14U)
 #define LINE_LCD_SEG4               PAL_LINE(GPIOB, 15U)
 #define LINE_MAG_CS                 PAL_LINE(GPIOC, 0U)
@@ -255,9 +255,9 @@
 #define LINE_LCD_SEG9               PAL_LINE(GPIOC, 7U)
 #define LINE_LCD_SEG13              PAL_LINE(GPIOC, 8U)
 #define LINE_OTG_FS_PSON            PAL_LINE(GPIOC, 9U)
-#define LINE_OTG_FS_OVCURR          PAL_LINE(GPIOC, 10U)
-#define LINE_OTG_FS_VBUS            PAL_LINE(GPIOC, 11U)
-#define LINE_OTG_FS_ID              PAL_LINE(GPIOC, 12U)
+#define LINE_SPI3_CLK               PAL_LINE(GPIOC, 10U)
+#define LINE_SPI3_MISO              PAL_LINE(GPIOC, 11U)
+#define LINE_SPI3_MOSI              PAL_LINE(GPIOC, 12U)
 #define LINE_BUTTON_USER            PAL_LINE(GPIOC, 13U)
 #define LINE_OSC32_IN               PAL_LINE(GPIOC, 14U)
 #define LINE_OSC32_OUT              PAL_LINE(GPIOC, 15U)
@@ -277,15 +277,15 @@
 #define LINE_LCD_SEG7               PAL_LINE(GPIOD, 13U)
 #define LINE_LCD_SEG15              PAL_LINE(GPIOD, 14U)
 #define LINE_LCD_SEG8               PAL_LINE(GPIOD, 15U)
-#define LINE_XL_CS                  PAL_LINE(GPIOE, 0U)
-#define LINE_XL_INT                 PAL_LINE(GPIOE, 1U)
+#define LINE_ISM43362_CS            PAL_LINE(GPIOE, 0U)
+#define LINE_ISM43362_CMDTRDY       PAL_LINE(GPIOE, 1U)
 #define LINE_SAI1_MCK               PAL_LINE(GPIOE, 2U)
 #define LINE_AUDIO_RST              PAL_LINE(GPIOE, 3U)
 #define LINE_SAI1_FS                PAL_LINE(GPIOE, 4U)
 #define LINE_SAI1_SCK               PAL_LINE(GPIOE, 5U)
 #define LINE_SAI1_SD                PAL_LINE(GPIOE, 6U)
 #define LINE_AUDIO_DIN              PAL_LINE(GPIOE, 7U)
-#define LINE_LED_GREEN              PAL_LINE(GPIOE, 8U)
+#define LINE_ISM43362_RST           PAL_LINE(GPIOE, 8U)
 #define LINE_AUDIO_CLK              PAL_LINE(GPIOE, 9U)
 #define LINE_QSPI_CLK               PAL_LINE(GPIOE, 10U)
 #define LINE_QSPI_CS                PAL_LINE(GPIOE, 11U)
@@ -502,8 +502,8 @@
  * PB9  - LCD_COM3                  (alternate 11).
  * PB10 - MFX_I2C_SCL I2C2_SCL      (alternate 4).
  * PB11 - MFX_I2C_SDA I2C2_SDA      (alternate 4).
- * PB12 - LCD_SEG20                 (alternate 11).
- * PB13 - LCD_SEG3                  (alternate 11).
+ * PB12 - ISM43362_BOOT0            (output floating).
+ * PB13 - ISM43362_WAKEUP           (output floating).
  * PB14 - LED_LD2                   (output pushpull maximum)
  * PB15 - LCD_SEG4                  (alternate 11).
  */
@@ -519,8 +519,8 @@
                                      PIN_MODE_ALTERNATE(GPIOB_LCD_COM3) |   \
                                      PIN_MODE_ALTERNATE(GPIOB_MFX_I2C_SCL) |\
                                      PIN_MODE_ALTERNATE(GPIOB_MFX_I2C_SDA) |\
-                                     PIN_MODE_ALTERNATE(GPIOB_LCD_SEG20) |  \
-                                     PIN_MODE_ALTERNATE(GPIOB_LCD_SEG3) |   \
+                                     PIN_MODE_OUTPUT(GPIOB_ISM43362_BOOT0) |\
+                                     PIN_MODE_OUTPUT(GPIOB_ISM43362_WAKEUP) |   \
                                      PIN_MODE_OUTPUT(GPIOB_LD2) |           \
                                      PIN_MODE_ALTERNATE(GPIOB_LCD_SEG4))                
 #define VAL_GPIOB_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOB_LCD_SEG21) |  \
@@ -535,8 +535,8 @@
                                      PIN_OTYPE_PUSHPULL(GPIOB_LCD_COM3) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOB_MFX_I2C_SCL) |\
                                      PIN_OTYPE_PUSHPULL(GPIOB_MFX_I2C_SDA) |\
-                                     PIN_OTYPE_PUSHPULL(GPIOB_LCD_SEG20) |  \
-                                     PIN_OTYPE_PUSHPULL(GPIOB_LCD_SEG3) |   \
+                                     PIN_OTYPE_PUSHPULL(GPIOB_ISM43362_BOOT0) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOB_ISM43362_WAKEUP) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOB_LD2) |        \
                                      PIN_OTYPE_PUSHPULL(GPIOB_LCD_SEG4))
 #define VAL_GPIOB_OSPEEDR           (PIN_OSPEED_HIGH(GPIOB_LCD_SEG21) |     \
@@ -551,8 +551,8 @@
                                      PIN_OSPEED_HIGH(GPIOB_LCD_COM3) |      \
                                      PIN_OSPEED_HIGH(GPIOB_MFX_I2C_SCL) |   \
                                      PIN_OSPEED_HIGH(GPIOB_MFX_I2C_SDA) |   \
-                                     PIN_OSPEED_HIGH(GPIOB_LCD_SEG20) |     \
-                                     PIN_OSPEED_HIGH(GPIOB_LCD_SEG3) |      \
+                                     PIN_OSPEED_HIGH(GPIOB_ISM43362_BOOT0) |     \
+                                     PIN_OSPEED_HIGH(GPIOB_ISM43362_WAKEUP) |      \
                                      PIN_OSPEED_HIGH(GPIOB_LD2) |           \
                                      PIN_OSPEED_HIGH(GPIOB_LCD_SEG4))
 #define VAL_GPIOB_PUPDR             (PIN_PUPDR_FLOATING(GPIOB_LCD_SEG21) |  \
@@ -567,8 +567,8 @@
                                      PIN_PUPDR_FLOATING(GPIOB_LCD_COM3) |   \
                                      PIN_PUPDR_FLOATING(GPIOB_MFX_I2C_SCL) |\
                                      PIN_PUPDR_FLOATING(GPIOB_MFX_I2C_SDA) |\
-                                     PIN_PUPDR_FLOATING(GPIOB_LCD_SEG20) |  \
-                                     PIN_PUPDR_FLOATING(GPIOB_LCD_SEG3) |   \
+                                     PIN_PUPDR_FLOATING(GPIOB_ISM43362_BOOT0) |  \
+                                     PIN_PUPDR_FLOATING(GPIOB_ISM43362_WAKEUP) |   \
                                      PIN_PUPDR_FLOATING(GPIOB_LD2) |        \
                                      PIN_PUPDR_FLOATING(GPIOB_LCD_SEG4))
 #define VAL_GPIOB_ODR               (PIN_ODR_HIGH(GPIOB_LCD_SEG21) |        \
@@ -583,8 +583,8 @@
                                      PIN_ODR_HIGH(GPIOB_LCD_COM3) |         \
                                      PIN_ODR_HIGH(GPIOB_MFX_I2C_SCL) |      \
                                      PIN_ODR_HIGH(GPIOB_MFX_I2C_SDA) |      \
-                                     PIN_ODR_HIGH(GPIOB_LCD_SEG20) |        \
-                                     PIN_ODR_HIGH(GPIOB_LCD_SEG3) |         \
+                                     PIN_ODR_HIGH(GPIOB_ISM43362_BOOT0) |        \
+                                     PIN_ODR_HIGH(GPIOB_ISM43362_WAKEUP) |         \
                                      PIN_ODR_HIGH(GPIOB_LD2) |              \
                                      PIN_ODR_HIGH(GPIOB_LCD_SEG4))
 #define VAL_GPIOB_AFRL              (PIN_AFIO_AF(GPIOB_LCD_SEG21, 11U) |    \
@@ -599,8 +599,8 @@
                                      PIN_AFIO_AF(GPIOB_LCD_COM3, 11U) |     \
                                      PIN_AFIO_AF(GPIOB_MFX_I2C_SCL, 4U) |   \
                                      PIN_AFIO_AF(GPIOB_MFX_I2C_SDA, 4U) |   \
-                                     PIN_AFIO_AF(GPIOB_LCD_SEG20, 11U) |    \
-                                     PIN_AFIO_AF(GPIOB_LCD_SEG3, 0U) |      \
+                                     PIN_AFIO_AF(GPIOB_ISM43362_BOOT0, 0U) |    \
+                                     PIN_AFIO_AF(GPIOB_ISM43362_WAKEUP, 0U) |      \
                                      PIN_AFIO_AF(GPIOB_LD2, 0U) |           \
                                      PIN_AFIO_AF(GPIOB_LCD_SEG4, 11U))
 #define VAL_GPIOB_ASCR              (PIN_ASCR_DISABLED(GPIOB_LCD_SEG21) |   \
@@ -615,8 +615,8 @@
                                      PIN_ASCR_DISABLED(GPIOB_LCD_COM3) |    \
                                      PIN_ASCR_DISABLED(GPIOB_MFX_I2C_SCL) | \
                                      PIN_ASCR_DISABLED(GPIOB_MFX_I2C_SDA) | \
-                                     PIN_ASCR_DISABLED(GPIOB_LCD_SEG20) |   \
-                                     PIN_ASCR_DISABLED(GPIOB_LCD_SEG3) |    \
+                                     PIN_ASCR_DISABLED(GPIOB_ISM43362_BOOT0) |   \
+                                     PIN_ASCR_DISABLED(GPIOB_ISM43362_WAKEUP) |    \
                                      PIN_ASCR_DISABLED(GPIOB_LD2) |         \
                                      PIN_ASCR_DISABLED(GPIOB_LCD_SEG4))
 #define VAL_GPIOB_LOCKR             (PIN_LOCKR_DISABLED(GPIOB_LCD_SEG21) |  \
@@ -631,8 +631,8 @@
                                      PIN_LOCKR_DISABLED(GPIOB_LCD_COM3) |   \
                                      PIN_LOCKR_DISABLED(GPIOB_MFX_I2C_SCL) |\
                                      PIN_LOCKR_DISABLED(GPIOB_MFX_I2C_SDA) |\
-                                     PIN_LOCKR_DISABLED(GPIOB_LCD_SEG20) |  \
-                                     PIN_LOCKR_DISABLED(GPIOB_LCD_SEG3) |   \
+                                     PIN_LOCKR_DISABLED(GPIOB_ISM43362_BOOT0) |  \
+                                     PIN_LOCKR_DISABLED(GPIOB_ISM43362_WAKEUP) |   \
                                      PIN_LOCKR_DISABLED(GPIOB_LD2) |        \
                                      PIN_LOCKR_DISABLED(GPIOB_LCD_SEG4))
 
@@ -649,9 +649,9 @@
  * PC7  - LCD_SEG9                  (alternate 11).
  * PC8  - LCD_SEG13                 (alternate 11).
  * PC9  - OTG_FS_PSON               (output pushpull maximum).
- * PC10 - OTG_FS_OVCURR             (input floating).
- * PC11 - OTG_FS_VBUS               (input floating).
- * PC12 - OTG_FS_ID                 (alternate 10).
+ * PC10 - SPI3_CLK                  (alternate 6).
+ * PC11 - SPI3_MISO                 (alternate 6).
+ * PC12 - SPI3_MOSI                 (alternate 6).
  * PC13 - BUTTON_USER               (input floating).
  * PC14 - OSC32_IN                  (input floating).
  * PC15 - OSC32_OUT                 (input floating).
@@ -666,9 +666,9 @@
                                      PIN_MODE_ALTERNATE(GPIOC_LCD_SEG9) |   \
                                      PIN_MODE_ALTERNATE(GPIOC_LCD_SEG13) |  \
                                      PIN_MODE_OUTPUT(GPIOC_OTG_FS_PSON) |   \
-                                     PIN_MODE_INPUT(GPIOC_OTG_FS_OVCURR) |  \
-                                     PIN_MODE_INPUT(GPIOC_OTG_FS_VBUS) |    \
-                                     PIN_MODE_ALTERNATE(GPIOC_OTG_FS_ID) |  \
+                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_CLK) |  \
+                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_MISO) |    \
+                                     PIN_MODE_ALTERNATE(GPIOC_SPI3_MOSI) |  \
                                      PIN_MODE_INPUT(GPIOC_BUTTON_USER) |    \
                                      PIN_MODE_INPUT(GPIOC_OSC32_IN) |       \
                                      PIN_MODE_INPUT(GPIOC_OSC32_OUT))
@@ -682,9 +682,9 @@
                                      PIN_OTYPE_PUSHPULL(GPIOC_LCD_SEG9) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_LCD_SEG13) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_PSON) |\
-                                     PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_OVCURR) |\
-                                     PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_VBUS) |\
-                                     PIN_OTYPE_PUSHPULL(GPIOC_OTG_FS_ID) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_CLK) |\
+                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_MISO) |\
+                                     PIN_OTYPE_PUSHPULL(GPIOC_SPI3_MOSI) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOC_BUTTON_USER) |\
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_IN) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_OUT))
@@ -698,9 +698,9 @@
                                      PIN_OSPEED_HIGH(GPIOC_LCD_SEG9) |      \
                                      PIN_OSPEED_HIGH(GPIOC_LCD_SEG13) |     \
                                      PIN_OSPEED_HIGH(GPIOC_OTG_FS_PSON) |   \
-                                     PIN_OSPEED_HIGH(GPIOC_OTG_FS_OVCURR) | \
-                                     PIN_OSPEED_HIGH(GPIOC_OTG_FS_VBUS) |   \
-                                     PIN_OSPEED_HIGH(GPIOC_OTG_FS_ID) |     \
+                                     PIN_OSPEED_HIGH(GPIOC_SPI3_CLK) | \
+                                     PIN_OSPEED_HIGH(GPIOC_SPI3_MISO) |   \
+                                     PIN_OSPEED_HIGH(GPIOC_SPI3_MOSI) |     \
                                      PIN_OSPEED_HIGH(GPIOC_BUTTON_USER) |   \
                                      PIN_OSPEED_VERYLOW(GPIOC_OSC32_IN) |   \
                                      PIN_OSPEED_VERYLOW(GPIOC_OSC32_OUT))
@@ -714,9 +714,9 @@
                                      PIN_PUPDR_FLOATING(GPIOC_LCD_SEG9) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_LCD_SEG13) |  \
                                      PIN_PUPDR_FLOATING(GPIOC_OTG_FS_PSON) |\
-                                     PIN_PUPDR_FLOATING(GPIOC_OTG_FS_OVCURR) |\
-                                     PIN_PUPDR_FLOATING(GPIOC_OTG_FS_VBUS) |\
-                                     PIN_PUPDR_FLOATING(GPIOC_OTG_FS_ID) |  \
+                                     PIN_PUPDR_FLOATING(GPIOC_SPI3_CLK) |\
+                                     PIN_PUPDR_FLOATING(GPIOC_SPI3_MISO) |\
+                                     PIN_PUPDR_FLOATING(GPIOC_SPI3_MOSI) |  \
                                      PIN_PUPDR_FLOATING(GPIOC_BUTTON_USER) |\
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_IN) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_OUT))
@@ -730,9 +730,9 @@
                                      PIN_ODR_HIGH(GPIOC_LCD_SEG9) |         \
                                      PIN_ODR_HIGH(GPIOC_LCD_SEG13) |        \
                                      PIN_ODR_HIGH(GPIOC_OTG_FS_PSON) |      \
-                                     PIN_ODR_HIGH(GPIOC_OTG_FS_OVCURR) |    \
-                                     PIN_ODR_HIGH(GPIOC_OTG_FS_VBUS) |      \
-                                     PIN_ODR_HIGH(GPIOC_OTG_FS_ID) |        \
+                                     PIN_ODR_HIGH(GPIOC_SPI3_CLK) |    \
+                                     PIN_ODR_HIGH(GPIOC_SPI3_MISO) |      \
+                                     PIN_ODR_HIGH(GPIOC_SPI3_MOSI) |        \
                                      PIN_ODR_HIGH(GPIOC_BUTTON_USER) |      \
                                      PIN_ODR_HIGH(GPIOC_OSC32_IN) |         \
                                      PIN_ODR_HIGH(GPIOC_OSC32_OUT))
@@ -746,9 +746,9 @@
                                      PIN_AFIO_AF(GPIOC_LCD_SEG9, 11U))
 #define VAL_GPIOC_AFRH              (PIN_AFIO_AF(GPIOC_LCD_SEG13, 11U) |    \
                                      PIN_AFIO_AF(GPIOC_OTG_FS_PSON, 0U) |   \
-                                     PIN_AFIO_AF(GPIOC_OTG_FS_OVCURR, 0U) | \
-                                     PIN_AFIO_AF(GPIOC_OTG_FS_VBUS, 0U) |   \
-                                     PIN_AFIO_AF(GPIOC_OTG_FS_ID, 10U) |    \
+                                     PIN_AFIO_AF(GPIOC_SPI3_CLK, 6U) | \
+                                     PIN_AFIO_AF(GPIOC_SPI3_MISO, 6U) |   \
+                                     PIN_AFIO_AF(GPIOC_SPI3_MOSI, 6U) |    \
                                      PIN_AFIO_AF(GPIOC_BUTTON_USER, 0U) |   \
                                      PIN_AFIO_AF(GPIOC_OSC32_IN, 0U) |      \
                                      PIN_AFIO_AF(GPIOC_OSC32_OUT, 0U))
@@ -762,9 +762,9 @@
                                      PIN_ASCR_DISABLED(GPIOC_LCD_SEG9) |    \
                                      PIN_ASCR_DISABLED(GPIOC_LCD_SEG13) |   \
                                      PIN_ASCR_DISABLED(GPIOC_OTG_FS_PSON) | \
-                                     PIN_ASCR_DISABLED(GPIOC_OTG_FS_OVCURR) |\
-                                     PIN_ASCR_DISABLED(GPIOC_OTG_FS_VBUS) | \
-                                     PIN_ASCR_DISABLED(GPIOC_OTG_FS_ID) |   \
+                                     PIN_ASCR_DISABLED(GPIOC_SPI3_CLK) |\
+                                     PIN_ASCR_DISABLED(GPIOC_SPI3_MISO) | \
+                                     PIN_ASCR_DISABLED(GPIOC_SPI3_MOSI) |   \
                                      PIN_ASCR_DISABLED(GPIOC_BUTTON_USER) | \
                                      PIN_ASCR_DISABLED(GPIOC_OSC32_IN) |    \
                                      PIN_ASCR_DISABLED(GPIOC_OSC32_OUT))
@@ -778,9 +778,9 @@
                                      PIN_LOCKR_DISABLED(GPIOC_LCD_SEG9) |   \
                                      PIN_LOCKR_DISABLED(GPIOC_LCD_SEG13) |  \
                                      PIN_LOCKR_DISABLED(GPIOC_OTG_FS_PSON) |\
-                                     PIN_LOCKR_DISABLED(GPIOC_OTG_FS_OVCURR) |\
-                                     PIN_LOCKR_DISABLED(GPIOC_OTG_FS_VBUS) |\
-                                     PIN_LOCKR_DISABLED(GPIOC_OTG_FS_ID) |  \
+                                     PIN_LOCKR_DISABLED(GPIOC_SPI3_CLK) |\
+                                     PIN_LOCKR_DISABLED(GPIOC_SPI3_MISO) |\
+                                     PIN_LOCKR_DISABLED(GPIOC_SPI3_MOSI) |  \
                                      PIN_LOCKR_DISABLED(GPIOC_BUTTON_USER) |\
                                      PIN_LOCKR_DISABLED(GPIOC_OSC32_IN) |   \
                                      PIN_LOCKR_DISABLED(GPIOC_OSC32_OUT))
@@ -937,15 +937,15 @@
 /*
  * GPIOE setup:
  *
- * PE0  - XL_CS                     (output pushpull maximum).
- * PE1  - XL_INT                    (input pulldown).
+ * PE0  - ISM43362_CS               (output pushpull maximum).
+ * PE1  - ISM43362_CMDTRDY          (input floating).
  * PE2  - SAI1_MCK                  (alternate 13).
  * PE3  - AUDIO_RST                 (output pushpull maximum).
  * PE4  - SAI1_FS                   (alternate 13).
  * PE5  - SAI1_SCK                  (alternate 13).
  * PE6  - SAI1_SD                   (alternate 13).
  * PE7  - AUDIO_DIN                 (alternate 6).
- * PE8  - LED_GREEN                 (output pushpull maximum).
+ * PE8  - ISM43362_RST              (output pushpull maximum).
  * PE9  - AUDIO_CLK                 (alternate 6).
  * PE10 - QSPI_CLK                  (alternate 10).
  * PE11 - QSPI_CS                   (alternate 10).
@@ -954,15 +954,15 @@
  * PE14 - QSPI_D2                   (alternate 10).
  * PE15 - QSPI_D3                   (alternate 10).
  */
-#define VAL_GPIOE_MODER             (PIN_MODE_OUTPUT(GPIOE_XL_CS) |         \
-                                     PIN_MODE_INPUT(GPIOE_XL_INT) |         \
+#define VAL_GPIOE_MODER             (PIN_MODE_OUTPUT(GPIOE_ISM43362_CS) |         \
+                                     PIN_MODE_INPUT(GPIOE_ISM43362_CMDTRDY) |         \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_MCK) |   \
                                      PIN_MODE_OUTPUT(GPIOE_AUDIO_RST) |     \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_FS) |    \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_SCK) |   \
                                      PIN_MODE_ALTERNATE(GPIOE_SAI1_SD) |    \
                                      PIN_MODE_ALTERNATE(GPIOE_AUDIO_DIN) |  \
-                                     PIN_MODE_OUTPUT(GPIOE_LED_GREEN) |     \
+                                     PIN_MODE_OUTPUT(GPIOE_ISM43362_RST) |  \
                                      PIN_MODE_ALTERNATE(GPIOE_AUDIO_CLK) |  \
                                      PIN_MODE_ALTERNATE(GPIOE_QSPI_CLK) |   \
                                      PIN_MODE_ALTERNATE(GPIOE_QSPI_CS) |    \
@@ -970,15 +970,15 @@
                                      PIN_MODE_ALTERNATE(GPIOE_QSPI_D1) |    \
                                      PIN_MODE_ALTERNATE(GPIOE_QSPI_D2) |    \
                                      PIN_MODE_ALTERNATE(GPIOE_QSPI_D3))
-#define VAL_GPIOE_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOE_XL_CS) |      \
-                                     PIN_OTYPE_PUSHPULL(GPIOE_XL_INT) |     \
+#define VAL_GPIOE_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOE_ISM43362_CS) |      \
+                                     PIN_OTYPE_PUSHPULL(GPIOE_ISM43362_CMDTRDY) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOE_SAI1_MCK) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOE_AUDIO_RST) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOE_SAI1_FS) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOE_SAI1_SCK) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOE_SAI1_SD) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOE_AUDIO_DIN) |  \
-                                     PIN_OTYPE_PUSHPULL(GPIOE_LED_GREEN) |  \
+                                     PIN_OTYPE_PUSHPULL(GPIOE_ISM43362_RST) |\
                                      PIN_OTYPE_PUSHPULL(GPIOE_AUDIO_CLK) |  \
                                      PIN_OTYPE_PUSHPULL(GPIOE_QSPI_CLK) |   \
                                      PIN_OTYPE_PUSHPULL(GPIOE_QSPI_CS) |    \
@@ -986,15 +986,15 @@
                                      PIN_OTYPE_PUSHPULL(GPIOE_QSPI_D1) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOE_QSPI_D2) |    \
                                      PIN_OTYPE_PUSHPULL(GPIOE_QSPI_D3))
-#define VAL_GPIOE_OSPEEDR           (PIN_OSPEED_HIGH(GPIOE_XL_CS) |         \
-                                     PIN_OSPEED_HIGH(GPIOE_XL_INT) |        \
+#define VAL_GPIOE_OSPEEDR           (PIN_OSPEED_HIGH(GPIOE_ISM43362_CS) |         \
+                                     PIN_OSPEED_VERYLOW(GPIOE_ISM43362_CMDTRDY) |        \
                                      PIN_OSPEED_HIGH(GPIOE_SAI1_MCK) |      \
                                      PIN_OSPEED_HIGH(GPIOE_AUDIO_RST) |     \
                                      PIN_OSPEED_HIGH(GPIOE_SAI1_FS) |       \
                                      PIN_OSPEED_HIGH(GPIOE_SAI1_SCK) |      \
                                      PIN_OSPEED_HIGH(GPIOE_SAI1_SD) |       \
                                      PIN_OSPEED_HIGH(GPIOE_AUDIO_DIN) |     \
-                                     PIN_OSPEED_HIGH(GPIOE_LED_GREEN) |     \
+                                     PIN_OSPEED_HIGH(GPIOE_ISM43362_RST) |  \
                                      PIN_OSPEED_HIGH(GPIOE_AUDIO_CLK) |     \
                                      PIN_OSPEED_HIGH(GPIOE_QSPI_CLK) |      \
                                      PIN_OSPEED_HIGH(GPIOE_QSPI_CS) |       \
@@ -1002,15 +1002,15 @@
                                      PIN_OSPEED_HIGH(GPIOE_QSPI_D1) |       \
                                      PIN_OSPEED_HIGH(GPIOE_QSPI_D2) |       \
                                      PIN_OSPEED_HIGH(GPIOE_QSPI_D3))
-#define VAL_GPIOE_PUPDR             (PIN_PUPDR_PULLUP(GPIOE_XL_CS) |        \
-                                     PIN_PUPDR_PULLDOWN(GPIOE_XL_INT) |     \
+#define VAL_GPIOE_PUPDR             (PIN_PUPDR_FLOATING(GPIOE_ISM43362_CS) |        \
+                                     PIN_PUPDR_FLOATING(GPIOE_ISM43362_CMDTRDY) |     \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_MCK) |   \
                                      PIN_PUPDR_FLOATING(GPIOE_AUDIO_RST) |  \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_FS) |    \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_SCK) |   \
                                      PIN_PUPDR_FLOATING(GPIOE_SAI1_SD) |    \
                                      PIN_PUPDR_FLOATING(GPIOE_AUDIO_DIN) |  \
-                                     PIN_PUPDR_FLOATING(GPIOE_LED_GREEN) |  \
+                                     PIN_PUPDR_FLOATING(GPIOE_ISM43362_RST) |\
                                      PIN_PUPDR_FLOATING(GPIOE_AUDIO_CLK) |  \
                                      PIN_PUPDR_PULLUP(GPIOE_QSPI_CLK) |     \
                                      PIN_PUPDR_PULLUP(GPIOE_QSPI_CS) |      \
@@ -1018,15 +1018,15 @@
                                      PIN_PUPDR_PULLUP(GPIOE_QSPI_D1) |      \
                                      PIN_PUPDR_PULLUP(GPIOE_QSPI_D2) |      \
                                      PIN_PUPDR_PULLUP(GPIOE_QSPI_D3))
-#define VAL_GPIOE_ODR               (PIN_ODR_HIGH(GPIOE_XL_CS) |            \
-                                     PIN_ODR_HIGH(GPIOE_XL_INT) |           \
+#define VAL_GPIOE_ODR               (PIN_ODR_HIGH(GPIOE_ISM43362_CS) |            \
+                                     PIN_ODR_HIGH(GPIOE_ISM43362_CMDTRDY) |           \
                                      PIN_ODR_HIGH(GPIOE_SAI1_MCK) |         \
                                      PIN_ODR_HIGH(GPIOE_AUDIO_RST) |        \
                                      PIN_ODR_HIGH(GPIOE_SAI1_FS) |          \
                                      PIN_ODR_HIGH(GPIOE_SAI1_SCK) |         \
                                      PIN_ODR_HIGH(GPIOE_SAI1_SD) |          \
                                      PIN_ODR_HIGH(GPIOE_AUDIO_DIN) |        \
-                                     PIN_ODR_LOW(GPIOE_LED_GREEN) |         \
+                                     PIN_ODR_HIGH(GPIOE_ISM43362_RST) |     \
                                      PIN_ODR_HIGH(GPIOE_AUDIO_CLK) |        \
                                      PIN_ODR_HIGH(GPIOE_QSPI_CLK) |         \
                                      PIN_ODR_HIGH(GPIOE_QSPI_CS) |          \
@@ -1034,15 +1034,15 @@
                                      PIN_ODR_HIGH(GPIOE_QSPI_D1) |          \
                                      PIN_ODR_HIGH(GPIOE_QSPI_D2) |          \
                                      PIN_ODR_HIGH(GPIOE_QSPI_D3))
-#define VAL_GPIOE_AFRL              (PIN_AFIO_AF(GPIOE_XL_CS, 0U) |         \
-                                     PIN_AFIO_AF(GPIOE_XL_INT, 0U) |        \
+#define VAL_GPIOE_AFRL              (PIN_AFIO_AF(GPIOE_ISM43362_CS, 0U) |         \
+                                     PIN_AFIO_AF(GPIOE_ISM43362_CMDTRDY, 0U) |        \
                                      PIN_AFIO_AF(GPIOE_SAI1_MCK, 13U) |     \
                                      PIN_AFIO_AF(GPIOE_AUDIO_RST, 0U) |     \
                                      PIN_AFIO_AF(GPIOE_SAI1_FS, 13U) |      \
                                      PIN_AFIO_AF(GPIOE_SAI1_SCK, 13U) |     \
                                      PIN_AFIO_AF(GPIOE_SAI1_SD, 13U) |      \
                                      PIN_AFIO_AF(GPIOE_AUDIO_DIN, 6U))
-#define VAL_GPIOE_AFRH              (PIN_AFIO_AF(GPIOE_LED_GREEN, 0U) |     \
+#define VAL_GPIOE_AFRH              (PIN_AFIO_AF(GPIOE_ISM43362_RST, 0U) |  \
                                      PIN_AFIO_AF(GPIOE_AUDIO_CLK, 6U) |     \
                                      PIN_AFIO_AF(GPIOE_QSPI_CLK, 10U) |     \
                                      PIN_AFIO_AF(GPIOE_QSPI_CS, 10U) |      \
@@ -1050,15 +1050,15 @@
                                      PIN_AFIO_AF(GPIOE_QSPI_D1, 10U) |      \
                                      PIN_AFIO_AF(GPIOE_QSPI_D2, 10U) |      \
                                      PIN_AFIO_AF(GPIOE_QSPI_D3, 10U))
-#define VAL_GPIOE_ASCR              (PIN_ASCR_DISABLED(GPIOE_XL_CS) |       \
-                                     PIN_ASCR_DISABLED(GPIOE_XL_INT) |      \
+#define VAL_GPIOE_ASCR              (PIN_ASCR_DISABLED(GPIOE_ISM43362_CS) |       \
+                                     PIN_ASCR_DISABLED(GPIOE_ISM43362_CMDTRDY) |      \
                                      PIN_ASCR_DISABLED(GPIOE_SAI1_MCK) |    \
                                      PIN_ASCR_DISABLED(GPIOE_AUDIO_RST) |   \
                                      PIN_ASCR_DISABLED(GPIOE_SAI1_FS) |     \
                                      PIN_ASCR_DISABLED(GPIOE_SAI1_SCK) |    \
                                      PIN_ASCR_DISABLED(GPIOE_SAI1_SD) |     \
                                      PIN_ASCR_DISABLED(GPIOE_AUDIO_DIN) |   \
-                                     PIN_ASCR_DISABLED(GPIOE_LED_GREEN) |   \
+                                     PIN_ASCR_DISABLED(GPIOE_ISM43362_RST) |\
                                      PIN_ASCR_DISABLED(GPIOE_AUDIO_CLK) |   \
                                      PIN_ASCR_DISABLED(GPIOE_QSPI_CLK) |    \
                                      PIN_ASCR_DISABLED(GPIOE_QSPI_CS) |     \
@@ -1066,15 +1066,15 @@
                                      PIN_ASCR_DISABLED(GPIOE_QSPI_D1) |     \
                                      PIN_ASCR_DISABLED(GPIOE_QSPI_D2) |     \
                                      PIN_ASCR_DISABLED(GPIOE_QSPI_D3))
-#define VAL_GPIOE_LOCKR             (PIN_LOCKR_DISABLED(GPIOE_XL_CS) |      \
-                                     PIN_LOCKR_DISABLED(GPIOE_XL_INT) |     \
+#define VAL_GPIOE_LOCKR             (PIN_LOCKR_DISABLED(GPIOE_ISM43362_CS) |      \
+                                     PIN_LOCKR_DISABLED(GPIOE_ISM43362_CMDTRDY) |     \
                                      PIN_LOCKR_DISABLED(GPIOE_SAI1_MCK) |   \
                                      PIN_LOCKR_DISABLED(GPIOE_AUDIO_RST) |  \
                                      PIN_LOCKR_DISABLED(GPIOE_SAI1_FS) |    \
                                      PIN_LOCKR_DISABLED(GPIOE_SAI1_SCK) |   \
                                      PIN_LOCKR_DISABLED(GPIOE_SAI1_SD) |    \
                                      PIN_LOCKR_DISABLED(GPIOE_AUDIO_DIN) |  \
-                                     PIN_LOCKR_DISABLED(GPIOE_LED_GREEN) |  \
+                                     PIN_LOCKR_DISABLED(GPIOE_ISM43362_RST) |\
                                      PIN_LOCKR_DISABLED(GPIOE_AUDIO_CLK) |  \
                                      PIN_LOCKR_DISABLED(GPIOE_QSPI_CLK) |   \
                                      PIN_LOCKR_DISABLED(GPIOE_QSPI_CS) |    \
