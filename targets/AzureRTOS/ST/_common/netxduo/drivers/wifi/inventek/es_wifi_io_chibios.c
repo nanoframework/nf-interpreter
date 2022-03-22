@@ -23,6 +23,7 @@ __attribute__((aligned(32)))
 uint8_t rxBuffer[220];
 
 SPIDriver *spiDriver;
+SPIConfig spiConfiguration = {0};
 static int volatile spi_rx_event = 0;
 static int volatile spi_tx_event = 0;
 static int volatile cmddata_rdy_rising_event = 0;
@@ -47,8 +48,6 @@ int8_t SPI_WIFI_Init(uint16_t mode)
 
         // configure SPI driver
         spiDriver = &SPID3;
-
-        SPIConfig spiConfiguration = {0};
 
         // prescaller
         spiConfiguration.cr1 = SPI_CR1_BR_0;
