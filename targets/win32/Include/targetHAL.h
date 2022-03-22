@@ -103,4 +103,4 @@ inline uint64_t CPU_MillisecondsToTicks(UINT64 uSec)
     return uSec * 10 * 1000;
 }
 
-#endif //TARGET_HAL_H
+#endif // TARGET_HAL_H
