@@ -130,6 +130,8 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND
             NF_Network_SRCS
   
+            nf_wireless.cpp
+            
             es_wifi.c
             wifi.c
 
