@@ -13,6 +13,8 @@
 #include <wifi.h>
 #endif
 
+uint8_t programWidth = 0;
+
 uint32_t GetExistingConfigSize()
 {
     uint32_t currentConfigSize = 0;
@@ -29,6 +31,18 @@ uint32_t GetExistingConfigSize()
 // with a mechanism other then saving to flash
 __nfweak void ConfigurationManager_Initialize()
 {
+    BlockStorageStream stream;
+    memset(&stream, 0, sizeof(BlockStorageStream));
+    BlockStorageStream_Initialize(&stream, BlockUsage_CONFIG);
+
+    BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
+    DeviceBlockInfo * deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
+    
+    if(deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
+    {
+        programWidth = 64 / 8;
+    }
+
     // init g_TargetConfiguration
     memset(&g_TargetConfiguration, 0, sizeof(HAL_TARGET_CONFIGURATION));
 
@@ -280,7 +294,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 && configurationIndex == 0))
         {
             // there is no network config block, we are storing the default one
-            // THIS IS THE ONLY CONFIG BLOCK THAT'S AUTO-CREATED
+            // THIS IS THE FIRST CONFIG BLOCK THAT'S AUTO-CREATED
             // OK to continue
             // set storage address as the start of the flash configuration sector
             storageAddress = (ByteAddress)&__nanoConfig_start__;
@@ -308,17 +322,37 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     }
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
-        if (g_TargetConfiguration.Wireless80211Configs == NULL ||
-            (g_TargetConfiguration.Wireless80211Configs->Count == 0 ||
-             (configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count))
-        {
-            // there is no room for this block, or there are no blocks stored at all
-            // failing the operation
-            return FALSE;
-        }
 
-        // set storage address from block address, plus the requested offset
-        storageAddress = (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
+#if (STM32_WIFI_SUPPORT == 1)
+
+        if (g_TargetConfiguration.Wireless80211Configs == NULL ||
+            (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
+        {
+            // there is no wireless 80211 config block, so we are storing the default one
+            // THIS IS THE SECOND CONFIG BLOCK THAT'S AUTO-CREATED
+            // OK to continue
+            // set storage address contiguous to the network config block
+            storageAddress = (uint32_t)&__nanoConfig_start__ + sizeof(HAL_Configuration_NetworkInterface);
+
+            // check programming width
+            if(programWidth > 0)
+            {
+                // round address to the next valid programming width
+                storageAddress += programWidth - storageAddress % programWidth;
+            }
+        }
+        else
+        {
+            // the requested config block is beyond the available count
+            if ((configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
+            {
+                return FALSE;
+            }
+
+            // set storage address from block address, plus the requested offset
+            storageAddress =
+                (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
+        }
 
         // set block size, in case it's not already set
         blockSize = sizeof(HAL_Configuration_Wireless80211);
@@ -328,6 +362,11 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             configurationBlock,
             c_MARKER_CONFIGURATION_WIRELESS80211_V1,
             sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+
+#else
+        // no support for WIFI in this STM32 build
+        return FALSE;
+#endif
     }
     else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
