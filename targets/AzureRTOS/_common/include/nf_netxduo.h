@@ -12,7 +12,7 @@
 #include <nxd_bsd.h>
 #include <netxduo_options.h>
 
-#if defined(NETX_DRIVER_ISM43362)
+#if defined(NETX_WIFI_DRIVER_ISM43362)
 #include <wifi.h>
 #endif
 

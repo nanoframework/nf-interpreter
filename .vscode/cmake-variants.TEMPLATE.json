@@ -53,7 +53,6 @@
           "STM32_HAL_DRIVER_SOURCE": "<path-to-stm32-hal-driver-mind-the-forward-slash>",
           "STM32_CMSIS_DEVICE_SOURCE": "<path-to-stm32-cmsis-for-device-mind-the-forward-slash>",
           "STM32_CMSIS_CORE_SOURCE": "<path-to-stm32-cmsis-core-mind-the-forward-slash>",
-          "STM32_WIFI_SUPPORT": "OFF-default-ON-to-enable-wifi-support-for-STM32",
           "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
           "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
           "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",

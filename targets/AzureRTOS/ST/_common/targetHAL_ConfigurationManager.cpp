@@ -9,7 +9,7 @@
 #include <Target_BlockStorage_STM32FlashDriver.h>
 #include <netxduo_options.h>
 
-#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -97,7 +97,7 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
                 (uint32_t)&__nanoConfig_start__,
                 (uint32_t)&__nanoConfig_end__);
 
-#if STM32_WIFI_SUPPORT
+#if (TARGET_HAS_WIFI_SUPPORT == 1)
         if (networkWirelessConfigs->Count == 0)
         {
             // there is no network config block available, get a default
@@ -323,7 +323,7 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
 
-#if (STM32_WIFI_SUPPORT == 1)
+#if (TARGET_HAS_WIFI_SUPPORT == 1)
 
         if (g_TargetConfiguration.Wireless80211Configs == NULL ||
             (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
@@ -713,7 +713,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
 {
     (void)configurationIndex;
 
-#if STM32_WIFI_SUPPORT
+#if (TARGET_HAS_WIFI_SUPPORT == 1)
 
     memset(config, 0, sizeof(HAL_Configuration_NetworkInterface));
 
@@ -730,7 +730,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
 
 // get default MAC
-#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
     // OK to ignore the return value, no harm done if it fails
     WIFI_GetMAC_Address(config->MacAddress);
 #endif

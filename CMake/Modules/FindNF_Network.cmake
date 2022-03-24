@@ -36,7 +36,7 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND NF_Network_SRCS ssl_stubs.cpp)
     endif()
 
-    if("${NETX_DRIVER}" STREQUAL "LAN8742")
+    if("${NETX_ETHERNET_DRIVER}" STREQUAL "LAN8742")
 
         # add driver files to network sources
         list(APPEND
@@ -54,7 +54,7 @@ if(RTOS_AZURERTOS_CHECK)
         )
 
         # need this name in lower case
-        string(TOLOWER "${NETX_DRIVER}" NETX_DRIVER_1)
+        string(TOLOWER "${NETX_ETHERNET_DRIVER}" NETX_ETHERNET_DRIVER_1)
 
         # add includes too
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet)
@@ -124,7 +124,7 @@ if(RTOS_AZURERTOS_CHECK)
             ${ETH_SOURCE_FILE} 
             "${ETH_SOURCE_FILE_FINAL_CONTENTS_2}")
 
-    elseif("${NETX_DRIVER}" STREQUAL "ISM43362")
+    elseif("${NETX_WIFI_DRIVER}" STREQUAL "ISM43362")
 
         # add driver files to network sources
         list(APPEND
@@ -153,7 +153,7 @@ if(RTOS_AZURERTOS_CHECK)
         endif()
 
         # need this name in lower case
-        string(TOLOWER "${NETX_DRIVER}" NETX_DRIVER_1)
+        string(TOLOWER "${NETX_WIFI_DRIVER}" NETX_WIFI_DRIVER_1)
 
         SET(NX_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
         SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
@@ -164,10 +164,6 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/Windows.Devices.Spi)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
 
-    elseif(NOT NETX_DRIVER OR "${NETX_DRIVER}" STREQUAL "")
-        message(FATAL_ERROR "Need to set a driver for NetX Duo using NETX_DRIVER build option.")
-    else()
-        message(FATAL_ERROR "The specified driver for NetX Duo '${NETX_DRIVER}' is not available.")
     endif()
 
     # add source files 
@@ -192,9 +188,10 @@ if(RTOS_AZURERTOS_CHECK)
                 # drivers
                 ${NX_DRIVER_LOCATION}
                 ${NX_DRIVER_LOCATION}/..
+                
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_DRIVER_1}
+                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_ETHERNET_DRIVER_1}
                 ${TARGET_BASE_LOCATION}/common/CubeMX
 
                 # ISM43362

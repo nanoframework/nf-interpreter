@@ -24,6 +24,53 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
+# sets network connectivity options according to the NetX driver choosen in build options NETX_WIFI_DRIVER and NETX_ETHERNET_DRIVER
+macro(nf_set_network_connectivity_options)
+
+    # sanity check
+    if(NOT DEFINED NETX_ETHERNET_DRIVER AND NOT DEFINED NETX_WIFI_DRIVER)
+        message(FATAL_ERROR "\n\nSorry but you must define either NETX_ETHERNET_DRIVER or NETX_WIFI_DRIVER build option...\n\n")
+    endif()
+
+    ############################
+    if(DEFINED NETX_WIFI_DRIVER)
+
+        # list of supported Wi-Fi drivers
+        set(NETX_WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
+        # try to find the driver in the list
+        list(FIND NETX_WIFI_DRIVER_SUPPORTED_OPTIONS ${NETX_WIFI_DRIVER} WIFI_DRIVER_NAME_INDEX)
+
+        if(WIFI_DRIVER_NAME_INDEX EQUAL -1)
+            # driver is NOT supported 
+            message(FATAL_ERROR "\n\nSorry but '${NETX_WIFI_DRIVER}' provided in NETX_WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+        elseif(WIFI_DRIVER_NAME_INDEX EQUAL 0)
+            set(TARGET_HAS_WIFI_SUPPORT TRUE BOOL)
+        else()
+            message(FATAL_ERROR "invalid index for WIFI_DRIVER_NAME_INDEX")
+        endif()
+
+    endif()
+
+    ################################
+    if(DEFINED NETX_ETHERNET_DRIVER)
+
+        # list of supported Ethernet drivers
+        set(NETX_ETHERNET_DRIVER_SUPPORTED_OPTIONS "LAN8742")
+        # try to find the driver in the list
+        list(FIND NETX_ETHERNET_DRIVER_SUPPORTED_OPTIONS ${NETX_ETHERNET_DRIVER} ETHERNET_DRIVER_NAME_INDEX)
+
+        if(ETHERNET_DRIVER_NAME_INDEX EQUAL -1)
+            # driver is NOT supported 
+            message(FATAL_ERROR "\n\nSorry but '${NETX_ETHERNET_DRIVER}' provided in NETX_ETHERNET_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+        elseif(ETHERNET_DRIVER_NAME_INDEX EQUAL 0)
+            set(TARGET_HAS_ETHERNET_SUPPORT TRUE BOOL)
+        else()
+            message(FATAL_ERROR "invalid index for ETHERNET_DRIVER_NAME_INDEX")
+        endif()
+        
+    endif()
+
+endmacro()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for

@@ -18,9 +18,11 @@ typedef enum NetxDuoDriver
     NetxDuoDriver_LAN8742 = 20,
 } NetxDuoDriver;
 
-#cmakedefine01 STM32_WIFI_SUPPORT
+#cmakedefine01 TARGET_HAS_WIFI_SUPPORT
+#cmakedefine01 TARGET_HAS_ETHERNET_SUPPORT
 
-#define NETX_DRIVER_@NETX_DRIVER@
+#define NETX_WIFI_DRIVER_@NETX_WIFI_DRIVER@
+#define NETX_ETHERNET_DRIVER_@NETX_ETHERNET_DRIVER@
 
 #cmakedefine01 CHIBIOS_HAL_REQUIRED
 

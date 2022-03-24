@@ -7,7 +7,7 @@
 
 #include <nanoHAL.h>
 #include <nf_netxduo.h>
-#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -79,7 +79,7 @@ void nanoHAL_Network_Initialize()
         if (NF_NetXDuo_Init(&networkConfig) == NX_SUCCESS)
         {
 
-#if defined(NETX_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
             // check if we have the MAC address stored in the configuration block
             if (networkConfig.MacAddress[0] == 0xFF)
             {

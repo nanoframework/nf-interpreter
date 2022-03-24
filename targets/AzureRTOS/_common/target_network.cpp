@@ -76,6 +76,7 @@ bool Network_Interface_Close(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+#if (TARGET_HAS_WIFI_SUPPORT == 1)
         // Wireless
         case NetworkInterfaceType_Wireless80211:
             return NF_Wireless_Close();
@@ -83,12 +84,14 @@ bool Network_Interface_Close(int index)
         // // Soft AP
         // case NetworkInterfaceType_WirelessAP:
         //     return NF_ESP32_WirelessAP_Close();
+#endif
 
-#ifdef ESP32_ETHERNET_SUPPORT
+#if (TARGET_HAS_ETHERNET_SUPPORT == 1)
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Close();
 #endif
+
         default:
             break;
     }

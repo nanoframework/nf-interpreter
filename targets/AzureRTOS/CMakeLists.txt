@@ -280,6 +280,10 @@ if(AZURERTOS_NETXDUO_REQUIRED)
 endif()
 
 ##############################
+# network connectivity options
+nf_set_network_connectivity_options()
+
+##############################
 # AzureRTOS common directories
 add_subdirectory(_common)
 add_subdirectory(_include)
