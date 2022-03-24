@@ -74,7 +74,7 @@ int NF_Wireless_Open(HAL_Configuration_NetworkInterface *config)
     if ((wirelessConfig->Options & Wireless80211Configuration_ConfigurationOptions_AutoConnect) &&
         (hal_strlen_s((const char *)wirelessConfig->Ssid) > 0))
     {
-        NF_Wireless_Start_Connect(wirelessConfig);
+        return NF_Wireless_Start_Connect(wirelessConfig) == true ? 0 : SOCK_SOCKET_ERROR;
 
         // don't start smart connect
         // okToStartSmartConnect = false;
