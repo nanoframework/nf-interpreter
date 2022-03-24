@@ -11,12 +11,12 @@
 // this is to store the return value of the calls to sockets APIs
 int socketErrorCode;
 
-Sockets_LWIP_Driver g_Sockets_LWIP_Driver;
+Sockets_NETX_Driver g_Sockets_NETX_Driver;
 
 SOCK_SOCKET SOCK_socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Socket(family, type, protocol, FALSE);
+    return Sockets_NETX_Driver::Socket(family, type, protocol, FALSE);
 }
 int SOCK_bind(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addressLen)
 {
@@ -26,32 +26,32 @@ int SOCK_bind(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addre
 int SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Connect(socket, address, addressLen);
+    return Sockets_NETX_Driver::Connect(socket, address, addressLen);
 }
 int SOCK_send(SOCK_SOCKET socket, const char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Send(socket, buf, len, flags);
+    return Sockets_NETX_Driver::Send(socket, buf, len, flags);
 }
 int SOCK_recv(SOCK_SOCKET socket, char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Recv(socket, buf, len, flags);
+    return Sockets_NETX_Driver::Recv(socket, buf, len, flags);
 }
 int SOCK_close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Close(socket);
+    return Sockets_NETX_Driver::Close(socket);
 }
 int SOCK_listen(SOCK_SOCKET socket, int backlog)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Listen(socket, backlog);
+    return Sockets_NETX_Driver::Listen(socket, backlog);
 }
 SOCK_SOCKET SOCK_accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Accept(socket, address, addressLen, FALSE);
+    return Sockets_NETX_Driver::Accept(socket, address, addressLen, FALSE);
 }
 int SOCK_shutdown(SOCK_SOCKET socket, int how)
 {
@@ -95,7 +95,7 @@ int SOCK_select(
     const struct SOCK_timeval *timeout)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Select(nfds, readfds, writefds, except, timeout);
+    return Sockets_NETX_Driver::Select(nfds, readfds, writefds, except, timeout);
 }
 int SOCK_setsockopt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
 {
@@ -120,31 +120,31 @@ int SOCK_getsockname(SOCK_SOCKET socket, struct SOCK_sockaddr *name, int *namele
 int SOCK_recvfrom(SOCK_SOCKET s, char *buf, int len, int flags, struct SOCK_sockaddr *from, int *fromlen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::RecvFrom(s, buf, len, flags, from, fromlen);
+    return Sockets_NETX_Driver::RecvFrom(s, buf, len, flags, from, fromlen);
 }
 int SOCK_sendto(SOCK_SOCKET s, const char *buf, int len, int flags, const struct SOCK_sockaddr *to, int tolen)
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::SendTo(s, buf, len, flags, to, tolen);
+    return Sockets_NETX_Driver::SendTo(s, buf, len, flags, to, tolen);
 }
 
 bool Network_Initialize()
 {
     NATIVE_PROFILE_PAL_COM();
-    return Sockets_LWIP_Driver::Initialize();
+    return Sockets_NETX_Driver::Initialize();
 }
 
 bool Network_Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
 
-    return Sockets_LWIP_Driver::Uninitialize();
+    return Sockets_NETX_Driver::Uninitialize();
 }
 
 void SOCKETS_CloseConnections()
 {
     NATIVE_PROFILE_PAL_COM();
-    Sockets_LWIP_Driver::CloseConnections(FALSE);
+    Sockets_NETX_Driver::CloseConnections(FALSE);
 }
 
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(HAL_Configuration_NetworkInterface *config, uint32_t interfaceIndex)
@@ -235,17 +235,17 @@ const char *SOCK_IPAddressToString(uint32_t address)
 //  lost.
 //
 //-----------------------------------------------------------------------------
-void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
+void Sockets_NETX_Driver::CloseConnections(bool fCloseDbg)
 {
     NATIVE_PROFILE_PAL_COM();
 
-    int32_t cnt = g_Sockets_LWIP_Driver.m_cntSockets;
+    int32_t cnt = g_Sockets_NETX_Driver.m_cntSockets;
     int32_t idx = 0;
 
     // round one - close all SSL sockets
     for (int32_t i = cnt - 1; i >= 0; i--)
     {
-        struct SocketRegisterMap &entry = g_Sockets_LWIP_Driver.m_socketHandles[i];
+        struct SocketRegisterMap &entry = g_Sockets_NETX_Driver.m_socketHandles[i];
 
         if (entry.m_socket != SOCK_SOCKET_ERROR && entry.m_sslData != NULL)
         {
@@ -254,11 +254,11 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
     }
 
     // round two - close all non-SSL sockets
-    cnt = g_Sockets_LWIP_Driver.m_cntSockets;
+    cnt = g_Sockets_NETX_Driver.m_cntSockets;
 
     for (int32_t i = 0; i < cnt; i++)
     {
-        struct SocketRegisterMap &entry = g_Sockets_LWIP_Driver.m_socketHandles[i];
+        struct SocketRegisterMap &entry = g_Sockets_NETX_Driver.m_socketHandles[i];
 
         if (entry.m_socket != SOCK_SOCKET_ERROR)
         {
@@ -267,17 +267,17 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
                 // use the HAL method so we don't unregister the socket since we handle that here
                 HAL_SOCK_close(entry.m_socket);
 
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
-                g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = NULL;
-                g_Sockets_LWIP_Driver.m_cntSockets--;
+                g_Sockets_NETX_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
+                g_Sockets_NETX_Driver.m_socketHandles[i].m_flags = 0;
+                g_Sockets_NETX_Driver.m_socketHandles[i].m_sslData = NULL;
+                g_Sockets_NETX_Driver.m_cntSockets--;
             }
             else if (i > 0)
             {
                 memcpy(
-                    &g_Sockets_LWIP_Driver.m_socketHandles[i],
-                    &g_Sockets_LWIP_Driver.m_socketHandles[idx++],
-                    sizeof(g_Sockets_LWIP_Driver.m_socketHandles[i]));
+                    &g_Sockets_NETX_Driver.m_socketHandles[i],
+                    &g_Sockets_NETX_Driver.m_socketHandles[idx++],
+                    sizeof(g_Sockets_NETX_Driver.m_socketHandles[i]));
             }
         }
     }
@@ -285,7 +285,7 @@ void Sockets_LWIP_Driver::CloseConnections(bool fCloseDbg)
 
 //--//
 
-SOCK_SOCKET Sockets_LWIP_Driver::Socket(int32_t family, int32_t type, int32_t protocol, bool fDebug)
+SOCK_SOCKET Sockets_NETX_Driver::Socket(int32_t family, int32_t type, int32_t protocol, bool fDebug)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -297,26 +297,26 @@ SOCK_SOCKET Sockets_LWIP_Driver::Socket(int32_t family, int32_t type, int32_t pr
     }
     return ret;
 }
-int Sockets_LWIP_Driver::Connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int32_t addressLen)
+int Sockets_NETX_Driver::Connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int32_t addressLen)
 {
     NATIVE_PROFILE_PAL_COM();
 
     return HAL_SOCK_connect(socket, address, addressLen);
 }
-int Sockets_LWIP_Driver::Send(SOCK_SOCKET socket, const char *buf, int32_t len, int32_t flags)
+int Sockets_NETX_Driver::Send(SOCK_SOCKET socket, const char *buf, int32_t len, int32_t flags)
 {
     NATIVE_PROFILE_PAL_COM();
 
     return HAL_SOCK_send(socket, buf, len, flags);
 }
-int Sockets_LWIP_Driver::Recv(SOCK_SOCKET socket, char *buf, int32_t len, int32_t flags)
+int Sockets_NETX_Driver::Recv(SOCK_SOCKET socket, char *buf, int32_t len, int32_t flags)
 {
     NATIVE_PROFILE_PAL_COM();
 
     return HAL_SOCK_recv(socket, buf, len, flags);
 }
 
-int Sockets_LWIP_Driver::Shutdown(SOCK_SOCKET sock, int32_t how)
+int Sockets_NETX_Driver::Shutdown(SOCK_SOCKET sock, int32_t how)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -330,19 +330,19 @@ int Sockets_LWIP_Driver::Shutdown(SOCK_SOCKET sock, int32_t how)
 // closed socket.  Therfore in the select thread the socket is closed.
 //
 //-----------------------------------------------------------------------------
-int Sockets_LWIP_Driver::Close(SOCK_SOCKET sock)
+int Sockets_NETX_Driver::Close(SOCK_SOCKET sock)
 {
     NATIVE_PROFILE_PAL_COM();
     UnregisterSocket(sock);
     return HAL_SOCK_close(sock);
 }
-int Sockets_LWIP_Driver::Listen(SOCK_SOCKET socket, int32_t backlog)
+int Sockets_NETX_Driver::Listen(SOCK_SOCKET socket, int32_t backlog)
 {
     NATIVE_PROFILE_PAL_COM();
 
     return HAL_SOCK_listen(socket, backlog);
 }
-SOCK_SOCKET Sockets_LWIP_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen, bool fDebug)
+SOCK_SOCKET Sockets_NETX_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen, bool fDebug)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -356,7 +356,7 @@ SOCK_SOCKET Sockets_LWIP_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr
     return ret;
 }
 
-int Sockets_LWIP_Driver::Select(
+int Sockets_NETX_Driver::Select(
     int32_t nfds,
     SOCK_fd_set *readfds,
     SOCK_fd_set *writefds,
@@ -368,7 +368,7 @@ int Sockets_LWIP_Driver::Select(
     return HAL_SOCK_select(nfds, readfds, writefds, exceptfds, timeout);
 }
 
-int Sockets_LWIP_Driver::RecvFrom(
+int Sockets_NETX_Driver::RecvFrom(
     SOCK_SOCKET s,
     char *buf,
     int32_t len,
@@ -381,7 +381,7 @@ int Sockets_LWIP_Driver::RecvFrom(
     return HAL_SOCK_recvfrom(s, buf, len, flags, from, fromlen);
 }
 
-int Sockets_LWIP_Driver::SendTo(
+int Sockets_NETX_Driver::SendTo(
     SOCK_SOCKET s,
     const char *buf,
     int32_t len,
@@ -394,22 +394,22 @@ int Sockets_LWIP_Driver::SendTo(
     return HAL_SOCK_sendto(s, buf, len, flags, to, tolen);
 }
 
-bool Sockets_LWIP_Driver::Initialize()
+bool Sockets_NETX_Driver::Initialize()
 {
     NATIVE_PROFILE_PAL_COM();
     SOCKET_CHECK_ENTER();
 
     if (!s_initialized)
     {
-        g_Sockets_LWIP_Driver.m_fShuttingDown = FALSE;
+        g_Sockets_NETX_Driver.m_fShuttingDown = FALSE;
 
-        g_Sockets_LWIP_Driver.m_cntSockets = 0;
+        g_Sockets_NETX_Driver.m_cntSockets = 0;
 
         for (int32_t i = 0; i < SOCKETS_MAX_COUNT; i++)
         {
-            g_Sockets_LWIP_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
-            g_Sockets_LWIP_Driver.m_socketHandles[i].m_flags = 0;
-            g_Sockets_LWIP_Driver.m_socketHandles[i].m_sslData = NULL;
+            g_Sockets_NETX_Driver.m_socketHandles[i].m_socket = SOCK_SOCKET_ERROR;
+            g_Sockets_NETX_Driver.m_socketHandles[i].m_flags = 0;
+            g_Sockets_NETX_Driver.m_socketHandles[i].m_sslData = NULL;
         }
 
         SOCKET_CHECK_bool(HAL_SOCK_Initialize());
@@ -423,14 +423,14 @@ bool Sockets_LWIP_Driver::Initialize()
 }
 
 // Dummy methods in case Debbuger is not installed
-__nfweak void Sockets_LWIP_Driver::Debugger_Abort()
+__nfweak void Sockets_NETX_Driver::Debugger_Abort()
 {
 }
-__nfweak void Sockets_LWIP_Driver::Debugger_Uninitialize()
+__nfweak void Sockets_NETX_Driver::Debugger_Uninitialize()
 {
 }
 
-bool Sockets_LWIP_Driver::Uninitialize()
+bool Sockets_NETX_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_COM();
     bool ret = TRUE;
@@ -465,7 +465,7 @@ bool Sockets_LWIP_Driver::Uninitialize()
 //    listening or connected state
 //
 //-----------------------------------------------------------------------------
-void Sockets_LWIP_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool fDebug)
+void Sockets_NETX_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool fDebug)
 {
     (void)selectable;
 
@@ -476,21 +476,21 @@ void Sockets_LWIP_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool
         return;
     }
 
-    if (g_Sockets_LWIP_Driver.m_cntSockets >= SOCKETS_MAX_COUNT)
+    if (g_Sockets_NETX_Driver.m_cntSockets >= SOCKETS_MAX_COUNT)
         return;
 
     GLOBAL_LOCK_SOCKETS(lock);
 
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = sock;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_sslData = NULL;
+    g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets].m_socket = sock;
+    g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets].m_flags = 0;
+    g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets].m_sslData = NULL;
 
     if (fDebug)
         SET_SOCKET_FLAG(
-            g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets],
+            g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets],
             SocketRegisterMap::c_DebugSocket);
 
-    g_Sockets_LWIP_Driver.m_cntSockets++;
+    g_Sockets_NETX_Driver.m_cntSockets++;
 }
 
 //-----------------------------------------------------------------------------
@@ -499,30 +499,30 @@ void Sockets_LWIP_Driver::RegisterSocket(SOCK_SOCKET sock, bool selectable, bool
 //    This method should only be called immediately before closing down a socket.
 //
 //-----------------------------------------------------------------------------
-void Sockets_LWIP_Driver::UnregisterSocket(SOCK_SOCKET sock)
+void Sockets_NETX_Driver::UnregisterSocket(SOCK_SOCKET sock)
 {
     int32_t index = -1;
 
     NATIVE_PROFILE_PAL_COM();
     GLOBAL_LOCK_SOCKETS(lock);
 
-    g_Sockets_LWIP_Driver.GetSocketSslData(sock, index);
+    g_Sockets_NETX_Driver.GetSocketSslData(sock, index);
 
     if (index == -1)
         return;
 
-    g_Sockets_LWIP_Driver.m_cntSockets--;
+    g_Sockets_NETX_Driver.m_cntSockets--;
 
-    if (index != g_Sockets_LWIP_Driver.m_cntSockets)
+    if (index != g_Sockets_NETX_Driver.m_cntSockets)
     {
         memcpy(
-            &g_Sockets_LWIP_Driver.m_socketHandles[index],
-            &g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets],
-            sizeof(g_Sockets_LWIP_Driver.m_socketHandles[index]));
+            &g_Sockets_NETX_Driver.m_socketHandles[index],
+            &g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets],
+            sizeof(g_Sockets_NETX_Driver.m_socketHandles[index]));
     }
 
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_socket = SOCK_SOCKET_ERROR;
-    g_Sockets_LWIP_Driver.m_socketHandles[g_Sockets_LWIP_Driver.m_cntSockets].m_flags = 0;
+    g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets].m_socket = SOCK_SOCKET_ERROR;
+    g_Sockets_NETX_Driver.m_socketHandles[g_Sockets_NETX_Driver.m_cntSockets].m_flags = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,6 +533,6 @@ void Sockets_LWIP_Driver::UnregisterSocket(SOCK_SOCKET sock)
 //     return;
 // }
 
-bool Sockets_LWIP_Driver::s_initialized = FALSE;
-bool Sockets_LWIP_Driver::s_wirelessInitialized = FALSE;
-bool Sockets_LWIP_Driver::s_discoveryInitialized = FALSE;
+bool Sockets_NETX_Driver::s_initialized = FALSE;
+bool Sockets_NETX_Driver::s_wirelessInitialized = FALSE;
+bool Sockets_NETX_Driver::s_discoveryInitialized = FALSE;

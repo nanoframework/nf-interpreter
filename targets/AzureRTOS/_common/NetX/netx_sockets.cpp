@@ -43,21 +43,21 @@ extern "C"
 }
 //--//
 
-LWIP_SOCKETS_Driver g_LWIP_SOCKETS_Driver;
+NETX_SOCKETS_Driver g_NETX_SOCKETS_Driver;
 
 //--//
 static HAL_CONTINUATION PostAddressChangedContinuation;
 static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
 
-void LWIP_SOCKETS_Driver::PostAddressChanged(void *arg)
+void NETX_SOCKETS_Driver::PostAddressChanged(void *arg)
 {
     (void)arg;
 
     Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, 0);
 }
 
-void LWIP_SOCKETS_Driver::PostAvailabilityOn(void *arg)
+void NETX_SOCKETS_Driver::PostAvailabilityOn(void *arg)
 {
     (void)arg;
 
@@ -67,7 +67,7 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOn(void *arg)
         0);
 }
 
-void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
+void NETX_SOCKETS_Driver::PostAvailabilityOff(void *arg)
 {
     (void)arg;
 
@@ -77,7 +77,7 @@ void LWIP_SOCKETS_Driver::PostAvailabilityOff(void *arg)
         0);
 }
 
-HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
+HRESULT NETX_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
 {
     (void)interfaceIndex;
 
@@ -93,7 +93,7 @@ HRESULT LWIP_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *status)
     return S_OK;
 }
 
-HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
+HRESULT NETX_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t *address)
 {
     struct in_addr ipv4_addr;
 
@@ -109,7 +109,7 @@ HRESULT LWIP_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint64_t 
     return S_OK;
 }
 
-const char *LWIP_SOCKETS_Driver::IPAddressToString(uint32_t address)
+const char *NETX_SOCKETS_Driver::IPAddressToString(uint32_t address)
 {
     // get IP v4 address in numeric format
     // FIXME IPV6
@@ -118,7 +118,7 @@ const char *LWIP_SOCKETS_Driver::IPAddressToString(uint32_t address)
     return inet_ntoa(ip4Address);
 }
 
-void LWIP_SOCKETS_Driver::Link_callback(NX_IP *ipInstance)
+void NETX_SOCKETS_Driver::Link_callback(NX_IP *ipInstance)
 {
     uint32_t actual_status;
 
@@ -141,7 +141,7 @@ void LWIP_SOCKETS_Driver::Link_callback(NX_IP *ipInstance)
     }
 }
 
-void LWIP_SOCKETS_Driver::Status_callback(NX_IP *ipInstance)
+void NETX_SOCKETS_Driver::Status_callback(NX_IP *ipInstance)
 {
     (void)ipInstance;
 
@@ -191,7 +191,7 @@ void LWIP_SOCKETS_Driver::Status_callback(NX_IP *ipInstance)
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
 }
 
-bool LWIP_SOCKETS_Driver::Initialize()
+bool NETX_SOCKETS_Driver::Initialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -208,10 +208,10 @@ bool LWIP_SOCKETS_Driver::Initialize()
     // sanity check for any interfaces
     if(interfaceCount > 0)
     {
-        g_LWIP_SOCKETS_Driver.m_interfaces =
-            (LWIP_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(LWIP_DRIVER_INTERFACE_DATA));
+        g_NETX_SOCKETS_Driver.m_interfaces =
+            (NETX_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(NETX_DRIVER_INTERFACE_DATA));
 
-        /* Initialize the target board lwIP stack */
+        // Initialize the target board network
         nanoHAL_Network_Initialize();
 
         for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
@@ -234,7 +234,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 return FALSE;
             }
 
-            /* Bind and Open the Ethernet driver */
+            // Bind and Open the Ethernet driver
             Network_Interface_Bind(i);
             interfaceNumber = Network_Interface_Open(i);
 
@@ -245,7 +245,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
                 continue;
             }
 
-            g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
+            g_NETX_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
             UpdateAdapterConfiguration(
                 i,
@@ -281,7 +281,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
     return TRUE;
 }
 
-bool LWIP_SOCKETS_Driver::Uninitialize()
+bool NETX_SOCKETS_Driver::Uninitialize()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -302,7 +302,7 @@ bool LWIP_SOCKETS_Driver::Uninitialize()
 
 extern void debug_printf(const char *format, ...);
 
-SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
+SOCK_SOCKET NETX_SOCKETS_Driver::Socket(int family, int type, int protocol)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -328,7 +328,7 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Socket(int family, int type, int protocol)
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
+int NETX_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -341,7 +341,7 @@ errorCode = bind(socket, (sockaddr *)&addr, addressLen);
 return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
+int NETX_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -354,7 +354,7 @@ int LWIP_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *addres
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int flags)
+int NETX_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -363,7 +363,7 @@ int LWIP_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int 
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
+int NETX_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeFlag;
@@ -383,7 +383,7 @@ int LWIP_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
+int NETX_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -392,7 +392,7 @@ int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
+int NETX_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -401,7 +401,7 @@ errorCode =  listen(socket, backlog);
 return errorCode;
 }
 
-SOCK_SOCKET LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
+SOCK_SOCKET NETX_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     sockaddr_in addr;
@@ -421,7 +421,7 @@ SOCK_SOCKET LWIP_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *addre
     return errorCode;
 }
 
-int LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
+int NETX_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
 {
     (void)socket;
     (void)how;
@@ -433,7 +433,7 @@ int LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
     return -1;
 }
 
-int LWIP_SOCKETS_Driver::GetAddrInfo(
+int NETX_SOCKETS_Driver::GetAddrInfo(
     const char *nodename,
     char *servname,
     const SOCK_addrinfo *hints,
@@ -564,7 +564,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
     return SOCK_SOCKET_ERROR;
 }
 
-void LWIP_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
+void NETX_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -578,21 +578,21 @@ void LWIP_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
     }
 }
 
-int LWIP_SOCKETS_Driver::Ioctl(SOCK_SOCKET socket, int cmd, int *data)
+int NETX_SOCKETS_Driver::Ioctl(SOCK_SOCKET socket, int cmd, int *data)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return ioctl(socket, cmd, data);
 }
 
-int LWIP_SOCKETS_Driver::GetLastError()
+int NETX_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
     return GetNativeError(errorCode);
 }
 
-int LWIP_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
+int NETX_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
 {
     (void)socket;
     
@@ -636,7 +636,7 @@ static void MARSHAL_FDSET_TO_SOCK_FDSET(SOCK_fd_set *sf, fd_set *f)
     }
 }
 
-int LWIP_SOCKETS_Driver::Select(
+int NETX_SOCKETS_Driver::Select(
     int nfds,
     SOCK_fd_set *readfds,
     SOCK_fd_set *writefds,
@@ -706,7 +706,7 @@ int LWIP_SOCKETS_Driver::Select(
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
+int NETX_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, const char *optval, int optlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeLevel;
@@ -768,7 +768,7 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
     return setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
 }
 
-int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
+int NETX_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeLevel;
@@ -827,7 +827,7 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
+int NETX_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
@@ -843,7 +843,7 @@ int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
+int NETX_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;
@@ -859,7 +859,7 @@ int LWIP_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, in
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
+int NETX_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     sockaddr_in addr;
@@ -882,7 +882,7 @@ int LWIP_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int fl
     return ret;
 }
 
-int LWIP_SOCKETS_Driver::SendTo(
+int NETX_SOCKETS_Driver::SendTo(
     SOCK_SOCKET socket,
     const char *buf,
     int len,
@@ -899,7 +899,7 @@ int LWIP_SOCKETS_Driver::SendTo(
     return sendto(socket, (CHAR *)buf, len, flags, (sockaddr *)&addr, tolen);
 }
 
-HRESULT LWIP_SOCKETS_Driver::LoadAdapterConfiguration(
+HRESULT NETX_SOCKETS_Driver::LoadAdapterConfiguration(
     HAL_Configuration_NetworkInterface *config,
     uint32_t interfaceIndex)
 {
@@ -964,7 +964,7 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
-HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
+HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags,
     HAL_Configuration_NetworkInterface *config)
@@ -1053,7 +1053,7 @@ HRESULT LWIP_SOCKETS_Driver::UpdateAdapterConfiguration(
     return S_OK;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeTcpOption(int optname)
+int NETX_SOCKETS_Driver::GetNativeTcpOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
@@ -1078,7 +1078,7 @@ int LWIP_SOCKETS_Driver::GetNativeTcpOption(int optname)
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeSockOption(int optname)
+int NETX_SOCKETS_Driver::GetNativeSockOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
@@ -1152,7 +1152,7 @@ int LWIP_SOCKETS_Driver::GetNativeSockOption(int optname)
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeIPOption(int optname)
+int NETX_SOCKETS_Driver::GetNativeIPOption(int optname)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
@@ -1200,7 +1200,7 @@ int LWIP_SOCKETS_Driver::GetNativeIPOption(int optname)
     return nativeOptionName;
 }
 
-int LWIP_SOCKETS_Driver::GetNativeError(int error)
+int NETX_SOCKETS_Driver::GetNativeError(int error)
 {
     NATIVE_PROFILE_PAL_NETWORK();
     int ret;

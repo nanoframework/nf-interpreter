@@ -55,7 +55,7 @@
 #define SOCKET_CHECK_EXIT_NORETURN()                                                                                   \
     RETURN_OK:
 
-struct Sockets_LWIP_Driver
+struct Sockets_NETX_Driver
 {
     static SOCK_SOCKET Socket(int32_t family, int32_t type, int32_t protocol, bool fDebug);
     static int Connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, int32_t addressLen);
@@ -195,6 +195,6 @@ struct Sockets_LWIP_Driver
     static bool s_discoveryInitialized;
 };
 
-extern Sockets_LWIP_Driver g_Sockets_LWIP_Driver;
+extern Sockets_NETX_Driver g_Sockets_NETX_Driver;
 
 #endif // SOCKETS_H

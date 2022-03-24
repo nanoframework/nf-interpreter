@@ -20,7 +20,7 @@
 // SOCKET driver
 //
 
-struct LWIP_DRIVER_INTERFACE_DATA
+struct NETX_DRIVER_INTERFACE_DATA
 {
     int m_interfaceNumber;
 };
@@ -39,7 +39,7 @@ struct LWIP_DRIVER_INTERFACE_DATA
     memcpy(((SOCK_sockaddr_in *)ssa)->sin_zero, sa.sin_zero, sizeof(((SOCK_sockaddr_in *)ssa)->sin_zero));             \
     *addrLen = sizeof(SOCK_sockaddr_in)
 
-struct LWIP_SOCKETS_Driver
+struct NETX_SOCKETS_Driver
 {
     static bool Initialize();
 
@@ -124,7 +124,7 @@ struct LWIP_SOCKETS_Driver
 
     static void PostAvailabilityOff(void *arg);
 
-    LWIP_DRIVER_INTERFACE_DATA *m_interfaces;
+    NETX_DRIVER_INTERFACE_DATA *m_interfaces;
 };
 
 //
