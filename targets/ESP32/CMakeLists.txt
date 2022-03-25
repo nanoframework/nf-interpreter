@@ -88,7 +88,7 @@ set(NF_SECURITY_MBEDTLS ON CACHE INTERNAL "mbedTLS must be ON for IDF build")
 
 # add platform dirs
 add_subdirectory(_common)
-add_subdirectory(_Include)
+add_subdirectory(_include)
 add_subdirectory(_nanoCLR)
 
 if(USE_NETWORKING_OPTION)
