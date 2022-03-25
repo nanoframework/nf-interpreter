@@ -20,6 +20,41 @@ struct ScanRecord
     uint8_t cypherType;
 };
 
+//
+//  Stores Ap records to target string.
+//  if pTarget == 0 then just calculates length of target
+//
+//  unint_8[6]  MAC;
+//  unint_8[33] SSID
+//  unit8_t     RSSI
+//
+//  Return : length in pTarget
+static int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount)
+{
+    int index;
+
+    if (pTarget != 0)
+    {
+        // Store record count as first of returned byte[]
+        *pTarget++ = (uint8_t)recordCount;
+
+        ScanRecord *pScanRec = (ScanRecord *)pTarget;
+
+        for (index = 0; index < recordCount; index++)
+        {
+            memcpy(pScanRec->bssid, apRecords[index].bssid, 6);
+            memcpy(pScanRec->ssid, apRecords[index].ssid, 33);
+            pScanRec->rssi = apRecords[index].rssi;
+            pScanRec->authMode = apRecords[index].authmode;
+            pScanRec->cypherType = apRecords[index].pairwise_cipher;
+            pScanRec++;
+        }
+    }
+
+    // Fixed length records so we can calculate length
+    return (recordCount * sizeof(ScanRecord) + sizeof(uint16_t));
+}
+
 HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -192,44 +227,6 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAs
         }
     }
     NANOCLR_NOCLEANUP();
-}
-
-//
-//  Stores Ap records to target string.
-//  if pTarget == 0 then just calculates length of target
-//
-//  unint_8[6]  MAC;
-//  unint_8[33] SSID
-//  unit8_t     RSSI
-//
-//  Return : length in pTarget
-int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsToString(
-    uint8_t *pTarget,
-    wifi_ap_record_t *apRecords,
-    uint16_t recordCount)
-{
-    int index;
-
-    if (pTarget != 0)
-    {
-        // Store record count as first of returned byte[]
-        *pTarget++ = (uint8_t)recordCount;
-
-        ScanRecord *pScanRec = (ScanRecord *)pTarget;
-
-        for (index = 0; index < recordCount; index++)
-        {
-            memcpy(pScanRec->bssid, apRecords[index].bssid, 6);
-            memcpy(pScanRec->ssid, apRecords[index].ssid, 33);
-            pScanRec->rssi = apRecords[index].rssi;
-            pScanRec->authMode = apRecords[index].authmode;
-            pScanRec->cypherType = apRecords[index].pairwise_cipher;
-            pScanRec++;
-        }
-    }
-
-    // Fixed length records so we can calculate length
-    return (recordCount * sizeof(ScanRecord) + sizeof(uint16_t));
 }
 
 // private extern WiFiNetworkReport NativeNetworkReport();
