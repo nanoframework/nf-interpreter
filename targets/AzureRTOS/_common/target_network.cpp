@@ -5,9 +5,13 @@
 //
 
 #include <nanoHAL.h>
+
+#if defined(AZURE_RTOS_NETXDUO)
 #include <nx_api.h>
 #include <nxd_bsd.h>
-#include <netxduo_options.h>
+#endif
+
+#include <network_options.h>
 #include <nf_wireless.h>
 
 // extern "C" struct netif *nf_getNetif();
@@ -39,15 +43,18 @@ int Network_Interface_Open(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+
+#if (TARGET_HAS_WIFI_SUPPORT == 1)
         // Wi-Fi (STA)
         case NetworkInterfaceType_Wireless80211:
             return NF_Wireless_Open(&networkConfiguration);
+#endif
 
         // // Wi-Fi (Soft AP)
         // case NetworkInterfaceType_WirelessAP:
         //     return NF_WirelessAP_Open(&networkConfiguration);
 
-#ifdef ESP32_ETHERNET_SUPPORT
+#if (TARGET_HAS_ETHERNET_SUPPORT == 1)
         // Ethernet
         case NetworkInterfaceType_Ethernet:
             return NF_ESP32_Ethernet_Open(&networkConfiguration);
@@ -76,6 +83,7 @@ bool Network_Interface_Close(int index)
 
     switch (networkConfiguration.InterfaceType)
     {
+
 #if (TARGET_HAS_WIFI_SUPPORT == 1)
         // Wireless
         case NetworkInterfaceType_Wireless80211:
@@ -122,3 +130,29 @@ bool Network_Interface_Close(int index)
 
 //     return false;
 // }
+
+int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options)
+{
+    (void)index;
+    (void)ssid;
+    (void)passphase;
+    (void)options;
+
+return SOCK_SOCKET_ERROR;
+}
+
+
+int Network_Interface_Connect_Result(int index)
+{
+    (void)index;
+
+
+return SOCK_SOCKET_ERROR;
+}
+
+int Network_Interface_Disconnect(int index){
+    (void)index;
+
+
+return SOCK_SOCKET_ERROR;
+}

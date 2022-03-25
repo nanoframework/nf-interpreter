@@ -190,7 +190,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 static uint8_t wifi_init()
 {
 
-#if defined(NETX_WIFI_DRIVER_ISM43362)
+#if defined(WIFI_DRIVER_ISM43362)
 
     if (WIFI_Init() != WIFI_STATUS_OK)
     {

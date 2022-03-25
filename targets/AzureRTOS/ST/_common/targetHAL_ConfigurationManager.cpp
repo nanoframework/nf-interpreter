@@ -7,9 +7,9 @@
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
 #include <Target_BlockStorage_STM32FlashDriver.h>
-#include <netxduo_options.h>
+#include <network_options.h>
 
-#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -730,7 +730,7 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
 
 // get default MAC
-#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
     // OK to ignore the return value, no harm done if it fails
     WIFI_GetMAC_Address(config->MacAddress);
 #endif

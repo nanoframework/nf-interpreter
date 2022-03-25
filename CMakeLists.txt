@@ -531,7 +531,7 @@ if( API_System.Net)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
     endif()
 
-    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND ${NETX_WIFI_DRIVER} STREQUAL "ISM43362")
+    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND ${WIFI_DRIVER} STREQUAL "ISM43362")
         set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
         set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()
@@ -698,12 +698,12 @@ if(USE_NETWORKING_OPTION)
         message(STATUS "Support for ENC28j60 network driver enabled")
     endif()
 
-    if(NETX_WIFI_DRIVER)
-        message(STATUS "NetX Duo using '${NETX_WIFI_DRIVER}' driver for Wi-Fi")
+    if(WIFI_DRIVER)
+        message(STATUS "Using '${WIFI_DRIVER}' driver for Wi-Fi")
     endif()
 
-    if(NETX_ETHERNET_DRIVER)
-        message(STATUS "NetX Duo using '${NETX_ETHERNET_DRIVER}' driver for Ethernet")
+    if(ETHERNET_DRIVER)
+        message(STATUS "Using '${ETHERNET_DRIVER}' driver for Ethernet")
     endif()
 
     # sanity check for missing configuration block option

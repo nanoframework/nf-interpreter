@@ -7,12 +7,16 @@
 #define NF_NETXDUO_H_
 
 #include <nanoHAL_v2.h>
+
+#if defined(AZURE_RTOS_NETXDUO)
 #include <nxd_dns.h>
 #include <nxd_dhcp_client.h>
 #include <nxd_bsd.h>
-#include <netxduo_options.h>
+#endif
 
-#if defined(NETX_WIFI_DRIVER_ISM43362)
+#include <network_options.h>
+
+#if defined(WIFI_DRIVER_ISM43362)
 #include <wifi.h>
 #endif
 

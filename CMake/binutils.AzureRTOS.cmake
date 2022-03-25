@@ -24,25 +24,25 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
-# sets network connectivity options according to the NetX driver choosen in build options NETX_WIFI_DRIVER and NETX_ETHERNET_DRIVER
+# sets network connectivity options according to the NetX driver choosen in build options WIFI_DRIVER and ETHERNET_DRIVER
 macro(nf_set_network_connectivity_options)
 
     # sanity check
-    if(NOT DEFINED NETX_ETHERNET_DRIVER AND NOT DEFINED NETX_WIFI_DRIVER)
-        message(FATAL_ERROR "\n\nSorry but you must define either NETX_ETHERNET_DRIVER or NETX_WIFI_DRIVER build option...\n\n")
+    if(NOT DEFINED ETHERNET_DRIVER AND NOT DEFINED WIFI_DRIVER)
+        message(FATAL_ERROR "\n\nSorry but you must define either ETHERNET_DRIVER or WIFI_DRIVER build option...\n\n")
     endif()
 
     ############################
-    if(DEFINED NETX_WIFI_DRIVER)
+    if(DEFINED WIFI_DRIVER)
 
         # list of supported Wi-Fi drivers
-        set(NETX_WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
+        set(WIFI_DRIVER_SUPPORTED_OPTIONS "ISM43362")
         # try to find the driver in the list
-        list(FIND NETX_WIFI_DRIVER_SUPPORTED_OPTIONS ${NETX_WIFI_DRIVER} WIFI_DRIVER_NAME_INDEX)
+        list(FIND WIFI_DRIVER_SUPPORTED_OPTIONS ${WIFI_DRIVER} WIFI_DRIVER_NAME_INDEX)
 
         if(WIFI_DRIVER_NAME_INDEX EQUAL -1)
             # driver is NOT supported 
-            message(FATAL_ERROR "\n\nSorry but '${NETX_WIFI_DRIVER}' provided in NETX_WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+            message(FATAL_ERROR "\n\nSorry but '${WIFI_DRIVER}' provided in WIFI_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
         elseif(WIFI_DRIVER_NAME_INDEX EQUAL 0)
             set(TARGET_HAS_WIFI_SUPPORT TRUE BOOL)
         else()
@@ -52,22 +52,22 @@ macro(nf_set_network_connectivity_options)
     endif()
 
     ################################
-    if(DEFINED NETX_ETHERNET_DRIVER)
+    if(DEFINED ETHERNET_DRIVER)
 
         # list of supported Ethernet drivers
-        set(NETX_ETHERNET_DRIVER_SUPPORTED_OPTIONS "LAN8742")
+        set(ETHERNET_DRIVER_SUPPORTED_OPTIONS "LAN8742")
         # try to find the driver in the list
-        list(FIND NETX_ETHERNET_DRIVER_SUPPORTED_OPTIONS ${NETX_ETHERNET_DRIVER} ETHERNET_DRIVER_NAME_INDEX)
+        list(FIND ETHERNET_DRIVER_SUPPORTED_OPTIONS ${ETHERNET_DRIVER} ETHERNET_DRIVER_NAME_INDEX)
 
         if(ETHERNET_DRIVER_NAME_INDEX EQUAL -1)
             # driver is NOT supported 
-            message(FATAL_ERROR "\n\nSorry but '${NETX_ETHERNET_DRIVER}' provided in NETX_ETHERNET_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
+            message(FATAL_ERROR "\n\nSorry but '${ETHERNET_DRIVER}' provided in ETHERNET_DRIVER build option is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
         elseif(ETHERNET_DRIVER_NAME_INDEX EQUAL 0)
             set(TARGET_HAS_ETHERNET_SUPPORT TRUE BOOL)
         else()
             message(FATAL_ERROR "invalid index for ETHERNET_DRIVER_NAME_INDEX")
         endif()
-        
+
     endif()
 
 endmacro()
@@ -148,8 +148,10 @@ macro(nf_add_platform_packages)
     if(NFAPP_TARGET STREQUAL ${NANOCLR_PROJECT_NAME})
 
         if(USE_NETWORKING_OPTION)
-
             find_package(NF_Network REQUIRED QUIET)
+        endif()
+
+        if(AZURERTOS_NETXDUO_REQUIRED)
 
             FetchContent_GetProperties(azure_rtos)
 
@@ -195,6 +197,7 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_coreclr(
             EXTRA_INCLUDES
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+                ${NF_Network_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
@@ -205,7 +208,7 @@ macro(nf_add_platform_dependencies target)
         add_dependencies(${target}.elf nano::NF_CoreCLR)
 
 
-        if(USE_NETWORKING_OPTION)
+        if(AZURERTOS_NETXDUO_REQUIRED)
             FetchContent_GetProperties(azure_rtos_netxduo)
             get_target_property(NETXDUO_INCLUDES azrtos::netxduo INCLUDE_DIRECTORIES)
         endif()
@@ -270,7 +273,6 @@ macro(nf_add_platform_dependencies target)
 
                 EXTRA_COMPILE_DEFINITIONS 
                     -DTX_INCLUDE_USER_DEFINE_FILE
-                    -DNX_INCLUDE_USER_DEFINE_FILE
                     -DUSE_HAL_DRIVER
                     -D${STM32_DRIVER_TARGET_DEVICE}
 
@@ -400,7 +402,7 @@ macro(nf_add_platform_sources target)
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
         )
 
-        if(USE_NETWORKING_OPTION)         
+        if(AZURERTOS_NETXDUO_REQUIRED)         
             target_link_libraries(${target}.elf
                 nano::NF_Network
                 azrtos::netxduo

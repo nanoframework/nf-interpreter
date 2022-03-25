@@ -7,7 +7,7 @@
 
 #include <nanoHAL.h>
 #include <nf_netxduo.h>
-#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
 #endif
 
@@ -76,24 +76,26 @@ void nanoHAL_Network_Initialize()
         // Start lwIP thread in ChibiOS bindings using the above options
         // lwipInit(&lwipOptions);
 
-        if (NF_NetXDuo_Init(&networkConfig) == NX_SUCCESS)
-        {
+#if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 
-#if defined(NETX_WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-            // check if we have the MAC address stored in the configuration block
-            if (networkConfig.MacAddress[0] == 0xFF)
-            {
-                // OK to ignore the return value, no harm done if it fails
-                if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
-                {
-                    // store the MAC address in the configuration block
-                    ConfigurationManager_UpdateConfigurationBlock(
-                        &networkConfig,
-                        DeviceConfigurationOption_Network,
-                        0);
-                }
-            }
+        // if (NF_NetXDuo_Init(&networkConfig) == NX_SUCCESS)
+        // {
+
+        //     // check if we have the MAC address stored in the configuration block
+        //     if (networkConfig.MacAddress[0] == 0xFF)
+        //     {
+        //         // OK to ignore the return value, no harm done if it fails
+        //         if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
+        //         {
+        //             // store the MAC address in the configuration block
+        //             ConfigurationManager_UpdateConfigurationBlock(
+        //                 &networkConfig,
+        //                 DeviceConfigurationOption_Network,
+        //                 0);
+        //         }
+        //     }
+        // }
 #endif
-        }
+
     }
 }

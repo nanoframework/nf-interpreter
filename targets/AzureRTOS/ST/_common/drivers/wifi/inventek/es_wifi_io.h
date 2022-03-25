@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <netxduo_options.h>
+#include <network_options.h>
 
 #if defined(CHIBIOS_HAL_REQUIRED)
 #include "es_wifi_io_chibios.h"

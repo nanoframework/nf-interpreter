@@ -5,8 +5,8 @@
 
 include(FetchContent)
 
-#############################
-# network layer from NetX Duo
+############################################
+# network layer from Azure RTOS and NetX Duo
 if(RTOS_AZURERTOS_CHECK)
 
     # set include directories for nanoFramework network
@@ -16,27 +16,26 @@ if(RTOS_AZURERTOS_CHECK)
     # source files for nanoFramework Networking
     set(NF_Network_SRCS
 
-        nf_netxduo.c
-
-        #PAL Socket
-        sockets_netx.cpp
-
-        #NetX Duo
-        netx_sockets.cpp
-        netx_sockets_functions.cpp 
-        netx_thread.c
-
         # platform specific
         target_network.cpp
         targetHAL_network.cpp
     )
+
+    if(AZURERTOS_NETXDUO_REQUIRED)
+        #NetX Duo
+        list(APPEND NF_Network_SRCS sockets_netx.cpp)
+        list(APPEND NF_Network_SRCS nf_netxduo.c)
+        list(APPEND NF_Network_SRCS netx_sockets.cpp)
+        list(APPEND NF_Network_SRCS netx_sockets_functions.cpp )
+        list(APPEND NF_Network_SRCS netx_thread.c)
+    endif()
 
     # need a conditional include because of building network
     if(NOT USE_SECURITY_MBEDTLS_OPTION)
         list(APPEND NF_Network_SRCS ssl_stubs.cpp)
     endif()
 
-    if("${NETX_ETHERNET_DRIVER}" STREQUAL "LAN8742")
+    if("${ETHERNET_DRIVER}" STREQUAL "LAN8742")
 
         # add driver files to network sources
         list(APPEND
@@ -48,22 +47,22 @@ if(RTOS_AZURERTOS_CHECK)
                 # lan8742.c
 
                 # mx_eth_init.c
+                nx_driver_stm32l4.c
 
                 # stm32f7xx_hal_eth_extra.c
                 # stm32${TARGET_SERIES_SHORT_LOWER}xx_hal_msp_eth.c
         )
 
         # need this name in lower case
-        string(TOLOWER "${NETX_ETHERNET_DRIVER}" NETX_ETHERNET_DRIVER_1)
+        string(TOLOWER "${ETHERNET_DRIVER}" ETHERNET_DRIVER_1)
 
         # add includes too
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet)
         # list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742)
         list(APPEND NF_Network_INCLUDE_DIRS ${CHIBIOS_HAL_INCLUDE_DIRS})
 
-        SET(NX_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/chibios)
+        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/chibios)
         SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
-
 
         # add exception to compiler warnings as errors
         SET_SOURCE_FILES_PROPERTIES( ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/lan8742/lan8742.c PROPERTIES COMPILE_FLAGS -Wno-unused-parameter)
@@ -124,18 +123,20 @@ if(RTOS_AZURERTOS_CHECK)
             ${ETH_SOURCE_FILE} 
             "${ETH_SOURCE_FILE_FINAL_CONTENTS_2}")
 
-    elseif("${NETX_WIFI_DRIVER}" STREQUAL "ISM43362")
+    elseif("${WIFI_DRIVER}" STREQUAL "ISM43362")
 
         # add driver files to network sources
         list(APPEND
             NF_Network_SRCS
   
             nf_wireless.cpp
+
+            sockets_ISM43362.cpp
+            ISM43362_sockets.cpp
+            ISM43362_sockets_functions.cpp
             
             es_wifi.c
             wifi.c
-
-            nx_driver_stm32l4.c
         )
 
         if(${CHIBIOS_HAL_REQUIRED})
@@ -153,13 +154,12 @@ if(RTOS_AZURERTOS_CHECK)
         endif()
 
         # need this name in lower case
-        string(TOLOWER "${NETX_WIFI_DRIVER}" NETX_WIFI_DRIVER_1)
+        string(TOLOWER "${WIFI_DRIVER}" WIFI_DRIVER_1)
 
-        SET(NX_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
-        SET(NX_THREAD_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo)
+        SET(NETWORK_DRIVER_LOCATION ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/drivers/wifi/inventek)
 
         # add includes too
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/drivers/wifi/inventek)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/System.Device.Spi)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_nanoCLR/Windows.Devices.Spi)
         list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
@@ -186,12 +186,12 @@ if(RTOS_AZURERTOS_CHECK)
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo
 
                 # drivers
-                ${NX_DRIVER_LOCATION}
-                ${NX_DRIVER_LOCATION}/..
-                
+                ${NETWORK_DRIVER_LOCATION}
+                ${NETWORK_DRIVER_LOCATION}/..
+
                 # ST LAN8742
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet
-                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${NETX_ETHERNET_DRIVER_1}
+                ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/ethernet/${ETHERNET_DRIVER_1}
                 ${TARGET_BASE_LOCATION}/common/CubeMX
 
                 # ISM43362

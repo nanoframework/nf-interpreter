@@ -30,8 +30,8 @@ endif()
 
 if(USE_NETWORKING_OPTION)
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/netxduo/netxduo_options.h.in
-                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/netxduo_options.h @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/network_options.h.in
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/network_options.h @ONLY)
 
 endif()
 

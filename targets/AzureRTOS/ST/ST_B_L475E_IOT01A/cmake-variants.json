@@ -31,7 +31,7 @@
           "RTOS": "AzureRTOS",
           "TARGET_SERIES": "STM32L4xx",
           "TARGET_BOARD": "ST_B_L475E_IOT01A",
-          "NETX_WIFI_DRIVER": "ISM43362",
+          "WIFI_DRIVER": "ISM43362",
           "RTOS_SOURCE_FOLDER": "",
           "STM32_CUBE_PACKAGE_REQUIRED": "ON",
           "STM32_HAL_DRIVER_SOURCE": "",
