@@ -9,7 +9,7 @@
 
 #if (HAL_NF_USE_STM32_ONEWIRE == TRUE)
 
-#include <target_nf_devices_onewire_config.h>
+#include <target_nf_dev_onewire_config.h>
 #include <string.h>
 
 #if !defined(NF_ONEWIRE_STM32_UART_USE_USART1) && !defined(NF_ONEWIRE_STM32_UART_USE_USART2) &&                        \
@@ -18,7 +18,7 @@
     !defined(NF_ONEWIRE_STM32_UART_USE_USART7) && !defined(NF_ONEWIRE_STM32_UART_USE_USART8)
 
 #error                                                                                                                 \
-    "1-Wire driver activated but no USART/UART peripheral assigned. Make sure to assign it @ target_nf_devices_onewire_config.h"
+    "1-Wire driver activated but no USART/UART peripheral assigned. Make sure to assign it @ target_nf_dev_onewire_config.h"
 #endif
 
 /*===========================================================================*/

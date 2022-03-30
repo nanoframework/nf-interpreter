@@ -8,7 +8,20 @@ steps:
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], ''), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: >-
+      or(
+        eq(variables['ForceUpload'], true),
+        and(
+          succeeded(),
+          eq(variables['System.PullRequest.PullRequestId'], ''),
+          or(
+            startswith(variables['Build.SourceBranchName'], 'develop'),
+            eq(variables['Build.SourceBranchName'], 'main'),
+            eq(variables['Build.SourceBranchName'], ''),
+            contains(variables['Build.SourceBranchName'], 'release')
+          )
+        )
+      )
     displayName: Set Cloudsmith repo path
     inputs:
       targetType: 'inline'
@@ -38,14 +51,24 @@ steps:
       failOnStderr: 'true'
 
   - task: PowerShell@2
-    condition: or( eq(variables['ForceUpload'], true), and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), or( eq(variables['Build.SourceBranchName'], 'develop'), eq(variables['Build.SourceBranchName'], ''), contains(variables['Build.SourceBranchName'], 'release') ) ) )
+    condition: >-
+      or(
+        eq(variables['ForceUpload'], true),
+        and(
+          succeeded(),
+          eq(variables['System.PullRequest.PullRequestId'], ''),
+          or(
+            startswith(variables['Build.SourceBranchName'], 'develop'),
+            eq(variables['Build.SourceBranchName'], 'main'),
+            eq(variables['Build.SourceBranchName'], ''),
+            contains(variables['Build.SourceBranchName'], 'release')
+          )
+        )
+      )
     displayName: Upload WIN32 nanoCLR to Cloudsmith
     inputs:
       targetType: 'inline'
       script: |
-
-          # update pip (until the build agent image is updated)
-          python -m pip install --upgrade pip
 
           # install Cloudsmith CLI
           python -m pip install --upgrade cloudsmith-cli

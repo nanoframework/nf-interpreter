@@ -89,9 +89,9 @@ macro(nf_add_platform_packages)
         # no packages for booter
     endif()
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-        # no packages for nanoCRL
+        # no packages for nanoCLR
     endif()
 
 endmacro()
@@ -102,7 +102,7 @@ macro(nf_add_platform_dependencies target)
     
     nf_add_common_dependencies(${target})
 
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
@@ -205,7 +205,7 @@ macro(nf_add_platform_sources target)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_sources(${target}.elf PUBLIC
@@ -236,6 +236,8 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
     set(TI_DEVICE_FAMILIES_WITH_RADIO_FREQUENCY "CC13X2")
 
     list(FIND TI_DEVICE_FAMILIES_WITH_RADIO_FREQUENCY ${TARGET_SERIES} TI_DEVICE_FAMILY_NAME_INDEX)
+
+    string(TOLOWER ${ti_device_family} TI_DEVICE_FAMILY_LOWER_CASE)
 
     if(TI_DEVICE_FAMILY_NAME_INDEX EQUAL -1)
         # this target series doesn't have/support/care radio frequency option
@@ -347,12 +349,12 @@ macro(nf_setup_target_build)
 
     # add extra libraries for SimpleLink
     set(CLR_EXTRA_LIBRARIES
-        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/display/lib/gcc/m4f/display_cc13x2.a
+        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/display/lib/gcc/m4f/display_${TI_DEVICE_FAMILY_LOWER_CASE}.a
         ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/grlib/lib/gcc/m4f/grlib.a
-        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/drivers/rf/lib/rf_multiMode_cc13x2.am4fg
-        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/drivers/lib/gcc/m4f/drivers_cc13x2.a
+        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/drivers/rf/lib/gcc/m4f/rf_multiMode_${TI_DEVICE_FAMILY_LOWER_CASE}.a
+        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/drivers/lib/gcc/m4f/drivers_${TI_DEVICE_FAMILY_LOWER_CASE}.a
         ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/source/ti/devices/cc13x2_cc26x2/driverlib/bin/gcc/driverlib.lib
-        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/ti/dpl/lib/gcc/m4f/dpl_cc13x2.a
+        ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/ti/dpl/lib/gcc/m4f/dpl_${TI_DEVICE_FAMILY_LOWER_CASE}.a
         
         ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libm.a
         ${simplelinkcc13xx_26xxsdk_SOURCE_DIR}/kernel/tirtos/packages/gnu/targets/arm/libs/install-native/arm-none-eabi/lib/thumb/v7e-m/hard/libnosys.a

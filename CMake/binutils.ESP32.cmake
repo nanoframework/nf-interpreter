@@ -95,17 +95,12 @@ macro(nf_add_platform_packages)
 
     find_package(ESP32_IDF REQUIRED QUIET)
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
 
             find_package(NF_Network REQUIRED QUIET)
-
-            # security provider is mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED QUIET)
-            endif()
 
         endif()
 
@@ -170,10 +165,15 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES 
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
+                ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
         )
 
         add_dependencies(${target}.elf nano::NF_Network)
 
+        # security provider is mbedTLS
+        if(USE_SECURITY_MBEDTLS_OPTION)
+            add_dependencies(NF_Network mbedtls)
+        endif()
     endif()
 
     # if(USE_FILESYSTEM_OPTION)
@@ -202,7 +202,7 @@ macro(nf_add_platform_include_directories target)
         ${NF_CoreCLR_INCLUDE_DIRS}
     )
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -230,7 +230,7 @@ macro(nf_add_platform_sources target)
 
     )
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
            
         # add header with target platform definitions
@@ -248,11 +248,12 @@ macro(nf_add_platform_sources target)
 
     endif()
 
-    # mbed TLS requires a config file
     if(USE_SECURITY_MBEDTLS_OPTION)
-        # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
+        target_link_libraries(${target}.elf
+        mbedtls
+        )
+
+        add_dependencies(NF_Network mbedtls)
     endif()
 
 endmacro()
@@ -607,7 +608,7 @@ macro(nf_add_idf_as_library)
         # SDKCONFIG ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig
         SDKCONFIG_DEFAULTS
             ${SDKCONFIG_DEFAULTS_FILE}
-        PROJECT_NAME "nanoCRL"
+        PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
     )
 
@@ -646,7 +647,7 @@ macro(nf_add_idf_as_library)
         # add nanoCLR include path to lwIP so our lwipots are taken instead of the IDF ones
         list(INSERT 
             IDF_LWIP_INCLUDE_DIRECTORIES 0
-                ${CMAKE_SOURCE_DIR}/targets/ESP32/_Include
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_include
                 ${CMAKE_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD}
                 ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
                 ${CMAKE_SOURCE_DIR}/src/CLR/Include
@@ -669,24 +670,6 @@ macro(nf_add_idf_as_library)
             TARGET __idf_lwip 
             PROPERTY COMPILE_DEFINITIONS ${IDF_LWIP_COMPILE_DEFINITIONS}
         )
-
-        message(STATUS "Adding byteorder functions")
-                
-        # need to read the supplied SDK CONFIG file and replace the appropriate options
-        set(ARCH_CC_FILE "${esp32_idf_SOURCE_DIR}/components/lwip/port/esp32/include/arch/cc.h")       
-        file(READ
-            ${ARCH_CC_FILE}
-            ARCH_CC_CONTENTS)
-
-        string(REPLACE
-            "#endif // BYTE_ORDER"
-            "#endif // __BYTE_ORDER\n\n#define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS\n#define htons(x) __builtin_bswap16(x)\n#define ntohs(x) __builtin_bswap16(x)\n#define htonl(x) __builtin_bswap32(x)\n#define ntohl(x) __builtin_bswap32(x)\n"
-            ARCH_CC_FINAL_CONTENTS
-            "${ARCH_CC_CONTENTS}")
-
-        file(WRITE 
-            ${ARCH_CC_FILE} 
-            "${ARCH_CC_FINAL_CONTENTS}")
 
     endif()
 

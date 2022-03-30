@@ -28,8 +28,6 @@ list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH
 # source files
 set(nanoFramework.Device.Bluetooth_SRCS
 
-    sys_ble_nimble_chars.c
-    
     sys_dev_ble_native.cpp
 
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider.cpp

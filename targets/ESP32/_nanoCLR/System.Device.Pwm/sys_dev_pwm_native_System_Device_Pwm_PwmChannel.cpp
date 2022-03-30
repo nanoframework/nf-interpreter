@@ -152,7 +152,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     // Work out the duty Cycle for the current duty resolution
     dutyCycle = CalculateDuty(timerId, dutyCycle, polarity);
 
-    ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0};
+    ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, 0};
 
     // Configure Channel which will also start it
     IDF_ERROR(ledc_channel_config(&ledc_conf));

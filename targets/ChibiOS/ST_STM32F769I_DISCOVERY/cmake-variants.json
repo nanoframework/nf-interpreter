@@ -65,7 +65,7 @@
           "API_System.Device.Adc": "ON",
           "API_System.Device.Dac": "ON",
           "API_System.Net": "ON",
-          "API_nanoFramework.Devices.OneWire": "ON",
+          "API_nanoFramework.Device.OneWire": "ON",
           "API_nanoFramework.Devices.Can": "ON",
           "API_Windows.Storage": "ON",
           "API_nanoFramework.ResourceManager": "ON",

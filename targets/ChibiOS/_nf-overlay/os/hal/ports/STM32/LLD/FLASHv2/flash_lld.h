@@ -53,6 +53,10 @@ typedef struct STM32FlashDriver
 #define FLASH_OPT_KEY2 ((uint32_t)0x4C5D6E7FU)
 #define SECTOR_MASK    ((uint32_t)0xFFFFFF07)
 
+#ifndef HAL_OK
+#define HAL_OK 0x00U
+#endif
+
 // FLASH_Error_Code FLASH Error Code
 #define HAL_FLASH_ERROR_NONE      ((uint32_t)0x00000000U) /*!< No error                      */
 #define HAL_FLASH_ERROR_ERS       ((uint32_t)0x00000002U) /*!< Programming Sequence error    */

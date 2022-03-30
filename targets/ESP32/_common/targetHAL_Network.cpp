@@ -9,6 +9,7 @@
 #include "lwIP_Sockets.h"
 #include "apps/sntp.h"
 #include <target_lwip_sntp_opts.h>
+#include "target_platform.h"
 
 extern "C" void set_signal_sock_function(void (*funcPtr)());
 

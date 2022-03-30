@@ -102,13 +102,29 @@ bool CPU_SPI_Initialize(uint8_t spiBus)
     }
 
     spi_bus_config_t bus_config{
-        mosi_io_num : (int)mosiPin,  // mosi pin
-        miso_io_num : (int)misoPin,  // miso pin
-        sclk_io_num : (int)clockPin, // Clock
-        quadwp_io_num : -1,          // Quad Write protect
-        quadhd_io_num : -1,          // Quad Hold
-        max_transfer_sz : 16384,     // max transfer size
-        flags : 0,                   // SPICOMMON_BUSFLAG_* flags
+
+        // mosi pin
+        mosi_io_num : (int)mosiPin,
+        // miso pin
+        miso_io_num : (int)misoPin,
+        // Clock
+        sclk_io_num : (int)clockPin,
+        // Quad Write protect (-1 not used)
+        quadwp_io_num : -1,
+        // Quad Hold
+        quadhd_io_num : -1,
+        // GPIO pin for spi data4 signal in octal mode, -1 if not used.
+        data4_io_num : -1,
+        // GPIO pin for spi data5 signal in octal mode, // -1 if not used.
+        data5_io_num : -1,
+        // GPIO pin for spi data6 signal in octal mode, // -1 if not used.
+        data6_io_num : -1,
+        // GPIO pin for spi data7 signal in octal mode, //-1 if not used.
+        data7_io_num : -1,
+        // max transfer size
+        max_transfer_sz : 16384,
+        // SPICOMMON_BUSFLAG_* flags
+        flags : 0,
         intr_flags : ESP_INTR_FLAG_IRAM
     };
 
@@ -185,7 +201,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
     // if clock frequency is unset use the maximum frequency
     if (clockHz == 0)
     {
-        clockHz = CPU_SPI_MaxClockFrequency(spiDeviceConfig.Spi_Bus);
+        CPU_SPI_MaxClockFrequency(spiDeviceConfig.Spi_Bus, &clockHz);
     }
 
     uint32_t flags =
@@ -464,12 +480,17 @@ void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GP
 }
 
 // Return SPI minimum clock frequency
-uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    (void)spi_bus;
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
 
     // TODO check what is minimum ( Min clock that can be configured on chip)
-    return 20000000 / 256;
+    *frequency = 20000000 / 256;
+
+    return S_OK;
 }
 
 // Return SPI maximum clock frequency
@@ -478,25 +499,34 @@ uint32_t CPU_SPI_MinClockFrequency(uint32_t spi_bus)
 // If using native SPI pins then maximum is 80mhz
 // if SPI pins are routed over GPIO matrix then 40mhz half duplex 26mhz full
 
-uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
+    if (spiBus - 1 >= NUM_SPI_BUSES)
+    {
+        return CLR_E_INVALID_PARAMETER;
+    }
+
     bool directPin = false;
 
     GPIO_PIN clockPin, misoPin, mosiPin;
 
-    CPU_SPI_GetPins(spi_bus, clockPin, misoPin, mosiPin);
+    CPU_SPI_GetPins(spiBus, clockPin, misoPin, mosiPin);
 
     // Check if direct pins being used
     switch (clockPin)
     {
         case 14:
             if (misoPin == 12 && mosiPin == 13)
+            {
                 directPin = true;
+            }
             break;
 
         case 18:
             if (misoPin == 19 && mosiPin == 23)
+            {
                 directPin = true;
+            }
             break;
 
         default:
@@ -505,10 +535,12 @@ uint32_t CPU_SPI_MaxClockFrequency(uint32_t spi_bus)
 
     if (directPin)
     {
-        return MAX_CLOCK_FREQUENCY_NATIVE;
+        *frequency = MAX_CLOCK_FREQUENCY_NATIVE;
     }
 
-    return MAX_CLOCK_FREQUENCY_GPIO_HALF;
+    *frequency = MAX_CLOCK_FREQUENCY_GPIO_HALF;
+
+    return S_OK;
 }
 
 //

@@ -3,10 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
-#define NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
+#ifndef _NF_DEV_ONEWIRE_TARGET_H_
+#define _NF_DEV_ONEWIRE_TARGET_H_
 
-#include <nf_devices_onewire_native.h>
+#include <nf_dev_onewire.h>
 
 // struct with parameters for 1-Wire working thread
 struct OneWireFindStruct
@@ -35,4 +35,4 @@ typedef enum {
 #define SEARCH_ROM               0xF0    /* search ROM */
 #define COND_SEARCH_ROM          0xEC    /* conditional search ROM */
 
-#endif // NF_DEVICES_ONEWIRE_NATIVE_TARGET_H
+#endif // _NF_DEV_ONEWIRE_TARGET_H_

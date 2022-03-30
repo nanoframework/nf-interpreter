@@ -10,7 +10,7 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <xdc/runtime/Error.h>
 #include <ti/drivers/gpio/GPIOCC26XX.h>
-#include <ti/drivers/PIN.h>
+#include <ti/drivers/GPIO.h>
 #include <ti_drivers_config.h>
 
 // SimpleLink doesn't follow the port&pin design pattern, there are no ports, just GPIO pins
@@ -165,6 +165,9 @@ void UnlinkInputState(gpio_input_state *pState)
     // Remove interrupt associated with pin
     // it's OK to do always this, no matter if interrupts are enabled or not
     GPIO_disableInt(pState->pinConfigIndex);
+
+    // disable pin
+    GPIO_setConfig(pState->pinConfigIndex, GPIO_CFG_IN_NOPULL);
 
     // remove callback
     gpioCallbackFunctions[pState->pinConfigIndex] = NULL;
@@ -394,7 +397,8 @@ bool CPU_GPIO_EnableInputPin(
     pState->pinConfigIndex = FindPinConfig(pinNumber);
 
     // set default input config for GPIO pin
-    gpioPinConfigs[pState->pinConfigIndex] |= PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS;
+    gpioPinConfigs[pState->pinConfigIndex] |=
+        GPIO_CFG_INPUT_INTERNAL | GPIO_CFG_IN_INT_NONE | GPIO_CFG_PULL_NONE_INTERNAL;
 
     if (!CPU_GPIO_SetDriveMode(pState->pinConfigIndex, driveMode))
     {

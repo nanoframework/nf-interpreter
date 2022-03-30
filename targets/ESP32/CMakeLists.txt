@@ -23,7 +23,7 @@ if(ESP32_IDF_PATH)
 endif()
 
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.3.2" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo
@@ -83,61 +83,12 @@ endif()
 
 # target folder was added in main CMakeList
 
-# if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
-
-    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDTLS_SOURCE TRUE)
-
-    if(MBEDTLS_SOURCE)
-        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
-            set(NO_MBEDTLS_SOURCE FALSE)
-        endif()
-    endif()
-
-    # set tag for currently supported version
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.0")
-
-    # set options for mbed TLS
-    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
-
-    if(NO_MBEDTLS_SOURCE)
-        # no mbed TLS source specified, download it from it's repo
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
-
-        FetchContent_Declare(
-            mbedtls
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
-            GIT_TAG ${MBEDTLS_GIT_TAG}
-        )
-
-    else()
-        # mbedTLS source was specified
-
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
-            
-        FetchContent_Declare(
-            mbedtls
-            SOURCE_DIR ${MBEDTLS_SOURCE}
-        )
-
-    endif()
-
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
-    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
-    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
-
-endif()
+# force this to ON
+set(NF_SECURITY_MBEDTLS ON CACHE INTERNAL "mbedTLS must be ON for IDF build")
 
 # add platform dirs
 add_subdirectory(_common)
-add_subdirectory(_Include)
+add_subdirectory(_include)
 add_subdirectory(_nanoCLR)
 
 if(USE_NETWORKING_OPTION)

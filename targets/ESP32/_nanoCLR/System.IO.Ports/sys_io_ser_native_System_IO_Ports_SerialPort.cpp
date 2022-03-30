@@ -8,9 +8,6 @@
 #include "sys_io_ser_native_target.h"
 #include <Esp32_DeviceMapping.h>
 
-// UART buffer size: 256 bytes
-#define UART_BUFER_SIZE 256
-
 // in UWP the COM ports are named COM1, COM2, COM3. But ESP32 uses internally UART0, UART1, UART2. This maps the port
 // index 1, 2 or 3 to the uart number 0, 1 or 2
 #define PORT_INDEX_TO_UART_NUM(portIndex) ((portIndex)-1)
@@ -289,6 +286,76 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
 
     // return how many bytes can be read from the Rx buffer
     stack.SetResult_U4(palUart->RxRingBuffer.Length());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    stack.SetResult_Boolean(palUart->SignalLevelsInverted);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart = NULL;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // check if UART it's already opened
+    if (palUart->SerialDevice)
+    {
+        // it is opened, so we can't change the signal levels
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+    }
+
+    palUart->SignalLevelsInverted = (bool)stack.Arg1().NumericByRef().u1;
 
     NANOCLR_NOCLEANUP();
 }
@@ -671,7 +738,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
         // check if this is a long running operation
         palUart->IsLongRunning = IsLongRunningOperation_sys(
-            length,
+            count,
             (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
             (uint32_t &)estimatedDurationMiliseconds);
 
@@ -685,13 +752,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             // this is a long running operation and
 
             // push to the stack how many bytes bytes where buffered for Tx
-            stack.PushValueI4(length);
+            stack.PushValueI4(count);
 
             // store pointer
             palUart->TxBuffer = data;
 
             // set TX count
-            palUart->TxOngoingCount = length;
+            palUart->TxOngoingCount = count;
 
             // Create a task to handle UART event from ISR
             char task_name[16];
@@ -713,7 +780,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
             // Write data to ring buffer to start sending
             // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)data, length);
+            uart_write_bytes(uart_num, (const char *)data, count);
         }
     }
 
@@ -790,6 +857,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     char task_name[16];
     uart_port_t uart_num;
     esp_err_t esp_err;
+    int32_t bufferSize;
 
     NF_PAL_UART *palUart;
 
@@ -821,8 +889,9 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // alloc buffers memory
-    palUart->RxBuffer = (uint8_t *)platform_malloc(UART_BUFER_SIZE);
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
     // sanity check
     if (palUart->RxBuffer == NULL)
@@ -831,7 +900,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     // init buffer
-    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, UART_BUFER_SIZE);
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
 
     // set/reset all the rest
     palUart->SerialDevice = stack.This();
@@ -839,12 +908,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->TxOngoingCount = 0;
     palUart->RxBytesToRead = 0;
     palUart->NewLineChar = 0;
+    palUart->SignalLevelsInverted = 0;
 
     // Install driver
     esp_err = uart_driver_install(
         uart_num,
         // rx_buffer_size
-        UART_BUFER_SIZE,
+        bufferSize,
         // tx_buffer_size, not buffered
         0,
         // queue_size
@@ -1013,6 +1083,33 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             // First time make sure UART is reset so use uart_param_config.
             // If you call this once driver installed it resets UART and stop events ISR being called.
             if (uart_param_config(uart_num, &uart_config) != ESP_OK)
+            {
+                ESP_LOGE(TAG, "Failed to set UART parameters configuration");
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            ////////////////////////////////////////////////////////////////////////////
+            // signal level inversion can only be configured when UART is not running //
+            ////////////////////////////////////////////////////////////////////////////
+
+            // default is to not invert
+            uart_signal_inv_t inversionMmask = UART_SIGNAL_INV_DISABLE;
+
+            // get pointer to PAL UART
+            NF_PAL_UART *palUart = GetPalUartFromUartNum_sys(uart_num);
+            if (palUart == NULL)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+            }
+
+            // check if signal levels are to be inverted
+            if (palUart->SignalLevelsInverted)
+            {
+                inversionMmask = (uart_signal_inv_t)(UART_SIGNAL_RXD_INV | UART_SIGNAL_TXD_INV);
+            }
+
+            // config signal inversion (or not)
+            if (uart_set_line_inverse(uart_num, inversionMmask) != ESP_OK)
             {
                 ESP_LOGE(TAG, "Failed to set UART parameters configuration");
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);

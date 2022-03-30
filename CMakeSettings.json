@@ -164,7 +164,7 @@
           "value": "ON"
         },
         {
-          "name": "API_nanoFramework.Devices.OneWire",
+          "name": "API_nanoFramework.Device.OneWire",
           "value": "OFF"
         },
         {
@@ -364,7 +364,7 @@
         },
         // LIBRARIES
         {
-          "name": "API_nanoFramework.Devices.OneWire:BOOL", //OFF-default-ON-to-add-this-API
+          "name": "API_nanoFramework.Device.OneWire:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {

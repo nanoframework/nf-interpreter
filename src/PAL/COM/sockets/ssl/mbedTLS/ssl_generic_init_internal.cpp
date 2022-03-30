@@ -287,7 +287,7 @@ bool ssl_generic_init_internal(
 
     // setup debug stuff
     // only required if output debug is enabled in mbedtls_config.h
-#ifdef MBEDTLS_DEBUG_C
+#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
     mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
     mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
 #endif

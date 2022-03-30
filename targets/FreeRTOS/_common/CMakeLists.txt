@@ -21,7 +21,7 @@ list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL
 
 list(APPEND TARGET_FREERTOS_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_ReceiverThread.c)
 
-# FreeRTOS nanoCRL
+# FreeRTOS nanoCLR
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR)
 
 # make vars global

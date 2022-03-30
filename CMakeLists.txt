@@ -494,14 +494,14 @@ endif()
 # for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
-if( API_nanoFramework.Devices.OneWire OR
+if( API_nanoFramework.Device.OneWire OR
     API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports)
 
-    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 
 else()
-    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 endif()
 
 if( API_System.Net)
@@ -594,10 +594,10 @@ else()
 endif()
 
 
-if(API_nanoFramework.Devices.OneWire)
-    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+if(API_nanoFramework.Device.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 else()
-    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################
@@ -626,7 +626,7 @@ endif()
 #################################################################
 
 # include nanoFramework.Runtime.Events API
-if( API_nanoFramework.Devices.OneWire OR 
+if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
     API_Windows.Devices.Gpio OR

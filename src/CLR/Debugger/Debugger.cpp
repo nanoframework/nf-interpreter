@@ -1263,8 +1263,6 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    bool success = false;
-
     // include handling of configuration block only if feature is available
 #if (HAS_CONFIG_BLOCK == TRUE)
 
@@ -1287,7 +1285,6 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
                     cmd->Done) == true)
             {
                 cmdReply.ErrorCode = 0;
-                success = true;
             }
             else
             {
@@ -1299,15 +1296,16 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
             cmdReply.ErrorCode = 10;
     }
 
-    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(message, true, false, (uint8_t *)&cmdReply, sizeof(Monitor_UpdateConfiguration_Reply));
+
+    return true;
 
 #else
 
     (void)message;
+    return false;
 
-#endif // (HAS_CONFIG_BLOCK == TRUE)
-
-    return success;
+#endif
 }
 
 //--//
@@ -1553,6 +1551,12 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
             {
                 reply.u_capsFlags |=
                     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_HasNanoBooter;
+            }
+
+            if (::Target_CanChangeMacAddress())
+            {
+                reply.u_capsFlags |=
+                    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_CanChangeMacAddress;
             }
 
             reply.u_capsFlags |=
