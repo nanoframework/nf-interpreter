@@ -377,7 +377,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
@@ -611,7 +611,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -692,7 +692,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
@@ -783,7 +783,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
     GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
@@ -822,7 +822,7 @@ jobs:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_7_4_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_8_0_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -985,6 +985,22 @@ jobs:
       versionSpec: '= 3.0'
       addToPath: true
 
+  # Cache change log cache files
+  - task: Cache@2
+    displayName: Cache change log cache files
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      )
+    inputs:
+      key: 'changeLogCacheFiles'
+      restoreKeys: 1_0
+      path: |
+        $env:AGENT_TEMPDIRECTORY/github-changelog-logger.log
+        $env:AGENT_TEMPDIRECTORY/github-changelog-http-cache
+
   # generate change log including future version
   - powershell: |
         gem install github_changelog_generator --quiet --no-document
@@ -994,28 +1010,7 @@ jobs:
       and(
         succeeded(),
         eq(variables['System.PullRequest.PullRequestId'], ''),
-        or(
-          eq(variables['Build.SourceBranchName'], 'main'),
-          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-        )
-      )
-    displayName: Generate change log
-
-  # generate change log without future version
-  - powershell: |
-        gem install github_changelog_generator --quiet --no-document
-        # need to call it passing both cache options with full path otherwise it won't work
-        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], ''),
-        not(
-          or(
-            eq(variables['Build.SourceBranchName'], 'main'),
-            startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-          )
-        )
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
       )
     displayName: Generate change log
 
