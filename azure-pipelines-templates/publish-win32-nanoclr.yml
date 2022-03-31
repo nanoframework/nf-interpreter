@@ -13,13 +13,7 @@ steps:
         eq(variables['ForceUpload'], true),
         and(
           succeeded(),
-          eq(variables['System.PullRequest.PullRequestId'], ''),
-          or(
-            startswith(variables['Build.SourceBranchName'], 'develop'),
-            eq(variables['Build.SourceBranchName'], 'main'),
-            eq(variables['Build.SourceBranchName'], ''),
-            contains(variables['Build.SourceBranchName'], 'release')
-          )
+          eq(variables['System.PullRequest.PullRequestId'], '')
         )
       )
     displayName: Set Cloudsmith repo path
@@ -45,7 +39,7 @@ steps:
             # this main branch, publish to Cloudsmith stable repo
             Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images"
             # set version
-            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_AssemblyVersion)"
+            Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)"
           }
       errorActionPreference: 'stop'
       failOnStderr: 'true'
@@ -56,13 +50,7 @@ steps:
         eq(variables['ForceUpload'], true),
         and(
           succeeded(),
-          eq(variables['System.PullRequest.PullRequestId'], ''),
-          or(
-            startswith(variables['Build.SourceBranchName'], 'develop'),
-            eq(variables['Build.SourceBranchName'], 'main'),
-            eq(variables['Build.SourceBranchName'], ''),
-            contains(variables['Build.SourceBranchName'], 'release')
-          )
+          eq(variables['System.PullRequest.PullRequestId'], '')
         )
       )
     displayName: Upload WIN32 nanoCLR to Cloudsmith
@@ -71,9 +59,9 @@ steps:
       script: |
 
           # install Cloudsmith CLI
-          python -m pip install --upgrade cloudsmith-cli
+          python -m pip install --upgrade cloudsmith-cli --quiet
 
-          Write-Host "Uploading nanoFramework.nanoCLR.exe v$(PACKAGE_VERSION)"
+          Write-Host "Uploading nanoFramework.nanoCLR.exe to v$(PACKAGE_VERSION)"
 
           cloudsmith push raw net-nanoframework/$(CLOUDSMITH_REPO) $(Build.ArtifactStagingDirectory)\$(TargetPublishName)\nanoFramework.nanoCLR.exe --name $(TargetPublishName) --version $(PACKAGE_VERSION) -k $(CLOUDSMITH_KEY)
 
