@@ -8,8 +8,23 @@
 
 #include <nanoHAL.h>
 #include <nanoHAL_ConfigurationManager.h>
+#include "wifi.h"
 
 #define NATIVE_PROFILE_PAL_NETWORK()
+
+//////////////////////////////////////////////////////////////////////////////
+// ISM43362 Socket structure (heavily inspired by the NX Duo socket structure)
+
+typedef struct ISM43362_SOCKET
+{
+    uint16_t protocol;
+    uint32_t localIP;
+    uint32_t remoteIP;
+    uint16_t localPort;
+    uint16_t remotePort;
+    uint8_t tcpConnected;
+    uint8_t isClient;
+} ISM43362_Socket;
 
 //////////////////////////////////////////////////////////////////////////////
 // SOCKET driver
@@ -20,20 +35,21 @@ struct ISM43362_DRIVER_INTERFACE_DATA
     int m_interfaceNumber;
 };
 
-#define SOCK_SOCKADDR_TO_SOCKADDR(ssa, sa, addrLen)                                                                    \
-    addr.sin_family = (uint8_t)((SOCK_sockaddr_in *)ssa)->sin_family;                                                  \
-    sa.sin_port = ((SOCK_sockaddr_in *)ssa)->sin_port;                                                                 \
-    sa.sin_addr.s_addr = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_addr;                                              \
-    memcpy(sa.sin_zero, ((SOCK_sockaddr_in *)ssa)->sin_zero, sizeof(sa.sin_zero));                                     \
-    *addrLen = sizeof(sa);
+#define SOCK_SOCKADDR_TO_IP_DATA(ssa)                                                                                  \
+    ipPort = __builtin_bswap16(((SOCK_sockaddr_in *)ssa)->sin_port);                                                   \
+    ipAddress[0] = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_un_b.s_b4;                                               \
+    ipAddress[1] = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_un_b.s_b3;                                               \
+    ipAddress[2] = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_un_b.s_b2;                                               \
+    ipAddress[3] = ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_un_b.s_b1;
 
+/*
 #define SOCKADDR_TO_SOCK_SOCKADDR(ssa, sa, addrLen)                                                                    \
     ((SOCK_sockaddr_in *)ssa)->sin_port = sa.sin_port;                                                                 \
     ((SOCK_sockaddr_in *)ssa)->sin_addr.S_un.S_addr = sa.sin_addr.s_addr;                                              \
     ((SOCK_sockaddr_in *)ssa)->sin_family = sa.sin_family;                                                             \
     memcpy(((SOCK_sockaddr_in *)ssa)->sin_zero, sa.sin_zero, sizeof(((SOCK_sockaddr_in *)ssa)->sin_zero));             \
     *addrLen = sizeof(SOCK_sockaddr_in)
-
+*/
 struct ISM43362_SOCKETS_Driver
 {
     static bool Initialize();
@@ -109,9 +125,9 @@ struct ISM43362_SOCKETS_Driver
         HAL_Configuration_NetworkInterface *config);
 
   private:
-  // TODO
+    // TODO
     // static void Status_callback(NX_IP *ipInstance);
-// TODO
+    // TODO
     // static void Link_callback(NX_IP *ipInstance);
 
     static void PostAddressChanged(void *arg);

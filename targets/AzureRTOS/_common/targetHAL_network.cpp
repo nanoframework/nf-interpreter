@@ -78,23 +78,20 @@ void nanoHAL_Network_Initialize()
 
 #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 
-        // if (NF_NetXDuo_Init(&networkConfig) == NX_SUCCESS)
+        // // check if we have the MAC address stored in the configuration block
+        // if (networkConfig.MacAddress[0] == 0xFF)
         // {
-
-        //     // check if we have the MAC address stored in the configuration block
-        //     if (networkConfig.MacAddress[0] == 0xFF)
+        //     // OK to ignore the return value, no harm done if it fails
+        //     if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
         //     {
-        //         // OK to ignore the return value, no harm done if it fails
-        //         if (WIFI_GetMAC_Address(&networkConfig.MacAddress[0]) == WIFI_STATUS_OK)
-        //         {
-        //             // store the MAC address in the configuration block
-        //             ConfigurationManager_UpdateConfigurationBlock(
-        //                 &networkConfig,
-        //                 DeviceConfigurationOption_Network,
-        //                 0);
-        //         }
+        //         // store the MAC address in the configuration block
+        //         ConfigurationManager_UpdateConfigurationBlock(
+        //             &networkConfig,
+        //             DeviceConfigurationOption_Network,
+        //             0);
         //     }
         // }
+
 #endif
 
     }

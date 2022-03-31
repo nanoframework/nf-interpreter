@@ -118,6 +118,10 @@ typedef struct {
 } WIFI_Conn_t;
 
 /* Exported macro ------------------------------------------------------------*/
+
+// Define the macro for building IPv4 addresses. 
+#define IP_ADDRESS(a, b, c, d)                     ((((uint32_t)a) << 24) | (((uint32_t)b) << 16) | (((uint32_t)c) << 8) | ((uint32_t)d))
+
 /* Exported functions ------------------------------------------------------- */
 WIFI_Status_t       WIFI_Init(void);
 WIFI_Status_t       WIFI_ListAccessPoints(WIFI_APs_t *APs, uint8_t AP_MaxNbr);

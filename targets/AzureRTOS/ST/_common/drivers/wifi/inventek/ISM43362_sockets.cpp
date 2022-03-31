@@ -5,23 +5,7 @@
 //
 
 #include "ISM43362_sockets.h"
-
-extern "C"
-{
-    // #include "lwip/init.h"
-    // #include "lwip/tcpip.h"
-    // #include "lwip/dns.h"
-    // #include "lwip/netifapi.h"
-    // #include "lwip/netdb.h"
-    // #include "lwip/tcp.h"
-    // #include "lwip/sockets.h"
-    // #include "lwip/dhcp.h"
-    // #include "lwip/netif.h"
-
-//     extern NX_IP IpInstance;
-//     extern NX_DNS DnsInstance;
-//     extern NX_DHCP DhcpInstance;
-}
+#include <nanoCLR_Types.h>
 
 int errorCode;
 
@@ -34,21 +18,47 @@ int errorCode;
 #define DEBUG_HANDLE_SOCKET_ERROR(t, a)
 #endif
 
-//
+#define IP4ADDR_STRLEN_MAX 16
 
-// declaration of function not available in standard lwIP API
-extern "C"
-{
-    extern uint32_t lwip_socket_get_err(int s);
-}
+#define ISM43362_AVAILABLE_SOCKETS 4
+#define LOCAL_PORT_START           0xC000
+#define LOCAL_PORT_MAX             0xFFFF
+
 //--//
 
 ISM43362_SOCKETS_Driver g_ISM43362_SOCKETS_Driver;
+static char str[IP4ADDR_STRLEN_MAX];
+
+static ISM43362_Socket _sockets[ISM43362_AVAILABLE_SOCKETS];
 
 //--//
 static HAL_CONTINUATION PostAddressChangedContinuation;
 static HAL_CONTINUATION PostAvailabilityOnContinuation;
 static HAL_CONTINUATION PostAvailabilityOffContinuation;
+
+// generate ramdon port number
+uint16_t GetRandomPortNumber(void)
+{
+    uint16_t port = 0;
+
+    while (port == 0)
+    {
+        port = LOCAL_PORT_START + (rand() % ((LOCAL_PORT_MAX + 1) - LOCAL_PORT_START));
+
+        // check if this port is in use
+        for (int i = 0; i < ISM43362_AVAILABLE_SOCKETS; i++)
+        {
+            if (_sockets[i].protocol != 0xFF && _sockets[i].localPort == port)
+            {
+                // try again
+                port = 0;
+                break;
+            }
+        }
+    }
+
+    return port;
+}
 
 void ISM43362_SOCKETS_Driver::PostAddressChanged(void *arg)
 {
@@ -82,7 +92,7 @@ HRESULT ISM43362_SOCKETS_Driver::Link_status(uint32_t interfaceIndex, bool *stat
     (void)interfaceIndex;
     (void)status;
 
-// TODO
+    // TODO
     // uint32_t actual_status;
     // if (nx_ip_status_check(&IpInstance, NX_IP_LINK_ENABLED, &actual_status, NX_NO_WAIT) != NX_SUCCESS)
     // {
@@ -115,16 +125,25 @@ HRESULT ISM43362_SOCKETS_Driver::IPAddressFromString(const char *ipString, uint6
 
 const char *ISM43362_SOCKETS_Driver::IPAddressToString(uint32_t address)
 {
-    (void)address;
-    
+    char *szBuffer = str;
+
+    size_t iBuffer = IP4ADDR_STRLEN_MAX;
+    uint8_t ipAddress[4];
+
     // get IP v4 address in numeric format
+    ipAddress[0] = (uint8_t)((address & 0xFF000000) >> 24);
+    ipAddress[1] = (uint8_t)((address & 0x00FF0000) >> 16);
+    ipAddress[2] = (uint8_t)((address & 0x0000FF00) >> 8);
+    ipAddress[3] = (uint8_t)((address & 0x000000FF));
+
     // FIXME IPV6
-    //struct in_addr ip4Address = {address};
+    // struct in_addr ip4Address = {address};
 
-// TODO
-    //return inet_ntoa(ip4Address);
+    memset(str, 0, IP4ADDR_STRLEN_MAX);
 
-    return NULL;
+    CLR_SafeSprintf(szBuffer, iBuffer, "%d.%d.%d.%d", ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+
+    return str;
 }
 
 // TODO
@@ -213,16 +232,26 @@ bool ISM43362_SOCKETS_Driver::Initialize()
     PostAvailabilityOnContinuation.InitializeCallback(PostAvailabilityOn, NULL);
     PostAvailabilityOffContinuation.InitializeCallback(PostAvailabilityOff, NULL);
 
+    // initialize sockets array
+    for (int i = 0; i < ISM43362_AVAILABLE_SOCKETS; i++)
+    {
+        // clear socket struct
+        memset(&_sockets[i], 0, sizeof(ISM43362_Socket));
+        // this signals that the socket is not in use
+        _sockets[i].protocol = 0xFF;
+    }
+
     // create m_interfaceNumber array
     int interfaceCount = g_TargetConfiguration.NetworkInterfaceConfigs->Count;
 
     // sanity check for any interfaces
-    if(interfaceCount > 0)
+    if (interfaceCount > 0)
     {
         g_ISM43362_SOCKETS_Driver.m_interfaces =
             (ISM43362_DRIVER_INTERFACE_DATA *)platform_malloc(interfaceCount * sizeof(ISM43362_DRIVER_INTERFACE_DATA));
 
         // Initialize the target board network
+        // TODO: consider removing this
         nanoHAL_Network_Initialize();
 
         for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
@@ -240,7 +269,7 @@ bool ISM43362_SOCKETS_Driver::Initialize()
             }
 
             // sanity check
-            if(networkConfiguration.StartupAddressMode == 0)
+            if (networkConfiguration.StartupAddressMode == 0)
             {
                 return FALSE;
             }
@@ -258,10 +287,13 @@ bool ISM43362_SOCKETS_Driver::Initialize()
 
             g_ISM43362_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-            UpdateAdapterConfiguration(
-                i,
-                (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
-                &networkConfiguration);
+            if (UpdateAdapterConfiguration(
+                    i,
+                    (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+                    &networkConfiguration) != S_OK)
+            {
+                return FALSE;
+            }
 
             // TODO NETWORK
             // netif_set_link_callback(networkInterface, Link_callback);
@@ -317,31 +349,43 @@ SOCK_SOCKET ISM43362_SOCKETS_Driver::Socket(int family, int type, int protocol)
 {
     (void)family;
     (void)type;
-    (void)protocol;
-    
-    // TODO
-    // NATIVE_PROFILE_PAL_NETWORK();
 
-    // switch (protocol)
-    // {
-    //     case SOCK_IPPROTO_TCP:
-    //         protocol = IPPROTO_TCP;
-    //         break;
-    //     case SOCK_IPPROTO_UDP:
-    //         protocol = IPPROTO_UDP;
-    //         break;
-    //     case SOCK_IPPROTO_ICMP:
-    //         protocol = IPPROTO_ICMP;
-    //         break;
+    NATIVE_PROFILE_PAL_NETWORK();
 
-    //     case SOCK_IPPROTO_IGMP:
-    //         protocol = IPPROTO_IGMP;
-    //         break;
-    // }
+    int8_t socketIndex = -1;
 
-    // errorCode = socket(family, type, protocol);
+    if (protocol != SOCK_IPPROTO_TCP && protocol != SOCK_IPPROTO_UDP)
+    {
+        return SOCK_SOCKET_ERROR;
+    }
 
-    return errorCode;
+    // find a free socket
+    for (int i = 0; i < ISM43362_AVAILABLE_SOCKETS; i++)
+    {
+        if (_sockets[i].protocol == 0xFF)
+        {
+            // found a free socket
+            socketIndex = i;
+
+            // done here
+            break;
+        }
+    }
+
+    if (socketIndex == -1)
+    {
+        return SOCK_SOCKET_ERROR;
+    }
+    else
+    {
+        // set protocol
+        _sockets[socketIndex].protocol = protocol == SOCK_IPPROTO_TCP ? WIFI_TCP_PROTOCOL : WIFI_UDP_PROTOCOL;
+
+        // clear error
+        errorCode = 0;
+
+        return socketIndex;
+    }
 }
 
 int ISM43362_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
@@ -349,86 +393,102 @@ int ISM43362_SOCKETS_Driver::Bind(SOCK_SOCKET socket, const SOCK_sockaddr *addre
     (void)socket;
     (void)address;
     (void)addressLen;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
 
-// TODO
-//     sockaddr_in addr;
+    // TODO
+    //     sockaddr_in addr;
 
-//     SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
+    //     SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
 
-// errorCode = bind(socket, (sockaddr *)&addr, addressLen);
+    // errorCode = bind(socket, (sockaddr *)&addr, addressLen);
 
-return errorCode;
+    return errorCode;
 }
 
 int ISM43362_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *address, int addressLen)
 {
-        (void)socket;
-    (void)address;
     (void)addressLen;
 
-    // TODO
-    // NATIVE_PROFILE_PAL_NETWORK();
+    NATIVE_PROFILE_PAL_NETWORK();
 
-    // sockaddr_in addr;
+    uint8_t ipAddress[4];
+    uint16_t ipPort;
 
-    // SOCK_SOCKADDR_TO_SOCKADDR(address, addr, &addressLen);
+    SOCK_SOCKADDR_TO_IP_DATA(address);
 
-    // errorCode = connect(socket, (sockaddr *)&addr, addressLen);
+    // fill socket details
+    _sockets[socket].isClient = true;
+    _sockets[socket].remotePort = ipPort;
+    _sockets[socket].remoteIP = ((SOCK_sockaddr_in *)address)->sin_addr.S_un.S_addr;
+    _sockets[socket].localPort = GetRandomPortNumber();
+
+    if (WIFI_OpenClientConnection(
+            socket,
+            (WIFI_Protocol_t)_sockets[socket].protocol,
+            "",
+            ipAddress,
+            ipPort,
+            _sockets[socket].localPort) != WIFI_STATUS_OK)
+    {
+        errorCode = SOCK_SOCKET_ERROR;
+    }
+    else
+    {
+        errorCode = 0;
+    }
 
     return errorCode;
 }
 
 int ISM43362_SOCKETS_Driver::Send(SOCK_SOCKET socket, const char *buf, int len, int flags)
 {
-        (void)socket;
-    (void)buf;
-    (void)len;
     (void)flags;
 
- NATIVE_PROFILE_PAL_NETWORK();
+    NATIVE_PROFILE_PAL_NETWORK();
+    uint16_t bytesSent = 0;
 
-// TODO
-    // errorCode = send(socket, (const CHAR *)buf, len, flags);
+    if (WIFI_SendData((uint8_t)socket, (uint8_t *)buf, len, &bytesSent, 100) != WIFI_STATUS_OK)
+    {
+        errorCode = SOCK_SOCKET_ERROR;
+        return -1;
+    }
 
-    return errorCode;
+    return bytesSent;
 }
 
 int ISM43362_SOCKETS_Driver::Recv(SOCK_SOCKET socket, char *buf, int len, int flags)
 {
-(void)socket;
-    (void)buf;
-    (void)len;
     (void)flags;
 
     NATIVE_PROFILE_PAL_NETWORK();
-    // TODO
-    // int nativeFlag;
+    uint16_t bytesReceived = 0;
 
-    // switch (flags)
-    // {
-    //     case SOCKET_READ_PEEK_OPTION:
-    //         nativeFlag = MSG_PEEK;
-    //         break;
-    //     default:
-    //         nativeFlag = flags;
-    //         break;
-    // }
+    if (WIFI_ReceiveData((uint8_t)socket, (uint8_t *)buf, len, &bytesReceived, 1000) != WIFI_STATUS_OK)
+    {
+        errorCode = SOCK_SOCKET_ERROR;
+        return -1;
+    }
 
-    // errorCode = recv(socket, (void *)buf, len, nativeFlag);
-
-    return errorCode;
+    return bytesReceived;
 }
 
 int ISM43362_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
-    (void)socket;
-
     NATIVE_PROFILE_PAL_NETWORK();
 
-    // TODO
-    // errorCode =  soc_close(socket);
+    WIFI_Status_t status;
+
+    if (_sockets[socket].isClient)
+    {
+        status = WIFI_CloseClientConnection((uint8_t)socket);
+    }
+    else
+    {
+        status = WIFI_CloseServerConnection((uint8_t)socket);
+    }
+
+    errorCode = status == WIFI_STATUS_OK ? 0 : SOCK_SOCKET_ERROR;
 
     return errorCode;
 }
@@ -438,21 +498,19 @@ int ISM43362_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
     (void)socket;
     (void)backlog;
 
-
     NATIVE_PROFILE_PAL_NETWORK();
 
     // TODO
-// errorCode =  listen(socket, backlog);
+    // errorCode =  listen(socket, backlog);
 
-return errorCode;
+    return errorCode;
 }
 
 SOCK_SOCKET ISM43362_SOCKETS_Driver::Accept(SOCK_SOCKET socket, SOCK_sockaddr *address, int *addressLen)
 {
-            (void)socket;
+    (void)socket;
     (void)address;
     (void)addressLen;
-
 
     NATIVE_PROFILE_PAL_NETWORK();
     // TODO
@@ -491,184 +549,146 @@ int ISM43362_SOCKETS_Driver::GetAddrInfo(
     const SOCK_addrinfo *hints,
     SOCK_addrinfo **res)
 {
-            (void)nodename;
     (void)servname;
-    (void)hints;
-(void)res;
-
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-    // TODO
+    uint8_t ipAddress[4];
+    SOCK_addrinfo *ai;
+    void *dummyPtr;
+    SOCK_sockaddr_in *sa = NULL;
+    int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
 
-    // SOCK_addrinfo *ai;
-    // void *dummyPtr;
-    // SOCK_sockaddr_in *sa = NULL;
-    // int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-    // struct addrinfo *netxAddrinfo = NULL;
+    if (res == NULL)
+    {
+        return SOCK_SOCKET_ERROR;
+    }
 
-    // if (res == NULL)
-    //     return SOCK_SOCKET_ERROR;
+    *res = NULL;
 
-    // *res = NULL;
+    // if the nodename == "" then return the IP address of this device
+    if (nodename[0] == 0 && servname == NULL)
+    {
+        if (WIFI_GetIP_Address(ipAddress) != WIFI_STATUS_OK)
+        {
+            return S_FALSE;
+        }
 
-    // // if the nodename == "" then return the IP address of this device
-    // if (nodename[0] == 0 && servname == NULL)
-    // {
-    //     uint32_t ip_address;
-    //     uint32_t network_mask;
+        ai = (SOCK_addrinfo *)platform_malloc(total_size);
+        if (ai == NULL)
+        {
+            return SOCK_SOCKET_ERROR;
+        }
 
-    //     if (nx_ip_interface_address_get(&IpInstance, 0, &ip_address, &network_mask) != NX_SUCCESS)
-    //     {
-    //         return -1;
-    //     }
+        memset(ai, 0, total_size);
+        sa = (SOCK_sockaddr_in *)((uint8_t *)ai + sizeof(SOCK_addrinfo));
 
-    //     ai = (SOCK_addrinfo *)platform_malloc(total_size);
-    //     if (ai == NULL)
-    //     {
-    //         return -1;
-    //     }
-    //     memset(ai, 0, total_size);
-    //     sa = (SOCK_sockaddr_in *)((uint8_t *)ai + sizeof(SOCK_addrinfo));
+        // set up sockaddr
+        sa->sin_addr.S_un.S_addr = IP_ADDRESS(ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
 
-    //     /* set up sockaddr */
-    //     sa->sin_addr.S_un.S_addr = ip_address;
+        sa->sin_family = SOCK_AF_INET;
+        sa->sin_port = 0;
 
-    //     sa->sin_family = AF_INET;
-    //     sa->sin_port = 0;
+        // set up addrinfo
+        ai->ai_family = SOCK_AF_INET;
+        if (hints != NULL)
+        {
+            // copy socktype & protocol from hints if specified
+            ai->ai_socktype = hints->ai_socktype;
+            ai->ai_protocol = hints->ai_protocol;
+        }
 
-    //     /* set up addrinfo */
-    //     ai->ai_family = AF_INET;
-    //     if (hints != NULL)
-    //     {
-    //         /* copy socktype & protocol from hints if specified */
-    //         ai->ai_socktype = hints->ai_socktype;
-    //         ai->ai_protocol = hints->ai_protocol;
-    //     }
+        // need this to keep the compiler happy about the cast to SOCK_sockaddr
+        // which is intended and perfectly safe
+        dummyPtr = sa;
 
-    //     // need this to keep the compiler happy about the cast to SOCK_sockaddr
-    //     // which is intended and perfectly safe
-    //     dummyPtr = sa;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
+        ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
 
-    //     ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-    //     ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
+        *res = ai;
 
-    //     *res = ai;
+        return 0;
+    }
+    else
+    {
+        if (WIFI_GetHostAddress(nodename, ipAddress) != WIFI_STATUS_OK)
+        {
+            errorCode = SOCK_EINVAL;
 
-    //     return 0;
-    // }
+            return SOCK_SOCKET_ERROR;
+        }
 
-    // int err = getaddrinfo(nodename, servname, (addrinfo *)hints, &netxAddrinfo);
+        ai = (SOCK_addrinfo *)platform_malloc(total_size);
+        if (ai == NULL)
+        {
+            return SOCK_SOCKET_ERROR;
+        }
 
-    // if (err == 0)
-    // {
-    //     ///
-    //     /// Marshal addrinfo data
-    //     ///
-    //     struct sockaddr_in *lwip_sockaddr_in;
+        memset(ai, 0, total_size);
 
-    //     ai = (SOCK_addrinfo *)platform_malloc(total_size);
-    //     if (ai == NULL)
-    //     {
-    //         freeaddrinfo(netxAddrinfo);
-    //         return -1;
-    //     }
-    //     memset(ai, 0, total_size);
+        sa = (SOCK_sockaddr_in *)((uint8_t *)ai + sizeof(SOCK_addrinfo));
 
-    //     lwip_sockaddr_in = ((struct sockaddr_in *)netxAddrinfo->ai_addr);
+        // set up sockaddr
+        sa->sin_addr.S_un.S_addr = (u_long)IP_ADDRESS(ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+        sa->sin_family = SOCK_AF_INET;
+        sa->sin_port = 0;
 
-    //     sa = (SOCK_sockaddr_in *)((uint8_t *)ai + sizeof(SOCK_addrinfo));
-    //     /* set up sockaddr */
-    //     sa->sin_addr.S_un.S_addr = lwip_sockaddr_in->sin_addr.s_addr;
-    //     sa->sin_family = lwip_sockaddr_in->sin_family;
-    //     sa->sin_port = lwip_sockaddr_in->sin_port;
+        // set up addrinfo
+        ai->ai_family = SOCK_AF_INET;
+        if (hints != NULL)
+        {
+            // copy socktype & protocol from hints if specified
+            ai->ai_socktype = hints->ai_socktype;
+            ai->ai_protocol = hints->ai_protocol;
+        }
 
-    //     /* set up addrinfo */
-    //     ai->ai_family = netxAddrinfo->ai_family;
-    //     if (hints != NULL)
-    //     {
-    //         /* copy socktype & protocol from hints if specified */
-    //         ai->ai_socktype = hints->ai_socktype;
-    //         ai->ai_protocol = hints->ai_protocol;
-    //     }
+        // need this to keep the compiler happy about the cast to SOCK_sockaddr
+        // which is intended and perfectly safe
+        dummyPtr = sa;
 
-    //     // need this to keep the compiler happy about the cast to SOCK_sockaddr
-    //     // which is intended and perfectly safe
-    //     dummyPtr = sa;
+        ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
+        ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
 
-    //     ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-    //     ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
+        *res = ai;
 
-    //     *res = ai;
-
-    //     // free marshalled addrinfo
-    //     platform_free(netxAddrinfo);
-
-    //     return 0;
-    // }
-    // else
-    // {
-    //     // map DNS error with socket errors
-    //     switch (err)
-    //     {
-    //             // TODO NETWORK
-    //             // case HOST_NOT_FOUND:
-    //             //     errorCode = SOCK_HOST_NOT_FOUND;
-    //             //     break;
-
-    //         default:
-    //             errorCode = SOCK_EINVAL;
-    //     }
-    // }
+        return 0;
+    }
 
     return SOCK_SOCKET_ERROR;
 }
 
 void ISM43362_SOCKETS_Driver::FreeAddrInfo(SOCK_addrinfo *ai)
 {
-            (void)ai;
-
+    (void)ai;
 
     NATIVE_PROFILE_PAL_NETWORK();
-
-    // TODO
-    // SOCK_addrinfo *next;
-
-    // while (ai != NULL)
-    // {
-    //     next = ai->ai_next;
-    //     platform_free(ai);
-    //     ai = next;
-    // }
 }
 
 int ISM43362_SOCKETS_Driver::Ioctl(SOCK_SOCKET socket, int cmd, int *data)
 {
-            (void)socket;
+    (void)socket;
     (void)cmd;
     (void)data;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-     // TODO
+    // TODO
 
-//    return ioctl(socket, cmd, data);
-return 0;
+    //    return ioctl(socket, cmd, data);
+    return 0;
 }
 
 int ISM43362_SOCKETS_Driver::GetLastError()
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-    // TODO
-    // return GetNativeError(errorCode);
-return 0;
+    return GetNativeError(errorCode);
 }
 
 int ISM43362_SOCKETS_Driver::GetSockLastError(SOCK_SOCKET socket)
 {
     (void)socket;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
 
     // get last error number from socket
@@ -725,74 +745,37 @@ int ISM43362_SOCKETS_Driver::Select(
     const SOCK_timeval *timeout)
 {
     (void)nfds;
-    (void)readfds;
-
-    (void)writefds;
-
-    (void)exceptfds;
-
     (void)timeout;
-
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-    int ret = 0;
-// TODO
+    // implement a check for data in the sockets
+    int ret = 1;
 
-    // fd_set read;
-    // fd_set write;
-    // fd_set excpt;
+    // If the network goes down then we should alert any pending socket actions
+    if (exceptfds != NULL && exceptfds->fd_count > 0)
+    {
+        // check if network is down
+        if (WIFI_IsConnected() == WIFI_STATUS_ERROR)
+        {
+            if (readfds != NULL)
+            {
+                readfds->fd_count = 0;
+            }
 
-    // fd_set *pR = (readfds != NULL) ? &read : NULL;
-    // fd_set *pW = (writefds != NULL) ? &write : NULL;
-    // fd_set *pE = (exceptfds != NULL) ? &excpt : NULL;
+            if (writefds != NULL)
+            {
+                writefds->fd_count = 0;
+            }
 
-    // // If the network goes down then we should alert any pending socket actions
-    // if (exceptfds != NULL && exceptfds->fd_count > 0)
-    // {
-    //     uint32_t actual_status;
+            errorCode = SOCK_ENETDOWN;
 
-    //     if (nx_ip_status_check(&IpInstance, NX_IP_LINK_ENABLED, &actual_status, NX_NO_WAIT) != NX_SUCCESS)
-    //     {
-    //         return -1;
-    //     }
+            return exceptfds->fd_count;
+        }
 
-    //     if (!(actual_status & NX_IP_LINK_ENABLED))
-    //     {
-    //         if (readfds != NULL)
-    //         {
-    //             readfds->fd_count = 0;
-    //         }
-
-    //         if (writefds != NULL)
-    //         {
-    //             writefds->fd_count = 0;
-    //         }
-
-    //         errorCode = ENETDOWN;
-
-    //         return exceptfds->fd_count;
-    //     }
-    // }
-
-    // MARSHAL_SOCK_FDSET_TO_FDSET(readfds, pR);
-    // MARSHAL_SOCK_FDSET_TO_FDSET(writefds, pW);
-    // MARSHAL_SOCK_FDSET_TO_FDSET(exceptfds, pE);
-
-    // int max_sd = NX_BSD_MAX_SOCKETS;
-
-    // // developer note:
-    // // our declaration of SOCK_timeval is dependent of "long" type which is platform dependent
-    // // so it's not safe to cast it to "timeval"
-    // timeval timeoutCopy;
-    // timeoutCopy.tv_sec = timeout->tv_sec;
-    // timeoutCopy.tv_usec = timeout->tv_usec;
-
-    // ret = select(max_sd, pR, pW, pE, &timeoutCopy);
-
-    // MARSHAL_FDSET_TO_SOCK_FDSET(readfds, pR);
-    // MARSHAL_FDSET_TO_SOCK_FDSET(writefds, pW);
-    // MARSHAL_FDSET_TO_SOCK_FDSET(exceptfds, pE);
+        // clear exception state
+        exceptfds->fd_count = 0;
+    }
 
     return ret;
 }
@@ -802,12 +785,12 @@ int ISM43362_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optna
     (void)socket;
     (void)level;
     (void)optname;
-(void)optval;
-(void)optlen;
+    (void)optval;
+    (void)optlen;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-// TODO
+    // TODO
     // int nativeLevel;
     // int nativeOptionName;
     // int nativeIntValue;
@@ -870,11 +853,11 @@ int ISM43362_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optna
 
 int ISM43362_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
 {
-      (void)socket;
+    (void)socket;
     (void)level;
     (void)optname;
-(void)optval;
-(void)optlen;
+    (void)optval;
+    (void)optlen;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -937,14 +920,14 @@ int ISM43362_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optna
 
 int ISM43362_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
-      (void)socket;
+    (void)socket;
     (void)name;
-(void)namelen;
+    (void)namelen;
 
     NATIVE_PROFILE_PAL_NETWORK();
     int ret = 0;
 
-// TODO
+    // TODO
     // sockaddr_in addr;
 
     // SOCK_SOCKADDR_TO_SOCKADDR(name, addr, namelen);
@@ -958,15 +941,14 @@ int ISM43362_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name
 
 int ISM43362_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
 {
-        (void)socket;
+    (void)socket;
     (void)name;
-(void)namelen;
-
+    (void)namelen;
 
     NATIVE_PROFILE_PAL_NETWORK();
     int ret = 0;
 
-// TODO
+    // TODO
     // sockaddr_in addr;
 
     // SOCK_SOCKADDR_TO_SOCKADDR(name, addr, namelen);
@@ -978,14 +960,20 @@ int ISM43362_SOCKETS_Driver::GetSockName(SOCK_SOCKET socket, SOCK_sockaddr *name
     return ret;
 }
 
-int ISM43362_SOCKETS_Driver::RecvFrom(SOCK_SOCKET socket, char *buf, int len, int flags, SOCK_sockaddr *from, int *fromlen)
+int ISM43362_SOCKETS_Driver::RecvFrom(
+    SOCK_SOCKET socket,
+    char *buf,
+    int len,
+    int flags,
+    SOCK_sockaddr *from,
+    int *fromlen)
 {
-        (void)socket;
+    (void)socket;
     (void)buf;
-(void)len;
-(void)flags;
-(void)from;
-(void)fromlen;
+    (void)len;
+    (void)flags;
+    (void)from;
+    (void)fromlen;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -1019,16 +1007,15 @@ int ISM43362_SOCKETS_Driver::SendTo(
     int tolen)
 {
     (void)socket;
-(void)buf;
-(void)len;
-(void)flags;
-(void)to;
-(void)tolen;
-
+    (void)buf;
+    (void)len;
+    (void)flags;
+    (void)to;
+    (void)tolen;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-// TODO
+    // TODO
     // sockaddr_in addr;
 
     // SOCK_SOCKADDR_TO_SOCKADDR(to, addr, &tolen);
@@ -1043,55 +1030,42 @@ HRESULT ISM43362_SOCKETS_Driver::LoadAdapterConfiguration(
     uint32_t interfaceIndex)
 {
     (void)interfaceIndex;
-    (void)config;
+
+    uint8_t ipAddress[4];
+    uint8_t ipMask[4];
+    uint8_t gatewayAddress[4];
+    uint8_t dns1addr[4];
+    uint8_t dns2addr[4];
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-//     if (config->StartupAddressMode == AddressMode_DHCP)
-//     {
-// #ifndef NX_DISABLE_IPV6
-//         config->IPv4Address = networkInterface->ip_addr.u_addr.ip4.addr;
-//         config->IPv4NetMask = networkInterface->netmask.u_addr.ip4.addr;
-//         config->IPv4GatewayAddress = networkInterface->gw.u_addr.ip4.addr;
+    if (config->StartupAddressMode == AddressMode_DHCP)
+    {
+        if (WIFI_GetIP_Address(ipAddress) != WIFI_STATUS_OK)
+        {
+            return S_FALSE;
+        }
+        else if (WIFI_GetIP_Mask(ipMask) != WIFI_STATUS_OK)
+        {
+            return S_FALSE;
+        }
+        else if (WIFI_GetGateway_Address(gatewayAddress) != WIFI_STATUS_OK)
+        {
+            return S_FALSE;
+        }
+        else if (WIFI_GetDNS_Address(dns1addr, dns2addr) != WIFI_STATUS_OK)
+        {
+            return S_FALSE;
+        }
 
-//         // FIXME IPV6
-//         // config->IPv6Address     = networkInterface->ip_addr.u_addr.ip6.addr;
-//         // config->IPv6NetMask = networkInterface->netmask.u_addr.ip6.addr;
-//         // config->IPv6GatewayAddress    = networkInterface->gw.u_addr.ip6.addr;
-// #else
-//         uint32_t ip_address;
-//         uint32_t network_mask;
+        config->IPv4Address = IP_ADDRESS(ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]);
+        config->IPv4NetMask = IP_ADDRESS(ipMask[0], ipMask[1], ipMask[2], ipMask[3]);
+        config->IPv4GatewayAddress =
+            IP_ADDRESS(gatewayAddress[0], gatewayAddress[1], gatewayAddress[2], gatewayAddress[3]);
 
-//         if (nx_ip_interface_address_get(&IpInstance, 0, &ip_address, &network_mask) != NX_SUCCESS)
-//         {
-//             return S_FALSE;
-//         }
-
-//         config->IPv4Address = ip_address;
-//         config->IPv4NetMask = network_mask;
-
-//         uint32_t gwAddress;
-
-//         if (nx_ip_gateway_address_get(&IpInstance, &gwAddress) != NX_SUCCESS)
-//         {
-//             return S_FALSE;
-//         }
-
-//         config->IPv4GatewayAddress = ip_address;
-// #endif
-
-//         UCHAR dnsIpString[4];
-//         UINT dnsSize;
-
-//         if (nx_dhcp_interface_user_option_retrieve(&DhcpInstance, 0, NX_DHCP_OPTION_DNS_SVR, dnsIpString, &dnsSize) !=
-//             NX_SUCCESS)
-//         {
-//             return S_FALSE;
-//         }
-
-//         config->IPv4DNSAddress1 = nx_dhcp_user_option_convert(dnsIpString);
-//         config->IPv4DNSAddress2 = 0;
-//     }
+        config->IPv4DNSAddress1 = IP_ADDRESS(dns1addr[0], dns1addr[1], dns1addr[2], dns1addr[3]);
+        config->IPv4DNSAddress2 = IP_ADDRESS(dns2addr[0], dns2addr[1], dns2addr[2], dns2addr[3]);
+    }
 
     return S_OK;
 }
@@ -1109,89 +1083,63 @@ HRESULT ISM43362_SOCKETS_Driver::UpdateAdapterConfiguration(
     uint32_t updateFlags,
     HAL_Configuration_NetworkInterface *config)
 {
-    (void) interfaceIndex;
+    (void)interfaceIndex;
     (void)updateFlags;
     (void)config;
 
     NATIVE_PROFILE_PAL_NETWORK();
 
-// TODO
-    // bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
+    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
 
-    // // when using DHCP do not use the static settings
-    // if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
-    // {
-    //     // FIXME IPV6
-    //     if (config->AutomaticDNS == 0)
-    //     {
-    //         // user defined DNS addresses
-    //         if (config->IPv4DNSAddress1 != 0)
-    //         {
-    //             // TODO NETWORK
-    //             // nx_dns_server_remove(&DnsInstance, ULONG server_address);
+    // when using DHCP do not use the static settings
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
+    {
+        // FIXME IPV6
+        if (config->AutomaticDNS == 0)
+        {
+            // NOT supported!
+            return CLR_E_NOT_SUPPORTED;
+        }
+    }
 
-    //             // // need to convert this first
-    //             // ip_addr_t dnsServer;
-    //             // ip_addr_set_ip4_u32(&dnsServer, config->IPv4DNSAddress1);
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
+    {
+        if (enableDHCP)
+        {
+            // this is the default, nothing else to do
+        }
+        else
+        {
+            // stop DHCP
+            // NOT supported!
+            return CLR_E_NOT_SUPPORTED;
+        }
+    }
 
-    //             // dns_setserver(0, &dnsServer);
-    //         }
-    //     }
-    // }
+    if (enableDHCP)
+    {
+        if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
+        {
+            // nothing to do here
+        }
+        else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
+        {
+            // nothing to do here
+        }
+        else if (
+            0 !=
+            (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
+        {
+            return CLR_E_INVALID_PARAMETER;
+        }
+    }
 
-    // if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
-    // {
-    //     if (enableDHCP)
-    //     {
-    //         // need to start DHCP
-    //         UINT dhcpStartResult = nx_dhcp_start(&DhcpInstance);
-
-    //         if (dhcpStartResult != NX_SUCCESS && dhcpStartResult != NX_DHCP_ALREADY_STARTED)
-    //         {
-    //             return CLR_E_FAIL;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // stop DHCP
-    //         UINT dhcpStopResult = nx_dhcp_stop(&DhcpInstance);
-
-    //         if (dhcpStopResult != NX_SUCCESS && dhcpStopResult != NX_DHCP_NOT_STARTED)
-    //         {
-    //             return CLR_E_FAIL;
-    //         }
-
-    //         nx_ip_interface_address_set(&IpInstance, 0, config->IPv4Address, config->IPv4NetMask);
-
-    //         // we should be polite and let the DHCP server that we are now using a static IP
-    //         nx_dhcp_release(&DhcpInstance);
-    //     }
-    // }
-
-    // if (enableDHCP)
-    // {
-    //     if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
-    //     {
-    //         nx_dhcp_release(&DhcpInstance);
-    //     }
-    //     else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
-    //     {
-    //         nx_dhcp_force_renew(&DhcpInstance);
-    //     }
-    //     else if (
-    //         0 !=
-    //         (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
-    //     {
-    //         return CLR_E_INVALID_PARAMETER;
-    //     }
-    // }
-
-    // if (0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
-    // {
-    //     // TODO NETWORK
-    //     // at this time changing MAC address is not supported
-    //     return CLR_E_NOT_SUPPORTED;
-    // }
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
+    {
+        // TODO
+        // changing MAC address is not supported
+        return CLR_E_NOT_SUPPORTED;
+    }
 
     return S_OK;
 }
@@ -1199,11 +1147,11 @@ HRESULT ISM43362_SOCKETS_Driver::UpdateAdapterConfiguration(
 int ISM43362_SOCKETS_Driver::GetNativeTcpOption(int optname)
 {
     (void)optname;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
-// TODO
+    // TODO
     // switch (optname)
     // {
     //     case SOCK_TCP_NODELAY:
@@ -1227,11 +1175,11 @@ int ISM43362_SOCKETS_Driver::GetNativeTcpOption(int optname)
 int ISM43362_SOCKETS_Driver::GetNativeSockOption(int optname)
 {
     (void)optname;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
-// TODO
+    // TODO
     // switch (optname)
     // {
     //     case SOCK_SOCKO_DONTLINGER:
@@ -1304,11 +1252,11 @@ int ISM43362_SOCKETS_Driver::GetNativeSockOption(int optname)
 int ISM43362_SOCKETS_Driver::GetNativeIPOption(int optname)
 {
     (void)optname;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
     int nativeOptionName = 0;
 
-// TODO
+    // TODO
     // switch (optname)
     // {
     //     // not supported
@@ -1355,151 +1303,154 @@ int ISM43362_SOCKETS_Driver::GetNativeIPOption(int optname)
 int ISM43362_SOCKETS_Driver::GetNativeError(int error)
 {
     (void)error;
-    
+
     NATIVE_PROFILE_PAL_NETWORK();
-    int ret  = 0;
+    int ret = 0;
 
-// TODO
-//     switch (error)
-//     {
-//         case EINTR:
-//             ret = SOCK_EINTR;
-//             break;
+    // until we have a better mapping, just return the native error
+    ret = error;
 
-//         case EACCES:
-//             ret = SOCK_EACCES;
-//             break;
+    // TODO
+    //     switch (error)
+    //     {
+    //         case EINTR:
+    //             ret = SOCK_EINTR;
+    //             break;
 
-//         case EFAULT:
-//             ret = SOCK_EFAULT;
-//             break;
+    //         case EACCES:
+    //             ret = SOCK_EACCES;
+    //             break;
 
-//         case EINVAL:
-//             ret = SOCK_EINVAL;
-//             break;
+    //         case EFAULT:
+    //             ret = SOCK_EFAULT;
+    //             break;
 
-//         case EMFILE:
-//             ret = SOCK_EMFILE;
-//             break;
+    //         case EINVAL:
+    //             ret = SOCK_EINVAL;
+    //             break;
 
-//         case EAGAIN:
-//         case EBUSY:
-//         /* case EWOULDBLOCK: same as EINPROGRESS */
-//         case EINPROGRESS:
-//             ret = SOCK_EWOULDBLOCK;
-//             break;
+    //         case EMFILE:
+    //             ret = SOCK_EMFILE;
+    //             break;
 
-//         case EALREADY:
-//             ret = SOCK_EALREADY;
-//             break;
+    //         case EAGAIN:
+    //         case EBUSY:
+    //         /* case EWOULDBLOCK: same as EINPROGRESS */
+    //         case EINPROGRESS:
+    //             ret = SOCK_EWOULDBLOCK;
+    //             break;
 
-//         case ENOTSOCK:
-//             ret = SOCK_ENOTSOCK;
-//             break;
+    //         case EALREADY:
+    //             ret = SOCK_EALREADY;
+    //             break;
 
-//         case EDESTADDRREQ:
-//             ret = SOCK_EDESTADDRREQ;
-//             break;
+    //         case ENOTSOCK:
+    //             ret = SOCK_ENOTSOCK;
+    //             break;
 
-//         case EMSGSIZE:
-//             ret = SOCK_EMSGSIZE;
-//             break;
+    //         case EDESTADDRREQ:
+    //             ret = SOCK_EDESTADDRREQ;
+    //             break;
 
-//         case EPROTOTYPE:
-//             ret = SOCK_EPROTOTYPE;
-//             break;
+    //         case EMSGSIZE:
+    //             ret = SOCK_EMSGSIZE;
+    //             break;
 
-//         case ENOPROTOOPT:
-//             ret = SOCK_ENOPROTOOPT;
-//             break;
+    //         case EPROTOTYPE:
+    //             ret = SOCK_EPROTOTYPE;
+    //             break;
 
-//         case EPROTONOSUPPORT:
-//             ret = SOCK_EPROTONOSUPPORT;
-//             break;
-//             // TODO nanoframework check why missing
-//             // case ESOCKTNOSUPPORT:
-//             //     ret = SOCK_ESOCKTNOSUPPORT;
-//             //     break;
+    //         case ENOPROTOOPT:
+    //             ret = SOCK_ENOPROTOOPT;
+    //             break;
 
-//         case EPFNOSUPPORT:
-//             ret = SOCK_EPFNOSUPPORT;
-//             break;
+    //         case EPROTONOSUPPORT:
+    //             ret = SOCK_EPROTONOSUPPORT;
+    //             break;
+    //             // TODO nanoframework check why missing
+    //             // case ESOCKTNOSUPPORT:
+    //             //     ret = SOCK_ESOCKTNOSUPPORT;
+    //             //     break;
 
-//         case EAFNOSUPPORT:
-//             ret = SOCK_EAFNOSUPPORT;
-//             break;
+    //         case EPFNOSUPPORT:
+    //             ret = SOCK_EPFNOSUPPORT;
+    //             break;
 
-//         case EADDRINUSE:
-//             ret = SOCK_EADDRINUSE;
-//             break;
+    //         case EAFNOSUPPORT:
+    //             ret = SOCK_EAFNOSUPPORT;
+    //             break;
 
-//         case EADDRNOTAVAIL:
-//             ret = SOCK_EADDRNOTAVAIL;
-//             break;
+    //         case EADDRINUSE:
+    //             ret = SOCK_EADDRINUSE;
+    //             break;
 
-//         case ENETDOWN:
-//             ret = SOCK_ENETDOWN;
-//             break;
+    //         case EADDRNOTAVAIL:
+    //             ret = SOCK_EADDRNOTAVAIL;
+    //             break;
 
-//         case ENETUNREACH:
-//             ret = SOCK_ENETUNREACH;
-//             break;
+    //         case ENETDOWN:
+    //             ret = SOCK_ENETDOWN;
+    //             break;
 
-//         case ENETRESET:
-//             ret = SOCK_ENETRESET;
-//             break;
+    //         case ENETUNREACH:
+    //             ret = SOCK_ENETUNREACH;
+    //             break;
 
-//         case ECONNABORTED:
-//             ret = SOCK_ECONNABORTED;
-//             break;
+    //         case ENETRESET:
+    //             ret = SOCK_ENETRESET;
+    //             break;
 
-//         case ECONNRESET:
-//             ret = SOCK_ECONNRESET;
-//             break;
+    //         case ECONNABORTED:
+    //             ret = SOCK_ECONNABORTED;
+    //             break;
 
-//         case ENOBUFS:
-//         case ENOMEM:
-//             ret = SOCK_ENOBUFS;
-//             break;
+    //         case ECONNRESET:
+    //             ret = SOCK_ECONNRESET;
+    //             break;
 
-//         case EISCONN:
-//             ret = SOCK_EISCONN;
-//             break;
+    //         case ENOBUFS:
+    //         case ENOMEM:
+    //             ret = SOCK_ENOBUFS;
+    //             break;
 
-//         case ENOTCONN:
-//             ret = SOCK_EISCONN;
-//             break;
+    //         case EISCONN:
+    //             ret = SOCK_EISCONN;
+    //             break;
 
-// #if !defined(__GNUC__) // same as ENOTSOCK for GCC
-//         case ESHUTDOWN:
-//             ret = SOCK_ESHUTDOWN;
-//             break;
-// #endif
+    //         case ENOTCONN:
+    //             ret = SOCK_EISCONN;
+    //             break;
 
-//         case ETIMEDOUT:
-//             ret = SOCK_ETIMEDOUT;
-//             break;
+    // #if !defined(__GNUC__) // same as ENOTSOCK for GCC
+    //         case ESHUTDOWN:
+    //             ret = SOCK_ESHUTDOWN;
+    //             break;
+    // #endif
 
-//         case ECONNREFUSED:
-//             ret = SOCK_ECONNREFUSED;
-//             break;
+    //         case ETIMEDOUT:
+    //             ret = SOCK_ETIMEDOUT;
+    //             break;
 
-//         case EHOSTDOWN:
-//             ret = SOCK_EHOSTDOWN;
-//             break;
+    //         case ECONNREFUSED:
+    //             ret = SOCK_ECONNREFUSED;
+    //             break;
 
-//         case EHOSTUNREACH:
-//             ret = SOCK_EHOSTUNREACH;
-//             break;
+    //         case EHOSTDOWN:
+    //             ret = SOCK_EHOSTDOWN;
+    //             break;
 
-//         case ENODATA:
-//             ret = SOCK_NO_DATA;
-//             break;
+    //         case EHOSTUNREACH:
+    //             ret = SOCK_EHOSTUNREACH;
+    //             break;
 
-//         default:
-//             ret = error;
-//             break;
-//     }
+    //         case ENODATA:
+    //             ret = SOCK_NO_DATA;
+    //             break;
+
+    //         default:
+    //             ret = error;
+    //             break;
+    //     }
 
     return (ret);
 }
