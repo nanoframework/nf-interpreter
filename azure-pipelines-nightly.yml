@@ -20,7 +20,7 @@ resources:
 schedules:
 - cron: "58 23 * * *"
   branches:
-    include: [ develop ]
+    include: [ main ]
   always: true
   displayName: Nightly build at 23:58
 
