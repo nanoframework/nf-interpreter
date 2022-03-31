@@ -20,7 +20,7 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
         WP_Message_Process();
 
         // pass control to the OS
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(100));
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
     }
 
     // this function never returns
