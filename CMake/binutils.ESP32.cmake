@@ -647,7 +647,7 @@ macro(nf_add_idf_as_library)
         # add nanoCLR include path to lwIP so our lwipots are taken instead of the IDF ones
         list(INSERT 
             IDF_LWIP_INCLUDE_DIRECTORIES 0
-                ${CMAKE_SOURCE_DIR}/targets/ESP32/_Include
+                ${CMAKE_SOURCE_DIR}/targets/ESP32/_include
                 ${CMAKE_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD}
                 ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
                 ${CMAKE_SOURCE_DIR}/src/CLR/Include
