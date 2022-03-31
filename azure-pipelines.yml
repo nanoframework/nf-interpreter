@@ -864,8 +864,26 @@ jobs:
       )
 
   - task: NuGetCommand@2
-    condition: succeeded()
-    displayName: Pack nanoCLR WIN32
+  condition: >-
+      and(
+        succeeded(),
+        startsWith(variables['Build.SourceBranchName'], 'main')
+      )
+    displayName: Pack nanoCLR WIN32 (stable)
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)'
+
+  - task: NuGetCommand@2
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          startsWith(variables['Build.SourceBranchName'], 'develop'),
+          startsWith(variables['Build.SourceBranchName'], 'release')
+        )
+      )
+    displayName: Pack nanoCLR WIN32 (preview)
     inputs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
