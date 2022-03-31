@@ -998,8 +998,8 @@ jobs:
       key: 'changeLogCacheFiles'
       restoreKeys: 1_0
       path: |
-        $env:AGENT_TEMPDIRECTORY/github-changelog-logger.log
-        $env:AGENT_TEMPDIRECTORY/github-changelog-http-cache
+        $(AGENT.TEMPDIRECTORY)/github-changelog-logger.log
+        $(AGENT.TEMPDIRECTORY)/github-changelog-http-cache
 
   # generate change log including future version
   - powershell: |
