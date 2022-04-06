@@ -24,6 +24,7 @@ typedef struct ISM43362_SOCKET
     uint16_t remotePort;
     uint8_t tcpConnected;
     uint8_t isClient;
+    uint8_t isSecure;
 } ISM43362_Socket;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -123,6 +124,8 @@ struct ISM43362_SOCKETS_Driver
         uint32_t interfaceIndex,
         uint32_t updateFlags,
         HAL_Configuration_NetworkInterface *config);
+
+    static int UpgradeToSsl(SOCK_SOCKET s);
 
   private:
     // TODO

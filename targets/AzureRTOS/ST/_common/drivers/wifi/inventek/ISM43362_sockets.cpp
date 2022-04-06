@@ -422,10 +422,12 @@ int ISM43362_SOCKETS_Driver::Connect(SOCK_SOCKET socket, const SOCK_sockaddr *ad
     _sockets[socket].remotePort = ipPort;
     _sockets[socket].remoteIP = ((SOCK_sockaddr_in *)address)->sin_addr.S_un.S_addr;
     _sockets[socket].localPort = GetRandomPortNumber();
+    _sockets[socket].isSecure = false;
 
     if (WIFI_OpenClientConnection(
             socket,
             (WIFI_Protocol_t)_sockets[socket].protocol,
+            _sockets[socket].isSecure,
             "",
             ipAddress,
             ipPort,
@@ -1170,6 +1172,53 @@ int ISM43362_SOCKETS_Driver::GetNativeTcpOption(int optname)
     // }
 
     return nativeOptionName;
+}
+
+int ISM43362_SOCKETS_Driver::UpgradeToSsl(SOCK_SOCKET socket)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+
+    WIFI_Status_t status;
+    uint8_t ipAddress[4];
+
+    if (_sockets[socket].protocol != 0xFF && !_sockets[socket].isSecure)
+    {
+        // disconnect socket
+        if (_sockets[socket].isClient)
+        {
+            status = WIFI_CloseClientConnection((uint8_t)socket);
+        }
+        else
+        {
+            status = WIFI_CloseServerConnection((uint8_t)socket);
+        }
+
+        if (status != WIFI_STATUS_OK)
+        {
+            return 0;
+        }
+
+        // open socket again this time as secure
+        ipAddress[0] = _sockets[socket].remoteIP >> 24;
+        ipAddress[1] = _sockets[socket].remoteIP >> 16;
+        ipAddress[2] = _sockets[socket].remoteIP >> 8;
+        ipAddress[3] = _sockets[socket].remoteIP;
+
+        _sockets[socket].isSecure = true;
+
+        return WIFI_OpenClientConnection(
+                   socket,
+                   (WIFI_Protocol_t)_sockets[socket].protocol,
+                   _sockets[socket].isSecure,
+                   "",
+                   ipAddress,
+                   _sockets[socket].remotePort,
+                   _sockets[socket].localPort) == WIFI_STATUS_OK;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 int ISM43362_SOCKETS_Driver::GetNativeSockOption(int optname)

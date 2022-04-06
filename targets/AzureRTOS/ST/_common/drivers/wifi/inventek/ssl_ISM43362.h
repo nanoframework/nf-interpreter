@@ -6,11 +6,9 @@
 #ifndef SSL_ISM43362_H
 #define SSL_ISM43362_H
 
-// struct SlSSL_Context
-// {
-//     SlNetSockSecAttrib_t* SecurityAttributes;
-//     uint32_t SocketFd;
-//     bool IsServer;
-// };
+struct SSL_Context
+{
+    uint32_t SocketIndex;
+};
 
 #endif //SSL_ISM43362_H

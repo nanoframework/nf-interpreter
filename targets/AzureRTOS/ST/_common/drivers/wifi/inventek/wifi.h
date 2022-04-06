@@ -147,7 +147,7 @@ WIFI_Status_t       WIFI_ConfigureAP(
 WIFI_Status_t       WIFI_HandleAPEvents(WIFI_APSettings_t *setting);
 WIFI_Status_t       WIFI_Ping(uint8_t *ipaddr, uint16_t count, uint16_t interval_ms,int32_t result[]);
 WIFI_Status_t       WIFI_GetHostAddress(const char *location, uint8_t *ipaddr);
-WIFI_Status_t       WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t type, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port);
+WIFI_Status_t       WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protocol, uint8_t requestSecured, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port);
 WIFI_Status_t       WIFI_CloseClientConnection(uint32_t socket);
 
 WIFI_Status_t       WIFI_StartServer(uint32_t socket, WIFI_Protocol_t type, uint16_t backlog, const char *name, uint16_t port);
@@ -169,6 +169,8 @@ WIFI_Status_t       WIFI_ModuleFirmwareUpdate(const char *url);
 WIFI_Status_t       WIFI_GetModuleID(char *Id);
 WIFI_Status_t       WIFI_GetModuleFwRevision(char *rev);
 WIFI_Status_t       WIFI_GetModuleName(char *ModuleName);
+
+WIFI_Status_t       WIFI_StoreCA(uint8_t credSet, uint8_t* ca, uint16_t caLength);
 #ifdef __cplusplus
 }
 #endif

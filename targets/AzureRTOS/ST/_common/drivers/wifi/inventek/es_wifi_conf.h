@@ -49,7 +49,7 @@ extern TX_MUTEX WiFiMutex;
 #define ES_WIFI_MAX_DETECTED_AP                     10
 
 #ifndef ES_WIFI_TIMEOUT   
-#define ES_WIFI_TIMEOUT                             30000
+#define ES_WIFI_TIMEOUT                             5000
 #endif /* ES_WIFI_TIMEOUT  */
 #ifndef ES_WIFI_TRANSPORT_TIMEOUT
 #define ES_WIFI_TRANSPORT_TIMEOUT                   30000

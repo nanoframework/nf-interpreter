@@ -141,6 +141,12 @@ HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(
     return ISM43362_SOCKETS_Driver::LoadAdapterConfiguration(config, interfaceIndex);
 }
 
+int HAL_SOCK_upgradeToSsl(SOCK_SOCKET s)
+{
+    NATIVE_PROFILE_PAL_NETWORK();
+    return ISM43362_SOCKETS_Driver::UpgradeToSsl(s);
+}
+
 HRESULT HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
     HAL_Configuration_NetworkInterface *config,
     uint32_t interfaceIndex,

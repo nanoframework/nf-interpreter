@@ -127,6 +127,11 @@ int SOCK_sendto(SOCK_SOCKET s, const char *buf, int len, int flags, const struct
     NATIVE_PROFILE_PAL_COM();
     return Sockets_ISM43362_Driver::SendTo(s, buf, len, flags, to, tolen);
 }
+int SOCK_UpgradeToSsl(SOCK_SOCKET socket)
+{
+    NATIVE_PROFILE_PAL_COM();
+    return Sockets_ISM43362_Driver::UpgradeToSsl(socket);
+}
 
 bool Network_Initialize()
 {
@@ -342,7 +347,11 @@ int Sockets_ISM43362_Driver::Listen(SOCK_SOCKET socket, int32_t backlog)
 
     return HAL_SOCK_listen(socket, backlog);
 }
-SOCK_SOCKET Sockets_ISM43362_Driver::Accept(SOCK_SOCKET socket, struct SOCK_sockaddr *address, int *addressLen, bool fDebug)
+SOCK_SOCKET Sockets_ISM43362_Driver::Accept(
+    SOCK_SOCKET socket,
+    struct SOCK_sockaddr *address,
+    int *addressLen,
+    bool fDebug)
 {
     NATIVE_PROFILE_PAL_COM();
 
@@ -523,6 +532,11 @@ void Sockets_ISM43362_Driver::UnregisterSocket(SOCK_SOCKET sock)
 
     g_Sockets_ISM43362_Driver.m_socketHandles[g_Sockets_ISM43362_Driver.m_cntSockets].m_socket = SOCK_SOCKET_ERROR;
     g_Sockets_ISM43362_Driver.m_socketHandles[g_Sockets_ISM43362_Driver.m_cntSockets].m_flags = 0;
+}
+
+bool Sockets_ISM43362_Driver::UpgradeToSsl(SOCK_SOCKET sock)
+{
+    return HAL_SOCK_upgradeToSsl(sock);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

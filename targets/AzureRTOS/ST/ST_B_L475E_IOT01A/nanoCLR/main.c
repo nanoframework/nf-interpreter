@@ -25,7 +25,7 @@ extern CLR_SETTINGS clrSettings;
 // need to be at least as big as the config sector
 #define DEFAULT_BYTE_POOL_SIZE 0x3C00
 TX_BYTE_POOL byte_pool_0;
-uint8_t __attribute__((section (".ram4"))) memory_area[DEFAULT_BYTE_POOL_SIZE];
+uint8_t __attribute__((section(".ram4"))) memory_area[DEFAULT_BYTE_POOL_SIZE];
 
 // threads definitions and configurations
 

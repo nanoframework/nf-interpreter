@@ -79,6 +79,7 @@ struct Sockets_ISM43362_Driver
         const struct SOCK_sockaddr *to,
         int32_t tolen);
     static int Shutdown(SOCK_SOCKET s, int32_t how);
+    static bool UpgradeToSsl(SOCK_SOCKET s);
 
     static bool Initialize();
     static bool Uninitialize();
