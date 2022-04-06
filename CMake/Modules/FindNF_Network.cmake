@@ -10,6 +10,7 @@ include(FetchContent)
 if(RTOS_AZURERTOS_CHECK)
 
     # set include directories for nanoFramework network
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
 
@@ -30,12 +31,9 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND NF_Network_SRCS netx_thread.c)
     endif()
 
-    # need a conditional include because of building network
-    if(NOT USE_SECURITY_MBEDTLS_OPTION)
-        list(APPEND NF_Network_SRCS ssl_stubs.cpp)
-    endif()
-
     if("${ETHERNET_DRIVER}" STREQUAL "LAN8742")
+
+        list(APPEND NF_Network_SRCS ssl_stubs.cpp)
 
         # add driver files to network sources
         list(APPEND
@@ -134,7 +132,10 @@ if(RTOS_AZURERTOS_CHECK)
             sockets_ISM43362.cpp
             ISM43362_sockets.cpp
             ISM43362_sockets_functions.cpp
-            
+
+            ssl.cpp
+            ssl_ISM43362.cpp
+
             es_wifi.c
             wifi.c
         )
