@@ -562,11 +562,7 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMillisecon
 
     if (state)
     {
-        if (state->debounceMs > 0 && debounceTimeMilliseconds)
-        {
-            // removing debounce, nothing to do here
-        }
-        else if (debounceTimeMilliseconds > 0)
+        if (debounceTimeMilliseconds > 0)
         {
             // compute ticks for debounce timer
             int ticks = debounceTimeMilliseconds / portTICK_PERIOD_MS;
@@ -590,6 +586,11 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMillisecon
                 // no need to wait for the timer operation to execute
                 xTimerChangePeriod(state->debounceTimer, ticks, 0);
             }
+        }
+        else if (state->debounceTimer != NULL)
+        {
+            xTimerDelete(state->debounceTimer, 100);
+            state->debounceTimer = NULL;
         }
 
         // store new value for debounce time
