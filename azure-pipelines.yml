@@ -864,7 +864,7 @@ jobs:
       )
 
   - task: NuGetCommand@2
-  condition: >-
+    condition: >-
       and(
         succeeded(),
         startsWith(variables['Build.SourceBranchName'], 'main')
