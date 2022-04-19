@@ -8,7 +8,7 @@
 #include <cmsis_os.h>
 
 #include <targetPAL.h>
-#include "win_dev_gpio_native_target.h"
+#include "sys_dev_gpio_native_target.h"
 
 #define GPIO_MAX_PIN     256
 #define TOTAL_GPIO_PORTS ((GPIO_MAX_PIN + 15) / 16)
@@ -256,12 +256,12 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_INTERRUPT_SERVICE_ROUTINE pinISR,
     void *isrParam,
     GPIO_INT_EDGE intEdge,
-    GpioPinDriveMode driveMode)
+    PinMode driveMode)
 {
     gpio_input_state *pState;
 
     // Check Input drive mode
-    if (driveMode >= (int)GpioPinDriveMode_Output)
+    if (driveMode >= (int)PinMode_Output)
     {
         return false;
     }
@@ -338,10 +338,10 @@ bool CPU_GPIO_EnableInputPin(
 // driveMode    -   Drive mode and resistors
 // return       -   True if successful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, PinMode driveMode)
 {
     // check not an output drive mode
-    if (driveMode < (int)GpioPinDriveMode_Output)
+    if (driveMode < (int)PinMode_Output)
         return false;
 
     // If this is currently an input pin then clean up
@@ -355,7 +355,7 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Gpi
     return true;
 }
 
-void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_t alternateFunction)
+void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alternateFunction)
 {
     DeleteInputState(pinNumber);
 
@@ -374,30 +374,30 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 
 // Validate pin and set drive mode
 // return true if ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
 {
     // get IoLine from pin number
     ioline_t ioLine = GetIoLine(pinNumber);
 
     switch (driveMode)
     {
-        case GpioPinDriveMode_Input:
+        case PinMode_Input:
             palSetLineMode(ioLine, PAL_MODE_INPUT);
             break;
 
-        case GpioPinDriveMode_InputPullDown:
+        case PinMode_InputPullDown:
             palSetLineMode(ioLine, PAL_MODE_INPUT_PULLDOWN);
             break;
 
-        case GpioPinDriveMode_InputPullUp:
+        case PinMode_InputPullUp:
             palSetLineMode(ioLine, PAL_MODE_INPUT_PULLUP);
             break;
 
-        case GpioPinDriveMode_Output:
+        case PinMode_Output:
             palSetLineMode(ioLine, PAL_MODE_OUTPUT_PUSHPULL);
             break;
 
-        case GpioPinDriveMode_OutputOpenDrain:
+        case PinMode_OutputOpenDrain:
             palSetLineMode(ioLine, PAL_MODE_OUTPUT_OPENDRAIN);
             break;
 
@@ -409,16 +409,15 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
     return true;
 }
 
-bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
+bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode)
 {
     (void)pinNumber;
 
     bool driveModeSupported = false;
 
     // check if the requested drive mode is support by ChibiOS config
-    if ((driveMode == GpioPinDriveMode_Input) || (driveMode == GpioPinDriveMode_InputPullDown) ||
-        (driveMode == GpioPinDriveMode_InputPullUp) || (driveMode == GpioPinDriveMode_Output) ||
-        (driveMode == GpioPinDriveMode_OutputOpenDrain))
+    if ((driveMode == PinMode_Input) || (driveMode == PinMode_InputPullDown) || (driveMode == PinMode_InputPullUp) ||
+        (driveMode == PinMode_Output) || (driveMode == PinMode_OutputOpenDrain))
     {
         driveModeSupported = true;
     }

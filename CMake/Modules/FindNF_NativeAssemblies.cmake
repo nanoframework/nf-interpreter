@@ -6,7 +6,7 @@
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
 # e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
-# and the namespace designation is 'Windows.Devices.Gpio'
+# and the namespace designation is 'System.Device.Gpio'
 ###########################################################################################
 
 option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
@@ -19,18 +19,12 @@ option(API_nanoFramework.System.Text            "option for nanoFramework.System
 option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
-option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
 option(API_System.Device.Adc                    "option for System.Device.Adc API")
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
-option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
-option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
-option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
-option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
-option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
@@ -275,12 +269,6 @@ if(API_System.Net)
     PerformSettingsForApiEntry("System.Net")
 endif()
 
-# Windows.Devices.Adc
-if(API_Windows.Devices.Adc)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Adc")
-endif()
-
 # System.Device.Adc
 if(API_System.Device.Adc)
     ##### API name here (doted name)
@@ -299,28 +287,10 @@ if(API_System.Device.Gpio)
     PerformSettingsForApiEntry("System.Device.Gpio")
 endif()
 
-# Windows.Devices.Gpio
-if(API_Windows.Devices.Gpio)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Gpio")
-endif()
-
-# Windows.Devices.I2c
-if(API_Windows.Devices.I2c)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.I2c")
-endif()
-
 # System.Device.I2c
 if(API_System.Device.I2c)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.I2c")
-endif()
-
-# Windows.Devices.Pwm
-if(API_Windows.Devices.Pwm)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Pwm")
 endif()
 
 # System.Device.Pwm
@@ -329,22 +299,10 @@ if(API_System.Device.Pwm)
     PerformSettingsForApiEntry("System.Device.Pwm")
 endif()
 
-# Windows.Devices.SerialCommunication
-if(API_Windows.Devices.SerialCommunication)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
-endif()
-
 # API_System.IO.Ports
 if(API_System.IO.Ports)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.IO.Ports")
-endif()
-
-# Windows.Devices.Spi
-if(API_Windows.Devices.Spi)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Spi")
 endif()
 
 # System.Device.Spi

@@ -40,12 +40,12 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
 -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Device.Dac=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
@@ -66,11 +66,11 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DNF_PLATFORM_NO_CLR_TRACE=ON
 -DNF_CLR_NO_IL_INLINE=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
 -DAPI_nanoFramework.System.Text=ON
 "@
     }
@@ -84,12 +84,12 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DNF_FEATURE_RTC=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.Devices.Can=ON
 -DAPI_nanoFramework.ResourceManager=ON
@@ -110,12 +110,12 @@ If ($TargetBoard -eq "ORGPAL_PALTHREE" -or
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
 -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Device.Dac=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
@@ -160,16 +160,10 @@ elseif ($TargetBoard -eq "ESP32_WROOM_32") {
 -DNF_FEATURE_HAS_SDCARD=ON
 -DAPI_System.IO.FileSystem=ON
 -DAPI_System.Math=ON
--DAPI_Windows.Devices.Gpio=ON
 -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON
 -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON
 -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON
 -DAPI_System.IO.Ports=ON 
--DAPI_Windows.Devices.Adc=ON
 -DAPI_System.Net=ON
 -DAPI_System.Device.WiFi=ON
 -DNF_SECURITY_MBEDTLS=ON
@@ -215,12 +209,9 @@ elseif ($TargetBoard -eq "TI_CC1352R1_LAUNCHXL") {
 -DNF_FEATURE_DEBUGGER=ON
 -DNF_FEATURE_RTC=ON
 -DNF_FEATURE_WATCHDOG=OFF
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=OFF
--DAPI_Windows.Devices.I2c=OFF
--DAPI_Windows.Devices.Pwm=OFF
--DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.IO.Ports=OFF
+-DAPI_System.Device.Adc=ON
 -DAPI_nanoFramework.TI.EasyLink=ON
 -DAPI_nanoFramework.Hardware.TI=ON
 "@
@@ -266,12 +257,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DRTOS=ChibiOS
 -DNF_FEATURE_DEBUGGER=ON
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "NETDUINO3_WIFI") {
@@ -284,12 +275,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_HAS_SDCARD=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Device.Dac=OFF
 -DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.ResourceManager=ON
@@ -304,12 +295,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_DEBUGGER=ON
 -DUSE_RNG=OFF
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "I2M_OXYGEN_NF") {
@@ -319,12 +310,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_DEBUGGER=ON
 -DUSE_RNG=OFF
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
 "@
@@ -336,12 +327,6 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DUSE_RNG=OFF
 -DSWO_OUTPUT=ON
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON
--DAPI_Windows.Devices.Spi=ON
--DAPI_Windows.Devices.I2c=ON
--DAPI_Windows.Devices.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON
--DAPI_Windows.Devices.Adc=ON
 -DAPI_nanoFramework.Device.OneWire=ON
 "@
     }
@@ -353,12 +338,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DUSE_RNG=OFF
 -DSWO_OUTPUT=ON
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Text=ON
@@ -374,12 +359,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DUSE_RNG=OFF
 -DSWO_OUTPUT=ON
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_nanoFramework.System.Collections=ON
 -DAPI_nanoFramework.ResourceManager=ON
 -DAPI_nanoFramework.System.Text=ON
@@ -392,12 +377,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_DEBUGGER=ON
 -DSWO_OUTPUT=ON
 -DNF_FEATURE_RTC=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 "@
     }
     elseif ($TargetBoard -eq "ST_NUCLEO144_F746ZG") {
@@ -410,12 +395,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
 -DAPI_nanoFramework.Device.OneWire=ON
@@ -434,12 +419,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_RTC=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_nanoFramework.Devices.Can=ON
 "@
@@ -454,12 +439,12 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
--DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Adc=ON
 -DAPI_System.Net=ON
 -DNF_SECURITY_MBEDTLS=ON
 "@
@@ -475,11 +460,11 @@ elseif ($TargetBoard -eq "GHI_FEZ_CERB40_NF" -or
 -DNF_FEATURE_HAS_SDCARD=ON
 -DAPI_System.Math=ON
 -DAPI_Hardware.Stm32=ON
--DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
--DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
--DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
--DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
--DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
+-DAPI_System.Device.Gpio=ON
+-DAPI_System.Device.Spi=ON
+-DAPI_System.Device.I2c=ON
+-DAPI_System.Device.Pwm=ON
+-DAPI_System.IO.Ports=ON
 -DAPI_nanoFramework.Device.OneWire=ON
 -DAPI_Windows.Storage=ON
 -DAPI_nanoFramework.ResourceManager=ON
@@ -509,12 +494,6 @@ elseif ($TargetBoard -eq "TI_CC1352P1_LAUNCHXL") {
 -DNF_FEATURE_DEBUGGER=ON
 -DNF_FEATURE_RTC=ON 
 -DNF_FEATURE_WATCHDOG=OFF
--DAPI_Windows.Devices.Gpio=ON
--DAPI_Windows.Devices.Spi=OFF
--DAPI_Windows.Devices.I2c=OFF
--DAPI_Windows.Devices.Pwm=OFF 
--DAPI_Windows.Devices.SerialCommunication=OFF
--DAPI_Windows.Devices.Adc=OFF
 -DAPI_nanoFramework.TI.EasyLink=ON
 "@
     

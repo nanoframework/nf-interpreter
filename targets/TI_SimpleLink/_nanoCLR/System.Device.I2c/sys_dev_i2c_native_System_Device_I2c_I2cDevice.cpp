@@ -10,15 +10,21 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransf
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
 /////////////////////////////////////////////////////
-// I2C PAL strucs declared in win_dev_i2c_native.h //
+// I2C PAL strucs declared in sys_dev_i2c_native.h //
 /////////////////////////////////////////////////////
 NF_PAL_I2C I2C1_PAL;
 
 uint8_t I2C1_DeviceCounter = 0;
 
-// need to declare these as external
-// TODO move them here after Windows.Devices.I2c is removed
-extern void HostI2C_CallbackFxn(I2C_Handle handle, I2C_Transaction *transaction, bool transferStatus);
+void HostI2C_CallbackFxn(I2C_Handle handle, I2C_Transaction *transaction, bool transferStatus)
+{
+    NATIVE_INTERRUPT_START
+
+    // fire event for I2C transaction complete
+    Events_Set(SYSTEM_EVENT_FLAG_I2C_MASTER);
+
+    NATIVE_INTERRUPT_END
+}
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {

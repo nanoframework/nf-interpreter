@@ -761,7 +761,7 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 
     // Max prescaler value = 256
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
+    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
 
     return S_OK;
 }
@@ -776,7 +776,7 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
     // According to STM : "At a minimum, the clock frequency should be twice the required communication frequency."
     // So maximum useable frequency is CoreClock / 2.
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
+    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
 
     return S_OK;
 }

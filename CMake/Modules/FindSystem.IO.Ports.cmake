@@ -14,8 +14,6 @@ list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.Ports)
-# TODO remove the following when Windows.Devices.SerialCommunications is removed
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.SerialCommunications)
 
 # source files
 set(System.IO.Ports_SRCS

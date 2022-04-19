@@ -495,7 +495,6 @@ endif()
 # and/or manage other APIs that are required
 
 if( API_nanoFramework.Device.OneWire OR
-    API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports)
 
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
@@ -526,10 +525,10 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Adc)
-    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+if(API_System.Device.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 else()
-    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 endif()
 
 
@@ -547,13 +546,6 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Gpio)
-    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-else()
-    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
 if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
@@ -561,31 +553,19 @@ else()
 endif()
 
 
-if(API_Windows.Devices.I2c)
-    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+if(API_System.Device.Pwm)
+    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
-    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for System.DevicesPwm")
 endif()
 
-
-if(API_Windows.Devices.Pwm)
-    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()
-    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-endif()
 
 if(API_System.Device.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
 else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
 endif()
+
 
 if(API_nanoFramework.Devices.Can)
     set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
@@ -629,8 +609,6 @@ endif()
 if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
-    API_Windows.Devices.Gpio OR
-    API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR

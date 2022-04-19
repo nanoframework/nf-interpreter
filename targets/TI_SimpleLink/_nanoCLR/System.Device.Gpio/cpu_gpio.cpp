@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "win_dev_gpio_native_target.h"
+#include "sys_dev_gpio_native_target.h"
 #include "nf_rt_events_native.h"
 
 #include <ti/sysbios/knl/Clock.h>
@@ -380,12 +380,12 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_INTERRUPT_SERVICE_ROUTINE pinISR,
     void *isrParam,
     GPIO_INT_EDGE intEdge,
-    GpioPinDriveMode driveMode)
+    PinMode driveMode)
 {
     gpio_input_state *pState;
 
     // Check Input drive mode
-    if (driveMode >= (int)GpioPinDriveMode_Output)
+    if (driveMode >= (int)PinMode_Output)
     {
         return false;
     }
@@ -501,10 +501,10 @@ bool CPU_GPIO_EnableInputPin(
 // driveMode    -   Drive mode and resistors
 // return       -   True if successful, false invalid pin, pin not putput, invalid drive mode for ouptput
 //
-bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, GpioPinDriveMode driveMode)
+bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, PinMode driveMode)
 {
     // check is output drive mode
-    if (driveMode < (int)GpioPinDriveMode_Output)
+    if (driveMode < (int)PinMode_Output)
     {
         return false;
     }
@@ -528,7 +528,7 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Gpi
     return true;
 }
 
-void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_t alternateFunction)
+void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alternateFunction)
 {
     GLOBAL_LOCK();
 
@@ -554,7 +554,7 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, GpioPinDriveMode driveMode, uint32_
 // Set drive mode
 // pinNumber is the index of the corresponding PIN config in array
 // return true if ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, GpioPinDriveMode driveMode)
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, PinMode driveMode)
 {
     // get current config
     GPIO_PinConfig currentPinConfig;
@@ -562,31 +562,31 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, GpioPinDriveMode driveMode)
 
     switch (driveMode)
     {
-        case GpioPinDriveMode_Input:
+        case PinMode_Input:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_NOPULL);
             break;
 
-        case GpioPinDriveMode_InputPullDown:
+        case PinMode_InputPullDown:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PD);
             break;
 
-        case GpioPinDriveMode_InputPullUp:
+        case PinMode_InputPullUp:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PU);
             break;
 
-        case GpioPinDriveMode_Output:
+        case PinMode_Output:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED);
             break;
 
-        case GpioPinDriveMode_OutputOpenDrain:
+        case PinMode_OutputOpenDrain:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_NOPULL);
             break;
 
-        case GpioPinDriveMode_OutputOpenDrainPullUp:
+        case PinMode_OutputOpenDrainPullUp:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PU);
             break;
 
-        case GpioPinDriveMode_OutputOpenSourcePullDown:
+        case PinMode_OutputOpenSourcePullDown:
             GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PD);
             break;
 
@@ -598,17 +598,16 @@ bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, GpioPinDriveMode driveMode)
     return true;
 }
 
-bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode)
+bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode)
 {
     (void)pinNumber;
 
     bool driveModeSupported = false;
 
     // check if the requested drive mode is supported by SimpleLink
-    if ((driveMode == GpioPinDriveMode_Input) || (driveMode == GpioPinDriveMode_InputPullDown) ||
-        (driveMode == GpioPinDriveMode_InputPullUp) || (driveMode == GpioPinDriveMode_Output) ||
-        (driveMode == GpioPinDriveMode_OutputOpenDrain) || (driveMode == GpioPinDriveMode_OutputOpenDrainPullUp) ||
-        (driveMode == GpioPinDriveMode_OutputOpenSourcePullDown))
+    if ((driveMode == PinMode_Input) || (driveMode == PinMode_InputPullDown) || (driveMode == PinMode_InputPullUp) ||
+        (driveMode == PinMode_Output) || (driveMode == PinMode_OutputOpenDrain) ||
+        (driveMode == PinMode_OutputOpenDrainPullUp) || (driveMode == PinMode_OutputOpenSourcePullDown))
     {
         driveModeSupported = true;
     }

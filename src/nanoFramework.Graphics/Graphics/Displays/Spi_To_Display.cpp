@@ -53,16 +53,16 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
         lcdBacklight = config.Spi.backLight;
 
         // Initialize non-SPI GPIOs
-        CPU_GPIO_SetDriveMode(lcdDC, GpioPinDriveMode::GpioPinDriveMode_Output);
+        CPU_GPIO_SetDriveMode(lcdDC, PinMode::PinMode_Output);
 
         if (lcdBacklight >= 0)
         {
-            CPU_GPIO_SetDriveMode(lcdBacklight, GpioPinDriveMode::GpioPinDriveMode_Output);
+            CPU_GPIO_SetDriveMode(lcdBacklight, PinMode::PinMode_Output);
         }
 
         if (lcdReset >= 0)
         {
-            CPU_GPIO_SetDriveMode(lcdReset, GpioPinDriveMode::GpioPinDriveMode_Output);
+            CPU_GPIO_SetDriveMode(lcdReset, PinMode::PinMode_Output);
             // Reset the display
             CPU_GPIO_SetPinState(lcdReset, GpioPinValue_Low);
             OS_DELAY(100);

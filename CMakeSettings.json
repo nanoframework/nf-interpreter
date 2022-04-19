@@ -116,23 +116,11 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Gpio",
-          "value": "ON"
-        },
-        {
           "name": "API_System.Device.Gpio",
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Spi",
-          "value": "ON"
-        },        
-        {
           "name": "API_System.Device.Spi",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.I2c",
           "value": "ON"
         },
         {
@@ -140,21 +128,9 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Pwm",
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.SerialCommunication",
-          "value": "ON"
-        },
-        {
           "name": "API_System.IO.Ports",
           "value": "ON"
         },        
-        {
-          "name": "API_Windows.Devices.Adc",
-          "value": "ON"
-        },
         {
           "name": "API_System.Device.Dac",
           "value": "ON"
@@ -388,15 +364,7 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Adc:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
           "name": "API_System.Device.Dac:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Gpio:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
@@ -404,27 +372,11 @@
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.I2c:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
           "name": "API_System.Device.I2c:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
-          "name": "API_Windows.Devices.Pwm:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.SerialCommunication:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
           "name": "API_System.IO.Ports:BOOL", //OFF-default-ON-to-add-this-API
-          "value": "ON"
-        },
-        {
-          "name": "API_Windows.Devices.Spi:BOOL", //OFF-default-ON-to-add-this-API
           "value": "ON"
         },
         {
