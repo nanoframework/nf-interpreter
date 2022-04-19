@@ -17,34 +17,20 @@
 #define GPIO_ATTRIBUTE_ALTERNATE_A 0x04
 #define GPIO_ATTRIBUTE_ALTERNATE_B 0x08
 
-// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
-typedef enum __nfpack GpioPinDriveMode
+// from declaration at src\System.Device.Gpio\sys_dev_gpio_native.h
+typedef enum __nfpack PinMode
 {
-    GpioPinDriveMode_Input = 0,
-    GpioPinDriveMode_InputPullDown = 1,
-    GpioPinDriveMode_InputPullUp = 2,
-    GpioPinDriveMode_Output = 3,
-    GpioPinDriveMode_OutputOpenDrain = 4,
-    GpioPinDriveMode_OutputOpenDrainPullUp = 5,
-    GpioPinDriveMode_OutputOpenSource = 6,
-    GpioPinDriveMode_OutputOpenSourcePullDown = 7,
-} GpioPinDriveMode;
+    PinMode_Input = 0,
+    PinMode_InputPullDown = 1,
+    PinMode_InputPullUp = 2,
+    PinMode_Output = 3,
+    PinMode_OutputOpenDrain = 4,
+    PinMode_OutputOpenDrainPullUp = 5,
+    PinMode_OutputOpenSource = 6,
+    PinMode_OutputOpenSourcePullDown = 7,
+} PinMode;
 
-// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
-// TODO replace GpioPinDriveMode with this one when Windows.Devices.Gpio is removed
-// typedef enum __nfpack PinMode
-// {
-//     PinMode_Input = 0,
-//     PinMode_InputPullDown = 1,
-//     PinMode_InputPullUp = 2,
-//     PinMode_Output = 3,
-//     PinMode_OutputOpenDrain = 4,
-//     PinMode_OutputOpenDrainPullUp = 5,
-//     PinMode_OutputOpenSource = 6,
-//     PinMode_OutputOpenSourcePullDown = 7,
-// } PinMode;
-
-// from declaration at src\Windows.Devices.Gpio\win_dev_gpio_native.h
+// from declaration at src\System.Device.Gpio\sys_dev_gpio_native.h
 typedef enum __nfpack GpioPinValue
 {
     GpioPinValue_Low = 0,
@@ -73,7 +59,7 @@ typedef void (*GPIO_INTERRUPT_SERVICE_ROUTINE)(GPIO_PIN pin, bool pinState, void
 bool CPU_GPIO_Initialize();
 bool CPU_GPIO_Uninitialize();
 
-void CPU_GPIO_DisablePin(GPIO_PIN Pin, GpioPinDriveMode driveMode, uint32_t alternateFunction);
+void CPU_GPIO_DisablePin(GPIO_PIN Pin, PinMode driveMode, uint32_t alternateFunction);
 
 //
 // CPU_GPIO_EnableOutputPin
@@ -84,13 +70,13 @@ void CPU_GPIO_DisablePin(GPIO_PIN Pin, GpioPinDriveMode driveMode, uint32_t alte
 //   The number of the input pin to be enabled.
 // InitialState
 //   Inial value of pin
-// GpioPinDriveMode
+// PinMode
 //   Pin resistor driver mode
 //
 // Return Value
 //   true if the specified pin was successfully enabled as output; otherwise, false.
 //
-bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, GpioPinDriveMode driveMode);
+bool CPU_GPIO_EnableOutputPin(GPIO_PIN Pin, GpioPinValue InitialState, PinMode driveMode);
 
 //
 // CPU_GPIO_EnableInputPin
@@ -118,7 +104,7 @@ bool CPU_GPIO_EnableInputPin(
     GPIO_INTERRUPT_SERVICE_ROUTINE pin_ISR,
     void *isr_Param,
     GPIO_INT_EDGE intEdge,
-    GpioPinDriveMode driveMode);
+    PinMode driveMode);
 
 //  Return current gpio pin state
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN Pin);
@@ -155,11 +141,11 @@ bool CPU_GPIO_SetPinDebounce(GPIO_PIN pinNumber, uint32_t debounceTimeMillisecon
 
 // Validate pin and set drive mode
 // return true if pin ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode);
 
 // Check if drive mode supported
 // return true if drive mode supported
-bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, GpioPinDriveMode driveMode);
+bool CPU_GPIO_DriveModeSupported(GPIO_PIN pinNumber, PinMode driveMode);
 
 //  ==== Not implemented/used ====
 // Retrieves an array containing the attributes of all the GPIO pins.

@@ -17,8 +17,7 @@ typedef enum __nfpack DataFlow
     DataFlow_LsbFirst = 1,
 } DataFlow;
 
-// TODO: as this is already existing in Windows.Devices.Spi, this should be uncommented
-// once it will be fully removed.
+// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
 // typedef enum __nfpack SpiMode
 // {
 //     SpiMode_Mode0 = 0,

@@ -136,7 +136,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
                 cardDetect_interrupt,
                 0,
                 GPIO_INT_EDGE::GPIO_INT_EDGE_BOTH,
-                GpioPinDriveMode::GpioPinDriveMode_InputPullUp))
+                PinMode::PinMode_InputPullUp))
         {
             CPU_GPIO_ReservePin(cardDetectPin, false);
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -171,7 +171,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
         // Stop card detect interupt
         cardDetectPin = (int)(pThis[FIELD___cardDetectPin].NumericByRef().s4);
 
-        CPU_GPIO_DisablePin(cardDetectPin, GpioPinDriveMode::GpioPinDriveMode_Input, 0);
+        CPU_GPIO_DisablePin(cardDetectPin, PinMode::PinMode_Input, 0);
     }
 
     cardType = (SDCard_SDInterfaceType)pThis[FIELD___sdCardType].NumericByRef().s4;

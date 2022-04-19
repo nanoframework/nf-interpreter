@@ -10,7 +10,7 @@
 
 #include "FreeRTOS.h"
 #include <nanoHAL.h>
-#include <target_windows_devices_serialcommunication_config.h>
+#include <target_system_io_ports_config.h>
 #include <sys_io_ser_native.h>
 
 #include "fsl_lpuart.h"

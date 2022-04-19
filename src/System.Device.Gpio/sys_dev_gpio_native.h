@@ -31,7 +31,6 @@ typedef enum __nfpack PinEventTypes
 //     PinMode_OutputOpenSource = 6,
 //     PinMode_OutputOpenSourcePullDown = 7,
 // } PinMode;
-typedef GpioPinDriveMode PinMode;
 
 struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValue
 {
@@ -65,7 +64,7 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPin
     //--//
 
     static HRESULT ExtractDebounceTimeSpanValue(CLR_RT_HeapBlock &timeSpanValue, CLR_UINT64 &value);
-    static HRESULT SetPinMode(CLR_RT_HeapBlock *gpioPin, GpioPinDriveMode pinMode);
+    static HRESULT SetPinMode(CLR_RT_HeapBlock *gpioPin, PinMode pinMode);
     static HRESULT Write(CLR_RT_HeapBlock *gpioPin, GpioPinValue pinValue);
     static HRESULT Read(CLR_RT_HeapBlock *gpioPin, bool &pinValue);
 };
@@ -104,4 +103,4 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPinBundle
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio;
 
-#endif //SYS_DEV_GPIO_NATIVE_H
+#endif // SYS_DEV_GPIO_NATIVE_H

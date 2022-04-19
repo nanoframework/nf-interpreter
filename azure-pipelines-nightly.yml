@@ -261,12 +261,12 @@ jobs:
           -DAPI_System.Math=ON
           -DAPI_Hardware.Stm32=ON
           -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Device.Dac=ON
           -DAPI_System.Net=ON
           -DNF_SECURITY_MBEDTLS=ON
@@ -289,11 +289,11 @@ jobs:
           -DNF_PLATFORM_NO_CLR_TRACE=ON
           -DNF_CLR_NO_IL_INLINE=ON
           -DAPI_Hardware.Stm32=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
           -DAPI_nanoFramework.System.Text=ON
 
         GccArm_Version:
@@ -359,12 +359,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -395,12 +395,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -432,12 +432,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -468,12 +468,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -503,12 +503,12 @@ jobs:
           -DNF_SECURITY_MBEDTLS=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -537,12 +537,12 @@ jobs:
           -DNF_SECURITY_MBEDTLS=ON
           -DSUPPORT_ANY_BASE_CONVERSION=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -577,17 +577,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON
           -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON
           -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON
           -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON
           -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON
           -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -619,12 +614,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -659,12 +654,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -701,12 +696,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -742,12 +737,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -783,12 +778,12 @@ jobs:
           -DNF_FEATURE_HAS_SDCARD=ON
           -DAPI_System.IO.FileSystem=ON
           -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=ON
+          -DAPI_System.Device.I2c=ON
+          -DAPI_System.Device.Pwm=ON
+          -DAPI_System.IO.Ports=ON
+          -DAPI_System.Device.Adc=ON
           -DAPI_System.Net=ON
           -DAPI_System.Device.WiFi=ON
           -DAPI_Hardware.Esp32=ON
@@ -883,12 +878,12 @@ jobs:
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_WATCHDOG=OFF
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=OFF
-          -DAPI_Windows.Devices.I2c=OFF
-          -DAPI_Windows.Devices.Pwm=OFF
-          -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=OFF
+          -DAPI_System.Device.I2c=OFF
+          -DAPI_System.Device.Pwm=OFF
+          -DAPI_System.IO.Ports=OFF
+          -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
           -DAPI_nanoFramework.System.Text=ON
