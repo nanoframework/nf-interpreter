@@ -12,18 +12,29 @@
 // Callback when operation complete on bus in async operation
 typedef void (*SPI_Callback)(int busIndex);
 
-///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Device.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 typedef enum __nfpack DataBitOrder
 {
     DataBitOrder_MSB = 0,
     DataBitOrder_LSB = 1
 } DataBitOrder;
 
-///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+// !!! KEEP IN SYNC WITH System.Device.Spi.SpiConfiguration (in managed code) !!! //
+////////////////////////////////////////////////////////////////////////////////////
+
+typedef enum __nfpack SpiBusConfiguration
+{
+    SpiBusConfiguration_FullDuplex = 0,
+    SpiBusConfiguration_HalfDuplex = 1,
+    SpiBusConfiguration_Simplex = 2,
+} SpiBusConfiguration;
+
+///////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Device.Spi.SpiMode (in managed code) !!! //
-///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 // SPI mode
 typedef enum __nfpack SpiMode
@@ -50,13 +61,22 @@ typedef enum __nfpack SPI_OP_STATUS
 
 struct SPI_DEVICE_CONFIGURATION
 {
-    uint32_t Spi_Bus;          // SPi bus thats connected to device
-    SpiBusMode BusMode;        // Slave or master(default)
-    GPIO_PIN DeviceChipSelect; // GPIO pin used for device Chip select
-    bool ChipSelectActive;     // False = LOW active,      True = HIGH active
-    SpiMode Spi_Mode;          // SPI mode 0 -> 3
-    bool MD16bits;             // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
-    DataBitOrder DataOrder16;  // Data order for 16 bit operation
+    // SPi bus thats connected to device
+    uint32_t Spi_Bus;
+    // Slave or master(default)
+    SpiBusMode BusMode;
+    // GPIO pin used for device Chip select
+    GPIO_PIN DeviceChipSelect;
+    // False = LOW active,      True = HIGH active
+    bool ChipSelectActive;
+    // SPI mode 0 -> 3
+    SpiMode Spi_Mode;
+    // SPI bus Configuration (full-duplex is default)
+    SpiBusConfiguration BusConfiguration;
+    // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
+    bool MD16bits;
+    // Data order for 16 bit operation
+    DataBitOrder DataOrder16;
 
     // Master Only
     uint32_t Clock_RateHz;   // Master - SPI bus clock frequency, in hertz (Hz).
@@ -80,7 +100,7 @@ struct SPI_WRITE_READ_SETTINGS
 // HAL SPi functions (porting layer)
 
 // Initialise an SPI bus, called before any devices opened (optional)
-bool CPU_SPI_Initialize(uint8_t bus);
+bool CPU_SPI_Initialize(uint8_t bus, SpiBusConfiguration spiConfiguration);
 
 // Unintialise spi bus, called after last device removed (optional)
 bool CPU_SPI_Uninitialize(uint8_t bus);
@@ -90,10 +110,10 @@ bool CPU_SPI_Uninitialize(uint8_t bus);
 SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle);
 
 // Add a device to SPi Bus (Optional)
-// Returns a device handle.  Returns 0 if error
-// deviceHandle is a reference to underlying OS handle/address of device. If not required then return
-// value not equal 0
-uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+// Returns a device handle in the handle pointer.
+// deviceHandle is a reference to underlying OS handle/address of device. If not required then return value other than
+// 0. returns S_OK on success, else S_FALSE on failure.
+HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint32_t &handle);
 
 // Remove device from bus (Optional)
 // return true is successful

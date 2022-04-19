@@ -87,18 +87,30 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 // Initialise the physical SPI bus
 // Bus index 0 or 1
 // return true of successful, false if error
-bool CPU_SPI_Initialize(uint8_t spiBus)
+bool CPU_SPI_Initialize(uint8_t spiBus, SpiBusConfiguration spiConfiguration)
 {
     GPIO_PIN clockPin, misoPin, mosiPin;
 
     // Get pins used by spi bus
     CPU_SPI_GetPins(spiBus, clockPin, misoPin, mosiPin);
 
-    // Check pins have been configured
-    if (clockPin == GPIO_PIN_NONE || misoPin == GPIO_PIN_NONE || mosiPin == GPIO_PIN_NONE)
+    if (spiConfiguration == SpiBusConfiguration_FullDuplex)
     {
-        ESP_LOGE(TAG, "Spi pins for SPI%d not configured", spiBus);
-        return false;
+        // Check that ALL pins have been configured
+        if (clockPin == GPIO_PIN_NONE || misoPin == GPIO_PIN_NONE || mosiPin == GPIO_PIN_NONE)
+        {
+            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", spiBus);
+            return false;
+        }
+    }
+    else
+    {
+        // Half duplex only requires CLK and MOSI
+        if (clockPin == GPIO_PIN_NONE || mosiPin == GPIO_PIN_NONE)
+        {
+            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", spiBus);
+            return false;
+        }
     }
 
     spi_bus_config_t bus_config{
@@ -211,7 +223,15 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
 
     // Positive Chip Select for Active
     if (spiDeviceConfig.ChipSelectActive)
+    {
         flags |= SPI_DEVICE_POSITIVE_CS;
+    }
+
+    // check for half duplex
+    if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_HalfDuplex)
+    {
+        flags |= SPI_DEVICE_HALFDUPLEX;
+    }
 
     // Fill in device config
     spi_device_interface_config_t dev_config{
@@ -238,10 +258,16 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
 //  Add a device to a SPI bus
 //  returns device handle as uint32_t
 //
-uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint32_t &handle)
 {
     // First available bus on ESP32 is HSPI_HOST(1), so add one
     spi_device_interface_config_t dev_config = GetConfig(spiDeviceConfig);
+
+    // check supported bus configuration: all valid except simplex
+    if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_Simplex)
+    {
+        return CLR_E_NOT_SUPPORTED;
+    }
 
     // Add device to bus
     spi_device_handle_t deviceHandle;
@@ -254,10 +280,13 @@ uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
     if (ret != ESP_OK)
     {
         ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
-        return 0;
+
+        return S_FALSE;
     }
 
-    return (uint32_t)deviceHandle;
+    handle = (uint32_t)deviceHandle;
+
+    return S_OK;
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -289,8 +318,6 @@ HRESULT CPU_SPI_nWrite_nRead(
     uint8_t *readData,
     int32_t readSize)
 {
-    (void)sdev;
-
     NANOCLR_HEADER();
     {
         uint8_t *writeDataBuffer = NULL;
@@ -366,8 +393,9 @@ HRESULT CPU_SPI_nWrite_nRead(
         // Set up SPI Transaction
         spi_transaction_t *pTrans = &pnf_pal_spi->trans;
 
-        // Mainly use full duplex unless no read data
-        pTrans->flags = (readSize == 0) ? SPI_DEVICE_HALFDUPLEX : 0;
+        // use full duplex unless no read data or bus configuration is half duplex
+        pTrans->flags =
+            (readSize == 0) || (sdev.BusConfiguration == SpiBusConfiguration_HalfDuplex) ? SPI_DEVICE_HALFDUPLEX : 0;
         pTrans->cmd = 0;
         pTrans->addr = 0;
         // length - Full duplex is total length, half duplex the TX length
