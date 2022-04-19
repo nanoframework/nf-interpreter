@@ -44,7 +44,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
 
     // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
     // Ignore errors as it may already been opened by managed code if trying to share bus
-    CPU_SPI_Initialize(spiBus);
+    CPU_SPI_Initialize(spiBus, SpiBusConfiguration_FullDuplex);
 
     if (!Storage_MountSpi(spiBus, CSPin, 0))
     {
