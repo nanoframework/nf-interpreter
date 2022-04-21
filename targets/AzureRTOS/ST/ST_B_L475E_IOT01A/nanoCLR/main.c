@@ -7,6 +7,7 @@
 #include <hal_nf_community.h>
 
 #include <tx_api.h>
+#include <nx_api.h>
 
 #include <serialcfg.h>
 #include <LaunchCLR.h>
