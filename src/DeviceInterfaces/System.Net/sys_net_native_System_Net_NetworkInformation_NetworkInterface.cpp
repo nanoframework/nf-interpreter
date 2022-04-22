@@ -18,10 +18,12 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_HEADER();
 
     HAL_Configuration_NetworkInterface config;
-    CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
-    _ASSERTE(pConfig != NULL);
+    CLR_UINT32 interfaceIndex;
 
-    CLR_UINT32 interfaceIndex = pConfig[FIELD___interfaceIndex].NumericByRefConst().u4;
+    CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
+    FAULT_ON_NULL(pConfig);
+
+    interfaceIndex = pConfig[FIELD___interfaceIndex].NumericByRefConst().u4;
 
     NANOCLR_CLEAR(config);
 
@@ -148,16 +150,19 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
-    HAL_Configuration_NetworkInterface config, storageConfig;
-    CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
-    _ASSERTE(pConfig != NULL);
+    HAL_Configuration_NetworkInterface config;
+    CLR_UINT32 interfaceIndex;
+    CLR_UINT32 updateFlags;
+    CLR_RT_HeapBlock_Array *pMACAddress;
 
-    CLR_UINT32 interfaceIndex = pConfig[FIELD___interfaceIndex].NumericByRefConst().u4;
-    CLR_UINT32 updateFlags = stack.Arg1().NumericByRef().u4;
-    CLR_RT_HeapBlock_Array *pMACAddress = pConfig[FIELD___macAddress].DereferenceArray();
+    CLR_RT_HeapBlock *pConfig = stack.Arg0().Dereference();
+    FAULT_ON_NULL(pConfig);
+
+    interfaceIndex = pConfig[FIELD___interfaceIndex].NumericByRefConst().u4;
+    updateFlags = stack.Arg1().NumericByRef().u4;
+    pMACAddress = pConfig[FIELD___macAddress].DereferenceArray();
 
     NANOCLR_CLEAR(config);
-    NANOCLR_CLEAR(storageConfig);
 
     config.IPv4Address = pConfig[FIELD___ipv4Address].NumericByRef().u4;
     config.IPv4GatewayAddress = pConfig[FIELD___ipv4GatewayAddress].NumericByRef().u4;
@@ -180,15 +185,6 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     if (pMACAddress != NULL)
     {
         memcpy(&config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN);
-    }
-
-    // load network interface configuration from storage
-    if (!ConfigurationManager_GetConfigurationBlock(
-            (void *)&storageConfig,
-            DeviceConfigurationOption_Network,
-            interfaceIndex))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
     // store configuration, updating the configuration block
