@@ -45,5 +45,7 @@ list(APPEND CHIBIOS_CONTRIB_SOURCES ${chibios-contrib_SOURCE_DIR}/os/hal/src/usb
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usb_msd.c)
 list(APPEND CHIBIOS_CONTRIB_SOURCES ${chibios-contrib_SOURCE_DIR}/os/hal/ports/STM32/LLD/USBHv1/hal_usbh_lld.c)
 
+SET_SOURCE_FILES_PROPERTIES( ${chibios-contrib_SOURCE_DIR}/os/hal/src/hal_usbh.c PROPERTIES COMPILE_FLAGS -Wno-type-limits)
+
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ChibiOS-Contrib DEFAULT_MSG CHIBIOS_CONTRIB_INCLUDE_DIRS CHIBIOS_CONTRIB_SOURCES)
