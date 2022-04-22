@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -87,13 +87,6 @@ if(NOT RTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
         message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
 endif()
 
-# Set up short path substitution on Windows
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-    if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-        set(ENV{nfRoot} ${NFROOT})
-    endif()
-endif()
 
 #########################################
 
@@ -431,7 +424,7 @@ endif()
 option(USE_NETWORKING_OPTION "option to use networking")
 
 # (default is OFF so mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
+option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider" ON)
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)

@@ -45,11 +45,11 @@ if(DEFINED TOOL_SRECORD_PREFIX)
     endif()
 endif()
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT ${RTOS_SOURCE_FOLDER} STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if CHIBIOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_SOURCE_FOLDER TRUE)
+if(CHIBIOS_SOURCE_FOLDER)
+    if(NOT ${CHIBIOS_SOURCE_FOLDER} STREQUAL "")
+        set(NO_CHIBIOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -78,7 +78,7 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_CHIBIOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
@@ -92,10 +92,10 @@ else()
     # ChibiOS source was specified
 
 
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
     FetchContent_Declare(
         chibios
-        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
     )
 
 
@@ -209,7 +209,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 endif()
 
 # if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
 
     # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_MBEDTLS_SOURCE TRUE)
