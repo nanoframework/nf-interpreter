@@ -1243,7 +1243,7 @@
             "hidden": true,
             "cacheVariables": {
                 "RTOS": "TI_SimpleLink",
-                "TARGET_SERIES": "CC13x2_26x2",
+                "TARGET_SERIES": "CC13X2",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
