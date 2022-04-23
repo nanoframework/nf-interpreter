@@ -62,15 +62,6 @@
       "taskName": "task-README",
       "appliesTo": "README.md",
       "type": "launch"
-    },
-    {
-      "taskName": "task-SetNFRoot",
-      "appliesTo": "SetNFRoot.bat",
-      "type": "default",
-      "command": "${env.COMSPEC}",
-      "args": [
-        "SetNFRoot.bat"
-      ]
     }
   ]
 }

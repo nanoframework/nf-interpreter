@@ -61,8 +61,10 @@ steps:
         $envars_raw = python $(IDF_PATH)/tools/idf_tools.py export --format key-value 2>$null
         
         # need to access the PATH collection, which seems to always be the last on in the collection
-        $varsCount = $envars_raw.Count       
-        $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '')
+        $varsCount = $envars_raw.Count
+        # go through the output and grab what has to be appended to the PATH
+        # need to remove the entry for IDF CMake because it's using an older version of CMake, OK to remove after they update it to >2.23.0
+        $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '').Replace('C:\Users\VssAdministrator\.espressif\tools\cmake\3.20.3\bin;', '')
 
         # append to path
         echo "##vso[task.prependpath]$newPath"
