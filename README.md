@@ -17,7 +17,7 @@ Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
 
 ## .NET nanoFramework interpreter for reference boards
 
-Each of the linked files contain the board firmware binaries for nanoBooter (if applicable) and nanoCLR in various formats (`.HEX`, `.BIN` and `.DFU`). They should be flashed to the target board using an appropriate software utility.
+Each of the linked files contain the board firmware binaries for nanoBooter (if applicable) and nanoCLR in various formats (`.HEX`, `.BIN` and `.DFU`). They should be flashed to the target board using [nanoff](https://github.com/nanoframework/nanoFirmwareFlasher) or the appropriate software utility depending on the target MCU.
 
 Firmware versions contained below are released via the `main` branch, and are treated as `RTM` builds as per our stable release mandate. These releases are compiled with optimizations and the smallest possible size. For these builds, the debugging features are also disabled and only contain no (or minimal) detailed error messages.
 
