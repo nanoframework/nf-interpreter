@@ -435,7 +435,7 @@ jobs:
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
     parameters:
-      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
+      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
   - template: azure-pipelines-templates/publish-cloudsmith.yml
 
 #################

@@ -6,13 +6,7 @@ parameters:
 
 steps:
 
-  # Rename CMakeUserPresets for CI
-  - task: PowerShell@2
-    displayName: Rename CMakeUserPresets
-    inputs:
-      workingDirectory:  ${{ parameters.buildDirectory }}
-      targetType: 'inline'
-      script: Rename-Item -Path "CMakeUserPresets.CI.json" -NewName "CMakeUserPresets.json"
+  - template: setup-cmake-user-presets.yml
 
   - task: CMake@1
     inputs:
@@ -25,11 +19,3 @@ steps:
       cmakeArgs: '--build --preset $(TargetBoard) --target all --config MinSizeRel'
       workingDirectory:  ${{ parameters.buildDirectory }}
     displayName: Build with CMake
-
-  # Revert rename
-  - task: PowerShell@2
-    displayName: Rename CMakeUserPresets
-    inputs:
-      workingDirectory:  ${{ parameters.buildDirectory }}
-      targetType: 'inline'
-      script: Rename-Item -Path "CMakeUserPresets.json" -NewName "CMakeUserPresets.CI.json"
