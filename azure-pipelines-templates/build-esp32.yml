@@ -7,13 +7,9 @@ parameters:
 
 steps:
 
-  # Rename CMakeUserPresets for CI
-  - task: PowerShell@2
-    displayName: Rename CMakeUserPresets
-    inputs:
-      workingDirectory:  ${{ parameters.buildDirectory }}
-      targetType: 'inline'
-      script: Rename-Item -Path "CMakeUserPresets.CI.json" -NewName "CMakeUserPresets.json"
+  - template: setup-cmake-user-presets.yml
+    parameters:
+      repoDirectory: ${{ parameters.buildDirectory }}
 
   - task: CMake@1
     condition: succeeded()
@@ -53,11 +49,3 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_4mb.csv ${{ parameters.buildDirectory }}\build\partitions_4mb.bin'
-
-  # Revert rename
-  - task: PowerShell@2
-    displayName: Rename CMakeUserPresets
-    inputs:
-      workingDirectory:  ${{ parameters.buildDirectory }}
-      targetType: 'inline'
-      script: Rename-Item -Path "CMakeUserPresets.json" -NewName "CMakeUserPresets.CI.json"
