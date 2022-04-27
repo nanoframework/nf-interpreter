@@ -25,6 +25,29 @@
             }
         },
         {
+            "name": "user-local-tools-container",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
+            "hidden": true,
+            "cacheVariables": {
+                "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
+                "TOOL_HEX2DFU_PREFIX": "/usr/local/bin/hex2dfu",
+                "TOOL_SRECORD_PREFIX": "/usr/bin",
+                "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
+                "FREERTOS_SOURCE_FOLDER": "/sources/FreeRTOS",
+                "CHIBIOS_CONTRIB_SOURCE": "/sources/ChibiOs-Contrib",
+                "CHIBIOS_HAL_SOURCE": null,
+                "STM32_CUBE_PACKAGE_SOURCE": "/sources/STM32CubeL4",
+                "MBEDTLS_SOURCE": "/sources/mbedtls",
+                "FATFS_SOURCE": "/sources/fatfs",
+                "SPIFFS_SOURCE": "/sources/spiffs",
+                "ESP32_IDF_PATH": "/sources/esp-idf",
+                "TI_SL_CC32xx_SDK_SOURCE": "/sources/SimpleLinkCC32",
+                "TI_SL_CC13xx_26xx_SDK_SOURCE": "/sources/SimpleLinkCC13",
+                "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
+                "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig"
+            }
+        },
+        {
             "name": "user-prefs",
             "description": "Cache variables with user preferences general to all builds and targets.",
             "hidden": true,

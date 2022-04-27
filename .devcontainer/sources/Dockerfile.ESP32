@@ -58,9 +58,7 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 ENV IDF_PATH=/sources/esp-idf
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-RUN $IDF_PATH/export.sh
-# need to remove the entry for IDF CMake because it's using an older version of CMake, OK to remove after they update it to >2.23.0
-ENV PATH=$(REMOVE_PART='.espressif/tools/cmake/3.20.3/bin;' sh -c 'echo ":$PATH:" | sed "s@:$REMOVE_PART:@:@g;s@^:\(.*\):\$@\1@"')
+ENV PATH=$PATH:$IDF_PATH/components/esptool_py/esptool:$IDF_PATH/components/espcoredump:$IDF_PATH/components/partition_table/:$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch3-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
