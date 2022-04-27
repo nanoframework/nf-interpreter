@@ -235,7 +235,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_System.Math": "ON",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "ON",
@@ -263,7 +263,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
@@ -284,7 +284,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_System.Net": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_System.Math": "ON",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "ON",
@@ -309,7 +309,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -327,7 +327,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -344,7 +344,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
@@ -362,7 +362,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
@@ -381,7 +381,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_Windows.Storage": "ON"
             }
@@ -399,7 +399,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
@@ -421,7 +421,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.Bluetooth": "OFF",
                 "API_nanoFramework.Graphics": "ON",
@@ -444,7 +444,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9342_320x240_SPI.cpp",
@@ -466,7 +466,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON",
                 "API_nanoFramework.Graphics": "ON",
@@ -491,7 +491,7 @@
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -511,7 +511,7 @@
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "DETH_PHY_RST_GPIO": "12",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
         },
@@ -528,7 +528,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ST7735S_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
@@ -549,7 +549,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ST7789V_240x320_SPI.cpp",
@@ -590,7 +590,7 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem=ON": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
