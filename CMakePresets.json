@@ -590,7 +590,6 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
