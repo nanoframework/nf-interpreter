@@ -6,28 +6,26 @@
 -----
 Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
 
-### Welcome to the **nanoFramework** Interpreter repository!
+### Welcome to the .NET **nanoFramework** interpreter repository!
 
 ## Build status
 
-| Component | Stable (branch: main) |
+| Component | Build Status |
 |:-|---|
 | nanoBooter + nanoCLR | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
 | Win32 test project | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
 
-## Firmware for reference boards
+## .NET nanoFramework interpreter for reference boards
 
-Each of the following ZIP files contain the firmware binaries for nanoBooter (if applicable) and nanoCLR in various formats (HEX, BIN and DFU). They should be flashed to the target board using an appropriate software utility.
+Each of the linked files contain the firmware binaries for nanoBooter (if applicable) and nanoCLR in various formats (`.HEX`, `.BIN` and `.DFU`). They should be flashed to the target board using [nanoff](https://github.com/nanoframework/nanoFirmwareFlasher) or the appropriate software utility depending on the target MCU.
 
-The **stable** firmware versions are `RTM` builds that are updated as per our stable release mandate. These are released with compiler optimizations and the smallest possible size. For these builds, the debugging features are also disabled and only contain no (or minimal) detailed error messages.
+Firmware versions contained below are released via the `main` branch, and are treated as `RTM` builds as per our stable release mandate. These releases are compiled with optimizations and the smallest possible size. For these builds, the debugging features are also disabled and only contain no (or minimal) detailed error messages.
 
-The **preview** firmware versions are the latest available builds of the reference targets. They include the latest bug fixes and features, but are more susceptible to breaking changes and a high release candence. For these builds, debugging features are enabled along with detailed error messages.
-
-We also have a [Community Targets](https://github.com/nanoframework/nf-Community-Targets) repository where you can find firmware images for several other popular boards that have been contibuted by the community, although limited support is provided.
+We also have a [Community Targets](https://github.com/nanoframework/nf-Community-Targets) repository where you can find firmware versions for several other popular boards that have been contibuted by the community, although limited support is provided.
 
 ### ESP32 modules and boards
 
-| Target | Stable |
+| Target | Version |
 |:-|---|
 | ESP32_PSRAM_REV0 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_PSRAM_REV0/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_PSRAM_REV0/latest/) |
 | ESP32_REV0 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ESP32_REV0/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ESP32_REV0/latest/) |
@@ -45,7 +43,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 
 ### M5Stack
 
-| Target | Stable |
+| Target | Version |
 |:-|---|
 | [M5Core](https://docs.m5stack.com/en/core/gray) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/M5Core/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/M5Core/latest/) |
 | [M5StickC](https://docs.m5stack.com/en/core/m5stickc) | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/M5StickC/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/M5StickC/latest/) |
@@ -54,7 +52,7 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 
 ### STM32 boards and chip based
 
-| Target | Stable |
+| Target | Version |
 |:-|---|
 | ST_STM32F429I_DISCOVERY | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ST_STM32F429I_DISCOVERY/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ST_STM32F429I_DISCOVERY/latest/) |
 | ST_NUCLEO64_F091RC | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/ST_NUCLEO64_F091RC/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/ST_NUCLEO64_F091RC/latest/) |
@@ -63,19 +61,19 @@ We also have a [Community Targets](https://github.com/nanoframework/nf-Community
 
 ### NXP boards
 
-| Target | Stable |
+| Target | Version |
 |:-|---|
 | NXP_MIMXRT1060_EVK | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/NXP_MIMXRT1060_EVK/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/NXP_MIMXRT1060_EVK/latest/) |
 
 ### TI boards
 
-| Target | Stable |
+| Target | Version |
 |:-|---|
 | TI_CC1352R1_LAUNCHXL_868 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/TI_CC1352R1_LAUNCHXL_868/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/TI_CC1352R1_LAUNCHXL_868/latest/) |
 | TI_CC1352R1_LAUNCHXL_915 | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/TI_CC1352R1_LAUNCHXL_915/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/TI_CC1352R1_LAUNCHXL_915/latest/) |
 | TI_CC3220SF_LAUNCHXL | [![Latest Version @ Cloudsmith](https://api-prd.cloudsmith.io/v1/badges/version/net-nanoframework/nanoframework-images/raw/TI_CC3220SF_LAUNCHXL/latest/x/?render=true)](https://cloudsmith.io/~net-nanoframework/repos/nanoframework-images/packages/detail/raw/TI_CC3220SF_LAUNCHXL/latest/) |
 
-The above firmware builds include support for the class libraries and features marked below.
+The above .NET nanoFramework interpreter builds include support for the class libraries and features marked below.
 
 <details>
   <summary>Click to expand!</summary>

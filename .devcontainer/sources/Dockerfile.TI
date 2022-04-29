@@ -12,7 +12,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
     && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-Linux-x86_64.sh
+ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-linux-x86_64.sh
 RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake

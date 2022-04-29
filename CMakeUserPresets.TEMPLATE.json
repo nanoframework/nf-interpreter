@@ -3,7 +3,7 @@
     "configurePresets": [
         {
             "name": "user-local-tools",
-            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults.",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
                 "TOOLCHAIN_PREFIX": "<path-to-gcc-toolchain-mind-the-forward-slash>",
@@ -25,6 +25,29 @@
             }
         },
         {
+            "name": "user-local-tools-container",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
+            "hidden": true,
+            "cacheVariables": {
+                "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
+                "TOOL_HEX2DFU_PREFIX": "/usr/local/bin/hex2dfu",
+                "TOOL_SRECORD_PREFIX": "/usr/bin",
+                "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
+                "FREERTOS_SOURCE_FOLDER": "/sources/FreeRTOS",
+                "CHIBIOS_CONTRIB_SOURCE": "/sources/ChibiOs-Contrib",
+                "CHIBIOS_HAL_SOURCE": null,
+                "STM32_CUBE_PACKAGE_SOURCE": "/sources/STM32CubeL4",
+                "MBEDTLS_SOURCE": "/sources/mbedtls",
+                "FATFS_SOURCE": "/sources/fatfs",
+                "SPIFFS_SOURCE": "/sources/spiffs",
+                "ESP32_IDF_PATH": "/sources/esp-idf",
+                "TI_SL_CC32xx_SDK_SOURCE": "/sources/SimpleLinkCC32",
+                "TI_SL_CC13xx_26xx_SDK_SOURCE": "/sources/SimpleLinkCC13",
+                "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
+                "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig"
+            }
+        },
+        {
             "name": "user-prefs",
             "description": "Cache variables with user preferences general to all builds and targets.",
             "hidden": true,
@@ -38,6 +61,11 @@
                 "NF_WP_TRACE_NODATA": "OFF",
                 "NF_WP_TRACE_ALL": "OFF"
             }
+        },
+        {
+            "name": "user-local-tools-cloud",
+            "description": "Empty preset to be used in cloud builds",
+            "hidden": true
         },
         {
             "name": "ORGPAL_PALTHREE",
@@ -103,6 +131,18 @@
             }
         },
         {
+            "name": "ESP32_PSRAM_REV3",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_PSRAM_REV3_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "ESP32_REV0",
             "inherits": [
                 "user-local-tools",
@@ -115,11 +155,47 @@
             }
         },
         {
+            "name": "ESP32_REV3",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_REV3_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_XTAL26_REV0",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_PSRAM_XTAL26_REV0_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "ESP32_BLE_REV0",
             "inherits": [
                 "user-local-tools",
                 "user-prefs",
                 "ESP32_BLE_REV0_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_BLE_REV3",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_BLE_REV3_preset"
             ],
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
@@ -163,6 +239,18 @@
             }
         },
         {
+            "name": "M5Core",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "M5Core_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "M5Core2",
             "inherits": [
                 "user-local-tools",
@@ -180,6 +268,42 @@
                 "user-local-tools",
                 "user-prefs",
                 "ESP32_LILYGO_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_OLIMEX",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_OLIMEX_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "M5StickC",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "M5StickC_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "M5StickCPlus",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "M5StickCPlus_preset"
             ],
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
@@ -468,14 +592,34 @@
             "configurePreset": "ESP32_PSRAM_REV0"
         },
         {
+            "name": "ESP32_PSRAM_REV3",
+            "displayName": "ESP32_PSRAM_REV3",
+            "configurePreset": "ESP32_PSRAM_REV3"
+        },
+        {
             "name": "ESP32_REV0",
             "displayName": "ESP32_REV0",
             "configurePreset": "ESP32_REV0"
         },
         {
+            "name": "ESP32_REV3",
+            "displayName": "ESP32_REV3",
+            "configurePreset": "ESP32_REV3"
+        },
+        {
+            "name": "ESP32_PSRAM_XTAL26_REV0",
+            "displayName": "ESP32_PSRAM_XTAL26_REV0",
+            "configurePreset": "ESP32_PSRAM_XTAL26_REV0"
+        },
+        {
             "name": "ESP32_BLE_REV0",
             "displayName": "ESP32_BLE_REV0",
             "configurePreset": "ESP32_BLE_REV0"
+        },
+        {
+            "name": "ESP32_BLE_REV3",
+            "displayName": "ESP32_BLE_REV3",
+            "configurePreset": "ESP32_BLE_REV3"
         },
         {
             "name": "ESP32_PICO",
@@ -493,6 +637,11 @@
             "configurePreset": "M5Stack"
         },
         {
+            "name": "M5Core",
+            "displayName": "M5Core",
+            "configurePreset": "M5Core"
+        },
+        {
             "name": "M5Core2",
             "displayName": "M5Core2",
             "configurePreset": "M5Core2"
@@ -501,6 +650,21 @@
             "name": "ESP32_LILYGO",
             "displayName": "ESP32_LILYGO",
             "configurePreset": "ESP32_LILYGO"
+        },
+        {
+            "name": "ESP32_OLIMEX",
+            "displayName": "ESP32_OLIMEX",
+            "configurePreset": "ESP32_OLIMEX"
+        },
+        {
+            "name": "M5StickC",
+            "displayName": "M5StickC",
+            "configurePreset": "M5StickC"
+        },
+        {
+            "name": "M5StickCPlus",
+            "displayName": "M5StickCPlus",
+            "configurePreset": "M5StickCPlus"
         },
         {
             "name": "FEATHER_S2",
