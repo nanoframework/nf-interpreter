@@ -147,15 +147,17 @@ bool CPU_GPIO_Initialize()
     // Make sure all pins are not reserved
     memset(pinReserved, 0, sizeof(pinReserved));
 
+#ifdef CONFIG_IDF_TARGET_ESP32
     // check if PSRAM it's available (querying largets free block available with SPIRAM capabilities)
     if (heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM))
     {
-        // Reserve Pins 6-11 as used by Spi flash
+        // Reserve Pins 6-11 as used by SPI flash
         for (int pinNumber = 6; pinNumber <= 11; pinNumber++)
         {
             CPU_GPIO_ReservePin(pinNumber, true);
         }
     }
+#endif
 
     // Install ISR service for GPIO
     esp_err_t ret = gpio_install_isr_service(0);
