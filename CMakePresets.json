@@ -149,7 +149,9 @@
                 "API_System.Device.I2c": "ON",
                 "API_System.Device.Pwm": "ON",
                 "API_System.IO.Ports": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON"
             }
         },
         {
@@ -215,6 +217,9 @@
                 "API_System.Net": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Devices.Can": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
