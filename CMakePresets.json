@@ -1157,7 +1157,7 @@
                 "API_Hardware.Stm32": "ON",
                 "API_nanoFramework.Devices.Can": "OFF",
                 "API_nanoFramework.Device.OneWire": "ON",
-                "API_nanoFramework.ResourceManager": "OFF",
+                "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
                 "API_System.Math": "ON",
