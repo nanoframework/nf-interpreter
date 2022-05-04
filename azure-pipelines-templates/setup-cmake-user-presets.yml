@@ -7,7 +7,7 @@ parameters:
 steps:
 
   - task: PowerShell@2
-    displayName: Composer CMakeUserPresets
+    displayName: Compose CMakeUserPresets
     inputs:
       workingDirectory:  ${{ parameters.repoDirectory }}
       targetType: 'inline'
