@@ -48,7 +48,6 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiConnectionResult
     static const int FIELD___ConnectionStatus = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
@@ -62,7 +61,8 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
 
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind);
+    NANOCLR_NATIVE_DECLARE(
+        NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind);
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID);
     NANOCLR_NATIVE_DECLARE(NativeScanAsync___VOID);
     NANOCLR_NATIVE_DECLARE(GetNativeScanReport___SZARRAY_U1);
@@ -78,7 +78,6 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiNetworkReport
     static const int FIELD___WifiNetworks = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_Wifi_native_nanoFramework_Networking_WifiNetworkHelper
@@ -97,7 +96,6 @@ struct Library_sys_dev_Wifi_native_nanoFramework_Networking_WifiNetworkHelper
     static const int FIELD_STATIC___helperInstanciated = 12;
 
     //--//
-
 };
 
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEvent
@@ -106,7 +104,6 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEvent
     static const int FIELD__Time = 4;
 
     //--//
-
 };
 
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEventListener
@@ -114,10 +111,8 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEventListener
     static const int FIELD__WifiAdapters = 1;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi;
-
 
 #endif // SYS_DEV_WIFI_NATIVE_H
