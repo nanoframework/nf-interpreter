@@ -43,7 +43,7 @@ typedef enum __nfpack WifiReconnectionKind
     WifiReconnectionKind_Manual = 1,
 } WifiReconnectionKind;
 
-struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiConnectionResult
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiConnectionResult
 {
     static const int FIELD___ConnectionStatus = 1;
 
@@ -51,7 +51,7 @@ struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiConnectionResult
 
 };
 
-struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiAdapter
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
 {
     static const int FIELD_STATIC__s_eventListener = 0;
 
@@ -73,7 +73,7 @@ struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiAdapter
     static int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount);
 };
 
-struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiNetworkReport
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiNetworkReport
 {
     static const int FIELD___WifiNetworks = 1;
 
@@ -100,7 +100,7 @@ struct Library_sys_dev_Wifi_native_nanoFramework_Networking_WifiNetworkHelper
 
 };
 
-struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiEvent
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEvent
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__Time = 4;
@@ -109,7 +109,7 @@ struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiEvent
 
 };
 
-struct Library_sys_dev_Wifi_native_System_Device_Wifi_WifiEventListener
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEventListener
 {
     static const int FIELD__WifiAdapters = 1;
 
