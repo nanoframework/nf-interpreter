@@ -33,14 +33,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::DisposeNative___VOID,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeInit___VOID,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeConnect___SystemDeviceWiFiWiFiConnectionStatus__STRING__STRING__SystemDeviceWiFiWiFiReconnectionKind,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeDisconnect___VOID,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAsync___VOID,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::DisposeNative___VOID,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeInit___VOID,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeDisconnect___VOID,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAsync___VOID,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeScanReport___SZARRAY_U1,
     NULL,
-    Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1,
+    Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1,
     NULL,
     NULL,
     NULL,
@@ -79,9 +79,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi =
 {
     "System.Device.Wifi",
-    0xEC3A3374,
+    0x1C1D3214,
     method_lookup,
-    { 100, 0, 6, 3 }
+    { 100, 0, 6, 4 }
 };
 
 // clang-format on

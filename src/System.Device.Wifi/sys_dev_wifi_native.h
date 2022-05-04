@@ -11,56 +11,46 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-typedef enum __nfpack WiFiConnectionStatus
+typedef enum __nfpack WifiConnectionStatus
 {
-    WiFiConnectionStatus_AccessRevoked = 0,
-    WiFiConnectionStatus_InvalidCredential = 1,
-    WiFiConnectionStatus_NetworkNotAvailable = 2,
-    WiFiConnectionStatus_Success = 3,
-    WiFiConnectionStatus_Timeout = 4,
-    WiFiConnectionStatus_UnspecifiedFailure = 5,
-    WiFiConnectionStatus_UnsupportedAuthenticationProtocol = 6,
-} WiFiConnectionStatus;
+    WifiConnectionStatus_AccessRevoked = 0,
+    WifiConnectionStatus_InvalidCredential = 1,
+    WifiConnectionStatus_NetworkNotAvailable = 2,
+    WifiConnectionStatus_Success = 3,
+    WifiConnectionStatus_Timeout = 4,
+    WifiConnectionStatus_UnspecifiedFailure = 5,
+    WifiConnectionStatus_UnsupportedAuthenticationProtocol = 6,
+} WifiConnectionStatus;
 
 ////////////////////////////////////////////////
 // moved to nanoPAL_Sockets.h for convenience //
 ////////////////////////////////////////////////
-// typedef enum __nfpack WiFiEventType
+// typedef enum __nfpack WifiEventType
 // {
-//     WiFiEventType_ScanComplete = 1,
-// } WiFiEventType;
+//     WifiEventType_ScanComplete = 1,
+// } WifiEventType;
 
-typedef enum __nfpack WiFiNetworkKind
+typedef enum __nfpack WifiNetworkKind
 {
-    WiFiNetworkKind_Adhoc = 0,
-    WiFiNetworkKind_Any = 1,
-    WiFiNetworkKind_Infrastructure = 2,
-} WiFiNetworkKind;
+    WifiNetworkKind_Adhoc = 0,
+    WifiNetworkKind_Any = 1,
+    WifiNetworkKind_Infrastructure = 2,
+} WifiNetworkKind;
 
-typedef enum __nfpack WiFiReconnectionKind
+typedef enum __nfpack WifiReconnectionKind
 {
-    WiFiReconnectionKind_Automatic = 0,
-    WiFiReconnectionKind_Manual = 1,
-} WiFiReconnectionKind;
+    WifiReconnectionKind_Automatic = 0,
+    WifiReconnectionKind_Manual = 1,
+} WifiReconnectionKind;
 
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAvailableNetwork
-{
-    static const int FIELD___bsid = 1;
-    static const int FIELD___ssid = 2;
-    static const int FIELD___rssi = 3;
-    static const int FIELD___networkKind = 4;
-
-    //--//
-};
-
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiConnectionResult
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiConnectionResult
 {
     static const int FIELD___ConnectionStatus = 1;
 
     //--//
 };
 
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
 {
     static const int FIELD_STATIC__s_eventListener = 0;
 
@@ -72,7 +62,7 @@ struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(
-        NativeConnect___SystemDeviceWiFiWiFiConnectionStatus__STRING__STRING__SystemDeviceWiFiWiFiReconnectionKind);
+        NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind);
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID);
     NANOCLR_NATIVE_DECLARE(NativeScanAsync___VOID);
     NANOCLR_NATIVE_DECLARE(GetNativeScanReport___SZARRAY_U1);
@@ -83,14 +73,14 @@ struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter
     static int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount);
 };
 
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiNetworkReport
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiNetworkReport
 {
-    static const int FIELD___wifiNetworks = 1;
+    static const int FIELD___WifiNetworks = 1;
 
     //--//
 };
 
-struct Library_sys_dev_wifi_native_nanoFramework_Networking_WiFiNetworkHelper
+struct Library_sys_dev_Wifi_native_nanoFramework_Networking_WifiNetworkHelper
 {
     static const int FIELD_STATIC___ipAddressAvailable = 1;
     static const int FIELD_STATIC___networkReady = 2;
@@ -108,7 +98,7 @@ struct Library_sys_dev_wifi_native_nanoFramework_Networking_WiFiNetworkHelper
     //--//
 };
 
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiEvent
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEvent
 {
     static const int FIELD__EventType = 3;
     static const int FIELD__Time = 4;
@@ -116,9 +106,9 @@ struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiEvent
     //--//
 };
 
-struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiEventListener
+struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiEventListener
 {
-    static const int FIELD__wifiAdapters = 1;
+    static const int FIELD__WifiAdapters = 1;
 
     //--//
 };

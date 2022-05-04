@@ -311,10 +311,10 @@ if(API_System.Device.Spi)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
-# System.Device.WiFi
-if(API_System.Device.WiFi)
+# System.Device.Wifi
+if(API_System.Device.Wifi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("System.Device.WiFi")
+    PerformSettingsForApiEntry("System.Device.Wifi")
 endif()
 
 # Windows.Storage

@@ -9,7 +9,7 @@
 #include <esp_wifi_types.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH System.Device.WiFi (in managed code) !!! //
+// !!! KEEP IN SYNC WITH System.Device.Wifi (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
 struct ScanRecord
 {
@@ -20,7 +20,7 @@ struct ScanRecord
     uint8_t cypherType;
 };
 
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::DisposeNative___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::DisposeNative___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     (void)stack;
@@ -28,7 +28,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::DisposeNativ
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeInit___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     (void)stack;
@@ -39,7 +39,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeInit__
 //
 //  Pickup Net interface index and do checks
 //
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNetInterfaceIndex(
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNetInterfaceIndex(
     CLR_RT_StackFrame &stack,
     int *pNetIndex)
 {
@@ -48,7 +48,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNetInterf
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        if (pThis[Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::FIELD___disposedValue]
+        if (pThis[Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::FIELD___disposedValue]
                 .NumericByRef()
                 .u1 != 0)
         {
@@ -63,8 +63,8 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNetInterf
 //
 // Connect to Wireless connection to passed SSID / passPhase
 //
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
-    NativeConnect___SystemDeviceWiFiWiFiConnectionStatus__STRING__STRING__SystemDeviceWiFiWiFiReconnectionKind(
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
+    NativeConnect___SystemDeviceWifiWifiConnectionStatus__STRING__STRING__SystemDeviceWifiWifiReconnectionKind(
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -77,7 +77,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
         CLR_RT_HeapBlock hbTimeout;
         CLR_INT64 *timeout;
         bool eventResult = true;
-        WiFiConnectionStatus Status = WiFiConnectionStatus_UnspecifiedFailure;
+        WifiConnectionStatus Status = WifiConnectionStatus_UnspecifiedFailure;
 
         NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
 
@@ -102,7 +102,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
             res = (esp_err_t)Network_Interface_Start_Connect(netIndex, szSsid, szPassPhase, reconnectionKind);
             if (res != ESP_OK)
             {
-                Status = WiFiConnectionStatus_UnspecifiedFailure;
+                Status = WifiConnectionStatus_UnspecifiedFailure;
                 eventResult = false;
             }
         }
@@ -113,15 +113,15 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
             int connectResult = Network_Interface_Connect_Result(netIndex);
             if (connectResult >= 0)
             {
-                // Map ESP32 wifi reason code to WiFiConnectionStatus
+                // Map ESP32 wifi reason code to WifiConnectionStatus
                 switch (connectResult)
                 {
                     case 0:
-                        Status = WiFiConnectionStatus_Success;
+                        Status = WifiConnectionStatus_Success;
                         break;
 
                     case WIFI_REASON_NO_AP_FOUND:
-                        Status = WiFiConnectionStatus_NetworkNotAvailable;
+                        Status = WifiConnectionStatus_NetworkNotAvailable;
                         break;
 
                     case WIFI_REASON_AUTH_EXPIRE:
@@ -130,11 +130,11 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
                     case WIFI_REASON_AUTH_FAIL:
                     case WIFI_REASON_ASSOC_FAIL:
                     case WIFI_REASON_HANDSHAKE_TIMEOUT:
-                        Status = WiFiConnectionStatus_InvalidCredential;
+                        Status = WifiConnectionStatus_InvalidCredential;
                         break;
 
                     default:
-                        Status = WiFiConnectionStatus_UnspecifiedFailure;
+                        Status = WifiConnectionStatus_UnspecifiedFailure;
                         break;
                 }
                 break;
@@ -150,7 +150,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
             if (!eventResult)
             {
                 // Timeout
-                Status = WiFiConnectionStatus_Timeout;
+                Status = WifiConnectionStatus_Timeout;
                 break;
             }
         }
@@ -162,9 +162,9 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::
 }
 
 //
-//  Disconnect WiFi connection
+//  Disconnect Wifi connection
 //
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeDisconnect___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeDisconnect___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -177,7 +177,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeDiscon
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -203,7 +203,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeScanAs
 //  unit8_t     RSSI
 //
 //  Return : length in pTarget
-int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsToString(
+int Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::StoreApRecordsToString(
     uint8_t *pTarget,
     wifi_ap_record_t *apRecords,
     uint16_t recordCount)
@@ -232,8 +232,8 @@ int Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::StoreApRecordsTo
     return (recordCount * sizeof(ScanRecord) + sizeof(uint16_t));
 }
 
-// private extern WiFiNetworkReport NativeNetworkReport();
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNativeScanReport___SZARRAY_U1(
+// private extern WifiNetworkReport NativeNetworkReport();
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeScanReport___SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -291,7 +291,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::GetNativeSca
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_sys_dev_wifi_native_System_Device_WiFi_WiFiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1(
+HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeFindWirelessAdapters___STATIC__SZARRAY_U1(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
