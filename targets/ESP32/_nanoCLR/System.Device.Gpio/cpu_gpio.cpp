@@ -23,6 +23,16 @@ static const char *TAG = "cpu_Gpio";
 #define ESP32_Gpio_MaxPins GPIO_PIN_COUNT // 0 -> 31,  32-39 (high)
 #define TOTAL_GPIO_PORTS   ((ESP32_Gpio_MaxPins + 15) / 16)
 
+// Maps reserved GPIOs used by SPI connecting to PSRAM
+// These have to be reserved in advanced so the user can't accidentally use them
+#if defined(CONFIG_IDF_TARGET_ESP32)
+static const int spiReservedInitialGpio = 6;
+static const int spiReservedFinalGpio = 11;
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+static const int spiReservedInitialGpio = 26;
+static const int spiReservedFinalGpio = 32;
+#endif
+
 TimerHandle_t oneshot;
 
 // Double linkedlist to hold the state of each Input pin
@@ -147,12 +157,11 @@ bool CPU_GPIO_Initialize()
     // Make sure all pins are not reserved
     memset(pinReserved, 0, sizeof(pinReserved));
 
-#ifdef CONFIG_IDF_TARGET_ESP32
-    // check if PSRAM it's available (querying largets free block available with SPIRAM capabilities)
+    // check if PSRAM it's available by querying largest free block available with SPIRAM capabilities
     if (heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_32BIT | MALLOC_CAP_SPIRAM))
     {
-        // Reserve Pins 6-11 as used by SPI flash
-        for (int pinNumber = 6; pinNumber <= 11; pinNumber++)
+        // reserve GPIO pins used by SPI flash
+        for (int pinNumber = spiReservedInitialGpio; pinNumber <= spiReservedFinalGpio; pinNumber++)
         {
             CPU_GPIO_ReservePin(pinNumber, true);
         }
