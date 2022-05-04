@@ -123,6 +123,6 @@ struct Library_sys_dev_wifi_native_System_Device_WiFi_WiFiEventListener
     //--//
 };
 
-extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_WiFi;
+extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Wifi;
 
 #endif // SYS_DEV_WIFI_NATIVE_H
