@@ -32,11 +32,12 @@ endmacro()
 
 function(nf_set_optimization_options target) 
 
+    # debug compile options: -Og (optimize for debugging) and -g (produce generic debug symbols)
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -g>
         $<$<CONFIG:Release>:-O3>
         $<$<CONFIG:MinSizeRel>:-Os>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:RelWithDebInfo>:-Os -g>
     )
 
 endfunction()
