@@ -29,7 +29,7 @@ function(nf_print_target_size target)
     else()
       set(FILENAME "${target}")
     endif()
-    add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_SIZE} -A -x ${FILENAME})
+    add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_SIZE_UTIL} -A -x ${FILENAME})
 endfunction()
 
 

@@ -77,17 +77,6 @@ else()
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
 endif()
 
-#######################
-
-# check for toolchain path (this is required for Windows builds and we are only building on Windows)
-if(NOT RTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
-        message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
-        message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-        message(STATUS "########################################\n\n")
-        message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
-endif()
-
-
 #########################################
 
 # set default version

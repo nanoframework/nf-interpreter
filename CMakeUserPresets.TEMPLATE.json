@@ -6,7 +6,6 @@
             "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "TOOLCHAIN_PREFIX": "<path-to-gcc-toolchain-mind-the-forward-slash>",
                 "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
                 "TOOL_SRECORD_PREFIX": "<path-to-srecord-utility-mind-the-forward-slash>",
                 "CHIBIOS_SOURCE_FOLDER": "<path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash>",
@@ -29,7 +28,6 @@
             "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
                 "TOOL_HEX2DFU_PREFIX": "/usr/local/bin/hex2dfu",
                 "TOOL_SRECORD_PREFIX": "/usr/bin",
                 "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",

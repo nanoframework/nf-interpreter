@@ -65,6 +65,9 @@ RUN mkdir -p /usr/local/bin/hex2dfu \
     && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
     && chmod +x /usr/local/bin/hex2dfu/hex2dfu
 
+# add gcc location
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
+
 # Clean up downloaded files
 RUN apt-get autoremove -y \
     && apt-get clean -y \
