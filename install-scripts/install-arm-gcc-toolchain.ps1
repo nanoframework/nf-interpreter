@@ -91,16 +91,16 @@ if ($IsAzurePipelines -eq $False) {
     # need to replace forward slash for paths to work with GCC and CMake
     $Path = "$Path".Replace('\', '/')
 
-    "Setting User Environment Variable GNU_GCC_TOOLCHAIN_PATH='" + $env:GNU_GCC_TOOLCHAIN_PATH + "'" | Write-Host -ForegroundColor Yellow
+    "Setting User Environment Variable ARM_GCC_PATH='" + $env:ARM_GCC_PATH + "'" | Write-Host -ForegroundColor Yellow
 
-    $env:GNU_GCC_TOOLCHAIN_PATH = $Path
+    $env:ARM_GCC_PATH = $Path
 
     try {
         # this call can fail if the script is not run with appropriate permissions
-        [System.Environment]::SetEnvironmentVariable("GNU_GCC_TOOLCHAIN_PATH", $env:GNU_GCC_TOOLCHAIN_PATH, "User")
+        [System.Environment]::SetEnvironmentVariable("ARM_GCC_PATH", $env:ARM_GCC_PATH, "User")
     }
     catch {
-        "Failed to set User Environment Variable GNU_GCC_TOOLCHAIN_PATH. Make sure to manually add 'GNU_GCC_TOOLCHAIN_PATH' with '" + $env:GNU_GCC_TOOLCHAIN_PATH + "'." | Write-Host -ForegroundColor Red
+        "Failed to set User Environment Variable ARM_GCC_PATH. Make sure to manually add 'ARM_GCC_PATH' with '" + $env:ARM_GCC_PATH + "'." | Write-Host -ForegroundColor Red
     }
 }
 

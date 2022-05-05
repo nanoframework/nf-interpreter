@@ -67,7 +67,7 @@ steps:
         $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '').Replace('C:\Users\VssAdministrator\.espressif\tools\cmake\3.20.3\bin;', '')
 
         # append to path
-        echo "##vso[task.prependpath]$newPath"
+        Write-Host "##vso[task.prependpath]$newPath"
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
     displayName: Tweak PATH to reach cmd
