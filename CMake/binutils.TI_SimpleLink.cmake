@@ -10,11 +10,12 @@ FetchContent_GetProperties(ti_xdctools)
 
 function(nf_set_optimization_options target) 
 
+    # debug compile options: -Og (optimize for debugging) and -ggdb (produce debug symbols specifically for gdb)
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -ggdb>
         $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
         $<$<CONFIG:MinSizeRel>:-Os -flto -fuse-linker-plugin -fno-fat-lto-objects>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
 endfunction()
