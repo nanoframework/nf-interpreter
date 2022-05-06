@@ -3,24 +3,25 @@
     "configurePresets": [
         {
             "name": "user-local-tools",
-            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null `""` to use build defaults or completely remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "TOOL_HEX2DFU_PREFIX": "<!--path-to-hex2dfu-utility-mind-the-forward-slash-->",
-                "TOOL_SRECORD_PREFIX": "<!--path-to-srecord-utility-mind-the-forward-slash-->",
-                "CHIBIOS_SOURCE_FOLDER": "<!--OPTIONAL-path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "FREERTOS_SOURCE_FOLDER": "<!--OPTIONAL-path-to-FreeRTOS-source-folder-if-supported-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "CHIBIOS_CONTRIB_SOURCE": "<!--OPTIONAL-path-to-local-ChibiOS-contrib-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "CHIBIOS_HAL_SOURCE": "<!--OPTIONAL-path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "STM32_CUBE_PACKAGE_SOURCE": "<!--OPTIONAL-path-to-stm32-cubemx-package-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "MBEDTLS_SOURCE": "<!--OPTIONAL-path-to-mbedtls-source-mind-the-forward-slashes-REMOVE-IF-NOT-REQUIRED-->",
-                "FATFS_SOURCE": "<!--OPTIONAL-path-to-local-FATFS-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "SPIFFS_SOURCE": "<!--OPTIONAL-path-to-local-SPIFFS-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "ESP32_IDF_PATH": "<!--absolute-path-to-the-IDF-folder-mind-the-forward-slashes-REMOVE-IF-NOT-REQUIRED-->",
-                "TI_SL_CC32xx_SDK_SOURCE": "<!--OPTIONAL-path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "TI_SL_CC13xx_26xx_SDK_SOURCE": "<!--OPTIONAL-path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "TI_XDCTOOLS_SOURCE": "<!--OPTIONAL-path-to-local-TI-XDC-Tools-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->",
-                "TI_SYSCONFIG_SOURCE": "<!--OPTIONAL-path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash-REMOVE-IF-NOT-REQUIRED-->"
+                "USER_PRESET_DEFAULT_WARNING_NOTICE": "Update variables and ensure the use of forward slashes `/` in all paths",
+                "TOOL_HEX2DFU_PREFIX": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to hex2dfu utility -->",
+                "TOOL_SRECORD_PREFIX": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to srecord utility -->",
+                "CHIBIOS_SOURCE_FOLDER": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the ChibiOS source -->",
+                "FREERTOS_SOURCE_FOLDER": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the FreeRTOS source -->",
+                "CHIBIOS_CONTRIB_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the ChibiOS-contrib source -->",
+                "CHIBIOS_HAL_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the ChibiOS-HAL source -->",
+                "STM32_CUBE_PACKAGE_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the stm32-cubemx-package source -->",
+                "MBEDTLS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the mbedtls source -->",
+                "FATFS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the FATFS source -->",
+                "SPIFFS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the SPIFFS source -->",
+                "ESP32_IDF_PATH": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) absolute-path-to-the-IDF-folder-REMOVE-IF-NOT-REQUIRED -->",
+                "TI_SL_CC32xx_SDK_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI_SimpleLink-CC32xx-SDK source-->",
+                "TI_SL_CC13xx_26xx_SDK_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI_SimpleLink-CC13xx_26xx-SDK source -->",
+                "TI_XDCTOOLS_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI-XDC-Tools source-->",
+                "TI_SYSCONFIG_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI-SYSCONFIG-Tool source -->"
             }
         },
         {
