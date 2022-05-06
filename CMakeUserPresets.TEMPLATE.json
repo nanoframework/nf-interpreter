@@ -3,7 +3,7 @@
     "configurePresets": [
         {
             "name": "user-local-tools",
-            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null `""` to use build defaults or completely remove if your not building the concerned target.",
+            "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null (empty string) to use build defaults or completely remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
                 "USER_PRESET_DEFAULT_WARNING_NOTICE": "Update variables and ensure the use of forward slashes in all paths",
