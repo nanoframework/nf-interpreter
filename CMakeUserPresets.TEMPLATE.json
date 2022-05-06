@@ -6,7 +6,7 @@
             "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null `""` to use build defaults or completely remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "USER_PRESET_DEFAULT_WARNING_NOTICE": "Update variables and ensure the use of forward slashes `/` in all paths",
+                "USER_PRESET_DEFAULT_WARNING_NOTICE": "Update variables and ensure the use of forward slashes in all paths",
                 "TOOL_HEX2DFU_PREFIX": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to hex2dfu utility -->",
                 "TOOL_SRECORD_PREFIX": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to srecord utility -->",
                 "CHIBIOS_SOURCE_FOLDER": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the ChibiOS source -->",
@@ -17,10 +17,10 @@
                 "MBEDTLS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the mbedtls source -->",
                 "FATFS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the FATFS source -->",
                 "SPIFFS_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the SPIFFS source -->",
-                "ESP32_IDF_PATH": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) absolute-path-to-the-IDF-folder-REMOVE-IF-NOT-REQUIRED -->",
-                "TI_SL_CC32xx_SDK_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI_SimpleLink-CC32xx-SDK source-->",
+                "ESP32_IDF_PATH": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) absolute path to a folder containing the IDF source -->",
+                "TI_SL_CC32xx_SDK_SOURCE": "<!-- (OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI_SimpleLink-CC32xx-SDK source -->",
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI_SimpleLink-CC13xx_26xx-SDK source -->",
-                "TI_XDCTOOLS_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI-XDC-Tools source-->",
+                "TI_XDCTOOLS_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI-XDC-Tools source -->",
                 "TI_SYSCONFIG_SOURCE": "<!--(OPTIONAL: SEE-README-FOR-DETAILS) path to a local folder containing the TI-SYSCONFIG-Tool source -->"
             }
         },
