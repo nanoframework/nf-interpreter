@@ -56,9 +56,11 @@ uint8_t hal_spiffs_config()
         }
         else if (i == 1)
         {
+#if SPIFFS_INSTANCES_COUNT > 1
             spiffs_cfg[1].hal_erase_f = hal_spiffs_erase_1;
             spiffs_cfg[1].hal_read_f = hal_spiffs_read_1;
             spiffs_cfg[1].hal_write_f = hal_spiffs_write_1;
+#endif
         }
 
         mountResult = SPIFFS_mount(
@@ -152,7 +154,7 @@ uint32_t hal_spiffs_get_totalsize(int spiffsIndex)
             return SPIFFS0_TOTAL_SIZE;
             break;
 
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
         case 1:
             return SPIFFS1_TOTAL_SIZE;
             break;
@@ -171,7 +173,7 @@ uint32_t hal_spiffs_get_eraseblocksize(int spiffsIndex)
             return SPIFFS0_ERASE_BLOCK_SIZE;
             break;
 
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
         case 1:
             return SPIFFS1_ERASE_BLOCK_SIZE;
             break;
@@ -190,7 +192,7 @@ uint32_t hal_spiffs_get_logicalblocksize(int spiffsIndex)
             return SPIFFS0_LOGICAL_BLOCK_SIZE;
             break;
 
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
         case 1:
             return SPIFFS0_LOGICAL_BLOCK_SIZE;
             break;
@@ -207,7 +209,7 @@ int32_t hal_spiffs_get_fs_index(spiffs *fsInstance)
     {
         return 0;
     }
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
     if (fsInstance == &fs[1])
     {
         return 1;
@@ -230,7 +232,7 @@ int32_t hal_spiffs_get_instances_count()
     // there is at least one
     int32_t count = 1;
 
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
     count++;
 #endif
 
