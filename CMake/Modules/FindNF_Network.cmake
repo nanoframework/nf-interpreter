@@ -5,6 +5,7 @@
 
 include(FetchContent)
 FetchContent_GetProperties(mbedtls)
+FetchContent_GetProperties(esp32_idf)
 
 # set include directories for nanoFramework network
 list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets)
@@ -16,6 +17,12 @@ list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Net
 if(USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
     list(APPEND NF_Network_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
+endif()
+
+if(RTOS_ESP32_CHECK)
+    list(APPEND NF_Network_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include)
+    list(APPEND NF_Network_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/port/include/mbedtls)
+    list(APPEND NF_Network_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include)
 endif()
 
 if(USE_ENC28J60_DRIVER_OPTION)
@@ -197,8 +204,6 @@ macro(nf_add_lib_network)
 
     # TODO can be removed later
     if(RTOS_ESP32_CHECK)
-        # nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NFALN_TARGET})
-
         # this is the only one different
         target_compile_definitions(
             ${LIB_NAME} PUBLIC
