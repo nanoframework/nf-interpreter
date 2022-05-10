@@ -19,7 +19,6 @@
 #include <win_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI == TRUE)
-#include <win_dev_spi_native_target.h>
 #include <sys_dev_spi_native_target.h>
 #endif
 // #if (HAL_USE_UART == TRUE)

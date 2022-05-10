@@ -9,9 +9,22 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cCo
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
-/////////////////////////////////////////////////////
-// I2C PAL strucs declared in win_dev_i2c_native.h //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////
+// declaration of the the I2C PAL structs //
+////////////////////////////////////////////
+#if (STM32_I2C_USE_I2C1 == TRUE)
+NF_PAL_I2C I2C1_PAL;
+#endif
+#if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
+NF_PAL_I2C I2C2_PAL;
+#endif
+#if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
+NF_PAL_I2C I2C3_PAL;
+#endif
+#if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
+NF_PAL_I2C I2C4_PAL;
+#endif
+
 #if (STM32_I2C_USE_I2C1 == TRUE)
 uint8_t I2C1_DeviceCounter;
 #endif
@@ -25,14 +38,52 @@ uint8_t I2C3_DeviceCounter;
 uint8_t I2C4_DeviceCounter;
 #endif
 
-// need to declare these as external
-// TODO move them here after Windows.Devices.I2c is removed
-extern void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig);
-extern bool IsLongRunningOperation(
+void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig)
+{
+    I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
+
+// set the LL I2C configuration (according to I2C driver version)
+#if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
+
+    llConfig->op_mode = OPMODE_I2C;
+    llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
+    llConfig->duty_cycle = busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2;
+
+#elif defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || defined(STM32L0XX) || defined(STM32L4XX) ||    \
+    defined(STM32H7XX)
+
+    // Standard mode : 100 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
+    // Fast mode : 400 KHz, Rise time 120 ns, Fall time 25 ns, 54MHz clock source
+    // Timing register value calculated by STM32 CubeMx
+    llConfig->timingr = busSpeed == I2cBusSpeed_StandardMode ? 0x80201721 : 0x00B01B59;
+    llConfig->cr1 = 0;
+    llConfig->cr2 = 0;
+
+#else
+#error Your board is unimplemented. Please provide the needed information for the realtime OS as done above!
+#endif
+}
+
+// estimate the time required to perform the I2C transaction
+bool IsLongRunningOperation(
     uint16_t writeSize,
     uint16_t readSize,
     float byteTime,
-    uint32_t &estimatedDurationMiliseconds);
+    uint32_t &estimatedDurationMiliseconds)
+{
+    // add an extra byte to account for the address
+    estimatedDurationMiliseconds = byteTime * (writeSize + readSize + 1);
+
+    if (estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
+    {
+        // total operation time will exceed thread quantum, so this is a long running operation
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 // ThreadX I2C Working thread
 static void I2CWorkingThread_entry(uint32_t arg)

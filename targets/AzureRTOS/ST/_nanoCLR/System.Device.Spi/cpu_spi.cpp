@@ -108,6 +108,11 @@ static void SpiCallback(SPIDriver *spip)
         palSpi->SequentialTxRx = false;
 
         // ... start it
+        if (palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex)
+        {
+            // half duplex operation, clear output enable bit
+            palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
+        }
         spiStartReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
     }
     else
@@ -348,6 +353,18 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 #endif
     }
 
+    // set bus configuration
+    // only required for half duplex mode
+    if (config.BusConfiguration == SpiBusConfiguration_HalfDuplex)
+    {
+#ifdef STM32F4XX
+        llConfig->cr1 |= SPI_CR1_BIDIMODE;
+#endif
+#ifdef STM32F7XX
+        llConfig->cr2 |= SPI_CR1_BIDIMODE;
+#endif
+    }
+
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
 
@@ -393,6 +410,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 {
     NANOCLR_HEADER();
     {
+        bool busConfigIsHalfDuplex;
         NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
         bool sync = (wrc.callback == 0); // If callback then use aync operation
 
@@ -418,9 +436,14 @@ HRESULT CPU_SPI_nWrite_nRead(
         // get the LL SPI configuration, depending on passed parameters and buffer element size
         GetSPIConfig(sdev, wrc, &palSpi->Configuration);
 
+        // set bus config flag
+        busConfigIsHalfDuplex = palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex;
+
         // Clear callback if sync
         if (sync)
+        {
             palSpi->Configuration.data_cb = NULL;
+        }
 
         if (writeBuffer != NULL)
         {
@@ -478,8 +501,19 @@ HRESULT CPU_SPI_nWrite_nRead(
                 else
                 {
                     // send operation
+                    if (busConfigIsHalfDuplex)
+                    {
+                        // half duplex operation, set output enable
+                        palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
+                    }
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
+
                     // receive operation
+                    if (busConfigIsHalfDuplex)
+                    {
+                        // half duplex operation, set output enable
+                        palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
+                    }
                     spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
             }
@@ -488,12 +522,24 @@ HRESULT CPU_SPI_nWrite_nRead(
                 // Transmit only or Receive only
                 if (palSpi->ReadSize != 0)
                 {
-                    // receive
+                     // receive
+                    if (busConfigIsHalfDuplex)
+                    {
+                        // half duplex operation, set output enable
+                        palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
+                    }
+
                     spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
                 else
                 {
                     // send
+                    if (busConfigIsHalfDuplex)
+                    {
+                        // half duplex operation, set output enable
+                        palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
+                    }
+
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
                 }
             }
@@ -530,6 +576,12 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = true;
 
                     // start send operation
+                    if (busConfigIsHalfDuplex)
+                    {
+                        // half duplex operation, set output enable
+                        palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
+                    }
+
                     spiStartSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
                     // receive operation will be started in the callback after the above completes
                 }
@@ -590,7 +642,7 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
     return os;
 }
 
-bool CPU_SPI_Initialize(uint8_t busIndex)
+bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
 {
     // init the PAL struct for this SPI bus and assign the respective driver
     // all this occurs if not already done
@@ -601,7 +653,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 1:
             if (SPI1_PAL.Driver == NULL)
             {
-                ConfigPins_SPI1();
+                ConfigPins_SPI1(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI1_PAL.Driver = &SPID1;
             }
             break;
@@ -610,7 +662,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 2:
             if (SPI2_PAL.Driver == NULL)
             {
-                ConfigPins_SPI2();
+                ConfigPins_SPI2(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI2_PAL.Driver = &SPID2;
             }
             break;
@@ -619,7 +671,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 3:
             if (SPI3_PAL.Driver == NULL)
             {
-                ConfigPins_SPI3();
+                ConfigPins_SPI3(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI3_PAL.Driver = &SPID3;
             }
             break;
@@ -628,7 +680,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 4:
             if (SPI4_PAL.Driver == NULL)
             {
-                ConfigPins_SPI4();
+                ConfigPins_SPI4(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI4_PAL.Driver = &SPID4;
             }
             break;
@@ -637,7 +689,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 5:
             if (SPI5_PAL.Driver == NULL)
             {
-                ConfigPins_SPI5();
+                ConfigPins_SPI5(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI5_PAL.Driver = &SPID5;
             }
             break;
@@ -646,7 +698,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex)
         case 6:
             if (SPI6_PAL.Driver == NULL)
             {
-                ConfigPins_SPI6();
+                ConfigPins_SPI6(busConfiguration == SpiBusConfiguration_HalfDuplex);
                 SPI6_PAL.Driver = &SPID6;
             }
             break;
@@ -748,9 +800,17 @@ uint32_t CPU_SPI_PortsMap()
 
 // Add a device to SPi Bus (Optional)
 // Returns a device handle.  Returns 0 if error
-uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint32_t &handle)
 {
-    return (uint32_t)GetNfPalfromBusIndex(spiDeviceConfig.Spi_Bus);
+    // check supported bus configuration: all valid except simplex
+    if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_Simplex)
+    {
+        return CLR_E_NOT_SUPPORTED;
+    }
+
+    handle = (uint32_t)GetNfPalfromBusIndex(spiDeviceConfig.Spi_Bus);
+
+    return S_OK;
 }
 
 // Return pins used for SPI bus
@@ -773,7 +833,7 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 
     // Max prescaler value = 256
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
+    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
 
     return S_OK;
 }
@@ -788,7 +848,7 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
     // According to STM : "At a minimum, the clock frequency should be twice the required communication frequency."
     // So maximum useable frequency is CoreClock / 2.
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spi_bus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
+    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
 
     return S_OK;
 }

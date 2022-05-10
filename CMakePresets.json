@@ -260,6 +260,7 @@
                 "API_System.Device.Adc": "OFF",
                 "API_System.Device.Dac": "OFF",
                 "API_System.Net": "ON",
+                "API_System.Device.Wifi": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "API_nanoFramework.Devices.Can": "OFF",
                 "API_nanoFramework.ResourceManager": "ON",
