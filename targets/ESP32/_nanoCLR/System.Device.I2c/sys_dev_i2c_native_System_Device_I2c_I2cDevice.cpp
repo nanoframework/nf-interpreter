@@ -17,10 +17,41 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 
 static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {0, 0};
 
-// need to declare these as external
-// TODO move them here after Windows.Devices.I2c is removed
-extern void Esp32_I2c_UnitializeAll();
-extern bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config);
+void Esp32_I2c_UnitializeAll()
+{
+    for (int c = 0; c < I2C_NUM_MAX; c++)
+    {
+        if (Esp_I2C_Initialised_Flag[c])
+        {
+            // Delete bus driver
+            i2c_driver_delete((i2c_port_t)c);
+            Esp_I2C_Initialised_Flag[c] = 0;
+        }
+    }
+}
+
+bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
+{
+    int busSpeed = config[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
+
+    gpio_num_t DataPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 0);
+    gpio_num_t ClockPin = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2C, bus, 1);
+
+    i2c_config_t conf;
+    conf.mode = I2C_MODE_MASTER;
+    conf.sda_io_num = DataPin;
+    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.scl_io_num = ClockPin;
+    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.master.clk_speed = (busSpeed == 0) ? 100000 : 400000;
+    conf.clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
+
+    esp_err_t err = i2c_param_config(bus, &conf);
+
+    ASSERT(err == ESP_OK);
+
+    return (err == ESP_OK);
+}
 
 HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {

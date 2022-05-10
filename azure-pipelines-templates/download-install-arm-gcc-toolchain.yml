@@ -27,5 +27,10 @@ steps:
       archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
 
-  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded\bin"
+    displayName: Add GCC to PATH
+
+  - script: |
+      echo "##vso[task.prependpath]c:\windows\System32"
+      echo "##vso[task.prependpath]c:\windows\SysWoW64"
     displayName: Tweak PATH to reach cmd

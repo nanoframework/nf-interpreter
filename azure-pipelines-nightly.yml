@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4
+      ref: refs/tags/v4.4.1
     
 # scheduled build
 schedules:
@@ -247,55 +247,14 @@ jobs:
       ORGPAL_PALTHREE:
         TargetBoard: ORGPAL_PALTHREE
         TargetSeries: 'stm32f7xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32F7xx
-          -DRTOS=ChibiOS
-          -DCHIBIOS_CONTRIB_REQUIRED=ON
-          -DSTM32_CUBE_PACKAGE_REQUIRED=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_USB_MSD=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DNF_FEATURE_USE_SPIFFS=ON
-          -DAPI_System.Math=ON
-          -DAPI_Hardware.Stm32=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_System.Net=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-
+        BuildOptions: 
         GccArm_Version:
         NeedsDFU: true
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32F0xx
-          -DRTOS=ChibiOS
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DUSE_RNG=OFF
-          -DNF_PLATFORM_NO_CLR_TRACE=ON
-          -DNF_CLR_NO_IL_INLINE=ON
-          -DAPI_Hardware.Stm32=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_nanoFramework.System.Text=ON
-
+        BuildOptions: 
         GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
@@ -304,7 +263,6 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
 
@@ -347,34 +305,7 @@ jobs:
       ESP32_REV0:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
+        BuildOptions: 
         SDK_config: sdkconfig.default_nopsram.esp32
         IDF_Target: esp32
         TargetName: ESP32
@@ -383,35 +314,7 @@ jobs:
       ESP32_PSRAM_REV3:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_rev3.esp32
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV3
@@ -419,36 +322,7 @@ jobs:
       ESP32_PSRAM_XTAL26_REV0:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DESP32_XTAL_FREQ_26=ON
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default.esp32
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_XTAL26_REV0
@@ -456,35 +330,7 @@ jobs:
       ESP32_REV3:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_nopsram_rev3.esp32
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_REV3
@@ -492,34 +338,7 @@ jobs:
       ESP32_PICO:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_Windows.Storage=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico
+        BuildOptions:
         IDF_Target: esp32
         TargetName: ESP32_PICO
         PackageName: ESP32_PICO
@@ -527,37 +346,7 @@ jobs:
       KALUGA_1:
         TargetBoard: ESP32_S2
         TargetSeries: 'esp32_s2'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32_S2
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-        ToolchainFile: toolchain.xtensa-esp32s2-elf.cmake
-        SDK_config: sdkconfig.default.esp32s2
+        BuildOptions: 
         IDF_Target: esp32s2
         TargetName: KALUGA_1
         PackageName: KALUGA_1
@@ -565,41 +354,7 @@ jobs:
       ESP32_BLE_REV3:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON
-          -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON
-          -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON
-          -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON
-          -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.Device.OneWire=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Device.Bluetooth=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_ble_rev3.esp32
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_BLE_REV3
@@ -607,37 +362,7 @@ jobs:
       ESP32_OLIMEX:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_System.Device.Dac=ON
-          -DESP32_ETHERNET_SUPPORT=ON
-          -DETH_PHY_RST_GPIO=12
-          -DETH_RMII_CLK_OUT_GPIO=17
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: 
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: ESP32_OLIMEX
         PackageName: ESP32_OLIMEX
@@ -646,40 +371,7 @@ jobs:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ST7735S_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico 
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: M5StickC
         PackageName: M5StickC
@@ -688,40 +380,7 @@ jobs:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DTARGET_SERIAL_BAUDRATE=115200
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ST7789V_240x320_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_pico 
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: M5StickCPlus
         PackageName: M5StickCPlus
@@ -730,39 +389,7 @@ jobs:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9342_320x240_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_nopsram.esp32 
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: M5Core
         PackageName: M5Core
@@ -771,40 +398,7 @@ jobs:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
-        BuildOptions: >-
-          -DTARGET_SERIES=ESP32
-          -DRTOS=ESP32
-          -DNF_TARGET_HAS_NANOBOOTER=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DNF_SECURITY_MBEDTLS=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_HAS_SDCARD=ON
-          -DAPI_System.IO.FileSystem=ON
-          -DAPI_System.Math=ON
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON
-          -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON
-          -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
-          -DAPI_System.Net=ON
-          -DAPI_System.Device.WiFi=ON
-          -DAPI_Hardware.Esp32=ON
-          -DAPI_nanoFramework.ResourceManager=ON
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-          -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON
-          -DAPI_nanoFramework.Graphics=ON
-          -DGRAPHICS_DISPLAY="ILI9342_320x240_SPI.cpp"
-          -DTOUCHPANEL_DEVICE="XPT2046.cpp"
-          -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp"
-          -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp"
-          -DAPI_System.Device.Dac=ON
-          -DAPI_nanoFramework.Device.Bluetooth=ON
-        ToolchainFile: toolchain.xtensa-esp32-elf.cmake
-        SDK_config: sdkconfig.default_ble_rev3.esp32
+        BuildOptions: 
         IDF_Target: esp32
         TargetName: M5Core2
         PackageName: M5Core2
@@ -883,12 +477,12 @@ jobs:
           -DNF_FEATURE_DEBUGGER=ON
           -DNF_FEATURE_RTC=ON
           -DNF_FEATURE_WATCHDOG=OFF
-          -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON
-          -DAPI_Windows.Devices.Spi=OFF
-          -DAPI_Windows.Devices.I2c=OFF
-          -DAPI_Windows.Devices.Pwm=OFF
-          -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF
-          -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Adc=ON
+          -DAPI_System.Device.Gpio=ON
+          -DAPI_System.Device.Spi=OFF
+          -DAPI_System.Device.I2c=OFF
+          -DAPI_System.Device.Pwm=OFF
+          -DAPI_System.IO.Ports=OFF
+          -DAPI_System.Device.Adc=ON
           -DAPI_nanoFramework.TI.EasyLink=ON
           -DAPI_nanoFramework.Hardware.TI=ON
           -DAPI_nanoFramework.System.Text=ON
@@ -898,7 +492,6 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
 

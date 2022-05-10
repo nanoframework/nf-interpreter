@@ -25,9 +25,11 @@ nanoSPI_BusConfig spiconfig[NUM_SPI_BUSES];
 
 // Define weak functions for some optional PAL functions
 // so low level implementations don't require them.
-__nfweak bool CPU_SPI_Initialize(uint8_t bus)
+__nfweak bool CPU_SPI_Initialize(uint8_t bus, SpiBusConfiguration spiConfiguration)
 {
     (void)bus;
+    (void)spiConfiguration;
+
     return true;
 }
 __nfweak bool CPU_SPI_Uninitialize(uint8_t bus)
@@ -43,10 +45,12 @@ __nfweak SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
     return SPI_OP_STATUS::SPI_OP_COMPLETE;
 }
 
-__nfweak uint32_t CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+__nfweak HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint32_t &handle)
 {
     (void)spiDeviceConfig;
-    return 1;
+    handle = 1;
+
+    return S_OK;
 }
 
 __nfweak bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
@@ -182,7 +186,9 @@ HRESULT nanoSPI_ReserveBusPins(int spiBus, bool reserve)
             if (pins[0] != GPIO_PIN_NONE)
             {
                 if (CPU_GPIO_PinIsBusy(pins[i]))
+                {
                     return CLR_E_INVALID_PARAMETER;
+                }
             }
         }
     }
@@ -193,7 +199,9 @@ HRESULT nanoSPI_ReserveBusPins(int spiBus, bool reserve)
         if (pins[i] != GPIO_PIN_NONE)
         {
             if (CPU_GPIO_ReservePin(pins[i], reserve) == false)
+            {
                 return CLR_E_INVALID_PARAMETER;
+            }
         }
     }
 
@@ -215,50 +223,97 @@ HRESULT nanoSPI_OpenDeviceEx(
     (void)altMosi;
 
     int deviceIndex;
-    int32_t deviceHandle;
+    uint32_t deviceHandle;
+    HRESULT hr;
 
     // spiBus 0 to (number of buses - 1)
     uint8_t spiBusIndex = (uint8_t)spiDeviceConfig.Spi_Bus - 1;
+
     if (spiBusIndex >= NUM_SPI_BUSES)
+    {
         return CLR_E_INVALID_PARAMETER;
+    }
 
     // Validate Bus available
     if (!(CPU_SPI_PortsMap() & (1 << spiBusIndex)))
+    {
         return CLR_E_INVALID_PARAMETER;
+    }
 
     // Check not maximum devices per SPI bus reached
     if (spiconfig[spiBusIndex].devicesInUse >= MAX_SPI_DEVICES)
+    {
         return CLR_E_INDEX_OUT_OF_RANGE;
+    }
 
     // Initialise Bus if not already initialised
     if (!spiconfig[spiBusIndex].spiBusInited)
     {
-        if (!CPU_SPI_Initialize(spiBusIndex))
+        if (!CPU_SPI_Initialize(spiBusIndex, spiDeviceConfig.BusConfiguration))
+        {
             return CLR_E_INVALID_PARAMETER;
+        }
 
         // Reserve pins used by SPI bus
-        HRESULT hr = nanoSPI_ReserveBusPins(spiBusIndex, true);
+        hr = nanoSPI_ReserveBusPins(spiBusIndex, true);
+
         if (hr != S_OK)
+        {
             return hr;
+        }
 
         spiconfig[spiBusIndex].spiBusInited = true;
     }
 
     // Find if device slot is available and check
     deviceIndex = FindFreeDeviceSlotSpi(spiBusIndex, spiDeviceConfig.DeviceChipSelect);
+
     if (deviceIndex < 0)
     {
         if (deviceIndex == -1)
+        {
             // No device slots left
             return CLR_E_INDEX_OUT_OF_RANGE;
+        }
         else
+        {
             // Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
             // currently raised in managed code
             return CLR_E_NOT_SUPPORTED;
+        }
     }
 
     // Add device and get handle
-    deviceHandle = CPU_SPI_Add_Device(spiDeviceConfig);
+    hr = CPU_SPI_Add_Device(spiDeviceConfig, deviceHandle);
+
+    if (hr != S_OK)
+    {
+        spiconfig[spiBusIndex].deviceHandles[deviceIndex] = 0;
+        spiconfig[spiBusIndex].devicesInUse--;
+
+        // Unreserve CS pin
+        CPU_GPIO_ReservePin(spiconfig[spiBusIndex].deviceCongfig->DeviceChipSelect, false);
+
+        // Last device on bus then close bus and also remove bus pin reserves
+        if (spiconfig[spiBusIndex].devicesInUse <= 0)
+        {
+            // Uninitialise bus and reset init flag
+            CPU_SPI_Uninitialize(spiBusIndex);
+            spiconfig[spiBusIndex].spiBusInited = false;
+
+            // Unreserve bus pins
+            nanoSPI_ReserveBusPins(spiBusIndex, false);
+        }
+
+        // free SPI device, if we ever got a valid handle
+        if (deviceHandle != 0)
+        {
+            CPU_SPI_Remove_Device(deviceHandle);
+        }
+
+        return hr;
+    }
+
     if (deviceHandle != 0)
     {
         // Reserve chip select pin
@@ -266,6 +321,7 @@ HRESULT nanoSPI_OpenDeviceEx(
         {
             // Failed to reserve CS pin
             CPU_SPI_Remove_Device(deviceHandle);
+
             return CLR_E_FAIL;
         }
     }
@@ -299,7 +355,9 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle)
     int deviceIndex;
 
     if (!getDevice(handle, spiBus, deviceIndex))
+    {
         return CLR_E_INVALID_PARAMETER;
+    }
 
     // Remove device from bus (ignore any error )
     CPU_SPI_Remove_Device(spiconfig[spiBus].deviceHandles[deviceIndex]);

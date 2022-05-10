@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches:
-      - develop
+      - main
     paths:
       - '**Dockerfile.ESP32'
     
