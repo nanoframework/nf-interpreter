@@ -84,15 +84,12 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x)                                                                                   \
-    (ExtractTransport(x) == USART_TRANSPORT                                                                            \
-         ? SYSTEM_EVENT_FLAG_COM_IN                                                                                    \
-         : ExtractTransport(x) == SOCKET_TRANSPORT                                                                     \
-               ? SYSTEM_EVENT_FLAG_SOCKET                                                                              \
-               : ExtractTransport(x) == GENERIC_TRANSPORT                                                              \
-                     ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                                                  \
-                     : ExtractTransport(x) == DEBUG_TRANSPORT                                                          \
-                           ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                                       \
-                           : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY : 0)
+    (ExtractTransport(x) == USART_TRANSPORT       ? SYSTEM_EVENT_FLAG_COM_IN                                           \
+     : ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET                                           \
+     : ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                     \
+     : ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                \
+     : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY                               \
+                                                  : 0)
 
 #define USART_TRANSPORT (1 << TRANSPORT_SHIFT)
 //#define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
@@ -782,7 +779,7 @@ template <typename T> class HAL_RingBuffer
                 platform_free(tempBuffer);
             }
         }
-        
+
         // adjust indexes
         _read_index = 0;
         _write_index = _size;
