@@ -10,6 +10,7 @@
 
 #ifdef PLATFORM_ESP32
 #include <esp32_idf.h>
+#include <mbedtls/esp_config.h>
 #else
 #include "nf_mbedtls_config.h"
 #endif

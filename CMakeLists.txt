@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -76,24 +76,6 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/${RTOS})
     set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
 else()
     message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
-endif()
-
-#######################
-
-# check for toolchain path (this is required for Windows builds and we are only building on Windows)
-if(NOT RTOS_ESP32_CHECK AND NOT DEFINED TOOLCHAIN_PREFIX)
-        message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
-        message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-        message(STATUS "########################################\n\n")
-        message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
-endif()
-
-# Set up short path substitution on Windows
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-    if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-        set(ENV{nfRoot} ${NFROOT})
-    endif()
 endif()
 
 #########################################
@@ -448,7 +430,7 @@ endif()
 option(USE_NETWORKING_OPTION "option to use networking")
 
 # (default is OFF so mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
+option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider" ON)
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
@@ -512,7 +494,6 @@ endif()
 # and/or manage other APIs that are required
 
 if( API_nanoFramework.Device.OneWire OR
-    API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports)
 
     set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
@@ -548,10 +529,10 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Adc)
-    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+if(API_System.Device.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 else()
-    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 endif()
 
 
@@ -569,16 +550,6 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Gpio)
-    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-else()
-    # temporary check for option already set by API_System.Device.Gpio
-    if(NOT HAL_USE_GPIO_OPTION)
-        set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-    endif()        
-endif()
-
-
 if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
@@ -586,31 +557,19 @@ else()
 endif()
 
 
-if(API_Windows.Devices.I2c)
-    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+if(API_System.Device.Pwm)
+    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
-    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for System.DevicesPwm")
 endif()
 
-
-if(API_Windows.Devices.Pwm)
-    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()
-    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-endif()
 
 if(API_System.Device.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
 else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
 endif()
+
 
 if(API_nanoFramework.Devices.Can)
     set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
@@ -654,8 +613,6 @@ endif()
 if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
-    API_Windows.Devices.Gpio OR
-    API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports OR
     API_nanoFramework.Devices.Can OR
     API_Windows.Storage OR

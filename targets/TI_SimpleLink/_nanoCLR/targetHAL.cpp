@@ -15,11 +15,11 @@
 
 #if (HAL_USE_I2C_OPTION == TRUE)
 #include <ti/drivers/I2C.h>
-#include <win_dev_i2c_native_target.h>
+#include <sys_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI_OPTION == TRUE)
 #include <ti/drivers/SPI.h>
-#include <win_dev_spi_native_target.h>
+#include <sys_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_SPI == ON)
 #include <easylink/EasyLink.h>

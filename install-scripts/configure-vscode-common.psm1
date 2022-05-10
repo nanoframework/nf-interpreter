@@ -35,11 +35,6 @@ function Update-Paths {
     # replace patterns in the file content
     # to be safe, make sure to replace the paths with the forward slashes
 
-    if($env:GNU_GCC_TOOLCHAIN_PATH)
-    {
-        $content = $content -replace $toolchainPattern, $env:GNU_GCC_TOOLCHAIN_PATH.Replace('\', '/')
-    }
-
     if($env:OPENOCD_PATH)
     {
         $content = $content -replace $openOcdPattern, $env:OPENOCD_PATH.Replace('\', '/')

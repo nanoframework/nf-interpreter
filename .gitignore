@@ -66,3 +66,6 @@ CMake/Modules/FindINTEROP*.cmake
 
 # ESP32 sdkconfig file
 sdkconfig
+
+# CMake user presets
+CMakeUserPresets.json

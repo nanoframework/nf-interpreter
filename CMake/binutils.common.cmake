@@ -575,14 +575,8 @@ macro(nf_setup_target_build_common)
             ${TARGET_BASE_LOCATION}/nanoCLR
             ${TARGET_BASE_LOCATION}
         )
-
-        # target_sources(mbedcrypto PUBLIC ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/ssl_generic.cpp)
-        # target_sources(mbedcrypto PRIVATE  ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/mbed_network.c)
-       
-        if(NOT RTOS_ESP32_CHECK)
-            # platform implementation of hardware random provider
-            target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
-        endif()
+        # platform implementation of hardware random provider
+        target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
 
         nf_set_compile_options(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_options(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})

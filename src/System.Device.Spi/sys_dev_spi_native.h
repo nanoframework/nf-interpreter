@@ -17,8 +17,15 @@ typedef enum __nfpack DataFlow
     DataFlow_LsbFirst = 1,
 } DataFlow;
 
-// TODO: as this is already existing in Windows.Devices.Spi, this should be uncommented
-// once it will be fully removed.
+// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
+// typedef enum __nfpack SpiBusConfiguration
+// {
+//     SpiBusConfiguration_FullDuplex = 0,
+//     SpiBusConfiguration_HalfDuplex = 1,
+//     SpiBusConfiguration_Simplex = 2,
+// } SpiBusConfiguration;
+
+// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
 // typedef enum __nfpack SpiMode
 // {
 //     SpiMode_Mode0 = 0,
@@ -47,6 +54,7 @@ struct Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings
     static const int FIELD___dataFlow = 6;
     static const int FIELD___busId = 7;
     static const int FIELD___chipSelectLineActiveState = 8;
+    static const int FIELD___busConfiguration = 9;
 
     //--//
 };

@@ -438,10 +438,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
     void *dummyPtr;
     SOCK_sockaddr_in *sa = NULL;
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-    struct addrinfo *lwipAddrinfo = NULL;
+    struct addrinfo *lwipAddrinfo = {0};
 
     if (res == NULL)
+    {
         return SOCK_SOCKET_ERROR;
+    }
 
     *res = NULL;
 
@@ -454,10 +456,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
             return -1;
 
         ai = (SOCK_addrinfo *)mem_malloc(total_size);
+
         if (ai == NULL)
         {
             return -1;
         }
+
         memset(ai, 0, total_size);
         sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
 
@@ -473,6 +477,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
 
         /* set up addrinfo */
         ai->ai_family = AF_INET;
+
         if (hints != NULL)
         {
             /* copy socktype & protocol from hints if specified */
@@ -502,11 +507,13 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
         struct sockaddr_in *lwip_sockaddr_in;
 
         ai = (SOCK_addrinfo *)mem_malloc(total_size);
+
         if (ai == NULL)
         {
             lwip_freeaddrinfo(lwipAddrinfo);
             return -1;
         }
+
         memset(ai, 0, total_size);
 
         lwip_sockaddr_in = ((struct sockaddr_in *)lwipAddrinfo->ai_addr);
@@ -519,6 +526,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
 
         /* set up addrinfo */
         ai->ai_family = lwipAddrinfo->ai_family;
+
         if (hints != NULL)
         {
             /* copy socktype & protocol from hints if specified */
@@ -542,7 +550,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
     }
     else
     {
-        // map DNS error with socket errors
+        // map DNS error with socket errors (as much as possible)
         switch (err)
         {
             case HOST_NOT_FOUND:

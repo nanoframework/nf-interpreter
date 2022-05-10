@@ -550,7 +550,7 @@ typedef enum __nfpack NetworkChange_NetworkEventType
 } NetworkChange_NetworkEventType;
 
 //////////////////////////////////////////////////////////////////
-// moved here from src\System.Device.WiFi\sys_dev_wifi_native.h //
+// moved here from src\System.Device.Wifi\sys_dev_wifi_native.h //
 //////////////////////////////////////////////////////////////////
 typedef enum __nfpack WiFiEventType
 {

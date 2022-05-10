@@ -390,7 +390,7 @@ int flash_lld_erase(uint32_t address)
 #endif
 
         // wait 2000ms for any flash operation to be completed
-        success = FLASH_WaitForLastOperation(2000) == HAL_OK;
+        success = FLASH_WaitForLastOperation(2000);
 
         // after erase operation completed disable the SER and SNB Bits
         CLEAR_BIT(FLASH->CR, (FLASH_CR_SER | FLASH_CR_SNB));

@@ -18,14 +18,12 @@
 #include <nf_devices_can_native_target.h>
 #endif
 #if (HAL_USE_I2C == TRUE)
-#include <win_dev_i2c_native_target.h>
+#include <sys_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI == TRUE)
-#include <win_dev_spi_native_target.h>
 #include <sys_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_UART == TRUE)
-#include <win_dev_serial_native_target.h>
 #include <sys_io_ser_native_target.h>
 #endif
 
@@ -115,35 +113,27 @@ void nanoHAL_Initialize()
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
     Uart1_PAL.UartDriver = NULL;
-    Uart1_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
     Uart2_PAL.UartDriver = NULL;
-    Uart2_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
     Uart3_PAL.UartDriver = NULL;
-    Uart3_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
     Uart4_PAL.UartDriver = NULL;
-    Uart4_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
     Uart5_PAL.UartDriver = NULL;
-    Uart5_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
     Uart6_PAL.UartDriver = NULL;
-    Uart6_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
     Uart7_PAL.UartDriver = NULL;
-    Uart7_PAL__.UartDriver = NULL;
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
     Uart8_PAL.UartDriver = NULL;
-    Uart8_PAL__.UartDriver = NULL;
 #endif
 
 #endif

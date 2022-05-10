@@ -15,11 +15,41 @@ nf_set_stm32_target_series()
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT ${RTOS_SOURCE_FOLDER} STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+########################################################
+# check availability of hex2dfu tool if specified
+if(DEFINED TOOL_HEX2DFU_PREFIX)
+    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
+        message(STATUS "")
+        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
+        message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
+        message(STATUS "")
+        message(FATAL_ERROR "hex2dfu tool not found")
+    else()
+        set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+    endif()
+endif()
+
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
+# check if CHIBIOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_SOURCE_FOLDER TRUE)
+if(CHIBIOS_SOURCE_FOLDER)
+    if(NOT ${CHIBIOS_SOURCE_FOLDER} STREQUAL "")
+        set(NO_CHIBIOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -49,7 +79,7 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_CHIBIOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
@@ -63,10 +93,10 @@ else()
     # ChibiOS source was specified
 
 
-    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
     FetchContent_Declare(
         chibios
-        SOURCE_DIR ${RTOS_SOURCE_FOLDER}
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
     )
 
 
@@ -180,7 +210,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 endif()
 
 # if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
 
     # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_MBEDTLS_SOURCE TRUE)
