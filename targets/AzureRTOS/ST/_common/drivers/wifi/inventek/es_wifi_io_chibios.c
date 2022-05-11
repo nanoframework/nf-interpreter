@@ -132,13 +132,22 @@ int8_t SPI_WIFI_DeInit(void)
 // @param  timeout : timeout to wait for the signal to be asserted in mS
 int wait_cmddata_rdy_high(int timeout)
 {
-    int tickstart = HAL_GetTick();
+    int ticksToEnd = HAL_GetTick() + timeout;
+    int currentTicks;
 
     while (WIFI_IS_CMDDATA_READY() == 0)
     {
-        if (((int)HAL_GetTick() - tickstart) > timeout)
+        currentTicks = (int)HAL_GetTick();
+
+        if (currentTicks > ticksToEnd)
         {
             return ES_WIFI_STATUS_ERROR;
+        }
+
+        if (currentTicks % 1000)
+        {
+            // pass control to the OS every second
+            tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
         }
     }
 
@@ -154,19 +163,29 @@ int wait_cmddata_rdy_rising_event(int timeout)
     return SEM_WAIT(cmddata_rdy_rising_sem, timeout);
 #else
 
-    int tickstart = HAL_GetTick();
+    int ticksToEnd = HAL_GetTick() + timeout;
+    int currentTicks;
 
     while (cmddata_rdy_rising_event == 1 && !WIFI_IS_CMDDATA_READY())
     {
-        if (((int)HAL_GetTick() - tickstart) > timeout)
+        currentTicks = (int)HAL_GetTick();
+
+        if (currentTicks > ticksToEnd)
         {
             return -1;
+        }
+
+        if (currentTicks % 1000)
+        {
+            // pass control to the OS every second
+            tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
         }
     }
 
     cmddata_rdy_rising_event = 0;
 
     return 0;
+
 #endif
 }
 
@@ -176,7 +195,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
     uint8_t tmp[2];
 
     spiUnselect(spiDriver);
-    
+
     SPI_WIFI_DelayUs(3);
 
     if (wait_cmddata_rdy_rising_event(timeout) < 0)
@@ -184,7 +203,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
         return ES_WIFI_ERROR_WAITING_DRDY_FALLING;
     }
 
-    //spiAcquireBus(spiDriver);
+    // spiAcquireBus(spiDriver);
 
     spiSelect(spiDriver);
     SPI_WIFI_DelayUs(15);
@@ -198,7 +217,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
             if (spiReceive(spiDriver, 1, &tmp[0]) != HAL_RET_SUCCESS)
             {
                 spiUnselect(spiDriver);
-                //spiReleaseBus(spiDriver);
+                // spiReleaseBus(spiDriver);
 
                 return ES_WIFI_ERROR_SPI_FAILED;
             }
@@ -211,7 +230,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
             {
                 spiUnselect(spiDriver);
                 SPI_WIFI_ResetModule();
-                //spiReleaseBus(spiDriver);
+                // spiReleaseBus(spiDriver);
 
                 return ES_WIFI_ERROR_STUFFING_FOREVER;
             }
@@ -224,7 +243,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
     spiUnselect(spiDriver);
 
-    //spiReleaseBus(spiDriver);
+    // spiReleaseBus(spiDriver);
 
     return length;
 }
@@ -236,21 +255,21 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 // @retval Length of sent data
 int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
 {
-    //uint8_t waitResult = TX_WAIT_ERROR;
-    //uint32_t dummy;
+    // uint8_t waitResult = TX_WAIT_ERROR;
+    // uint32_t dummy;
 
-        if (wait_cmddata_rdy_high(timeout) < 0)
-        {
-            return ES_WIFI_ERROR_SPI_FAILED;
-        }
+    if (wait_cmddata_rdy_high(timeout) < 0)
+    {
+        return ES_WIFI_ERROR_SPI_FAILED;
+    }
 
-        // arm to detect rising event
-        cmddata_rdy_rising_event = 1;
-        //spiAcquireBus(spiDriver);
+    // arm to detect rising event
+    cmddata_rdy_rising_event = 1;
+    // spiAcquireBus(spiDriver);
 
-        spiSelect(spiDriver);
+    spiSelect(spiDriver);
 
-        SPI_WIFI_DelayUs(15);
+    SPI_WIFI_DelayUs(15);
 
     if (len > 1)
     {

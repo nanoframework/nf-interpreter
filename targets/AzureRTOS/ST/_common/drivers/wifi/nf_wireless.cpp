@@ -13,7 +13,6 @@ TX_MUTEX WiFiMutex;
 TX_THREAD wifiConnectThread;
 uint32_t wifiConnectThreadStack[WIFI_CONNECT_THREAD_STACK_SIZE / sizeof(uint32_t)];
 
-
 // flag to store if Wi-Fi has been initialized
 static bool NF_WirelessInitialized = false;
 
@@ -56,7 +55,7 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                 }
                 else
                 {
-                    // connect succesfull
+                    // connect successful
                     // fire notification event
                     NF_ConnectResult = 1;
                     NF_ConnectInProgress = false;
@@ -70,6 +69,9 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                         0);
                 }
             }
+
+            // pass control to the OS
+            tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
         }
     }
 
@@ -97,7 +99,7 @@ uint8_t NF_Wireless_InitaliseWifi()
     }
 
     // create mutex for WiFi API
-    if(tx_mutex_create(&WiFiMutex, NULL, TX_NO_INHERIT) != TX_SUCCESS)
+    if (tx_mutex_create(&WiFiMutex, NULL, TX_NO_INHERIT) != TX_SUCCESS)
     {
         return TX_START_ERROR;
     }
