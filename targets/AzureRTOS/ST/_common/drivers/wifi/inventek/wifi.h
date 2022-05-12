@@ -120,7 +120,7 @@ typedef struct {
 /* Exported macro ------------------------------------------------------------*/
 
 // Define the macro for building IPv4 addresses. 
-#define IP_ADDRESS(a, b, c, d)                     ((((uint32_t)a) << 24) | (((uint32_t)b) << 16) | (((uint32_t)c) << 8) | ((uint32_t)d))
+//#define IP_ADDRESS(a, b, c, d)                     ((((uint32_t)a) << 24) | (((uint32_t)b) << 16) | (((uint32_t)c) << 8) | ((uint32_t)d))
 
 /* Exported functions ------------------------------------------------------- */
 WIFI_Status_t       WIFI_Init(void);
@@ -147,7 +147,7 @@ WIFI_Status_t       WIFI_ConfigureAP(
 WIFI_Status_t       WIFI_HandleAPEvents(WIFI_APSettings_t *setting);
 WIFI_Status_t       WIFI_Ping(uint8_t *ipaddr, uint16_t count, uint16_t interval_ms,int32_t result[]);
 WIFI_Status_t       WIFI_GetHostAddress(const char *location, uint8_t *ipaddr);
-WIFI_Status_t       WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protocol, uint8_t requestSecured, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port);
+WIFI_Status_t       WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protocol, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port);
 WIFI_Status_t       WIFI_CloseClientConnection(uint32_t socket);
 
 WIFI_Status_t       WIFI_StartServer(uint32_t socket, WIFI_Protocol_t type, uint16_t backlog, const char *name, uint16_t port);

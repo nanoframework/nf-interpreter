@@ -43,6 +43,9 @@ NX_DHCP DhcpInstance;
 
 uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 {
+
+#error "MOVE & MERGE THIS with targets\AzureRTOS\ST\_common\drivers\wifi\nf_netxduo.c"
+
     // store MAC address
     //MacAddress = networkConfig->MacAddress;
     MACConfig mac_config = {networkConfig->MacAddress};

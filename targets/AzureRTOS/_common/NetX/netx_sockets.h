@@ -16,6 +16,13 @@
 
 #define NATIVE_PROFILE_PAL_NETWORK()
 
+extern "C"
+{
+    extern NX_IP IpInstance;
+    extern NX_DNS DnsInstance;
+    extern NX_DHCP DhcpInstance;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // SOCKET driver
 //

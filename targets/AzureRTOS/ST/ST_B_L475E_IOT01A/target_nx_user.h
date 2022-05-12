@@ -713,6 +713,12 @@
    NX_ENABLE_INTERFACE_CAPABILITY must be defined to enable this feature.  */
 #define NX_ENABLE_TCPIP_OFFLOAD
 
+// #define NX_SECURE_ENABLE
+#define NX_SNTP_CLIENT_MIN_SERVER_STRATUM 3
+
+#define NX_DNS_CLIENT_USER_CREATE_PACKET_POOL
+#define NX_DNS_CLIENT_CLEAR_QUEUE
+
 #define NX_BSD_ENABLE_DNS
 
 #endif

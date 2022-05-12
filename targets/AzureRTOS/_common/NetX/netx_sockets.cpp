@@ -6,23 +6,6 @@
 
 #include "netx_sockets.h"
 
-extern "C"
-{
-    // #include "lwip/init.h"
-    // #include "lwip/tcpip.h"
-    // #include "lwip/dns.h"
-    // #include "lwip/netifapi.h"
-    // #include "lwip/netdb.h"
-    // #include "lwip/tcp.h"
-    // #include "lwip/sockets.h"
-    // #include "lwip/dhcp.h"
-    // #include "lwip/netif.h"
-
-    extern NX_IP IpInstance;
-    extern NX_DNS DnsInstance;
-    extern NX_DHCP DhcpInstance;
-}
-
 int errorCode;
 
 //--//
@@ -293,6 +276,8 @@ bool NETX_SOCKETS_Driver::Uninitialize()
     {
         Network_Interface_Close(i);
     }
+
+    nanoHAL_Network_Uninitialize();
 
     // FIXME    tcpip_shutdown();
     // tcpip_shutdown is MS method added to lwip tcpip.c
@@ -899,7 +884,8 @@ int NETX_SOCKETS_Driver::SendTo(
     return sendto(socket, (CHAR *)buf, len, flags, (sockaddr *)&addr, tolen);
 }
 
-HRESULT NETX_SOCKETS_Driver::LoadAdapterConfiguration(
+// this implementation it's weak so it can be replaced at plaftorm level 
+__nfweak HRESULT NETX_SOCKETS_Driver::LoadAdapterConfiguration(
     HAL_Configuration_NetworkInterface *config,
     uint32_t interfaceIndex)
 {
@@ -964,7 +950,8 @@ struct dhcp_client_id
     uint8_t clientId[6];
 };
 
-HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
+// this implementation it's weak so it can be replaced at plaftorm level 
+__nfweak HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
     uint32_t interfaceIndex,
     uint32_t updateFlags,
     HAL_Configuration_NetworkInterface *config)

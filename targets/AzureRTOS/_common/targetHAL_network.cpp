@@ -40,6 +40,7 @@ void nanoHAL_Network_Initialize()
     if (ConfigurationManager_GetConfigurationBlock((void *)&networkConfig, DeviceConfigurationOption_Network, 0) ==
         true)
     {
+        NF_NetXDuo_Init(&networkConfig);
         // TODO NETWORK
         // // build lwIP configuration
         // lwipthread_opts lwipOptions;
@@ -95,4 +96,9 @@ void nanoHAL_Network_Initialize()
 #endif
 
     }
+}
+
+void nanoHAL_Network_Uninitialize()
+{
+    NF_NetXDuo_UnInit();
 }

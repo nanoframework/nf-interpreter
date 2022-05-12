@@ -324,14 +324,13 @@ WIFI_Status_t WIFI_GetHostAddress(const char *location, uint8_t *ipaddr)
 /**
   * @brief  Configure and start a client connection
   * @param  protocol : Protocol TCP/UDP
-  * @param  requestSecured : request secured connection
   * @param  name : name of the connection
   * @param  ipaddr : IP address of the remote host
   * @param  port : Remote port
   * @param  local_port : Local port
   * @retval Operation status
   */
-WIFI_Status_t WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protocol, uint8_t requestSecured, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port)
+WIFI_Status_t WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protocol, const char *name, uint8_t *ipaddr, uint16_t port, uint16_t local_port)
 {
   (void)name;
 
@@ -345,15 +344,7 @@ WIFI_Status_t WIFI_OpenClientConnection(uint32_t socket, WIFI_Protocol_t protoco
   conn.RemoteIP[1] = ipaddr[1];
   conn.RemoteIP[2] = ipaddr[2];
   conn.RemoteIP[3] = ipaddr[3];
-
-  if(protocol == WIFI_TCP_PROTOCOL)
-  {
-    conn.Type = requestSecured ? ES_WIFI_TCP_SSL_CONNECTION : ES_WIFI_TCP_CONNECTION;
-  }
-  else
-  {
-    conn.Type = ES_WIFI_UDP_CONNECTION;
-  }
+  conn.Type = protocol == WIFI_TCP_PROTOCOL ? ES_WIFI_TCP_CONNECTION : ES_WIFI_UDP_CONNECTION;
 
   if(ES_WIFI_StartClientConnection(&EsWifiObj, &conn)== ES_WIFI_STATUS_OK)
   {

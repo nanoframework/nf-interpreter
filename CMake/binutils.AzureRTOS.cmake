@@ -273,6 +273,7 @@ macro(nf_add_platform_dependencies target)
 
                 EXTRA_COMPILE_DEFINITIONS 
                     -DTX_INCLUDE_USER_DEFINE_FILE
+                    -DNX_INCLUDE_USER_DEFINE_FILE
                     -DUSE_HAL_DRIVER
                     -D${STM32_DRIVER_TARGET_DEVICE}
 

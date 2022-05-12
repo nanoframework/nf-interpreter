@@ -11,6 +11,7 @@ if(RTOS_AZURERTOS_CHECK)
 
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
 
@@ -127,14 +128,17 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND
             NF_Network_SRCS
   
+            ssl_stubs.cpp
+
             nf_wireless.cpp
 
-            sockets_ISM43362.cpp
-            ISM43362_sockets.cpp
-            ISM43362_sockets_functions.cpp
+            nx_driver_stm32l4.c
+            # sockets_ISM43362.cpp
+            # ISM43362_sockets.cpp
+            # ISM43362_sockets_functions.cpp
 
-            ssl.cpp
-            ssl_ISM43362.cpp
+            # ssl.cpp
+            # ssl_ISM43362.cpp
 
             es_wifi.c
             wifi.c

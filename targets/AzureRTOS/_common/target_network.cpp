@@ -239,7 +239,8 @@ int Network_Interface_Start_Connect(int index, const char *ssid, const char *pas
 
 int Network_Interface_Connect_Result(int index)
 {
-    if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index]->InterfaceType == NetworkInterfaceType_Wireless80211)
+    if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index]->InterfaceType ==
+        NetworkInterfaceType_Wireless80211)
     {
         return NF_ConnectInProgress ? -1 : NF_ConnectResult;
     }
@@ -249,14 +250,15 @@ int Network_Interface_Connect_Result(int index)
 
 int Network_Interface_Disconnect(int index)
 {
-    if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index]->InterfaceType == NetworkInterfaceType_Wireless80211 && NF_ConnectResult == 1)
+    if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index]->InterfaceType ==
+            NetworkInterfaceType_Wireless80211 &&
+        NF_ConnectResult == 1)
     {
-        if(WIFI_Disconnect() == WIFI_STATUS_OK)
-        {
-            NF_ConnectResult = 0;
+        // queue request to disconnect WiFi
+        uint32_t wifiRequest = WIFI_REQUEST_STOP_STATION;
+        tx_queue_send(&WiFiConnectQueue, &wifiRequest, TX_NO_WAIT);
 
-            return 0;
-        }
+        return true;
     }
 
     return false;

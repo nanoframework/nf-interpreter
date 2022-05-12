@@ -7,7 +7,9 @@
 #define NF_NETXDUO_H_
 
 #include <nanoHAL_v2.h>
+#include <nx_api.h>
 
+// TODO this ifdef may be removed
 #if defined(AZURE_RTOS_NETXDUO)
 #include <nxd_dns.h>
 #include <nxd_dhcp_client.h>
@@ -40,6 +42,7 @@ extern "C"
 #endif
 
     uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig);
+    void NF_NetXDuo_UnInit(void);
 
 #ifdef __cplusplus
 }

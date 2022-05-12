@@ -21,7 +21,7 @@ static uint8_t wifi_init();
 // byte pool for NetX Duo
 #define NX_APP_MEM_POOL_SIZE 1024 * 15
 #if defined(__GNUC__)
-__attribute__((section(".NetXPoolSection")))
+//__attribute__((section(".NetXPoolSection")))
 #endif
 #if defined(__GNUC__)
 __attribute__((aligned(4)))
@@ -34,7 +34,11 @@ uint8_t *pointer;
 NX_PACKET_POOL pool_0;
 NX_IP IpInstance;
 NX_DNS DnsInstance;
+
+#if !defined(WIFI_DRIVER_ISM43362)
+// ISM43362 handles DHCP
 NX_DHCP DhcpInstance;
+#endif
 
 uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 {
@@ -43,21 +47,23 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
     if (tx_byte_pool_create(&nx_app_byte_pool, "NetX Duo mem pool", nx_byte_pool_buffer, NX_APP_MEM_POOL_SIZE) !=
         TX_SUCCESS)
     {
-        // TODO replace with proper handling
-        while (1)
-        {
-        }
+        HAL_AssertEx();
+        return NX_NOT_ENABLED;
     }
 
     // init NetXDuo
     nx_system_initialize();
 
+    tx_thread_sleep(TX_TICKS_PER_MILLISEC(10));
+
     // Initialize Wifi
     if (wifi_init() != NX_SUCCESS)
     {
-        HAL_AssertEx();
+        //HAL_AssertEx();
         return NX_NOT_ENABLED;
     }
+
+    tx_thread_sleep(TX_TICKS_PER_MILLISEC(10));
 
     // allocate the Ethernet packet pool
     if (tx_byte_allocate(&nx_app_byte_pool, (void **)&pointer, NX_PACKET_POOL_SIZE, TX_NO_WAIT) != NX_SUCCESS)
@@ -167,20 +173,30 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
         }
     }
 
+#if !defined(WIFI_DRIVER_ISM43362)
+
     // Create a DHCP instance
     if (nx_dhcp_create(&DhcpInstance, &IpInstance, "My DHCP") != NX_SUCCESS)
     {
         return NX_NOT_ENABLED;
     }
 
+#endif
+
     if(networkConfig->StartupAddressMode == AddressMode_DHCP ||
        networkConfig->AutomaticDNS == 1)
     {
+
+#if !defined(WIFI_DRIVER_ISM43362)
+
         // Start the DHCP Client
         if (nx_dhcp_start(&DhcpInstance) != NX_SUCCESS)
         {
             return NX_NOT_ENABLED;
         }
+
+#endif
+
     }
 
 
@@ -200,4 +216,9 @@ static uint8_t wifi_init()
 #endif
 
     return NX_SUCCESS;
+}
+
+void NF_NetXDuo_UnInit(void)
+{
+    tx_byte_pool_delete(&nx_app_byte_pool);
 }
