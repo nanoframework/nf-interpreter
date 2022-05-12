@@ -23,6 +23,9 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
     (void)parameter;
     uint32_t wifiRequest;
     uint16_t configIndex;
+    uint8_t ipAddress[4];
+    uint8_t ipMask[4];
+    uint8_t gatewayAddress[4];
 
     // loop until thread receives a request to terminate
     while (1)
@@ -68,6 +71,7 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                         NetworkChange_NetworkEvents_NetworkNOTAvailable,
                         0);
 
+                retry_connect:
                     // wait 2 seconds before trying again
                     tx_thread_sleep(TX_TICKS_PER_MILLISEC(2000));
 
@@ -79,37 +83,67 @@ __attribute__((noreturn)) void WiFiConnectWorker_entry(uint32_t parameter)
                 else
                 {
                     // connect successful
-                    // fire notification event
 
                     // find network config for this wireless config
                     int32_t networkConfigId =
                         ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(configIndex);
 
-                    if (networkConfigId >= 0)
+                    // grab IP configuration from Wifi module
+                    if (WIFI_GetIP_Address(ipAddress) != WIFI_STATUS_OK)
                     {
-                        if (HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
-                                g_TargetConfiguration.NetworkInterfaceConfigs->Configs[networkConfigId],
-                                0,
-                                (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns)) == S_OK)
-                        {
-
-                            // all good, update flags
-                            NF_ConnectResult = 1;
-                            NF_ConnectInProgress = false;
-
-                            // fire event for Wi-Fi station job complete
-                            Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
-
-                            // notify about network availability
-                            Network_PostEvent(
-                                NetworkChange_NetworkEventType_AvailabilityChanged,
-                                NetworkChange_NetworkEvents_NetworkAvailable,
-                                0);
-
-                            // notify about IP address change
-                            Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, 0);
-                        }
+                        goto retry_connect;
                     }
+                    else if (WIFI_GetIP_Mask(ipMask) != WIFI_STATUS_OK)
+                    {
+                        goto retry_connect;
+                    }
+                    else if (WIFI_GetGateway_Address(gatewayAddress) != WIFI_STATUS_OK)
+                    {
+                        goto retry_connect;
+                    }
+                    // set IP address
+                    else if (
+                        nx_ip_address_set(
+                            &IpInstance,
+                            IP_ADDRESS(ipAddress[0], ipAddress[1], ipAddress[2], ipAddress[3]),
+                            IP_ADDRESS(ipMask[0], ipMask[1], ipMask[2], ipMask[3])) != NX_SUCCESS)
+                    {
+                        goto retry_connect;
+                    }
+                    // set gateway address
+                    else if (
+                        nx_ip_gateway_address_set(
+                            &IpInstance,
+                            IP_ADDRESS(gatewayAddress[0], gatewayAddress[1], gatewayAddress[2], gatewayAddress[3])) !=
+                        NX_SUCCESS)
+                    {
+                        goto retry_connect;
+                    }
+                    else if (
+                        networkConfigId < 0 ||
+                        HAL_SOCK_CONFIGURATION_UpdateAdapterConfiguration(
+                            g_TargetConfiguration.NetworkInterfaceConfigs->Configs[networkConfigId],
+                            0,
+                            NetworkInterface_UpdateOperation_Dns) != S_OK)
+                    {
+                        goto retry_connect;
+                    }
+
+                    // all good, update flags
+                    NF_ConnectResult = 1;
+                    NF_ConnectInProgress = false;
+
+                    // fire event for Wi-Fi station job complete
+                    Events_Set(SYSTEM_EVENT_FLAG_WIFI_STATION);
+
+                    // notify about network availability
+                    Network_PostEvent(
+                        NetworkChange_NetworkEventType_AvailabilityChanged,
+                        NetworkChange_NetworkEvents_NetworkAvailable,
+                        0);
+
+                    // notify about IP address change
+                    Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, 0);
                 }
             }
 
@@ -419,6 +453,99 @@ HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
 {
     (void)interfaceIndex;
 
+#if defined(WIFI_DRIVER_ISM43362)
+
+    (void)updateFlags;
+    (void)config;
+
+    uint8_t dns1addr[4];
+    uint8_t dns2addr[4];
+
+    NATIVE_PROFILE_PAL_NETWORK();
+
+    bool enableDHCP = (config->StartupAddressMode == AddressMode_DHCP);
+
+    // when using DHCP do not use the static settings
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dns))
+    {
+        // FIXME IPV6
+        if (config->AutomaticDNS == 0)
+        {
+            // user defined DNS addresses
+            if (config->IPv4DNSAddress1 != 0)
+            {
+                if (nx_dns_server_remove_all(&DnsInstance) != NX_SUCCESS)
+                {
+                    return S_FALSE;
+                }
+
+                // Add an IPv4 server address to the Client list
+                if (nx_dns_server_add(&DnsInstance, config->IPv4DNSAddress1) != NX_SUCCESS)
+                {
+                    return S_FALSE;
+                }
+            }
+        }
+        else
+        {
+            if (WIFI_GetDNS_Address(dns1addr, dns2addr) != WIFI_STATUS_OK)
+            {
+                return S_FALSE;
+            }
+
+            // don't care about the result as it will fail when there are no DNS servers set
+            nx_dns_server_remove_all(&DnsInstance);
+
+            // Add an IPv4 server address to the Client list
+            if (nx_dns_server_add(&DnsInstance, IP_ADDRESS(dns1addr[0], dns1addr[1], dns1addr[2], dns1addr[3])) !=
+                NX_SUCCESS)
+            {
+                return S_FALSE;
+            }
+        }
+    }
+
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Dhcp))
+    {
+        if (enableDHCP)
+        {
+            // this is the default, nothing else to do
+        }
+        else
+        {
+            // stop DHCP
+            // NOT supported!
+            return CLR_E_NOT_SUPPORTED;
+        }
+    }
+
+    if (enableDHCP)
+    {
+        if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRelease))
+        {
+            // nothing to do here
+        }
+        else if (0 != (updateFlags & NetworkInterface_UpdateOperation_DhcpRenew))
+        {
+            // nothing to do here
+        }
+        else if (
+            0 !=
+            (updateFlags & (NetworkInterface_UpdateOperation_DhcpRelease | NetworkInterface_UpdateOperation_DhcpRenew)))
+        {
+            return CLR_E_INVALID_PARAMETER;
+        }
+    }
+
+    if (0 != (updateFlags & NetworkInterface_UpdateOperation_Mac))
+    {
+        // TODO
+        // changing MAC address is not supported
+        return CLR_E_NOT_SUPPORTED;
+    }
+
+#else
+
     uint8_t ipAddress[4];
     uint8_t ipMask[4];
     uint8_t gatewayAddress[4];
@@ -535,6 +662,8 @@ HRESULT NETX_SOCKETS_Driver::UpdateAdapterConfiguration(
         // at this time changing MAC address is not supported
         return CLR_E_NOT_SUPPORTED;
     }
+
+#endif
 
     return S_OK;
 }

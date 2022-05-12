@@ -19,7 +19,7 @@ VOID  nx_driver_stm32l4(NX_IP_DRIVER *driver_req_ptr);
 static uint8_t wifi_init();
 
 // byte pool for NetX Duo
-#define NX_APP_MEM_POOL_SIZE 1024 * 6
+#define NX_APP_MEM_POOL_SIZE 1024 * 8
 #if defined(__GNUC__)
 //__attribute__((section(".NetXPoolSection")))
 #endif
