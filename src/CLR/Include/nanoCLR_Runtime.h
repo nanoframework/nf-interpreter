@@ -2579,18 +2579,20 @@ struct CLR_RT_GarbageCollector
     static const int c_minimumSpaceForGC = 128;
     static const int c_minimumSpaceForCompact = 128;
     static const CLR_UINT32 c_pressureThreshold = 10;
-    static const CLR_UINT32 c_memoryThreshold = HEAP_SIZE_THRESHOLD;
-    static const CLR_UINT32 c_memoryThreshold2 = HEAP_SIZE_THRESHOLD_UPPER;
 
     static const CLR_UINT32 c_StartGraphEvent = 0x00000001;
     static const CLR_UINT32 c_StopGraphEvent = 0x00000002;
     static const CLR_UINT32 c_DumpGraphHeapEvent = 0x00000004;
     static const CLR_UINT32 c_DumpPerfCountersEvent = 0x00000008;
 
+    CLR_UINT32 c_memoryThreshold;
+    CLR_UINT32 c_memoryThreshold2;
+
     CLR_UINT32 m_numberOfGarbageCollections;
     CLR_UINT32 m_numberOfCompactions;
 
-    CLR_RT_DblLinkedList m_weakDelegates_Reachable; // list of CLR_RT_HeapBlock_Delegate_List
+    // list of CLR_RT_HeapBlock_Delegate_List
+    CLR_RT_DblLinkedList m_weakDelegates_Reachable;
 
     CLR_UINT32 m_totalBytes;
     CLR_UINT32 m_freeBytes;
