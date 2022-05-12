@@ -6,7 +6,8 @@
 #ifndef NANOCLR_PLATFORMDEF_H
 #define NANOCLR_PLATFORMDEF_H
 
-//#include <CLR_Defines.h>
+#include <target_platform.h>
+#include <target_common.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
@@ -41,20 +42,20 @@
 //-o-//-o-//-o-//-o-//-o-//-o-//
 
 //--//
-// Setting the threshold value to start Garbagge collector
-// PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD should set in the file platform.settings file, eg sam7x_ek.settings.
-// defaults are 32Kb and 48 kb for lower and upper threshold respectively
+// Setting the threshold value to start garbage collection
+// PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD should be set in target_platform or target_common to override the defaults.
+// defaults are 50% and 75% for lower and upper threshold respectively
 
 #ifdef PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
-#define HEAP_SIZE_THRESHOLD PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
+#define HEAP_SIZE_THRESHOLD_RATIO PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD
 #else
-#define HEAP_SIZE_THRESHOLD 48 * 1024
+#define HEAP_SIZE_THRESHOLD_RATIO 0.5
 #endif
 
 #ifdef PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
-#define HEAP_SIZE_THRESHOLD_UPPER PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
+#define HEAP_SIZE_THRESHOLD_UPPER_RATIO PLATFORM_DEPENDENT_HEAP_SIZE_THRESHOLD_UPPER
 #else
-#define HEAP_SIZE_THRESHOLD_UPPER HEAP_SIZE_THRESHOLD + 16 * 1024
+#define HEAP_SIZE_THRESHOLD_UPPER_RATIO 0.75
 #endif
 
 //--//
