@@ -746,3 +746,18 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
     return FALSE;
 #endif
 }
+
+int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId)
+{
+    // loop though all Network config blocks trying to find one that has this ID as its SpecificConfig ID
+    for (int index = 0; index < g_TargetConfiguration.NetworkInterfaceConfigs->Count; index++)
+    {
+        if (g_TargetConfiguration.NetworkInterfaceConfigs->Configs[index]->SpecificConfigId == configurationId)
+        {
+            return index;
+        }
+    }
+
+    // not found
+    return -1;
+}
