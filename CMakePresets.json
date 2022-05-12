@@ -244,6 +244,8 @@
                 "CHIBIOS_HAL_REQUIRED": "ON",
                 "WIFI_DRIVER": "ISM43362",
                 "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "NF_PLATFORM_NO_CLR_TRACE": "ON",
+                "NF_CLR_NO_IL_INLINE": "ON",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",

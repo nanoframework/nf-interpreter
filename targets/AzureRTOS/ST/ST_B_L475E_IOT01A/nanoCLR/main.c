@@ -23,7 +23,7 @@ extern CLR_SETTINGS clrSettings;
 
 // byte pool configuration and definitions
 // need to be at least as big as the config sector
-#define DEFAULT_BYTE_POOL_SIZE 0x3C00
+#define DEFAULT_BYTE_POOL_SIZE 0x4000
 TX_BYTE_POOL byte_pool_0;
 uint8_t __attribute__((section(".ram4"))) memory_area[DEFAULT_BYTE_POOL_SIZE];
 
@@ -38,7 +38,7 @@ uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ReceiverThread_entry(uint32_t parameter);
 
 // CLR thread
-#define CLR_THREAD_STACK_SIZE 4096
+#define CLR_THREAD_STACK_SIZE 4092
 #define CLR_THREAD_PRIORITY   5
 
 TX_THREAD clrStartupThread;
