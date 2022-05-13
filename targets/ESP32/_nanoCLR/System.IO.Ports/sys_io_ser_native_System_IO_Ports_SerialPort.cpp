@@ -52,7 +52,7 @@ NF_PAL_UART *GetPalUartFromUartNum_sys(int uart_num)
     return palUart;
 }
 
-void UnitializePalUart_sys(NF_PAL_UART *palUart)
+void UninitializePalUart_sys(NF_PAL_UART *palUart)
 {
     if (palUart && palUart->SerialDevice)
     {
@@ -75,12 +75,12 @@ void UnitializePalUart_sys(NF_PAL_UART *palUart)
     }
 }
 
-void Esp32_Serial_UnitializeAll_sys()
+void Esp32_Serial_UninitializeAll_sys()
 {
     for (int uart_num = 0; uart_num < UART_NUM_MAX; uart_num++)
     {
         // free buffers memory
-        UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
+        UninitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
     }
 }
 
@@ -239,23 +239,6 @@ void UartTxWorkerTask_sys(void *pvParameters)
 
     // delete task
     vTaskDelete(NULL);
-}
-
-// estimate the time required to perform the TX transaction
-bool IsLongRunningOperation_sys(uint32_t bufferSize, uint32_t baudRate, uint32_t &estimatedDurationMiliseconds)
-{
-    // simplifying calculation assuming worst case values for stop bits
-    estimatedDurationMiliseconds = ((8 + 2) * bufferSize * 1000) / baudRate;
-
-    if (estimatedDurationMiliseconds > CLR_RT_Thread::c_TimeQuantum_Milliseconds)
-    {
-        // total operation time will exceed thread quantum, so this is a long running operation
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 }
 
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
@@ -588,7 +571,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
-
+    
     if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
@@ -679,7 +662,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
     CLR_RT_HeapBlock_Array *dataBuffer;
     CLR_RT_HeapBlock hbTimeout;
 
-    uint32_t estimatedDurationMiliseconds;
     int32_t length = 0;
     uart_port_t uart_num;
 
@@ -736,11 +718,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         // get a the pointer to the array by using the first element of the array
         data = dataBuffer->GetElement(offset);
 
-        // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation_sys(
-            count,
-            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t &)estimatedDurationMiliseconds);
+        // Try to send buffer to fifo first.
+        // if not all data written then use long running operation to complete.
+        palUart->IsLongRunning = false;
+        int txCount = uart_tx_chars(uart_num, (const char *)data, count);
+        if (txCount < count )
+        {
+            palUart->IsLongRunning = true;
+            if (txCount >= 0)
+            {
+                // Any written then update ptr / count
+                count -= txCount;
+                data += txCount;
+            }
+        }
 
         if (palUart->IsLongRunning)
         {
@@ -772,15 +763,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
-        }
-        else
-        {
-            // this is NOT a long running operation
-            // perform TX operation right away
-
-            // Write data to ring buffer to start sending
-            // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)data, count);
         }
     }
 
@@ -845,7 +827,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VO
     // Get Uart number for serial device
     uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
 
-    UnitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
+    UninitializePalUart_sys(GetPalUartFromUartNum_sys(uart_num));
 
     NANOCLR_NOCLEANUP();
 }
@@ -938,8 +920,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    // Ensure driver gets unitialized during soft reboot
-    HAL_AddSoftRebootHandler(Esp32_Serial_UnitializeAll_sys);
+    // Ensure driver gets uninitialized during soft reboot
+    HAL_AddSoftRebootHandler(Esp32_Serial_UninitializeAll_sys);
 
     NANOCLR_NOCLEANUP();
 }
@@ -1205,7 +1187,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     char *buffer = NULL;
     uint32_t bufferLength;
     int32_t length = 0;
-    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -1239,11 +1220,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // get buffer to output
         NANOCLR_CHECK_HRESULT(SetupWriteLine(stack, &buffer, &bufferLength, &isNewAllocation));
 
-        // check if this is a long running operation
-        palUart->IsLongRunning = IsLongRunningOperation_sys(
-            bufferLength,
-            (uint32_t)pThis[FIELD___baudRate].NumericByRef().s4,
-            (uint32_t &)estimatedDurationMiliseconds);
+        // Try to send buffer to fifo first.
+        // if not all data written then use long running operation to complete.
+        palUart->IsLongRunning = false;
+        int txCount = uart_tx_chars(uart_num, (const char *)buffer, bufferLength);
+        if (txCount < (int)bufferLength )
+        {
+            palUart->IsLongRunning = true;
+            if (txCount >= 0)
+            {
+                // Any written then update ptr / count
+                bufferLength -= txCount;
+                buffer += txCount;
+            }
+        }
+    
 
         if (palUart->IsLongRunning)
         {
@@ -1273,15 +1264,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
             // bump custom state so the read value above is pushed only once
             stack.m_customState = 2;
-        }
-        else
-        {
-            // this is NOT a long running operation
-            // perform TX operation right away
-
-            // Write data to ring buffer to start sending
-            // by design: don't bother checking the return value
-            uart_write_bytes(uart_num, (const char *)buffer, bufferLength);
         }
     }
 
