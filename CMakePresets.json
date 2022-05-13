@@ -1235,7 +1235,7 @@
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
                 "RTOS": "CHIBIOS",
                 "CHIBIOS_CONTRIB_REQUIRED": "OFF",
-                "SWO_OUTPUT": "OFF",
+                "STM32_SWO_OUTPUT": "OFF",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",

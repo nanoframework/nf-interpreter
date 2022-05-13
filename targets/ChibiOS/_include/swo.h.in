@@ -12,10 +12,10 @@
 #define SWO_H
 
 
-#define SWO_OUTPUT @SWO_OUTPUT_OPTION@
+#define STM32_SWO_OUTPUT @STM32_SWO_OUTPUT_OPTION@
 
 
-#if (SWO_OUTPUT == TRUE)
+#if (STM32_SWO_OUTPUT == TRUE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +29,7 @@ extern "C" {
 }
 #endif
 
-#endif //(SWO_OUTPUT == TRUE)
+#endif //(STM32_SWO_OUTPUT == TRUE)
 
 
 #endif  // SWO_H

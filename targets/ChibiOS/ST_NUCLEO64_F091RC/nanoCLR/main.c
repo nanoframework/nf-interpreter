@@ -42,7 +42,7 @@ int main(void)
     InitBootClipboard();
 
 // init SWO as soon as possible to make it available to output ASAP
-#if (SWO_OUTPUT == TRUE)
+#if (STM32_SWO_OUTPUT == TRUE)
     SwoInit();
 #endif
 
