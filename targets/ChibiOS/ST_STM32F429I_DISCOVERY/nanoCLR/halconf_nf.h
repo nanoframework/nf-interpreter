@@ -16,4 +16,8 @@
 #define HAL_NF_USE_FSMC                TRUE
 #endif
 
+#if !defined(HAL_LTDC_MODULE_ENABLED)
+#define HAL_LTDC_MODULE_ENABLED          TRUE
+#endif 
+
 #endif // HALCONF_NF_H

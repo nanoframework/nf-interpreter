@@ -220,7 +220,13 @@
                 "API_nanoFramework.Device.Can": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+                "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
             }
         },
         {
