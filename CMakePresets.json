@@ -226,7 +226,7 @@
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
-                "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
             }
         },
         {
