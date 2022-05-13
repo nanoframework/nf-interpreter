@@ -571,7 +571,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
-    
+
     if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
@@ -722,7 +722,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         // if not all data written then use long running operation to complete.
         palUart->IsLongRunning = false;
         int txCount = uart_tx_chars(uart_num, (const char *)data, count);
-        if (txCount < count )
+        if (txCount < count)
         {
             palUart->IsLongRunning = true;
             if (txCount >= 0)
@@ -1224,7 +1224,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
         // if not all data written then use long running operation to complete.
         palUart->IsLongRunning = false;
         int txCount = uart_tx_chars(uart_num, (const char *)buffer, bufferLength);
-        if (txCount < (int)bufferLength )
+        if (txCount < (int)bufferLength)
         {
             palUart->IsLongRunning = true;
             if (txCount >= 0)
@@ -1234,7 +1234,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
                 buffer += txCount;
             }
         }
-    
 
         if (palUart->IsLongRunning)
         {
