@@ -4,8 +4,8 @@
 //
 
 #include <hal.h>
-#include "target_nf_devices_can_config.h"
-#include <nf_devices_can_native_target.h>
+#include "target_nf_device_can_config.h"
+#include <nf_device_can_native_target.h>
 
 ///////////
 // CAN1 //
