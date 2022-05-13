@@ -57,7 +57,8 @@
                 "NF_WP_TRACE_HEADERS": "OFF",
                 "NF_WP_TRACE_STATE": "OFF",
                 "NF_WP_TRACE_NODATA": "OFF",
-                "NF_WP_TRACE_ALL": "OFF"
+                "NF_WP_TRACE_ALL": "OFF",
+                "NF_WP_IMPLEMENTS_CRC32": "OFF"
             }
         },
         {
