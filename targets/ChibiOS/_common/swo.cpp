@@ -9,7 +9,7 @@
 #include "nanoCLR_Types.h"
 
 #if (__CORTEX_M == 0)
-    #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option STM32_SWO_OUTPUT to OFF."
+    #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option SWO_OUTPUT to OFF."
 #else
 
 // number of attempts to write to the ITM port before quitting
