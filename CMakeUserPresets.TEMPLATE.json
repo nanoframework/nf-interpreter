@@ -59,6 +59,7 @@
                 "NF_WP_TRACE_NODATA": "OFF",
                 "NF_WP_TRACE_ALL": "OFF",
                 "NF_WP_IMPLEMENTS_CRC32": "OFF",
+                "NF_PLATFORM_NO_CLR_TRACE": "OFF",
                 "STM32_SWO_OUTPUT": "ON"
             }
         },
