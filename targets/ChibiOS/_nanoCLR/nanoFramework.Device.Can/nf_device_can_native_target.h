@@ -3,12 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef NF_DEVICES_CAN_NATIVE_TARGET_H
-#define NF_DEVICES_CAN_NATIVE_TARGET_H
+#ifndef NF_DEVICE_CAN_NATIVE_TARGET_H
+#define NF_DEVICE_CAN_NATIVE_TARGET_H
 
 #include <hal.h>
-#include "target_nf_devices_can_config.h"
-#include <nf_devices_can_native.h>
+#include "target_nf_device_can_config.h"
+#include <nf_device_can_native.h>
 
 // struct representing the CAN
 typedef struct
@@ -54,7 +54,7 @@ extern NF_PAL_CAN Can3_PAL;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // when a CAN is defined the declarations below will have the real function/configuration
-// in the target folder @ target_nf_devices_can_config.cpp
+// in the target folder @ target_nf_device_can_config.cpp
 ///////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_CAN1();
 void ConfigPins_CAN2();
@@ -77,9 +77,9 @@ extern CANRxFrame Can3_MsgBuffer[];
     }
 
 // when a CAN is defined the declarations below will have the real function/configuration
-// in the target folder @ target_nf_devices_can_config.cpp
+// in the target folder @ target_nf_device_can_config.cpp
 void Init_Can1();
 void Init_Can2();
 void Init_Can3();
 
-#endif //NF_DEVICES_CAN_NATIVE_TARGET_H
+#endif // NF_DEVICE_CAN_NATIVE_TARGET_H
