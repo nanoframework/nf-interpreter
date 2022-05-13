@@ -53,7 +53,7 @@
           "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
           "RADIO_FREQUENCY": "<radio-frequency-for-target-with-configurable-radio-valid-values-868-915>",
           "SPIFFS_SOURCE": "<path-to-local-SPIFFS-source-mind-the-forward-slash>",
-          "STM32_SWO_OUTPUT": "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
+          "STM32_SWO_DEBUG_OUTPUT": "OFF-default-ON-to-enable-ARM-CortexM-Single-Wire-Output",
           "FATFS_VERSION": "<valid-fatfs-version-if-empty-use-default-set-cmake>",
           "FATFS_SOURCE": "<path-to-local-FATFS-source-mind-the-forward-slash>",
           "LWIP_VERSION": "<valid-lwip-version-if-empty-use-default-set-cmake>",

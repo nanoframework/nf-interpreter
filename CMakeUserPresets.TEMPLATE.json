@@ -61,7 +61,7 @@
                 "NF_WP_IMPLEMENTS_CRC32": "OFF",
                 "NF_PLATFORM_NO_CLR_TRACE": "OFF",
                 "NF_CLR_NO_IL_INLINE": "OFF",
-                "STM32_SWO_OUTPUT": "ON"
+                "STM32_SWO_DEBUG_OUTPUT": "ON"
             }
         },
         {
