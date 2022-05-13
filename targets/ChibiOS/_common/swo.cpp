@@ -11,7 +11,6 @@
 #if (__CORTEX_M == 0)
 #error "ITM port is not available on Cortex-M0(+) cores. Need to set CMake option STM32_SWO_DEBUG_OUTPUT to OFF."
 
-
 // number of attempts to write to the ITM port before quitting
 // developer note: this is an arbitrary value from trial & error attempts to get a satisfactory output on ST-Link SWO
 // viewer
