@@ -416,7 +416,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
         }
     }
 
-    // get a the pointer to the array by using the first element of the array
+    // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
 
     // Choose the driver for this SerialDevice
@@ -717,7 +717,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // get a the pointer to the array by using the first element of the array
+        // get a the pointer to the array by using the offset
         data = dataBuffer->GetElement(offset);
 
         // push onto the eval stack how many bytes are being pushed to the UART
