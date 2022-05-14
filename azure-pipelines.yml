@@ -52,7 +52,7 @@ jobs:
 ##############################
 - job: Check_Build_Options
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -276,7 +276,7 @@ jobs:
   - Check_Build_Options
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - checkout: self
@@ -303,7 +303,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -358,7 +358,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
   strategy:
@@ -455,7 +455,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -502,7 +502,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -571,7 +571,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -737,7 +737,7 @@ jobs:
     )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - task: DotNetCoreCLI@2  
@@ -839,7 +839,7 @@ jobs:
     )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
 
