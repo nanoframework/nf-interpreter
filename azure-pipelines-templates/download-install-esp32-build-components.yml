@@ -21,11 +21,11 @@ steps:
       path: $(PIP_CACHE_DIR)
       cacheHitVar: PIP_PACKAGES_RESTORED
 
-  # Use Python Version 3.6 and add it to path
+  # Use Python Version 3.7 and add it to path
   - task: UsePythonVersion@0
-    displayName: Set Python to v3.6
+    displayName: Set Python to v3.7
     inputs:
-      versionSpec: '3.6' 
+      versionSpec: '3.7'
       addToPath: true
 
   # run IDF installers
