@@ -8,6 +8,8 @@
 #include <NF_ESP32_Network.h>
 #include <esp32_ethernet_options.h>
 
+static const char *TAG = "ETH";
+
 esp_eth_handle_t eth_handle = NULL;
 
 // OLIMEX ESP32-EVB Rev B, OLIMEX ESP32-Gateway, Generic Lan8270
@@ -55,9 +57,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     esp_netif_config_t cfg = ESP_NETIF_DEFAULT_ETH();
     esp_netif_t *eth_netif = esp_netif_new(&cfg);
-
-    // Set default handlers to process TCP/IP stuffs
-    ESP_ERROR_CHECK(esp_eth_set_default_handlers(eth_netif));
 
     // now MAC and PHY configs
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
@@ -139,7 +138,12 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     // now the do the Ethernet config
     esp_eth_config_t config = ETH_DEFAULT_CONFIG(mac, phy);
-    ESP_ERROR_CHECK(esp_eth_driver_install(&config, &eth_handle));
+    esp_err_t err = esp_eth_driver_install(&config, &eth_handle);
+    if (err != ESP_OK)
+    {
+        ESP_LOGI(TAG, "Unable to install ethernet driver");
+        return err;
+    }
 
 #ifndef ESP32_ETHERNET_INTERNAL
     // The SPI Ethernet module might doesn't have a burned factory MAC address, we have to set it manually.
