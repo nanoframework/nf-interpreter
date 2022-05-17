@@ -520,7 +520,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
-                "DETH_PHY_RST_GPIO": "12",
+                "ETH_PHY_RST_GPIO": "12",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
