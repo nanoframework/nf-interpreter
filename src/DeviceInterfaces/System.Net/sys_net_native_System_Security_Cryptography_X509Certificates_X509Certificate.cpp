@@ -23,7 +23,7 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     CLR_INT64 *val;
     SYSTEMTIME st;
     CLR_RT_HeapBlock *hbPwd = stack.Arg1().DereferenceString();
-    const char *password= hbPwd->StringText();
+    const char *password = hbPwd->StringText();
 
     CLR_RT_Memory::ZeroFill(&cert, sizeof(cert));
 
