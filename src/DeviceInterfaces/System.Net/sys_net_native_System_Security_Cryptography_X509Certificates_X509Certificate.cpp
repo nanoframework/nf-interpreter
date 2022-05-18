@@ -21,15 +21,9 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     CLR_RT_ProtectFromGC gc2(hbSubject);
     X509CertData cert;
     CLR_INT64 *val;
-    //    CLR_INT64               tzOffset;
     SYSTEMTIME st;
-    //    INT32                   standardBias;
     CLR_RT_HeapBlock *hbPwd = stack.Arg1().DereferenceString();
-    LPCSTR szPwd;
-
-    FAULT_ON_NULL_ARG(hbPwd);
-
-    szPwd = hbPwd->StringText();
+    const char *password= hbPwd->StringText();
 
     CLR_RT_Memory::ZeroFill(&cert, sizeof(cert));
 
@@ -37,9 +31,10 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
 
     certBytes = arrData->GetFirstElement();
 
-    if (!SSL_ParseCertificate((const char *)certBytes, arrData->m_numOfElements, szPwd, &cert))
+    if (!SSL_ParseCertificate((const char *)certBytes, arrData->m_numOfElements, password, &cert))
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
+    // fill in the various fields of the certificate class
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(hbIssuer, cert.Issuer));
     NANOCLR_CHECK_HRESULT(hbIssuer.StoreToReference(stack.Arg2(), 0));
 
@@ -54,19 +49,8 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
     st.wSecond = cert.EffectiveDate.second;
     st.wMilliseconds = cert.EffectiveDate.msec;
 
-    //   standardBias     = Time_GetTimeZoneOffset();
-    //    standardBias    *= TIME_CONVERSION__ONEMINUTE;
-
     val = Library_corlib_native_System_DateTime::GetValuePtr(stack.Arg4());
     *val = HAL_Time_ConvertFromSystemTime(&st);
-
-    // tzOffset = cert.EffectiveDate.tzOffset;
-
-    // // adjust for timezone differences
-    // if(standardBias != tzOffset)
-    // {
-    //     *val += tzOffset - standardBias;
-    // }
 
     st.wYear = cert.ExpirationDate.year;
     st.wMonth = cert.ExpirationDate.month;
@@ -78,13 +62,6 @@ HRESULT Library_sys_net_native_System_Security_Cryptography_X509Certificates_X50
 
     val = Library_corlib_native_System_DateTime::GetValuePtr(stack.ArgN(5));
     *val = HAL_Time_ConvertFromSystemTime(&st);
-
-    // tzOffset = cert.ExpirationDate.tzOffset;
-
-    // if(standardBias != tzOffset)
-    // {
-    //    *val += tzOffset - standardBias;
-    // }
 
     NANOCLR_NOCLEANUP();
 }
