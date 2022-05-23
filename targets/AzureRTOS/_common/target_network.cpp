@@ -7,6 +7,7 @@
 #include <nanoHAL.h>
 
 #if defined(AZURE_RTOS_NETXDUO)
+#include <nx_user.h>
 #include <nx_api.h>
 #include <nxd_bsd.h>
 #endif

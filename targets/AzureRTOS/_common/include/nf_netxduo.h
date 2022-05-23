@@ -7,6 +7,7 @@
 #define NF_NETXDUO_H_
 
 #include <nanoHAL_v2.h>
+#include <nx_user.h>
 #include <nx_api.h>
 
 // TODO this ifdef may be removed

@@ -24,7 +24,7 @@
 #define GLOBAL_LOCK_SOCKETS(x)
 
 // get number of sockets from NetX BSD (NX_BSD_MAX_SOCKETS)
-#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 32
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 16
 
 #define LPCSTR const char *
 

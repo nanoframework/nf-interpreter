@@ -4,6 +4,7 @@
 //
 
 #include <hal.h>
+#include <nx_user.h>
 #include <nx_api.h>
 #include <nxd_bsd.h>
 #include <nxd_dns.h>
