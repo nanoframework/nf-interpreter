@@ -367,15 +367,18 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
 
-    // make sure the CS pin is properly configured as GPIO, output & pushpull
-    palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
+    if (!config.ManualChipSelect)
+    {
+        // make sure the CS pin is properly configured as GPIO, output & pushpull
+        palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
 
-    // being SPI CS active low, default it to high
-    palSetPad(GPIO_PORT(csPin), csPin % 16);
+        // being SPI CS active low, default it to high
+        palSetPad(GPIO_PORT(csPin), csPin % 16);
 
-    // set port&pad for CS pin
-    llConfig->ssport = GPIO_PORT(csPin);
-    llConfig->sspad = csPin % 16;
+        // set port&pad for CS pin
+        llConfig->ssport = GPIO_PORT(csPin);
+        llConfig->sspad = csPin % 16;
+    }
 }
 
 // Performs a read/write operation on 8-bit word data.

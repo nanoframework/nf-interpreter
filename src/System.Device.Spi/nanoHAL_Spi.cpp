@@ -279,20 +279,31 @@ HRESULT nanoSPI_OpenDeviceEx(
     }
 
     // Find if device slot is available and check
-    deviceIndex = FindFreeDeviceSlotSpi(spiDeviceConfig.Spi_Bus, spiDeviceConfig.DeviceChipSelect);
+    if (spiDeviceConfig.ManualChipSelect)
 
-    if (deviceIndex < 0)
     {
-        if (deviceIndex == -1)
-        {
-            // No device slots left
-            return CLR_E_INDEX_OUT_OF_RANGE;
-        }
-        else
-        {
-            // Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
-            // currently raised in managed code
+        if (spiconfig[spiBusIndex].devicesInUse > 0)
             return CLR_E_NOT_SUPPORTED;
+
+        deviceIndex = 0;
+    }
+    else
+    {
+        deviceIndex = FindFreeDeviceSlotSpi(spiBusIndex, spiDeviceConfig.DeviceChipSelect);
+
+        if (deviceIndex < 0)
+        {
+            if (deviceIndex == -1)
+            {
+                // No device slots left
+                return CLR_E_INDEX_OUT_OF_RANGE;
+            }
+            else
+            {
+                // Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
+                // currently raised in managed code
+                return CLR_E_NOT_SUPPORTED;
+            }
         }
     }
 
@@ -305,7 +316,8 @@ HRESULT nanoSPI_OpenDeviceEx(
         spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse--;
 
         // Unreserve CS pin
-        CPU_GPIO_ReservePin(spiconfig[spiDeviceConfig.Spi_Bus].deviceCongfig->DeviceChipSelect, false);
+        if (!spiconfig[spiBusIndex].deviceConfig[deviceIndex].ManualChipSelect)
+            CPU_GPIO_ReservePin(spiconfig[spiBusIndex].deviceConfig->DeviceChipSelect, false);
 
         // Last device on bus then close bus and also remove bus pin reserves
         if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse <= 0)
@@ -327,7 +339,7 @@ HRESULT nanoSPI_OpenDeviceEx(
         return hr;
     }
 
-    if (deviceHandle != 0)
+    if (deviceHandle != 0 && !spiDeviceConfig.ManualChipSelect)
     {
         // Reserve chip select pin
         if (CPU_GPIO_ReservePin((GPIO_PIN)spiDeviceConfig.DeviceChipSelect, true) == false)
@@ -382,7 +394,10 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle)
     spiconfig[spiBus].devicesInUse--;
 
     // Unreserve CS pin
-    CPU_GPIO_ReservePin(spiconfig[spiBus].deviceCongfig->DeviceChipSelect, false);
+    if (!spiconfig[spiBus].deviceConfig->ManualChipSelect)
+    {
+        CPU_GPIO_ReservePin(spiconfig[spiBus].deviceConfig->DeviceChipSelect, false);
+    }
 
     // Last device on bus then close bus and also remove bus pin reserves
     if (spiconfig[spiBus].devicesInUse <= 0)
@@ -440,7 +455,7 @@ HRESULT nanoSPI_Write_Read(
 
     return CPU_SPI_nWrite_nRead(
         spiconfig[spiBus].deviceHandles[deviceIndex],
-        spiconfig[spiBus].deviceCongfig[deviceIndex],
+        spiconfig[spiBus].deviceConfig[deviceIndex],
         swrs,
         writePtr,
         wsize,

@@ -67,6 +67,8 @@ struct SPI_DEVICE_CONFIGURATION
     SpiBusMode BusMode;
     // GPIO pin used for device Chip select
     GPIO_PIN DeviceChipSelect;
+    // False = manage the Chip select,      True = let the user manage the Chip select
+    bool ManualChipSelect;
     // False = LOW active,      True = HIGH active
     bool ChipSelectActive;
     // SPI mode 0 -> 3
