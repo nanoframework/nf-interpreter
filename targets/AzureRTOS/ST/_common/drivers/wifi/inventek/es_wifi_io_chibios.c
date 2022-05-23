@@ -16,11 +16,11 @@
 #if defined(__GNUC__)
 __attribute__((aligned(32)))
 #endif
-uint8_t txBuffer[1024];
+uint8_t __attribute__((section(".ram4"))) txBuffer[1024];
 #if defined(__GNUC__)
 __attribute__((aligned(32)))
 #endif
-uint8_t rxBuffer[220];
+uint8_t __attribute__((section(".ram4"))) rxBuffer[220];
 
 SPIDriver *spiDriver;
 SPIConfig spiConfiguration = {0};

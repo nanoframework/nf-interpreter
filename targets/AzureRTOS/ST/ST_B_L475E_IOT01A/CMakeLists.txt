@@ -23,6 +23,9 @@ add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
 nf_setup_target_build(
     HAS_NANOBOOTER
 
+    CLR_EXTRA_COMPILE_DEFINITIONS
+        -DRUNTIME_MEMORY_PROFILE__small
+
     BOOTER_LINKER_FILE 
         STM32L475xG_booter
 
@@ -30,10 +33,10 @@ nf_setup_target_build(
         STM32L475xG_CLR
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x4000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x0,--defsym=__crt_heap_size__=0x4000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x800,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x3000"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x0,--defsym=__crt_heap_size__=0x2000"
 )
 
 # make vars global

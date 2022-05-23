@@ -11,7 +11,7 @@ uint32_t WiFiConnectQueueStorage = 0;
 TX_MUTEX WiFiMutex;
 bool IsWifiInitialised = false;
 
-#define WIFI_CONNECT_THREAD_STACK_SIZE 2048
+#define WIFI_CONNECT_THREAD_STACK_SIZE 1024
 TX_THREAD wifiConnectThread;
 uint32_t wifiConnectThreadStack[WIFI_CONNECT_THREAD_STACK_SIZE / sizeof(uint32_t)];
 
