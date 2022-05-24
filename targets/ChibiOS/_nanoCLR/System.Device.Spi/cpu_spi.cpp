@@ -374,10 +374,6 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 
         // being SPI CS active low, default it to high
         palSetPad(GPIO_PORT(csPin), csPin % 16);
-
-        // set port&pad for CS pin
-        llConfig->ssport = GPIO_PORT(csPin);
-        llConfig->sspad = csPin % 16;
     }
 }
 
