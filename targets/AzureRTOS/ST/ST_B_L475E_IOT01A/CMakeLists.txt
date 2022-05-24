@@ -23,9 +23,6 @@ add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
 nf_setup_target_build(
     HAS_NANOBOOTER
 
-    CLR_EXTRA_COMPILE_DEFINITIONS
-        -DRUNTIME_MEMORY_PROFILE__small
-
     BOOTER_LINKER_FILE 
         STM32L475xG_booter
 
