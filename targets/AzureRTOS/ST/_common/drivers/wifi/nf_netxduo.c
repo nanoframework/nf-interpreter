@@ -12,21 +12,21 @@
 #define PACKET_PAYLOAD_SIZE 1536
 #define NX_PACKET_POOL_SIZE ((1536 + sizeof(NX_PACKET)) * 3)
 #define ARP_CACHE_SIZE      1024
-#define BSD_STACK_SIZE      2048
+#define BSD_STACK_SIZE      1024
 
 void _nx_ram_network_driver(NX_IP_DRIVER *driver_req_ptr);
 VOID  nx_driver_stm32l4(NX_IP_DRIVER *driver_req_ptr);
 static uint8_t wifi_init();
 
 // byte pool for NetX Duo
-#define NX_APP_MEM_POOL_SIZE 1024 * 15
+#define NX_APP_MEM_POOL_SIZE 1024 * 8
 #if defined(__GNUC__)
 //__attribute__((section(".NetXPoolSection")))
 #endif
 #if defined(__GNUC__)
 __attribute__((aligned(4)))
 #endif
-static uint8_t nx_byte_pool_buffer[NX_APP_MEM_POOL_SIZE];
+uint8_t __attribute__((section(".ram4"))) nx_byte_pool_buffer[NX_APP_MEM_POOL_SIZE];
 static TX_BYTE_POOL nx_app_byte_pool;
 
 /* App memory pointer. */
@@ -65,7 +65,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
 
     tx_thread_sleep(TX_TICKS_PER_MILLISEC(10));
 
-    // allocate the Ethernet packet pool
+    // allocate the network packet pool
     if (tx_byte_allocate(&nx_app_byte_pool, (void **)&pointer, NX_PACKET_POOL_SIZE, TX_NO_WAIT) != NX_SUCCESS)
     {
         return NX_NOT_ENABLED;
@@ -79,7 +79,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
     }
 
     // Allocate the NetX IP Instance memory
-    if (tx_byte_allocate(&nx_app_byte_pool, (void **)&pointer, 2 * DEFAULT_MEMORY_SIZE, TX_NO_WAIT) != NX_SUCCESS)
+    if (tx_byte_allocate(&nx_app_byte_pool, (void **)&pointer, 1 * DEFAULT_MEMORY_SIZE, TX_NO_WAIT) != NX_SUCCESS)
     {
         return NX_NOT_ENABLED;
     }
@@ -111,7 +111,7 @@ uint32_t NF_NetXDuo_Init(HAL_Configuration_NetworkInterface *networkConfig)
             &pool_0,
             nx_driver_stm32l4,
             pointer,
-            2 * DEFAULT_MEMORY_SIZE,
+            1 * DEFAULT_MEMORY_SIZE,
             DEFAULT_PRIORITY) != NX_SUCCESS)
     {
         return NX_NOT_ENABLED;

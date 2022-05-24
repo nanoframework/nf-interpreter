@@ -38,7 +38,7 @@ uint32_t __attribute__((section(".ram4"))) receiverThreadStack[RECEIVER_THREAD_S
 extern void ReceiverThread_entry(uint32_t parameter);
 
 // CLR thread
-#define CLR_THREAD_STACK_SIZE 4096
+#define CLR_THREAD_STACK_SIZE 4092
 #define CLR_THREAD_PRIORITY   5
 
 TX_THREAD clrStartupThread;

@@ -9,6 +9,8 @@ include(FetchContent)
 # network layer from Azure RTOS and NetX Duo
 if(RTOS_AZURERTOS_CHECK)
 
+    FetchContent_GetProperties(azure_rtos_netxduo)
+
     # set include directories for nanoFramework network
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX)
@@ -30,6 +32,10 @@ if(RTOS_AZURERTOS_CHECK)
         list(APPEND NF_Network_SRCS netx_sockets.cpp)
         list(APPEND NF_Network_SRCS netx_sockets_functions.cpp )
         list(APPEND NF_Network_SRCS netx_thread.c)
+
+        # list(APPEND NF_Network_SRCS nxd_dns.c)
+        # list(APPEND NF_Network_SRCS nxd_sntp_client.c)
+
     endif()
 
     if("${ETHERNET_DRIVER}" STREQUAL "LAN8742")
@@ -202,6 +208,9 @@ if(RTOS_AZURERTOS_CHECK)
                 # ISM43362
                 # ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common/netxduo/drivers/wifi/inventek
 
+                # ${azure_rtos_netxduo_SOURCE_DIR}/addons/dns
+                # ${azure_rtos_netxduo_SOURCE_DIR}/addons/sntp
+
                 ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
     
             CMAKE_FIND_ROOT_PATH_BOTH
@@ -263,8 +272,6 @@ if(RTOS_AZURERTOS_CHECK)
     #     endforeach()
 
     # endif()
-
-    FetchContent_GetProperties(azure_rtos_netxduo)
 
     # need to replace this define here which is conflicting with another from STM32 HAL
     set(BSD_INCLUDE_FILE ${azure_rtos_netxduo_SOURCE_DIR}/addons/BSD/nxd_bsd.h)

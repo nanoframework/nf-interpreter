@@ -84,15 +84,12 @@
 
 // Macro to extract well-known system event flag ids from a COM_HANDLE
 #define ExtractEventFromTransport(x)                                                                                   \
-    (ExtractTransport(x) == USART_TRANSPORT                                                                            \
-         ? SYSTEM_EVENT_FLAG_COM_IN                                                                                    \
-         : ExtractTransport(x) == SOCKET_TRANSPORT                                                                     \
-               ? SYSTEM_EVENT_FLAG_SOCKET                                                                              \
-               : ExtractTransport(x) == GENERIC_TRANSPORT                                                              \
-                     ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                                                  \
-                     : ExtractTransport(x) == DEBUG_TRANSPORT                                                          \
-                           ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                                       \
-                           : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY : 0)
+    (ExtractTransport(x) == USART_TRANSPORT       ? SYSTEM_EVENT_FLAG_COM_IN                                           \
+     : ExtractTransport(x) == SOCKET_TRANSPORT    ? SYSTEM_EVENT_FLAG_SOCKET                                           \
+     : ExtractTransport(x) == GENERIC_TRANSPORT   ? SYSTEM_EVENT_FLAG_GENERIC_PORT                                     \
+     : ExtractTransport(x) == DEBUG_TRANSPORT     ? SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY                                \
+     : ExtractTransport(x) == MESSAGING_TRANSPORT ? SYSTEM_EVENT_FLAG_MESSAGING_ACTIVITY                               \
+                                                  : 0)
 
 #define USART_TRANSPORT (1 << TRANSPORT_SHIFT)
 //#define COM_NULL                    ((COM_HANDLE)(USART_TRANSPORT))
@@ -756,12 +753,16 @@ template <typename T> class HAL_RingBuffer
             // |xxxx......xxxxxx|
 
             // store size of tail
-            size_t tailSize = _write_index - (1 * _dataSize);
+            size_t tailSize = _write_index;
+            T *tempBuffer = NULL;
 
-            // 1st move tail to temp buffer (need to malloc first)
-            T *tempBuffer = (T *)platform_malloc(tailSize);
+            if (tailSize > 0)
+            {
+                // 1st move tail to temp buffer (need to malloc first)
+                tempBuffer = (T *)platform_malloc(tailSize);
 
-            memcpy(tempBuffer, _buffer, tailSize);
+                memcpy(tempBuffer, _buffer, tailSize);
+            }
 
             // store size of remaining buffer
             size_t headSize = _capacity - _read_index;
@@ -769,11 +770,14 @@ template <typename T> class HAL_RingBuffer
             // 2nd move head to start of buffer
             memcpy(_buffer, _buffer + _read_index, headSize);
 
-            // 3rd move temp buffer after head
-            memcpy(_buffer + headSize, tempBuffer, tailSize);
+            if (tailSize > 0)
+            {
+                // 3rd move temp buffer after head
+                memcpy(_buffer + headSize, tempBuffer, tailSize);
 
-            // free memory
-            platform_free(tempBuffer);
+                // free memory
+                platform_free(tempBuffer);
+            }
         }
 
         // adjust indexes
