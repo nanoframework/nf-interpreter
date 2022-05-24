@@ -29,7 +29,7 @@ struct NF_PAL_SPI
     uint16_t ReadSize;
 
     // -1 = no active ChipSelect | -2 = manual Active ChipSelect | 0+ Active chip select pan number
-    int32_t ActiveChipSelect;
+    int32_t ChipSelect;
 };
 
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral

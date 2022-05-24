@@ -130,11 +130,11 @@ static void SpiCallback(SPIDriver *spip)
         // Tidy up, release etc
         CompleteTranfer(palSpi);
 
-        if (palSpi->ActiveChipSelect >= 0)
+        if (palSpi->ChipSelect >= 0)
         {
-            CPU_GPIO_TogglePinState(palSpi->ActiveChipSelect);
+            palSpi->ChipSelect = -1;
+            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
         }
-        palSpi->ActiveChipSelect = -1;
 
         // fire callback for SPI transaction complete
         // only if callback set
@@ -439,6 +439,14 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         // get the LL SPI configuration, depending on passed parameters and buffer element size
         GetSPIConfig(sdev, wrc, &palSpi->Configuration);
+        if (sdev.ManualChipSelect)
+        {
+            palSpi->ChipSelect = -2;
+        }
+        else
+        {
+            palSpi->ChipSelect = -1;
+        }
 
         // set bus config flag
         busConfigIsHalfDuplex = palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex;
@@ -485,15 +493,11 @@ HRESULT CPU_SPI_nWrite_nRead(
         // just to satisfy the driver ceremony, no actual implementation for STM32
         spiSelect(palSpi->Driver);
 
-        if (!sdev.ManualChipSelect)
+        if (palSpi->ChipSelect != -2)
         {
-            palSpi->ActiveChipSelect = (int32_t)sdev.DeviceChipSelect;
+            palSpi->ChipSelect = (int32_t)sdev.DeviceChipSelect;
             // set CS pin based on activation behaviour of the CS pin
             CPU_GPIO_SetPinState(sdev.DeviceChipSelect, sdev.ChipSelectActive ? GpioPinValue_High : GpioPinValue_Low);
-        }
-        else
-        {
-            palSpi->ActiveChipSelect = -2;
         }
 
         if (sync)
@@ -562,9 +566,9 @@ HRESULT CPU_SPI_nWrite_nRead(
             // Release bus & cacheBufferInvalidate etc
             CompleteTranfer(palSpi);
 
-            if (!sdev.ManualChipSelect)
+            if (palSpi->ChipSelect >= 0)
             {
-                palSpi->ActiveChipSelect = -1;
+                palSpi->ChipSelect = -1;
                 CPU_GPIO_SetPinState(
                     sdev.DeviceChipSelect,
                     sdev.ChipSelectActive ? GpioPinValue_Low : GpioPinValue_High);
@@ -575,16 +579,12 @@ HRESULT CPU_SPI_nWrite_nRead(
         // perform SPI operation using driver's ASYNC API
         // Completed on calling Spi Callback
         {
-            if (!sdev.ManualChipSelect)
+            if (palSpi->ChipSelect != -2)
             {
-                palSpi->ActiveChipSelect = (int32_t)sdev.DeviceChipSelect;
+                palSpi->ChipSelect = (int32_t)sdev.DeviceChipSelect;
                 CPU_GPIO_SetPinState(
                     sdev.DeviceChipSelect,
                     sdev.ChipSelectActive ? GpioPinValue_High : GpioPinValue_Low);
-            }
-            else
-            {
-                palSpi->ActiveChipSelect = -2;
             }
 
             // this is a Async operation
