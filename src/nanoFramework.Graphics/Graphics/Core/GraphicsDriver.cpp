@@ -308,16 +308,23 @@ void GraphicsDriver::DrawRectangleNative(
 
                 if (opacity == PAL_GFX_Bitmap::c_OpacityOpaque)
                 {
-                    for (int row = 0; row < insetHeight; row++, curRow += stride)
+                    curPixel = curRow;
+
+                    CLR_UINT16 *startRow = curRow;
+
+                    // Draw the first row
+                    for (int col = 0; col < insetWidth; col++, curPixel++)
                     {
-                        curPixel = curRow;
-                        for (int col = 0; col < insetWidth; col++, curPixel++)
-                        {
-                            *curPixel = fillColor;
-                        }
+                        *curPixel = fillColor;
+                    }
+                    
+                    // Just memcpy the first row to all subsequent rows, which is moderately faster
+                    for (int row = 1; row < insetHeight; row++, curRow += stride)
+                    {
+                        memcpy(curRow, startRow, insetWidth * 2);
                     }
                 }
-                else // if (opacity != PAL_GFX_Bitmap::c_OpacityOpaque)
+                else
                 {
                     CLR_UINT16 lastPixel = *curPixel;
                     CLR_UINT16 interpolated = g_GraphicsDriver.NativeColorInterpolate(fillColor, lastPixel, opacity);
