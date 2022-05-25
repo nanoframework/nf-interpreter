@@ -317,7 +317,7 @@ void GraphicsDriver::DrawRectangleNative(
                     {
                         *curPixel = fillColor;
                     }
-                    
+
                     // Just memcpy the first row to all subsequent rows, which is moderately faster
                     for (int row = 1; row < insetHeight; row++, curRow += stride)
                     {
