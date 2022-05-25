@@ -306,7 +306,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     llConfig->cr2 = 0;
 
     // get chip select pin
-    uint32_t csPin = config.DeviceChipSelect;
+    int32_t csPin = config.DeviceChipSelect;
 
     // SPI mode
     switch (config.Spi_Mode)
@@ -373,7 +373,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
 
-    if (!config.ManualChipSelect)
+    if (csPin >= 0)
     {
         // make sure the CS pin is properly configured as GPIO, output & pushpull
         palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
@@ -439,14 +439,12 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         // get the LL SPI configuration, depending on passed parameters and buffer element size
         GetSPIConfig(sdev, wrc, &palSpi->Configuration);
-        if (sdev.ManualChipSelect)
-        {
-            palSpi->ChipSelect = -2;
-        }
-        else
-        {
+
+        // Set the ChipSelect pin
+        if (sdev.DeviceChipSelect >= 0)
             palSpi->ChipSelect = -1;
-        }
+        else
+            palSpi->ChipSelect = -2;
 
         // set bus config flag
         busConfigIsHalfDuplex = palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex;
