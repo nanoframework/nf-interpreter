@@ -714,6 +714,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NF_PAL_UART *palUart;
         uint8_t uartNum;
         int32_t bufferSize;
+        uint8_t watchChar;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -758,8 +759,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
 #endif
 
+        // get watch character
+        watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+        // set watch char, if set
+        if (watchChar != 0)
+        {
+            palUart->WatchChar = watchChar;
+        }
         // all the rest
-        palUart->WatchChar = 0;
         palUart->NewLineChar = 0;
         palUart->RxBytesToRead = 0;
         palUart->TxOngoingCount = 0;

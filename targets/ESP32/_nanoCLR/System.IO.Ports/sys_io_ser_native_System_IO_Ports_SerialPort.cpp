@@ -840,6 +840,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     uart_port_t uart_num;
     esp_err_t esp_err;
     int32_t bufferSize;
+    uint8_t watchChar;
 
     NF_PAL_UART *palUart;
 
@@ -910,6 +911,21 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     }
 
     NANOCLR_CHECK_HRESULT(NativeConfig___VOID(stack));
+
+    // Get the watch char
+    watchChar = (uint8_t)pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // get watch character
+    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        // Enable pattern detection for the serial device
+        uart_enable_pattern_det_baud_intr(uart_num, watchChar, 1, 9, 0, 00);
+        // Reset the pattern queue length to record at most 10 pattern positions.
+        uart_pattern_queue_reset(uart_num, 10);
+    }
 
     // Create a task to handle UART event from ISR
     snprintf(task_name, ARRAYSIZE(task_name), "uart%d_events", uart_num);
