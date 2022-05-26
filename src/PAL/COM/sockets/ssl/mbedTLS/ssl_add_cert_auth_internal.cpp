@@ -9,11 +9,8 @@
 bool ssl_add_cert_auth_internal( 
     int contextHandle, 
     const char* certificate, 
-    int certLength, 
-    const char* certPassword )
+    int certLength)
 {
-    (void)certPassword;
-
     mbedTLS_NFContext* context;
 
     // Check contextHandle range
