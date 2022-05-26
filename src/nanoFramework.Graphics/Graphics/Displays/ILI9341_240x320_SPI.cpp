@@ -310,10 +310,8 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
 
     CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
 
-    // Position to offset in data[] for start of window
-    // CLR_UINT16 offset = (y * Attributes.Width) + x;
-    // CLR_UINT16 offset = y * width;
-    // StartOfLine_src += offset;
+    // Offset for window start
+    StartOfLine_src += (y * Attributes.Width) + x;
 
     CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
     CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
@@ -351,7 +349,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
         }
 
         // Next row in data[]
-        StartOfLine_src += width;
+        StartOfLine_src += Attributes.Width;
     }
 
     // Send remaining data in transfer buffer to SPI
