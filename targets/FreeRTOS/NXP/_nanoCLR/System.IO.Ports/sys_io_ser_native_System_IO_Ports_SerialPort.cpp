@@ -690,6 +690,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NF_PAL_UART *palUart = NULL;
     BaseType_t xReturned;
     int32_t bufferSize;
+    uint8_t watchChar;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -720,9 +721,17 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
     palUart->RxBytesToRead = 0;
 
+    // get watch character
+    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        palUart->WatchChar = watchChar;
+    }
+
     // now all the rest
     palUart->TxOngoingCount = 0;
-    palUart->WatchChar = 0;
     palUart->NewLineChar = 0;
 
     // Get default config structure for initializing given UART peripheral and enable TX, RX

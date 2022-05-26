@@ -856,6 +856,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     NF_PAL_UART *palUart;
     int32_t bufferSize;
+    uint8_t watchChar;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -943,6 +944,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->Uart_cfg.txend1_cb = TxEnd1;
     palUart->Uart_cfg.rxchar_cb = RxChar;
     // palUart->Uart_cfg.rxend_cb = RxEnd;
+
+    // get watch character
+    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        palUart->WatchChar = watchChar;
+    }
 
     // call the configure
     return NativeConfig___VOID(stack);
