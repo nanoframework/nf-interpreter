@@ -195,22 +195,25 @@ void uart_event_task_sys(void *pvParameters)
                         }
                         else
                         {
-                            // no read operation ongoing, so fire an event
-
-                            // post a managed event with the port index and event code (check if there is a watch char
-                            // in the buffer or just any char)
-                            //  check if callbacks are registered so this is called only if there is anyone listening
-                            //  otherwise don't bother
-                            if (palUart
-                                    ->SerialDevice[Library_sys_io_ser_native_System_IO_Ports_SerialPort::
-                                                       FIELD___callbacksDataReceivedEvent]
-                                    .Dereference() != NULL)
+                            // no read operation ongoing, so fire an event, if the available bytes are above the
+                            // threshold
+                            if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
                             {
-                                PostManagedEvent(
-                                    EVENT_SERIAL,
-                                    0,
-                                    UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                                    (watchCharPos > -1) ? SerialData_WatchChar : SerialData_Chars);
+                                // post a managed event with the port index and event code (check if there is a watch
+                                // char in the buffer or just any char)
+                                //  check if callbacks are registered so this is called only if there is anyone
+                                //  listening otherwise don't bother
+                                if (palUart
+                                        ->SerialDevice[Library_sys_io_ser_native_System_IO_Ports_SerialPort::
+                                                           FIELD___callbacksDataReceivedEvent]
+                                        .Dereference() != NULL)
+                                {
+                                    PostManagedEvent(
+                                        EVENT_SERIAL,
+                                        0,
+                                        UART_NUM_TO_PORT_INDEX(palUart->UartNum),
+                                        (watchCharPos > -1) ? SerialData_WatchChar : SerialData_Chars);
+                                }
                             }
                         }
 
@@ -1331,6 +1334,53 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     // null pointers and vars
     pThis = NULL;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    int32_t threshold;
+    uart_port_t uart_num;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
+
+    if (threshold <= 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    // Get UART number for serial device
+    uart_num = (uart_port_t)PORT_INDEX_TO_UART_NUM(pThis[FIELD___portIndex].NumericByRef().s4);
+
+    // get pointer to PAL UART
+    palUart = GetPalUartFromUartNum_sys(uart_num);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    palUart->ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case port is open and the new threshold was set
+    // to a value lower than the bytes that are already available
+    if (pThis[FIELD___opened].NumericByRef().u1 && (uint32_t)threshold <= palUart->RxRingBuffer.Length())
+    {
+        PostManagedEvent(EVENT_SERIAL, 0, UART_NUM_TO_PORT_INDEX(palUart->UartNum), SerialData_Chars);
+    }
 
     NANOCLR_NOCLEANUP();
 }
