@@ -19,10 +19,8 @@ void SSL_GetCertDateTime_internal(DATE_TIME_INFO *dt, mbedtls_x509_time *mt)
     dt->tzOffset = 0;
 }
 
-bool ssl_parse_certificate_internal(void *certificate, size_t size, void *pwd, void *x509CertData)
+bool ssl_parse_certificate_internal(void *certificate, size_t size, void *x509CertData)
 {
-    (void)pwd;
-
     int ret;
     X509CertData *x509 = (X509CertData *)x509CertData;
 

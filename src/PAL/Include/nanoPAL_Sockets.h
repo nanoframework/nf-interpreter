@@ -652,8 +652,8 @@ bool SSL_ServerInit(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *privateKeyPassword,
+    int privateKeyPasswordLength,
     int &sslContextHandle,
     bool useDeviceCertificate);
 
@@ -664,23 +664,19 @@ bool SSL_ClientInit(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *privateKeyPassword,
+    int privateKeyPasswordLength,
     int &sslContextHandle,
     bool useDeviceCertificate);
 
-bool SSL_AddCertificateAuthority(
-    int sslContextHandle,
-    const char *certificate,
-    int certLength,
-    const char *certPassword);
+bool SSL_AddCertificateAuthority(int sslContextHandle, const char *certificate, int certLength);
 bool SSL_ExitContext(int sslContextHandle);
 int SSL_Accept(int socket, int sslContextHandle);
 int SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle);
 int SSL_Write(int socket, const char *Data, size_t size);
 int SSL_Read(int socket, char *Data, size_t size);
 int SSL_CloseSocket(int socket);
-bool SSL_ParseCertificate(const char *certificate, size_t certLength, const char *password, X509CertData *certData);
+bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertData *certData);
 int SSL_DecodePrivateKey(
     const unsigned char *key,
     size_t keyLength,

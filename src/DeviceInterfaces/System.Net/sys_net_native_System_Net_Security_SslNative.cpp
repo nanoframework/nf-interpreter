@@ -423,9 +423,9 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
     CLR_RT_HeapBlock_Array *privateKey = NULL;
     CLR_UINT8 *sslCert = NULL;
     volatile int result;
-    const char *password = NULL;
-    CLR_UINT32 passwordLength = 0;
     uint8_t *pk = NULL;
+    const char *pkPassword = NULL;
+    CLR_UINT32 pkPasswordLength = 0;
 
     if (hbCert != NULL)
     {
@@ -447,21 +447,21 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
             if (privateKey)
             {
                 pk = privateKey->GetFirstElement();
+
+                // get password field
+                CLR_RT_HeapBlock *passwordHb = hbCert[X509Certificate2::FIELD___password].Dereference();
+
+                // get password length, if there is a password
+                if (passwordHb)
+                {
+                    pkPassword = passwordHb->StringText();
+                    pkPasswordLength = hal_strlen_s(pkPassword);
+                }
             }
         }
 
         // get certificate
         sslCert = arrCert->GetFirstElement();
-
-        // get password field
-        CLR_RT_HeapBlock *passwordHb = hbCert[X509Certificate::FIELD___password].Dereference();
-
-        // get password length, if there is a password
-        if (passwordHb)
-        {
-            password = passwordHb->StringText();
-            passwordLength = hal_strlen_s(password);
-        }
     }
 
     if (isServer)
@@ -474,8 +474,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  sslCert == NULL ? 0 : arrCert->m_numOfElements,
                  pk,
                  pk == NULL ? 0 : privateKey->m_numOfElements,
-                 password,
-                 passwordLength,
+                 pkPassword,
+                 pkPasswordLength,
                  sslContext,
                  useDeviceCertificate)
                  ? 0
@@ -491,8 +491,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
                  sslCert == NULL ? 0 : arrCert->m_numOfElements,
                  pk,
                  pk == NULL ? 0 : privateKey->m_numOfElements,
-                 password,
-                 passwordLength,
+                 pkPassword,
+                 pkPasswordLength,
                  sslContext,
                  useDeviceCertificate)
                  ? 0
@@ -508,27 +508,14 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
         // If arrCert == NULL then the certificate is an X509Certificate2 which uses a certificate handle
         if (arrCert == NULL)
         {
-            CLR_INT32 sessionCtx = 0;
-
             arrCert = caCert[X509Certificate::FIELD___handle].DereferenceArray();
             FAULT_ON_NULL(arrCert);
 
             sslCert = arrCert->GetFirstElement();
 
-            arrCert = caCert[X509Certificate::FIELD___sessionHandle].DereferenceArray();
-            FAULT_ON_NULL(arrCert);
-
-            sessionCtx = *(int32_t *)arrCert->GetFirstElement();
-
-            // pass the session handle down as the password parameter and the certificate handle as the data parameter
+            // pass the certificate handle as the data parameter
             result =
-                (SSL_AddCertificateAuthority(
-                     sslContext,
-                     (const char *)sslCert,
-                     arrCert->m_numOfElements,
-                     (LPCSTR)&sessionCtx)
-                     ? 0
-                     : -1);
+                (SSL_AddCertificateAuthority(sslContext, (const char *)sslCert, arrCert->m_numOfElements) ? 0 : -1);
 
             NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
         }
@@ -539,15 +526,8 @@ HRESULT Library_sys_net_native_System_Net_Security_SslNative::InitHelper(CLR_RT_
 
             sslCert = arrCert->GetFirstElement();
 
-            CLR_RT_HeapBlock *hbPwd = caCert[X509Certificate::FIELD___password].Dereference();
-            FAULT_ON_NULL(hbPwd);
-
-            LPCSTR szCAPwd = hbPwd->StringText();
-
             result =
-                (SSL_AddCertificateAuthority(sslContext, (const char *)sslCert, arrCert->m_numOfElements, szCAPwd)
-                     ? 0
-                     : -1);
+                (SSL_AddCertificateAuthority(sslContext, (const char *)sslCert, arrCert->m_numOfElements) ? 0 : -1);
 
             NANOCLR_CHECK_HRESULT(ThrowOnError(stack, result));
         }
