@@ -75,7 +75,9 @@ __nfweak uint32_t CPU_SPI_PortsCount()
     while (map > 0)
     {
         if (map & 0x01)
+        {
             count++;
+        }
         map >>= 1;
     }
     return count;
@@ -104,7 +106,9 @@ static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
 
     // Validate type, bus, deviceIndex
     if (type != CPU_DEVICE_TYPE_SPI || spiBus >= NUM_SPI_BUSES || deviceIndex >= NUM_SPI_BUSES)
+    {
         return false;
+    }
 
     return true;
 }
@@ -119,12 +123,10 @@ static int FindFreeDeviceSlotSpi(int spiBus, int32_t cs)
         {
             return deviceIndex;
         }
-
         // Check device chip select not already in use
-        if (cs != -1)
+        if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
         {
-            if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
-                return -2;
+            return -2;
         }
     }
 
@@ -284,7 +286,9 @@ HRESULT nanoSPI_OpenDeviceEx(
 
     {
         if (spiconfig[spiBusIndex].devicesInUse > 0)
+        {
             return CLR_E_NOT_SUPPORTED;
+        }
 
     if (deviceIndex < 0)
     {
@@ -310,8 +314,10 @@ HRESULT nanoSPI_OpenDeviceEx(
         spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse--;
 
         // Unreserve CS pin
-        if (spiconfig[spiBusIndex].deviceConfig[deviceIndex].DeviceChipSelect >= 0)
+        if (!spiconfig[spiBusIndex].deviceConfig[deviceIndex].ManualChipSelect)
+        {
             CPU_GPIO_ReservePin(spiconfig[spiBusIndex].deviceConfig->DeviceChipSelect, false);
+        }
 
         // Last device on bus then close bus and also remove bus pin reserves
         if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse <= 0)
@@ -353,7 +359,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
     // Used to compute length of time for each IO to see if this is a long running operation
     // Store for each device as each device could use a different bit rate
-    pBusConfig->byteTime[deviceIndex] = (1.0 / spiDeviceConfig.Clock_RateHz) * 1000 * 8;
+    pBusConfig->byteTime[deviceIndex] = (float)(1.0 / spiDeviceConfig.Clock_RateHz) * 1000 * 8;
 
     pBusConfig->devicesInUse++;
 
