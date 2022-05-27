@@ -319,8 +319,10 @@ void GraphicsDriver::DrawRectangleNative(
                     }
 
                     // Just memcpy the first row to all subsequent rows, which is moderately faster
-                    for (int row = 1; row < insetHeight; row++, curRow += stride)
+                    for (int row = 1; row < insetHeight; row++)
                     {
+                        curRow += stride;
+
                         memcpy(curRow, startRow, insetWidth * 2);
                     }
                 }
