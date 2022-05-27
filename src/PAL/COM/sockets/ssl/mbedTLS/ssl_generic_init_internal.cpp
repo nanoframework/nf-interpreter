@@ -16,8 +16,8 @@ bool ssl_generic_init_internal(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *pkPassword,
+    int pkPasswordLength,
     int &contextHandle,
     bool useDeviceCertificate,
     bool isServer)
@@ -234,8 +234,8 @@ bool ssl_generic_init_internal(
                     context->pk,
                     privateKey,
                     privateKeyLength,
-                    (const unsigned char *)password,
-                    passwordLength) < 0)
+                    (const unsigned char *)pkPassword,
+                    pkPasswordLength) < 0)
             {
                 // private key parse failed
                 goto error;

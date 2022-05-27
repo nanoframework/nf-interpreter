@@ -2807,8 +2807,11 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         fArray = true;
     }
 
-    if (desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    // only check reflection levels if this is not an array
+    if (!fArray && desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    {
         return false;
+    }
 
     if (desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
     {

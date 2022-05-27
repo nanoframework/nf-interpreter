@@ -28,6 +28,8 @@ typedef struct
     bool SignalLevelsInverted;
 
     uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
+
 } NF_PAL_UART;
 
 #endif // SYS_IO_SER_NATIVE_

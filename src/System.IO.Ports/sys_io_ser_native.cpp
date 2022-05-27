@@ -66,11 +66,13 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeDispose___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeSetWatchChar___VOID,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString___VOID__STRING__BOOLEAN,
+    Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4,
     NULL,
     NULL,
     Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING,
@@ -100,9 +102,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_Ports =
 {
     "System.IO.Ports",
-    0xCB7C0ECA,
+    0xB798CE30,
     method_lookup,
-    { 100, 1, 4, 0 }
+    { 100, 1, 6, 0 }
 };
 
 // clang-format on

@@ -32,6 +32,8 @@ typedef struct
 
     uint8_t WatchChar;
     uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
+
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
