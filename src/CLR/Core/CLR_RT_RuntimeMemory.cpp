@@ -111,7 +111,7 @@
 size_t LinkArraySize   () { return (PLATFORM_DEPENDENT_ENTRY_SIZE  + PLATFORM_DEPENDENT_HASH_TABLE_SIZE); } 
 size_t LinkMRUArraySize() { return (PLATFORM_DEPENDENT_ENTRY_SIZE  + 1                                 ); } 
 size_t PayloadArraySize() { return  PLATFORM_DEPENDENT_ENTRY_SIZE;                                        } 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 size_t InlineBufferCount() { return PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE; }
 #endif
 
@@ -119,7 +119,7 @@ unsigned int g_scratchVirtualMethodTableLink   [ LINK_SIZE_BYTES    * (PLATFORM_
 unsigned int g_scratchVirtualMethodTableLinkMRU[ LINK_SIZE_BYTES    * (PLATFORM_DEPENDENT_ENTRY_SIZE  + 1                                 ) / sizeof(unsigned int) + 1 ];
 unsigned int g_scratchVirtualMethodPayload     [ PAYLOAD_SIZE_BYTES *  PLATFORM_DEPENDENT_ENTRY_SIZE                                        / sizeof(unsigned int) + 1 ]; 
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 unsigned int g_scratchInlineBuffer[ INLINE_SIZE_BYTES * PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE / sizeof(unsigned int) + 1 ];
 #endif
 

@@ -2125,7 +2125,7 @@ struct CLR_RT_HeapCluster : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELO
 
 //--//
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 struct CLR_RT_InlineFrame
 {
     CLR_RT_HeapBlock *m_locals;
@@ -2234,7 +2234,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
         void *m_customPointer;
     };
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer *m_inlineFrame;
 #endif
 
@@ -2262,7 +2262,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
     void Pop();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool PushInline(
         CLR_PMETADATA &ip,
         CLR_RT_Assembly *&assm,
@@ -3136,7 +3136,7 @@ extern size_t LinkArraySize();
 extern size_t LinkMRUArraySize();
 extern size_t PayloadArraySize();
 extern size_t InterruptRecords();
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 extern size_t InlineBufferCount();
 #endif
 
@@ -3144,7 +3144,7 @@ extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
 extern CLR_UINT32 g_scratchVirtualMethodTableLinkMRU[];
 extern CLR_UINT32 g_scratchVirtualMethodPayload[];
 extern CLR_UINT32 g_scratchInterruptDispatchingStorage[];
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 extern CLR_UINT32 g_scratchInlineBuffer[];
 #endif
 
@@ -3289,7 +3289,7 @@ struct CLR_RT_EventCache
     BoundedList *m_events;
 
     VirtualMethodTable m_lookup_VirtualMethod;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineBuffer *m_inlineBufferStart;
 #endif
 
@@ -3309,7 +3309,7 @@ struct CLR_RT_EventCache
         const CLR_RT_MethodDef_Index &mdVirtual,
         CLR_RT_MethodDef_Index &md);
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     bool GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer);
     bool FreeInlineBuffer(CLR_RT_InlineBuffer *pBuffer);
 #endif

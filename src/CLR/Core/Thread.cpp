@@ -767,7 +767,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
     // point of the filter. Try to resume from the frame of the last filter executed.
     CLR_RT_StackFrame *stack = us.m_handlerStack;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineFrame tmpInline;
     memset(&tmpInline, 0, sizeof(tmpInline));
 #endif
@@ -849,7 +849,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                     us.m_handlerBlockEnd = eh.m_handlerEnd;
                     us.m_handlerStack = stack;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if (tmpInline.m_IP)
                     {
                         us.m_flags |= UnwindStack::c_MagicCatchForInline;
@@ -987,7 +987,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (stack->m_inlineFrame != NULL && tmpInline.m_IP == NULL)
         {
             stack->SaveStack(tmpInline);
@@ -1038,7 +1038,7 @@ ContinueAndExit:
 
     NANOCLR_CLEANUP();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     if (tmpInline.m_IP)
     {
         stack->RestoreStack(tmpInline);
@@ -1119,7 +1119,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                     iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if (iterStack->m_inlineFrame == NULL)
 #endif
                     {
@@ -1132,7 +1132,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
 
                 if (iterStack == us.m_handlerStack)
                 {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if (iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
 #endif
                     {
@@ -1156,7 +1156,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                         m_currentException.SetObjectReference(NULL);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                         if (iterStack->m_inlineFrame == NULL)
 #endif
                         {
@@ -1235,7 +1235,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (iterStack->m_inlineFrame)
             {
                 iterStack->PopInline();
@@ -1268,7 +1268,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (iterStack->m_inlineFrame)
         {
             iterStack->PopInline();
