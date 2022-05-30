@@ -3289,7 +3289,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Threads_Prepare(CLR_RT_DblLinkedList &th
                     }
                 }
             }
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 if (call->m_inlineFrame->m_frame.m_call.DebuggingInfo().HasBreakpoint())
