@@ -59,7 +59,7 @@ typedef CLR_RT_AddressToSymbolMap::iterator CLR_RT_AddressToSymbolMapIter;
 #endif // #if defined(_WIN32)
 
 #if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_RUNTIME_H, 4)
+#pragma pack(push, __NANOCLR_RUNTIME_H__, 4)
 #endif
 
 #if defined(_WIN32)
@@ -3877,7 +3877,7 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
 //--//
 
 #if defined(_MSC_VER)
-#pragma pack(pop, NANOCLR_RUNTIME_H)
+#pragma pack(pop, __NANOCLR_RUNTIME_H__)
 #endif
 
 extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];

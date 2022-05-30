@@ -80,7 +80,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_TYPES_H, 4)
+#pragma pack(push, __NANOCLR_TYPES_H__, 4)
 #endif
 
 enum CLR_OPCODE
@@ -1312,7 +1312,7 @@ struct CLR_RECORD_RESOURCE
 };
 
 #if defined(_MSC_VER)
-#pragma pack(pop, NANOCLR_TYPES_H)
+#pragma pack(pop, __NANOCLR_TYPES_H__)
 #endif
 
 #endif // NANOCLR_TYPES_H
