@@ -1277,32 +1277,33 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8," + terminator
     // and init with the terminator
-    char deviceSelectorString[40 + 1] = {0};
+    static char deviceSelectorString[] =
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    strcat(deviceSelectorString, "COM1,");
+        "COM1,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    strcat(deviceSelectorString, "COM3,");
+        "COM3,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    strcat(deviceSelectorString, "COM4,");
+        "COM4,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    strcat(deviceSelectorString, "COM5,");
+        "COM5,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    strcat(deviceSelectorString, "COM6,");
+        "COM6,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    strcat(deviceSelectorString, "COM7,");
+        "COM7,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    strcat(deviceSelectorString, "COM8,");
+        "COM8,"
 #endif
+        ;
 
     // replace the last comma with a terminator
     deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';

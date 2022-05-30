@@ -1084,11 +1084,12 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM2," + terminator
     // and init with the terminator
-    char deviceSelectorString[4 + 1] = {0};
+    static char deviceSelectorString[] =
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
+        ;
 
     // replace the last comma with a terminator
     deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
