@@ -571,10 +571,10 @@ else()
 endif()
 
 
-if(API_nanoFramework.Devices.Can)
-    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+if(API_nanoFramework.Device.Can)
+    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Device.Can")
 else()
-    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Device.Can")
 endif()
 
 
@@ -614,7 +614,7 @@ if( API_nanoFramework.Device.OneWire OR
     API_System.Net OR
     API_System.Device.Gpio OR
     API_System.IO.Ports OR
-    API_nanoFramework.Devices.Can OR
+    API_nanoFramework.Device.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)
 

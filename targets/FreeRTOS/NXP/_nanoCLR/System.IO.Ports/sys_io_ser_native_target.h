@@ -30,6 +30,7 @@ typedef struct
     uint16_t RxBytesToRead;
     uint8_t WatchChar;
     uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
 
     TaskHandle_t xRTaskToNotify;
     TaskHandle_t xWTaskToNotify;

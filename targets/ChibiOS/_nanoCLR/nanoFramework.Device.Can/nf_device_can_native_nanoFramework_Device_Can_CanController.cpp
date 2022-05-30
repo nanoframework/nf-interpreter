@@ -3,11 +3,11 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "nf_devices_can_native_target.h"
+#include "nf_device_can_native_target.h"
 
 // define these types here to make it shorter and improve code readability
-typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanSettings CanSettings;
-typedef Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage ManagedCanMessage;
+typedef Library_nf_device_can_native_nanoFramework_Device_Can_CanSettings CanSettings;
+typedef Library_nf_device_can_native_nanoFramework_Device_Can_CanMessage ManagedCanMessage;
 
 static void RxMessage(CANDriver *canp, uint32_t flags)
 {
@@ -57,7 +57,7 @@ static void RxMessage(CANDriver *canp, uint32_t flags)
 }
 
 /////////////////////////////////////////////////////////
-// CAN PAL strucs delcared in nf_devices_can_native.h  //
+// CAN PAL strucs delcared in nf_device_can_native.h  //
 /////////////////////////////////////////////////////////
 #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
 NF_PAL_CAN Can1_PAL;
@@ -69,8 +69,8 @@ NF_PAL_CAN Can2_PAL;
 NF_PAL_CAN Can3_PAL;
 #endif
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
-    WriteMessage___VOID__nanoFrameworkDevicesCanCanMessage(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
+    WriteMessage___VOID__nanoFrameworkDeviceCanCanMessage(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -89,19 +89,20 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
         uint8_t controllerIndex = (uint8_t)(pThis[FIELD___controllerId].NumericByRef().s4);
 
         // dereference message fields
-        id = (uint32_t)(
-            pMessage[Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___id].NumericByRef().u4);
-        msgIdType = (CanMessageIdType)(
-            pMessage[Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___identifierType]
-                .NumericByRefConst()
-                .u1);
-        msgFrameType = (CanMessageFrameType)(
-            pMessage[Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___frameType]
-                .NumericByRefConst()
-                .u1);
+        id = (uint32_t)(pMessage[Library_nf_device_can_native_nanoFramework_Device_Can_CanMessage::FIELD___id]
+                            .NumericByRef()
+                            .u4);
+        msgIdType = (CanMessageIdType)(pMessage[Library_nf_device_can_native_nanoFramework_Device_Can_CanMessage::
+                                                    FIELD___identifierType]
+                                           .NumericByRefConst()
+                                           .u1);
+        msgFrameType = (CanMessageFrameType)(pMessage[Library_nf_device_can_native_nanoFramework_Device_Can_CanMessage::
+                                                          FIELD___frameType]
+                                                 .NumericByRefConst()
+                                                 .u1);
 
         // get message to transmite
-        message = pMessage[Library_nf_devices_can_native_nanoFramework_Devices_Can_CanMessage::FIELD___message]
+        message = pMessage[Library_nf_device_can_native_nanoFramework_Device_Can_CanMessage::FIELD___message]
                       .DereferenceArray();
 
         // message max length is 8 bytes
@@ -157,8 +158,8 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
-    GetMessage___nanoFrameworkDevicesCanCanMessage(CLR_RT_StackFrame &stack)
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
+    GetMessage___nanoFrameworkDeviceCanCanMessage(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -212,7 +213,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
     messageCount = palCan->MsgRingBuffer.Pop(&canFrame, 1);
 
     // find <CanMessage> type, don't bother checking the result as the type exists for sure
-    g_CLR_RT_TypeSystem.FindTypeDef("CanMessage", "nanoFramework.Devices.Can", canMessageTypeDef);
+    g_CLR_RT_TypeSystem.FindTypeDef("CanMessage", "nanoFramework.Device.Can", canMessageTypeDef);
 
     // create an instance of <StorageFolder>
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), canMessageTypeDef));
@@ -270,7 +271,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::DisposeNative___VOID(
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::DisposeNative___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -321,8 +322,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::D
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::NativeInit___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -387,7 +387,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::NativeUpdateCallbacks___VOID(
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::NativeUpdateCallbacks___VOID(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -449,7 +449,7 @@ HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::N
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_devices_can_native_nanoFramework_Devices_Can_CanController::GetDeviceSelector___STATIC__STRING(
+HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::GetDeviceSelector___STATIC__STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

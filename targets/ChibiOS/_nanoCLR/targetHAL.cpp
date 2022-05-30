@@ -15,7 +15,7 @@
 #include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
-#include <nf_devices_can_native_target.h>
+#include <nf_device_can_native_target.h>
 #endif
 #if (HAL_USE_I2C == TRUE)
 #include <sys_dev_i2c_native_target.h>

@@ -25,6 +25,7 @@ typedef struct
 
     uint8_t WatchChar;
     uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
 
     bool SignalLevelsInverted;
 
@@ -59,7 +60,7 @@ extern NF_PAL_UART Uart8_PAL;
 #endif
 
 // the following macro defines a function that configures the GPIO pins for a STM32 UART/USART
-// it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeConfig function
+// it gets called in the System_IO_Ports_SerialPort::NativeConfig function
 // this is required because the UART/USART peripherals can use multiple GPIO configuration combinations
 #define UART_CONFIG_PINS(num, gpio_port_tx, gpio_port_rx, tx_pin, rx_pin, alternate_function)                          \
     void ConfigPins_UART##num()                                                                                        \
@@ -70,7 +71,7 @@ extern NF_PAL_UART Uart8_PAL;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // when a UART/USART is defined the declarations below will have the real function/configuration
-// in the target folder @ target_windows_devices_serialcommunication_config.cpp
+// in the target folder @ target_system_io_ports_config.cpp
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void ConfigPins_UART1();
 void ConfigPins_UART2();
@@ -82,7 +83,7 @@ void ConfigPins_UART7();
 void ConfigPins_UART8();
 
 // the following macro defines a function that initializes an UART struct
-// it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeInit function
+// it gets called in the system_io_ports_SerialDevice::NativeInit function
 
 #if defined(STM32F7XX) || defined(STM32F0XX)
 
@@ -109,7 +110,7 @@ void ConfigPins_UART8();
 
 #else
 
-// all other STM32F use UART driver v1 which has a different UARTConfig struct
+// all other STM32F series use UART driver v1 which has a different UARTConfig struct
 #define UART_INIT(num)                                                                                                 \
     void Init_UART##num()                                                                                              \
     {                                                                                                                  \
@@ -131,7 +132,7 @@ void ConfigPins_UART8();
 #endif
 
 // when a UART/USART is defined the declarations below will have the real function/configuration
-// in the target folder @ target_windows_devices_serialcommunication_config.cpp
+// in the target folder @ target_system_io_ports_config.cpp
 void Init_UART1();
 void Init_UART2();
 void Init_UART3();
@@ -142,7 +143,7 @@ void Init_UART7();
 void Init_UART8();
 
 // the following macro defines a function that un initializes an UART struct
-// it gets called in the Windows_Devices_SerialCommunication_SerialDevice::NativeDispose function
+// it gets called in the System_IO_Ports_SerialPort::NativeDispose function
 #define UART_UNINIT(num)                                                                                               \
     void UnInit_UART##num()                                                                                            \
     {                                                                                                                  \
@@ -155,7 +156,7 @@ void Init_UART8();
     }
 
 // when a UART/USART is defined the declarations below will have the real function/configuration
-// in the target folder @ target_windows_devices_serialcommunication_config.cpp
+// in the target folder @ target_system_io_ports_config.cpp
 void UnInit_UART1();
 void UnInit_UART2();
 void UnInit_UART3();

@@ -97,7 +97,7 @@
           "NF_NETWORKING_SNTP": "ON-default-to-add-SNTP-client-requires-networking",
           "NF_SECURITY_MBEDTLS": "ON-default-OFF-to-disable-network-security-from-mbedTLS",
           "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
-          "API_nanoFramework.Devices.Can": "OFF-default-ON-to-add-this-API",
+          "API_nanoFramework.Device.Can": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.Device.OneWire": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.ResourceManager": "OFF-default-ON-to-add-this-API",
           "API_nanoFramework.System.Collections": "OFF-default-ON-to-add-this-API",

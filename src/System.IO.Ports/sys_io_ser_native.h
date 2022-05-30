@@ -106,6 +106,7 @@ struct Library_sys_io_ser_native_System_IO_Ports_SerialPort
     NANOCLR_NATIVE_DECLARE(NativeConfig___VOID);
     NANOCLR_NATIVE_DECLARE(NativeSetWatchChar___VOID);
     NANOCLR_NATIVE_DECLARE(NativeWriteString___VOID__STRING__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeReceivedBytesThreshold___VOID__I4);
     NANOCLR_NATIVE_DECLARE(GetDeviceSelector___STATIC__STRING);
 
     //--//
