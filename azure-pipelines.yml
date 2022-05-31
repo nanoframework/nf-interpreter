@@ -587,68 +587,22 @@ jobs:
       ST_B_L475E_IOT01A:
         TargetBoard: ST_B_L475E_IOT01A
         TargetSeries: 'stm32l4xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32L4xx
-          -DRTOS=AzureRTOS
-          -DWIFI_DRIVER="ISM43362"
-          -DCHIBIOS_HAL_REQUIRED=ON
-          -DSTM32_CUBE_PACKAGE_REQUIRED=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_SDCARD=OFF
-          -DAPI_System.Math=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DAPI_System.Device.Gpio=ON
-          -DAPI_System.Net=ON
-          -DAPI_Windows.Storage=OFF
-          -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_Windows.Devices.I2c=ON
-          -DAPI_System.Device.I2c=ON
-          -DAPI_nanoFramework.ResourceManager=OFF
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
+        BuildOptions: 
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
 
-      ORGPAL_PALTHREE:
-        TargetBoard: ORGPAL_PALTHREE
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: >-
-          -DTARGET_SERIES=STM32F7xx
-          -DRTOS=AzureRTOS
-          -DSTM32_CUBE_PACKAGE_REQUIRED=ON
-          -DAZURERTOS_USBX_REQUIRED=OFF
-          -DUSBX_FEATURE_CDC=OFF
-          -DETHERNET_DRIVER="LAN8742"
-          -DCHIBIOS_HAL_REQUIRED=ON
-          -DSUPPORT_ANY_BASE_CONVERSION=ON
-          -DNF_FEATURE_USE_SPIFFS=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_HAS_SDCARD=OFF
-          -DAPI_System.Math=ON
-          -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
-          -DAPI_System.Device.Gpio=ON
-          -DAPI_System.Net=ON
-          -DAPI_Windows.Storage=OFF
-          -DAPI_System.IO.Ports=ON
-          -DAPI_Windows.Devices.SerialCommunication=ON
-          -DAPI_Windows.Devices.I2c=ON
-          -DAPI_System.Device.I2c=ON
-          -DAPI_nanoFramework.ResourceManager=OFF
-          -DAPI_nanoFramework.System.Collections=ON
-          -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version: 
-        NeedsDFU: true
-        NeedsSRECORD: false
+      # ORGPAL_PALTHREE:
+      #   TargetBoard: ORGPAL_PALTHREE
+      #   TargetSeries: 'stm32f7xx'
+      #   BuildOptions:
+      #   GccArm_Version: 
+      #   NeedsDFU: true
+      #   NeedsSRECORD: false
 
   variables:
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_7_3_versioncounter', 0)]
+    REVISION: $[counter('AZUREROTOS_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'azure_rtos'
 
