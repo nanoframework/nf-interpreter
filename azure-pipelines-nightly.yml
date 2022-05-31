@@ -244,13 +244,13 @@ jobs:
 
   strategy:
     matrix:
-      ORGPAL_PALTHREE:
-        TargetBoard: ORGPAL_PALTHREE
-        TargetSeries: 'stm32f7xx'
-        BuildOptions: 
-        GccArm_Version:
-        NeedsDFU: true
-        NeedsSRECORD: false
+      # ORGPAL_PALTHREE:
+      #   TargetBoard: ORGPAL_PALTHREE
+      #   TargetSeries: 'stm32f7xx'
+      #   BuildOptions: 
+      #   GccArm_Version:
+      #   NeedsDFU: true
+      #   NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
