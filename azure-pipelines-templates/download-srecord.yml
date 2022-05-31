@@ -16,7 +16,7 @@ steps:
     displayName: Install SRECORD
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-srecord.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-srecord.ps1'
         failOnStderr: true
 
   - task: ExtractFiles@1
