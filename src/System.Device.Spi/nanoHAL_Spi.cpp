@@ -121,9 +121,10 @@ static int FindFreeDeviceSlotSpi(int spiBus, int32_t cs)
         }
 
         // Check device chip select not already in use
-        if (spiconfig[spiBus].deviceCongfig[deviceIndex].DeviceChipSelect == cs)
+        if (cs != -1)
         {
-            return -2;
+            if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
+                return -2;
         }
     }
 
@@ -285,25 +286,18 @@ HRESULT nanoSPI_OpenDeviceEx(
         if (spiconfig[spiBusIndex].devicesInUse > 0)
             return CLR_E_NOT_SUPPORTED;
 
-        deviceIndex = 0;
-    }
-    else
+    if (deviceIndex < 0)
     {
-        deviceIndex = FindFreeDeviceSlotSpi(spiBusIndex, spiDeviceConfig.DeviceChipSelect);
-
-        if (deviceIndex < 0)
+        if (deviceIndex == -1)
         {
-            if (deviceIndex == -1)
-            {
-                // No device slots left
-                return CLR_E_INDEX_OUT_OF_RANGE;
-            }
-            else
-            {
-                // Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
-                // currently raised in managed code
-                return CLR_E_NOT_SUPPORTED;
-            }
+            // No device slots left
+            return CLR_E_INDEX_OUT_OF_RANGE;
+        }
+        else
+        {
+            // Return NOT_SUPPORTED when Device already in use. Not really any other relevant exception that's
+            // currently raised in managed code
+            return CLR_E_NOT_SUPPORTED;
         }
     }
 

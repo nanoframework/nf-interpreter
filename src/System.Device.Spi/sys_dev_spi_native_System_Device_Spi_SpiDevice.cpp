@@ -299,6 +299,10 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
 
     spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
+    if (spiConfig.DeviceChipSelect < 0)
+    {
+        spiConfig.DeviceChipSelect = -1;
+    }
 
     if (chipSelect == 0)
     {
