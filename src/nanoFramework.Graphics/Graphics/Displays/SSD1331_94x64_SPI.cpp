@@ -239,7 +239,15 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
     return;
 }
 
-void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 

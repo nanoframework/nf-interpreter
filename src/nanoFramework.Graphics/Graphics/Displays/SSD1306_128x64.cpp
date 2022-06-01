@@ -169,7 +169,15 @@ void DisplayDriver::Clear()
 //
 // data[] reference to whole screen bitmap
 //
-void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // // With the current design the Colour data is packed into the lower two bytes of each data array element
     // // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
