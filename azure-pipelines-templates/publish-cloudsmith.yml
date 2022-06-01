@@ -51,7 +51,7 @@ steps:
         eq(variables['System.PullRequest.PullRequestId'], ''),
         or(
           eq(variables['ForceUpload'], true),
-          startsWith(variables['Build.SourceBranchName'], 'develop')
+          startsWith(variables['Build.SourceBranchName'], 'main')
         )
       )
     displayName: Zip binary files (preview)
@@ -91,10 +91,10 @@ steps:
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2
     condition: >-
-      or(
-        eq(variables['ForceUpload'], true),
-        and(
-          succeeded(),
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
           eq(variables['System.PullRequest.PullRequestId'], '')
         )
       )
@@ -145,11 +145,14 @@ steps:
 
   - task: PowerShell@2
     condition: >-
-      or(
-        eq(variables['ForceUpload'], true),
-        and(
-          succeeded(),
-          eq(variables['System.PullRequest.PullRequestId'], '')
+      and(
+        succeeded(),
+        or(
+          eq(variables['ForceUpload'], true),
+          and(
+            eq(variables['Build.SourceBranchName'], 'main'),
+            eq(variables['System.PullRequest.PullRequestId'], '')
+          )
         )
       )
     displayName: Upload package to Cloudsmith
