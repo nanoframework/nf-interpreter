@@ -623,6 +623,7 @@ int SOCK_getpeername(int socket, struct SOCK_sockaddr *name, int *namelen);
 int SOCK_getsockname(int socket, struct SOCK_sockaddr *name, int *namelen);
 int SOCK_recvfrom(int s, char *buf, int len, int flags, struct SOCK_sockaddr *from, int *fromlen);
 int SOCK_sendto(int s, const char *buf, int len, int flags, const struct SOCK_sockaddr *to, int tolen);
+int SOCK_UpgradeToSsl(int socket);
 
 // network adapter settings
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(
@@ -719,7 +720,7 @@ int HAL_SOCK_getpeername(int socket, struct SOCK_sockaddr *name, int *namelen);
 int HAL_SOCK_getsockname(int socket, struct SOCK_sockaddr *name, int *namelen);
 int HAL_SOCK_recvfrom(int s, char *buf, int len, int flags, struct SOCK_sockaddr *from, int *fromlen);
 int HAL_SOCK_sendto(int s, const char *buf, int len, int flags, const struct SOCK_sockaddr *to, int tolen);
-
+int HAL_SOCK_upgradeToSsl(int socket);
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(
     HAL_Configuration_NetworkInterface *config,
     uint32_t interfaceIndex);

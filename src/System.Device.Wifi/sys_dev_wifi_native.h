@@ -70,7 +70,6 @@ struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter
 
     //--//
     static HRESULT GetNetInterfaceIndex(CLR_RT_StackFrame &stack, int *pNetIndex);
-    static int StoreApRecordsToString(uint8_t *pTarget, wifi_ap_record_t *apRecords, uint16_t recordCount);
 };
 
 struct Library_sys_dev_wifi_native_System_Device_Wifi_WifiNetworkReport

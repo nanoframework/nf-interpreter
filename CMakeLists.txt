@@ -26,6 +26,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 #########################################
 
+message(STATUS "\n\nINFO: Running CMake ${CMAKE_VERSION}\n\n")
 
 ########################################################
 # path to local CMake modules
@@ -214,6 +215,22 @@ if(NF_FEATURE_DEBUGGER)
     message(STATUS "Support for debugging managed applications is included.")
 else()
     message(STATUS "Support for debugging managed applications **IS NOT** included.")
+endif()
+
+#################################################################
+# nanoFramework features
+#################################################################
+
+###################################################################
+# native send trace to stdio (default is OFF so no support for sending stdio to serial port)
+option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
+
+if(NF_TRACE_TO_STDIO)
+    set(TARGET_TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio is included.")
+else()
+    set(TARGET_TRACE_TO_STDIO FALSE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
 endif()
 
 #################################################################
@@ -485,14 +502,19 @@ else()
     set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 endif()
 
-if( API_System.Net)
+if(API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
-    # set Security module to use
-    if(NF_SECURITY_MBEDTLS )
+    # set Security module to use (not applicable for Azure RTOS)
+    if(NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
+    endif()
+
+    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND "${WIFI_DRIVER}" STREQUAL "ISM43362")
+        set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
+        set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()
 
     if(NF_NETWORKING_ENC28J60)
@@ -615,11 +637,15 @@ endif()
 # handles Networking support at HAL level
 
 if(USE_NETWORKING_OPTION)
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+
+    if(RTOS_CHIBIOS_CHECK)
+        set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+    endif()
 
     if(NF_SECURITY_MBEDTLS)
         message(STATUS "Support for networking enabled with security from mbedTLS")
-    elseif(RTOS_TI_SIMPLELINK_CHECK)
+    elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
+        # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")
     else()
         message(STATUS "Support for networking enabled WITHOUT security")
@@ -627,6 +653,14 @@ if(USE_NETWORKING_OPTION)
 
     if(NF_NETWORKING_ENC28J60)
         message(STATUS "Support for ENC28j60 network driver enabled")
+    endif()
+
+    if(WIFI_DRIVER)
+        message(STATUS "Using '${WIFI_DRIVER}' driver for Wi-Fi")
+    endif()
+
+    if(ETHERNET_DRIVER)
+        message(STATUS "Using '${ETHERNET_DRIVER}' driver for Ethernet")
     endif()
 
     # sanity check for missing configuration block option
@@ -689,6 +723,36 @@ endif()
 
 #################################################################
 
+########################################################
+# check availability of hex2dfu tool if specified
+if(DEFINED TOOL_HEX2DFU_PREFIX)
+    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
+        message(STATUS "")
+        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
+        message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
+        message(STATUS "")
+        message(FATAL_ERROR "hex2dfu tool not found")
+    else()
+        set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+    endif()
+endif()
+
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
 #################################################################
 # Override target name on device properties
 
@@ -706,16 +770,16 @@ set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
 
 # Define PLATFORM base path
-set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR})
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
 
 #######################
-# FreeRTOS
-if(RTOS_FREERTOS_CHECK)
+# FreeRTOS or AzureRTOS
+if(RTOS_FREERTOS_CHECK OR RTOS_AZURERTOS_CHECK)
 
-    add_subdirectory(targets/FreeRTOS)
+    add_subdirectory(${BASE_PATH_FOR_PLATFORM})
 
 #######################
-# FreeRTOS ESP32
+# ESP32
 elseif(RTOS_ESP32_CHECK)
 
     # enables embedded USB CDC 
@@ -792,8 +856,7 @@ elseif(RTOS_ESP32_CHECK)
 
     nf_clear_output_files_nanoclr()
 
-#######################
-# All standard nanoFramework Platforms
+# all other platforms
 else()
 
     # now add the subdirectory for the board
@@ -827,8 +890,10 @@ else()
 
     # Define base path for the class libraries
     nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR)
+    
     # add common directory for TARGET
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
+    
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 

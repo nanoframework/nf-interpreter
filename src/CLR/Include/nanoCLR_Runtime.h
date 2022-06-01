@@ -3880,4 +3880,7 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
 #pragma pack(pop, __NANOCLR_RUNTIME_H__)
 #endif
 
+extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+extern const uint16_t g_CLR_InteropAssembliesCount;
+
 #endif // NANOCLR_RUNTIME_H

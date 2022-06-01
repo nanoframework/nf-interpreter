@@ -16,6 +16,7 @@ macro(nf_common_compiler_definitions)
     endif()
    
     if(NOT NFCCF_TARGET OR "${NFCCF_TARGET}" STREQUAL "")
+        message(AUTHOR_WARNING "No TARGET argument specified when calling nf_common_compiler_definitions(), defaulting to '${BUILD_TARGET}'")
         set(NFCCF_TARGET ${NFCCF_BUILD_TARGET})
     endif()
 
@@ -62,6 +63,11 @@ macro(nf_common_compiler_definitions)
     # set compiler definition regarding CLR IL inlining
     if(NF_CLR_NO_IL_INLINE)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
+    endif()
+
+    # set compiler definition for implementing (or not) TRACE to stdio
+    if(NF_TRACE_TO_STDIO)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNF_TRACE_TO_STDIO)
     endif()
 
 endmacro()
