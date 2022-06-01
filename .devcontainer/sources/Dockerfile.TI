@@ -10,7 +10,8 @@ ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
     && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
-    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1
+    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
 ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-linux-x86_64.sh
 RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
@@ -55,20 +56,15 @@ RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC
     && git clone --branch 1.10.0 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
     && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
 
+# set gcc location
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
+ENV PATH=$ARM_GCC_PATH/bin:${PATH}
+
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
+COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/local/bin/titools
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
-
-# Putting hex2dfu in the container
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
-RUN mkdir -p /usr/local/bin/hex2dfu \
-    && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
-    && chmod +x /usr/local/bin/hex2dfu/hex2dfu
-
-# add gcc location
-ENV ARM_GCC_PATH=/usr/local/bin/gcc
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
