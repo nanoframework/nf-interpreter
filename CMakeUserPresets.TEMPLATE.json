@@ -137,6 +137,21 @@
             }
         },
         {
+            "name": "EFM32GG11",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "EFM32GG11_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "${presetName}"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "ESP32_PSRAM_REV0",
             "inherits": [
                 "user-local-tools",
@@ -620,6 +635,11 @@
             "name": "ST_B_L475E_IOT01A",
             "displayName": "ST_B_L475E_IOT01A",
             "configurePreset": "ST_B_L475E_IOT01A"
+        },
+        {
+            "name": "EFM32GG11",
+            "displayName": "EFM32GG11",
+            "configurePreset": "EFM32GG11"
         },
         {
             "name": "ESP32_PSRAM_REV0",
