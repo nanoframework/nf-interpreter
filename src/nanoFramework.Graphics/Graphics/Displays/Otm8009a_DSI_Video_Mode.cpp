@@ -489,7 +489,15 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
     _ASSERTE(brightness >= 0 && brightness <= 100);
 }
 
-void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     CLR_UINT32 dataSize = width * height * 2;
 
@@ -508,7 +516,8 @@ void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride
         dataSize = width * 2;
 
         // Target 16bit offset in frame
-        CLR_UINT32 targetOffset = (screenY * (CLR_UINT32)Atrributes.Width) + screenX;;
+        CLR_UINT32 targetOffset = (screenY * (CLR_UINT32)Atrributes.Width) + screenX;
+        ;
 
         while (height--)
         {

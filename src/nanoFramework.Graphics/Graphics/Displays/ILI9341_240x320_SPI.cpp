@@ -299,7 +299,15 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     return true;
 }
 
-void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
