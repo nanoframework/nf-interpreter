@@ -3,7 +3,6 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
-//---------------------------------------------------------------------------
 
 #include "Graphics.h"
 #include "nanoFramework_Graphics.h"
@@ -830,7 +829,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 src.bottom = src.top + topBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst, rightBorder, topBorder, bitmap,
-                //                      widthSrc - rightBorder, 0, rightBorder, topBorder, opacity);
+                //                     widthSrc - rightBorder, 0, rightBorder, topBorder, opacity);
             }
             // bottom-left
             if (/*widthDst >= leftBorder && */ heightDst > topBorder)
@@ -845,7 +844,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 src.bottom = src.top + bottomBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst, yDst + heightDst - bottomBorder, leftBorder, bottomBorder, bitmap,
-                //                      0, heightSrc - bottomBorder, leftBorder, bottomBorder, opacity);
+                //                     0, heightSrc - bottomBorder, leftBorder, bottomBorder, opacity);
             }
             // bottom-right
             if (widthDst > leftBorder && heightDst > topBorder)
@@ -861,8 +860,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + heightDst - bottomBorder, rightBorder,
                 // bottomBorder, bitmap,
-                //                      widthSrc - rightBorder, heightSrc - bottomBorder, rightBorder, bottomBorder,
-                //                      opacity);
+                //                     widthSrc - rightBorder, heightSrc - bottomBorder, rightBorder, bottomBorder,
+                //                     opacity);
             }
             // left
             if (/*widthDst >= leftBorder &&*/ centerHeightDst > 0)
@@ -877,7 +876,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 src.bottom = src.top + centerHeightSrc - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst, yDst + topBorder, leftBorder, centerHeightDst, bitmap,
-                //                      0, topBorder, leftBorder, centerHeightSrc, opacity);
+                //                     0, topBorder, leftBorder, centerHeightSrc, opacity);
             }
             // top
             if (centerWidthDst > 0 /*&& heightDst >= topBorder*/)
@@ -892,7 +891,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 src.bottom = src.top + topBorder - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + leftBorder, yDst, centerWidthDst, topBorder, bitmap,
-                //                      leftBorder, 0, centerWidthSrc, topBorder, opacity);
+                //                     leftBorder, 0, centerWidthSrc, topBorder, opacity);
             }
 
             // right
@@ -909,7 +908,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + widthDst - rightBorder, yDst + topBorder, rightBorder, centerHeightDst,
                 // bitmap,
-                //                      widthSrc - rightBorder, topBorder, rightBorder,  centerHeightSrc, opacity);
+                //                     widthSrc - rightBorder, topBorder, rightBorder,  centerHeightSrc, opacity);
             }
             // bottom
             if (centerWidthDst > 0 && heightDst > topBorder)
@@ -925,7 +924,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + leftBorder, yDst + heightDst - bottomBorder, centerWidthDst,
                 // bottomBorder, bitmap,
-                //                  leftBorder, heightSrc - bottomBorder, centerWidthSrc, bottomBorder, opacity);
+                //                 leftBorder, heightSrc - bottomBorder, centerWidthSrc, bottomBorder, opacity);
             }
             // center
             if (centerWidthDst > 0 && centerHeightDst > 0)
@@ -940,7 +939,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
                 src.bottom = src.top + centerHeightSrc - 1;
                 bitmap->DrawImage(dst, *bitmapSrc, src, opacity);
                 // bmpDest.StretchImage(xDst + leftBorder, yDst + topBorder, centerWidthDst, centerHeightDst, bitmap,
-                //                      leftBorder, topBorder, centerWidthSrc, centerHeightSrc, opacity);
+                //                     leftBorder, topBorder, centerWidthSrc, centerHeightSrc, opacity);
             }
         }
     }
