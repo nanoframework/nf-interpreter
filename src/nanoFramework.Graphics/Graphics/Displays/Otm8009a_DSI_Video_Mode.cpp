@@ -516,7 +516,7 @@ void DisplayDriver::BitBlt(
         dataSize = width * 2;
 
         // Target 16bit offset in frame
-        CLR_UINT32 targetOffset = (screenY * (CLR_UINT32)Atrributes.Width) + screenX;
+        CLR_UINT32 targetOffset = (screenY * (CLR_UINT32)Attributes.Width) + screenX;
 
         while (height--)
         {
