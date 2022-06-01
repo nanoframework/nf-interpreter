@@ -14,8 +14,6 @@ static const SPIConfig spiConfig = {
     .slave = false,
     .data_cb = NULL,
     .error_cb = NULL,
-    .ssport = PAL_PORT(LINE_FLASH_SPI1_CS),
-    .sspad = PAL_PAD(LINE_FLASH_SPI1_CS),
     // CPHA=0, CPOL=0, MSb first
     .cr1 = 0U, // SPI_CR1_CPOL | SPI_CR1_BR_0,
     // transfer length to 8bit
