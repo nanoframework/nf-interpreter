@@ -725,7 +725,8 @@ endif()
 
 ########################################################
 # check availability of hex2dfu tool if specified
-if(DEFINED TOOL_HEX2DFU_PREFIX)
+# only usefull for CHIBIOS and Azure RTOS
+if(DEFINED TOOL_HEX2DFU_PREFIX AND RTOS_AZURERTOS_CHECK AND RTOS_CHIBIOS_CHECK)
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
