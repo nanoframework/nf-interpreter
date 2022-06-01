@@ -979,7 +979,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
     "nanoFramework.Graphics",
     0xFA76FD3F,
     method_lookup,
-    { 100, 0, 0, 3 }
+    { 100, 0, 0, 4 }
 };
 
 // clang-format on
