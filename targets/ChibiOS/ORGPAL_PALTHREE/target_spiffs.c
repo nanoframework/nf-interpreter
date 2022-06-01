@@ -30,7 +30,7 @@ uint8_t readBuffer[SPIFFS_LOGICAL_PAGE_SIZE];
 
 ///////////////
 // Definitions
-#define CS_SELECT palClearPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
+#define CS_SELECT   palClearPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
 #define CS_UNSELECT palSetPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
 
 ///////////////
