@@ -273,7 +273,7 @@
             }
         },
         {
-            "name": "EFM32GG11_preset",
+            "name": "SL_STK3701A_preset",
             "inherits": [
                 "general-preset",
                 "arm-gcc-cortex-preset"
@@ -281,7 +281,7 @@
             "hidden": true,
             "cacheVariables": {
                 "RTOS": "AzureRTOS",
-                "TARGET_SERIES": "SILABS_GG_S1",
+                "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",

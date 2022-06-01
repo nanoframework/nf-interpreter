@@ -141,7 +141,7 @@
             "inherits": [
                 "user-local-tools",
                 "user-prefs",
-                "EFM32GG11_preset"
+                "SL_STK3701A_preset"
             ],
             "cacheVariables": {
                 "TARGET_BOARD": {

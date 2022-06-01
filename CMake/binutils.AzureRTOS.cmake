@@ -27,11 +27,6 @@ endfunction()
 # sets network connectivity options according to the NetX driver choosen in build options WIFI_DRIVER and ETHERNET_DRIVER
 macro(nf_set_network_connectivity_options)
 
-    # sanity check
-    if(NOT DEFINED ETHERNET_DRIVER AND NOT DEFINED WIFI_DRIVER)
-        message(FATAL_ERROR "\n\nSorry but you must define either ETHERNET_DRIVER or WIFI_DRIVER build option...\n\n")
-    endif()
-
     ############################
     if(DEFINED WIFI_DRIVER)
 

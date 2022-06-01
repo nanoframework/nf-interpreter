@@ -360,6 +360,23 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
 
     set(TARGET_VENDOR Maxim)
 
+# try to find SiliconLabs board in the targets folder
+elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/${TARGET_BOARD})
+
+    # board found
+    message(STATUS "Support for target board '${TARGET_BOARD}' found")
+
+    # Define base path for the class libraries
+    nf_set_base_path_for_libraries_modules(${PROJECT_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR)
+
+    # set target base location
+    set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/${TARGET_BOARD})
+
+    add_subdirectory(SiliconLabs)
+
+    # add TARGET board directory
+    add_subdirectory(SiliconLabs/${TARGET_BOARD})
+
 else()
 
     # try to find STM board in the Community targets folder
