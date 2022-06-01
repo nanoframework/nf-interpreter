@@ -1,4 +1,4 @@
-FROM debian:10.4-slim AS downloader
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -18,7 +18,7 @@ RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
 
-FROM debian:10.4-slim AS devcontainer
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
