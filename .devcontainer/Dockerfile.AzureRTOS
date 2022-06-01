@@ -1,1 +1,1 @@
-FROM ghcr.io/nanoframework/dev-container-azure-rtos:v1.4
+FROM ghcr.io/nanoframework/dev-container-azure-rtos:v1.5
