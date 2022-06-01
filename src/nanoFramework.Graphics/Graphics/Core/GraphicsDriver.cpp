@@ -1419,14 +1419,14 @@ void GraphicsDriver::Screen_Flush(
     CLR_INT32 widthMax = g_DisplayDriver.Attributes.Width;
     CLR_INT32 heightMax = g_DisplayDriver.Attributes.Height;
 
-    if ((CLR_UINT32)(x + width) > bitmap.m_bm.m_width)
-        width = bitmap.m_bm.m_width - x;
-    if ((CLR_UINT32)(y + height) > bitmap.m_bm.m_height)
-        height = bitmap.m_bm.m_height - y;
+    if ((CLR_UINT32)(x + width) > (CLR_UINT32)widthMax)
+        width = widthMax - x;
+    if ((CLR_UINT32)(y + height) > (CLR_UINT32)heightMax)
+        height = heightMax - y;
 
-    if (bitmap.m_bm.m_width != (CLR_UINT32)widthMax)
+    if (bitmap.m_bm.m_width > (CLR_UINT32)widthMax)
         return;
-    if (bitmap.m_bm.m_height != (CLR_UINT32)heightMax)
+    if (bitmap.m_bm.m_height > (CLR_UINT32)heightMax)
         return;
     if (bitmap.m_bm.m_bitsPerPixel != CLR_GFX_BitmapDescription::c_NativeBpp)
         return;

@@ -1045,8 +1045,11 @@ void CLR_RT_HeapBlock::Promote()
 CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, CLR_UINT32 crc = 0)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (!ptr)
-        return 0;
+    {
+        return crc;
+    }
 
     switch (ptr->DataType())
     {
@@ -1056,33 +1059,103 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
         case DATATYPE_STRING:
         {
-            const char *szText = ptr->StringText();
-
-            crc = SUPPORT_ComputeCRC(szText, (int)hal_strlen_s(szText), crc);
+            const char *src = ptr->StringText();
+            crc = SUPPORT_ComputeCRC(src, (int)hal_strlen_s(src), crc);
         }
         break;
 
+        case DATATYPE_BOOLEAN:
+            crc = ptr->NumericByRef().u1 == 0 ? 0 : 1;
+            break;
+
+        case DATATYPE_I1:
+            crc = (CLR_UINT32)ptr->NumericByRef().s1;
+            break;
+
+        case DATATYPE_U1:
+            crc = (CLR_UINT32)ptr->NumericByRef().u1;
+            break;
+
+        case DATATYPE_CHAR:
+            crc = (CLR_UINT32)(ptr->NumericByRef().u2 | ptr->NumericByRef().u2 << 16);
+            break;
+
+        case DATATYPE_U2:
+            crc = (CLR_UINT32)ptr->NumericByRef().u2;
+            break;
+
+        case DATATYPE_I2:
+            crc = (CLR_UINT32)(ptr->NumericByRef().s2 | ptr->NumericByRef().s2 << 16);
+            break;
+
+        case DATATYPE_I4:
+            crc = (CLR_UINT32)ptr->NumericByRef().s4;
+            break;
+
+        case DATATYPE_U4:
+            crc = ptr->NumericByRef().u4;
+            break;
+
+        case DATATYPE_R4:
+            crc = (CLR_INT32)ptr->NumericByRef().u8.LL;
+            break;
+
+        case DATATYPE_U8:
+            crc = ((CLR_INT32)ptr->NumericByRef().u8.LL ^ (CLR_INT32)ptr->NumericByRef().u8.HH);
+            break;
+
+        case DATATYPE_I8:
+            crc = ((CLR_INT32)ptr->NumericByRef().s8.LL ^ (CLR_INT32)ptr->NumericByRef().s8.HH);
+            break;
+
+        case DATATYPE_R8:
+            crc = ((CLR_INT32)ptr->NumericByRef().r8.LL ^ (CLR_INT32)ptr->NumericByRef().r8.HH);
+            break;
+
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
-            if (fRecurse)
-            {
-                CLR_RT_TypeDef_Instance cls;
-                cls.InitializeFromIndex(ptr->ObjectCls());
-                int totFields = cls.CrossReference().m_totalFields;
+        {
+            CLR_RT_TypeDef_Instance cls;
+            cls.InitializeFromIndex(ptr->ObjectCls());
 
-                if (totFields > 0)
+            // check if this is any of the following types
+            // DATATYPE_BOOLEAN
+            // DATATYPE_I1
+            // DATATYPE_U1
+            // DATATYPE_CHAR
+            // DATATYPE_I2
+            // DATATYPE_U2
+            // DATATYPE_I4
+            // DATATYPE_U4
+            // DATATYPE_R4
+            // DATATYPE_I8
+            // DATATYPE_U8
+            // DATATYPE_R8
+            if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
+            {
+                // pass the 1st field which is the one holding the actual value
+                crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+            }
+            else
+            {
+                // always starts with the pointer to the object to fully disambiguate
+                crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
+
+                if (fRecurse)
                 {
-                    while (totFields-- > 0)
+                    int totFields = cls.CrossReference().m_totalFields;
+
+                    if (totFields > 0)
                     {
-                        crc = GetHashCode(++ptr, false, crc);
+                        do
+                        {
+                            crc = GetHashCode(&ptr[totFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
+                        } while (--totFields > 0);
                     }
                 }
-                else
-                {
-                    crc = SUPPORT_ComputeCRC(&ptr, sizeof(ptr), crc);
-                }
             }
-            break;
+        }
+        break;
 
         case DATATYPE_DELEGATE_HEAD:
         {
@@ -1105,7 +1178,8 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
         break;
 
         default:
-            crc = SUPPORT_ComputeCRC(&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+            crc = SUPPORT_ComputeCRC((const void *)&ptr->DataByRefConst(), ptr->GetAtomicDataUsedBytes(), crc);
+
             break;
     }
 
@@ -1155,12 +1229,18 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
     bool fSameReference)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (&pArgLeft == &pArgRight)
-        return true;
 
-    if (pArgLeft.DataType() == pArgRight.DataType())
+    if (&pArgLeft == &pArgRight)
     {
-        switch (pArgLeft.DataType())
+        return true;
+    }
+
+    CLR_DataType leftDataType = pArgLeft.DataType();
+    CLR_DataType rightDataType = pArgRight.DataType();
+
+    if (leftDataType == rightDataType)
+    {
+        switch (leftDataType)
         {
             case DATATYPE_VALUETYPE:
                 if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
@@ -1186,13 +1266,18 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             {
                 CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
                 CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+
                 if (objLeft == objRight)
+                {
                     return true;
+                }
 
                 if (objLeft && objRight)
                 {
                     if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
+                    {
                         return ObjectsEqual(*objLeft, *objRight, false);
+                    }
                 }
             }
             break;
@@ -1222,10 +1307,18 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     }
                 }
                 break;
+
             case DATATYPE_REFLECTION:
                 if (pArgLeft.SameHeader(pArgRight))
+                {
                     return true;
+                }
                 break;
+
+            case DATATYPE_STRING:
+                return Compare_Values(pArgLeft, pArgRight, false) == 0;
+                break;
+
             default:
                 if (fSameReference == false)
                 {
@@ -1242,6 +1335,44 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     }
                 }
                 break;
+        }
+    }
+    else
+    {
+        if ((leftDataType == DATATYPE_BYREF && rightDataType == DATATYPE_OBJECT))
+        {
+            // this is to handle the special case for calls to callvirt with constrained type
+            // namely with Objects, ValueType and Enum.
+            // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+
+            CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
+            CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
+
+            if (rightObj->DataType() == DATATYPE_VALUETYPE)
+            {
+                CLR_RT_TypeDef_Instance inst;
+                CLR_RT_HeapBlock *obj = NULL;
+
+                if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
+                {
+                }
+
+                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                {
+                    // boxed primitive or enum type
+                    obj = &rightObj[1];
+                }
+
+                return ObjectsEqual(*leftObj, *obj, false);
+            }
+            else
+            {
+                return ObjectsEqual(*leftObj, *rightObj, false);
+            }
+        }
+        else
+        {
+            _ASSERTE(false);
         }
     }
 

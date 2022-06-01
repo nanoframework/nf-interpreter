@@ -93,11 +93,12 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
 {
     const char *newLine;
     uint32_t newLineLength;
+    uint32_t newLineIndex;
     int32_t compareIndex;
     uint8_t *buffer;
     uint8_t *comparison;
     uint32_t matchCount = 0;
-    uint32_t index;
+    uint32_t index = 0;
 
     // clear line
     line = NULL;
@@ -105,11 +106,12 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
     // check for anything in the buffer
     if (ringBuffer->Length() > 0)
     {
-        // get new line from field
+        // get "new line" from field
         newLine = serialDevice[FIELD___newLine].RecoverString();
         newLineLength = hal_strlen_s(newLine);
+
         // need to subtract one because we are 0 indexed
-        newLineLength--;
+        newLineIndex = newLineLength - 1;
 
         // better optimize to speed up search
         ringBuffer->OptimizeSequence();
@@ -118,61 +120,65 @@ bool Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetLineFromRxBuffer(
         buffer = ringBuffer->Reader();
 
         // search for latest new line char in the buffer
-        for (index = 0; index < ringBuffer->Length(); index++)
+        do
         {
-            if (*buffer == newLine[newLineLength])
+            if (*buffer == newLine[newLineIndex])
             {
                 matchCount = 1;
 
-                if (newLineLength == 1)
+                if (newLineIndex == 0)
                 {
                     // found and nothing else to compare
+                    index++;
                     break;
                 }
                 else
                 {
-                    if (index >= newLineLength)
+                    // get pointer to the index before the last one
+                    comparison = buffer;
+                    comparison--;
+
+                    // subtract one position, we've already check the last one
+                    compareIndex = newLineIndex - 1;
+
+                    do
                     {
-                        // get pointer to the index before the last one
-                        comparison = buffer;
+                        if (*comparison == newLine[compareIndex])
+                        {
+                            // found another match
+                            matchCount++;
+
+                            //
+                        }
+
+                        // move comparer to position before
                         comparison--;
 
-                        // subtract one position, we've already check the last one
-                        compareIndex = newLineLength - 1;
-
-                        do
-                        {
-                            if (*comparison == newLine[compareIndex])
-                            {
-                                // found another match
-                                matchCount++;
-
-                                // move comparer to position before
-                                comparison--;
-                            }
-                        } while (--compareIndex <= 0);
-                    }
+                    } while (--compareIndex > 0);
                 }
             }
 
-            buffer--;
-        }
+            // move to next position in the buffer
+            buffer++;
+            index++;
+
+        } while (index < ringBuffer->Length() || matchCount < newLineLength);
 
         // sequence found?
         if (matchCount == newLineLength)
         {
-            // allocate memory for the string
-            // index has the position of the last char of the "new line" string
-            // need to add an extra position for the terminator
-            line = (uint8_t *)platform_malloc(index + 1);
+            // allocate memory for the string, including the new line char(s)
+            // the new line char allow enough room in the buffer for for the terminator
+            line = (uint8_t *)platform_malloc(index);
 
             if (line != NULL)
             {
-                // clear memory
-                memset(line, 0, index + 1);
+                // pop string AND new line from buffer
+                ringBuffer->Pop(line, index);
 
-                // the returned string DOES NOT include the new line string
-                memcpy(line, ringBuffer->Reader(), index - newLineLength);
+                // the returned string DOES NOT include the new line char(s)
+                // put a terminator at index 0 where the new line char(s) are, so the real string ends there
+                line[index - newLineLength] = 0;
             }
         }
     }

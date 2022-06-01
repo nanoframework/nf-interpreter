@@ -65,7 +65,6 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock &ref, const CLR_GFX_Bitm
     CLR_GFX_Bitmap *bitmap;
     int size;
     size = sizeof(CLR_GFX_Bitmap) + bm.GetTotalSize();
-
     bitmap = (CLR_GFX_Bitmap *)g_GraphicsMemoryHeap.Allocate(size);
 
     ref.SetInteger((CLR_UINT32)bitmap);

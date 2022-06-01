@@ -549,15 +549,13 @@ typedef enum __nfpack NetworkChange_NetworkEventType
     NetworkChange_NetworkEventType_APStationChanged = 3,
 } NetworkChange_NetworkEventType;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Windows.Devices.WiFi.WiFiEventType (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum WiFiEventType
+//////////////////////////////////////////////////////////////////
+// moved here from src\System.Device.Wifi\sys_dev_wifi_native.h //
+//////////////////////////////////////////////////////////////////
+typedef enum __nfpack WiFiEventType
 {
-    WiFiEventType_Invalid = 0,
     WiFiEventType_ScanComplete = 1,
-};
+} WiFiEventType;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Net.NetworkInformation.NetworkChange.NetworkEventFlags (in managed code) !!! //
@@ -625,6 +623,7 @@ int SOCK_getpeername(int socket, struct SOCK_sockaddr *name, int *namelen);
 int SOCK_getsockname(int socket, struct SOCK_sockaddr *name, int *namelen);
 int SOCK_recvfrom(int s, char *buf, int len, int flags, struct SOCK_sockaddr *from, int *fromlen);
 int SOCK_sendto(int s, const char *buf, int len, int flags, const struct SOCK_sockaddr *to, int tolen);
+int SOCK_UpgradeToSsl(int socket);
 
 // network adapter settings
 HRESULT SOCK_CONFIGURATION_LoadAdapterConfiguration(
@@ -654,8 +653,8 @@ bool SSL_ServerInit(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *privateKeyPassword,
+    int privateKeyPasswordLength,
     int &sslContextHandle,
     bool useDeviceCertificate);
 
@@ -666,23 +665,19 @@ bool SSL_ClientInit(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *privateKeyPassword,
+    int privateKeyPasswordLength,
     int &sslContextHandle,
     bool useDeviceCertificate);
 
-bool SSL_AddCertificateAuthority(
-    int sslContextHandle,
-    const char *certificate,
-    int certLength,
-    const char *certPassword);
+bool SSL_AddCertificateAuthority(int sslContextHandle, const char *certificate, int certLength);
 bool SSL_ExitContext(int sslContextHandle);
 int SSL_Accept(int socket, int sslContextHandle);
 int SSL_Connect(int socket, const char *szTargetHost, int sslContextHandle);
 int SSL_Write(int socket, const char *Data, size_t size);
 int SSL_Read(int socket, char *Data, size_t size);
 int SSL_CloseSocket(int socket);
-bool SSL_ParseCertificate(const char *certificate, size_t certLength, const char *password, X509CertData *certData);
+bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertData *certData);
 int SSL_DecodePrivateKey(
     const unsigned char *key,
     size_t keyLength,
@@ -725,7 +720,7 @@ int HAL_SOCK_getpeername(int socket, struct SOCK_sockaddr *name, int *namelen);
 int HAL_SOCK_getsockname(int socket, struct SOCK_sockaddr *name, int *namelen);
 int HAL_SOCK_recvfrom(int s, char *buf, int len, int flags, struct SOCK_sockaddr *from, int *fromlen);
 int HAL_SOCK_sendto(int s, const char *buf, int len, int flags, const struct SOCK_sockaddr *to, int tolen);
-
+int HAL_SOCK_upgradeToSsl(int socket);
 HRESULT HAL_SOCK_CONFIGURATION_LoadAdapterConfiguration(
     HAL_Configuration_NetworkInterface *config,
     uint32_t interfaceIndex);

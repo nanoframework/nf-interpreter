@@ -100,14 +100,13 @@ list(APPEND CHIBIOS_HAL_SOURCES ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/
 if(RTOS_CHIBIOS_CHECK)
     set(OSHAL_PATH ${chibios_SOURCE_DIR}/os/hal/osal/rt-nil)
 elseif(RTOS_AZURERTOS_CHECK)
-    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS/HAL)
+    set(OSHAL_PATH ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ChibiOS)
 else()
     message(FATAL_ERROR "RTOS not configured to use ChibiOS HAL")
 endif()
 
 # set include path for OSHAL header
 list(APPEND CHIBIOS_HAL_INCLUDE_DIRS ${OSHAL_PATH})
-
 
 # source files for ChibiOS HAL
 set(CHIBIOS_HAL_SRCS
@@ -126,12 +125,14 @@ set(CHIBIOS_HAL_SRCS
     
     hal_buffers.c
     hal_queues.c
+    hal_flash.c
     hal_mmcsd.c
     
     hal_adc.c
     hal_can.c
     hal_crypto.c
     hal_dac.c
+    hal_efl.c
     hal_gpt.c
     hal_i2c.c
     hal_i2s.c
@@ -171,7 +172,7 @@ set(CHIBIOS_HAL_SRCS
     hal_sdc_lld.c
 
     hal_i2s_lld.c
-    hal_spi_lld.c
+    hal_spi_v2_lld.c
 
     hal_st_lld.c
     hal_gpt_lld.c

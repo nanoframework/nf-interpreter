@@ -15,17 +15,15 @@
 #include <nanoHAL_Graphics.h>
 
 #if (HAL_USE_CAN == TRUE)
-#include <nf_devices_can_native_target.h>
+#include <nf_device_can_native_target.h>
 #endif
 #if (HAL_USE_I2C == TRUE)
-#include <win_dev_i2c_native_target.h>
+#include <sys_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI == TRUE)
-#include <win_dev_spi_native_target.h>
 #include <sys_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_UART == TRUE)
-#include <win_dev_serial_native_target.h>
 #include <sys_io_ser_native_target.h>
 #endif
 
@@ -69,10 +67,6 @@ void nanoHAL_Initialize()
 
     ::HeapLocation(heapStart, heapSize);
     memset(heapStart, 0, heapSize);
-
-#if (NANOCLR_GRAPHICS == TRUE)
-    g_GraphicsMemoryHeap.Initialize();
-#endif
 
     ConfigurationManager_Initialize();
 

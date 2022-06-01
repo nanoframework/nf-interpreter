@@ -14,11 +14,11 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.
 if(RTOS_CHIBIOS_CHECK)
     #list(APPEND Windows.Storage_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/fatfs/src)
     list(APPEND Windows.Storage_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
-    set( PROJECT_COMMON_PATH ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common)
+elseif(RTOS_ESP32_CHECK)
+    # TODO: this needs to be changed so it's not platform & target dependent
 elseif(RTOS_FREERTOS_CHECK)
     list(APPEND Windows.Storage_INCLUDE_DIRS ${fatfs_SOURCE_DIR}/source)
     # TODO: this needs to be changed so it's not platform & target dependent
-    set( PROJECT_COMMON_PATH ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/_common)
 endif()
 
 list(APPEND Windows.Storage_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/Include)
@@ -33,8 +33,6 @@ set(Windows.Storage_SRCS
     win_storage_native_Windows_Storage_StorageFolder.cpp  
     win_storage_native_Windows_Storage_Devices_SDCard.cpp
     win_storage_native.cpp
-
-    Target_Windows_Storage.c
 )
 
 foreach(SRC_FILE ${Windows.Storage_SRCS})
@@ -46,7 +44,6 @@ foreach(SRC_FILE ${Windows.Storage_SRCS})
 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_COMMON_PATH}
             ${CMAKE_SOURCE_DIR}/src/Windows.Storage
 
         CMAKE_FIND_ROOT_PATH_BOTH

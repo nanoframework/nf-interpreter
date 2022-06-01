@@ -47,6 +47,16 @@ __nfweak HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigu
     return NULL;
 }
 
+__nfweak HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
+{
+    return NULL;
+}
+
+__nfweak HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
+{
+    return NULL;
+}
+
 __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
     void *existingConfigBlock,
     void *newConfigBlock,

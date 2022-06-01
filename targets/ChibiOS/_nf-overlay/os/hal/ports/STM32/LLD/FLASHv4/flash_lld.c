@@ -167,6 +167,12 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
     uint32_t remainingBytes = length;
     uint32_t error = FLASH_NO_ERROR;
 
+    // Disable data cache
+    __HAL_FLASH_DATA_CACHE_DISABLE();
+
+    // read (and clear) error flags
+    FLASH_CheckErrors();
+
     // Unlock the Flash to enable the flash control register access
     HAL_FLASH_Unlock();
 
@@ -177,7 +183,7 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
     {
         volatile uint32_t *address;
 
-        // unwritten bytes are initialized to flahs erase value
+        // unwritten bytes are initialized to flash erase value
         line.w[0] = 0xFFFFFFFFU;
         line.w[1] = 0xFFFFFFFFU;
 
@@ -216,6 +222,9 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
 
     // Lock the Flash to disable the flash control register access
     HAL_FLASH_Lock();
+
+    // enable back data cache
+    __HAL_FLASH_DATA_CACHE_ENABLE();
 
     // done here
     return (error == FLASH_NO_ERROR);

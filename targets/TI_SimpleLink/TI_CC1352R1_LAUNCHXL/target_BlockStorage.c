@@ -5,11 +5,15 @@
 
 #include <nanoPAL_BlockStorage.h>
 
-extern struct BlockStorageDevice    Device_BlockStorage;
-extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG   Device_BlockStorageConfig;
-extern IBlockStorageDevice CC13x2_26x2Flash_BlockStorageInterface;
+extern struct BlockStorageDevice Device_BlockStorage;
+extern struct MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig;
+extern IBlockStorageDevice CC13xx_26xxFlash_BlockStorageInterface;
 
 void BlockStorage_AddDevices()
 {
-    BlockStorageList_AddDevice( (BlockStorageDevice*)&Device_BlockStorage, &CC13x2_26x2Flash_BlockStorageInterface, &Device_BlockStorageConfig, true);
+    BlockStorageList_AddDevice(
+        (BlockStorageDevice *)&Device_BlockStorage,
+        &CC13xx_26xxFlash_BlockStorageInterface,
+        &Device_BlockStorageConfig,
+        true);
 }

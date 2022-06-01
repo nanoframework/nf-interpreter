@@ -15,6 +15,7 @@
 #define SPI_MAX_TRANSFER_SIZE (320 * 2 * NUMBER_OF_LINES) // 320 pixels 2 words wide ( 16 bit colour)
 
 struct DisplayInterface g_DisplayInterface;
+DisplayInterfaceConfig g_DisplayInterfaceConfig;
 
 // Saved gpio pins
 CLR_INT16 lcdReset;
@@ -30,7 +31,7 @@ CLR_UINT8 spiCommandMode = 0; // 0 Command first byte, 1 = Command all bytes
 void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
 {
     SPI_DEVICE_CONFIGURATION spiConfig;
-
+    g_DisplayInterfaceConfig = config;
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
     spiConfig.Spi_Bus = config.Spi.spiBus;
     spiConfig.DeviceChipSelect = config.Spi.chipSelect;
@@ -52,15 +53,22 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
         lcdBacklight = config.Spi.backLight;
 
         // Initialize non-SPI GPIOs
-        CPU_GPIO_SetDriveMode(lcdDC, GpioPinDriveMode::GpioPinDriveMode_Output);
-        CPU_GPIO_SetDriveMode(lcdReset, GpioPinDriveMode::GpioPinDriveMode_Output);
-        CPU_GPIO_SetDriveMode(lcdBacklight, GpioPinDriveMode::GpioPinDriveMode_Output);
+        CPU_GPIO_SetDriveMode(lcdDC, PinMode::PinMode_Output);
 
-        // Reset the display
-        CPU_GPIO_SetPinState(lcdReset, GpioPinValue_Low);
-        OS_DELAY(100);
-        CPU_GPIO_SetPinState(lcdReset, GpioPinValue_High);
-        OS_DELAY(100);
+        if (lcdBacklight >= 0)
+        {
+            CPU_GPIO_SetDriveMode(lcdBacklight, PinMode::PinMode_Output);
+        }
+
+        if (lcdReset >= 0)
+        {
+            CPU_GPIO_SetDriveMode(lcdReset, PinMode::PinMode_Output);
+            // Reset the display
+            CPU_GPIO_SetPinState(lcdReset, GpioPinValue_Low);
+            OS_DELAY(100);
+            CPU_GPIO_SetPinState(lcdReset, GpioPinValue_High);
+            OS_DELAY(100);
+        }
     }
 
     return;
@@ -135,14 +143,18 @@ void DisplayInterface::SendCommand(CLR_UINT8 arg_count, ...)
 
 void DisplayInterface::DisplayBacklight(bool on) // true = on
 {
-    if (on)
+    if (lcdBacklight >= 0)
     {
-        CPU_GPIO_SetPinState(lcdBacklight, GpioPinValue_High);
+        if (on)
+        {
+            CPU_GPIO_SetPinState(lcdBacklight, GpioPinValue_High);
+        }
+        else
+        {
+            CPU_GPIO_SetPinState(lcdBacklight, GpioPinValue_Low);
+        }
     }
-    else
-    {
-        CPU_GPIO_SetPinState(lcdBacklight, GpioPinValue_Low);
-    }
+
     return;
 }
 

@@ -22,7 +22,7 @@ static WP_Message _inboundMessage;
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
 // used WP_Message_Process() and methods it calls to avoid flooding TRACE
-uint32_t traceLoopCounter = 0;
+int32_t traceLoopCounter = 0;
 #endif
 
 #ifdef DEBUG
@@ -221,6 +221,18 @@ uint8_t WP_Message_VerifyPayload(WP_Message *message)
     return true;
 }
 
+void WP_ReportBadPacket(uint32_t flag)
+{
+    WP_Message msg;
+    uint32_t flags = flag | WP_Flags_c_NonCritical | WP_Flags_c_NACK;
+
+    WP_Message_Initialize(&msg);
+
+    WP_Message_PrepareRequest(&msg, 0, flags, 0, NULL);
+
+    WP_TransmitMessage(&msg);
+}
+
 void WP_Message_Process()
 {
     uint32_t len;
@@ -336,20 +348,20 @@ void WP_Message_Process()
                     {
                         if (_inboundMessage.m_header.m_size != 0)
                         {
-                            if (_inboundMessage.m_payload == NULL)
+                            if (_inboundMessage.m_payload != NULL)
                             {
-                                // Bad, no buffer...
-                                _rxState = ReceiveState_Initialize;
+                                _receiveExpiryTicks = HAL_Time_CurrentSysTicks() + c_PayloadTimeout;
+                                _pos = _inboundMessage.m_payload;
+                                _size = _inboundMessage.m_header.m_size;
+
+                                _rxState = ReceiveState_ReadingPayload;
+
                                 break;
                             }
-
-                            _receiveExpiryTicks = HAL_Time_CurrentSysTicks() + c_PayloadTimeout;
-                            _pos = _inboundMessage.m_payload;
-                            _size = _inboundMessage.m_header.m_size;
-
-                            _rxState = ReceiveState_ReadingPayload;
-
-                            break;
+                            else
+                            {
+                                // Bad, no buffer...
+                            }
                         }
                         else
                         {
@@ -360,7 +372,10 @@ void WP_Message_Process()
                     }
                 }
 
-                // one the verifications above failed, return
+                // one the verifications above failed, report...
+                WP_ReportBadPacket(WP_Flags_c_BadHeader);
+
+                //... and restart state machine
                 _rxState = ReceiveState_Initialize;
                 return;
 
@@ -402,11 +417,12 @@ void WP_Message_Process()
                 else
                 {
                     TRACE_WP_HEADER(WP_RXMSG_NAK, &_inboundMessage);
+                    WP_ReportBadPacket(WP_Flags_c_BadPayload);
                 }
 
                 _rxState = ReceiveState_Initialize;
 
-                break;
+                return;
 
             default:
                 // unknown state

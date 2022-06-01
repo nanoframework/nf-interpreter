@@ -11,11 +11,11 @@ include(binutils.FreeRTOS)
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if FREERTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_FREERTOS_SOURCE_FOLDER TRUE)
+if(FREERTOS_SOURCE_FOLDER)
+    if(NOT "${FREERTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_FREERTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -49,7 +49,7 @@ if(RTOS_VERSION_EMPTY)
     set(RTOS_VERSION "V10.4.1-kernel-only")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_FREERTOS_SOURCE_FOLDER)
     # no FreeRTOS source specified, download it from it's repo
 
     message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} from GitHub repo")
@@ -63,24 +63,20 @@ if(NO_RTOS_SOURCE_FOLDER)
 else()
     # FreeRTOS source was specified
 
-    # sanity check is source path exists
-    if(EXISTS "${RTOS_SOURCE_FOLDER}/")
-        message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
-        
-        FetchContent_Declare(
-            freertos
-            GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
-            GIT_TAG ${RTOS_VERSION}
-        )
-
-    else()
-        message(FATAL_ERROR "Couldn't find FreeRTOS source at ${RTOS_SOURCE_FOLDER}/")
-    endif()
+    message(STATUS "RTOS is: FreeRTOS ${RTOS_VERSION} (source from: ${FREERTOS_SOURCE_FOLDER})")
+    
+    FetchContent_Declare(
+        freertos
+        SOURCE_DIR ${FREERTOS_SOURCE_FOLDER}
+    )
 
 endif()
 
 FetchContent_GetProperties(freertos)
-FetchContent_Populate(freertos)
+if(NOT freertos_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(freertos)
+endif()
 
 # check if CMSIS_SOURCE was specified or if it's empty (default is empty)
 set(NO_CMSIS_SOURCE TRUE)
@@ -123,23 +119,21 @@ if(NO_CMSIS_SOURCE)
 else()
     # CMSIS source was specified
 
-    # sanity check is source path exists
-    if(EXISTS "${CMSIS_SOURCE}/")
-        message(STATUS "CMSIS v${CMSIS_GIT_TAG} (source from: ${CMSIS_SOURCE})")
-       
-        FetchContent_Declare(
-            cmsis
-            GIT_REPOSITORY ${CMSIS_SOURCE}
-            GIT_TAG ${CMSIS_GIT_TAG}
-        )
-    else()
-        message(FATAL_ERROR "Couldn't find CMSIS source at ${CMSIS_SOURCE}/")
-    endif()
+    message(STATUS "CMSIS v${CMSIS_GIT_TAG} (source from: ${CMSIS_SOURCE})")
+    
+    FetchContent_Declare(
+        cmsis
+        SOURCE_DIR ${CMSIS_SOURCE}
+    )
 
 endif()
 
 FetchContent_GetProperties(cmsis)
 FetchContent_Populate(cmsis)
+if(NOT cmsis_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(cmsis)
+endif()
 
 # FreeRTOS common directories
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_common)
@@ -147,7 +141,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/_common)
 # try to find board in the targets folder
 # and set target base location and base path for class libs
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -164,7 +158,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/NXP/${TARGET_BOARD})
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/NXP/${TARGET_BOARD})
 
 # try to find board in the targets folder
-elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
+elseif(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 
     # board found
     message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -183,7 +177,7 @@ elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets/FreeRTOS/ST/${TARGET_BOARD})
 else()
 
     # try to find NXP board in the Community targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
@@ -200,7 +194,7 @@ else()
         add_subdirectory(${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/NXP/${TARGET_BOARD})
 
     # try to find STM board in the Community targets folder
-    elseif(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
+    elseif(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets-community/FreeRTOS/ST/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")

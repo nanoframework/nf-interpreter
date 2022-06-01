@@ -7,34 +7,30 @@
 #include <nanoHAL.h>
 #include "sys_io_ser_native_target.h"
 
-/////////////////////////////////////////////////////////
-// UART PAL strucs delcared in win_dev_serial_native.h //
-/////////////////////////////////////////////////////////
-// TODO: uncomment when Windows.Deveices.SerialCommunication will be removed
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-// NF_PAL_UART Uart1_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-// NF_PAL_UART Uart2_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-// NF_PAL_UART Uart3_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-// NF_PAL_UART Uart4_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-// NF_PAL_UART Uart5_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-// NF_PAL_UART Uart6_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-// NF_PAL_UART Uart7_PAL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-// NF_PAL_UART Uart8_PAL;
-// #endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+NF_PAL_UART Uart1_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+NF_PAL_UART Uart2_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+NF_PAL_UART Uart3_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+NF_PAL_UART Uart4_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+NF_PAL_UART Uart5_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+NF_PAL_UART Uart6_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+NF_PAL_UART Uart7_PAL;
+#endif
+#if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+NF_PAL_UART Uart8_PAL;
+#endif
 
 static NF_PAL_UART *GetUartPAL(int index)
 {
@@ -246,18 +242,20 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     }
     else
     {
-        // no read operation ongoing, so fire an event
-
-        // post a managed event with the port index and event code (check if this is the watch char or just another
-        // another)
-        // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise don't
-        // bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-        // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
-        PostManagedEvent(
-            EVENT_SERIAL,
-            0,
-            portIndex,
-            (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+        // no read operation ongoing, so fire an event, if the available bytes are above the threshold
+        if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
+        {
+            // post a managed event with the port index and event code (check if this is the watch char or just another
+            // another)
+            // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise
+            // don't bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+            // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+            PostManagedEvent(
+                EVENT_SERIAL,
+                0,
+                portIndex,
+                (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+        }
     }
 
     NATIVE_INTERRUPT_END
@@ -282,6 +280,83 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_BytesToRead___
 
     // get length of Rx ring buffer
     stack.SetResult_U4(palUart->RxRingBuffer.Length());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::get_InvertSignalLevels___BOOLEAN(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    NF_PAL_UART *palUart = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // get the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    stack.SetResult_Boolean(palUart->SignalLevelsInverted);
+
+#else
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+#endif
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::set_InvertSignalLevels___VOID__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    NF_PAL_UART *palUart = NULL;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // get the driver for this SerialDevice
+    palUart = GetUartPAL((int)pThis[FIELD___portIndex].NumericByRef().s4);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    palUart->SignalLevelsInverted = (bool)stack.Arg1().NumericByRef().u1;
+
+    // call config
+    NativeConfig___VOID(stack);
+#else
+
+    (void)stack;
+
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+
+#endif
 
     NANOCLR_NOCLEANUP();
 }
@@ -343,7 +418,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
         }
     }
 
-    // get a the pointer to the array by using the first element of the array
+    // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
 
     // Choose the driver for this SerialDevice
@@ -530,18 +605,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::ReadLine___STRING(
             // got one!
             eventResult = false;
         }
+        else
+        {
+            // get new line from field
+            newLine = pThis[FIELD___newLine].RecoverString();
+            newLineLength = hal_strlen_s(newLine);
+            // need to subtract one because we are 0 indexed
+            newLineLength--;
 
-        // get new line from field
-        newLine = pThis[FIELD___newLine].RecoverString();
-        newLineLength = hal_strlen_s(newLine);
-        // need to subtract one because we are 0 indexed
-        newLineLength--;
+            // set new line char as the last one in the string
+            // only if this one is found it will have a chance of the others being there
+            palUart->NewLineChar = newLine[newLineLength];
 
-        // set new line char as the last one in the string
-        // only if this one is found it will have a chance of the others being there
-        palUart->NewLineChar = newLine[newLineLength];
-
-        stack.m_customState = 2;
+            stack.m_customState = 2;
+        }
     }
 
     while (eventResult)
@@ -642,27 +719,27 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // get a the pointer to the array by using the first element of the array
+        // get a the pointer to the array by using the offset
         data = dataBuffer->GetElement(offset);
 
         // push onto the eval stack how many bytes are being pushed to the UART
-        stack.PushValueI4(length - offset);
+        stack.PushValueI4(count);
 
         // flush DMA buffer to ensure cache coherency
         // (only required for Cortex-M7)
-        cacheBufferFlush(data, length - offset);
+        cacheBufferFlush(data, count);
 
         // store pointer
         palUart->TxBuffer = data;
 
         // set TX ongoing count
-        palUart->TxOngoingCount = length - offset;
+        palUart->TxOngoingCount = count;
 
         // because the UART can be accessed from several threads need to get exclusive access to it
         uartAcquireBus(palUart->UartDriver);
 
         // start sending data (DMA will read from the ring buffer)
-        uartStartSend(palUart->UartDriver, length - offset, (uint8_t *)data);
+        uartStartSend(palUart->UartDriver, count, (uint8_t *)data);
 
         // bump custom state
         stack.m_customState = 2;
@@ -681,7 +758,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         {
             // event occurred
             // get from the eval stack how many bytes were buffered to Tx
-            length = stack.m_evalStack[1].NumericByRef().s4;
+            count = stack.m_evalStack[1].NumericByRef().s4;
 
             // done here
             break;
@@ -692,13 +769,13 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
         }
     }
 
-    // pop "length" heap block from stack
+    // pop "count" heap block from stack
     stack.PopValue();
 
     // pop "hbTimeout" heap block from stack
     stack.PopValue();
 
-    stack.SetResult_U4(length);
+    stack.SetResult_U4(count);
 
     // null pointers and vars
     pThis = NULL;
@@ -780,6 +857,8 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     NANOCLR_HEADER();
 
     NF_PAL_UART *palUart;
+    int32_t bufferSize;
+    uint8_t watchChar;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -850,10 +929,32 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
             break;
     }
 
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    palUart->RxBuffer = (uint8_t *)platform_malloc(bufferSize);
+
+    // sanity check
+    if (palUart->RxBuffer == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
+
+    // init buffer
+    palUart->RxRingBuffer.Initialize(palUart->RxBuffer, bufferSize);
+
     // configure UART handlers
     palUart->Uart_cfg.txend1_cb = TxEnd1;
     palUart->Uart_cfg.rxchar_cb = RxChar;
     // palUart->Uart_cfg.rxend_cb = RxEnd;
+
+    // get watch character
+    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        palUart->WatchChar = watchChar;
+    }
 
     // call the configure
     return NativeConfig___VOID(stack);
@@ -908,6 +1009,20 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeConfig___VOI
             palUart->Uart_cfg.cr2 |= USART_CR2_STOP_1;
             break;
     }
+
+#if defined(USART_CR2_TXINV) && defined(USART_CR2_RXINV)
+
+    // configure TX, RX signal levels
+    if (palUart->SignalLevelsInverted)
+    {
+        palUart->Uart_cfg.cr2 |= USART_CR2_TXINV | USART_CR2_RXINV;
+    }
+    else
+    {
+        palUart->Uart_cfg.cr2 &= ~(USART_CR2_TXINV | USART_CR2_RXINV);
+    }
+
+#endif
 
     // baud rate
     palUart->Uart_cfg.speed = (int)pThis[FIELD___baudRate].NumericByRef().s4;
@@ -1109,6 +1224,52 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    int32_t threshold;
+    uint8_t portIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
+
+    if (threshold <= 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    portIndex = (int)pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL(portIndex);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    palUart->ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case port is open and the new threshold was set
+    // to a value lower than the bytes that are already available
+    if (pThis[FIELD___opened].NumericByRef().u1 && (uint32_t)threshold <= palUart->RxRingBuffer.Length())
+    {
+        PostManagedEvent(EVENT_SERIAL, 0, portIndex, SerialData_Chars);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -1116,32 +1277,33 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8," + terminator
     // and init with the terminator
-    char deviceSelectorString[40 + 1] = {0};
+    static char deviceSelectorString[] =
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    strcat(deviceSelectorString, "COM1,");
+        "COM1,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    strcat(deviceSelectorString, "COM3,");
+        "COM3,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    strcat(deviceSelectorString, "COM4,");
+        "COM4,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    strcat(deviceSelectorString, "COM5,");
+        "COM5,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    strcat(deviceSelectorString, "COM6,");
+        "COM6,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    strcat(deviceSelectorString, "COM7,");
+        "COM7,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    strcat(deviceSelectorString, "COM8,");
+        "COM8,"
 #endif
+        ;
 
     // replace the last comma with a terminator
     deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';

@@ -18,6 +18,11 @@ extern "C"
 #include <targetSimpleLinkCC32xx_Sntp.h>
 #elif defined(_WIN32)
 // empty on purpose
+#elif defined(AZURE_RTOS_NETXDUO)
+#include <nxd_sntp_client.h>
+#elif defined(AZURE_RTOS_THREADX)
+// TODO
+//#include <nxd_sntp_client.h>
 #else
 #include <apps/sntp.h>
 #endif

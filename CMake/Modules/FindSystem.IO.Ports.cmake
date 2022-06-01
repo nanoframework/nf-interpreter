@@ -14,67 +14,31 @@ list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.Ports)
-# TODO remove the following when Windows.Devices.SerialCommunications is removed
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.SerialCommunications)
 
 # source files
+set(System.IO.Ports_SRCS
 
-if(RTOS_TI_SIMPLELINK_CHECK)
+    sys_io_ser_native.cpp
+    sys_io_ser_native_System_IO_Ports_SerialPort.cpp
+    sys_io_ser_native_System_IO_Ports_SerialPort__.cpp
 
-    # TI SimpleLink is using the new Serial.IO.Ports 
+    target_system_io_ports_config.cpp
+)
 
-    set(System.IO.Ports_SRCS
+foreach(SRC_FILE ${System.IO.Ports_SRCS})
+    set(System.IO.Ports_SRC_FILE SRC_FILE-NOTFOUND)
+    find_file(System.IO.Ports_SRC_FILE ${SRC_FILE}
+        PATHS
+            ${BASE_PATH_FOR_THIS_MODULE}
+            ${TARGET_BASE_LOCATION}
+            ${PROJECT_SOURCE_DIR}/src/System.IO.Ports
 
-        sys_io_ser_native.cpp
-        sys_io_ser_native_System_IO_Ports_SerialDevice.cpp
-        sys_io_ser_native_System_IO_Ports_SerialPort__.cpp
-
-        target_system_io_serial_config.cpp
+        CMAKE_FIND_ROOT_PATH_BOTH
     )
+    # message("${SRC_FILE} >> ${System.IO.Ports_SRC_FILE}") # debug helper
+    list(APPEND System.IO.Ports_SOURCES ${System.IO.Ports_SRC_FILE})
+endforeach()
 
-    foreach(SRC_FILE ${System.IO.Ports_SRCS})
-        set(System.IO.Ports_SRC_FILE SRC_FILE-NOTFOUND)
-        find_file(System.IO.Ports_SRC_FILE ${SRC_FILE}
-            PATHS
-                ${BASE_PATH_FOR_THIS_MODULE}
-                ${TARGET_BASE_LOCATION}
-                ${PROJECT_SOURCE_DIR}/src/System.IO.Ports
-
-            CMAKE_FIND_ROOT_PATH_BOTH
-        )
-        # message("${SRC_FILE} >> ${System.IO.Ports_SRC_FILE}") # debug helper
-        list(APPEND System.IO.Ports_SOURCES ${System.IO.Ports_SRC_FILE})
-    endforeach()
-
-else()
-
-    # all the other targets are using the Windows.Devices.SerialCommunication
-    
-    set(System.IO.Ports_SRCS
-
-        sys_io_ser_native.cpp
-        sys_io_ser_native_System_IO_Ports_SerialPort.cpp
-        sys_io_ser_native_System_IO_Ports_SerialPort__.cpp
-
-        # this will have to be adjusted to the system_device file once Windows.Devices removed
-        target_windows_devices_serialcommunication_config.cpp
-    )
-
-    foreach(SRC_FILE ${System.IO.Ports_SRCS})
-        set(System.IO.Ports_SRC_FILE SRC_FILE-NOTFOUND)
-        find_file(System.IO.Ports_SRC_FILE ${SRC_FILE}
-            PATHS
-                ${BASE_PATH_FOR_THIS_MODULE}
-                ${TARGET_BASE_LOCATION}
-                ${PROJECT_SOURCE_DIR}/src/System.IO.Ports
-
-            CMAKE_FIND_ROOT_PATH_BOTH
-        )
-        # message("${SRC_FILE} >> ${System.IO.Ports_SRC_FILE}") # debug helper
-        list(APPEND System.IO.Ports_SOURCES ${System.IO.Ports_SRC_FILE})
-    endforeach()
-
-endif()
 
 include(FindPackageHandleStandardArgs)
 

@@ -9,10 +9,6 @@
 
 extern "C"
 {
-    uint64_t HAL_Time_SysTicksToTime_C(unsigned int sysTicks)
-    {
-        return 0;
-    }
 
     unsigned int HAL_Time_CurrentSysTicks()
     {

@@ -267,9 +267,9 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
 
         while (xCount--)
         {
-            CLR_UINT16 data = *src++;
-            *transferBufferIndex++ = (data >> 8);
-            *transferBufferIndex++ = data & 0xff;
+            CLR_UINT16 dt = *src++;
+            *transferBufferIndex++ = (dt >> 8);
+            *transferBufferIndex++ = dt & 0xff;
             transferBufferCount -= 2;
 
             // Send over SPI if no room for another 2 bytes

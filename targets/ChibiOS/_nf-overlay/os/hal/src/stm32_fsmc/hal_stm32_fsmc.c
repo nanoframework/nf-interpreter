@@ -135,10 +135,10 @@ void fsmc_stop(FSMCDriver *fsmcp)
 }
 
 // FSMC shared interrupt handler.
-CH_IRQ_HANDLER(STM32_FSMC_HANDLER)
+OSAL_IRQ_HANDLER(STM32_FSMC_HANDLER)
 {
 
-    CH_IRQ_PROLOGUE();
+    OSAL_IRQ_PROLOGUE();
 #if STM32_NAND_USE_FSMC_NAND1
     if (FSMCD1.nand1->SR & FSMC_SR_ISR_MASK)
     {
@@ -151,7 +151,7 @@ CH_IRQ_HANDLER(STM32_FSMC_HANDLER)
         NANDD2.isr_handler(&NANDD2);
     }
 #endif
-    CH_IRQ_EPILOGUE();
+    OSAL_IRQ_EPILOGUE();
 }
 
 #endif /* HAL_NF_USE_FSMC */

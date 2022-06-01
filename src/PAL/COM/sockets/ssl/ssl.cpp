@@ -72,7 +72,7 @@ static bool SSL_GenericInit(
         isServer);
 }
 
-bool SSL_ParseCertificate(const char *certificate, size_t certLength, const char *password, X509CertData *certData)
+bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertData *certData)
 {
     if (!s_InitDone)
     {
@@ -81,7 +81,7 @@ bool SSL_ParseCertificate(const char *certificate, size_t certLength, const char
 
     NATIVE_PROFILE_PAL_COM();
 
-    return ssl_parse_certificate_internal((void *)certificate, certLength, (void *)password, (void *)certData);
+    return ssl_parse_certificate_internal((void *)certificate, certLength, (void *)certData);
 }
 
 int SSL_DecodePrivateKey(const unsigned char *key, size_t keyLength, const unsigned char *pwd, size_t pwdLength)
@@ -152,9 +152,9 @@ bool SSL_ClientInit(
         false);
 }
 
-bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength, const char *certPassword)
+bool SSL_AddCertificateAuthority(int contextHandle, const char *certificate, int certLength)
 {
-    return ssl_add_cert_auth_internal(contextHandle, certificate, certLength, certPassword);
+    return ssl_add_cert_auth_internal(contextHandle, certificate, certLength);
 }
 
 bool SSL_ExitContext(int contextHandle)

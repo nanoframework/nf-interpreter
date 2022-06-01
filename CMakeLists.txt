@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -26,6 +26,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 #########################################
 
+message(STATUS "\n\nINFO: Running CMake ${CMAKE_VERSION}\n\n")
 
 ########################################################
 # path to local CMake modules
@@ -34,6 +35,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
 include(binutils.common)
+include(binutils.ESP32)
 
 ######################################################
 # set build type to release if not specified otherwise
@@ -64,69 +66,16 @@ if(NOT RTOS OR RTOS STREQUAL "")
     message(FATAL_ERROR "\n\nMissing build option 'RTOS'.")
 endif()
 
-# list of supported RTOSes
-# when adding a new RTOS add the corresponding string below AND...
-# ... also on the compare block below
-set(RTOS_SUPPORTED "ChibiOS" "FreeRTOS" "FreeRTOS_ESP32" "TI_SimpleLink" CACHE INTERNAL "supported RTOS options")
+# check the RTOS and TARGET folders exist. 
+# optionally add custom logic in the last section of this CMakeLists.txt 
+# to perform custom add_subdirectory() actions.
 
-list(FIND RTOS_SUPPORTED ${RTOS} RTOS_INDEX)
-if(RTOS_INDEX EQUAL -1)
-    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
-else()
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/${RTOS})
     message(STATUS "\nSetting RTOS to ${RTOS}\n")
-endif()
-
-string(COMPARE EQUAL "ChibiOS" ${RTOS}  RTOS_CHIBIOS_CHECK)
-string(COMPARE EQUAL "FreeRTOS" ${RTOS} RTOS_FREERTOS_CHECK)
-string(COMPARE EQUAL "FreeRTOS_ESP32" ${RTOS} RTOS_FREERTOS_ESP32_CHECK)
-string(COMPARE EQUAL "TI_SimpleLink" ${RTOS} RTOS_TI_SIMPLELINK_CHECK)
-
-##########################################################################
-
-if(RTOS_FREERTOS_CHECK)
-    set(RTOS_FREERTOS_CHECK TRUE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-endif()
-
-if(RTOS_FREERTOS_ESP32_CHECK)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK TRUE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-endif()
-
-if(RTOS_CHIBIOS_CHECK)
-    set(RTOS_CHIBIOS_CHECK TRUE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_TI_SIMPLELINK_CHECK FALSE)
-endif()
-
-if(RTOS_TI_SIMPLELINK_CHECK)
-    set(RTOS_TI_SIMPLELINK_CHECK TRUE)
-    set(RTOS_FREERTOS_CHECK FALSE)
-    set(RTOS_FREERTOS_ESP32_CHECK FALSE)
-    set(RTOS_CHIBIOS_CHECK FALSE)
-endif()
-
-#######################
-
-# check for toolchain path (this is required for Windows builds and we are only building on Windows)
-if(NOT DEFINED TOOLCHAIN_PREFIX)
-        message(STATUS "\n-- ########################################\nNo TOOLCHAIN_PREFIX specified, need one!\nCall CMake with -DTOOLCHAIN_PREFIX=\"<path_to_your_gcc_toolchain>\"\n specifing the path to your GCC toolchain (ex: E:/GNU_Tools_ARM_Embedded/5_4_2016q3)")
-        message(STATUS "\nNOTE: mind the forward slash in the path, without trailing slash.)")
-        message(STATUS "########################################\n\n")
-        message(FATAL_ERROR "No TOOLCHAIN_PREFIX specified")
-endif()
-
-# Set up short path substitution on Windows
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
-    if(EXISTS ${CMAKE_SOURCE_DIR}/SetNFRoot.bat)
-        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/SetNFRoot.bat OUTPUT_VARIABLE NFROOT OUTPUT_STRIP_TRAILING_WHITESPACE)
-        set(ENV{nfRoot} ${NFROOT})
-    endif()
+    string(TOUPPER ${RTOS} RTOS_UPPERCASE)
+    set(RTOS_${RTOS_UPPERCASE}_CHECK TRUE)
+else()
+    message(FATAL_ERROR "\n\n'${RTOS}' is an invalid option for RTOS. Please choose a valid RTOS.\n\n")
 endif()
 
 #########################################
@@ -185,6 +134,15 @@ if(RTOS_CHIBIOS_CHECK OR RTOS_TI_SIMPLELINK_CHECK)
     unset(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES)
     #################################################################
     
+    #################################################################
+    # clear other options and definitions that we want to set
+    unset(COMPILE_OPTIONS)
+    unset(C_COMPILE_OPTIONS)
+    unset(CXX_COMPILE_OPTIONS)
+    unset(COMPILE_DEFINITIONS)
+    unset(LINK_OPTIONS)
+    #################################################################
+
     #################################################################
     # clear other options and definitions that we want to set
     unset(COMPILE_OPTIONS)
@@ -260,6 +218,22 @@ else()
 endif()
 
 #################################################################
+# nanoFramework features
+#################################################################
+
+###################################################################
+# native send trace to stdio (default is OFF so no support for sending stdio to serial port)
+option(NF_TRACE_TO_STDIO  "option to enable sending trace data to stdio. Requires spare SERIAL device")
+
+if(NF_TRACE_TO_STDIO)
+    set(TARGET_TRACE_TO_STDIO TRUE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio is included.")
+else()
+    set(TARGET_TRACE_TO_STDIO FALSE CACHE INTERNAL "Option for stdio TRACE implementation")
+    message(STATUS "Support for sending TRACE to stdio **IS NOT** included.")
+endif()
+
+#################################################################
 # enables Application Domains support in nanoCLR
 # (default is OFF so Application Domains is NOT supported)
 option(NF_FEATURE_USE_APPDOMAINS "option to enable Application Domains")
@@ -313,7 +287,7 @@ option(NF_FEATURE_HAS_SDCARD "option to enable support for SD Card")
 if(NF_FEATURE_HAS_SDCARD)
 
     # this feature currently is supported only on ChibiOS, iMX.RT FreeRTOS and ESP32 FreeRTOS
-    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_FREERTOS_ESP32_CHECK)
+    if(NOT RTOS_CHIBIOS_CHECK AND NOT RTOS_FREERTOS_CHECK AND NOT RTOS_ESP32_CHECK)
         message(FATAL_ERROR "Support for SD Card is only available for ChibiOS Cortex-M targets, iMX.RT FreeRTOS and ESP32 targets..")
     endif()
 
@@ -351,7 +325,7 @@ if(NF_FEATURE_HAS_USB_MSD)
     # force inclusion of System.IO.FileSystem API
     set(API_System.IO.FileSystem ON CACHE INTERNAL "Forcing System.IO.FileSystem API option to ON")
 
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
         # can't System.IO.FileSystem API because of lack of suppporting configuration for FATFS. See issue #668
         message(WARNING "Can't use System.IO.FileSystem API in ESP32 targets because of FATFS config. See issue #668.")
         
@@ -456,7 +430,7 @@ endif()
 option(USE_NETWORKING_OPTION "option to use networking")
 
 # (default is OFF so mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider")
+option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider" ON)
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
@@ -519,24 +493,28 @@ endif()
 # for some APIs we need to enable the device in the HAL config
 # and/or manage other APIs that are required
 
-if( API_nanoFramework.Devices.OneWire OR
-    API_Windows.Devices.SerialCommunication OR
+if( API_nanoFramework.Device.OneWire OR
     API_System.IO.Ports)
 
-    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION TRUE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 
 else()
-    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Devices.OneWire")
+    set(HAL_USE_UART_OPTION FALSE CACHE INTERNAL "HAL OneWire for nanoFramework.Device.OneWire")
 endif()
 
-if( API_System.Net)
+if(API_System.Net)
 
     # set NETWORKING option to true
     set(USE_NETWORKING_OPTION TRUE CACHE INTERNAL "NF feature NETWORKING")
 
-    # set Security module to use
-    if(NF_SECURITY_MBEDTLS )
+    # set Security module to use (not applicable for Azure RTOS)
+    if(NOT RTOS_AZURERTOS_CHECK AND NF_SECURITY_MBEDTLS)
         set(USE_SECURITY_MBEDTLS_OPTION TRUE CACHE INTERNAL "NF security MBEDTLS")
+    endif()
+
+    if(RTOS_AZURERTOS_CHECK AND CHIBIOS_HAL_REQUIRED AND "${WIFI_DRIVER}" STREQUAL "ISM43362")
+        set(API_Windows.Devices.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
+        set(API_System.Device.Spi ON CACHE INTERNAL "SPI required for ISM43362 & ChibiOS HAL")
     endif()
 
     if(NF_NETWORKING_ENC28J60)
@@ -545,21 +523,16 @@ if( API_System.Net)
         set(USE_ENC28J60_DRIVER_OPTION FALSE CACHE INTERNAL "NF ENC28J60 network driver")
     endif()
 
-   if(API_Windows.Devices.Wifi)
-        set(USE_WIFI_OPTION TRUE CACHE INTERNAL  "Wifi for Windows.Devices.WiFi")
-    else()
-        set(USE_WIFI_OPTION FALSE CACHE INTERNAL "Wifi for Windows.Devices.WiFi")
-    endif()
 else()
     # need to force SNTP to OFF
     set(NF_NETWORKING_SNTP FALSE CACHE INTERNAL "SNTP is off as there is no network support")
 endif()
 
 
-if(API_Windows.Devices.Adc)
-    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+if(API_System.Device.Adc)
+    set(HAL_USE_ADC_OPTION TRUE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 else()
-    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for Windows.Devices.Adc")
+    set(HAL_USE_ADC_OPTION FALSE CACHE INTERNAL "HAL ADC for System.Device.Adc")
 endif()
 
 
@@ -577,13 +550,6 @@ else()
 endif()
 
 
-if(API_Windows.Devices.Gpio)
-    set(HAL_USE_GPIO_OPTION TRUE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-else()
-    set(HAL_USE_GPIO_OPTION FALSE CACHE INTERNAL "HAL GPIO for Windows.Devices.Gpio")
-endif()
-
-
 if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
@@ -591,25 +557,12 @@ else()
 endif()
 
 
-if(API_Windows.Devices.I2c)
-    set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+if(API_System.Device.Pwm)
+    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
-    set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for Windows.Devices.I2c")
+    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for System.DevicesPwm")
 endif()
 
-
-if(API_Windows.Devices.Pwm)
-    set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-else()
-    set(HAL_USE_PWM_OPTION FALSE CACHE INTERNAL "HAL PWM for Windows.Devices.Pwm")
-endif()
-
-
-if(API_Windows.Devices.Spi)
-    set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-else()
-    set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for Windows.Devices.Spi")
-endif()
 
 if(API_System.Device.Spi)
     set(HAL_USE_SPI_OPTION TRUE CACHE INTERNAL "HAL SPI for System.Device.Spi")
@@ -617,17 +570,18 @@ else()
     set(HAL_USE_SPI_OPTION FALSE CACHE INTERNAL "HAL SPI for System.Device.Spi")
 endif()
 
-if(API_nanoFramework.Devices.Can)
-    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+
+if(API_nanoFramework.Device.Can)
+    set(HAL_USE_CAN_OPTION TRUE CACHE INTERNAL "HAL CAN for nanoFramework.Device.Can")
 else()
-    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Devices.Can")
+    set(HAL_USE_CAN_OPTION FALSE CACHE INTERNAL "HAL CAN for nanoFramework.Device.Can")
 endif()
 
 
-if(API_nanoFramework.Devices.OneWire)
-    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+if(API_nanoFramework.Device.OneWire)
+    set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 else()
-    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Devices.OneWire")
+    set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################
@@ -656,13 +610,11 @@ endif()
 #################################################################
 
 # include nanoFramework.Runtime.Events API
-if( API_nanoFramework.Devices.OneWire OR 
+if( API_nanoFramework.Device.OneWire OR 
     API_System.Net OR
     API_System.Device.Gpio OR
-    API_Windows.Devices.Gpio OR
-    API_Windows.Devices.SerialCommunication OR
     API_System.IO.Ports OR
-    API_nanoFramework.Devices.Can OR
+    API_nanoFramework.Device.Can OR
     API_Windows.Storage OR
     API_System.IO.FileSystem)
 
@@ -685,11 +637,15 @@ endif()
 # handles Networking support at HAL level
 
 if(USE_NETWORKING_OPTION)
-    set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION")
+
+    if(RTOS_CHIBIOS_CHECK)
+        set(HAL_USE_MAC_OPTION TRUE CACHE INTERNAL "HAL MAC for USE_NETWORKING_OPTION, ChibiOS only")
+    endif()
 
     if(NF_SECURITY_MBEDTLS)
         message(STATUS "Support for networking enabled with security from mbedTLS")
-    elseif(RTOS_TI_SIMPLELINK_CHECK)
+    elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
+        # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")
     else()
         message(STATUS "Support for networking enabled WITHOUT security")
@@ -697,6 +653,14 @@ if(USE_NETWORKING_OPTION)
 
     if(NF_NETWORKING_ENC28J60)
         message(STATUS "Support for ENC28j60 network driver enabled")
+    endif()
+
+    if(WIFI_DRIVER)
+        message(STATUS "Using '${WIFI_DRIVER}' driver for Wi-Fi")
+    endif()
+
+    if(ETHERNET_DRIVER)
+        message(STATUS "Using '${ETHERNET_DRIVER}' driver for Ethernet")
     endif()
 
     # sanity check for missing configuration block option
@@ -759,6 +723,36 @@ endif()
 
 #################################################################
 
+########################################################
+# check availability of hex2dfu tool if specified
+if(DEFINED TOOL_HEX2DFU_PREFIX)
+    if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
+        message(STATUS "")
+        message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
+        message(STATUS "Make sure that the CMake option TOOL_HEX2DFU_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://github.com/nanoframework/nf-tools/releases")
+        message(STATUS "")
+        message(FATAL_ERROR "hex2dfu tool not found")
+    else()
+        set(HEX2DFU_TOOL_AVAILABLE TRUE CACHE INTERNAL "hex2dfu tool available")
+    endif()
+endif()
+
+########################################################
+# check availability of SRecord tool, if specified
+if(DEFINED TOOL_SRECORD_PREFIX)
+    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+        message(STATUS "")
+        message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
+        message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
+        message(STATUS "If you don't have this tool download it from https://sourceforge.net/projects/srecord/files/srecord-win32/")
+        message(STATUS "")
+        message(FATAL_ERROR "srec_cat tool not found")
+    else()
+        set(SRECORD_TOOL_AVAILABLE TRUE CACHE INTERNAL "srec_cat tool available")
+    endif()
+endif()
+
 #################################################################
 # Override target name on device properties
 
@@ -774,99 +768,55 @@ endif()
 # assume no community board... until proven otherwise
 set(IS_COMMUNITY_TARGET FALSE CACHE INTERNAL "Community target flag")
 
+
+# Define PLATFORM base path
+set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
+
 #######################
-# ChibiOS
-if(RTOS_CHIBIOS_CHECK)
+# FreeRTOS or AzureRTOS
+if(RTOS_FREERTOS_CHECK OR RTOS_AZURERTOS_CHECK)
+
+    add_subdirectory(${BASE_PATH_FOR_PLATFORM})
+
+#######################
+# ESP32
+elseif(RTOS_ESP32_CHECK)
+
+    # enables embedded USB CDC 
+    # (default is OFF so embedded USB CDC is NOT enabled)
+    option(ESP32_USB_CDC "option to enable USB Mass Storage")
 
     # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nanoCLR)
-    
-    add_subdirectory(targets/ChibiOS)
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/ESP32/_nanoCLR)
 
-    # now add the subdirectory for the board
-    # try to find board in the targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
-
-        # board found
-        message(STATUS "Support for target board '${TARGET_BOARD}' found")
-
-        # add TARGET board directory
-        add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
-
+    # Only used by ESP32 at the moment
+    if(API_nanoFramework.Device.Bluetooth)
+        set(HAL_USE_BLE_OPTION TRUE CACHE INTERNAL "Bluetooth Support")
+        message(STATUS "Support for Bluetooth enabled")
     else()
-
-        # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
-            # board found
-            message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
-
-            # add TARGET board directory from Community
-            add_subdirectory(targets-community/ChibiOS/${TARGET_BOARD})
-        else()
-        # board NOT found in targets folder
-            # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
-        endif()
-
+        set(HAL_USE_BLE_OPTION FALSE CACHE INTERNAL "No Bluetooth Support")
+        message(STATUS "Support for Bluetooth disabled")
     endif()
 
-#######################
-# FreeRTOS
-elseif(RTOS_FREERTOS_CHECK)
+    if(ESP32_ETHERNET_SUPPORT)
+        message(STATUS "Support for Ethernet network interface enabled")
+    else()
+        message(STATUS "Support for Ethernet network interface disabled")
+    endif()
 
-    add_subdirectory(targets/FreeRTOS)
-
-#######################
-# FreeRTOS ESP32
-elseif(RTOS_FREERTOS_ESP32_CHECK)
-
-    if(${TARGET_SERIES} STREQUAL "ESP32")
-        message(STATUS "Platform ESP32 target board: ${TARGET_BOARD} variant: ${TARGET_VARIANT}")
-
-        if (NOT TARGET_VARIANT)
-            set(TARGET_VARIANT "generic" CACHE INTERNAL "Generic ESP32 build")
-        endif()
-
-        # Only used by ESP32 at the moment
-        if(API_nanoFramework.Hardware.Esp32.Ble)
-            set(USE_ESP32_BLE TRUE CACHE INTERNAL "BLE Support")
-            message(STATUS "Support for BLE enabled")
-        else()
-            set(USE_ESP32_BLE FALSE CACHE INTERNAL "No BLE Support")
-            message(STATUS "Support for BLE disabled")
-        endif()
-
-        # check watchdog feature
-        # EPS32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
-        # becuase the build system can't honour that preference
-        if(NOT NF_FEATURE_WATCHDOG)
+    # check watchdog feature
+    # ESP32 build has watchdog enabled by default, so setting it to OFF doesn't make sense 
+    # because the build system can't honour that preference
+    if(NOT NF_FEATURE_WATCHDOG)
         message(FATAL_ERROR "\n\nESP32 watchdog is enabled by default in so you can't have the NF_FEATURE_WATCHDOG option set to OFF.\n\n")
-        endif()
-
-        # Define base path for the class libraries
-        nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD}/nanoCLR)
-
-        add_subdirectory(targets/FreeRTOS_ESP32)
-
-        # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/FreeRTOS_ESP32/${TARGET_BOARD})
- 		add_subdirectory(targets/FreeRTOS_ESP32/${TARGET_BOARD})
-
     endif()
-
-#######################
-# TI_SIMPLELINK
-elseif(RTOS_TI_SIMPLELINK_CHECK)
-
-    # Define base path for the class libraries
-    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/TI_SimpleLink/_nanoCLR)
 
     # now add the subdirectory for the board
     # try to find board in the targets folder
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # set target base location
-        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink/${TARGET_BOARD})
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/ESP32/${TARGET_BOARD})
 
         # board found
         message(STATUS "Support for target board '${TARGET_BOARD}' found")
@@ -875,28 +825,75 @@ elseif(RTOS_TI_SIMPLELINK_CHECK)
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
-            
-            # set flag for this being a community board
-            set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
 
             # set target base location
-            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/TI_SimpleLink/${TARGET_BOARD})
+            set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/ESP32/${TARGET_BOARD})
         
             # board found
             message(STATUS "Support for target board '${TARGET_BOARD}' found in Community targets")
             message(STATUS "${TARGET_BASE_LOCATION}")
 
         else()
-        # board NOT found in targets folder
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
-
     endif()
+
+    # need to add this here to keep IDF build system happy
+    add_executable(
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
+    )
+
+    # add common directory for ESP32
+    add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)
+
+    nf_add_idf_as_library()
+
+    # add TARGET board directory
+    add_subdirectory(${TARGET_BASE_LOCATION})
+
+    nf_clear_output_files_nanoclr()
+
+# all other platforms
+else()
+
+    # now add the subdirectory for the board
+    # try to find board in the targets folder
+    if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+
+        # set target base location
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS}/${TARGET_BOARD})
+
+        # board found
+        message(STATUS "'${RTOS}' support for target board '${TARGET_BOARD}' found")
+        message(STATUS "${TARGET_BASE_LOCATION}")
+
+    # try to find board in the Community targets folder
+    elseif(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
+            
+        # set flag for this being a community board
+        set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
+
+        # set target base location
+        set(TARGET_BASE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/targets-community/${RTOS}/${TARGET_BOARD})
     
-    # add common directory for SimpleLink
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/TI_SimpleLink)
+        # board found
+        message(STATUS "'${RTOS}' support for target board '${TARGET_BOARD}' found in Community targets")
+        message(STATUS "${TARGET_BASE_LOCATION}")
+
+    else()
+        # board NOT found in targets folder
+        message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available in '${RTOS}' ...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+    endif()
+
+    # Define base path for the class libraries
+    nf_set_base_path_for_libraries_modules(${CMAKE_SOURCE_DIR}/targets/${RTOS}/_nanoCLR)
+    
+    # add common directory for TARGET
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${RTOS})
+    
     # add TARGET board directory
     add_subdirectory(${TARGET_BASE_LOCATION})
 

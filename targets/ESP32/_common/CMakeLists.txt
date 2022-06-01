@@ -1,0 +1,32 @@
+#
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+#
+
+# append target common source files 
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Device_BlockStorage.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GenericPort_Write.cpp)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_BlockStorage.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/platform_heap.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Target_BlockStorage_ESP32FlashDriver.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Time.cpp)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_HAL_Interface.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/WireProtocol_ReceiverThread.c)
+
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigStorageSPIFFS.c)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_ConfigurationManager.cpp)
+list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoSupport_CRC32.c)
+
+# add device mapping
+# check if there is a specific one for the target...
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}_DeviceMapping.cpp")
+    list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_NAME}_DeviceMapping.cpp)
+else()
+    # go with the default one for the series
+    list(APPEND TARGET_ESP32_IDF_COMMON_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_SERIES}_DeviceMapping.cpp)
+endif()
+
+
+# make var global
+set(TARGET_ESP32_IDF_COMMON_SOURCES ${TARGET_ESP32_IDF_COMMON_SOURCES} CACHE INTERNAL "make global")

@@ -213,7 +213,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
         uint8_t mask = 0x01;
 
         // For each line in a page
-        for (uint y = 0; y < 8; y++)
+        for (uint iy = 0; iy < 8; iy++)
         {
             CLR_UINT16 *pData = pui16Data;
 

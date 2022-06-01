@@ -17,6 +17,8 @@ list(APPEND nanoFramework.System.Collections_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/s
 set(nanoFramework.System.Collections_SRCS
 
     # source files of the assembly
+    nf_system_collections_System_Collections_Hashtable.cpp
+    nf_system_collections_System_Collections_Hashtable__HashtableEnumerator.cpp
     nf_system_collections_System_Collections_Queue.cpp
     nf_system_collections_System_Collections_Stack.cpp
     nf_system_collections.cpp

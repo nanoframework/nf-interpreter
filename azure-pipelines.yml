@@ -1,8 +1,35 @@
 trigger:
   branches:
-    include: ["main", "main", "develop*", "release-*", "refs/tags/*" ]
+    include: 
+      - main
+      - develop*
+      - release-*
+      - refs/tags/*
   paths:
-    exclude: [ "doc", "*.md", ".gitignore", "README.md" ]
+    exclude:
+      - .clang-format
+      - .github_changelog_generator
+      - .gitignore
+      - .typo-ci.yml
+      - build.ps1
+      - CHANGELOG.md
+      - CMakeSettings.json
+      - CMakeSettings.SAMPLE.json
+      - LICENSE.md
+      - nf.props
+      - nfcore.vssettings
+      - README.md
+      - README.zh-cn.md
+      - RunCmd.bat
+      - startocd.bat
+      - .github/*
+      - .devcontainer/*
+      - .vscode/*
+      - .vs/*
+      - assets/*
+      - config/*
+      - install-scripts/*
+      - VisualStudioDevelopment/*
 
 pr:
   autoCancel: true
@@ -14,13 +41,18 @@ resources:
       type: github
       name: nanoframework/nf-tools
       endpoint: nanoframework
-
+    - repository: esp32_idf
+      type: github
+      name: espressif/esp-idf
+      endpoint: nanoframework
+      ref: refs/tags/v4.4.1
+      
 jobs:
 
 ##############################
 - job: Check_Build_Options
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -106,6 +138,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_NANOCLR;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
@@ -144,10 +177,10 @@ jobs:
               Write-host "Building FreeRTOS targets"
           }
 
-          if( ($files.where{$_.Contains('targets/FreeRTOS_ESP32')}).Count -gt 0)
+          if( ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
           {
-              # files at FreeRTOS_ESP32 folder
-              echo "##vso[task.setvariable variable=BUILD_FREERTOS_ESP32;isOutput=true]true"
+              # files at ESP32 folder
+              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
 
               Write-host "Building ESP32 targets"
           }
@@ -158,6 +191,15 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
               Write-host "Building TI SimpleLink targets"
+          }
+          
+          
+          if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+          {
+              # files at AzureRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+              Write-host "Building Azure RTOS targets"
           }
 
           if( 
@@ -255,13 +297,24 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: >-
+    and(
+      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - checkout: self
@@ -270,57 +323,48 @@ jobs:
   - template: azure-pipelines-templates/download-install-llvm.yml
   - template: azure-pipelines-templates/check-code-style.yml
 
-#################
+################
 # STM32
 - job: Build_STM32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
-      NETDUINO3_WIFI:
-        TargetBoard: NETDUINO3_WIFI
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=OFF -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version:
-        NeedsDFU: true
-        NeedsSRECORD: false
-      ORGPAL_PALTHREE:
-        TargetBoard: ORGPAL_PALTHREE
-        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DCHIBIOS_CONTRIB_REQUIRED=ON -DSTM32_CUBE_PACKAGE_REQUIRED=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_USB_MSD=ON -DNF_FEATURE_HAS_SDCARD=ON -DNF_FEATURE_USE_SPIFFS=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version:
-        NeedsDFU: true
-        NeedsSRECORD: false
       ST_STM32F429I_DISCOVERY:
         TargetBoard: ST_STM32F429I_DISCOVERY
-        BuildOptions: -DTARGET_SERIES=STM32F4xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        TargetSeries: 'stm32f4xx'
+        BuildOptions: 
         GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: false
-      ST_NUCLEO64_F091RC:
-        TargetBoard: ST_NUCLEO64_F091RC
-        BuildOptions: -DTARGET_SERIES=STM32F0xx -DRTOS=ChibiOS -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DUSE_RNG=OFF -DNF_PLATFORM_NO_CLR_TRACE=ON -DNF_CLR_NO_IL_INLINE=ON -DAPI_Hardware.Stm32=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_nanoFramework.System.Text=ON
-        GccArm_Version:
-        NeedsDFU: false
-        NeedsSRECORD: true
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
-        BuildOptions: -DTARGET_SERIES=STM32F7xx -DRTOS=ChibiOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DAPI_Hardware.Stm32=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Device.Dac=ON -DAPI_System.Net=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.Devices.Can=ON -DAPI_System.IO.FileSystem=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_MEMORY=Graphics_Memory.cpp -DGRAPHICS_DISPLAY=Otm8009a_DSI_Video_Mode.cpp  -DGRAPHICS_DISPLAY_INTERFACE=DSI_To_Display_Video_Mode.cpp -DTOUCHPANEL_DEVICE=ft6x06_I2C.cpp -DTOUCHPANEL_INTERFACE=I2C_To_TouchPanel.cpp
-        GccArm_Version:
+        TargetSeries: 'stm32f7xx'
+        BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: true
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'stm32'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -337,94 +381,135 @@ jobs:
 #################
 # ESP32 targets
 - job: Build_ESP32_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS_ESP32'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
   strategy:
     matrix:
-      ESP32_WROOM_32:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON
-      ESP32_WROOM_32_BLE:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DTARGET_VARIANT=BLE -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON -DAPI_nanoFramework.Hardware.Esp32.Ble=ON
-        PackageName: ESP32_WROOM_32_BLE
-      ESP32_WROOM_32_V3:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DTARGET_VARIANT=V3 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON -DAPI_nanoFramework.Hardware.Esp32.Ble=ON
-        PackageName: ESP32_WROOM_32_V3_BLE
+      ESP32_PSRAM_REV0:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_PSRAM_REV0
+      ESP32_BLE_REV0:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_BLE_REV0
       ESP_WROVER_KIT:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.Devices.OneWire=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON  -DAPI_nanoFramework.Graphics=ON -DGRAPHICS_DISPLAY="ILI9341_240x320_SPI.cpp" -DTOUCHPANEL_DEVICE="XPT2046.cpp" -DGRAPHICS_DISPLAY_INTERFACE="Spi_To_Display.cpp" -DTOUCHPANEL_INTERFACE="Spi_To_TouchPanel.cpp" -DAPI_System.Device.Dac=ON
-        PackageName: ESP_WROVER_KIT
-      ESP32_PICO:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DTARGET_VARIANT=BLE -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DTARGET_SERIAL_BAUDRATE=115200 -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON -DAPI_nanoFramework.Hardware.Esp32.Ble=ON
-        PackageName: ESP32_PICO
+         TargetBoard: ESP32
+         TargetSeries: 'esp32'
+         BuildOptions: 
+         IDF_Target: esp32
+         TargetName: ESP_WROVER_KIT
+         PackageName: ESP_WROVER_KIT
       ESP32_LILYGO:
-        TargetBoard: ESP32_WROOM_32
-        BuildOptions: -DTARGET_SERIES=ESP32 -DTARGET_VARIANT=BLE -DRTOS=FreeRTOS_ESP32 -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.IO.FileSystem=ON -DAPI_System.Math=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_System.Device.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.Wifi=ON -DNF_SECURITY_MBEDTLS=ON -DAPI_Hardware.Esp32=ON -DSUPPORT_ANY_BASE_CONVERSION=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON -DAPI_nanoFramework.Hardware.Esp32.Rmt=ON -DAPI_System.Device.Dac=ON -DAPI_nanoFramework.Hardware.Esp32.Ble=ON -DESP32_ETHERNET_SUPPORT=ON -DESP32_CONFIG_PIN_PHY_POWER=5 -DESP32_CONFIG_PHY_CLOCK_MODE=ETH_CLOCK_GPIO17_OUT
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32_LILYGO
         PackageName: ESP32_LILYGO
+      FEATHER_S2:
+        TargetBoard: ESP32_S2
+        TargetSeries: 'esp32_s2'
+        BuildOptions: 
+        IDF_Target: esp32s2
+        TargetName: FEATHER_S2
+        PackageName: FEATHER_S2
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_versioncounter', 0)]
-    ESP32_TOOLCHAIN_PATH: $(Agent.TempDirectory)\ESP32_Tools\xtensa-esp32-elf
+    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
+    IDF_PATH: 'D:/a/1/s/esp-idf'
+    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+    TargetPlatform: 'esp32'
 
   steps:
+  - checkout: self
+  - checkout: esp32_idf
+    fetchDepth: 1
+
   - template: azure-pipelines-templates/build-preparations.yml
   - template: azure-pipelines-templates/nb-gitversioning.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/download-install-esp32-build-components.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-esp32.yml
 
   - task: CopyFiles@1
     condition: succeeded()
-    displayName: Copying bootloader from ESP32 libs
+    displayName: Copying bootloader
     inputs:
-      sourceFolder: $(ESP32_LIBS_PATH)
+      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter\build\bootloader'
       Contents: |
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
 
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
+    parameters:
+      buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
   - template: azure-pipelines-templates/publish-cloudsmith.yml
 
 #################
 # NXP
 - job: Build_NXP_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
       NXP_MIMXRT1060_EVK:
         TargetBoard: NXP_MIMXRT1060_EVK
-        BuildOptions: -DTARGET_SERIES=IMXRT10xx -DRTOS=FreeRTOS -DSUPPORT_ANY_BASE_CONVERSION=ON -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_HAS_SDCARD=ON -DAPI_System.Math=ON -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_System.Net=ON -DAPI_Windows.Devices.SerialCommunication=ON -DAPI_System.IO.Ports=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_nanoFramework.ResourceManager=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+        TargetSeries: 'imxrt10xx'
+        BuildOptions: 
         GccArm_Version: 
         NeedsSRECORD: true
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
     GIT_LFS_SKIP_SMUDGE: 1
+    TargetPlatform: 'freertos'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -440,39 +525,61 @@ jobs:
 #################
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
       # disabled: waiting to update SDK to latest version with Sys Config
       # TI_CC3220SF_LAUNCHXL:
       #   TargetBoard: TI_CC3220SF_LAUNCHXL
-      #   BuildOptions: -DTARGET_SERIES=CC32xx -DRTOS=TI_SimpleLink -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DNF_FEATURE_HAS_CONFIG_BLOCK=ON -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=ON -DAPI_System.Device.Spi=ON -DAPI_Windows.Devices.I2c=ON -DAPI_System.Device.I2c=ON -DAPI_Windows.Devices.Pwm=ON -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_System.Net=ON -DAPI_nanoFramework.System.Collections=ON -DAPI_nanoFramework.System.Text=ON
+      #   TargetSeries: 'cc32xx'
+      #   BuildOptions: >-
+          #  -DTARGET_SERIES=CC32xx
+          #  -DRTOS=TI_SimpleLink
+          #  -DSUPPORT_ANY_BASE_CONVERSION=OFF
+          #  -DNF_FEATURE_DEBUGGER=ON
+          #  -DNF_FEATURE_RTC=ON
+          #  -DNF_FEATURE_WATCHDOG=OFF
+          #  -DNF_FEATURE_HAS_CONFIG_BLOCK=ON
+          #  -DAPI_System.Device.Gpio=ON
+          #  -DAPI_System.Device.Spi=ON
+          #  -DAPI_System.Device.I2c=ON
+          #  -DAPI_System.Device.Pwm=ON
+          #  -DAPI_System.Device.Adc=ON
+          #  -DAPI_System.Net=ON
+          #  -DAPI_nanoFramework.System.Collections=ON
+          #  -DAPI_nanoFramework.System.Text=ON
+
       #   GccArm_Version:
-      TI_CC1352R1_LAUNCHXL_868:
-        TargetBoard: TI_CC1352R1_LAUNCHXL
-        PackageName: TI_CC1352R1_LAUNCHXL_868
-        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=868 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_System.Device.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
-        GccArm_Version:
       TI_CC1352R1_LAUNCHXL_915:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_915
-        BuildOptions: -DTARGET_SERIES=CC13x2_26x2 -DRTOS=TI_SimpleLink -DRADIO_FREQUENCY=915 -DSUPPORT_ANY_BASE_CONVERSION=OFF -DNF_FEATURE_DEBUGGER=ON -DNF_FEATURE_RTC=ON -DNF_FEATURE_WATCHDOG=OFF -DAPI_Windows.Devices.Gpio=ON -DAPI_System.Device.Gpio=ON -DAPI_Windows.Devices.Spi=OFF -DAPI_Windows.Devices.I2c=OFF -DAPI_Windows.Devices.Pwm=OFF -DAPI_System.Device.Pwm=OFF -DAPI_Windows.Devices.SerialCommunication=OFF -DAPI_System.IO.Ports=OFF -DAPI_Windows.Devices.Adc=ON -DAPI_nanoFramework.TI.EasyLink=ON -DAPI_nanoFramework.Hardware.TI=ON
+        TargetSeries: 'CC13X2'
+        BuildOptions: >-
+          -DRADIO_FREQUENCY=915
         GccArm_Version:
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'ti_simplelink'
 
   steps:
   - template: azure-pipelines-templates/build-preparations.yml
@@ -485,9 +592,17 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
 
 #################
-# nanoCLR 
-- job: BUILD_nanoCLR
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR'], true)) )
+# Azure RTOS
+- job: Build_Azure_RTOS_targets
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
@@ -496,11 +611,67 @@ jobs:
   pool:
     vmImage: 'windows-2019'
 
+  strategy:
+    matrix:
+      ST_B_L475E_IOT01A:
+        TargetBoard: ST_B_L475E_IOT01A
+        TargetSeries: 'stm32l4xx'
+        BuildOptions: 
+        GccArm_Version: 
+        NeedsDFU: true
+        NeedsSRECORD: false
+
+      # ORGPAL_PALTHREE:
+      #   TargetBoard: ORGPAL_PALTHREE
+      #   TargetSeries: 'stm32f7xx'
+      #   BuildOptions:
+      #   GccArm_Version: 
+      #   NeedsDFU: true
+      #   NeedsSRECORD: false
+
+  variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('AZUREROTOS_1_8_0_versioncounter', 0)]
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'azure_rtos'
+
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-hexdfu.yml
+  - template: azure-pipelines-templates/download-srecord.yml
+  - template: azure-pipelines-templates/build-azurertos.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
+# WIN32 
+- job: Build_WIN32_nanoCLR
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+      )
+    )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'windows-latest'
+
   variables:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_8_0_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -559,11 +730,33 @@ jobs:
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign nanoCLR assemblies
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
 
   - task: NuGetCommand@2
-    condition: succeeded()
-    displayName: Pack nanoCLR WIN32
+    condition: >-
+      and(
+        succeeded(),
+        startsWith(variables['Build.SourceBranchName'], 'main')
+      )
+    displayName: Pack nanoCLR WIN32 (stable)
+    inputs:
+      command: 'custom' 
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)'
+
+  - task: NuGetCommand@2
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          startsWith(variables['Build.SourceBranchName'], 'develop'),
+          startsWith(variables['Build.SourceBranchName'], 'release')
+        )
+      )
+    displayName: Pack nanoCLR WIN32 (preview)
     inputs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
@@ -773,7 +966,7 @@ jobs:
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-nf-interpreter'
 
-#######################
+######################
 # generate change log
 - job: Generate_change_log
   dependsOn:
@@ -781,11 +974,25 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
+  condition: >-
+    and(
+      succeeded('Build_STM32_targets'),
+      succeeded('Build_ESP32_targets'),
+      succeeded('Build_NXP_targets'),
+      succeeded('Build_TI_SimpleLink_targets'),
+      succeeded('Build_Azure_RTOS_targets'),
+      not( eq(variables['Build.Reason'], 'PullRequest')
+    ),
+    or(
+      eq(variables['Build.SourceBranchName'], 'main'),
+      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
+      ne( variables['StartReleaseCandidate'], true )
+    )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - task: DotNetCoreCLI@2  
@@ -803,23 +1010,36 @@ jobs:
   - task: UseRubyVersion@0
     condition: succeeded()
     inputs:
-      versionSpec: '= 2.7' 
+      versionSpec: '= 3.0'
       addToPath: true
+
+  # Cache change log cache files
+  - task: Cache@2
+    displayName: Cache change log cache files
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      )
+    inputs:
+      key: 'changeLogCacheFiles'
+      restoreKeys: 1_0
+      path: |
+        $(Agent.TempDirectory)/github-changelog-logger.log
+        $(Agent.TempDirectory)/github-changelog-http-cache
 
   # generate change log including future version
   - powershell: |
         gem install github_changelog_generator --quiet --no-document
         # need to call it passing both cache options with full path otherwise it won't work
         github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels --future-release "v$env:NBGV_AssemblyVersion"
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v')  ) )
-    displayName: Generate change log
-
-  # generate change log without future version
-  - powershell: |
-        gem install github_changelog_generator --quiet --no-document
-        # need to call it passing both cache options with full path otherwise it won't work
-        github_changelog_generator --token $(GitHubToken) --cache-log  $env:AGENT_TEMPDIRECTORY\github-changelog-logger.log --cache-file $env:AGENT_TEMPDIRECTORY\github-changelog-http-cache --pr-wo-labels
-    condition: and( succeeded(), ne(variables['Build.Reason'], 'PullRequest'), not( or( eq(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ) ) )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+      )
     displayName: Generate change log
 
   # push new changelog to GitHub repo
@@ -837,57 +1057,19 @@ jobs:
         $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], ''), not( startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), eq( variables['StartReleaseCandidate'], false ))
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        not(
+          startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+        ),
+        eq( variables['StartReleaseCandidate'], false )
+      )
     continueOnError: true
     displayName: Push changelog to GitHub
 
-#######################
-# create or update GitHub release ON tags from main branch or tags
-- job: Publish_Release
-  dependsOn:
-  - Build_STM32_targets
-  - Build_ESP32_targets
-  - Build_NXP_targets
-  - Build_TI_SimpleLink_targets
-  - Build_nanoCLR
-  - Generate_change_log
-  # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
-  condition: and( succeeded('Build_STM32_targets'), succeeded('Build_ESP32_targets'), succeeded('Build_NXP_targets'), succeeded('Build_TI_SimpleLink_targets'), succeeded('Generate_change_log'), not( eq(variables['Build.Reason'], 'PullRequest') ), or( endsWith(variables['Build.SourceBranchName'], 'main'), startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ), ne( variables['StartReleaseCandidate'], true ) )
-
-  pool:
-    vmImage: 'windows-2019'
-
-  steps:
-  - task: DotNetCoreCLI@2  
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
-    displayName: Install NBGV tool
-
-  - script: nbgv cloud -a -c
-    displayName: Set build number
-
-  - task: GitHubReleasePublish@1
-    condition: endsWith(variables['Build.SourceBranch'], 'main')
-    displayName: Create/Update GitHub stable release
-    inputs:
-      githubEndpoint: 'nanoframework'
-      githubOwner: 'nanoframework'
-      githubRepositoryName: nf-interpreter
-      githubTag: v$(NBGV_AssemblyVersion)
-      githubReleaseTitle: 'nf Interpreter v$(NBGV_AssemblyVersion)'
-      githubReleaseNotes: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br>Download images from our Cloudsmith repo. See the available images [here](https://github.com/nanoframework/nf-interpreter/tree/main#firmware-for-reference-boards).'
-      githubTargetCommitsh: $(Build.SourceVersion)
-      githubReleaseDraft: false
-      githubReleasePrerelease: false
-      githubReuseDraftOnly: false
-      githubReuseRelease: true
-      githubEditRelease: true
-      githubDeleteEmptyTag: true
-      githubReleaseAsset: '$(Build.ArtifactStagingDirectory)/**/*.zip'
-
-##################################
+#################################
 # report build failure to Discord
 - job: Report_Build_Failure
   dependsOn:
@@ -895,14 +1077,27 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   - Build_nanoCLR
   - Build_nanoCLR_CLI
   - Generate_change_log
   - Check_Code_Style
-  condition: and(ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true), or( failed('Build_STM32_targets'), failed('Build_ESP32_targets'), failed('Build_NXP_targets'), failed('Build_TI_SimpleLink_targets'), failed('BUILD_nanoCLR'), failed('Build_nanoCLR_CLI'), failed('Generate_change_log')))
+  condition: >-
+    and(
+      ne( dependencies.Check_Code_Style.outputs['Check_Code_Style.CODE_STYLE_CHECK_FAILED'], true),
+      or(
+        failed('Build_STM32_targets'),
+        failed('Build_ESP32_targets'),
+        failed('Build_NXP_targets'),
+        failed('Build_TI_SimpleLink_targets'),
+        succeeded('Build_Azure_RTOS_targets'),
+        failed('Build_WIN32_nanoCLR'),
+        failed('Generate_change_log')
+      )
+    )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
 

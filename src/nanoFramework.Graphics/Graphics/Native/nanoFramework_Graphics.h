@@ -809,6 +809,36 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_CancelEventArgs
     //--//
 };
 
+struct Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration
+{
+    static const int FIELD___spiBus = 1;
+    static const int FIELD___chipSelect = 2;
+    static const int FIELD___dataCommand = 3;
+    static const int FIELD___reset = 4;
+    static const int FIELD___backLight = 5;
+
+    //--//
+};
+
+struct Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration
+{
+    static const int FIELD___x = 1;
+    static const int FIELD___y = 2;
+    static const int FIELD___width = 3;
+    static const int FIELD___height = 4;
+
+    //--//
+};
+
+struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
+{
+    static const int FIELD___i2cBus = 1;
+    static const int FIELD___address = 2;
+    static const int FIELD___fastMode = 3;
+
+    //--//
+};
+
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
     static const int FIELD_STATIC___fullScreen = 20;
@@ -819,7 +849,15 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_ScreenHeight___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_BitsPerPixel___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
+    NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_U2);
+    NANOCLR_NATIVE_DECLARE(
+        Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
+    NANOCLR_NATIVE_DECLARE(
+        NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4);
 
     //--//
 };

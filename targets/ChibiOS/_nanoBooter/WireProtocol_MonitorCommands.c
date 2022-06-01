@@ -22,12 +22,12 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
     {
         case AccessMemory_Write:
             // use FLASH driver to perform write operation
-            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            // this requires that HAL_NF_USE_STM32_FLASH is set to TRUE on halconf_nf.h
             return stm32FlashWrite(location, lengthInBytes, buffer);
 
         case AccessMemory_Erase:
             // erase using FLASH driver
-            // this requires that HAL_USE_STM32_FLASH is set to TRUE on halconf_nf.h
+            // this requires that HAL_NF_USE_STM32_FLASH is set to TRUE on halconf_nf.h
             return stm32FlashErase(location);
 
         case AccessMemory_Check:

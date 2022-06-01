@@ -35,7 +35,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     md = callInstPtr->m_target;
 
     sizeLocals = md->numLocals;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
     sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
@@ -55,7 +55,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 
         if (extraBlocks > 0)
             memorySize += extraBlocks;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (memorySize < c_MinimumStack)
         {
             sizeEvalStack += c_MinimumStack - memorySize;
@@ -118,7 +118,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
                                    //    void*                  m_customPointer;
                                    // };
                                    //
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         stack->m_inlineFrame = NULL;
 #endif
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
@@ -268,7 +268,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     NANOCLR_CLEANUP_END();
 }
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_StackFrame::PushInline(
     CLR_PMETADATA &ip,
     CLR_RT_Assembly *&assm,
@@ -1238,7 +1238,7 @@ void CLR_RT_StackFrame::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     if (m_inlineFrame)
     {
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_call.m_assm);

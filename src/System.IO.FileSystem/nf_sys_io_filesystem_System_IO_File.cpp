@@ -151,6 +151,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetAttributesNative___STATI
         else if (operationResult == FR_NO_FILE)
         {
             // File/Directory not found
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_NOT_FOUND);
         }
         else
         {

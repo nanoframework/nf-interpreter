@@ -30,8 +30,6 @@ int errorCode;
 #define DEBUG_HANDLE_SOCKET_ERROR(t, a)
 #endif
 
-struct netif *netif_find_interface(int num);
-
 //
 
 // declaration of function not available in standard lwIP API
@@ -388,14 +386,7 @@ int LWIP_SOCKETS_Driver::Close(SOCK_SOCKET socket)
 {
     NATIVE_PROFILE_PAL_NETWORK();
 
-#ifdef PLATFORM_ESP32
-    // We have to call lwip_close_r() method otherwise the socket doesn't get freed up and we run out of sockets.
-    // We could also call the posix closesocket() which should work for all platforms and change all other methods to
-    // call the posix version to be consistent.(TODO)
-    return lwip_close_r(socket);
-#else
     return lwip_close(socket);
-#endif
 }
 
 int LWIP_SOCKETS_Driver::Listen(SOCK_SOCKET socket, int backlog)
@@ -447,10 +438,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
     void *dummyPtr;
     SOCK_sockaddr_in *sa = NULL;
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
-    struct addrinfo *lwipAddrinfo = NULL;
+    struct addrinfo *lwipAddrinfo = {0};
 
     if (res == NULL)
+    {
         return SOCK_SOCKET_ERROR;
+    }
 
     *res = NULL;
 
@@ -463,10 +456,12 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
             return -1;
 
         ai = (SOCK_addrinfo *)mem_malloc(total_size);
+
         if (ai == NULL)
         {
             return -1;
         }
+
         memset(ai, 0, total_size);
         sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
 
@@ -482,6 +477,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
 
         /* set up addrinfo */
         ai->ai_family = AF_INET;
+
         if (hints != NULL)
         {
             /* copy socktype & protocol from hints if specified */
@@ -511,11 +507,13 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
         struct sockaddr_in *lwip_sockaddr_in;
 
         ai = (SOCK_addrinfo *)mem_malloc(total_size);
+
         if (ai == NULL)
         {
             lwip_freeaddrinfo(lwipAddrinfo);
             return -1;
         }
+
         memset(ai, 0, total_size);
 
         lwip_sockaddr_in = ((struct sockaddr_in *)lwipAddrinfo->ai_addr);
@@ -528,6 +526,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
 
         /* set up addrinfo */
         ai->ai_family = lwipAddrinfo->ai_family;
+
         if (hints != NULL)
         {
             /* copy socktype & protocol from hints if specified */
@@ -551,7 +550,7 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
     }
     else
     {
-        // map DNS error with socket errors
+        // map DNS error with socket errors (as much as possible)
         switch (err)
         {
             case HOST_NOT_FOUND:
@@ -736,26 +735,43 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
 
             switch (optname)
             {
-                // If linger value negative then linger off
-                // otherwise enabled and linger value is number of seconds
                 case SOCK_SOCKO_LINGER:
                 {
                     int lingerValue = *(int *)optval;
-                    if (lingerValue >= 0)
+
+                    if (lingerValue < 0)
                     {
-                        lopt.l_onoff = 1;
-                        lopt.l_linger = abs(lingerValue);
+                        // invalid value, not supported
+                        return SOCK_SOCKET_ERROR;
                     }
+                    else
+                    {
+                        // set linger to ON
+                        lopt.l_onoff = 1;
+                        // set linger value
+                        lopt.l_linger = lingerValue;
+                    }
+
+                    // set option value pointer and length
                     pNativeOptionValue = (char *)&lopt;
                     optlen = sizeof(lopt);
                 }
                 break;
 
                 case SOCK_SOCKO_DONTLINGER:
+                    // set linger to OFF
+                    lopt.l_onoff = 0;
+
+                    // set option value pointer and length
+                    pNativeOptionValue = (char *)&lopt;
+                    optlen = sizeof(lopt);
+                    break;
+
                 case SOCK_SOCKO_EXCLUSIVEADDRESSUSE:
                     nativeIntValue = !*(int *)optval;
                     pNativeOptionValue = (char *)&nativeIntValue;
                     break;
+
                 default:
                     break;
             }
@@ -766,7 +782,9 @@ int LWIP_SOCKETS_Driver::SetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             break;
     }
 
-    return lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
+    // developer note: consider success if return is 0, because this can return a lwIP error code for some options
+    errorCode = lwip_setsockopt(socket, nativeLevel, nativeOptionName, pNativeOptionValue, optlen);
+    return errorCode == 0 ? 0 : SOCK_SOCKET_ERROR;
 }
 
 int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, char *optval, int *optlen)
@@ -775,7 +793,6 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
     int nativeLevel;
     int nativeOptionName;
     char *pNativeOptval = optval;
-    int ret;
 
     switch (level)
     {
@@ -801,9 +818,10 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
             break;
     }
 
-    ret = lwip_getsockopt(socket, nativeLevel, nativeOptionName, pNativeOptval, (u32_t *)optlen);
+    // developer note: consider success if return is 0, because this can return a lwIP error code for some options
+    errorCode = lwip_getsockopt(socket, nativeLevel, nativeOptionName, pNativeOptval, (u32_t *)optlen);
 
-    if (ret == 0)
+    if (errorCode == 0)
     {
         switch (level)
         {
@@ -825,7 +843,7 @@ int LWIP_SOCKETS_Driver::GetSockOpt(SOCK_SOCKET socket, int level, int optname, 
         }
     }
 
-    return ret;
+    return errorCode == 0 ? 0 : SOCK_SOCKET_ERROR;
 }
 
 int LWIP_SOCKETS_Driver::GetPeerName(SOCK_SOCKET socket, SOCK_sockaddr *name, int *namelen)
@@ -1407,7 +1425,8 @@ int LWIP_SOCKETS_Driver::GetNativeError(int error)
 struct netif *netif_find_interface(int num)
 {
 
-#ifdef LWIP_SINGLE_NETIF
+#if LWIP_SINGLE_NETIF
+
     // there is a single network interface
 
     // sanity check for interface other than 0

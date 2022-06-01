@@ -1,18 +1,14 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-steps:
-  - task: DotNetCoreCLI@2  
-    condition: succeeded()
-    displayName: Install NBGV tool
-    inputs:
-      command: custom
-      custom: tool
-      arguments: install --tool-path . nbgv
+parameters:
+  repoDirectory: '$(Build.SourcesDirectory)'
 
-  - script: nbgv cloud -a -c
-    condition: succeeded()
+steps:
+  - script: nbgv cloud -a -c -v $(Build.BuildNumber)
     displayName: Set build number
+    condition: succeeded()
+    workingDirectory: ${{ parameters.repoDirectory }}
 
   # Force version number for PRs
   - task: PowerShell@2
@@ -30,17 +26,19 @@ steps:
   - task: PowerShell@2
     displayName: Get target build counter
     inputs:
-        targetType: 'inline'
-        script: |
-            $counter = $env:REVISION
-            $version = ([int]$counter).ToString()
+      targetType: 'inline'
+      script: |
+        $counter = $env:REVISION
+        $version = ([int]$counter).ToString()
 
-            if($env:Build_SourceBranch.StartsWith('release-') -or 
-               $env:Build_SourceBranch.StartsWith('main'))
-            {
-                Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$env:NBGV_BuildNumber"
-            }
-            else
-            {
-                Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
-            }
+        if($env:Build_SourceBranch.StartsWith('release-') -or 
+            $env:Build_SourceBranch.StartsWith('main'))
+        {
+            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$env:NBGV_RevisionNumber"
+            Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(NBGV_RevisionNumber) ***"
+        }
+        else
+        {
+            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
+            Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version ***"
+        }

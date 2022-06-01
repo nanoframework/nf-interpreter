@@ -22,7 +22,7 @@ nf_setup_target_build(
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x1000"
 
     CLR_EXTRA_LINKMAP_PROPERTIES
-        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x2150"
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/ChibiOS/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x400,--defsym=__crt_heap_size__=0x2070"
 )
 
 # generate bin file for deployment

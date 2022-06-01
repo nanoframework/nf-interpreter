@@ -17,9 +17,6 @@
 
 //--//
 
-extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
-extern uint16_t g_CLR_InteropAssembliesCount;
-
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
 BlockStorageDevice *CLR_DBG_Debugger::m_deploymentStorageDevice = NULL;
@@ -294,7 +291,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
             {
                 int tmp = num;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 if (call->m_inlineFrame)
                 {
                     CLR_DBG_Commands::Debugging_Thread_Stack::Reply::Call &dst = cmdReply->m_data[tmp++];
@@ -326,7 +323,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
 #endif
             }
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 num++;
@@ -368,6 +365,9 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fStopOnBoot = true;
 
+#if !defined(BUILD_RTM) && defined(TRACE_TO_STDIO) && (TRACE_TO_STDIO == TRUE)
+    CLR_Debug::Printf("CLR_DBG_Debugger::Monitor_Ping...\r\n");
+#endif
     //
     // There's someone on the other side!!
     //
@@ -1263,8 +1263,6 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    bool success = false;
-
     // include handling of configuration block only if feature is available
 #if (HAS_CONFIG_BLOCK == TRUE)
 
@@ -1287,7 +1285,6 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
                     cmd->Done) == true)
             {
                 cmdReply.ErrorCode = 0;
-                success = true;
             }
             else
             {
@@ -1299,15 +1296,16 @@ bool CLR_DBG_Debugger::Monitor_UpdateConfiguration(WP_Message *message)
             cmdReply.ErrorCode = 10;
     }
 
-    WP_ReplyToCommand(message, success, false, &cmdReply, sizeof(cmdReply));
+    WP_ReplyToCommand(message, true, false, (uint8_t *)&cmdReply, sizeof(Monitor_UpdateConfiguration_Reply));
+
+    return true;
 
 #else
 
     (void)message;
+    return false;
 
-#endif // (HAS_CONFIG_BLOCK == TRUE)
-
-    return success;
+#endif
 }
 
 //--//
@@ -1553,6 +1551,12 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
             {
                 reply.u_capsFlags |=
                     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_HasNanoBooter;
+            }
+
+            if (::Target_CanChangeMacAddress())
+            {
+                reply.u_capsFlags |=
+                    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_CanChangeMacAddress;
             }
 
             reply.u_capsFlags |=
@@ -2016,7 +2020,7 @@ CLR_RT_StackFrame *CLR_DBG_Debugger::CheckStackFrame(CLR_INT32 pid, CLR_UINT32 d
     {
         NANOCLR_FOREACH_NODE(CLR_RT_StackFrame, call, th->m_stackFrames)
         {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (call->m_inlineFrame)
             {
                 if (depth-- == 0)
@@ -2411,7 +2415,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
 
     if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
     {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
         {
             cmdReply.m_md = call->m_inlineFrame->m_frame.m_call;
@@ -2448,7 +2452,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP(WP_Message *msg)
 
     if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
     {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
         {
             return false;
@@ -2611,7 +2615,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
     {
         CLR_RT_HeapBlock *array;
         CLR_UINT32 num;
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         CLR_RT_MethodDef_Instance &md = isInline ? call->m_inlineFrame->m_frame.m_call : call->m_call;
 #else
         CLR_RT_MethodDef_Instance &md = call->m_call;
@@ -2620,7 +2624,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         switch (cmd->m_kind)
         {
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
                 num = isInline ? md.m_target->numArgs : md.m_target->numArgs;
 #else
@@ -2630,7 +2634,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
                 num = isInline ? md.m_target->numLocals : md.m_target->numLocals;
 #else
@@ -2640,7 +2644,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack:
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_evalStack : call->m_evalStack;
                 num = isInline ? (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack)
                                : (CLR_UINT32)call->TopValuePosition();

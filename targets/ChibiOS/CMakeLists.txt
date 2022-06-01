@@ -45,11 +45,11 @@ if(DEFINED TOOL_SRECORD_PREFIX)
     endif()
 endif()
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT ${RTOS_SOURCE_FOLDER} STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if CHIBIOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_CHIBIOS_SOURCE_FOLDER TRUE)
+if(CHIBIOS_SOURCE_FOLDER)
+    if(NOT ${CHIBIOS_SOURCE_FOLDER} STREQUAL "")
+        set(NO_CHIBIOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -75,10 +75,11 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no ChibiOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "stable_21.6.x")
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE AzureRTOS\ST\CMakeLists.txt
+    set(RTOS_VERSION "stable_21.11.x")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_CHIBIOS_SOURCE_FOLDER)
     # no CHIBIOS source specified, download it from it's repo
     message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} from SVN official repo")
 
@@ -91,36 +92,22 @@ if(NO_RTOS_SOURCE_FOLDER)
 else()
     # ChibiOS source was specified
 
-    # sanity check is source path exists
-    if(EXISTS ${RTOS_SOURCE_FOLDER}/)
-        if(CMAKE_HOST_SYSTEM_NAME STREQUAL Windows)
 
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
-            FetchContent_Declare(
-                chibios
-                SOURCE_DIR ${RTOS_SOURCE_FOLDER}
-            )
+    message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${CHIBIOS_SOURCE_FOLDER})")
+    FetchContent_Declare(
+        chibios
+        SOURCE_DIR ${CHIBIOS_SOURCE_FOLDER}
+    )
 
-        else()
-            # running on *nix requires setting up a local git repo from SVN
-            # with git svn clone https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION} -rHEAD
-            message(STATUS "RTOS is: ChibiOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
-
-            FetchContent_Declare(
-                chibios
-                GIT_REPOSITORY ${RTOS_SOURCE_FOLDER}
-                GIT_TAG master
-            )
-
-        endif()
-    else()
-        message(FATAL_ERROR "Couldn't find ChibiOS source at ${RTOS_SOURCE_FOLDER}/")
-    endif()
 
 endif()
 
+# Check if population has already been performed
 FetchContent_GetProperties(chibios)
-FetchContent_Populate(chibios)
+if(NOT chibios_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(chibios)
+endif()
 
 if(CHIBIOS_CONTRIB_REQUIRED)
     if(NO_CHIBIOS_CONTRIB_SOURCE)
@@ -137,23 +124,21 @@ if(CHIBIOS_CONTRIB_REQUIRED)
     else()
         # ChibiOS-Contrib source was specified
 
-        # sanity check is source path exists
-        if(EXISTS ${CHIBIOS_CONTRIB_SOURCE}/)
-            message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
+        message(STATUS "ChibiOS-Contrib (source from: ${CHIBIOS_CONTRIB_SOURCE})")
 
-            FetchContent_Declare(
-                chibios-contrib
-                SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find ChibiOS-Contrib source at ${CHIBIOS_CONTRIB_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            chibios-contrib
+            SOURCE_DIR ${CHIBIOS_CONTRIB_SOURCE}
+        )
 
     endif()
 
+    # Check if population has already been performed
     FetchContent_GetProperties(chibios-contrib)
-    FetchContent_Populate(chibios-contrib)
+    if(NOT chibios-contrib_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(chibios-contrib)
+    endif()
 
 endif()
 
@@ -201,23 +186,21 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     else()
         # FatFS source was specified
 
-        # sanity check is source path exists
-        if(EXISTS ${FATFS_SOURCE}/)
-            message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
+        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
-            FetchContent_Declare(
-                fatfs
-                SOURCE_DIR ${FATFS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            fatfs
+            SOURCE_DIR ${FATFS_SOURCE}
+        )
 
     endif()
 
+    # Check if population has already been performed
     FetchContent_GetProperties(fatfs)
-    FetchContent_Populate(fatfs)
+    if(NOT fatfs_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(fatfs)
+    endif()
 
     # have to delete the ffconf.h template from the repo
     execute_process(
@@ -227,7 +210,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 endif()
 
 # if mbed TLS is enabled add it to the build
-if(NF_SECURITY_MBEDTLS)
+if(USE_SECURITY_MBEDTLS_OPTION)
 
     # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
     set(NO_MBEDTLS_SOURCE TRUE)
@@ -240,7 +223,7 @@ if(NF_SECURITY_MBEDTLS)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.26.0")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.28.0")
 
     # set options for mbed TLS
     option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
@@ -257,40 +240,40 @@ if(NF_SECURITY_MBEDTLS)
 
     else()
         # mbedTLS source was specified
-        # message(FATAL_ERROR ${mbedtls_SOURCE_DIR}") 
-
-        # sanity check is source path exists
-        if(EXISTS ${MBEDTLS_SOURCE}/)
 
         message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
-            FetchContent_Declare(
-                mbedtls
-                SOURCE_DIR ${MBEDTLS_SOURCE}
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find mbedTLS source at ${MBEDTLS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            mbedtls
+            SOURCE_DIR ${MBEDTLS_SOURCE}
+        )
 
     endif()
 
+    # Check if population has already been performed
     FetchContent_GetProperties(mbedtls)
-    FetchContent_Populate(mbedtls)
+    if(NOT mbedtls_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(mbedtls)
+    endif()
 
-    set(mbedTLS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/humblelogging/include)
-    set(mbedTLS_LIBRARIES ${CMAKE_SHARED_LIBRARY_PREFIX}mbedTLS${CMAKE_SHARED_LIBRARY_SUFFIX})
+    # don't include tests or programs, only build libraries
+    set(ENABLE_TESTING CACHE BOOL OFF)
+    set(ENABLE_PROGRAMS CACHE BOOL OFF)
+
+    cmake_policy(SET CMP0048 NEW)
+    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
 
 endif()
 
 # set target base location
 # this has to be set before the class library modules are pulled in
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
 else()
     # try to find board in the Community targets folder
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
         # set target base location
         set(TARGET_BASE_LOCATION ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD} CACHE INTERNAL "make global")
     else()
@@ -306,7 +289,7 @@ include_directories( ${CMSIS_RTOS_INCLUDE_DIR})
 # need to find board definition files (board.c and board.h)
 
 # start search in nanoFramework ChibiOS 'overlay' folder
-if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD})
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/hal/boards/${TARGET_BOARD})
     # board found
     # if it's on nF overlay board.c and board.h exist there for sure
     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from nanoFramework overlay" CACHE INTERNAL "Location of board definition files")
@@ -315,7 +298,7 @@ else()
     # board NOT found in ChibiOS 'overlay'
 
     # try to find it in the target boards
-    if(EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
+    if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD})
         # board found
         # check if the board definition files are available at the target folder
         if( EXISTS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/${TARGET_BOARD}/board.c AND
@@ -327,7 +310,7 @@ else()
         else()
             # board.c and board.h are NOT in the target folder, try to find them in the official distribution
 
-            if(EXISTS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+            if(IS_DIRECTORY ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
                 # board found
                 # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
                 set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
@@ -344,7 +327,7 @@ else()
     else()
 
         # try to find board in the Community targets folder
-        if(EXISTS ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
+        if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/targets-community/ChibiOS/${TARGET_BOARD})
             # set flag for this being a community board
             set(IS_COMMUNITY_TARGET TRUE CACHE INTERNAL "Community target flag")
 
@@ -360,7 +343,7 @@ else()
             else()
 
                 # board.c and board.h are NOT in the target folder, try to find them in the official distribution
-                if(EXISTS ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+                if(IS_DIRECTORY ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
                     # board found
                     # if it's on the ChibiOS official distribution board.c and board.h exist here for sure
                     set(CHIBIOS_BOARD_DEFINITIONS_LOCATION "Board definition files taken from official ChibiOS distribution" CACHE INTERNAL "Location of board definition files")
@@ -416,24 +399,21 @@ if(NF_FEATURE_USE_SPIFFS)
     else()
         # SPIFFS source was specified
 
-        # sanity check is source path exists
-        if(EXISTS ${SPIFFS_SOURCE}/)
-            message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
+        message(STATUS "SPIFFS source from: ${SPIFFS_SOURCE}")
 
-            FetchContent_Declare(
-                spiffs
-                GIT_REPOSITORY ${SPIFFS_SOURCE}
-                GIT_TAG "nf-build"
-            )
-
-        else()
-            message(FATAL_ERROR "Couldn't find SPIFFS source at ${SPIFFS_SOURCE}/")
-        endif()
+        FetchContent_Declare(
+            spiffs
+            SOURCE_DIR ${SPIFFS_SOURCE}
+        )
 
     endif()
-    
+
+    # Check if population has already been performed
     FetchContent_GetProperties(spiffs)
-    FetchContent_Populate(spiffs)
+    if(NOT spiffs_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(spiffs)
+    endif()
 
     add_subdirectory(_spiffs)
 
