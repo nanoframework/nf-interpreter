@@ -149,6 +149,35 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4__I4__I4__I4__I4__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs = &(stack.Arg1());
+
+    CLR_INT32 srcX = pArgs[0].NumericByRef().s4;
+    CLR_INT32 srcY = pArgs[1].NumericByRef().s4;
+    CLR_INT32 width = pArgs[2].NumericByRef().s4;
+    CLR_INT32 height = pArgs[3].NumericByRef().s4;
+    CLR_INT32 screenX = pArgs[4].NumericByRef().s4;
+    CLR_INT32 screenY = pArgs[5].NumericByRef().s4;
+
+    CLR_GFX_Bitmap *bitmap;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
+
+    g_GraphicsDriver.Screen_Flush(
+        *bitmap,
+        (CLR_UINT16)srcX,
+        (CLR_UINT16)srcY,
+        (CLR_UINT16)width,
+        (CLR_UINT16)height,
+        (CLR_UINT16)screenX,
+        (CLR_UINT16)screenY);
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();

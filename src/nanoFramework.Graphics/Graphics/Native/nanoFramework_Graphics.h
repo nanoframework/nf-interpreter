@@ -156,6 +156,7 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(_ctor___VOID__SZARRAY_U1__nanoFrameworkUIBitmapBitmapImageType);
     NANOCLR_NATIVE_DECLARE(Flush___VOID);
     NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
     NANOCLR_NATIVE_DECLARE(
         DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
