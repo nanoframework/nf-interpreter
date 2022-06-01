@@ -299,23 +299,24 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     return true;
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
-    SetWindow(x, y, (x + width - 1), (y + height - 1));
+    SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
     CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
-
-    // Offset for window start
-    StartOfLine_src += (y * Attributes.Width) + x;
-
     CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
     CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
+
+    // Offset for window start
+    StartOfLine_src += (srcY * stride) + srcX;
+
     CLR_UINT8 command = Memory_Write;
+    g_DisplayInterface.SendCommand(1, command);
 
     while (height--)
     {
@@ -349,7 +350,7 @@ void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[
         }
 
         // Next row in data[]
-        StartOfLine_src += Attributes.Width;
+        StartOfLine_src += stride;
     }
 
     // Send remaining data in transfer buffer to SPI

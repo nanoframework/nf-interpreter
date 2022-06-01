@@ -114,7 +114,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID(CLR
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
-    g_GraphicsDriver.Screen_Flush(*bitmap, 0, 0, bitmap->m_bm.m_width, bitmap->m_bm.m_height);
+    g_GraphicsDriver.Screen_Flush(*bitmap, 0, 0, bitmap->m_bm.m_width, bitmap->m_bm.m_height, 0, 0);
 
     NANOCLR_NOCLEANUP();
 }
@@ -134,7 +134,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Flush___VOID__I4
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, false, bitmap));
 
-    g_GraphicsDriver.Screen_Flush(*bitmap, (CLR_UINT16)x, (CLR_UINT16)y, (CLR_UINT16)width, (CLR_UINT16)height);
+    g_GraphicsDriver.Screen_Flush(*bitmap, (CLR_UINT16)x, (CLR_UINT16)y, (CLR_UINT16)width, (CLR_UINT16)height, (CLR_UINT16)x, (CLR_UINT16)y);
 
     NANOCLR_NOCLEANUP();
 }

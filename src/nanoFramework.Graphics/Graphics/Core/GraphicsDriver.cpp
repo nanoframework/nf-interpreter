@@ -1419,19 +1419,21 @@ void GraphicsDriver::SetPixelsHelper(
 
 void GraphicsDriver::Screen_Flush(
     CLR_GFX_Bitmap &bitmap,
-    CLR_UINT16 x,
-    CLR_UINT16 y,
+    CLR_UINT16 srcX,
+    CLR_UINT16 srcY,
     CLR_UINT16 width,
-    CLR_UINT16 height)
+    CLR_UINT16 height,
+    CLR_UINT16 screenX,
+    CLR_UINT16 screenY)
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     CLR_INT32 widthMax = g_DisplayDriver.Attributes.Width;
     CLR_INT32 heightMax = g_DisplayDriver.Attributes.Height;
 
-    if ((CLR_UINT32)(x + width) > (CLR_UINT32)widthMax)
-        width = widthMax - x;
-    if ((CLR_UINT32)(y + height) > (CLR_UINT32)heightMax)
-        height = heightMax - y;
+    if ((CLR_UINT32)(screenX + width) > (CLR_UINT32)widthMax)
+        width = widthMax - screenX;
+    if ((CLR_UINT32)(screenY + height) > (CLR_UINT32)heightMax)
+        height = heightMax - screenY;
 
     if (bitmap.m_bm.m_width > (CLR_UINT32)widthMax)
         return;
@@ -1442,5 +1444,5 @@ void GraphicsDriver::Screen_Flush(
     if (bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor)
         return;
 
-    g_DisplayDriver.BitBlt(x, y, width, height, bitmap.m_palBitmap.data);
+    g_DisplayDriver.BitBlt(srcX, srcY, width, height, bitmap.m_bm.m_width, screenX, screenY, bitmap.m_palBitmap.data);
 }
