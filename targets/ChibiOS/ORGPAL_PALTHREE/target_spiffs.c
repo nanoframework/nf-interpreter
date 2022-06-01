@@ -29,6 +29,11 @@ __attribute__((aligned(32)))
 uint8_t readBuffer[SPIFFS_LOGICAL_PAGE_SIZE];
 
 ///////////////
+// Definitions
+#define CS_SELECT palClearPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
+#define CS_UNSELECT palSetPad(PAL_PORT(LINE_FLASH_SPI1_CS), PAL_PAD(LINE_FLASH_SPI1_CS))
+
+///////////////
 // declarations
 bool SPI_Erase_Block(u32_t addr);
 bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size);
@@ -86,7 +91,7 @@ bool SPI_WaitOnBusy()
 
     writeBuffer[0] = READ_STATUS_REG1_CMD;
 
-    spiSelect(&SPID1);
+    CS_SELECT;
 
     // send read status register 1
     spiSend(&SPID1, 1, writeBuffer);
@@ -107,13 +112,13 @@ bool SPI_WaitOnBusy()
             // operation timeout
 
             // unselect SPI
-            spiUnselect(&SPID1);
+            CS_UNSELECT;
 
             return false;
         }
     }
 
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     return true;
 }
@@ -123,9 +128,9 @@ bool SPI_Erase_Block(u32_t addr)
     // send write enable
     writeBuffer[0] = WRITE_ENABLE_CMD;
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 1, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // send block erase
     writeBuffer[0] = SECTOR_ERASE_CMD;
@@ -137,9 +142,9 @@ bool SPI_Erase_Block(u32_t addr)
     // (only required for Cortex-M7)
     cacheBufferFlush(writeBuffer, 4);
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 4, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // wait for erase operation to complete
     return SPI_WaitOnBusy();
@@ -157,14 +162,14 @@ bool SPI_Read(uint8_t *pData, uint32_t readAddr, uint32_t size)
     // (only required for Cortex-M7)
     cacheBufferFlush(writeBuffer, 4);
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 4, writeBuffer);
 
     // clear read buffer
     memset(readBuffer, 0, SPIFFS_LOGICAL_PAGE_SIZE);
 
     spiReceive(&SPID1, size, readBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // invalidate cache
     // (only required for Cortex-M7)
@@ -181,9 +186,9 @@ bool SPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
     // send write enable
     writeBuffer[0] = WRITE_ENABLE_CMD;
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 1, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // send write page
     writeBuffer[0] = PAGE_PROG_CMD;
@@ -195,7 +200,7 @@ bool SPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
     // (only required for Cortex-M7)
     cacheBufferFlush(writeBuffer, 4);
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 4, writeBuffer);
 
     // copy from buffer
@@ -206,7 +211,7 @@ bool SPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
     cacheBufferFlush(writeBuffer, size);
 
     spiSend(&SPID1, size, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // wait for erase operation to complete
     SPI_WaitOnBusy();
@@ -215,9 +220,9 @@ bool SPI_Write(uint8_t *pData, uint32_t writeAddr, uint32_t size)
     writeBuffer[0] = WRITE_DISABLE_CMD;
     cacheBufferFlush(writeBuffer, 1);
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 1, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     return true;
 }
@@ -728,16 +733,16 @@ uint8_t target_spiffs_init()
     // have to send this to make sure device is functional after sleep
     writeBuffer[0] = RESUME_DEEP_PD_CMD;
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiSend(&SPID1, 1, writeBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // sanity check: read device ID and unique ID
     writeBuffer[0] = READ_ID_CMD2;
 
-    spiSelect(&SPID1);
+    CS_SELECT;
     spiExchange(&SPID1, 4, writeBuffer, readBuffer);
-    spiUnselect(&SPID1);
+    CS_UNSELECT;
 
     // constants from ID Definitions table in AT25SF641 datasheet
     ASSERT(readBuffer[1] == AT25SF641_MANUFACTURER_ID);
