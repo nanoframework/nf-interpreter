@@ -202,6 +202,9 @@ extern "C"
     // defined as weak to allow replacement at platform/target level to allow different storage management
     HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate();
 
+    // gets the HAL_Configuration_NetworkInterface configuration block that has the SpecificConfig Id, if that exists
+    int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId);
+
 #ifdef __cplusplus
 }
 #endif

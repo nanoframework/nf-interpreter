@@ -861,7 +861,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::SockNameHelper(C
     CLR_INT32 handle;
     CLR_INT32 ret;
 
-    struct SOCK_sockaddr addr;
+    struct SOCK_sockaddr addr = {};
     CLR_INT32 addrLen = sizeof(addr);
 
     FAULT_ON_NULL(socket);

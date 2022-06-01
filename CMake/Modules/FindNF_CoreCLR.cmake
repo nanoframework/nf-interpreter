@@ -21,6 +21,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
@@ -141,6 +142,7 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     nanoprintf.c
+    nanoRingBuffer.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -162,6 +164,10 @@ set(NF_CoreCLR_SRCS
 # append CRC32, if not already included with Wire Protocol
 if(NOT WireProtocol_FOUND)
     list(APPEND NF_CoreCLR_SRCS nanoSupport_CRC32.c)
+endif()
+
+if(NF_TRACE_TO_STDIO)
+    list(APPEND NF_CoreCLR_SRCS GenericPort_stdio.c)
 endif()
 
 # include System.Reflection API files depending on build option
@@ -230,6 +236,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             
             # Helpers
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
@@ -259,7 +266,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     list(APPEND NF_CoreCLR_SOURCES ${NF_CoreCLR_SRC_FILE})
     
 endforeach()
-
 
 include(FindPackageHandleStandardArgs)
 

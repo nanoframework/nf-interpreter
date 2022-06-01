@@ -122,6 +122,21 @@
             }
         },
         {
+            "name": "ST_B_L475E_IOT01A",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ST_B_L475E_IOT01A_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "${presetName}"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "ESP32_PSRAM_REV0",
             "inherits": [
                 "user-local-tools",
@@ -588,6 +603,11 @@
             "name": "ST_STM32F769I_DISCOVERY",
             "displayName": "ST_STM32F769I_DISCOVERY",
             "configurePreset": "ST_STM32F769I_DISCOVERY"
+        },
+        {
+            "name": "ST_B_L475E_IOT01A",
+            "displayName": "ST_B_L475E_IOT01A",
+            "configurePreset": "ST_B_L475E_IOT01A"
         },
         {
             "name": "ESP32_PSRAM_REV0",

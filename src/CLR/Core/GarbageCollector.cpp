@@ -718,7 +718,7 @@ void CLR_RT_GarbageCollector::Thread_Mark(CLR_RT_Thread *th)
 #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(stack->m_appDomain);
 #endif
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (stack->m_inlineFrame)
         {
             CheckMultipleBlocks(

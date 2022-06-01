@@ -1392,18 +1392,19 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3" + terminator
     // and init with the terminator
-    char deviceSelectorString[14 + 1] = {0};
+    static char deviceSelectorString[] =
 
     // unless the build is configure to use USB CDC, COM1 is being used for VS debug, so it's not available
 #if defined(CONFIG_USB_CDC_ENABLED)
-    strcat(deviceSelectorString, "COM1,");
+        "COM1,"
 #endif
 #if defined(UART_NUM_1)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
 #if defined(UART_NUM_2)
-    strcat(deviceSelectorString, "COM3,");
+        "COM3,"
 #endif
+        ;
 
     // replace the last comma with a terminator
     deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
