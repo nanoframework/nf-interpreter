@@ -356,6 +356,7 @@ jobs:
         TargetBoard: ST_STM32F769I_DISCOVERY
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
+        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
 
@@ -835,19 +836,27 @@ jobs:
 #################
 # nanoCLR CLI tool
 - job: Build_nanoCLR_CLI
-  condition: and( succeeded('Check_Code_Style'), ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ), or(eq( variables['BUILD_NANOCLR_CLI'], true ), eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)) )
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+      or(
+        eq(variables['BUILD_NANOCLR_CLI'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('CLI_versioncounter', 0)]
+    REVISION: $[counter('CLI_1_8_0_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -1078,7 +1087,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_Azure_RTOS_targets
-  - Build_nanoCLR
+  - Build_WIN32_nanoCLR
   - Build_nanoCLR_CLI
   - Generate_change_log
   - Check_Code_Style
@@ -1090,8 +1099,9 @@ jobs:
         failed('Build_ESP32_targets'),
         failed('Build_NXP_targets'),
         failed('Build_TI_SimpleLink_targets'),
-        succeeded('Build_Azure_RTOS_targets'),
+        failed('Build_Azure_RTOS_targets'),
         failed('Build_WIN32_nanoCLR'),
+        failed('Build_nanoCLR_CLI'),
         failed('Generate_change_log')
       )
     )
