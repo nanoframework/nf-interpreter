@@ -90,10 +90,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
         writeData = (CLR_UINT32 *)colors->GetFirstElement();
         g_DisplayDriver.BitBlt(
-            stack.Arg0().NumericByRef().u2,
-            stack.Arg1().NumericByRef().u2,
-            stack.Arg2().NumericByRef().u2,
-            stack.Arg3().NumericByRef().u2,
+            stack.Arg0().NumericByRef().u2, // srcX
+            stack.Arg1().NumericByRef().u2, // srcY
+            stack.Arg2().NumericByRef().u2, // width
+            stack.Arg3().NumericByRef().u2, // height
+            stack.Arg2().NumericByRef().u2, // stride
+            stack.Arg0().NumericByRef().u2, // screenX
+            stack.Arg1().NumericByRef().u2, // screenY
             writeData);
     }
     NANOCLR_NOCLEANUP();
@@ -316,7 +319,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     // to fit into the rectangle.
                     if (posY <= height)
                     {
-                        g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
+                        g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height, posX, posY);
                     }
 
                     prevCharWidth = widthChar;

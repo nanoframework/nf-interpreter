@@ -659,7 +659,14 @@ struct GraphicsDriver
         const GFX_Rect &srcRect,
         CLR_UINT16 opacity);
 
-    static void Screen_Flush(CLR_GFX_Bitmap &bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height);
+    static void Screen_Flush(
+        CLR_GFX_Bitmap &bitmap,
+        CLR_UINT16 srcX,
+        CLR_UINT16 srcY,
+        CLR_UINT16 width,
+        CLR_UINT16 height,
+        CLR_UINT16 screenX,
+        CLR_UINT16 screenY);
 
   private:
     static const CLR_UINT32 c_MaxSize = 2097152; // 2MB
