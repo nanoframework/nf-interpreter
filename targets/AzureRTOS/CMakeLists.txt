@@ -283,11 +283,6 @@ endif()
 # network connectivity options
 nf_set_network_connectivity_options()
 
-##############################
-# AzureRTOS common directories
-add_subdirectory(_common)
-add_subdirectory(_include)
-
 #############################################
 # try to find STM board in the targets folder
 # and set target base location and base path for class libs
@@ -307,10 +302,7 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD})
         set(CHIBIOS_BOARD_DEFINITIONS_PATH ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/ST/${TARGET_BOARD} CACHE INTERNAL "Path of board definition files")
     endif()
 
-    add_subdirectory(ST)
-
-    # add TARGET board directory
-    add_subdirectory(ST/${TARGET_BOARD})
+    set(TARGET_VENDOR ST)
 
 # try to find Nordic board in the targets folder
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
@@ -324,10 +316,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Nordic/${TARGET_BOARD})
 
-    add_subdirectory(Nordic)
-
-    # add TARGET board directory
-    add_subdirectory(Nordic/${TARGET_BOARD})
+    set(TARGET_VENDOR Nordic)
 
 # try to find MicroBit board in the targets folder
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
@@ -341,10 +330,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/MicroBit/${TARGET_BOARD})
 
-    add_subdirectory(MicroBit)
-
-    # add TARGET board directory
-    add_subdirectory(MicroBit/${TARGET_BOARD})
+    set(TARGET_VENDOR MicroBit)
 
 # try to find Raspberry Pi Pico board in the targets folder
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
@@ -358,10 +344,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/RaspberryPi/${TARGET_BOARD})
 
-    add_subdirectory(RaspberryPi)
-
-    # add TARGET board directory
-    add_subdirectory(RaspberryPi/${TARGET_BOARD})
+    set(TARGET_VENDOR RaspberryPi)
 
 # try to find Maxim board in the targets folder
 elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
@@ -375,10 +358,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/Maxim/${TARGET_BOARD})
 
-    add_subdirectory(Maxim)
-
-    # add TARGET board directory
-    add_subdirectory(Maxim/${TARGET_BOARD})
+    set(TARGET_VENDOR Maxim)
 
 else()
 
@@ -428,3 +408,13 @@ else()
     endif()
 
 endif()
+
+##############################
+# AzureRTOS common directories
+add_subdirectory(_common)
+add_subdirectory(_include)
+
+# add TARGET vendor directory
+add_subdirectory(${TARGET_VENDOR})
+# add TARGET board directory
+add_subdirectory(${TARGET_VENDOR}/${TARGET_BOARD})
