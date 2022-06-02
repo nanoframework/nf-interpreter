@@ -90,8 +90,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
         writeData = (CLR_UINT32 *)colors->GetFirstElement();
         g_DisplayDriver.BitBlt(
-            0, // srcX
-            0, // srcY
+            0,                              // srcX
+            0,                              // srcY
             stack.Arg2().NumericByRef().u2, // width
             stack.Arg3().NumericByRef().u2, // height
             stack.Arg2().NumericByRef().u2, // stride
