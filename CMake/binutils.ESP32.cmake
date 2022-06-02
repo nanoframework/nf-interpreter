@@ -466,6 +466,11 @@ macro(nf_add_idf_as_library)
 
     message(STATUS "\n--SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
 
+    # Save original contents to be restored later
+    file(READ
+    "${SDKCONFIG_DEFAULTS_FILE}"
+    SDKCONFIG_ORIGINAL_CONTENTS)
+
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
     set(IDF_COMPONENTS_TO_ADD
@@ -494,40 +499,6 @@ macro(nf_add_idf_as_library)
     if(ESP32_ETHERNET_SUPPORT)
         list(APPEND IDF_COMPONENTS_TO_ADD esp_eth)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
-
-        # check for ETH_RMII_CLK_OUT_GPIO in the build options
-        if(ETH_RMII_CLK_OUT_GPIO)
-
-            message(STATUS "\nETH_RMII_CLK_OUT_GPIO specified. Updating SDK CONFIG to enable CLK output on GPIO${ETH_RMII_CLK_OUT_GPIO}.\n")
-            
-            # need to read the supplied SDK CONFIG file and replace the appropriate options            
-            file(READ
-                "${SDKCONFIG_DEFAULTS_FILE}"
-                SDKCONFIG_DEFAULT_CONTENTS)
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                "CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                SDKCONFIG_DEFAULT_NEW_CONTENTS
-                "${SDKCONFIG_DEFAULT_CONTENTS}")
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUT_GPIO=n"
-                "CONFIG_ETH_RMII_CLK_OUT_GPIO=${ETH_RMII_CLK_OUT_GPIO}"
-                SDKCONFIG_DEFAULT_FINAL_CONTENTS
-                "${SDKCONFIG_DEFAULT_NEW_CONTENTS}")
-
-            # need to temporarilly allow changes in source files
-            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-            file(WRITE 
-                ${SDKCONFIG_DEFAULTS_FILE} 
-                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
-
-            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-            
-        endif()
-
     endif()
 
     # handle specifics for ESP32S2 series
@@ -612,6 +583,15 @@ macro(nf_add_idf_as_library)
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
     )
+
+    #Restore original sdkconfig back to defaults
+    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+    file(WRITE 
+        ${SDKCONFIG_DEFAULTS_FILE} 
+        ${SDKCONFIG_ORIGINAL_CONTENTS})
+
+    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 
     if(USE_NETWORKING_OPTION)
         
