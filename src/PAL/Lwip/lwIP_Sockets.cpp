@@ -243,7 +243,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         UpdateAdapterConfiguration(
             i,
-            (NetworkInterface_UpdateOperation_Dhcp | NetworkInterface_UpdateOperation_Dns),
+            (NetworkInterface_UpdateOperation_Dns),
             &networkConfiguration);
 
         networkInterface = netif_find_interface(interfaceNumber);
