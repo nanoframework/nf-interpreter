@@ -133,7 +133,11 @@ macro(nf_add_platform_packages)
     if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
     endif()
-    
+
+    if(SILABS_GECKO_SDK_REQUIRED)
+        find_package(Gecko_SDK REQUIRED QUIET)
+    endif()
+ 
     # packages specific for nanoBooter
     if(NFAPP_TARGET STREQUAL ${NANOBOOTER_PROJECT_NAME})
         # no packages for booter
@@ -195,6 +199,7 @@ macro(nf_add_platform_dependencies target)
                 ${NF_Network_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES}
         )
@@ -213,6 +218,7 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES}
         )
@@ -226,6 +232,7 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${Gecko_SDK_INCLUDE_DIRS}
                     ${azure_rtos_SOURCE_DIR}/common/inc
                     ${AZRTOS_INCLUDES}
             )
@@ -240,6 +247,7 @@ macro(nf_add_platform_dependencies target)
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${NETXDUO_INCLUDES}
                 ${TARGET_BASE_LOCATION}
@@ -321,6 +329,12 @@ macro(nf_add_platform_include_directories target)
         )
     endif()
     
+    if(SILABS_GECKO_SDK_REQUIRED)
+        target_include_directories(${target}.elf PUBLIC
+            ${Gecko_SDK_INCLUDE_DIRS}
+        )
+    endif()
+  
     # includes specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
@@ -420,6 +434,24 @@ macro(nf_add_platform_sources target)
 
         target_link_libraries(${target}.elf
             nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target}
+        )
+
+    endif()
+
+    if(SILABS_GECKO_SDK_REQUIRED)
+        
+        nf_add_gecko_sdk(
+            BUILD_TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${AZRTOS_INCLUDES}
+            #     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
+        )
+                        
+        # add_dependencies(${target}.elf nano::gecko_sdk_${target})
+
+        target_link_libraries(${target}.elf
+            nano::gecko_sdk_${target}
         )
 
     endif()

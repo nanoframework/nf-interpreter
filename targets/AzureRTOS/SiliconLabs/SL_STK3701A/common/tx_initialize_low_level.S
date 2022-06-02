@@ -49,7 +49,7 @@
 @
 @
 SYSTEM_CLOCK      =   38000000
-SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 100) -1)
+SYSTICK_CYCLES    =   ((SYSTEM_CLOCK / 1000) -1)
 
     .text 32
     .align 4

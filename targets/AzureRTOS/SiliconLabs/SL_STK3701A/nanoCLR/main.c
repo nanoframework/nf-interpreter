@@ -6,7 +6,7 @@
 // #include <hal.h>
 // #include <hal_nf_community.h>
 
-// #include <tx_api.h>
+#include <tx_api.h>
 
 // #include <serialcfg.h>
 // #include <LaunchCLR.h>
@@ -45,9 +45,9 @@
 // uint32_t __attribute__((section(".ram4"))) clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
 // extern void ClrStartupThread_entry(uint32_t parameter);
 
-// void tx_application_define(void *first_unused_memory)
-// {
-//     (void)first_unused_memory;
+void tx_application_define(void *first_unused_memory)
+{
+    (void)first_unused_memory;
 //     uint16_t status;
 
 //     // Create a byte memory pool from which to allocate the thread stacks.
@@ -117,16 +117,16 @@
 //         {
 //         }
 //     }
-// }
+}
 
-// //  Application entry point.
-// int main(void)
-// {
-//     halInit();
+//  Application entry point.
+int main(void)
+{
+    // halInit();
 
-//     // init boot clipboard
-//     InitBootClipboard();
+    // // init boot clipboard
+    // InitBootClipboard();
 
-//     // Enter the ThreadX kernel
-//     tx_kernel_enter();
-// }
+    // Enter the ThreadX kernel
+    tx_kernel_enter();
+}

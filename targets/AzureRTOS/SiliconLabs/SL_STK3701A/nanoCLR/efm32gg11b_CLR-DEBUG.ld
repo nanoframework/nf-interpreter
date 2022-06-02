@@ -27,11 +27,14 @@
  *
  ******************************************************************************/
 
+/* Set the RAM segment used end for threadx */
+__RAM_segment_used_end__ = 0;
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 2097152
-  RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 524288
+  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x200000
+  RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x80000
+  config     (rw) : ORIGIN = 0x00000000, len = 0      /* space reserved for configuration block */
 }
 
 /* Linker script to place sections and symbol values. Should be used together
@@ -68,6 +71,11 @@ MEMORY
  *   __Vectors_Size
  */
 ENTRY(Reset_Handler)
+
+__nanoConfig_start__    = ORIGIN(config);
+__nanoConfig_size__     = LENGTH(config);
+__nanoConfig_end__      = __nanoConfig_start__ + __nanoConfig_size__;
+
 
 SECTIONS
 {

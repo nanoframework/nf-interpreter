@@ -4,10 +4,8 @@
 #
 
 include(binutils.common)
-include(Gecko_SDK)
 
-# Set target series
-nf_set_silabs_target_series()
+set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
 # check if GECKO_SDK_SOURCE was specified or if it's empty (default is empty)
 set(NO_GECKO_SDK_SOURCE TRUE)
@@ -42,6 +40,7 @@ if(NO_GECKO_SDK_SOURCE)
         gecko_sdk
         GIT_REPOSITORY https://github.com/SiliconLabs/gecko_sdk.git
         GIT_TAG ${GECKO_SDK_VERSION}
+        GIT_SHALLOW 1
     )
 
 else()

@@ -3,12 +3,18 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <tx_api.h>
+#include <sl_system_init.h>
+#include <sl_system_kernel.h>
+#include <em_gpio.h>
+#include <sl_simple_led_instances.h>
 
 #include <LaunchCLR.h>
 #include <targetHAL.h>
-#include <nanoPAL_BlockStorage.h>
-#include <nanoHAL_ConfigurationManager.h>
+
+#include <tx_api.h>
+
+// #include <nanoPAL_BlockStorage.h>
+// #include <nanoHAL_ConfigurationManager.h>
 
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
@@ -31,6 +37,8 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 TX_THREAD blinkThread;
 uint32_t blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
+TX_THREAD blinkThread1;
+uint32_t blinkThread1Stack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
 
 void BlinkThread_entry(uint32_t parameter)
 {
@@ -38,8 +46,19 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        // palTogglePad(GPIOB, GPIOB_LD2);
+        sl_led_toggle(&sl_led_led0);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
+    }
+}
+
+void BlinkThread1_entry(uint32_t parameter)
+{
+    (void)parameter;
+
+    while (1)
+    {
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
+        sl_led_toggle(&sl_led_led1);
     }
 }
 
@@ -62,13 +81,13 @@ void tx_application_define(void *first_unused_memory)
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    BlockStorageList_Initialize();
-    BlockStorage_AddDevices();
+    // BlockStorageList_Initialize();
+    // BlockStorage_AddDevices();
 
     // initialize configuration manager
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it here to have access to network configuration blocks
-    ConfigurationManager_Initialize();
+    // ConfigurationManager_Initialize();
 
     // Create blink thread
     status = tx_thread_create(
@@ -77,6 +96,26 @@ void tx_application_define(void *first_unused_memory)
         BlinkThread_entry,
         0,
         blinkThreadStack,
+        BLINK_THREAD_STACK_SIZE,
+        BLINK_THREAD_PRIORITY,
+        BLINK_THREAD_PRIORITY,
+        TX_NO_TIME_SLICE,
+        TX_AUTO_START);
+
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
+
+    // Create blink thread
+    status = tx_thread_create(
+        &blinkThread1,
+        "Blink Thread1",
+        BlinkThread1_entry,
+        0,
+        blinkThread1Stack,
         BLINK_THREAD_STACK_SIZE,
         BLINK_THREAD_PRIORITY,
         BLINK_THREAD_PRIORITY,
@@ -117,7 +156,8 @@ void tx_application_define(void *first_unused_memory)
 //  Application entry point.
 int main(void)
 {
-    //halInit();
+    // Initialize the board
+    sl_system_init();
 
     // init boot clipboard
     InitBootClipboard();
@@ -142,6 +182,12 @@ int main(void)
     //     }
     // }
 
-    // Enter the ThreadX kernel
-    tx_kernel_enter();
+/*Set unbuffered mode for stdout (newlib)*/
+//       setvbuf(stdout, NULL, _IONBF, 0);  
+//       /*Set unbuffered mode for stdin (newlib)*/
+//   setvbuf(stdin, NULL, _IONBF, 0);   
+
+
+    // Enter the ThreadX kernel. Task(s) created in tx_application_define() will start running
+    sl_system_kernel_start();
 }

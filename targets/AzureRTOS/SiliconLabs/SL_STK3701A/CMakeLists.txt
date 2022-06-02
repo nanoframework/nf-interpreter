@@ -25,6 +25,20 @@ nf_setup_target_build(
     CLR_LINKER_FILE 
         efm32gg11b_CLR
 
+    BOOTER_EXTRA_COMPILE_DEFINITIONS
+        EFM32GG11B820F2048GL192=1
+        SL_BOARD_NAME=\"BRD2204A\"
+        SL_BOARD_REV=\"B07\"
+        SL_COMPONENT_CATALOG_PRESENT=1
+        _SILICON_LABS_32B_SERIES_2_CONFIG=0
+
+    CLR_EXTRA_COMPILE_DEFINITIONS
+        EFM32GG11B820F2048GL192=1
+        SL_BOARD_NAME=\"BRD2204A\"
+        SL_BOARD_REV=\"B07\"
+        SL_COMPONENT_CATALOG_PRESENT=1
+        _SILICON_LABS_32B_SERIES_2_CONFIG=0
+
     # BOOTER_EXTRA_LINKMAP_PROPERTIES
     #     ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x0,--defsym=__crt_heap_size__=0x4000"
 
