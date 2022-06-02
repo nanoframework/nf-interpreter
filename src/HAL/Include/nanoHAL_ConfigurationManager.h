@@ -148,8 +148,8 @@ extern "C"
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex);
 
-    // Checks if two configuration blocks are the same. Usefull to prevent going through the store process when the
-    // content is the same. Default implementation provided for memory addreasable implementations. defined as weak so
+    // Checks if two configuration blocks are the same. Useful to prevent going through the store process when the
+    // content is the same. Default implementation provided for memory addressable implementations. defined as weak so
     // targets are free to implement the storage of the configuration block as they see fit
     bool ConfigurationManager_CheckExistingConfigurationBlock(
         void *existingConfigBlock,

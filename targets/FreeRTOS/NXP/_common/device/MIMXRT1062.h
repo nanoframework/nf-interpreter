@@ -17027,7 +17027,7 @@ typedef struct {
 #define FLEXSPI_AHBCR_READADDROPT_MASK           (0x40U)
 #define FLEXSPI_AHBCR_READADDROPT_SHIFT          (6U)
 /*! READADDROPT - AHB Read Address option bit. This option bit is intend to remove AHB burst start address alignment limitation.
- *  0b0..There is AHB read burst start address alignment limitation when flash is accessed in parallel mode or flash is wordaddressable.
+ *  0b0..There is AHB read burst start address alignment limitation when flash is accessed in parallel mode or flash is word addressable.
  *  0b1..There is no AHB read burst start address alignment limitation. FlexSPI will fetch more datas than AHB burst required to meet the alignment requirement.
  */
 #define FLEXSPI_AHBCR_READADDROPT(x)             (((uint32_t)(((uint32_t)(x)) << FLEXSPI_AHBCR_READADDROPT_SHIFT)) & FLEXSPI_AHBCR_READADDROPT_MASK)
