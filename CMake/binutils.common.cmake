@@ -311,7 +311,7 @@ function(nf_generate_build_output_files target)
                 COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
                 COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
-                # copy target file to build folder (this is only usefull for debugging in VS Code because of path in launch.json)
+                # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
                 COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
 
                 COMMENT "Generate nanoBooter HEX and BIN files for deployment")
@@ -324,7 +324,7 @@ function(nf_generate_build_output_files target)
                 COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
                 COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
-                # copy target file to build folder (this is only usefull for debugging in VS Code because of path in launch.json)
+                # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
                 COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
 
                 # dump target image as source code listing 
