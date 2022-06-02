@@ -372,10 +372,7 @@ elseif(EXISTS ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/${TARGET_BOARD
     # set target base location
     set(TARGET_BASE_LOCATION ${PROJECT_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/${TARGET_BOARD})
 
-    add_subdirectory(SiliconLabs)
-
-    # add TARGET board directory
-    add_subdirectory(SiliconLabs/${TARGET_BOARD})
+    set(TARGET_VENDOR SiliconLabs)
 
 else()
 
