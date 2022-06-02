@@ -9,13 +9,7 @@ include(FetchContent)
 
 function(nf_set_silabs_target_series)
 
-    # process target series, which is in the format "SILABS_xxxxx"
-    string(REPLACE "SILABS" "" TARGET_SERIES_SHORT "${TARGET_SERIES}")
-
-    # store the series name for later use
-    set(TARGET_SERIES_SHORT ${TARGET_SERIES_SHORT} CACHE INTERNAL "Silabs series short name")
-
-    if("${TARGET_SERIES}" STREQUAL "EFM32GG1")
+    if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         # WHEN CHANGING THESE MAKE SURE TO UPDATE THE DEV CONTAINERS
         # set(HAL_DRIVER_GIT_TAG v1.7.6)
         # set(CMSIS_DEVICE_GIT_TAG v2.3.6)
@@ -28,21 +22,48 @@ endfunction()
 
 
 # check if cube package source was specified or if it's empty (default is empty)
-macro(nf_process_gecko_sdk)
+macro(nf_add_gecko_sdk)
 
     FetchContent_GetProperties(gecko_sdk)
+
+    # set include directories
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Include)
 
     # general files
 
     #series specific files
     if("${TARGET_SERIES}" STREQUAL "EFM32GG1")
         
-    set(GECKO_SDK_SRCS
-        
-        # RT
-        chcore.c
-        chcoreasm.S
-    )
+        set(GECKO_SDK_SRCS
+            system_efm32gg11b.c
+            startup_efm32gg11b.c
+            startup_efm32gg11b.S
+        )
+
+        foreach(SRC_FILE ${GECKO_SDK_SRCS})
+
+            set(GECKO_SDK_SRCS_SRC_FILE SRC_FILE-NOTFOUND)
+
+            find_file(GECKO_SDK_SRCS_SRC_FILE ${SRC_FILE}
+                PATHS 
+
+                ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source
+                ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source/GCC
+
+                CMAKE_FIND_ROOT_PATH_BOTH
+            )
+
+            if (BUILD_VERBOSE)
+                message("${SRC_FILE} >> ${GECKO_SDK_SRCS_SRC_FILE}")
+            endif()
+
+            list(APPEND Gecko_SDK_SOURCES ${GECKO_SDK_SRCS_SRC_FILE})
+            
+        endforeach()
+
+        list(REMOVE_DUPLICATES GECKO_SDK_SRCS_INCLUDE_DIRS)
+
+        include(FindPackageHandleStandardArgs)
 
     endif()
 
