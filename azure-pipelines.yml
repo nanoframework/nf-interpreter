@@ -912,7 +912,7 @@ jobs:
         failed('Build_ESP32_targets'),
         failed('Build_NXP_targets'),
         failed('Build_TI_SimpleLink_targets'),
-        succeeded('Build_Azure_RTOS_targets'),
+        failed('Build_Azure_RTOS_targets'),
         failed('Build_WIN32_nanoCLR'),
         failed('Generate_change_log')
       )

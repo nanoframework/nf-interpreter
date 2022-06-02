@@ -26,7 +26,7 @@
         "short": "<summary-here>",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
-          "BUILD_VERBOSE": "Option to output verbose messages during build. Usefull for debugging issues with build system.",
+          "BUILD_VERBOSE": "Option to output verbose messages during build. Useful for debugging issues with build system.",
           "CMAKE_TOOLCHAIN_FILE": "CMake/toolchain.<arm-none-eabi-OR-xtensa-esp32-elf>.cmake",
           "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
           "TARGET_BOARD": "<valid-board-name-from-platform-boards-collection>",
