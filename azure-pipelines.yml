@@ -288,6 +288,7 @@ jobs:
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
       )
     )
