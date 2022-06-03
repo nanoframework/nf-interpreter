@@ -305,6 +305,18 @@
             }
         },
         {
+            "name": "LilygoTWatch2020",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "LilygoTWatch2020_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "M5StickC",
             "inherits": [
                 "user-local-tools",
@@ -678,6 +690,11 @@
             "name": "ESP32_OLIMEX",
             "displayName": "ESP32_OLIMEX",
             "configurePreset": "ESP32_OLIMEX"
+        },
+        {
+            "name": "LilygoTWatch2020",
+            "displayName": "LilygoTWatch2020",
+            "configurePreset": "LilygoTWatch2020"
         },
         {
             "name": "M5StickC",
