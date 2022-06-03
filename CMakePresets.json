@@ -568,6 +568,27 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
+        },       
+        {
+            "name": "LilygoTWatch2020_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "ST7789V_240x320_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
         },
         {
             "name": "M5StickC_preset",
