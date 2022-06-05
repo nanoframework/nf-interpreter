@@ -234,11 +234,11 @@ void esp32_ble_start_advertise(ble_services_context *context)
     fields.name = (uint8_t *)context->pDeviceName;
     fields.name_len = hal_strlen_s(context->pDeviceName);
     fields.name_is_complete = 1;
-    
+
     // Only advertise first Service UUID for now.
     // if 16 or 32 add to advert fields.
     // 128 uuid probably won't fix so add to scan response.
-    switch(context->gatt_service_def->uuid->type)
+    switch (context->gatt_service_def->uuid->type)
     {
         case BLE_UUID_TYPE_16:
             fields.uuids16 = (ble_uuid16_t *)context->gatt_service_def->uuid;
@@ -253,13 +253,13 @@ void esp32_ble_start_advertise(ble_services_context *context)
             break;
 
         case BLE_UUID_TYPE_128:
-             scanResp.uuids128 =  (ble_uuid128_t*)platform_malloc( sizeof(ble_uuid128_t)); 
-             memcpy( (void*)scanResp.uuids128,  context->gatt_service_def->uuid, sizeof(ble_uuid128_t));
-             scanResp.num_uuids128 = 1;
-             scanResp.uuids128_is_complete = 1;
-             useScanResponse = true;
-             break;
-     }
+            scanResp.uuids128 = (ble_uuid128_t *)platform_malloc(sizeof(ble_uuid128_t));
+            memcpy((void *)scanResp.uuids128, context->gatt_service_def->uuid, sizeof(ble_uuid128_t));
+            scanResp.num_uuids128 = 1;
+            scanResp.uuids128_is_complete = 1;
+            useScanResponse = true;
+            break;
+    }
 
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0)
@@ -273,16 +273,16 @@ void esp32_ble_start_advertise(ble_services_context *context)
         if (rc != 0)
         {
             ESP_LOGI(tag, "error setting scan response  data; rc=%d\n", rc);
-        }       
+        }
     }
 
     // Free any allocated memory
     if (scanResp.uuids128 != 0)
     {
-        platform_free((void*)scanResp.uuids128);
+        platform_free((void *)scanResp.uuids128);
     }
 
-    if (rc!=0)
+    if (rc != 0)
     {
         return;
     }
@@ -465,7 +465,8 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
 
     BluetoothEventType op;
 
-    //debug_printf("device_ble_callback attr %d op %d id %X\n", attr_handle, ctxt->op,  ble_event_data.characteristicId );
+    // debug_printf("device_ble_callback attr %d op %d id %X\n", attr_handle, ctxt->op,  ble_event_data.characteristicId
+    // );
 
     switch (ctxt->op)
     {
