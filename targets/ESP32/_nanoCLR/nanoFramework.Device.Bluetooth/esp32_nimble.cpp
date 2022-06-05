@@ -201,6 +201,8 @@ void esp32_ble_start_advertise(ble_services_context *context)
 {
     struct ble_gap_adv_params adv_params;
     struct ble_hs_adv_fields fields;
+    struct ble_hs_adv_fields scanResp;
+    bool useScanResponse = false;
     int rc;
 
     //
@@ -209,7 +211,10 @@ void esp32_ble_start_advertise(ble_services_context *context)
     //     o Advertising tx power
     //     o Device name
     //
+    //  What doesn't fit in primary advert packet we add to scanData for Scan response
+    //
     memset(&fields, 0, sizeof(fields));
+    memset(&scanResp, 0, sizeof(scanResp));
 
     //
     // Advertise two flags:
@@ -229,11 +234,56 @@ void esp32_ble_start_advertise(ble_services_context *context)
     fields.name = (uint8_t *)context->pDeviceName;
     fields.name_len = hal_strlen_s(context->pDeviceName);
     fields.name_is_complete = 1;
+    
+    // Only advertise first Service UUID for now.
+    // if 16 or 32 add to advert fields.
+    // 128 uuid probably won't fix so add to scan response.
+    switch(context->gatt_service_def->uuid->type)
+    {
+        case BLE_UUID_TYPE_16:
+            fields.uuids16 = (ble_uuid16_t *)context->gatt_service_def->uuid;
+            fields.num_uuids16 = 1;
+            fields.uuids16_is_complete = 1;
+            break;
+
+        case BLE_UUID_TYPE_32:
+            fields.uuids32 = (ble_uuid32_t *)context->gatt_service_def->uuid;
+            fields.num_uuids32 = 1;
+            fields.uuids32_is_complete = 1;
+            break;
+
+        case BLE_UUID_TYPE_128:
+             scanResp.uuids128 =  (ble_uuid128_t*)platform_malloc( sizeof(ble_uuid128_t)); 
+             memcpy( (void*)scanResp.uuids128,  context->gatt_service_def->uuid, sizeof(ble_uuid128_t));
+             scanResp.num_uuids128 = 1;
+             scanResp.uuids128_is_complete = 1;
+             useScanResponse = true;
+             break;
+     }
 
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0)
     {
         ESP_LOGI(tag, "error setting advertisement data; rc=%d\n", rc);
+    }
+
+    if (useScanResponse)
+    {
+        rc = ble_gap_adv_rsp_set_fields(&scanResp);
+        if (rc != 0)
+        {
+            ESP_LOGI(tag, "error setting scan response  data; rc=%d\n", rc);
+        }       
+    }
+
+    // Free any allocated memory
+    if (scanResp.uuids128 != 0)
+    {
+        platform_free((void*)scanResp.uuids128);
+    }
+
+    if (rc!=0)
+    {
         return;
     }
 
@@ -415,21 +465,19 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
 
     BluetoothEventType op;
 
-    // debug_printf("device_ble_callback attr %d op %d\n", attr_handle, ctxt->op);
+    //debug_printf("device_ble_callback attr %d op %d id %X\n", attr_handle, ctxt->op,  ble_event_data.characteristicId );
 
     switch (ctxt->op)
     {
         case BLE_GATT_ACCESS_OP_READ_CHR:
+        case BLE_GATT_ACCESS_OP_READ_DSC:
             op = BluetoothEventType_Read;
             break;
 
         case BLE_GATT_ACCESS_OP_WRITE_CHR:
+        case BLE_GATT_ACCESS_OP_WRITE_DSC:
             op = BluetoothEventType_Write;
             break;
-
-            // TODO handle descriptors
-            //#define BLE_GATT_ACCESS_OP_READ_DSC  2
-            // #define BLE_GATT_ACCESS_OP_WRITE_DSC 3
 
         default:
             return BLE_ATT_ERR_REQ_NOT_SUPPORTED;
