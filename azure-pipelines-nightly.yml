@@ -139,13 +139,13 @@ jobs:
               {
                   # ChibiOS targets are the only ones needing to be build on a global change
                   echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                  Write-host "Building ChibiOS targets"
               }
               else
               {
                   echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-              }
-              
-              Write-host "Building ALL targets"
+                  Write-host "Building ALL targets"
+              }              
           }
 
           if($buildingPr)
@@ -213,10 +213,10 @@ jobs:
 
   condition: >-
     or(
-      eq(variables['BUILD_ALL'], 'true'),
-      eq(variables['BUILD_CHIBIOS'], 'true'),
-      eq(variables['BUILD_ESP32'], 'true'),
-      eq(variables['BUILD_TI'], 'true')
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true')
     )
 
   pool:
