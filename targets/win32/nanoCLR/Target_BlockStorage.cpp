@@ -359,6 +359,15 @@ __nfweak bool BlockStorageDevice_Memset(
     return false;
 }
 
+__nfweak bool BlockStorageDevice_GetMemoryMappedAddress(
+    BlockStorageDevice *device,
+    unsigned int blockRegionIndex,
+    unsigned int blockRangeIndex,
+    unsigned int *address)
+{
+    return false;
+}
+
 //__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
 //SectorMetadata* pSectorMetadata);
 //__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
