@@ -369,9 +369,9 @@ __nfweak bool BlockStorageDevice_GetMemoryMappedAddress(
 }
 
 //__nfweak bool BlockStorageDevice_GetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
-//SectorMetadata* pSectorMetadata);
+// SectorMetadata* pSectorMetadata);
 //__nfweak bool BlockStorageDevice_SetSectorMetadata(BlockStorageDevice* device, unsigned int sectorStart,
-//SectorMetadata* pSectorMetadata);
+// SectorMetadata* pSectorMetadata);
 
 __nfweak bool BlockStorageDevice_IsBlockErased(
     BlockStorageDevice *device,
