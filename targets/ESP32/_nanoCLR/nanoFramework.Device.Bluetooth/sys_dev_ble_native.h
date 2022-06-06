@@ -182,8 +182,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptor
 {
-    static const int FIELD_STATIC__GattLocalDescriptorIndex = 0;
-
     static const int FIELD___descriptorId = 1;
     static const int FIELD___charactisic = 2;
     static const int FIELD___writeProtectionLevel = 3;
@@ -236,23 +234,24 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic
 {
-    static const int FIELD_STATIC__GattLocalCharacteristicIndex = 1;
+    static const int FIELD_STATIC__GattLocalCharacteristicIndex = 0;
 
     static const int FIELD___characteristicId = 1;
-    static const int FIELD___characteristicUuid = 2;
-    static const int FIELD___writeProtectionLevel = 3;
-    static const int FIELD___readProtectionLevel = 4;
-    static const int FIELD___properties = 5;
-    static const int FIELD___descriptors = 6;
-    static const int FIELD___subscribedClients = 7;
-    static const int FIELD___userDescription = 8;
-    static const int FIELD___userDescriptionDescriptor = 9;
-    static const int FIELD___presentationFormats = 10;
-    static const int FIELD___presentationFormatsDescriptors = 11;
-    static const int FIELD___staticValue = 12;
-    static const int FIELD__ReadRequested = 13;
-    static const int FIELD__WriteRequested = 14;
-    static const int FIELD__SubscribedClientsChanged = 15;
+    static const int FIELD___descriptorNextID = 2;
+    static const int FIELD___characteristicUuid = 3;
+    static const int FIELD___writeProtectionLevel = 4;
+    static const int FIELD___readProtectionLevel = 5;
+    static const int FIELD___properties = 6;
+    static const int FIELD___descriptors = 7;
+    static const int FIELD___subscribedClients = 8;
+    static const int FIELD___userDescription = 9;
+    static const int FIELD___userDescriptionDescriptor = 10;
+    static const int FIELD___presentationFormats = 11;
+    static const int FIELD___presentationFormatsDescriptors = 12;
+    static const int FIELD___staticValue = 13;
+    static const int FIELD__ReadRequested = 14;
+    static const int FIELD__WriteRequested = 15;
+    static const int FIELD__SubscribedClientsChanged = 16;
 
     NANOCLR_NATIVE_DECLARE(NativeNotifyClient___I4__U2__U2__SZARRAY_U1);
 
@@ -261,7 +260,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventListener
 {
-    static const int FIELD_STATIC___characteristicMap = 2;
+    static const int FIELD_STATIC___characteristicMap = 1;
 
     //--//
 };
@@ -324,7 +323,7 @@ struct
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider
 {
-    static const int FIELD_STATIC___bluetoothEventManager = 3;
+    static const int FIELD_STATIC___bluetoothEventManager = 2;
 
     static const int FIELD___services = 1;
     static const int FIELD___status = 2;
@@ -371,7 +370,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_NordicSpp
 
 struct Library_sys_dev_ble_native_ThisAssembly
 {
-    static const int FIELD_STATIC__GitCommitDate = 4;
+    static const int FIELD_STATIC__GitCommitDate = 3;
 
     //--//
 };
