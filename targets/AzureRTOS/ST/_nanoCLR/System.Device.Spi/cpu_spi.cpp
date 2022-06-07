@@ -385,7 +385,7 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
 
-    if (csPin >= 0) 
+    if (csPin >= 0)
     {
         // make sure the CS pin is properly configured as GPIO, output & pushpull
         palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
@@ -596,7 +596,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     sdev.DeviceChipSelect,
                     sdev.ChipSelectActive ? GpioPinValue_High : GpioPinValue_Low);
             }
-            
+
             // this is a Async operation
             // perform SPI operation using driver's ASYNC API
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
