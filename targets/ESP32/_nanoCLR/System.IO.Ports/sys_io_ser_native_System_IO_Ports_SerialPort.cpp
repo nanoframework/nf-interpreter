@@ -1407,7 +1407,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
         ;
 
     // replace the last comma with a terminator
-    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = ',')
+    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
     {
         deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
     }
