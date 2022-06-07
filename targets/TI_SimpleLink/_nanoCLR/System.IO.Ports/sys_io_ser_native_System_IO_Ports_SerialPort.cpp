@@ -167,14 +167,18 @@ void SerialRxTask(UArg a0, UArg a1)
             }
             else
             {
-                // no read operation ongoing, so fire an event
-                // post a managed event with the port index and event code (check if this is the watch char or just
-                // another another)
-                PostManagedEvent(
-                    EVENT_SERIAL,
-                    0,
-                    UART_NUM_TO_PORT_INDEX(palUart->UartNum),
-                    (input == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+                // no read operation ongoing, so fire an event, if the available bytes are above the
+                // threshold
+                if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
+                {
+                    // post a managed event with the port index and event code (check if this is the watch char or just
+                    // another another)
+                    PostManagedEvent(
+                        EVENT_SERIAL,
+                        0,
+                        UART_NUM_TO_PORT_INDEX(palUart->UartNum),
+                        (input == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+                }
             }
         }
     }
@@ -714,6 +718,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
         NF_PAL_UART *palUart;
         uint8_t uartNum;
         int32_t bufferSize;
+        uint8_t watchChar;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -758,8 +763,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
 #endif
 
+        // get watch character
+        watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+        // set watch char, if set
+        if (watchChar != 0)
+        {
+            palUart->WatchChar = watchChar;
+        }
         // all the rest
-        palUart->WatchChar = 0;
         palUart->NewLineChar = 0;
         palUart->RxBytesToRead = 0;
         palUart->TxOngoingCount = 0;
@@ -1019,6 +1031,52 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    int32_t threshold;
+    uint8_t portIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
+
+    if (threshold <= 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    portIndex = (int)pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL(portIndex);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    palUart->ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case port is open and the new threshold was set
+    // to a value lower than the bytes that are already available
+    if (pThis[FIELD___opened].NumericByRef().u1 && (uint32_t)threshold <= palUart->RxRingBuffer.Length())
+    {
+        PostManagedEvent(EVENT_SERIAL, 0, portIndex, SerialData_Chars);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -1026,14 +1084,18 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM2," + terminator
     // and init with the terminator
-    char deviceSelectorString[4 + 1] = {0};
+    static char deviceSelectorString[] =
 
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
+        ;
 
     // replace the last comma with a terminator
-    deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
+    {
+        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    }
 
     // because the caller is expecting a result to be returned
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable

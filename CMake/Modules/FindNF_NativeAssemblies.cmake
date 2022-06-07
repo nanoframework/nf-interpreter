@@ -9,8 +9,8 @@
 # and the namespace designation is 'System.Device.Gpio'
 ###########################################################################################
 
-option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
-option(API_nanoFramework.Device.OneWire        "option for nanoFramework.Device.OneWire")
+option(API_nanoFramework.Device.Can             "option for nanoFramework.Device.Can")
+option(API_nanoFramework.Device.OneWire         "option for nanoFramework.Device.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
@@ -183,10 +183,10 @@ if(API_Hardware.Stm32)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
 endif()
 
-# nanoFramework.Devices.Can
-if(API_nanoFramework.Devices.Can)
+# nanoFramework.Device.Can
+if(API_nanoFramework.Device.Can)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+    PerformSettingsForApiEntry("nanoFramework.Device.Can")
 endif()
 
 # nanoFramework.Graphics
@@ -311,10 +311,10 @@ if(API_System.Device.Spi)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
-# System.Device.WiFi
-if(API_System.Device.WiFi)
+# System.Device.Wifi
+if(API_System.Device.Wifi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("System.Device.WiFi")
+    PerformSettingsForApiEntry("System.Device.Wifi")
 endif()
 
 # Windows.Storage

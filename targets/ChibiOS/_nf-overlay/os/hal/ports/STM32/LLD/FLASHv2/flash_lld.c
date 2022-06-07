@@ -30,6 +30,8 @@ STM32FlashDriver STM32FLASH;
 // Driver local functions.                                                   //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef USE_HAL_DRIVER
+
 // Unlock the FLASH control register access
 bool HAL_FLASH_Unlock(void)
 {
@@ -81,6 +83,8 @@ bool FLASH_WaitForLastOperation(uint32_t timeout)
     // If there is no error flag set
     return true;
 }
+
+#endif
 
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) ||                    \
     defined(STM32F469xx) || defined(STM32F479xx) || defined(STM32F405xx) || defined(STM32F415xx) ||                    \
@@ -156,7 +160,12 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
     }
 
     // unlock the FLASH
+
+#ifdef USE_HAL_DRIVER
+    if (HAL_FLASH_Unlock() == HAL_OK)
+#else
     if (HAL_FLASH_Unlock())
+#endif
     {
         // Clear pending flags (if any)
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
@@ -214,7 +223,11 @@ int flash_lld_write(uint32_t startAddress, uint32_t length, const uint8_t *buffe
             }
 
             // wait 500ms for any flash operation to be completed
+#ifdef USE_HAL_DRIVER
+            success = FLASH_WaitForLastOperation(500) == HAL_OK;
+#else
             success = FLASH_WaitForLastOperation(500);
+#endif            
 
             if (!success)
             {
@@ -341,7 +354,11 @@ int flash_lld_erase(uint32_t address)
     bool success = false;
 
     // unlock the FLASH
+#ifdef USE_HAL_DRIVER
+    if (HAL_FLASH_Unlock() == HAL_OK)
+#else
     if (HAL_FLASH_Unlock())
+#endif
     {
         // Clear pending flags (if any)
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
@@ -373,7 +390,7 @@ int flash_lld_erase(uint32_t address)
 #endif
 
         // wait 2000ms for any flash operation to be completed
-        success = FLASH_WaitForLastOperation(2000) == HAL_OK;
+        success = FLASH_WaitForLastOperation(2000);
 
         // after erase operation completed disable the SER and SNB Bits
         CLEAR_BIT(FLASH->CR, (FLASH_CR_SER | FLASH_CR_SNB));

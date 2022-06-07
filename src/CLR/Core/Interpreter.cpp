@@ -406,7 +406,7 @@ void CLR_RT_Thread::PopEH_Inner(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
             if (ip && (us.m_currentBlockStart <= ip && ip < us.m_currentBlockEnd))
                 break;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (stack->m_inlineFrame)
                 break;
 #endif
@@ -2181,7 +2181,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     else
 #endif // NANOCLR_APPDOMAINS
                     {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                         if (stack->PushInline(ip, assm, evalPos, calleeInst, pThis))
                         {
                             fDirty = true;
@@ -2199,7 +2199,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 OPDEF(CEE_RET, "ret", VarPop, Push0, InlineNone, IPrimitive, 1, 0xFF, 0x2A, RETURN)
                 {
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if (stack->m_inlineFrame)
                     {
                         stack->m_evalStackPos = evalPos;

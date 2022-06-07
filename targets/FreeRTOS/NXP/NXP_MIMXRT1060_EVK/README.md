@@ -36,7 +36,6 @@ Pre-configured cmake-variants.json for this board
         "short": "MIMXRT1060_EVK",
         "settings": {
           "BUILD_VERSION": "0.9.99.999",
-          "TOOLCHAIN_PREFIX": "C:/nanoFramework_Tools/GNU_ARM_Toolchain/7 2018-q2-update",
           "TARGET_SERIES": "IMXRT10xx",
           "RTOS": "FreeRTOS",
           "TARGET_BOARD": "NXP_MIMXRT1060_EVK",
@@ -53,7 +52,7 @@ Pre-configured cmake-variants.json for this board
           "API_System.Device.I2c": "OFF",
           "API_System.Device.Adc": "OFF",
           "API_System.Device.Pwm": "OFF",
-          "API_System.Device.WiFi": "OFF",
+          "API_System.Device.Wifi": "OFF",
           "API_System.Net": "OFF",
           "API_System.Math": "ON",
           "API_Windows.Storage": "ON"

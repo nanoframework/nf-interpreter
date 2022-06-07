@@ -80,7 +80,7 @@ extern "C"
 s32_t hal_spiffs_erase_0(u32_t addr, u32_t size);
 s32_t hal_spiffs_read_0(u32_t addr, u32_t size, u8_t *dst);
 s32_t hal_spiffs_write_0(u32_t addr, u32_t size, u8_t *src);
-#if SPIFFS_INSTANCES_COUNT > 0
+#if SPIFFS_INSTANCES_COUNT > 1
 s32_t hal_spiffs_erase_1(u32_t addr, u32_t size);
 s32_t hal_spiffs_read_1(u32_t addr, u32_t size, u8_t *dst);
 s32_t hal_spiffs_write_1(u32_t addr, u32_t size, u8_t *src);

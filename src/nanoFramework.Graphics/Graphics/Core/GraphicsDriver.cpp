@@ -308,16 +308,25 @@ void GraphicsDriver::DrawRectangleNative(
 
                 if (opacity == PAL_GFX_Bitmap::c_OpacityOpaque)
                 {
-                    for (int row = 0; row < insetHeight; row++, curRow += stride)
+                    curPixel = curRow;
+
+                    CLR_UINT16 *startRow = curRow;
+
+                    // Draw the first row
+                    for (int col = 0; col < insetWidth; col++, curPixel++)
                     {
-                        curPixel = curRow;
-                        for (int col = 0; col < insetWidth; col++, curPixel++)
-                        {
-                            *curPixel = fillColor;
-                        }
+                        *curPixel = fillColor;
+                    }
+
+                    // Just memcpy the first row to all subsequent rows, which is moderately faster
+                    for (int row = 1; row < insetHeight; row++)
+                    {
+                        curRow += stride;
+
+                        memcpy(curRow, startRow, insetWidth * 2);
                     }
                 }
-                else // if (opacity != PAL_GFX_Bitmap::c_OpacityOpaque)
+                else
                 {
                     CLR_UINT16 lastPixel = *curPixel;
                     CLR_UINT16 interpolated = g_GraphicsDriver.NativeColorInterpolate(fillColor, lastPixel, opacity);
@@ -1410,19 +1419,21 @@ void GraphicsDriver::SetPixelsHelper(
 
 void GraphicsDriver::Screen_Flush(
     CLR_GFX_Bitmap &bitmap,
-    CLR_UINT16 x,
-    CLR_UINT16 y,
+    CLR_UINT16 srcX,
+    CLR_UINT16 srcY,
     CLR_UINT16 width,
-    CLR_UINT16 height)
+    CLR_UINT16 height,
+    CLR_UINT16 screenX,
+    CLR_UINT16 screenY)
 {
     NATIVE_PROFILE_CLR_HARDWARE();
     CLR_INT32 widthMax = g_DisplayDriver.Attributes.Width;
     CLR_INT32 heightMax = g_DisplayDriver.Attributes.Height;
 
-    if ((CLR_UINT32)(x + width) > (CLR_UINT32)widthMax)
-        width = widthMax - x;
-    if ((CLR_UINT32)(y + height) > (CLR_UINT32)heightMax)
-        height = heightMax - y;
+    if ((CLR_UINT32)(screenX + width) > (CLR_UINT32)widthMax)
+        width = widthMax - screenX;
+    if ((CLR_UINT32)(screenY + height) > (CLR_UINT32)heightMax)
+        height = heightMax - screenY;
 
     if (bitmap.m_bm.m_width > (CLR_UINT32)widthMax)
         return;
@@ -1433,5 +1444,5 @@ void GraphicsDriver::Screen_Flush(
     if (bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor)
         return;
 
-    g_DisplayDriver.BitBlt(x, y, width, height, bitmap.m_palBitmap.data);
+    g_DisplayDriver.BitBlt(srcX, srcY, width, height, bitmap.m_bm.m_width, screenX, screenY, bitmap.m_palBitmap.data);
 }

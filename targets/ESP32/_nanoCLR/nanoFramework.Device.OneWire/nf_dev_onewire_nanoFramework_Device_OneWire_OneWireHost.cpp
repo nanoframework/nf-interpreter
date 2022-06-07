@@ -19,7 +19,16 @@ static uint8_t SerialNum[8];
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
 
-HRESULT oneWireInit()
+void IRAM_ATTR oneWireStop()
+{
+    // stop UART
+    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
+
+    // driver is stopped
+    DriverState = ONEWIRE_STOP;
+}
+
+HRESULT IRAM_ATTR oneWireInit()
 {
     DriverState = ONEWIRE_STOP;
 
@@ -35,8 +44,8 @@ HRESULT oneWireInit()
 
     // get GPIO pins configured for UART assigned to 1-Wire
     // need to subtract one to get the correct index of UART in mapped device pins
-    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Tx);
-    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM - 1, Esp32SerialPin_Rx);
+    int txPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Tx);
+    int rxPin = Esp32_GetMappedDevicePins(DEV_TYPE_SERIAL, NF_ONEWIRE_ESP32_UART_NUM, Esp32SerialPin_Rx);
 
     // check if TX, RX pins have been previously set
     if (txPin == UART_PIN_NO_CHANGE || rxPin == UART_PIN_NO_CHANGE)
@@ -60,23 +69,17 @@ HRESULT oneWireInit()
         return CLR_E_INVALID_OPERATION;
     }
 
-    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, UART_FIFO_LEN * 2, 0, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
+    if (uart_driver_install(NF_ONEWIRE_ESP32_UART_NUM, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM) != ESP_OK)
     {
         return CLR_E_INVALID_OPERATION;
     }
 
+    // driver need to be deleted on soft reboot
+    HAL_AddSoftRebootHandler(oneWireStop);
+
     DriverState = ONEWIRE_READY;
 
     return S_OK;
-}
-
-void oneWireStop()
-{
-    // stop UART
-    uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
-
-    // driver is stopped
-    DriverState = ONEWIRE_STOP;
 }
 
 uint8_t oneWireTouchReset(void)
@@ -515,8 +518,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     return S_OK;
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::TouchReset___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -587,8 +589,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNex
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeDispose___VOID(CLR_RT_StackFrame &stack)
 {
     (void)stack;
 

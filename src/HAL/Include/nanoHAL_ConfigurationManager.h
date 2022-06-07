@@ -148,8 +148,8 @@ extern "C"
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex);
 
-    // Checks if two configuration blocks are the same. Usefull to prevent going through the store process when the
-    // content is the same. Default implementation provided for memory addreasable implementations. defined as weak so
+    // Checks if two configuration blocks are the same. Useful to prevent going through the store process when the
+    // content is the same. Default implementation provided for memory addressable implementations. defined as weak so
     // targets are free to implement the storage of the configuration block as they see fit
     bool ConfigurationManager_CheckExistingConfigurationBlock(
         void *existingConfigBlock,
@@ -201,6 +201,9 @@ extern "C"
     // memory is allocated for the configuration block, has to be free by the caller
     // defined as weak to allow replacement at platform/target level to allow different storage management
     HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate();
+
+    // gets the HAL_Configuration_NetworkInterface configuration block that has the SpecificConfig Id, if that exists
+    int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId);
 
 #ifdef __cplusplus
 }

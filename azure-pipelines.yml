@@ -52,7 +52,7 @@ jobs:
 ##############################
 - job: Check_Build_Options
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -137,7 +137,8 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_FREERTOS;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
+          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
@@ -189,6 +190,14 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
               Write-host "Building TI SimpleLink targets"
+          }
+
+          if( ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+          {
+              # files at AzureRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+              Write-host "Building Azure RTOS targets"
           }
 
           if( ($files.where{$_.Contains('targets/win32')}).Count -gt 0)
@@ -270,13 +279,25 @@ jobs:
 
 ##############################
 - job: Check_Code_Style
-  condition: ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true )
+  condition: >-
+    and(
+      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+      )
+    )
 
   dependsOn:
   - Check_Build_Options
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - checkout: self
@@ -303,7 +324,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -325,7 +346,6 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'stm32'
 
@@ -336,7 +356,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32.yml
+  - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -359,7 +379,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   # there is only a single ESP32 target, but this is already config as a matrix to make it easy to add new ones
   strategy:
@@ -421,7 +441,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-esp32.yml
+  - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
   - task: CopyFiles@1
     condition: succeeded()
@@ -456,7 +476,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -471,7 +491,6 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
 
@@ -481,7 +500,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-freertos-nxp.yml
+  - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -504,7 +523,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -542,7 +561,6 @@ jobs:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
-    GNU_GCC_TOOLCHAIN_PATH: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
 
@@ -551,10 +569,66 @@ jobs:
   - template: azure-pipelines-templates/nb-gitversioning.yml
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink.yml
+  - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
+
+#################
+# Azure RTOS
+- job: Build_Azure_RTOS_targets
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+      )
+    )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'windows-latest'
+
+  strategy:
+    matrix:
+      ST_B_L475E_IOT01A:
+        TargetBoard: ST_B_L475E_IOT01A
+        TargetSeries: 'stm32l4xx'
+        BuildOptions: 
+        GccArm_Version: 
+        NeedsDFU: true
+        NeedsSRECORD: false
+
+      # ORGPAL_PALTHREE:
+      #   TargetBoard: ORGPAL_PALTHREE
+      #   TargetSeries: 'stm32f7xx'
+      #   BuildOptions:
+      #   GccArm_Version: 
+      #   NeedsDFU: true
+      #   NeedsSRECORD: false
+
+  variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('AZURERTOS_1_8_0_versioncounter', 0)]
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'azure_rtos'
+
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-hexdfu.yml
+  - template: azure-pipelines-templates/download-srecord.yml
+  - template: azure-pipelines-templates/build-azurertos-targets.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
 # WIN32 
@@ -574,7 +648,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   variables:
     DOTNET_NOLOGO: true
@@ -724,6 +798,7 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
   condition: >-
     and(
@@ -731,16 +806,17 @@ jobs:
       succeeded('Build_ESP32_targets'),
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
-      eq(variables['System.PullRequest.PullRequestId'], ''),
-      or(
-        eq(variables['Build.SourceBranchName'], 'main'),
-        startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
-      ),
-      ne(variables['StartReleaseCandidate'], true)
+      succeeded('Build_Azure_RTOS_targets'),
+      not( eq(variables['Build.Reason'], 'PullRequest')
+    ),
+    or(
+      eq(variables['Build.SourceBranchName'], 'main'),
+      startsWith(variables['Build.SourceBranch'], 'refs/tags/v') ),
+      ne( variables['StartReleaseCandidate'], true )
     )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
   - task: DotNetCoreCLI@2  
@@ -825,6 +901,7 @@ jobs:
   - Build_ESP32_targets
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
+  - Build_Azure_RTOS_targets
   - Build_WIN32_nanoCLR
   - Generate_change_log
   - Check_Code_Style
@@ -836,13 +913,14 @@ jobs:
         failed('Build_ESP32_targets'),
         failed('Build_NXP_targets'),
         failed('Build_TI_SimpleLink_targets'),
+        failed('Build_Azure_RTOS_targets'),
         failed('Build_WIN32_nanoCLR'),
         failed('Generate_change_log')
       )
     )
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   steps:
 

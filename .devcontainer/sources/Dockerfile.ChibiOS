@@ -1,4 +1,4 @@
-FROM debian:10.4-slim AS downloader
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -10,14 +10,15 @@ ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
     && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
-    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1
+    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
 ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-linux-x86_64.sh
 RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
 
-FROM debian:10.4-slim AS devcontainer
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -33,6 +34,7 @@ RUN apt-get update \
     && apt-get install -y \
     git \
     git-svn \
+    subversion \
     curl \
     ninja-build \
     srecord
@@ -54,16 +56,22 @@ RUN git clone --branch mbedtls-2.28.0 https://github.com/ARMmbed/mbedtls.git --d
     && git clone --branch R0.14 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
+# set gcc location
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
+ENV PATH=$ARM_GCC_PATH/bin:${PATH}
+
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
+COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
 # Putting hex2dfu in the container
+ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
+
 ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
-RUN mkdir -p /usr/local/bin/hex2dfu \
-    && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
-    && chmod +x /usr/local/bin/hex2dfu/hex2dfu
+RUN mkdir -p  $HEX2DFU_PATH \
+    && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
+    && chmod +x  $HEX2DFU_PATH/hex2dfu
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

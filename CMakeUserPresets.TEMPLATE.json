@@ -6,7 +6,6 @@
             "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "TOOLCHAIN_PREFIX": "<path-to-gcc-toolchain-mind-the-forward-slash>",
                 "TOOL_HEX2DFU_PREFIX": "<path-to-hex2dfu-utility-mind-the-forward-slash>",
                 "TOOL_SRECORD_PREFIX": "<path-to-srecord-utility-mind-the-forward-slash>",
                 "CHIBIOS_SOURCE_FOLDER": "<path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash>",
@@ -29,7 +28,6 @@
             "description": "Cache variables with paths to local tools. Please replace with your own paths. Set to null to use build defaults or completly remove if your not building the concerned target.",
             "hidden": true,
             "cacheVariables": {
-                "TOOLCHAIN_PREFIX": "/usr/local/bin/gcc",
                 "TOOL_HEX2DFU_PREFIX": "/usr/local/bin/hex2dfu",
                 "TOOL_SRECORD_PREFIX": "/usr/bin",
                 "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
@@ -59,7 +57,12 @@
                 "NF_WP_TRACE_HEADERS": "OFF",
                 "NF_WP_TRACE_STATE": "OFF",
                 "NF_WP_TRACE_NODATA": "OFF",
-                "NF_WP_TRACE_ALL": "OFF"
+                "NF_WP_TRACE_ALL": "OFF",
+                "NF_WP_IMPLEMENTS_CRC32": "OFF",
+                "NF_PLATFORM_NO_CLR_TRACE": "OFF",
+                "NF_CLR_NO_IL_INLINE": "OFF",
+                "NF_FEATURE_WATCHDOG": "ON",
+                "SWO_OUTPUT": "OFF"
             }
         },
         {
@@ -109,6 +112,21 @@
                 "user-local-tools",
                 "user-prefs",
                 "ST_STM32F769I_DISCOVERY_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "${presetName}"
+                },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ST_B_L475E_IOT01A",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ST_B_L475E_IOT01A_preset"
             ],
             "cacheVariables": {
                 "TARGET_BOARD": {
@@ -280,6 +298,18 @@
                 "user-local-tools",
                 "user-prefs",
                 "ESP32_OLIMEX_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "LilygoTWatch2020",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "LilygoTWatch2020_preset"
             ],
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
@@ -587,6 +617,11 @@
             "configurePreset": "ST_STM32F769I_DISCOVERY"
         },
         {
+            "name": "ST_B_L475E_IOT01A",
+            "displayName": "ST_B_L475E_IOT01A",
+            "configurePreset": "ST_B_L475E_IOT01A"
+        },
+        {
             "name": "ESP32_PSRAM_REV0",
             "displayName": "ESP32_PSRAM_REV0",
             "configurePreset": "ESP32_PSRAM_REV0"
@@ -655,6 +690,11 @@
             "name": "ESP32_OLIMEX",
             "displayName": "ESP32_OLIMEX",
             "configurePreset": "ESP32_OLIMEX"
+        },
+        {
+            "name": "LilygoTWatch2020",
+            "displayName": "LilygoTWatch2020",
+            "configurePreset": "LilygoTWatch2020"
         },
         {
             "name": "M5StickC",

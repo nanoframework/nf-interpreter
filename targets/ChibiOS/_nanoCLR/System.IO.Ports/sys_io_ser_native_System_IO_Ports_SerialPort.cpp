@@ -242,18 +242,20 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
     }
     else
     {
-        // no read operation ongoing, so fire an event
-
-        // post a managed event with the port index and event code (check if this is the watch char or just another
-        // another)
-        // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise don't
-        // bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-        // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
-        PostManagedEvent(
-            EVENT_SERIAL,
-            0,
-            portIndex,
-            (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+        // no read operation ongoing, so fire an event, if the available bytes are above the threshold
+        if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
+        {
+            // post a managed event with the port index and event code (check if this is the watch char or just another
+            // another)
+            // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise
+            // don't bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+            // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+            PostManagedEvent(
+                EVENT_SERIAL,
+                0,
+                portIndex,
+                (c == palUart->WatchChar) ? SerialData_WatchChar : SerialData_Chars);
+        }
     }
 
     NATIVE_INTERRUPT_END
@@ -416,7 +418,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Read___I4__SZARRAY
         }
     }
 
-    // get a the pointer to the array by using the first element of the array
+    // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
 
     // Choose the driver for this SerialDevice
@@ -717,7 +719,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::Write___VOID__SZAR
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        // get a the pointer to the array by using the first element of the array
+        // get a the pointer to the array by using the offset
         data = dataBuffer->GetElement(offset);
 
         // push onto the eval stack how many bytes are being pushed to the UART
@@ -856,6 +858,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
 
     NF_PAL_UART *palUart;
     int32_t bufferSize;
+    uint8_t watchChar;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -943,6 +946,15 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeInit___VOID(
     palUart->Uart_cfg.txend1_cb = TxEnd1;
     palUart->Uart_cfg.rxchar_cb = RxChar;
     // palUart->Uart_cfg.rxend_cb = RxEnd;
+
+    // get watch character
+    watchChar = pThis[FIELD___watchChar].NumericByRef().u1;
+
+    // set watch char, if set
+    if (watchChar != 0)
+    {
+        palUart->WatchChar = watchChar;
+    }
 
     // call the configure
     return NativeConfig___VOID(stack);
@@ -1212,6 +1224,52 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_UART *palUart;
+    int32_t threshold;
+    uint8_t portIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
+
+    if (threshold <= 0)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    portIndex = (int)pThis[FIELD___portIndex].NumericByRef().s4;
+
+    // Choose the driver for this SerialDevice
+    palUart = GetUartPAL(portIndex);
+    if (palUart == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    palUart->ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case port is open and the new threshold was set
+    // to a value lower than the bytes that are already available
+    if (pThis[FIELD___opened].NumericByRef().u1 && (uint32_t)threshold <= palUart->RxRingBuffer.Length())
+    {
+        PostManagedEvent(EVENT_SERIAL, 0, portIndex, SerialData_Chars);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector___STATIC__STRING(
     CLR_RT_StackFrame &stack)
 {
@@ -1219,35 +1277,39 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
 
     // declare the device selector string whose max size is "COM1,COM2,COM3,COM4,COM5,COM6,COM7,COM8," + terminator
     // and init with the terminator
-    char deviceSelectorString[40 + 1] = {0};
+    static char deviceSelectorString[] =
 
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    strcat(deviceSelectorString, "COM1,");
+        "COM1,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    strcat(deviceSelectorString, "COM2,");
+        "COM2,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    strcat(deviceSelectorString, "COM3,");
+        "COM3,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    strcat(deviceSelectorString, "COM4,");
+        "COM4,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    strcat(deviceSelectorString, "COM5,");
+        "COM5,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    strcat(deviceSelectorString, "COM6,");
+        "COM6,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    strcat(deviceSelectorString, "COM7,");
+        "COM7,"
 #endif
 #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    strcat(deviceSelectorString, "COM8,");
+        "COM8,"
 #endif
+        ;
 
     // replace the last comma with a terminator
-    deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
+    {
+        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+    }
 
     // because the caller is expecting a result to be returned
     // we need set a return result in the stack argument using the appropriate SetResult according to the variable

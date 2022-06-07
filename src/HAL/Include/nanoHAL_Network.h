@@ -308,6 +308,7 @@ typedef struct __nfpack HAL_Configuration_X509DeviceCertificate
 } HAL_Configuration_X509DeviceCertificate;
 
 void nanoHAL_Network_Initialize();
+void nanoHAL_Network_Uninitialize();
 void sys_signal_sock_event();
 
 #ifdef __cplusplus

@@ -21,11 +21,11 @@ steps:
       path: $(PIP_CACHE_DIR)
       cacheHitVar: PIP_PACKAGES_RESTORED
 
-  # Use Python Version 3.6 and add it to path
+  # Use Python Version 3.7 and add it to path
   - task: UsePythonVersion@0
-    displayName: Set Python to v3.6
+    displayName: Set Python to v3.7
     inputs:
-      versionSpec: '3.6' 
+      versionSpec: '3.7'
       addToPath: true
 
   # run IDF installers
@@ -67,7 +67,7 @@ steps:
         $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '').Replace('C:\Users\VssAdministrator\.espressif\tools\cmake\3.20.3\bin;', '')
 
         # append to path
-        echo "##vso[task.prependpath]$newPath"
+        Write-Host "##vso[task.prependpath]$newPath"
 
   - script: echo "##vso[task.prependpath]C:\Windows\System32"
     displayName: Tweak PATH to reach cmd

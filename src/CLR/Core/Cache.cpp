@@ -391,7 +391,7 @@ void CLR_RT_EventCache::EventCache_Initialize()
 
     m_lookup_VirtualMethod.Initialize();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     m_inlineBufferStart = (CLR_RT_InlineBuffer *)g_scratchInlineBuffer;
 
     num = InlineBufferCount() - 1;
@@ -594,7 +594,7 @@ bool CLR_RT_EventCache::FindVirtualMethod(
 
 // -- //
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer)
 {
     if (m_inlineBufferStart != NULL)

@@ -249,6 +249,17 @@
 
 #endif
 
+/**
+ * CONFIG_LWIP_DHCP_OPTIONS_LEN: The total length of outgoing DHCP option msg. If you have many options
+ * and options value is too long, you can configure the length according to your requirements
+ */
+#define DHCP_OPTIONS_LEN                CONFIG_LWIP_DHCP_OPTIONS_LEN
+
+/**
+ * LWIP_DHCP_DISABLE_VENDOR_CLASS_ID==1: Do not add option 60 (Vendor Class Identifier) to DHCP packets
+ */
+#define ESP_DHCP_DISABLE_VENDOR_CLASS_IDENTIFIER       CONFIG_LWIP_DHCP_DISABLE_VENDOR_CLASS_ID
+
 /*
    ------------------------------------
    ---------- AUTOIP options ----------
