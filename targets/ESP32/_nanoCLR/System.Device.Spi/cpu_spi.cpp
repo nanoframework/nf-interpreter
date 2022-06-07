@@ -228,7 +228,8 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
     flags |= SPI_DEVICE_NO_DUMMY;
 
     // Ensures manual Chip Select if csPin is negative
-    if (csPin < 0) {
+    if (csPin < 0)
+    {
         csPin = -1;
     }
 
