@@ -57,6 +57,7 @@ set(gecko_sdk_srcs
     em_lcd.c
     em_leuart.c
     em_lesense.c
+    em_msc.c
     em_prs.c
     em_rmu.c
     em_rtc.c

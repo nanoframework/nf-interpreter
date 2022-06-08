@@ -71,6 +71,7 @@ sl_status_t sl_iostream_usart_init_vcom(void)
   sl_status_t status;
   USART_InitAsync_TypeDef init_vcom = USART_INITASYNC_DEFAULT;
   init_vcom.baudrate = SL_IOSTREAM_USART_VCOM_BAUDRATE;
+  //init_vcom.oversampling = usartOVS16;
   init_vcom.parity = SL_IOSTREAM_USART_VCOM_PARITY;
   init_vcom.stopbits = SL_IOSTREAM_USART_VCOM_STOP_BITS;
 #if (_SILICON_LABS_32B_SERIES > 0)
