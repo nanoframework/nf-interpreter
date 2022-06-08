@@ -9,7 +9,7 @@
             "program": "${workspaceRoot}/build/nanoBooter.elf",
             "MIMode": "gdb",
             "debugServerPath": "<absolute-path-to-j-link-gdb-server-path-mind-the-forward-slashes>/JLinkGDBServerCL.exe",
-            "debugServerArgs": "-if swd -speed auto -endian little -device EFM32GG11B820F2048 -localhostonly 1 -timeout 0 -vd -singlerun -strict -nogui",
+            "debugServerArgs": "-if swd -speed auto -endian little -device EFM32GG11B820F2048 -localhostonly 1 -timeout 0 -vd -halt -reset -singlerun -strict -nogui",
             "stopAtEntry": false,
             "serverStarted": "Connected to target",
             "cwd": "${cwd}",
@@ -21,11 +21,14 @@
                 "text": "target extended-remote localhost:2331"
               },
               {
-                "text": "monitor reset 0"
+                "text": "monitor halt"
+              },
+              {
+                "text": "monitor reset"
               },
               {
                 "text": "load"
-              }
+              }      
             ],
             "launchCompleteCommand": "None",
             "logging": {
@@ -45,7 +48,7 @@
             "program": "${workspaceRoot}/build/nanoCLR.elf",
             "MIMode": "gdb",
             "debugServerPath": "<absolute-path-to-j-link-gdb-server-path-mind-the-forward-slashes>/JLinkGDBServerCL.exe",
-            "debugServerArgs": "-if swd -speed auto -endian little -device EFM32GG11B820F2048 -localhostonly 1 -timeout 0 -vd -singlerun -strict -nogui",
+            "debugServerArgs": "-if swd -speed auto -endian little -device EFM32GG11B820F2048 -localhostonly 1 -timeout 0 -vd -halt -reset -singlerun -strict -nogui",
             "stopAtEntry": false,
             "serverStarted": "Connected to target",
             "cwd": "${cwd}",
@@ -57,11 +60,14 @@
                 "text": "target extended-remote localhost:2331"
               },
               {
-                "text": "monitor reset 0"
+                "text": "monitor halt"
+              },
+              {
+                "text": "monitor reset"
               },
               {
                 "text": "load"
-              }
+              }      
             ],
             "launchCompleteCommand": "None",
             "logging": {
