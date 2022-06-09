@@ -32,13 +32,15 @@ __RAM_segment_used_end__ = 0;
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x200000
-  RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x80000
-  config     (rw) : ORIGIN = 0x00000000, len = 0      /* space reserved for configuration block */
+  flash0      (rx) : org = 0x00008000, len = 2M - 44k - 908k  /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
+  deployment  (rx) : org = 0x080C0000, len = 908k             /* space reserved for application deployment */
+  config      (rw) : org = 0x001FF000, len = 4k               /* space reserved for configuration block */
+  RAM         (rwx): org = 0x20000000, len = 512k - 48        /* RAM */
+  bootclpbrd  (wx) : org = 0x2007FFD0, len = 48               /* boot clipboard area */
 }
 
 /* Linker script to place sections and symbol values. Should be used together
- * with other linker script that defines memory regions FLASH and RAM.
+ * with other linker script that defines memory regions flash0 and RAM.
  * It references following symbols, which must be defined in code:
  *   Reset_Handler : Entry of reset handler
  *
@@ -72,10 +74,11 @@ MEMORY
  */
 ENTRY(Reset_Handler)
 
-__nanoConfig_start__    = ORIGIN(config);
-__nanoConfig_size__     = LENGTH(config);
-__nanoConfig_end__      = __nanoConfig_start__ + __nanoConfig_size__;
+/* RAM region to be used for the boot clipboard.*/
+REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
+/* RAM region to be used for the nanoFramework CLR managed heap.*/
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", RAM);
 
 SECTIONS
 {
@@ -108,18 +111,18 @@ SECTIONS
     *(.rodata*)
 
     KEEP(*(.eh_frame*))
-  } > FLASH
+  } > flash0
 
   .ARM.extab :
   {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
-  } > FLASH
+  } > flash0
 
   __exidx_start = .;
   .ARM.exidx :
   {
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-  } > FLASH
+  } > flash0
   __exidx_end = .;
 
   /* To copy multiple ROM to RAM sections,
@@ -137,7 +140,7 @@ SECTIONS
     LONG (__data2_start__)
     LONG (__data2_end__ - __data2_start__)
     __copy_table_end__ = .;
-  } > FLASH
+  } > flash0
   */
 
   /* To clear multiple BSS sections,
@@ -153,7 +156,7 @@ SECTIONS
     LONG (__bss2_start__)
     LONG (__bss2_end__ - __bss2_start__)
     __zero_table_end__ = .;
-  } > FLASH
+  } > flash0
   */
 
   __etext = .;
@@ -223,6 +226,18 @@ SECTIONS
     KEEP(*(.stack*))
   } > RAM
 
+  /* nanoFramework CLR managed heap section at the specified RAM section.*/
+  .clr_managed_heap (NOLOAD) :
+  {
+      . = ALIGN(8);
+      __clr_managed_heap_base__ = .;
+      PROVIDE(HeapBegin = .);
+      . = ORIGIN(CLR_MANAGED_HEAP_RAM) + LENGTH(CLR_MANAGED_HEAP_RAM);
+      . = ALIGN(8);
+      __clr_managed_heap_end__ = .;
+      PROVIDE(HeapEnd = .);
+  } > CLR_MANAGED_HEAP_RAM
+
   /* Set stack top to end of RAM, and stack limit move down by
    * size of stack_dummy section */
   __StackTop = ORIGIN(RAM) + LENGTH(RAM);
@@ -232,6 +247,12 @@ SECTIONS
   /* Check if data + heap + stack exceeds RAM limit */
   ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 
-  /* Check if FLASH usage exceeds FLASH size */
-  ASSERT( LENGTH(FLASH) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
+  /* Check if flash0 usage exceeds flash0 size */
+  ASSERT( LENGTH(flash0) >= (__etext + SIZEOF(.data)), "flash0 memory overflowed !")
 }
+
+/* Code rules inclusion.*/
+INCLUDE rules_code.ld
+
+/* boot clipboard rules inclusion.*/
+INCLUDE rules_bootclipboard.ld

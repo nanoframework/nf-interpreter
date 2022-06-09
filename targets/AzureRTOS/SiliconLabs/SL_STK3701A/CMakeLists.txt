@@ -39,11 +39,11 @@ nf_setup_target_build(
         SL_COMPONENT_CATALOG_PRESENT=1
         _SILICON_LABS_32B_SERIES_2_CONFIG=0
 
-    # BOOTER_EXTRA_LINKMAP_PROPERTIES
-    #     ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x0,--defsym=__crt_heap_size__=0x4000"
+    BOOTER_EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common,--defsym=__crt_heap_size__=0x4000"
 
-    # CLR_EXTRA_LINKMAP_PROPERTIES
-    #     ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/ST/_common,--defsym=__main_stack_size__=0x200,--defsym=__process_stack_size__=0x0,--defsym=__crt_heap_size__=0x2000"
+    CLR_EXTRA_LINKMAP_PROPERTIES
+        ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common,--defsym=__crt_heap_size__=0x2000"
 )
 
 # make vars global
