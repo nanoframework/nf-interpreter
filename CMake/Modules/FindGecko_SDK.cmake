@@ -17,6 +17,7 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/common/bsp)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/${TARGET_BOARD_SHORT}_${TARGET_SERIES}/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/common/inc)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/common/toolchain/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/board/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/CMSIS/Include)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/CMSIS/RTOS2/Include)
@@ -40,8 +41,6 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 set(gecko_sdk_srcs
     sl_board_control_gpio.c
     sl_board_init.c
-
-    sl_memory.c
 
     em_acmp.c
     em_adc.c
