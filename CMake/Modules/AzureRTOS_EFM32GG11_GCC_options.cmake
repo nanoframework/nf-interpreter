@@ -34,7 +34,7 @@ macro(nf_set_compile_options)
     # enable:
     # - FPU 
     # - DEBUG_EFM from Gecko SDK
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE -DDEBUG_EFM=1)
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=FALSE -DUSE_FPU=FALSE -DDEBUG_EFM=1)
 
 endmacro()
 
