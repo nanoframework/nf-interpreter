@@ -13,6 +13,8 @@ set(TX_USER_FILE ${TARGET_BASE_LOCATION}/target_tx_user.h CACHE STRING "Enable T
 
 # set(STM32_DRIVER_TARGET_DEVICE STM32L475xx CACHE BOOL "Set STM32 target for HAL Driver")
 
+set(SL_BOARD_NAME "BRD2204A" PARENT_SCOPE)
+
 add_subdirectory(${azure_rtos_SOURCE_DIR} threadx)
 # add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
 

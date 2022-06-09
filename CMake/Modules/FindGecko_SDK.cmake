@@ -14,7 +14,8 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
 
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Include)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/common/bsp)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/${TARGET_BOARD_SHORT}_${TARGET_SERIES}/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/common/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/board/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/CMSIS/Include)
@@ -111,9 +112,11 @@ set(gecko_sdk_srcs
 
 )
 
-#series specific files
+#series specific files and includes
 if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Include)
+
     list(APPEND gecko_sdk_srcs system_efm32gg11b.c)
     list(APPEND gecko_sdk_srcs startup_efm32gg11b.c)
 

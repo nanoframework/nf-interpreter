@@ -4,8 +4,11 @@
 #
 
 include(binutils.common)
+include(Gecko_SDK)
 
 set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
+
+ProcessGSDKPackage()
 
 # check if GECKO_SDK_SOURCE was specified or if it's empty (default is empty)
 set(NO_GECKO_SDK_SOURCE TRUE)
