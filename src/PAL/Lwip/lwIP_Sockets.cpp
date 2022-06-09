@@ -241,10 +241,7 @@ bool LWIP_SOCKETS_Driver::Initialize()
 
         g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber = interfaceNumber;
 
-        UpdateAdapterConfiguration(
-            i,
-            (NetworkInterface_UpdateOperation_Dns),
-            &networkConfiguration);
+        UpdateAdapterConfiguration(i, (NetworkInterface_UpdateOperation_Dns), &networkConfiguration);
 
         networkInterface = netif_find_interface(interfaceNumber);
 

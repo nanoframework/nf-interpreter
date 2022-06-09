@@ -58,10 +58,14 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #else
     phy_config.reset_gpio_num = -1;
 #endif
-  
-//    phy_config.reset_timeout_ms = 200;
-    ESP_LOGI(TAG, "Ethernet phy config reset %d timeout %d addr %d\n", phy_config.reset_gpio_num, phy_config.reset_timeout_ms, phy_config.phy_addr);
-    
+
+    //    phy_config.reset_timeout_ms = 200;
+    ESP_LOGI(
+        TAG,
+        "Ethernet phy config reset %d timeout %d addr %d\n",
+        phy_config.reset_gpio_num,
+        phy_config.reset_timeout_ms,
+        phy_config.phy_addr);
 
 #ifdef ESP32_ETHERNET_INTERNAL
 
@@ -71,7 +75,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 #ifdef ETH_RMII_CLK_OUT_GPIO
     mac_config.clock_config.rmii.clock_mode = EMAC_CLK_OUT;
     mac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ETH_RMII_CLK_OUT_GPIO; // always 16 or 17
-    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n",ETH_RMII_CLK_OUT_GPIO);
+    ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ETH_RMII_CLK_OUT_GPIO);
 #else
     mac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
     mac_config.clock_config.rmii.clock_gpio = EMAC_CLK_IN_GPIO; // always 0
@@ -113,10 +117,10 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     buscfg.sclk_io_num = ESP32_ETHERNET_SPI_SCLK_GPIO;
     buscfg.quadwp_io_num = -1;
     buscfg.quadhd_io_num = -1;
-    
+
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &buscfg, 1));
 
-#pragma 
+#pragma
     // Define SPI interface to use
 #ifdef ESP32_ETHERNET_SPI_MODULE_DM9051
     spi_device_interface_config_t devcfg = {
@@ -167,18 +171,17 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     ESP_ERROR_CHECK(spi_bus_add_device(ESP32_ETHERNET_SPI_HOST, &devcfg, &spi_handle));
     /*  enj28j60 ethernet driver is based on spi driver */
     eth_dm9051_config_t enj28j60_config = ETH_ENJ28J60_DEFAULT_CONFIG(spi_handle);
-     enj28j60_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
+    enj28j60_config.int_gpio_num = ESP32_ETHERNET_SPI_INT_GPIO;
     esp_eth_mac_t *mac = esp_eth_mac_new_enj28j60(&enj28j60_config, &mac_config);
 
     ESP_LOGI(TAG, "Ethernet ENJ28J60 spi\n");
 
 #else
-    // No SPI module defined
-    #error "Ethernet SPI module type not defined"
+// No SPI module defined
+#error "Ethernet SPI module type not defined"
 #endif
 
 #endif // ESP32_ETHERNET_SPI
-
 
     // now the do the Ethernet config
     esp_eth_config_t config = ETH_DEFAULT_CONFIG(mac, phy);
