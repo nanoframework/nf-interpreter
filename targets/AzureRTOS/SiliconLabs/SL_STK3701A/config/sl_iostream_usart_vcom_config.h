@@ -37,7 +37,7 @@
 
 // <o SL_IOSTREAM_USART_VCOM_BAUDRATE> Baud rate
 // <i> Default: 115200
-#define SL_IOSTREAM_USART_VCOM_BAUDRATE              115200
+#define SL_IOSTREAM_USART_VCOM_BAUDRATE              921600
 
 // <o SL_IOSTREAM_USART_VCOM_PARITY> Parity mode to use
 // <usartNoParity=> No Parity
