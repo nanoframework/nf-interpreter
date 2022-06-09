@@ -50,9 +50,9 @@ bool CheckValidCLRImage(uint32_t address)
         return false;
     }
 
-    // 2nd check: the content pointed by the reset vector has to be 0xE002
-    // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
-    // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
+    // 2nd check: the content pointed by the reset vector has to be 0xB510
+    // that's an assembly "push	{r4, lr}" the very first one in the Reset_Handler function
+    // see platform\Device\SiliconLabs\EFM32GG11B\Source\GCC\startup_efm32gg11b.c
 
     // "regular" address mapping
     resetVectorAddress = (uint32_t)((uint32_t *)nanoCLRVectorTable->ResetHandler);
