@@ -13,7 +13,7 @@
 
 #include <tx_api.h>
 
-// #include <nanoPAL_BlockStorage.h>
+#include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
 
 // byte pool configuration and definitions
@@ -81,8 +81,8 @@ void tx_application_define(void *first_unused_memory)
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    // BlockStorageList_Initialize();
-    // BlockStorage_AddDevices();
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
 
     // initialize configuration manager
     // in CLR this is called in nanoHAL_Initialize()
