@@ -32,11 +32,11 @@ __RAM_segment_used_end__ = 0;
 
 MEMORY
 {
-  flash0      (rx) : org = 0x00008000, len = 2M - 44k - 908k  /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
-  deployment  (rx) : org = 0x080C0000, len = 908k             /* space reserved for application deployment */
-  config      (rw) : org = 0x001FF000, len = 4k               /* space reserved for configuration block */
-  RAM         (rwx): org = 0x20000000, len = 512k - 48        /* RAM */
-  bootclpbrd  (wx) : org = 0x2007FFD0, len = 48               /* boot clipboard area */
+  flash0      (rx) : org = 0x0000A000, len = 2M - 44k - 4k - 908k /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
+  deployment  (rx) : org = 0x000EE000, len = 908k                 /* space reserved for application deployment */
+  config      (rw) : org = 0x001FF000, len = 4k                   /* space reserved for configuration block */
+  RAM         (rwx): org = 0x20000000, len = 512k - 48            /* RAM */
+  bootclpbrd  (wx) : org = 0x2007FFD0, len = 48                   /* boot clipboard area */
 }
 
 /* Linker script to place sections and symbol values. Should be used together
