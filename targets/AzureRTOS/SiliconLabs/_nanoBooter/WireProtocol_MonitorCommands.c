@@ -45,26 +45,26 @@ int AccessMemory(uint32_t location, uint32_t lengthInBytes, uint8_t *buffer, int
 
 ////////////////////////////////////////////////////
 
-// int Monitor_Reboot(WP_Message *message)
-// {
-//     Monitor_Reboot_Command *cmd = (Monitor_Reboot_Command *)message->m_payload;
+int Monitor_Reboot(WP_Message *message)
+{
+    Monitor_Reboot_Command *cmd = (Monitor_Reboot_Command *)message->m_payload;
 
-//     WP_ReplyToCommand(message, true, false, NULL, 0);
+    WP_ReplyToCommand(message, true, false, NULL, 0);
 
-//     if (cmd != NULL)
-//     {
-//         if (Monitor_Reboot_c_EnterProprietaryBooter == (cmd->m_flags & Monitor_Reboot_c_EnterProprietaryBooter))
-//         {
-//             // request to load proprietary bootloader
-//             // OK to call directly as this will launch the bootloader only if the target has support for it
-//             LaunchProprietaryBootloader();
-//         }
-//         else
-//         {
-//             // RESET CPU to load nanoCLR
-//             NVIC_SystemReset();
-//         }
-//     }
+    if (cmd != NULL)
+    {
+        if (Monitor_Reboot_c_EnterProprietaryBooter == (cmd->m_flags & Monitor_Reboot_c_EnterProprietaryBooter))
+        {
+            // request to load proprietary bootloader
+            // OK to call directly as this will launch the bootloader only if the target has support for it
+            LaunchProprietaryBootloader();
+        }
+        else
+        {
+            // RESET CPU to load nanoCLR
+            NVIC_SystemReset();
+        }
+    }
 
-//     return true;
-// }
+    return true;
+}
