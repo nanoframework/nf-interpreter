@@ -62,13 +62,6 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 //    phy_config.reset_timeout_ms = 200;
     ESP_LOGI(TAG, "Ethernet phy config reset %d timeout %d addr %d\n", phy_config.reset_gpio_num, phy_config.reset_timeout_ms, phy_config.phy_addr);
     
-#if (ETH_HIGH_GPIO > 0)
-    // Make sure its unavailable for other users
-    CPU_GPIO_ReservePin((GPIO_PIN)ETH_HIGH_GPIO, true);
-    CPU_GPIO_EnableOutputPin((GPIO_PIN)ETH_HIGH_GPIO, GpioPinValue_High, PinMode_Output);
-    ESP_LOGI(TAG, "Ethernet high pin %d\n", ETH_HIGH_GPIO);
-#endif
-
 
 #ifdef ESP32_ETHERNET_INTERNAL
 
