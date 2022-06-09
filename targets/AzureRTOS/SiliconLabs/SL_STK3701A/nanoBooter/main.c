@@ -160,6 +160,10 @@ int main(void)
     GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN, gpioModePushPull, 0);
     GPIO_PinModeSet(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN, gpioModePushPull, 0);
 
+    // configure 
+    GPIO_PinModeSet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN, gpioModeInputPullFilter, 1);
+
+
     // init boot clipboard
     InitBootClipboard();
 
@@ -169,8 +173,8 @@ int main(void)
     // check if there is a request to remain on nanoBooter
     if (!IsToRemainInBooter())
     {
-        // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-        // if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
+        // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
+        if (GPIO_PinInGet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN))
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address
@@ -182,11 +186,6 @@ int main(void)
             }
         }
     }
-
-    /*Set unbuffered mode for stdout (newlib)*/
-    //       setvbuf(stdout, NULL, _IONBF, 0);
-    //       /*Set unbuffered mode for stdin (newlib)*/
-    //   setvbuf(stdin, NULL, _IONBF, 0);
 
     // Enter the ThreadX kernel. Task(s) created in tx_application_define() will start running
     sl_system_kernel_start();
