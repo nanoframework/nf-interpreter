@@ -8,6 +8,8 @@
 #include <vectors.h>
 #include <targetHAL.h>
 
+#include <em_device.h>
+
 void LaunchCLR(uint32_t address)
 {
     // function pointer to load nanoCLR ResetHandler address
@@ -20,13 +22,13 @@ void LaunchCLR(uint32_t address)
     JumpToNanoCLR = nanoCLRVectorTable->ResetHandler;
 
     // disable all interrupts
-    // __disable_irq();
+    __disable_irq();
 
     // clear any pending interrupts to make sure we are jumping straight to nanoCLR ResetHandler
-    // SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
+    SCB->ICSR &= SCB_ICSR_PENDSVCLR_Msk;
 
     // need to set stack pointer from CLR vector table
-    // __set_MSP((uint32_t)nanoCLRVectorTable->InitStack);
+    __set_MSP((uint32_t)nanoCLRVectorTable->InitStack);
 
     // make the jump to nanoCLR, at last
     JumpToNanoCLR();
@@ -48,9 +50,9 @@ bool CheckValidCLRImage(uint32_t address)
         return false;
     }
 
-// 2nd check: the content pointed by the reset vector has to be 0xE002
-// that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
-// see os\common\startup\ARMCMx\compilers\GCC\vectors.S
+    // 2nd check: the content pointed by the reset vector has to be 0xE002
+    // that's an assembly "b.n" (branch instruction) the very first one in the Reset_Handler function
+    // see os\common\startup\ARMCMx\compilers\GCC\vectors.S
 
     // "regular" address mapping
     resetVectorAddress = (uint32_t)((uint32_t *)nanoCLRVectorTable->ResetHandler);

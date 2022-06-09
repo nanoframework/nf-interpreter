@@ -70,9 +70,6 @@ void tx_application_define(void *first_unused_memory)
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
-    // starts the serial driver
-    // sdStart(&SERIAL_DRIVER, NULL);
-
 // #if (HAL_NF_USE_STM32_CRC == TRUE)
 //     // startup crc
 //     crcStart(NULL);
@@ -165,22 +162,22 @@ int main(void)
     // the following IF is not mandatory, it's just providing a way for a user to 'force'
     // the board to remain in nanoBooter and not launching nanoCLR
 
-    // // check if there is a request to remain on nanoBooter
-    // if (!IsToRemainInBooter())
-    // {
-    //     // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-    //     if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
-    //     {
-    //         // check for valid CLR image
-    //         // we are checking for a valid image at the deployment address, which is pointing to the CLR address
-    //         if (CheckValidCLRImage((uint32_t)&__deployment_start__))
-    //         {
-    //             // there seems to be a valid CLR image
-    //             // launch nanoCLR
-    //             LaunchCLR((uint32_t)&__deployment_start__);
-    //         }
-    //     }
-    // }
+    // check if there is a request to remain on nanoBooter
+    if (!IsToRemainInBooter())
+    {
+        // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
+        //if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
+        {
+            // check for valid CLR image
+            // we are checking for a valid image at the deployment address, which is pointing to the CLR address
+            if (CheckValidCLRImage((uint32_t)&__deployment_start__))
+            {
+                // there seems to be a valid CLR image
+                // launch nanoCLR
+                LaunchCLR((uint32_t)&__deployment_start__);
+            }
+        }
+    }
 
 /*Set unbuffered mode for stdout (newlib)*/
 //       setvbuf(stdout, NULL, _IONBF, 0);  
