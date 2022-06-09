@@ -163,7 +163,6 @@ int main(void)
     // configure 
     GPIO_PinModeSet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN, gpioModeInput, 0);
 
-
     // init boot clipboard
     InitBootClipboard();
 
@@ -174,7 +173,7 @@ int main(void)
     if (!IsToRemainInBooter())
     {
         // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
-        if (GPIO_PinInGet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN))
+        if (GPIO_PinInGet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN) != 0)
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address
