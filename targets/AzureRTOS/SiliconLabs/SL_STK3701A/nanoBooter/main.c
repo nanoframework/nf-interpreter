@@ -6,7 +6,7 @@
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
-#include <sl_simple_led_instances.h>
+#include <bsp.h>
 
 #include <LaunchCLR.h>
 #include <targetHAL.h>
@@ -46,7 +46,7 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        sl_led_toggle(&sl_led_led0);
+        GPIO_PinOutToggle(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
     }
 }
@@ -58,7 +58,7 @@ void BlinkThread1_entry(uint32_t parameter)
     while (1)
     {
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
-        sl_led_toggle(&sl_led_led1);
+        GPIO_PinOutToggle(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN);
     }
 }
 
@@ -70,10 +70,10 @@ void tx_application_define(void *first_unused_memory)
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
-// #if (HAL_NF_USE_STM32_CRC == TRUE)
-//     // startup crc
-//     crcStart(NULL);
-// #endif
+    // #if (HAL_NF_USE_STM32_CRC == TRUE)
+    //     // startup crc
+    //     crcStart(NULL);
+    // #endif
 
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
@@ -156,6 +156,10 @@ int main(void)
     // Initialize the board
     sl_system_init();
 
+    // Configure LED0 and LED1 as output
+    GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN, gpioModePushPull, 0);
+    GPIO_PinModeSet(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN, gpioModePushPull, 0);
+
     // init boot clipboard
     InitBootClipboard();
 
@@ -166,7 +170,7 @@ int main(void)
     if (!IsToRemainInBooter())
     {
         // if the USER button (blue one) is pressed, skip the check for a valid CLR image and remain in booter
-        //if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
+        // if (palReadPad(GPIOC, GPIOC_BUTTON_USER))
         {
             // check for valid CLR image
             // we are checking for a valid image at the deployment address, which is pointing to the CLR address
@@ -179,11 +183,10 @@ int main(void)
         }
     }
 
-/*Set unbuffered mode for stdout (newlib)*/
-//       setvbuf(stdout, NULL, _IONBF, 0);  
-//       /*Set unbuffered mode for stdin (newlib)*/
-//   setvbuf(stdin, NULL, _IONBF, 0);   
-
+    /*Set unbuffered mode for stdout (newlib)*/
+    //       setvbuf(stdout, NULL, _IONBF, 0);
+    //       /*Set unbuffered mode for stdin (newlib)*/
+    //   setvbuf(stdin, NULL, _IONBF, 0);
 
     // Enter the ThreadX kernel. Task(s) created in tx_application_define() will start running
     sl_system_kernel_start();

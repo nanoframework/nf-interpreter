@@ -20,7 +20,6 @@
 #include "sl_uartdrv_instances.h"
 #include "sl_iostream_init_usart_instances.h"
 #include "sl_iostream_init_instances.h"
-#include "sl_simple_led_instances.h"
 #include "sl_i2cspm_instances.h"
 #include "sl_power_manager.h"
 
@@ -51,7 +50,6 @@ void sl_driver_init(void)
     GPIOINT_Init();
     // sl_i2cspm_init_instances();
     sl_uartdrv_init_instances();
-    sl_simple_led_init_instances();
 }
 
 void sl_service_init(void)

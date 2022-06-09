@@ -33,7 +33,6 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/slee
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/inc)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/leddrv/inc)
 
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 
@@ -104,12 +103,7 @@ set(gecko_sdk_srcs
     sl_iostream_handles.c
     sl_iostream_init_usart_instances.c
 
-    sl_led.c
-    sl_simple_led.c
-
     # autogen at target level
-    sl_simple_led_instances.c
-
 )
 
 #series specific files and includes
@@ -142,7 +136,6 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             ${gecko_sdk_SOURCE_DIR}/platform/service/system/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/src
             ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/src
-            ${gecko_sdk_SOURCE_DIR}/platform/driver/leddrv/src
             
             # device specific paths
             ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen
