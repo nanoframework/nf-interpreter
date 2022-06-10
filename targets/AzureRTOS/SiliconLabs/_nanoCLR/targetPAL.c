@@ -6,17 +6,5 @@
 #include <em_device.h>
 #include <em_gpio.h>
 
+// required for Azure RTOS TX_INTERRUPT_SAVE_AREA implementation at platform level
 unsigned int interrupt_save;
-// GPIO_Port_TypeDef *gpioPort[] = {
-
-// #if (_GPIO_PORT_A_PIN_COUNT > 0)
-//   gpioPortA,
-
-//   gpioPortB,
-//   gpioPortC,
-//   gpioPortD,
-//   gpioPortE,
-//   gpioPortF,
-//   gpioPortG,
-//   gpioPortH
-// };
