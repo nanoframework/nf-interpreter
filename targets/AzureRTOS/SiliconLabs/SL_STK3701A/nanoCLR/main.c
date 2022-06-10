@@ -3,130 +3,176 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// #include <hal.h>
-// #include <hal_nf_community.h>
+#include <sl_system_init.h>
+#include <sl_system_kernel.h>
+#include <em_gpio.h>
+#include <bsp.h>
+
+#include <targetHAL.h>
+#include <nanoCLR_Application.h>
+// #include <nanoHAL_v2.h>
 
 #include <tx_api.h>
+
+#include <nanoPAL_BlockStorage.h>
+// #include <nanoHAL_ConfigurationManager.h>
 
 // #include <serialcfg.h>
 // #include <LaunchCLR.h>
 // #include <targetHAL.h>
 // #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
-// #include <nanoCLR_Application.h>
-// #include <nanoHAL_v2.h>
 // #include <nanoPAL_COM.h>
 // #include <target_stdio_config.h>
 
 // extern TX_EVENT_FLAGS_GROUP wpUartEvent;
-// extern CLR_SETTINGS clrSettings;
+extern CLR_SETTINGS clrSettings;
 
-// // byte pool configuration and definitions
-// // need to be at least as big as the config sector
-// #define DEFAULT_BYTE_POOL_SIZE 0x2000
-// TX_BYTE_POOL byte_pool_0;
-// uint8_t __attribute__((section(".ram4"))) memory_area[DEFAULT_BYTE_POOL_SIZE];
+// byte pool configuration and definitions
+// need to be at least as big as the config sector
+#define DEFAULT_BYTE_POOL_SIZE 0x2000
+TX_BYTE_POOL byte_pool_0;
+uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
 
-// // threads definitions and configurations
+// threads definitions and configurations
+#define BLINK_THREAD_STACK_SIZE 1024
+#define BLINK_THREAD_PRIORITY   5
 
-// // receiver thread
-// #define RECEIVER_THREAD_STACK_SIZE 2048
-// #define RECEIVER_THREAD_PRIORITY   5
+TX_THREAD blinkThread;
+uint32_t blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
 
-// TX_THREAD receiverThread;
-// uint32_t __attribute__((section(".ram4"))) receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
-// extern void ReceiverThread_entry(uint32_t parameter);
+// receiver thread
+#define RECEIVER_THREAD_STACK_SIZE 2048
+#define RECEIVER_THREAD_PRIORITY   5
 
-// // CLR thread
-// #define CLR_THREAD_STACK_SIZE 4092
-// #define CLR_THREAD_PRIORITY   5
+TX_THREAD receiverThread;
+uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
+extern void ReceiverThread_entry(uint32_t parameter);
 
-// TX_THREAD clrStartupThread;
-// uint32_t __attribute__((section(".ram4"))) clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
-// extern void ClrStartupThread_entry(uint32_t parameter);
+// CLR thread
+#define CLR_THREAD_STACK_SIZE 4092
+#define CLR_THREAD_PRIORITY   5
+
+TX_THREAD clrStartupThread;
+uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
+extern void ClrStartupThread_entry(uint32_t parameter);
+
+
+void BlinkThread_entry(uint32_t parameter)
+{
+    (void)parameter;
+
+    while (1)
+    {
+        GPIO_PinOutToggle(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1);
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(250));
+    }
+}
 
 void tx_application_define(void *first_unused_memory)
 {
     (void)first_unused_memory;
-//     uint16_t status;
+    uint16_t status;
 
-//     // Create a byte memory pool from which to allocate the thread stacks.
-//     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
+    // Create a byte memory pool from which to allocate the thread stacks.
+    tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
-//     // start watchdog
-//     Watchdog_Init();
-
-//     // turn LED2 off
-//     palClearPad(GPIOB, GPIOB_LD2);
+    // start watchdog
+    // Watchdog_Init();
 
 // #if (HAL_NF_USE_STM32_CRC == TRUE)
 //     // startup crc
 //     crcStart(NULL);
 // #endif
 
-//     // starts the serial driver
-//     sdStart(&SERIAL_DRIVER, NULL);
+#if (TRACE_TO_STDIO == TRUE)
+    StdioPort_Init();
+#endif
 
-// #if (TRACE_TO_STDIO == TRUE)
-//     StdioPort_Init();
-// #endif
+    // Create blink thread
+    status = tx_thread_create(
+        &blinkThread,
+        "Blink Thread",
+        BlinkThread_entry,
+        0,
+        blinkThreadStack,
+        BLINK_THREAD_STACK_SIZE,
+        BLINK_THREAD_PRIORITY,
+        BLINK_THREAD_PRIORITY,
+        TX_NO_TIME_SLICE,
+        TX_AUTO_START);
 
-//     // Create receiver thread
-//     status = tx_thread_create(
-//         &receiverThread,
-//         "Receiver Thread",
-//         ReceiverThread_entry,
-//         0,
-//         receiverThreadStack,
-//         RECEIVER_THREAD_STACK_SIZE,
-//         RECEIVER_THREAD_PRIORITY,
-//         RECEIVER_THREAD_PRIORITY,
-//         TX_NO_TIME_SLICE,
-//         TX_AUTO_START);
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 
-//     if (status != TX_SUCCESS)
-//     {
-//         while (1)
-//         {
-//         }
-//     }
+    // Create receiver thread
+    status = tx_thread_create(
+        &receiverThread,
+        "Receiver Thread",
+        ReceiverThread_entry,
+        0,
+        receiverThreadStack,
+        RECEIVER_THREAD_STACK_SIZE,
+        RECEIVER_THREAD_PRIORITY,
+        RECEIVER_THREAD_PRIORITY,
+        TX_NO_TIME_SLICE,
+        TX_AUTO_START);
 
-//     // CLR settings to launch CLR thread
-//     memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 
-//     clrSettings.MaxContextSwitches = 50;
-//     clrSettings.WaitForDebugger = false;
-//     clrSettings.EnterDebuggerLoopAfterExit = true;
+    // CLR settings to launch CLR thread
+    memset(&clrSettings, 0, sizeof(CLR_SETTINGS));
 
-//     // Create CLR startup thread
-//     status = tx_thread_create(
-//         &clrStartupThread,
-//         "CLR Thread",
-//         ClrStartupThread_entry,
-//         (uint32_t)&clrSettings,
-//         clrStartupThreadStack,
-//         CLR_THREAD_STACK_SIZE,
-//         CLR_THREAD_PRIORITY,
-//         CLR_THREAD_PRIORITY,
-//         TX_NO_TIME_SLICE,
-//         TX_AUTO_START);
+    clrSettings.MaxContextSwitches = 50;
+    clrSettings.WaitForDebugger = false;
+    clrSettings.EnterDebuggerLoopAfterExit = true;
 
-//     if (status != TX_SUCCESS)
-//     {
-//         while (1)
-//         {
-//         }
-//     }
+    // Create CLR startup thread
+    status = tx_thread_create(
+        &clrStartupThread,
+        "CLR Thread",
+        ClrStartupThread_entry,
+        (uint32_t)&clrSettings,
+        clrStartupThreadStack,
+        CLR_THREAD_STACK_SIZE,
+        CLR_THREAD_PRIORITY,
+        CLR_THREAD_PRIORITY,
+        TX_NO_TIME_SLICE,
+        TX_AUTO_START);
+
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 }
 
 //  Application entry point.
 int main(void)
 {
-    // halInit();
+    // Initialize the board
+    sl_system_init();
 
-    // // init boot clipboard
-    // InitBootClipboard();
+    // Configure LED0 as output
+    GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1, gpioModePushPull, 0);
 
-    // Enter the ThreadX kernel
-    tx_kernel_enter();
+    // turn off LEDs, just in case
+    GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN, gpioModeDisabled, 0);
+    GPIO_PinModeSet(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN, gpioModeDisabled, 0);
+
+    // init boot clipboard
+    InitBootClipboard();
+
+    // Enter the ThreadX kernel. Task(s) created in tx_application_define() will start running
+    sl_system_kernel_start();
 }

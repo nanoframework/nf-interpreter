@@ -11,9 +11,12 @@
 
 #include <tx_api.h>
 
-// // Returns the current date time from the RTC
-// uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
-// {
+// Returns the current date time from the RTC
+uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
+{
+    (void)datePartOnly;
+
+    return 0;
 // #if (HAL_USE_RTC == TRUE)
 
 //     // use RTC to get date time
@@ -70,10 +73,12 @@
 //     }
 
 // #endif
-// };
+};
 
-// void HAL_Time_SetUtcTime(uint64_t utcTime)
-// {
+void HAL_Time_SetUtcTime(uint64_t utcTime)
+{
+    (void)utcTime;
+
 //     SYSTEMTIME systemTime;
 
 //     HAL_Time_ToSystemTime(utcTime, &systemTime);
@@ -101,7 +106,7 @@
 //     // can't mess with the systicks because the scheduling can fail
 
 // #endif
-// }
+}
 
 bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len)
 {

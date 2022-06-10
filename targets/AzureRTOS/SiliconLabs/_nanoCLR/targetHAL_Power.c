@@ -7,6 +7,7 @@
 #include <nanoHAL_v2.h>
 #include <target_platform.h>
 #include <target_common.h>
+#include <em_device.h>
 
 #ifdef HAL_RTC_MODULE_ENABLED
 extern RTC_HandleTypeDef RtcHandle;
@@ -16,7 +17,7 @@ extern RTC_HandleTypeDef RtcHandle;
 
 inline void CPU_Reset()
 {
-    //NVIC_SystemReset();
+    NVIC_SystemReset();
 };
 
 inline bool CPU_IsSoftRebootSupported()
@@ -45,7 +46,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C();
 
-            //__disable_irq();
+            __disable_irq();
 
 //             /////////////////////////////////////////////////////////////////////////
 //             // stop the idependent watchdog, for series where the option is available
@@ -116,10 +117,10 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 // #endif
 
             // set SLEEPDEEP bit of Cortex SCR
-            //SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPDEEP_Msk));
+            SCB->SCR &= SCB_SCR_SLEEPDEEP_Msk;
 
             // wait for interrupt, and the execution dies here
-            //__WFI();
+            __WFI();
 
             break;
 
