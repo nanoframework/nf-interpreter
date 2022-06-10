@@ -8,6 +8,10 @@
 
 #include <sys_dev_gpio_native.h>
 #include <tx_api.h>
-// #include <targetPAL.h>
+
+#include <em_device.h>
+#include <em_gpio.h>
+
+#include <targetPAL.h>
 
 #endif // SYS_DEV_GPIO_NATIVE_TARGET_H
