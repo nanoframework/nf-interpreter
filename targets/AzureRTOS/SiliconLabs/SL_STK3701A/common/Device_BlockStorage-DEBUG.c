@@ -16,7 +16,7 @@ const BlockRange BlockRange1[] = {
     {BlockRange_BLOCKTYPE_CODE, 10, 237},
 
     // 000EE000 deployment
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 238, 509},
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 238, 510},
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
@@ -24,7 +24,7 @@ const BlockRange BlockRange1[] = {
     // in nanoBooter so the configuration can be managed when in booter mode
     ///////////////////////////////////////////////////////////////////////////////////////
     // 001FF000 configuration block
-    {BlockRange_BLOCKTYPE_CONFIG, 510, 511},
+    {BlockRange_BLOCKTYPE_CONFIG, 511, 511},
     ///////////////////////////////////////////////////////////////////////////////////////
 };
 
