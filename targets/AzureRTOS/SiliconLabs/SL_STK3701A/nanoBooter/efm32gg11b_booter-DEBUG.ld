@@ -69,6 +69,8 @@ MEMORY
  *   __StackLimit
  *   __StackTop
  *   __stack
+ *   __Vectors_End
+ *   __Vectors_Size
  */
 ENTRY(Reset_Handler)
 
@@ -80,6 +82,9 @@ SECTIONS
   .text :
   {
     KEEP(*(.vectors))
+    __Vectors_End = .;
+    __Vectors_Size = __Vectors_End - __Vectors;
+    __end__ = .;
 
     *(.text*)
 
@@ -130,6 +135,7 @@ SECTIONS
   } > flash0
   __exidx_end = .;
 
+
   .copy.table :
   {
     . = ALIGN(4);
@@ -138,13 +144,6 @@ SECTIONS
     LONG (__etext)
     LONG (__data_start__)
     LONG ((__data_end__ - __data_start__) / 4)
-
-    /* Add each additional data section here */
-/*
-    LONG (__etext2)
-    LONG (__data2_start__)
-    LONG ((__data2_end__ - __data2_start__) / 4)
-*/
     __copy_table_end__ = .;
   } > flash0
 
@@ -152,11 +151,6 @@ SECTIONS
   {
     . = ALIGN(4);
     __zero_table_start__ = .;
-    /* Add each additional bss section here */
-/*
-    LONG (__bss2_start__)
-    LONG ((__bss2_end__ - __bss2_start__) / 4)
-*/
     __zero_table_end__ = .;
   } > flash0
 
@@ -277,7 +271,7 @@ SECTIONS
 
   /* Set stack top to end of RAM, and stack limit move down by
    * size of stack_dummy section */
-  __StackTop = ORIGIN(RAM) + LENGTH(RAM);
+  __StackTop = ORIGIN(RAM) + LENGTH(RAM) - 4;
   __StackLimit = __StackTop - SIZEOF(.stack_dummy);
   PROVIDE(__stack = __StackTop);
 

@@ -50,8 +50,8 @@ bool CheckValidCLRImage(uint32_t address)
         return false;
     }
 
-    // 2nd check: the content pointed by the reset vector has to be 0xB510
-    // that's an assembly "push	{r4, lr}" the very first one in the Reset_Handler function
+    // 2nd check: the content pointed by the reset vector has to be 0xB508
+    // that's an assembly "push	{r3, lr}" the very first one in the Reset_Handler function
     // see platform\Device\SiliconLabs\EFM32GG11B\Source\GCC\startup_efm32gg11b.c
 
     // "regular" address mapping
@@ -73,7 +73,7 @@ bool CheckValidCLRImage(uint32_t address)
     opCodeAddress -= 1;
 
     uint32_t opCode = *((uint32_t *)opCodeAddress);
-    if ((uint16_t)opCode == 0xB510)
+    if ((uint16_t)opCode == 0xB508)
     {
         // check, there seems to be a valid CLR image
         return true;

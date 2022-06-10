@@ -19,7 +19,7 @@
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
 TX_BYTE_POOL byte_pool_0;
-uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
+ALIGN_TYPE memory_area[DEFAULT_BYTE_POOL_SIZE / sizeof(ALIGN_TYPE)];
 
 // threads definitions and configurations
 
@@ -28,7 +28,7 @@ uint8_t memory_area[DEFAULT_BYTE_POOL_SIZE];
 #define RECEIVER_THREAD_PRIORITY   5
 
 TX_THREAD receiverThread;
-uint32_t receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(uint32_t)];
+ALIGN_TYPE receiverThreadStack[RECEIVER_THREAD_STACK_SIZE / sizeof(ALIGN_TYPE)];
 extern void ReceiverThread_entry(uint32_t parameter);
 
 // blink thread
@@ -36,9 +36,9 @@ extern void ReceiverThread_entry(uint32_t parameter);
 #define BLINK_THREAD_PRIORITY   5
 
 TX_THREAD blinkThread;
-uint32_t blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
+ALIGN_TYPE blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(ALIGN_TYPE)];
 TX_THREAD blinkThread1;
-uint32_t blinkThread1Stack[BLINK_THREAD_STACK_SIZE / sizeof(uint32_t)];
+ALIGN_TYPE blinkThread1Stack[BLINK_THREAD_STACK_SIZE / sizeof(ALIGN_TYPE)];
 
 void BlinkThread_entry(uint32_t parameter)
 {
@@ -92,7 +92,7 @@ void tx_application_define(void *first_unused_memory)
         "Blink Thread",
         BlinkThread_entry,
         0,
-        blinkThreadStack,
+        (uint8_t*)blinkThreadStack,
         BLINK_THREAD_STACK_SIZE,
         BLINK_THREAD_PRIORITY,
         BLINK_THREAD_PRIORITY,
@@ -106,25 +106,25 @@ void tx_application_define(void *first_unused_memory)
         }
     }
 
-    // Create blink thread
-    status = tx_thread_create(
-        &blinkThread1,
-        "Blink Thread1",
-        BlinkThread1_entry,
-        0,
-        blinkThread1Stack,
-        BLINK_THREAD_STACK_SIZE,
-        BLINK_THREAD_PRIORITY,
-        BLINK_THREAD_PRIORITY,
-        TX_NO_TIME_SLICE,
-        TX_AUTO_START);
+    // // Create blink thread
+    // status = tx_thread_create(
+    //     &blinkThread1,
+    //     "Blink Thread1",
+    //     BlinkThread1_entry,
+    //     0,
+    //     (uint8_t*)blinkThread1Stack,
+    //     BLINK_THREAD_STACK_SIZE,
+    //     BLINK_THREAD_PRIORITY,
+    //     BLINK_THREAD_PRIORITY,
+    //     TX_NO_TIME_SLICE,
+    //     TX_AUTO_START);
 
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
+    // if (status != TX_SUCCESS)
+    // {
+    //     while (1)
+    //     {
+    //     }
+    // }
 
     // Create receiver thread
     status = tx_thread_create(
@@ -160,7 +160,7 @@ int main(void)
     GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN, gpioModePushPull, 0);
     GPIO_PinModeSet(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN, gpioModePushPull, 0);
 
-    // configure 
+    // configure
     GPIO_PinModeSet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN, gpioModeInput, 0);
 
     // init boot clipboard

@@ -33,8 +33,10 @@ nf_setup_target_build(
         SL_BOARD_REV=\"B07\"
         SL_COMPONENT_CATALOG_PRESENT=1
         _SILICON_LABS_32B_SERIES_2_CONFIG=0
-        __STACK_SIZE=0x4000
-        __HEAP_SIZE=0x4000
+        __START=main
+        __STARTUP_CLEAR_BSS=1
+        SL_STACK_SIZE=0x9000
+        SL_HEAP_SIZE=0x9000
 
     CLR_EXTRA_COMPILE_DEFINITIONS
         EFM32GG11B820F2048GL192=1
@@ -42,8 +44,8 @@ nf_setup_target_build(
         SL_BOARD_REV=\"B07\"
         SL_COMPONENT_CATALOG_PRESENT=1
         _SILICON_LABS_32B_SERIES_2_CONFIG=0
-        __STACK_SIZE=0x4000
-        __HEAP_SIZE=0x4000
+        SL_STACK_SIZE=0x4000
+        SL_HEAP_SIZE=0x4000
 
     BOOTER_EXTRA_LINKMAP_PROPERTIES
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common"

@@ -122,7 +122,6 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             # common paths
             ${gecko_sdk_SOURCE_DIR}/hardware/board/src
             ${gecko_sdk_SOURCE_DIR}/platform/common/src
-            ${gecko_sdk_SOURCE_DIR}/platform/common/toolchain/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/dmadrv/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/gpiointerrupt/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/src
