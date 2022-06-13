@@ -24,7 +24,6 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 
 HAL_TARGET_CONFIGURATION  g_TargetConfiguration;
 
-// this target can use JTAG for updates
-// TODO
-// inline GET_TARGET_CAPABILITIES(TargetCapabilities_JtagUpdate);
-inline TARGET_HAS_PROPRIETARY_BOOTER(true);
+// this target can use J-Link for updates
+inline GET_TARGET_CAPABILITIES(TargetCapabilities_JlinkUpdate);
+inline TARGET_HAS_PROPRIETARY_BOOTER(false);
