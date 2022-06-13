@@ -7,6 +7,7 @@
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
 #include <bsp.h>
+#include <sl_event_handler.h>
 
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
@@ -161,7 +162,10 @@ void tx_application_define(void *first_unused_memory)
 int main(void)
 {
     // Initialize the board
-    sl_system_init();
+    sl_driver_init();
+    sl_service_init();
+    sl_stack_init();
+    sl_internal_app_init();
 
     // Configure LED0 as output
     GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1, gpioModePushPull, 0);
