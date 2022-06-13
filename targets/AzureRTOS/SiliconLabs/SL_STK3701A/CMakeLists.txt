@@ -52,8 +52,6 @@ nf_setup_target_build(
         ",--library-path=${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common"
 )
 
-# make vars global
-set(TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_AZURERTOS_COMMON_SOURCES} CACHE INTERNAL "make global")
 # generate bin file for deployment
 if(SRECORD_TOOL_AVAILABLE)
 
