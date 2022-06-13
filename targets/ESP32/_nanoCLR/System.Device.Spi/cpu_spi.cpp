@@ -76,6 +76,7 @@ struct NF_PAL_SPI
 };
 
 NF_PAL_SPI nf_pal_spi[2];
+bool haveAsycTrans[2];
 
 // Remove device from bus
 // return true of OK, false = error
@@ -390,6 +391,14 @@ HRESULT CPU_SPI_nWrite_nRead(
         pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
         pnf_pal_spi->callback = wrc.callback;
 
+        if (haveAsycTrans[sdev.Spi_Bus])
+        {
+            spi_transaction_t *rtrans;
+            ret = spi_device_get_trans_result((spi_device_handle_t)deviceHandle, &rtrans, portMAX_DELAY);
+
+            haveAsycTrans[sdev.Spi_Bus] = false;
+        }
+
         // Set up SPI Transaction
         spi_transaction_t *pTrans = &pnf_pal_spi->trans;
 
@@ -434,6 +443,10 @@ HRESULT CPU_SPI_nWrite_nRead(
                     default:
                         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
                 }
+            }
+            else
+            {
+                haveAsycTrans[sdev.Spi_Bus] = true;
             }
 
             pnf_pal_spi->status = SPI_OP_STATUS::SPI_OP_RUNNING;
