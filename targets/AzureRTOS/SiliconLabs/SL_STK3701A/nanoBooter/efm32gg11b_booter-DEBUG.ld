@@ -74,9 +74,6 @@ MEMORY
  */
 ENTRY(Reset_Handler)
 
-/* RAM region to be used for the boot clipboard.*/
-REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
-
 SECTIONS
 {
   .text :
@@ -109,19 +106,6 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > flash0
-
-  /*
-   * SG veneers:
-   * All SG veneers are placed in the special output section .gnu.sgstubs. Its start address
-   * must be set, either with the command line option ‘--section-start’ or in a linker script,
-   * to indicate where to place these veneers in memory.
-   */
-/*
-  .gnu.sgstubs :
-  {
-    . = ALIGN(32);
-  } > flash0
-*/
 
   .ARM.extab :
   {
@@ -199,59 +183,18 @@ SECTIONS
 
   } > RAM
 
-  /*
-   * Secondary data section, optional
-   *
-   * Remember to add each additional data section
-   * to the .copy.table above to asure proper
-   * initialization during startup.
-   */
-/*
-  __etext2 = ALIGN (4);
-
-  .data2 : AT (__etext2)
-  {
-    . = ALIGN(4);
-    __data2_start__ = .;
-    *(.data2)
-    *(.data2.*)
-    . = ALIGN(4);
-    __data2_end__ = .;
-
-  } > RAM2
-*/
-
   .bss :
   {
     . = ALIGN(4);
     __bss_start__ = .;
     *(.bss)
-    *(.bss.*)
+    *(.bss.*)    
     *(COMMON)
     . = ALIGN(4);
     __bss_end__ = .;
   } > RAM
 
-  /*
-   * Secondary bss section, optional
-   *
-   * Remember to add each additional bss section
-   * to the .zero.table above to asure proper
-   * initialization during startup.
-   */
-/*
-  .bss2 :
-  {
-    . = ALIGN(4);
-    __bss2_start__ = .;
-    *(.bss2)
-    *(.bss2.*)
-    . = ALIGN(4);
-    __bss2_end__ = .;
-  } > RAM2 AT > RAM2
-*/
-
-  .heap (COPY) :
+  .heap (COPY):
   {
     __HeapBase = .;
     __end__ = .;
@@ -264,14 +207,14 @@ SECTIONS
   /* .stack_dummy section doesn't contains any symbols. It is only
    * used for linker to calculate size of stack sections, and assign
    * values to stack symbols later */
-   .stack_dummy (COPY):
+  .stack_dummy (COPY):
   {
     KEEP(*(.stack*))
   } > RAM
 
   /* Set stack top to end of RAM, and stack limit move down by
    * size of stack_dummy section */
-  __StackTop = ORIGIN(RAM) + LENGTH(RAM) - 4;
+  __StackTop = ORIGIN(RAM) + LENGTH(RAM);
   __StackLimit = __StackTop - SIZEOF(.stack_dummy);
   PROVIDE(__stack = __StackTop);
 
@@ -281,6 +224,9 @@ SECTIONS
   /* Check if flash0 usage exceeds flash0 size */
   ASSERT( LENGTH(flash0) >= (__etext + SIZEOF(.data)), "flash0 memory overflowed !")
 }
+
+/* RAM region to be used for the boot clipboard.*/
+REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
 /* Code rules inclusion.*/
 INCLUDE rules_code.ld

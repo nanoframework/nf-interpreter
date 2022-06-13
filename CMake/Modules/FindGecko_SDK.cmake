@@ -41,6 +41,8 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
 set(gecko_sdk_srcs
     sl_board_control_gpio.c
     sl_board_init.c
+    sl_memory.c
+    sl_assert.c
 
     em_acmp.c
     em_adc.c
@@ -122,6 +124,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             # common paths
             ${gecko_sdk_SOURCE_DIR}/hardware/board/src
             ${gecko_sdk_SOURCE_DIR}/platform/common/src
+            ${gecko_sdk_SOURCE_DIR}/platform/common/toolchain/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/dmadrv/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/gpiointerrupt/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/src
@@ -139,7 +142,6 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
             # target series specific 
             ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source
-            ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source/GCC
 
             ${TARGET_BASE_LOCATION}/autogen
             ${TARGET_BASE_LOCATION}/config

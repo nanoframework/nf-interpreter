@@ -61,17 +61,13 @@ sl_iostream_instance_info_t sl_iostream_instance_vcom_info = {
   .init = sl_iostream_usart_init_vcom,
 };
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#endif
+
 
 sl_status_t sl_iostream_usart_init_vcom(void)
 {
   sl_status_t status;
   USART_InitAsync_TypeDef init_vcom = USART_INITASYNC_DEFAULT;
   init_vcom.baudrate = SL_IOSTREAM_USART_VCOM_BAUDRATE;
-  //init_vcom.oversampling = usartOVS16;
   init_vcom.parity = SL_IOSTREAM_USART_VCOM_PARITY;
   init_vcom.stopbits = SL_IOSTREAM_USART_VCOM_STOP_BITS;
 #if (_SILICON_LABS_32B_SERIES > 0)
@@ -141,9 +137,7 @@ sl_status_t sl_iostream_usart_init_vcom(void)
   return status;
 }
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+
 
 void sl_iostream_usart_init_instances(void)
 {
@@ -207,3 +201,9 @@ static void events_handler(sl_power_manager_em_t from,
   }
 }
 #endif
+
+// implementation required (even if empty) to keep debugger happy
+void sli_iostream_on_uart_rx(sl_iostream_t *handle)
+{
+  (void)handle;
+}

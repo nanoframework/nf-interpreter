@@ -69,6 +69,8 @@ MEMORY
  *   __StackLimit
  *   __StackTop
  *   __stack
+ *   __Vectors_End
+ *   __Vectors_Size
  */
 ENTRY(Reset_Handler)
 
@@ -83,6 +85,9 @@ SECTIONS
   .text :
   {
     KEEP(*(.vectors))
+    __Vectors_End = .;
+    __Vectors_Size = __Vectors_End - __Vectors;
+    __end__ = .;
 
     *(.text*)
 
@@ -107,19 +112,6 @@ SECTIONS
 
     KEEP(*(.eh_frame*))
   } > flash0
-
-  /*
-   * SG veneers:
-   * All SG veneers are placed in the special output section .gnu.sgstubs. Its start address
-   * must be set, either with the command line option ‘--section-start’ or in a linker script,
-   * to indicate where to place these veneers in memory.
-   */
-/*
-  .gnu.sgstubs :
-  {
-    . = ALIGN(32);
-  } > flash0
-*/
 
   .ARM.extab :
   {
@@ -196,28 +188,6 @@ SECTIONS
 
   } > RAM
 
-  /*
-   * Secondary data section, optional
-   *
-   * Remember to add each additional data section
-   * to the .copy.table above to asure proper
-   * initialization during startup.
-   */
-/*
-  __etext2 = ALIGN (4);
-
-  .data2 : AT (__etext2)
-  {
-    . = ALIGN(4);
-    __data2_start__ = .;
-    *(.data2)
-    *(.data2.*)
-    . = ALIGN(4);
-    __data2_end__ = .;
-
-  } > RAM2
-*/
-
   .bss :
   {
     . = ALIGN(4);
@@ -228,25 +198,6 @@ SECTIONS
     . = ALIGN(4);
     __bss_end__ = .;
   } > RAM
-
-  /*
-   * Secondary bss section, optional
-   *
-   * Remember to add each additional bss section
-   * to the .zero.table above to asure proper
-   * initialization during startup.
-   */
-/*
-  .bss2 :
-  {
-    . = ALIGN(4);
-    __bss2_start__ = .;
-    *(.bss2)
-    *(.bss2.*)
-    . = ALIGN(4);
-    __bss2_end__ = .;
-  } > RAM2 AT > RAM2
-*/
 
   .heap (COPY) :
   {
@@ -266,6 +217,12 @@ SECTIONS
     KEEP(*(.stack*))
   } > RAM
 
+  /* Set stack top to end of RAM, and stack limit move down by
+   * size of stack_dummy section */
+  __StackTop = .;
+  __StackLimit = __StackTop - SIZEOF(.stack_dummy);
+  PROVIDE(__stack = __StackTop);
+
   /* nanoFramework CLR managed heap section at the specified RAM section.*/
   .clr_managed_heap (NOLOAD) :
   {
@@ -277,12 +234,6 @@ SECTIONS
       __clr_managed_heap_end__ = .;
       PROVIDE(HeapEnd = .);
   } > CLR_MANAGED_HEAP_RAM
-
-  /* Set stack top to end of RAM, and stack limit move down by
-   * size of stack_dummy section */
-  __StackTop = ORIGIN(RAM) + LENGTH(RAM);
-  __StackLimit = __StackTop - SIZEOF(.stack_dummy);
-  PROVIDE(__stack = __StackTop);
 
   /* Check if data + heap + stack exceeds RAM limit */
   ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")

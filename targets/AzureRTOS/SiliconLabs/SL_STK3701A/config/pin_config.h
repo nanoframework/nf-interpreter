@@ -197,16 +197,6 @@
 // [USART0]$
 
 // $[USART1]
-// USART1 CLK on PC15
-#define USART1_CLK_PORT                          gpioPortC
-#define USART1_CLK_PIN                           15
-#define USART1_CLK_LOC                           3
-
-// USART1 TX on PA14
-#define USART1_TX_PORT                           gpioPortA
-#define USART1_TX_PIN                            14
-#define USART1_TX_LOC                            6
-
 // [USART1]$
 
 // $[USART2]
@@ -216,6 +206,26 @@
 // [USART3]$
 
 // $[USART4]
+// USART4 CTS on PH8
+#define USART4_CTS_PORT                          gpioPortH
+#define USART4_CTS_PIN                           8
+#define USART4_CTS_LOC                           4
+
+// USART4 RTS on PH9
+#define USART4_RTS_PORT                          gpioPortH
+#define USART4_RTS_PIN                           9
+#define USART4_RTS_LOC                           4
+
+// USART4 RX on PH5
+#define USART4_RX_PORT                           gpioPortH
+#define USART4_RX_PIN                            5
+#define USART4_RX_LOC                            4
+
+// USART4 TX on PH4
+#define USART4_TX_PORT                           gpioPortH
+#define USART4_TX_PIN                            4
+#define USART4_TX_LOC                            4
+
 // [USART4]$
 
 // $[USART5]
@@ -243,9 +253,6 @@
 // [WTIMER3]$
 
 // $[CUSTOM_PIN_NAME]
-#define SL_SIMPLE_LED_LED0_PORT_PORT             gpioPortH
-#define SL_SIMPLE_LED_LED0_PORT_PIN              11
-
 // [CUSTOM_PIN_NAME]$
 
 #endif // PIN_CONFIG_H

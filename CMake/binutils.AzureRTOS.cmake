@@ -445,13 +445,14 @@ macro(nf_add_platform_sources target)
                 ${target}
             EXTRA_INCLUDES
                 ${AZRTOS_INCLUDES}
-            #     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
         )
                         
-        # add_dependencies(${target}.elf nano::gecko_sdk_${target})
+        add_dependencies(${target}.elf nano::gecko_sdk_${target})
 
         target_link_libraries(${target}.elf
+            -Wl,-whole-archive
             nano::gecko_sdk_${target}
+            -Wl,-no-whole-archive
         )
 
     endif()
