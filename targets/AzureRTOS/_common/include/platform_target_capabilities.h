@@ -26,6 +26,9 @@ extern "C"
         // using Debugging_Execution_QueryCLRCapabilities::c_CapabilityFlags_TargetCapability_1
         TargetCapabilities_DfuUpdate = 0x20000000,
 
+        // J-Link update capable
+        TargetCapabilities_JlinkUpdate = 0x30000000,
+
     } TargetCapabilities;
 
 #ifdef __cplusplus
