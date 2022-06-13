@@ -54,3 +54,26 @@ nf_setup_target_build(
 
 # make vars global
 set(TARGET_AZURERTOS_COMMON_SOURCES ${TARGET_AZURERTOS_COMMON_SOURCES} CACHE INTERNAL "make global")
+# generate bin file for deployment
+if(SRECORD_TOOL_AVAILABLE)
+
+    ############################################################################################################
+    ## when changing the linker file make sure to update the addresses below with the offset of the CLR image ##
+    ## DO NOT use the leading 0x notation, just the address in plain hexadecimal formating                    ##
+    ############################################################################################################
+
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        nf_generate_bin_package(
+            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            A000
+            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+    else()
+        nf_generate_bin_package(
+            ${CMAKE_SOURCE_DIR}/build/${NANOBOOTER_PROJECT_NAME}.bin
+            ${CMAKE_SOURCE_DIR}/build/${NANOCLR_PROJECT_NAME}.bin
+            A000
+            ${CMAKE_SOURCE_DIR}/build/nanobooter-nanoclr.bin)
+    endif()
+
+endif()
