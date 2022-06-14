@@ -8,23 +8,15 @@
 #include <em_gpio.h>
 #include <bsp.h>
 #include <sl_event_handler.h>
+#include <sl_board_init.h>
 
 #include <targetHAL.h>
 #include <nanoCLR_Application.h>
-// #include <nanoHAL_v2.h>
 
 #include <tx_api.h>
 
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
-
-// #include <serialcfg.h>
-// #include <LaunchCLR.h>
-// #include <targetHAL.h>
-// #include <nanoPAL_BlockStorage.h>
-// #include <nanoHAL_ConfigurationManager.h>
-// #include <nanoPAL_COM.h>
-// #include <target_stdio_config.h>
 
 // extern TX_EVENT_FLAGS_GROUP wpUartEvent;
 extern CLR_SETTINGS clrSettings;
@@ -162,6 +154,8 @@ void tx_application_define(void *first_unused_memory)
 int main(void)
 {
     // Initialize the board
+    sl_board_preinit();
+    sl_board_init();
     sl_driver_init();
     sl_service_init();
     sl_stack_init();
