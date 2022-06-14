@@ -70,7 +70,6 @@ set(gecko_sdk_srcs
     # emdrv
     dmadrv.c
     uartdrv.c
-    gpiointerrupt.c
 
     sl_device_init_dcdc_s1.c
     sl_device_init_emu_s1.c
@@ -143,6 +142,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             # target series specific 
             ${gecko_sdk_SOURCE_DIR}/platform/Device/SiliconLabs/EFM32GG11B/Source
 
+            # target specifics
             ${TARGET_BASE_LOCATION}/autogen
             ${TARGET_BASE_LOCATION}/config
 
