@@ -24,7 +24,7 @@
 #define GECKO_USE_I2C0 FALSE
 #endif
 #ifndef GECKO_USE_I2C1
-#define GECKO_USE_I2C1 TRUE
+#define GECKO_USE_I2C1 FALSE
 #endif
 #ifndef GECKO_USE_I2C2
 #define GECKO_USE_I2C2 FALSE
@@ -51,10 +51,10 @@ typedef struct NF_PAL_I2C
 // declaration of the the I2C PAL structs //
 ////////////////////////////////////////////
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-extern NF_PAL_I2C I2C1_PAL;
+extern NF_PAL_I2C I2C0_PAL;
 #endif
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-extern NF_PAL_I2C I2C2_PAL;
+extern NF_PAL_I2C I2C1_PAL;
 #endif
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
 extern NF_PAL_I2C I2C2_PAL;
@@ -85,8 +85,8 @@ extern NF_PAL_I2C I2C2_PAL;
 // when an I2C is defined the declarations below will have the real function/configuration //
 // in the target folder @ target_windows_devices_i2c_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
+void ConfigPins_I2C0();
 void ConfigPins_I2C1();
 void ConfigPins_I2C2();
-void ConfigPins_I2C3();
 
 #endif // SYS_DEV_I2C_NATIVE_TARGET_H

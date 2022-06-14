@@ -38,5 +38,4 @@ I2CSPM_Init_TypeDef init_sensor = {
 void sl_i2cspm_init_instances(void)
 {
   CMU_ClockEnable(cmuClock_GPIO, true);
-  //I2CSPM_Init(&init_sensor);
 }

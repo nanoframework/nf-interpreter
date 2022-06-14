@@ -13,30 +13,39 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 // declaration of the the I2C PAL structs //
 ////////////////////////////////////////////
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-NF_PAL_I2C I2C1_PAL;
+NF_PAL_I2C I2C0_PAL;
 #endif
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-NF_PAL_I2C I2C2_PAL;
+NF_PAL_I2C I2C1_PAL;
 #endif
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-NF_PAL_I2C I2C3_PAL;
+NF_PAL_I2C I2C2_PAL;
 #endif
 
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-uint8_t I2C1_DeviceCounter = 0;
+uint8_t I2C0_DeviceCounter = 0;
 #endif
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-uint8_t I2C2_DeviceCounter = 0;
+uint8_t I2C1_DeviceCounter = 0;
 #endif
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-uint8_t I2C3_DeviceCounter = 0;
+uint8_t I2C2_DeviceCounter = 0;
 #endif
 
 void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CSPM_Init_TypeDef *llConfig)
 {
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
 
-    llConfig->i2cRefFreq = busSpeed == I2cBusSpeed_StandardMode ? 0 : 1;
+    if (busSpeed == I2cBusSpeed_StandardMode)
+    {
+        llConfig->i2cMaxFreq = I2C_FREQ_STANDARD_MAX;
+        llConfig->i2cClhr = i2cClockHLRStandard;
+    }
+    else
+    {
+        llConfig->i2cMaxFreq = I2C_FREQ_FAST_MAX;
+        llConfig->i2cClhr = i2cClockHLRAsymetric;
+    }
 }
 
 // estimate the time required to perform the I2C transaction
@@ -138,8 +147,37 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     switch (busIndex)
     {
 
+        ////////////////////////////////////
+        // Gecko I2C bus index is 0 based //
+        ////////////////////////////////////
+
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
         case 1:
+            if (I2C0_PAL.Configuration == NULL)
+            {
+                I2C0_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
+
+                if (I2C1_PAL.Configuration == NULL)
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+                }
+
+                // copy init struct
+                memcpy(I2C0_PAL.Configuration, &i2cInit, sizeof(I2CSPM_Init_TypeDef));
+
+                ConfigPins_I2C0();
+
+                I2C0_PAL.Configuration->port = I2C0;
+                palI2c = &I2C1_PAL;
+
+                // increase device counter
+                I2C0_DeviceCounter++;
+            }
+            break;
+#endif
+
+#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
+        case 2:
             if (I2C1_PAL.Configuration == NULL)
             {
                 I2C1_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
@@ -154,7 +192,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
 
                 ConfigPins_I2C1();
 
-                I2C1_PAL.Configuration->port = I2C0;
+                I2C1_PAL.Configuration->port = I2C1;
                 palI2c = &I2C1_PAL;
 
                 // increase device counter
@@ -163,8 +201,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             break;
 #endif
 
-#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-        case 2:
+#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
+        case 3:
             if (I2C2_PAL.Configuration == NULL)
             {
                 I2C2_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
@@ -179,36 +217,11 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
 
                 ConfigPins_I2C2();
 
-                I2C2_PAL.Configuration->port = I2C1;
+                I2C2_PAL.Configuration->port = I2C2;
                 palI2c = &I2C2_PAL;
 
                 // increase device counter
                 I2C2_DeviceCounter++;
-            }
-            break;
-#endif
-
-#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-        case 3:
-            if (I2C3_PAL.Configuration == NULL)
-            {
-                I2C3_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
-
-                if (I2C3_PAL.Configuration == NULL)
-                {
-                    NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-                }
-
-                // copy init struct
-                memcpy(I2C3_PAL.Configuration, &i2cInit, sizeof(I2CSPM_Init_TypeDef));
-
-                ConfigPins_I2C3();
-
-                I2C3_PAL.Configuration->port = I2C2;
-                palI2c = &I2C1_PAL;
-
-                // increase device counter
-                I2C3_DeviceCounter++;
             }
 
             break;
@@ -265,10 +278,36 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
     busIndex = (uint8_t)connectionSettings[I2cConnectionSettings::FIELD___busId].NumericByRef().s4;
 
     // get the driver for the I2C bus
+    // Gecko I2C bus index is 0 based
     switch (busIndex)
     {
+        ////////////////////////////////////
+        // Gecko I2C bus index is 0 based //
+        ////////////////////////////////////
+
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
         case 1:
+            palI2c = &I2C0_PAL;
+
+            // remove device
+            I2C0_DeviceCounter--;
+
+            if (I2C0_DeviceCounter == 0)
+            {
+                // no more devices on the bus
+
+                // free memory
+                platform_free(I2C0_PAL.Configuration);
+
+                // clears configuration
+                I2C0_PAL.Configuration = NULL;
+            }
+
+            break;
+#endif
+
+#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
+        case 2:
             palI2c = &I2C1_PAL;
 
             // remove device
@@ -288,8 +327,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
             break;
 #endif
 
-#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-        case 2:
+#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
+        case 3:
             palI2c = &I2C2_PAL;
 
             // remove device
@@ -304,27 +343,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeDispose___
 
                 // clears configuration
                 I2C2_PAL.Configuration = NULL;
-            }
-
-            break;
-#endif
-
-#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-        case 3:
-            palI2c = &I2C3_PAL;
-
-            // remove device
-            I2C3_DeviceCounter--;
-
-            if (I2C3_DeviceCounter == 0)
-            {
-                // no more devices on the bus
-
-                // free memory
-                platform_free(I2C3_PAL.Configuration);
-
-                // clears configuration
-                I2C3_PAL.Configuration = NULL;
             }
 
             break;
@@ -390,19 +408,25 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         // get the driver for the I2C bus
         switch (busIndex)
         {
+            ////////////////////////////////////
+            // Gecko I2C bus index is 0 based //
+            ////////////////////////////////////
+
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
             case 1:
+                palI2c = &I2C0_PAL;
+                break;
+#endif
+
+#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
+            case 2:
                 palI2c = &I2C1_PAL;
                 break;
 #endif
-#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-            case 2:
-                palI2c = &I2C2_PAL;
-                break;
-#endif
+
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
             case 3:
-                palI2c = &I2C3_PAL;
+                palI2c = &I2C2_PAL;
                 break;
 #endif
 
@@ -569,6 +593,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
                     i2cTransfer.buf[0].data = palI2c->WriteBuffer;
                     i2cTransfer.buf[0].len = palI2c->WriteSize;
+                    i2cTransfer.buf[1].data = NULL;
+                    i2cTransfer.buf[1].len = 0;
 
                     // Perform the transfer and return status from the transfer
                     transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
@@ -579,6 +605,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                     i2cTransfer.flags = I2C_FLAG_READ;
                     i2cTransfer.buf[0].data = palI2c->ReadBuffer;
                     i2cTransfer.buf[0].len = palI2c->ReadSize;
+                    i2cTransfer.buf[1].data = NULL;
+                    i2cTransfer.buf[1].len = 0;
 
                     // Perform the transfer and return status from the transfer
                     transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
