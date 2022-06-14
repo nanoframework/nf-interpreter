@@ -43,7 +43,7 @@
 
 // <q SL_BOARD_ENABLE_SENSOR_RHT> Enable Relative Humidity and Temperature sensor
 // <i> Default: 0
-#define SL_BOARD_ENABLE_SENSOR_RHT              0
+#define SL_BOARD_ENABLE_SENSOR_RHT              1
 
 // <q SL_BOARD_ENABLE_SENSOR_HALL> Enable Hall Effect sensor
 // <i> Default: 0
