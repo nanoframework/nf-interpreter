@@ -65,7 +65,7 @@
 
 // <o SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE> Receive buffer size
 // <i> Default: 32
-#define SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE    64
+#define SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE    512+32
 
 // <q SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF> Convert \n to \r\n
 // <i> It can be changed at runtime using the C API.
