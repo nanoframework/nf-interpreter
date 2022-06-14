@@ -47,7 +47,7 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-    // sl_i2cspm_init_instances();
+    sl_i2cspm_init_instances();
     sl_uartdrv_init_instances();
 }
 

@@ -293,7 +293,7 @@
                 "API_Hardware.Stm32": "OFF",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.Spi": "OFF",
-                "API_System.Device.I2c": "OFF",
+                "API_System.Device.I2c": "ON",
                 "API_System.Device.Pwm": "OFF",
                 "API_System.IO.Ports": "OFF",
                 "API_System.Device.Adc": "OFF",
