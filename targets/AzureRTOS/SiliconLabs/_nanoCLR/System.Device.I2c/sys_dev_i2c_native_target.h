@@ -19,14 +19,25 @@
 #define I2C_THREAD_STACK_SIZE 256
 #define I2C_THREAD_PRIORITY   5
 
+// set missing defines
+#ifndef GECKO_USE_I2C0
+#define GECKO_USE_I2C0 FALSE
+#endif
+#ifndef GECKO_USE_I2C1
+#define GECKO_USE_I2C1 TRUE
+#endif
+#ifndef GECKO_USE_I2C2
+#define GECKO_USE_I2C2 FALSE
+#endif
+
 // struct representing the I2C
 typedef struct NF_PAL_I2C
 {
     I2CSPM_Init_TypeDef *Configuration;
     TX_THREAD *WorkingThread;
     uint32_t *WorkingThreadStack;
-    // msg_t TransactionResult;
-    // i2caddr_t Address;
+    I2C_TransferReturn_TypeDef TransactionResult;
+    uint16_t Address;
     float ByteTime;
 
     uint8_t *WriteBuffer;

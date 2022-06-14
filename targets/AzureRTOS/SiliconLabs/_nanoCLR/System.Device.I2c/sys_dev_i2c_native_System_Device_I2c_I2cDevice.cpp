@@ -64,52 +64,45 @@ bool IsLongRunningOperation(
 static void I2CWorkingThread_entry(uint32_t arg)
 {
     NF_PAL_I2C *palI2c = (NF_PAL_I2C *)arg;
+    I2C_TransferSeq_TypeDef i2cTransfer;
 
-    // int estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + palI2c->ReadSize + 1);
+    if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
+    {
+        // this is a Write/Read transaction
+        i2cTransfer.flags = I2C_FLAG_WRITE_READ;
 
-    // if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
-    // {
-    //     // this is a Write/Read transaction
-    //     palI2c->TransactionResult = i2cMasterTransmitTimeout(
-    //         palI2c->Driver,
-    //         palI2c->Address,
-    //         palI2c->WriteBuffer,
-    //         palI2c->WriteSize,
-    //         palI2c->ReadBuffer,
-    //         palI2c->ReadSize,
-    //         TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
-    // }
-    // else
-    // {
-    //     if (palI2c->ReadSize == 0)
-    //     {
-    //         // this is Write only transaction
+        i2cTransfer.buf[0].data = palI2c->WriteBuffer;
+        i2cTransfer.buf[0].len = palI2c->WriteSize;
+        i2cTransfer.buf[1].data = palI2c->ReadBuffer;
+        i2cTransfer.buf[1].len = palI2c->ReadSize;
 
-    //         estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->WriteSize + 1);
+        // Perform the transfer and return status from the transfer
+        palI2c->TransactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
+    }
+    else
+    {
+        if (palI2c->ReadSize == 0)
+        {
+            // this is Write only transaction
+            i2cTransfer.flags = I2C_FLAG_WRITE;
 
-    //         palI2c->TransactionResult = i2cMasterTransmitTimeout(
-    //             palI2c->Driver,
-    //             palI2c->Address,
-    //             palI2c->WriteBuffer,
-    //             palI2c->WriteSize,
-    //             NULL,
-    //             0,
-    //             TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
-    //     }
-    //     else
-    //     {
-    //         // this is a Read only transaction
+            i2cTransfer.buf[0].data = palI2c->WriteBuffer;
+            i2cTransfer.buf[0].len = palI2c->WriteSize;
 
-    //         estimatedDurationMiliseconds = palI2c->ByteTime * (palI2c->ReadSize + 1);
+            // Perform the transfer and return status from the transfer
+            palI2c->TransactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
+        }
+        else
+        {
+            // this is a Read only transaction
+            i2cTransfer.flags = I2C_FLAG_READ;
+            i2cTransfer.buf[0].data = palI2c->ReadBuffer;
+            i2cTransfer.buf[0].len = palI2c->ReadSize;
 
-    //         palI2c->TransactionResult = i2cMasterReceiveTimeout(
-    //             palI2c->Driver,
-    //             palI2c->Address,
-    //             palI2c->ReadBuffer,
-    //             palI2c->ReadSize,
-    //             TX_TICKS_PER_MILLISEC(estimatedDurationMiliseconds));
-    //     }
-    // }
+            // Perform the transfer and return status from the transfer
+            palI2c->TransactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
+        }
+    }
 
     // fire event for I2C transaction complete
     Events_Set(SYSTEM_EVENT_FLAG_I2C_MASTER);
@@ -368,7 +361,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         uint8_t busIndex;
         NF_PAL_I2C *palI2c = NULL;
         bool isLongRunningOperation = false;
-        // msg_t transactionResult = MSG_OK;
 
         CLR_RT_HeapBlock hbTimeout;
         CLR_INT64 *timeout;
@@ -382,6 +374,8 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         CLR_RT_HeapBlock_Array *readBuffer = NULL;
         int readOffset = 0;
         int writeOffset = 0;
+        I2C_TransferSeq_TypeDef i2cTransfer;
+        I2C_TransferReturn_TypeDef transactionResult = i2cTransferInProgress;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -488,14 +482,10 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         // this is going to be used to check for the right event in case of simultaneous I2C transaction
         if (!isLongRunningOperation || stack.m_customState == 1)
         {
-            // get slave address from connection settings field
-            palI2c->Address =
-                (i2caddr_t)connectionSettings[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4;
 
-            // when using I2Cv1 driver the address needs to be loaded in the I2C driver struct
-#if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
-            palI2c->Driver->addr = palI2c->Address;
-#endif
+            // get slave address from connection settings field
+            i2cTransfer.addr =
+                (uint16_t)connectionSettings[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4;
 
             if (writeBuffer != NULL)
             {
@@ -508,10 +498,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                 // grab the pointer to the array by starting and the offset specified in the span
                 palI2c->ReadBuffer = (uint8_t *)readBuffer->GetElement(readOffset);
             }
-
-            // because the bus access is shared, acquire the appropriate bus
-            i2cAcquireBus(palI2c->Driver);
-            i2cStart(palI2c->Driver, &palI2c->Configuration);
         }
 
         if (isLongRunningOperation)
@@ -559,43 +545,43 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
         else
         {
             // this is NOT a long running operation
-            // perform I2C transaction using driver's SYNC API
+            // perform I2C transaction
 
             if (palI2c->ReadSize != 0 && palI2c->WriteSize != 0)
             {
                 // this is a Write/Read transaction
-                transactionResult = i2cMasterTransmitTimeout(
-                    palI2c->Driver,
-                    palI2c->Address,
-                    palI2c->WriteBuffer,
-                    palI2c->WriteSize,
-                    palI2c->ReadBuffer,
-                    palI2c->ReadSize,
-                    TX_TICKS_PER_MILLISEC(20));
+                i2cTransfer.flags = I2C_FLAG_WRITE_READ;
+
+                i2cTransfer.buf[0].data = palI2c->WriteBuffer;
+                i2cTransfer.buf[0].len = palI2c->WriteSize;
+                i2cTransfer.buf[1].data = palI2c->ReadBuffer;
+                i2cTransfer.buf[1].len = palI2c->ReadSize;
+
+                // Perform the transfer and return status from the transfer
+                transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
             }
             else
             {
                 if (palI2c->ReadSize == 0)
                 {
                     // this is Write only transaction
-                    transactionResult = i2cMasterTransmitTimeout(
-                        palI2c->Driver,
-                        palI2c->Address,
-                        palI2c->WriteBuffer,
-                        palI2c->WriteSize,
-                        NULL,
-                        0,
-                        TX_TICKS_PER_MILLISEC(20));
+                    i2cTransfer.flags = I2C_FLAG_WRITE;
+
+                    i2cTransfer.buf[0].data = palI2c->WriteBuffer;
+                    i2cTransfer.buf[0].len = palI2c->WriteSize;
+
+                    // Perform the transfer and return status from the transfer
+                    transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
                 }
                 else
                 {
                     // this is a Read only transaction
-                    transactionResult = i2cMasterReceiveTimeout(
-                        palI2c->Driver,
-                        palI2c->Address,
-                        palI2c->ReadBuffer,
-                        palI2c->ReadSize,
-                        TX_TICKS_PER_MILLISEC(20));
+                    i2cTransfer.flags = I2C_FLAG_READ;
+                    i2cTransfer.buf[0].data = palI2c->ReadBuffer;
+                    i2cTransfer.buf[0].len = palI2c->ReadSize;
+
+                    // Perform the transfer and return status from the transfer
+                    transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
                 }
             }
         }
@@ -630,8 +616,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             // event occurred
             // OR this is NOT a long running operation
 
-            i2cReleaseBus(palI2c->Driver);
-
             // create the return object (I2cTransferResult)
             // only at this point we are sure that there will be a return from this thread so it's OK to use the
             // managed stack
@@ -658,20 +642,20 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
             }
 
             // get the result from the working thread execution
-            if (transactionResult != MSG_OK)
+            if (transactionResult != i2cTransferDone)
             {
-                // error in transaction
-                int errors = i2cGetErrors(palI2c->Driver);
-
                 // figure out what was the error and set the status field
-                switch (errors)
+                switch (transactionResult)
                 {
-                    case I2C_ACK_FAILURE:
+                    case i2cTransferNack:
                         result[I2cTransferResult::FIELD___status].SetInteger(
                             (CLR_UINT32)I2cTransferStatus_SlaveAddressNotAcknowledged);
                         break;
 
-                    case I2C_TIMEOUT:
+                    case i2cTransferBusErr:
+                    case i2cTransferArbLost:
+                    case i2cTransferUsageFault:
+                    case i2cTransferSwFault:
                         result[I2cTransferResult::FIELD___status].SetInteger(
                             (CLR_UINT32)I2cTransferStatus_ClockStretchTimeout);
                         break;
