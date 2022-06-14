@@ -258,14 +258,7 @@ void DisplayDriver::BitBlt(
 
     g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    g_DisplayInterface.SendData16Windowed(
-                    (CLR_UINT16 *)&data[0],
-                    srcX,
-                    srcY,
-                    width,
-                    height,
-                    stride,
-                    true);
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

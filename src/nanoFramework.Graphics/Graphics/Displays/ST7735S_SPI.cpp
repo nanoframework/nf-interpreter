@@ -234,9 +234,7 @@ void DisplayDriver::Clear()
 
     g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    g_DisplayInterface.FillData16(
-                    0,
-                    Attributes.Width * Attributes.Height);
+    g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
 }
 
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
@@ -294,14 +292,7 @@ void DisplayDriver::BitBlt(
 
     g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    g_DisplayInterface.SendData16Windowed(
-                    (CLR_UINT16 *)&data[0],
-                    srcX,
-                    srcY,
-                    width,
-                    height,
-                    stride,
-                    true);
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

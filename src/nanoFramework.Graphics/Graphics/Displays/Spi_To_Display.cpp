@@ -11,9 +11,9 @@
 #include <nanoPAL.h>
 #include <target_platform.h>
 
-#define NUMBER_OF_LINES 8
+#define NUMBER_OF_LINES       8
 #define SPI_MAX_TRANSFER_SIZE (320 * 2 * NUMBER_OF_LINES) // 320 pixels 2 words wide ( 16 bit colour)
-#define SPI_MAX_TRANSFER_16 (SPI_MAX_TRANSFER_SIZE / 2)
+#define SPI_MAX_TRANSFER_16   (SPI_MAX_TRANSFER_SIZE / 2)
 
 struct DisplayInterface g_DisplayInterface;
 DisplayInterfaceConfig g_DisplayInterfaceConfig;
@@ -212,7 +212,7 @@ void CopyData16ByteSwapped(CLR_UINT16 *dest, CLR_UINT16 *src, CLR_UINT32 length)
 {
     while (length > 0)
     {
-        *dest = (*src << 8) | (*src >> 8 );
+        *dest = (*src << 8) | (*src >> 8);
 
         dest++;
         src++;
@@ -248,12 +248,19 @@ void SendData16(CLR_UINT16 *data, CLR_UINT32 length, bool doByteSwap)
     }
 }
 
-void DisplayInterface::SendData16Windowed(CLR_UINT16 *data, CLR_UINT32 startX, CLR_UINT32 startY, CLR_UINT32 width, CLR_UINT32 height, CLR_UINT32 stride, bool doByteSwap)
+void DisplayInterface::SendData16Windowed(
+    CLR_UINT16 *data,
+    CLR_UINT32 startX,
+    CLR_UINT32 startY,
+    CLR_UINT32 width,
+    CLR_UINT32 height,
+    CLR_UINT32 stride,
+    bool doByteSwap)
 {
     // Offset for window start
     CLR_UINT16 *startOfLine = data + (startY * stride) + startX;
 
-    if (width == stride)    // Optimize full-stride writes
+    if (width == stride) // Optimize full-stride writes
     {
         SendData16(startOfLine, width * height, doByteSwap);
     }
@@ -269,7 +276,7 @@ void DisplayInterface::SendData16Windowed(CLR_UINT16 *data, CLR_UINT32 startX, C
 
     FlushData();
 
-    return;    
+    return;
 }
 
 void DisplayInterface::FillData16(CLR_UINT16 fillValue, CLR_UINT32 fillLength)
