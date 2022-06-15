@@ -98,12 +98,13 @@ set(gecko_sdk_srcs
     sl_event_handler.c
     sl_board_default_init_stub.c
     sl_i2cspm_init.c
-    # sl_i2cspm.c
+    # candidate for replacement with RTOS friendly version
+    sl_i2cspm.c
     sl_iostream_handles.c
     sl_iostream_init_usart_instances.c
 
     # nanoFramework implementations
-    nano_sl_i2cspm.c
+    # nano_sl_i2cspm.c
 
     # autogen at target level
 )
