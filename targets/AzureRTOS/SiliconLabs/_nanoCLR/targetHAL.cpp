@@ -15,9 +15,6 @@
 // #if (HAL_USE_CAN == TRUE)
 // #include <nf_device_can_native_target.h>
 // #endif
-// #if (HAL_USE_I2C == TRUE)
-// #include <sys_dev_i2c_native_target.h>
-// #endif
 // #if (HAL_USE_SPI == TRUE)
 // #include <sys_dev_spi_native_target.h>
 // #endif
@@ -76,77 +73,70 @@ void nanoHAL_Initialize()
 
     CPU_GPIO_Initialize();
 
-// #if (HAL_USE_CAN == TRUE)
+    // #if (HAL_USE_CAN == TRUE)
 
-// #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
-//     Can1_PAL.Driver = NULL;
-// #endif
-// #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
-//     Can2_PAL.Driver = NULL;
-// #endif
-// #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
-//     Can3_PAL.Driver = NULL;
-// #endif
+    // #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
+    //     Can1_PAL.Driver = NULL;
+    // #endif
+    // #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
+    //     Can2_PAL.Driver = NULL;
+    // #endif
+    // #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
+    //     Can3_PAL.Driver = NULL;
+    // #endif
 
-// #endif
+    // #endif
 
-// #if (HAL_USE_I2C == TRUE)
+#if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
+    I2C0_PAL = {0};
+#endif
+#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
+    I2C1_PAL = {0};
+#endif
+#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
+    I2C1_PAL = {0};
+#endif
 
-// #if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
-//     I2C1_PAL.Driver = NULL;
-// #endif
-// #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
-//     I2C2_PAL.Driver = NULL;
-// #endif
-// #if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
-//     I2C3_PAL.Driver = NULL;
-// #endif
-// #if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
-//     I2C4_PAL.Driver = NULL;
-// #endif
+    // #if (HAL_USE_SPI == TRUE)
+    //     nanoSPI_Initialize();
+    // #endif
 
-// #endif
+    // #if (HAL_USE_UART == TRUE)
 
-// #if (HAL_USE_SPI == TRUE)
-//     nanoSPI_Initialize();
-// #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+    //     Uart1_PAL.UartDriver = NULL;
+    //     Uart1_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+    //     Uart2_PAL.UartDriver = NULL;
+    //     Uart2_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+    //     Uart3_PAL.UartDriver = NULL;
+    //     Uart3_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+    //     Uart4_PAL.UartDriver = NULL;
+    //     Uart4_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+    //     Uart5_PAL.UartDriver = NULL;
+    //     Uart5_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+    //     Uart6_PAL.UartDriver = NULL;
+    //     Uart6_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+    //     Uart7_PAL.UartDriver = NULL;
+    //     Uart7_PAL__.UartDriver = NULL;
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+    //     Uart8_PAL.UartDriver = NULL;
+    //     Uart8_PAL__.UartDriver = NULL;
+    // #endif
 
-// #if (HAL_USE_UART == TRUE)
-
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-//     Uart1_PAL.UartDriver = NULL;
-//     Uart1_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-//     Uart2_PAL.UartDriver = NULL;
-//     Uart2_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-//     Uart3_PAL.UartDriver = NULL;
-//     Uart3_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-//     Uart4_PAL.UartDriver = NULL;
-//     Uart4_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-//     Uart5_PAL.UartDriver = NULL;
-//     Uart5_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-//     Uart6_PAL.UartDriver = NULL;
-//     Uart6_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-//     Uart7_PAL.UartDriver = NULL;
-//     Uart7_PAL__.UartDriver = NULL;
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-//     Uart8_PAL.UartDriver = NULL;
-//     Uart8_PAL__.UartDriver = NULL;
-// #endif
-
-// #endif
+    // #endif
 
 #if (NANOCLR_GRAPHICS == TRUE)
     DisplayInterfaceConfig config; // not used for DSI display
@@ -184,7 +174,7 @@ void nanoHAL_Uninitialize()
     // }
 
     // TODO
-     SOCKETS_CloseConnections();
+    SOCKETS_CloseConnections();
 
 #if !defined(HAL_REDUCESIZE)
     // TODO need to call this but it's preventing the debug session from starting
@@ -197,85 +187,89 @@ void nanoHAL_Uninitialize()
     // - all mutexes for drivers that use them are released
     // - all drivers are stopped
 
-// #if (HAL_USE_SPI == TRUE)
-//     nanoSPI_Uninitialize();
-// #endif
+    // #if (HAL_USE_SPI == TRUE)
+    //     nanoSPI_Uninitialize();
+    // #endif
 
-// #if (HAL_USE_CAN == TRUE)
+    // #if (HAL_USE_CAN == TRUE)
 
-// #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
-//     canStop(&CAND1);
-// #endif
-// #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
-//     canStop(&CAND2);
-// #endif
-// #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
-//     canStop(&CAND3);
-// #endif
+    // #if defined(STM32_CAN_USE_CAN1) && (STM32_CAN_USE_CAN1 == TRUE)
+    //     canStop(&CAND1);
+    // #endif
+    // #if (STM32_CAN_USE_CAN2) && (STM32_CAN_USE_CAN2 == TRUE)
+    //     canStop(&CAND2);
+    // #endif
+    // #if (STM32_CAN_USE_CAN3) && (STM32_CAN_USE_CAN3 == TRUE)
+    //     canStop(&CAND3);
+    // #endif
 
-// #endif
+    // #endif
 
-// #if (HAL_USE_I2C == TRUE)
+#if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
+    if (I2C0_PAL.Configuration != NULL)
+    {
+        platform_free(I2C0_PAL.Configuration);
+        I2C0_PAL.Configuration = NULL;
+    }
+    I2C_Reset(I2C0);
+#endif
+#if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
+    if (I2C1_PAL.Configuration != NULL)
+    {
+        platform_free(I2C1_PAL.Configuration);
+        I2C1_PAL.Configuration = NULL;
+    }
+    I2C_Reset(I2C1);
+#endif
+#if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
+    if (I2C2_PAL.Configuration != NULL)
+    {
+        platform_free(I2C2_PAL.Configuration);
+        I2C2_PAL.Configuration = NULL;
+    }
+    I2C_Reset(I2C2);
+#endif
 
-// #if defined(STM32_I2C_USE_I2C1) && (STM32_I2C_USE_I2C1 == TRUE)
-//     i2cReleaseBus(&I2CD1);
-//     i2cStop(&I2CD1);
-// #endif
-// #if defined(STM32_I2C_USE_I2C2) && (STM32_I2C_USE_I2C2 == TRUE)
-//     i2cReleaseBus(&I2CD2);
-//     i2cStop(&I2CD2);
-// #endif
-// #if defined(STM32_I2C_USE_I2C3) && (STM32_I2C_USE_I2C3 == TRUE)
-//     i2cReleaseBus(&I2CD3);
-//     i2cStop(&I2CD3);
-// #endif
-// #if defined(STM32_I2C_USE_I2C4) && (STM32_I2C_USE_I2C4 == TRUE)
-//     i2cReleaseBus(&I2CD4);
-//     i2cStop(&I2CD4);
-// #endif
+    // #if (HAL_USE_SPI == TRUE)
+    //     nanoSPI_Uninitialize();
+    // #endif
 
-// #endif
+    // #if (HAL_USE_UART == TRUE)
 
-// #if (HAL_USE_SPI == TRUE)
-//     nanoSPI_Uninitialize();
-// #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
+    //     uartReleaseBus(&UARTD1);
+    //     uartStop(&UARTD1);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
+    //     uartReleaseBus(&UARTD2);
+    //     uartStop(&UARTD2);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
+    //     uartReleaseBus(&UARTD3);
+    //     uartStop(&UARTD3);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
+    //     uartReleaseBus(&UARTD4);
+    //     uartStop(&UARTD4);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
+    //     uartReleaseBus(&UARTD5);
+    //     uartStop(&UARTD5);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
+    //     uartReleaseBus(&UARTD6);
+    //     uartStop(&UARTD6);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
+    //     uartReleaseBus(&UARTD7);
+    //     uartStop(&UARTD7);
+    // #endif
+    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
+    //     uartReleaseBus(&UARTD8);
+    //     uartStop(&UARTD8);
+    // #endif
 
-// #if (HAL_USE_UART == TRUE)
-
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-//     uartReleaseBus(&UARTD1);
-//     uartStop(&UARTD1);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-//     uartReleaseBus(&UARTD2);
-//     uartStop(&UARTD2);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-//     uartReleaseBus(&UARTD3);
-//     uartStop(&UARTD3);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-//     uartReleaseBus(&UARTD4);
-//     uartStop(&UARTD4);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-//     uartReleaseBus(&UARTD5);
-//     uartStop(&UARTD5);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-//     uartReleaseBus(&UARTD6);
-//     uartStop(&UARTD6);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-//     uartReleaseBus(&UARTD7);
-//     uartStop(&UARTD7);
-// #endif
-// #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-//     uartReleaseBus(&UARTD8);
-//     uartStop(&UARTD8);
-// #endif
-
-// #endif
+    // #endif
 
     CPU_GPIO_Uninitialize();
 
