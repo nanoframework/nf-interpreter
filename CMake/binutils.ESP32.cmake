@@ -464,7 +464,7 @@ macro(nf_add_idf_as_library)
         set(SDKCONFIG_DEFAULTS_FILE ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/sdkconfig.default)
     endif()
 
-    message(STATUS "\n--SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
+    message(STATUS "\n-- SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
 
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
@@ -573,12 +573,16 @@ macro(nf_add_idf_as_library)
     # option for automatic XTAL frequency detection
     # (default is OFF which means that fixed default frequency will be used)
     option(ESP32_XTAL_FREQ_26 "option to set XTAL frequency to 26MHz")
-    
+   
+    message(DEBUG "ESP32_XTAL_FREQ_26 option is ${ESP32_XTAL_FREQ_26}")
+
     if(ESP32_XTAL_FREQ_26)
 
         message(STATUS "Set XTAL frequency to 26MHz")
-                
-        # need to read the supplied SDK CONFIG file and replace the appropriate options            
+
+        # need to read the supplied SDK CONFIG file(s) and replace the appropriate options
+
+        message(DEBUG "Reading SDK config from '${SDKCONFIG_DEFAULTS_FILE}'")
         file(READ
             "${SDKCONFIG_DEFAULTS_FILE}"
             SDKCONFIG_DEFAULT_CONTENTS)
@@ -589,12 +593,31 @@ macro(nf_add_idf_as_library)
             SDKCONFIG_DEFAULT_FINAL_CONTENTS
             "${SDKCONFIG_DEFAULT_CONTENTS}")
 
+        # now do the same for the series config file, if it exists
+        file(READ
+            "${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}"
+            SDKCONFIG_DEFAULT_SERIES_CONTENTS)
+        
+        string(REPLACE
+            "CONFIG_ESP32_XTAL_FREQ_40"
+            "CONFIG_ESP32_XTAL_FREQ_26"
+            SDKCONFIG_DEFAULT_SERIES_FINAL_CONTENTS
+            "${SDKCONFIG_DEFAULT_SERIES_CONTENTS}")
+
         # need to temporarilly allow changes in source files
         set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
 
         file(WRITE 
             ${SDKCONFIG_DEFAULTS_FILE} 
             ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
+
+        message(DEBUG "Wrote updated SDK config to '${SDKCONFIG_DEFAULTS_FILE}'")
+
+        file(WRITE 
+            "${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}" 
+            ${SDKCONFIG_DEFAULT_SERIES_FINAL_CONTENTS})
+
+        message(DEBUG "Wrote updated SDK config to '${SDKCONFIG_DEFAULTS_FILE}.${TARGET_SERIES_SHORT}'")
 
         set(CMAKE_DISABLE_SOURCE_CHANGES ON)
     else()
