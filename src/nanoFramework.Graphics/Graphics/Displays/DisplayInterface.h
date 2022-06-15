@@ -45,6 +45,15 @@ struct DisplayInterface
     void DisplayBacklight(bool on); // true = on
     void SendCommand(CLR_UINT8 arg_count, ...);
     void SendBytes(CLR_UINT8 *data, CLR_UINT32 length);
+    void SendData16Windowed(
+        CLR_UINT16 *data,
+        CLR_UINT32 startX,
+        CLR_UINT32 startY,
+        CLR_UINT32 width,
+        CLR_UINT32 height,
+        CLR_UINT32 stride,
+        bool doByteSwap);
+    void FillData16(CLR_UINT16 fillValue, CLR_UINT32 fillLength);
     void SetCommandMode(int mode);
 };
 

@@ -256,55 +256,9 @@ void DisplayDriver::BitBlt(
 
     SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
-    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
-    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
-    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    // Offset for window start
-    StartOfLine_src += (srcY * stride) + srcX;
-
-    CLR_UINT8 command = Memory_Write;
-    g_DisplayInterface.SendCommand(1, command);
-
-    while (height--)
-    {
-        CLR_UINT16 *src;
-        int xCount;
-
-        src = StartOfLine_src;
-        xCount = width;
-
-        while (xCount--)
-        {
-            CLR_UINT16 dt = *src++;
-            *transferBufferIndex++ = (dt >> 8);
-            *transferBufferIndex++ = dt & 0xff;
-            transferBufferCount -= 2;
-
-            // Send over SPI if no room for another 2 bytes
-            if (transferBufferCount < 1)
-            {
-                // Transfer buffer full, send it
-                g_DisplayInterface.SendBytes(
-                    Attributes.TransferBuffer,
-                    (Attributes.TransferBufferSize - transferBufferCount));
-
-                // Reset transfer ptrs/count
-                transferBufferIndex = Attributes.TransferBuffer;
-                transferBufferCount = Attributes.TransferBufferSize;
-            }
-        }
-
-        // Next row in data[]
-        StartOfLine_src += Attributes.Width;
-    }
-
-    // Send remaining data in transfer buffer to SPI
-    if (transferBufferCount < Attributes.TransferBufferSize)
-    {
-        // Transfer buffer full, send it
-        g_DisplayInterface.SendBytes(Attributes.TransferBuffer, (Attributes.TransferBufferSize - transferBufferCount));
-    }
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }
