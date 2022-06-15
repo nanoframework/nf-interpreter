@@ -153,10 +153,6 @@ void tx_application_define(void *first_unused_memory)
 //  Application entry point.
 int main(void)
 {
-    // Initialize the board
-    sl_board_preinit();
-    sl_board_init();
-    sl_driver_init();
     sl_service_init();
     sl_stack_init();
     sl_internal_app_init();
