@@ -384,11 +384,11 @@ void CPU_GPIO_SetPinState(GPIO_PIN pin, GpioPinValue pinState)
 
     if (pinState == GpioPinValue_High)
     {
-        GPIO_PortOutSet(port, portPin);
+        GPIO_PinOutSet(port, portPin);
     }
     else
     {
-        GPIO_PortOutClear(port, portPin);
+        GPIO_PinOutClear(port, portPin);
     }
 }
 
@@ -398,7 +398,7 @@ void CPU_GPIO_TogglePinState(GPIO_PIN pin)
     uint32_t portPin;
     GetIoLine(pin, &port, &portPin);
 
-    GPIO_PortOutToggle(port, portPin);
+    GPIO_PinOutToggle(port, portPin);
 }
 
 bool CPU_GPIO_EnableInputPin(
