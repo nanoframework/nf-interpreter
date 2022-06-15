@@ -509,7 +509,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
             // get slave address from connection settings field
             i2cTransfer.addr =
-                (uint16_t)connectionSettings[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4;
+                (uint16_t)connectionSettings[I2cConnectionSettings::FIELD___deviceAddress].NumericByRef().s4 << 1;
 
             if (writeBuffer != NULL)
             {
@@ -593,8 +593,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
 
                     i2cTransfer.buf[0].data = palI2c->WriteBuffer;
                     i2cTransfer.buf[0].len = palI2c->WriteSize;
-                    i2cTransfer.buf[1].data = NULL;
-                    i2cTransfer.buf[1].len = 0;
 
                     // Perform the transfer and return status from the transfer
                     transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
@@ -605,8 +603,6 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::
                     i2cTransfer.flags = I2C_FLAG_READ;
                     i2cTransfer.buf[0].data = palI2c->ReadBuffer;
                     i2cTransfer.buf[0].len = palI2c->ReadSize;
-                    i2cTransfer.buf[1].data = NULL;
-                    i2cTransfer.buf[1].len = 0;
 
                     // Perform the transfer and return status from the transfer
                     transactionResult = I2CSPM_Transfer(palI2c->Configuration->port, &i2cTransfer);
