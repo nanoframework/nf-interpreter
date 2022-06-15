@@ -189,7 +189,7 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     // setting this to 0 forces the transfer to be synchronous
     // reverting to this for the time being until a definitive solution is found
     wrc.callback = 0;
-    
+
     wrc.fullDuplex = false;
     wrc.readOffset = 0;
 
