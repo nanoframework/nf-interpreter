@@ -228,13 +228,19 @@ void SendData16(CLR_UINT16 *data, CLR_UINT32 length, bool doByteSwap)
         CLR_UINT32 toWrite = length;
 
         if (toWrite > (SPI_MAX_TRANSFER_16 - bufferWritten))
+        {
             toWrite = (SPI_MAX_TRANSFER_16 - bufferWritten);
+        }
 
         // If we need to byteswap the data, do that - otherwise we can just memcpy it
         if (doByteSwap)
+        {
             CopyData16ByteSwapped(bufferPtr, data, toWrite);
+        }
         else
+        {
             memcpy(bufferPtr, data, toWrite * 2);
+        }
 
         bufferPtr += toWrite;
         data += toWrite;
