@@ -127,7 +127,22 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     NF_PAL_I2C *palI2c = NULL;
     CLR_RT_HeapBlock *connectionSettings;
     uint8_t busIndex;
-    I2CSPM_Init_TypeDef i2cInit = I2CSPM_INIT_DEFAULT;
+    I2CSPM_Init_TypeDef i2cInit = {
+        NULL,
+        0,
+        0,
+        0,
+        0,
+#if defined(_SILICON_LABS_32B_SERIES_0)
+        0,
+#elif defined(_SILICON_LABS_32B_SERIES_1)
+        0,
+        0,
+#endif
+        0,
+        I2C_FREQ_STANDARD_MAX,
+        i2cClockHLRStandard,
+    };
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();

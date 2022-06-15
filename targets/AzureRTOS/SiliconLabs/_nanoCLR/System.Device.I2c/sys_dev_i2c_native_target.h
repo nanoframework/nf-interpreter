@@ -8,7 +8,6 @@
 
 #include <em_device.h>
 #include <sl_i2cspm.h>
-#include <i2cspmconfig.h>
 
 #include <targetPAL.h>
 #include <nanoHAL.h>
