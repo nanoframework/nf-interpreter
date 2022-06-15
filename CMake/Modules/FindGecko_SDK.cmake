@@ -98,9 +98,12 @@ set(gecko_sdk_srcs
     sl_event_handler.c
     sl_board_default_init_stub.c
     sl_i2cspm_init.c
-    sl_i2cspm.c
+    # sl_i2cspm.c
     sl_iostream_handles.c
     sl_iostream_init_usart_instances.c
+
+    # nanoFramework implementations
+    nano_sl_i2cspm.c
 
     # autogen at target level
 )
@@ -145,6 +148,9 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             # target specifics
             ${TARGET_BASE_LOCATION}/autogen
             ${TARGET_BASE_LOCATION}/config
+
+            # nanoFramework implementations
+            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR/System.Device.I2c
 
             CMAKE_FIND_ROOT_PATH_BOTH
         )
