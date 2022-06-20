@@ -130,6 +130,8 @@ HRESULT CPU_SPI_nWrite_nRead(
     uint8_t *readPtr,
     int32_t readSize);
 
+void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev);
+
 // Write / read 16 bit data to device specified by handle
 // return result 0=S_OK, CLR_E_BUSY async operation and operation still running or another error code
 HRESULT CPU_SPI_nWrite16_nRead16(

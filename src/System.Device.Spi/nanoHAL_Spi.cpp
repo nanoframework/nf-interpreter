@@ -53,6 +53,12 @@ __nfweak HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceCon
     return S_OK;
 }
 
+__nfweak void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+{
+    (void)deviceHandle;
+    (void)spiDeviceConfig;
+}
+
 __nfweak bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 {
     (void)deviceHandle;
@@ -359,6 +365,9 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle)
         return CLR_E_INVALID_PARAMETER;
     }
 
+    // Wait until device is not busy
+    CPU_SPI_Wait_Busy(spiconfig[spiBus].deviceHandles[deviceIndex], spiconfig[spiBus].deviceCongfig[deviceIndex]);
+
     // Remove device from bus (ignore any error )
     CPU_SPI_Remove_Device(spiconfig[spiBus].deviceHandles[deviceIndex]);
 
@@ -393,6 +402,16 @@ float nanoSPI_GetByteTime(uint32_t handle)
     getDevice(handle, spiBus, deviceIndex);
 
     return spiconfig[spiBus].byteTime[deviceIndex];
+}
+
+void nanoSPI_Wait_Busy(uint32_t handle)
+{
+    uint8_t spiBus;
+    int deviceIndex;
+
+    getDevice(handle, spiBus, deviceIndex);
+
+    CPU_SPI_Wait_Busy(spiconfig[spiBus].deviceHandles[deviceIndex], spiconfig[spiBus].deviceCongfig[deviceIndex]);
 }
 
 //
