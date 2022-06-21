@@ -53,6 +53,8 @@ HRESULT nanoSPI_CloseDevice(uint32_t handle);
 // Return the time in ms for a byte transfer
 float nanoSPI_GetByteTime(uint32_t handle);
 
+void nanoSPI_Wait_Busy(uint32_t handle);
+
 // Execute a SPI write/read operation
 // if callback is null the operation will completed as part of the call
 // if callback is not null then the job will be queued and the callback called when completed

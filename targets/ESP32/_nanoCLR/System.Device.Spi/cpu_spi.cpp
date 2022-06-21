@@ -153,6 +153,8 @@ bool CPU_SPI_Initialize(uint8_t spiBus, SpiBusConfiguration spiConfiguration)
     nf_pal_spi[spiBus].BusIndex = spiBus;
     nf_pal_spi[spiBus].status = SPI_OP_STATUS::SPI_OP_READY;
 
+    haveAsyncTrans[spiBus] = false;
+
     return true;
 }
 
@@ -290,6 +292,17 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
     return S_OK;
 }
 
+void CPU_SPI_Wait_Busy(uint32_t deviceHandle, SPI_DEVICE_CONFIGURATION &sdev)
+{
+    if (haveAsyncTrans[sdev.Spi_Bus])
+    {
+        spi_transaction_t *rtrans;
+        spi_device_get_trans_result((spi_device_handle_t)deviceHandle, &rtrans, portMAX_DELAY);
+
+        haveAsyncTrans[sdev.Spi_Bus] = false;
+    }
+}
+
 // Performs a read/write operation on 8-bit word data.
 //
 // Parameters
@@ -391,13 +404,8 @@ HRESULT CPU_SPI_nWrite_nRead(
         pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
         pnf_pal_spi->callback = wrc.callback;
 
-        if (haveAsyncTrans[sdev.Spi_Bus])
-        {
-            spi_transaction_t *rtrans;
-            ret = spi_device_get_trans_result((spi_device_handle_t)deviceHandle, &rtrans, portMAX_DELAY);
-
-            haveAsyncTrans[sdev.Spi_Bus] = false;
-        }
+        // Wait for any previously queued async transfer
+        CPU_SPI_Wait_Busy(deviceHandle, sdev);
 
         // Set up SPI Transaction
         spi_transaction_t *pTrans = &pnf_pal_spi->trans;
