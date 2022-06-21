@@ -30,10 +30,11 @@ CLR_UINT8 spiBuffer2[SPI_MAX_TRANSFER_SIZE];
 CLR_UINT8 spiCommandMode = 0; // 0 Command first byte, 1 = Command all bytes
 
 // State variables for writes
-CLR_UINT16 *currentBuffer = (CLR_UINT16 *)spiBuffer;
-CLR_UINT16 *bufferPtr = currentBuffer;
-CLR_UINT32 bufferWritten = 0;
+CLR_UINT16 *currentBuffer;
+CLR_UINT16 *bufferPtr;
+CLR_UINT32 bufferWritten;
 
+void SwapBuffers();
 void FlushData();
 void CopyData16ByteSwapped(CLR_UINT16 *dest, CLR_UINT16 *src, CLR_UINT32 length);
 void SendData16(CLR_UINT16 *data, CLR_UINT32 length, bool doByteSwap);
@@ -52,6 +53,10 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
 
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // Spi clock speed.
+
+    currentBuffer = (CLR_UINT16 *)spiBuffer;
+    bufferPtr = currentBuffer;
+    bufferWritten = 0;
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
     ASSERT(hr == ESP_OK);
@@ -128,6 +133,9 @@ void DisplayInterface::SendCommand(CLR_UINT8 arg_count, ...)
         parameters[i] = va_arg(ap, int);
     }
 
+    // Make sure any outstanding async writes have finished before we set the pin low
+    nanoSPI_Wait_Busy(spiDeviceHandle);
+
     CPU_GPIO_SetPinState(lcdDC, GpioPinValue_Low); // Command mode
     if (spiCommandMode == 0)
     {
@@ -185,17 +193,21 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     SPI_WRITE_READ_SETTINGS wrc;
 
     wrc.Bits16ReadWrite = false;
-
-    // setting this to 0 forces the transfer to be synchronous
-    // reverting to this for the time being until a definitive solution is found
-    wrc.callback = 0;
-
+    wrc.callback = sendAsync ? spi_callback : 0;
     wrc.fullDuplex = false;
     wrc.readOffset = 0;
 
     nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, NULL, 0);
 
     return;
+}
+
+// Swap between our two data transfer buffers
+void SwapBuffers()
+{
+    currentBuffer = (currentBuffer == (CLR_UINT16 *)spiBuffer) ? (CLR_UINT16 *)spiBuffer2 : (CLR_UINT16 *)spiBuffer;
+    bufferPtr = currentBuffer;
+    bufferWritten = 0;
 }
 
 // Flush any remaining buffered data, and swap buffers
@@ -205,9 +217,7 @@ void FlushData()
     {
         InternalSendBytes((CLR_UINT8 *)currentBuffer, bufferWritten * 2, true);
 
-        currentBuffer = (currentBuffer == (CLR_UINT16 *)spiBuffer) ? (CLR_UINT16 *)spiBuffer2 : (CLR_UINT16 *)spiBuffer;
-        bufferPtr = currentBuffer;
-        bufferWritten = 0;
+        SwapBuffers();
     }
 }
 
@@ -308,6 +318,9 @@ void DisplayInterface::FillData16(CLR_UINT16 fillValue, CLR_UINT32 fillLength)
 
         fillLength -= SPI_MAX_TRANSFER_16;
     }
+
+    // Swap buffers at the end so the next call doesn't overwrite our data
+    SwapBuffers();
 }
 
 #endif // SPI_TO_DISPLAY_
