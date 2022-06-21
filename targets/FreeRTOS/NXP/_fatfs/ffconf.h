@@ -26,7 +26,6 @@
 /   2: f_opendir(), f_readdir() and f_closedir() are removed in addition to 1.
 /   3: f_lseek() function is removed in addition to 2. */
 
-
 #define FF_USE_FIND 1
 /* This option switches filtered directory read functions, f_findfirst() and
 /  f_findnext(). (0:Disable, 1:Enable 2:Enable with matching altname[] too) */
@@ -51,11 +50,10 @@
 #define FF_USE_FORWARD 0
 /* This option switches f_forward() function. (0:Disable or 1:Enable) */
 
-
-#define FF_USE_STRFUNC	1
-#define FF_PRINT_LLI	0
-#define FF_PRINT_FLOAT	0
-#define FF_STRF_ENCODE	3
+#define FF_USE_STRFUNC 1
+#define FF_PRINT_LLI   0
+#define FF_PRINT_FLOAT 0
+#define FF_STRF_ENCODE 3
 /* FF_USE_STRFUNC switches string functions, f_gets(), f_putc(), f_puts() and
 /  f_printf().
 /
@@ -74,7 +72,6 @@
 /   2: Unicode in UTF-16BE
 /   3: Unicode in UTF-8
 */
-
 
 /*---------------------------------------------------------------------------/
 / Locale and Namespace Configurations
@@ -144,7 +141,6 @@
 /  which is used to read out directory items. These values should be suffcient for
 /  the file names to read. The maximum possible length of the read file name depends
 /  on character encoding. When LFN is not enabled, these options have no effect. */
-
 
 #define FF_FS_RPATH 2
 /* This option configures support for relative path.
