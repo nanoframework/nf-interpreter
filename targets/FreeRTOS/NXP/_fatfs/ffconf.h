@@ -1,11 +1,13 @@
-/* CHIBIOS FIX */
-#include "ch.h"
-
 /*---------------------------------------------------------------------------/
 /  FatFs Functional Configurations
 /---------------------------------------------------------------------------*/
 
 #define FFCONF_DEF 86631 /* Revision ID */
+
+#define SD_DISK_ENABLE
+
+/* Definitions of physical drive number for each drive */
+#define SDDISK 0 /* sd disk to physical drive 0 */
 
 /*---------------------------------------------------------------------------/
 / Function Configurations
@@ -142,7 +144,7 @@
 /  the file names to read. The maximum possible length of the read file name depends
 /  on character encoding. When LFN is not enabled, these options have no effect. */
 
-#define FF_FS_RPATH 2
+#define FF_FS_RPATH 1
 /* This option configures support for relative path.
 /
 /   0: Disable relative path and remove related functions.
@@ -154,11 +156,11 @@
 / Drive/Volume Configurations
 /---------------------------------------------------------------------------*/
 
-#define FF_VOLUMES 3
+#define FF_VOLUMES 1
 /* Number of volumes (logical drives) to be used. (1-10) */
 
 #define FF_STR_VOLUME_ID 1
-#define FF_VOLUME_STRS   "D", "E", "F"
+#define FF_VOLUME_STRS   "D"
 /* FF_STR_VOLUME_ID switches support for volume ID in arbitrary strings.
 /  When FF_STR_VOLUME_ID is set to 1 or 2, arbitrary strings can be used as drive
 /  number in the path name. FF_VOLUME_STRS defines the volume ID strings for each
@@ -239,7 +241,7 @@
 /  bit1=1: Do not trust last allocated cluster number in the FSINFO.
 */
 
-#define FF_FS_LOCK 0
+#define FF_FS_LOCK 1
 /* The option FF_FS_LOCK switches file lock function to control duplicated file open
 /  and illegal operation to open objects. This option must be 0 when FF_FS_READONLY
 /  is 1.
@@ -250,9 +252,9 @@
 /      can be opened simultaneously under file lock control. Note that the file
 /      lock control is independent of re-entrancy. */
 
-#define FF_FS_REENTRANT 1
-#define FF_FS_TIMEOUT   TIME_MS2I(1000)
-#define FF_SYNC_t       semaphore_t *
+#define FF_FS_REENTRANT 0
+#define FF_FS_TIMEOUT   1000
+#define FF_SYNC_t       HANDLE
 /* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
 /  volume is always re-entrant and volume control functions, f_mount(), f_mkfs()
