@@ -21,7 +21,7 @@
 static const char *TAG = "Memory";
 
 // Space to leave free in SPIRAM for allocation by IDF malloc
-#define SPIRAM_MEMORY_LEAVE_FOR_ALLOCATION (256 * 1024)
+// #define SPIRAM_MEMORY_LEAVE_FOR_ALLOCATION (256 * 1024)
 
 #if HAL_USE_BLE
 // Reduce Managed heap if using BLE without spiram
@@ -120,7 +120,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
             largestFreeBlock = spiramMaxSize;
 
             // get heap size to allocate
-            managedHeapSize = spiramMaxSize - SPIRAM_MEMORY_LEAVE_FOR_ALLOCATION;
+            managedHeapSize = spiramMaxSize - NATIVE_RESERVED_SPIRAM;
 
             ESP_LOGI(TAG, "Allocating managed heap from SPIRAM");
         }
