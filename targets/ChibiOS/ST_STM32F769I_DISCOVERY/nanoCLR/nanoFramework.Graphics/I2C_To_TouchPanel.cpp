@@ -12,7 +12,7 @@
 #include "TouchInterface.h"
 #include "hal_i2c.h"
 #include "CPU_GPIO_decl.h"
-#include "Core_Cm7.h"
+#include "core_cm7.h"
 #include "STM32f769xx.h"
 
 #define UNUSED(x)  (void)x
