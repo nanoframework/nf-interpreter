@@ -474,6 +474,20 @@ endif()
 #################################################################
 
 #############################################
+# handles inclusion of System.Data.Sqlite API
+#############################################
+
+if(API_nanoFramework.System.Data.Sqlite)
+    set(TARGET_SYSTEM_DATA_SQLITE TRUE CACHE INTERNAL "enable support for System.Data.Sqlite API")
+    message(STATUS "Support for System.Data.Sqlite API enabled")
+else()
+    set(TARGET_SYSTEM_DATA_SQLITE FALSE CACHE INTERNAL "DISABLE support for System.Data.Sqlite API")
+    message(STATUS "Support for System.Data.Sqlite API **IS NOT** enabled")
+endif()
+
+#################################################################
+
+#############################################
 # handles inclusion of System.Text API
 #############################################
 

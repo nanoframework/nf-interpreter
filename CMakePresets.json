@@ -219,6 +219,7 @@
                 "API_nanoFramework.Device.Can": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Data.Sqlite": "ON",
                 "API_nanoFramework.System.Text": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
