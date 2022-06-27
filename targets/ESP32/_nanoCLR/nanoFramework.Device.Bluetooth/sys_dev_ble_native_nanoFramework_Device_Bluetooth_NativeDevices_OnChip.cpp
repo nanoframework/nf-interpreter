@@ -650,7 +650,8 @@ void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 }
 #endif
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeInitService___BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeInitService___BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
@@ -663,7 +664,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeStartAdvertising___BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeStartAdvertising___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     bool result = false;
 
@@ -750,7 +752,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeStopAdvertising___VOID( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeStopAdvertising___VOID(
+    CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
@@ -769,7 +772,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
 //  Arg2 - Characteristic ID
 //  Arg3 - Notify Byte buffer
 //
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeNotifyClient___I4__U2__U2__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeNotifyClient___I4__U2__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -805,7 +809,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeReadRespondWithValue___VOID__U2__SZARRAY_U1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeReadRespondWithValue___VOID__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -839,7 +844,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeReadRespondWithProtocolError___VOID__U2__U1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeReadRespondWithProtocolError___VOID__U2__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -860,7 +866,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
 //
 //  Get data written to an attribute
 //
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeWriteGetData___SZARRAY_U1__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeWriteGetData___SZARRAY_U1__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -898,7 +905,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeWriteRespond___VOID__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeWriteRespond___VOID__U2(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -914,9 +922,10 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeWriteRespondWithProtocolError___VOID__U2__U1( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeWriteRespondWithProtocolError___VOID__U2__U1(CLR_RT_StackFrame &stack)
 {
-     NANOCLR_HEADER();
+    NANOCLR_HEADER();
     {
         // debug_printf("NativeWriteRespondWithProtocolError\n");
 
