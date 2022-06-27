@@ -16,6 +16,7 @@ option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtim
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
 option(API_nanoFramework.System.Collections     "option for nanoFramework.System.Collections")
 option(API_nanoFramework.System.Text            "option for nanoFramework.System.Text")
+option(API_nanoFramework.System.Data.Sqlite     "option for nanoFramework.System.Data.Sqlite")
 option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
@@ -217,6 +218,12 @@ endif()
 if(API_nanoFramework.System.Collections)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.System.Collections")
+endif()
+
+# nanoFramework.System.Data.Sqlite
+if(API_nanoFramework.System.Data.Sqlite)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.Data.Sqlite")
 endif()
 
 # nanoFramework.System.Text
