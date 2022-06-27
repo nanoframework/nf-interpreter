@@ -8,7 +8,7 @@
 
 #include "nf_system_data_sqlite.h"
 #include "sqlite3.h"
-#include "sqlite3ext.h"
+//#include "sqlite3ext.h"
 
 #define SQLITE_OMIT_WAL
 #define SQLITE_OMIT_LOAD_EXTENSION
@@ -16,7 +16,14 @@
 #define SQLITE_OMIT_EXPLAIN
 #define SQLITE_THREADSAFE=0
 #define SQLITE_TEMP_STORE=3
-#define SQLITE_ENABLE_MEMSYS5
+#define SQLITE_ENABLE_MEMSYS5=0
+
+//#define SQLITE_ENABLE_HIDDEN_COLUMNS=0
+#define HAVE_ISNAN=0
+#define SQLITE_HAVE_ISNAN=0
+#define SQLITE_DEBUG
+#define HAVE_LOCALTIME=0
+#define HAVE_LOCALTIME_S=0
 
 HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeOpen___I4__STRING(
     CLR_RT_StackFrame &stack)
