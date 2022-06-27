@@ -10,6 +10,14 @@
 #include "sqlite3.h"
 #include "sqlite3ext.h"
 
+#define SQLITE_OMIT_WAL
+#define SQLITE_OMIT_LOAD_EXTENSION
+#define SQLITE_OMIT_AUTHORIZATION
+#define SQLITE_OMIT_EXPLAIN
+#define SQLITE_THREADSAFE=0
+#define SQLITE_TEMP_STORE=3
+#define SQLITE_ENABLE_MEMSYS5
+
 HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeOpen___I4__STRING(
     CLR_RT_StackFrame &stack)
 {
