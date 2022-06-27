@@ -1,3 +1,5 @@
+// clang-format off
+
 /*
 ** 2006 June 7
 **
@@ -687,3 +689,5 @@ typedef int (*sqlite3_loadext_entry)(
 #endif
 
 #endif /* SQLITE3EXT_H */
+
+// clang-format on
