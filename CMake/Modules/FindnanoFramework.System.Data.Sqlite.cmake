@@ -11,7 +11,7 @@ list(APPEND nanoFramework.System.Data.Sqlite_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/s
 set(nanoFramework.System.Data.Sqlite_SRCS
 
     # source files of the assembly
-    nf_system_data_sqllite_native_System_Data_Sqlite_SqliteCommand_stubs.cpp
+    nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand.cpp
     shell.c
     sqlite3.c
 )
@@ -33,7 +33,7 @@ foreach(SRC_FILE ${nanoFramework.System.Data.Sqlite_SRCS})
         message("${SRC_FILE} >> ${nanoFramework.System.Data.SqLite_SRC_FILE}")
     endif()
 
-    list(APPEND nanoFramework.System.Text_SOURCES ${nanoFramework.System.Data.Sqlite_SRC_FILE})
+    list(APPEND nanoFramework.System.Data.Sqlite_SOURCES ${nanoFramework.System.Data.Sqlite_SRC_FILE})
     
 endforeach()
 
