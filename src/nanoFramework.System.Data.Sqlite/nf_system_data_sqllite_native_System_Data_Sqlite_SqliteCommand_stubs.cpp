@@ -1,3 +1,5 @@
+// clang-format off
+
 //
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -145,3 +147,5 @@ HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeCo
 
     NANOCLR_NOCLEANUP();
 }
+
+// clang-format on

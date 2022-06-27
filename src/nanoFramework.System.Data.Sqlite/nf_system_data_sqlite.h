@@ -1,3 +1,5 @@
+// clang-format off
+
 //
 // Copyright (c) .NET Foundation and Contributors
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
@@ -97,3 +99,5 @@ struct Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Data_Sqlite;
 
 #endif  //_NF_SYSTEM_DATA_SQLITE_H_
+
+// clang-format on
