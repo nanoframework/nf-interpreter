@@ -12,7 +12,7 @@ set(nanoFramework.System.Data.Sqlite_SRCS
 
     # source files of the assembly
     nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand.cpp
-    shell.c
+    # shell.c
     sqlite3.c
 )
 

@@ -18,12 +18,12 @@
 #define SQLITE_TEMP_STORE=3
 #define SQLITE_ENABLE_MEMSYS5
 
-//#define SQLITE_ENABLE_HIDDEN_COLUMNS
-#define HAVE_ISNAN=0
-#define SQLITE_HAVE_ISNAN=0
-#define SQLITE_DEBUG
-#define HAVE_LOCALTIME=0
-#define HAVE_LOCALTIME_S=0
+// #define SQLITE_ENABLE_HIDDEN_COLUMNS
+// #define HAVE_ISNAN=0
+// #define SQLITE_HAVE_ISNAN=0
+// #define SQLITE_DEBUG
+// #define HAVE_LOCALTIME=0
+// #define HAVE_LOCALTIME_S=0
 
 HRESULT Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand::NativeOpen___I4__STRING(
     CLR_RT_StackFrame &stack)
