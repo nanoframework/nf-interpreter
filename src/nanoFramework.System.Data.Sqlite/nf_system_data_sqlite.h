@@ -61,13 +61,12 @@ typedef enum __nfpack SQLiteErrorCode
 
 struct Library_nf_system_data_sqlite_System_Data_Sqlite_ResultSet
 {
-    static const int FIELD__<RowCount>k__BackingField = 1;
-    static const int FIELD__<ColumnCount>k__BackingField = 2;
-    static const int FIELD__<ColumnNames>k__BackingField = 3;
-    static const int FIELD__<Data>k__BackingField = 4;
+    static const int FIELD__<RowCount> k__BackingField = 1;
+    static const int FIELD__<ColumnCount> k__BackingField = 2;
+    static const int FIELD__<ColumnNames> k__BackingField = 3;
+    static const int FIELD__<Data> k__BackingField = 4;
 
     //--//
-
 };
 
 struct Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand
@@ -91,9 +90,8 @@ struct Library_nf_system_data_sqlite_System_Data_Sqlite_SqliteCommand
     NANOCLR_NATIVE_DECLARE(NativeColumnBlobData___VOID__I4__I4__SZARRAY_U1);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_System_Data_Sqlite;
 
-#endif  //_NF_SYSTEM_DATA_SQLITE_H_
+#endif //_NF_SYSTEM_DATA_SQLITE_H_
