@@ -1,4 +1,4 @@
-The following files are the amalgomated C lib for SQLite
+The following files are the amalgamated C lib for SQLite
 shell.c
 sqlite3.c
 sqlite3.h
