@@ -22,8 +22,8 @@ bool TouchInterface::Initialize()
     return true;
 }
 
-CLR_UINT8* TouchInterface::Write_Read(
-    CLR_UINT8* valuesToSend,
+CLR_UINT8 *TouchInterface::Write_Read(
+    CLR_UINT8 *valuesToSend,
     CLR_UINT16 numberOfValuesToSend,
     CLR_UINT16 numberValuesExpected)
 {
@@ -35,4 +35,4 @@ CLR_UINT8* TouchInterface::Write_Read(
     return 0;
 }
 
-#endif //SPI_TO_TOUCHPANEL_H
+#endif // SPI_TO_TOUCHPANEL_H
