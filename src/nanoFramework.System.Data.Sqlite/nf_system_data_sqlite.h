@@ -63,10 +63,10 @@ typedef enum __nfpack SQLiteErrorCode
 
 struct Library_nf_system_data_sqlite_System_Data_Sqlite_ResultSet
 {
-    static const int FIELD__<RowCount>k__BackingField = 1;
-    static const int FIELD__<ColumnCount>k__BackingField = 2;
-    static const int FIELD__<ColumnNames>k__BackingField = 3;
-    static const int FIELD__<Data>k__BackingField = 4;
+    static const int FIELD__RowCount = 1;
+    static const int FIELD__ColumnCount = 2;
+    static const int FIELD__ColumnNames = 3;
+    static const int FIELD__Data = 4;
 
     //--//
 
