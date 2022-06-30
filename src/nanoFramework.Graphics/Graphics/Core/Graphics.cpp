@@ -562,7 +562,7 @@ void CLR_GFX_Bitmap::SetPixelsHelper(
     GraphicsDriver::SetPixelsHelper(m_palBitmap, rect, config, callback, param);
 }
 
-void CLR_GFX_Bitmap::DrawChar(ushort c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
+void CLR_GFX_Bitmap::DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
 {
     CLR_GFX_FontCharacterInfo chr;
 
