@@ -263,6 +263,26 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    CLR_GFX_Bitmap *bitmap;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    CLR_GFX_Font *font;
+    CLR_RT_HeapBlock *pArgs;
+
+    pArgs = &(stack.Arg1());
+
+    NANOCLR_CHECK_HRESULT(Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(&pArgs[4], font));
+
+    bitmap->DrawChar(pArgs[0].NumericByRef().u2, *font, pArgs[3].NumericByRef().u4, pArgs[1].NumericByRef().s4, pArgs[2].NumericByRef().s4);
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRectangle___VOID__I4__I4__I4__I4(
     CLR_RT_StackFrame &stack)
 {

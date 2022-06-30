@@ -505,6 +505,7 @@ struct CLR_GFX_Bitmap
         const GFX_Rect &src,
         CLR_UINT16 opacity);
 
+    void DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     void DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     static HRESULT DrawTextInRect(
         LPCSTR &szText,
