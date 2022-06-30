@@ -245,8 +245,12 @@ struct DivHelper
         //       initY is the initial value of Y
         a = _a;
         b = _b;
+
         if (b != 0)
             stride = a / b;
+        else
+            stride = 0;
+
         DIncStride = 2 * (a - b * stride);
         DIncStridePlus1 = 2 * (a - b * (stride + 1));
         Reset(initY);
