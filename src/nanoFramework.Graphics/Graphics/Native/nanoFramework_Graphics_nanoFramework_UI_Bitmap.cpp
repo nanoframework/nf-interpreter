@@ -263,7 +263,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -278,7 +279,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID_
 
     NANOCLR_CHECK_HRESULT(Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(&pArgs[4], font));
 
-    bitmap->DrawChar(pArgs[0].NumericByRef().u2, *font, pArgs[3].NumericByRef().u4, pArgs[1].NumericByRef().s4, pArgs[2].NumericByRef().s4);
+    bitmap->DrawChar(
+        pArgs[0].NumericByRef().u2,
+        *font,
+        pArgs[3].NumericByRef().u4,
+        pArgs[1].NumericByRef().s4,
+        pArgs[2].NumericByRef().s4);
 
     NANOCLR_NOCLEANUP();
 }
