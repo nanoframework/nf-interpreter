@@ -247,9 +247,13 @@ struct DivHelper
         b = _b;
 
         if (b != 0)
+        {
             stride = a / b;
+        }
         else
+        {
             stride = 0;
+        }
 
         DIncStride = 2 * (a - b * stride);
         DIncStridePlus1 = 2 * (a - b * (stride + 1));
