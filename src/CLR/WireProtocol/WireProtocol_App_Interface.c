@@ -7,6 +7,9 @@
 #include <WireProtocol_Message.h>
 #include <WireProtocol_App_Interface.h>
 
+#if defined(__GNUC__)
+__attribute__((aligned(32)))
+#endif
 static uint8_t receptionBuffer[sizeof(WP_Packet) + WP_PACKET_SIZE];
 
 // Initialize to a packet sequence number impossible to encounter

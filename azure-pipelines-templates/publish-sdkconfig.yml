@@ -1,0 +1,11 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: PublishBuildArtifacts@1
+    condition: succeeded()
+    displayName: Publish SDKCONFIG artifact
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      ArtifactName: $(TargetPublishName)_sdkconfig
+      ArtifactType: Container
