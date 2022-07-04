@@ -291,9 +291,11 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
 
     chipSelect = config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
-    // bus zero based
     spiConfig.BusMode = SpiBusMode_master;
-    spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4;
+
+    // internally SPI bus ID is zero based, so better take care of that here
+    spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
+
     spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
 
     if (chipSelect == 0)

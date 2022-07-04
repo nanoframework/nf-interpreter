@@ -41,7 +41,7 @@ struct NF_PAL_SPI
     gpio_port_mosi,                                                                                                    \
     mosi_pin,                                                                                                          \
     alternate_function)                                                                                                \
-    void ConfigPins_SPI##num(bool isHalfDuplex)                                                                        \
+    void ConfigPins_SPI##num(SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                                \
     {                                                                                                                  \
         palSetPadMode(                                                                                                 \
             gpio_port_sck,                                                                                             \
@@ -53,7 +53,7 @@ struct NF_PAL_SPI
             mosi_pin,                                                                                                  \
             (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |            \
              PAL_STM32_OTYPE_PUSHPULL));                                                                               \
-        if (!isHalfDuplex)                                                                                             \
+        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
         {                                                                                                              \
             palSetPadMode(                                                                                             \
                 gpio_port_miso,                                                                                        \
@@ -67,11 +67,11 @@ struct NF_PAL_SPI
 // when an SPI is defined the declarations below will have the real function/configuration //
 // in the target folder @ target_windows_devices_spi_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
-void ConfigPins_SPI1(bool isHalfDuplex);
-void ConfigPins_SPI2(bool isHalfDuplex);
-void ConfigPins_SPI3(bool isHalfDuplex);
-void ConfigPins_SPI4(bool isHalfDuplex);
-void ConfigPins_SPI5(bool isHalfDuplex);
-void ConfigPins_SPI6(bool isHalfDuplex);
+void ConfigPins_SPI1(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI2(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI3(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI4(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI5(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI6(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 
 #endif // SYS_DEV_SPI_NATIVE_TARGET_H

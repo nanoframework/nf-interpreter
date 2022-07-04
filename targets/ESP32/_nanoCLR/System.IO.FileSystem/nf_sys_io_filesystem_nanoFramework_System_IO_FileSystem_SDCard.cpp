@@ -234,23 +234,25 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
 
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Spi:
         {
-            int spiBus;
+            int busIndex;
             int chipSelectPin;
+            SPI_DEVICE_CONFIGURATION spiConfig;
 
-            spiBus = (int)(pThis[FIELD___spiBus].NumericByRef().s4);
+            // internally SPI bus ID is zero based
+            busIndex = (int)(pThis[FIELD___spiBus].NumericByRef().s4 - 1);
             chipSelectPin = (int)(pThis[FIELD___chipSelectPin].NumericByRef().s4);
 
-            // Get current Gpio pins used by SPI device
-            spiBus--; // Spi devnumber 0 & 1
+            // set SPI bus configuration
+            spiConfig.BusConfiguration = SpiBusConfiguration_FullDuplex;
 
             // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
             // Ignore errors as it may already been opened by managed code if trying to share bus
-            CPU_SPI_Initialize(spiBus, SpiBusConfiguration_FullDuplex);
+            CPU_SPI_Initialize(busIndex, spiConfig);
 
             // Try mount twice
-            if (!Storage_MountSpi(spiBus, chipSelectPin, 0))
+            if (!Storage_MountSpi(busIndex, chipSelectPin, 0))
             {
-                if (!Storage_MountSpi(spiBus, chipSelectPin, 0))
+                if (!Storage_MountSpi(busIndex, chipSelectPin, 0))
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
                 }

@@ -100,14 +100,14 @@ struct SPI_WRITE_READ_SETTINGS
 // HAL SPi functions (porting layer)
 
 // Initialise an SPI bus, called before any devices opened (optional)
-bool CPU_SPI_Initialize(uint8_t bus, SpiBusConfiguration spiConfiguration);
+bool CPU_SPI_Initialize(uint8_t bus, SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 
 // Unintialise spi bus, called after last device removed (optional)
 bool CPU_SPI_Uninitialize(uint8_t bus);
 
 // Return status of current SPI operation
 // Used to find status of an Async SPI call
-SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle);
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle);
 
 // Add a device to SPi Bus (Optional)
 // Returns a device handle in the handle pointer.
@@ -155,11 +155,11 @@ uint32_t CPU_SPI_PortsCount();
 
 // Return pins used for SPI bus
 // return -1 if not known
-void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi);
+void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi);
 
 // Minimum and Maximum clock frequency available based on bus and configured pins
-uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus);
-HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency);
-HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency);
+uint32_t CPU_SPI_ChipSelectLineCount(uint32_t busIndex);
+HRESULT CPU_SPI_MinClockFrequency(uint32_t busIndex, int32_t *frequency);
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t busIndex, int32_t *frequency);
 
 #endif // DRIVERS_SPI_DECL_H
