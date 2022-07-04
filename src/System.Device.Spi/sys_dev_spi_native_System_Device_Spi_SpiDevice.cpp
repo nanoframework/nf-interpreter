@@ -278,7 +278,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     NANOCLR_HEADER();
 
     uint32_t handle;
-    int32_t chipSelect;
     SPI_DEVICE_CONFIGURATION spiConfig;
     CLR_RT_HeapBlock *config = NULL;
 
@@ -299,19 +298,16 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
 
     spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-    if (spiConfig.DeviceChipSelect < 0)
+
+    // sanity check chip select line
+    if (spiConfig.DeviceChipSelect < -1)
     {
-        spiConfig.DeviceChipSelect = -1;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    if (chipSelect == 0)
-    {
-        spiConfig.ChipSelectActive = false;
-    }
-    else
-    {
-        spiConfig.ChipSelectActive = true;
-    }
+    // load CS active state from config (which is always PinValue.Low or PinValue.High
+    spiConfig.ChipSelectActive =
+        (bool)config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
     spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
     spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;
