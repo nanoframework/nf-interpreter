@@ -126,7 +126,10 @@ static int FindFreeDeviceSlotSpi(int spiBus, int32_t cs)
         // Check device chip select not already in use
         if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
         {
-            return -2;
+            if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
+            {
+                return -2;
+            }
         }
     }
 

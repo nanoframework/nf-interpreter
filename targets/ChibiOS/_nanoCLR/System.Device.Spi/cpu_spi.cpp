@@ -442,9 +442,13 @@ HRESULT CPU_SPI_nWrite_nRead(
 
         // Set the ChipSelect pin
         if (sdev.DeviceChipSelect >= 0)
+        {
             palSpi->ChipSelect = -1;
+        }
         else
+        {
             palSpi->ChipSelect = -2;
+        }
 
         // set bus config flag
         busConfigIsHalfDuplex = palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex;
