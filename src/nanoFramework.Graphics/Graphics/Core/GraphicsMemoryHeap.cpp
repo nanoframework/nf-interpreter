@@ -149,7 +149,8 @@ bool GraphicsMemoryHeap::Release(void *pHeapBlockData)
         }
         // If the previous block is free, then subsume current block into previous including data length and block
         // header
-        if ((prevBlock != NOT_APPLICABLE) && (prevBlock->status == blockFree) && (prevBlock != ptrfirstBlockHeader)) // Guard against looking outside heap
+        if ((prevBlock != NOT_APPLICABLE) && (prevBlock->status == blockFree) &&
+            (prevBlock != ptrfirstBlockHeader)) // Guard against looking outside heap
         {
             prevBlock->dataLength += currentBlk->dataLength + blockHeaderSize;
             prevBlock->next = currentBlk->next;
