@@ -42,7 +42,7 @@ struct NF_PAL_SPI
     gpio_port_mosi,                                                                                                    \
     mosi_pin,                                                                                                          \
     alternate_function)                                                                                                \
-    void ConfigPins_SPI##num(SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                                \
+    void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
     {                                                                                                                  \
         palSetPadMode(                                                                                                 \
             gpio_port_sck,                                                                                             \
@@ -68,11 +68,11 @@ struct NF_PAL_SPI
 // when an SPI is defined the declarations below will have the real function/configuration //
 // in the target folder @ target_windows_devices_spi_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
-void ConfigPins_SPI1(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
-void ConfigPins_SPI2(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
-void ConfigPins_SPI3(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
-void ConfigPins_SPI4(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
-void ConfigPins_SPI5(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
-void ConfigPins_SPI6(SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI1(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI2(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI3(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI4(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI5(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI6(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 
 #endif // SYS_DEV_SPI_NATIVE_TARGET_H

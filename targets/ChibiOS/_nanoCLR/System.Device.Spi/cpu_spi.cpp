@@ -641,7 +641,7 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
     return os;
 }
 
-bool CPU_SPI_Initialize(uint8_t busIndex, SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     // init the PAL struct for this SPI bus and assign the respective driver
     // all this occurs if not already done

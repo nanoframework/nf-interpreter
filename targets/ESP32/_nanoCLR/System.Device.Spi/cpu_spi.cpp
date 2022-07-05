@@ -88,7 +88,7 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 // Initialise the physical SPI bus
 // Bus index 0 or 1
 // return true of successful, false if error
-bool CPU_SPI_Initialize(uint8_t busIndex, SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
+bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     GPIO_PIN clockPin, misoPin, mosiPin;
 

@@ -100,7 +100,7 @@ struct SPI_WRITE_READ_SETTINGS
 // HAL SPi functions (porting layer)
 
 // Initialise an SPI bus, called before any devices opened (optional)
-bool CPU_SPI_Initialize(uint8_t bus, SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+bool CPU_SPI_Initialize(uint8_t bus, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 
 // Unintialise spi bus, called after last device removed (optional)
 bool CPU_SPI_Uninitialize(uint8_t bus);
