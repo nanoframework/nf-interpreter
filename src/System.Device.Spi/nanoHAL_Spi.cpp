@@ -25,10 +25,10 @@ nanoSPI_BusConfig spiconfig[NUM_SPI_BUSES];
 
 // Define weak functions for some optional PAL functions
 // so low level implementations don't require them.
-__nfweak bool CPU_SPI_Initialize(uint8_t bus, SpiBusConfiguration spiConfiguration)
+__nfweak bool CPU_SPI_Initialize(uint8_t bus, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     (void)bus;
-    (void)spiConfiguration;
+    (void)spiDeviceConfig;
 
     return true;
 }
@@ -116,11 +116,17 @@ static int FindFreeDeviceSlotSpi(int spiBus, GPIO_PIN cs)
     for (int deviceIndex = 0; deviceIndex < MAX_SPI_DEVICES; deviceIndex++)
     {
         if (spiconfig[spiBus].deviceHandles[deviceIndex] == 0)
+        {
             return deviceIndex;
+        }
+
         // Check device chip select not already in use
         if (spiconfig[spiBus].deviceCongfig[deviceIndex].DeviceChipSelect == cs)
+        {
             return -2;
+        }
     }
+
     return -1;
 }
 
@@ -150,8 +156,11 @@ void nanoSPI_Uninitialize()
             for (int deviceIndex = 0; deviceIndex < MAX_SPI_DEVICES; deviceIndex++)
             {
                 uint32_t deviceHandle = spiconfig[spiBusIndex].deviceHandles[deviceIndex];
+
                 if (deviceHandle != 0)
+                {
                     nanoSPI_CloseDevice(CreateSpiHandle(spiBusIndex, deviceIndex));
+                }
             }
         }
     }
@@ -232,47 +241,45 @@ HRESULT nanoSPI_OpenDeviceEx(
     uint32_t deviceHandle;
     HRESULT hr;
 
-    // spiBus 0 to (number of buses - 1)
-    uint8_t spiBusIndex = (uint8_t)spiDeviceConfig.Spi_Bus - 1;
-
-    if (spiBusIndex >= NUM_SPI_BUSES)
+    // spiBus index is 0 based so need to add 1 to get to 1 based index
+    if (spiDeviceConfig.Spi_Bus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
 
     // Validate Bus available
-    if (!(CPU_SPI_PortsMap() & (1 << spiBusIndex)))
+    if (!(CPU_SPI_PortsMap() & (1 << spiDeviceConfig.Spi_Bus)))
     {
         return CLR_E_INVALID_PARAMETER;
     }
 
     // Check not maximum devices per SPI bus reached
-    if (spiconfig[spiBusIndex].devicesInUse >= MAX_SPI_DEVICES)
+    if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse >= MAX_SPI_DEVICES)
     {
         return CLR_E_INDEX_OUT_OF_RANGE;
     }
 
     // Initialise Bus if not already initialised
-    if (!spiconfig[spiBusIndex].spiBusInited)
+    if (!spiconfig[spiDeviceConfig.Spi_Bus].spiBusInited)
     {
-        if (!CPU_SPI_Initialize(spiBusIndex, spiDeviceConfig.BusConfiguration))
+        if (!CPU_SPI_Initialize(spiDeviceConfig.Spi_Bus, spiDeviceConfig))
         {
             return CLR_E_INVALID_PARAMETER;
         }
 
         // Reserve pins used by SPI bus
-        hr = nanoSPI_ReserveBusPins(spiBusIndex, true);
+        hr = nanoSPI_ReserveBusPins(spiDeviceConfig.Spi_Bus, true);
 
         if (hr != S_OK)
         {
             return hr;
         }
 
-        spiconfig[spiBusIndex].spiBusInited = true;
+        spiconfig[spiDeviceConfig.Spi_Bus].spiBusInited = true;
     }
 
     // Find if device slot is available and check
-    deviceIndex = FindFreeDeviceSlotSpi(spiBusIndex, spiDeviceConfig.DeviceChipSelect);
+    deviceIndex = FindFreeDeviceSlotSpi(spiDeviceConfig.Spi_Bus, spiDeviceConfig.DeviceChipSelect);
 
     if (deviceIndex < 0)
     {
@@ -294,21 +301,21 @@ HRESULT nanoSPI_OpenDeviceEx(
 
     if (hr != S_OK)
     {
-        spiconfig[spiBusIndex].deviceHandles[deviceIndex] = 0;
-        spiconfig[spiBusIndex].devicesInUse--;
+        spiconfig[spiDeviceConfig.Spi_Bus].deviceHandles[deviceIndex] = 0;
+        spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse--;
 
         // Unreserve CS pin
-        CPU_GPIO_ReservePin(spiconfig[spiBusIndex].deviceCongfig->DeviceChipSelect, false);
+        CPU_GPIO_ReservePin(spiconfig[spiDeviceConfig.Spi_Bus].deviceCongfig->DeviceChipSelect, false);
 
         // Last device on bus then close bus and also remove bus pin reserves
-        if (spiconfig[spiBusIndex].devicesInUse <= 0)
+        if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse <= 0)
         {
             // Uninitialise bus and reset init flag
-            CPU_SPI_Uninitialize(spiBusIndex);
-            spiconfig[spiBusIndex].spiBusInited = false;
+            CPU_SPI_Uninitialize(spiDeviceConfig.Spi_Bus);
+            spiconfig[spiDeviceConfig.Spi_Bus].spiBusInited = false;
 
             // Unreserve bus pins
-            nanoSPI_ReserveBusPins(spiBusIndex, false);
+            nanoSPI_ReserveBusPins(spiDeviceConfig.Spi_Bus, false);
         }
 
         // free SPI device, if we ever got a valid handle
@@ -333,7 +340,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     }
 
     // Add next Device - Copy device config, save handle, increment number devices on bus
-    nanoSPI_BusConfig *pBusConfig = &spiconfig[spiBusIndex];
+    nanoSPI_BusConfig *pBusConfig = &spiconfig[spiDeviceConfig.Spi_Bus];
     pBusConfig->deviceCongfig[deviceIndex] = spiDeviceConfig;
     pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
 
@@ -345,7 +352,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     pBusConfig->devicesInUse++;
 
     // Return unique generated device handle
-    handle = CreateSpiHandle(spiBusIndex, deviceIndex);
+    handle = CreateSpiHandle(spiDeviceConfig.Spi_Bus, deviceIndex);
 
     return S_OK;
 }
