@@ -15,7 +15,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     uint32_t pin = (int32_t)stack.Arg0().NumericByRef().s4;
     int32_t function = (int32_t)stack.Arg1().NumericByRef().s4;
 
-    if(!Esp32_SetMappedDevicePins(pin, function))
+    if (!Esp32_SetMappedDevicePins(pin, function))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
