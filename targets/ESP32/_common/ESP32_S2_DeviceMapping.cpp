@@ -38,7 +38,7 @@ int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max] = {
 //  I2C
 //  2 devices I2C1 & I2C2
 //  Map pins Data & Clock
-int8_t Esp32_I2C_DevicePinMap[2][2] = {
+int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {
     // I2C1 - pins 18, 19,
     {I2C1_DATA, I2C1_CLOCK},
     // I2C2 - pins 25, 26

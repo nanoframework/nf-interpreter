@@ -51,7 +51,7 @@ enum Esp32_MapDeviceType
 };
 
 extern int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max];
-extern int8_t Esp32_I2C_DevicePinMap[2][2];
+extern int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2];
 extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
 extern int8_t Esp32_LED_DevicePinMap[16];
 extern int8_t Esp32_ADC_DevicePinMap[20];
