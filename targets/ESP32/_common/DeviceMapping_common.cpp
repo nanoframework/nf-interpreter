@@ -123,7 +123,7 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
                 // validate if this is a valid output pin
                 // developer note: this is an oversimplified check for MISO which can be input only for simplex and
                 // half-duplex
-                if (GPIO_IS_VALID_OUTPUT_GPIO(gpioMapping))
+                if (GPIO_IS_VALID_OUTPUT_GPIO(pin))
                 {
                     Esp32_SPI_DevicePinMap[busIndex][gpioMapping] = pin;
                     return true;
