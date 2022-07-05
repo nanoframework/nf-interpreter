@@ -4,11 +4,13 @@
 //
 
 //
-//  Header file for ESP32 device pin mnapping
+//  Header file for ESP32 device pin mapping
 //
 
-#ifndef _ESP32_DEVICEMAPPING_
-#define _ESP32_DEVICEMAPPING_
+#ifndef ESP32_DEVICEMAPPING_H
+#define ESP32_DEVICEMAPPING_H
+
+#include "TargetHAL_Spi.h"
 
 // Default I2C gpio pins
 #define I2C1_DATA  18
@@ -27,6 +29,14 @@ enum Esp32SerialPin
     Esp32SerialPin_Max,
 };
 
+enum Esp32SpiPin
+{
+    Esp32SpiPin_Mosi,
+    Esp32SpiPin_Miso,
+    Esp32SpiPin_Clk,
+    Esp32SpiPin_Max,
+};
+
 enum Esp32_MapDeviceType
 {
     DEV_TYPE_GPIO,
@@ -40,10 +50,25 @@ enum Esp32_MapDeviceType
     DEV_TYPE_MAX,
 };
 
-int Esp32_GetMappedDevicePins(Esp32_MapDeviceType DevType, int DevNumber, int PinIndex);
+extern int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max];
+extern int8_t Esp32_I2C_DevicePinMap[2][2];
+extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
+extern int8_t Esp32_LED_DevicePinMap[16];
+extern int8_t Esp32_ADC_DevicePinMap[20];
+extern int8_t Esp32_DAC_DevicePinMap[2];
+
+void Esp32_DecodeAlternateFunction(
+    uint32_t alternateFunction,
+    Esp32_MapDeviceType &deviceType,
+    uint8_t &busIndex,
+    uint16_t &pinIndex);
+
+int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int pinIndex);
 int Esp32_GetMappedDevicePinsWithFunction(uint32_t alternateFunction);
 
-void Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction);
-void Esp32_SetMappedDevicePins(Esp32_MapDeviceType devType, int devNumber, int8_t pinIndex, int ioPinNumber);
+int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction);
+void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int8_t pinIndex, int ioPinNumber);
 
-#endif //_ESP32_DEVICEMAPPING_
+int Esp32_ValidateMappedDevicePin(Esp32_MapDeviceType deviceType, int ioPinNumber);
+
+#endif // ESP32_DEVICEMAPPING_H

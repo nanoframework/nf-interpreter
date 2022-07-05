@@ -524,9 +524,9 @@ uint32_t CPU_SPI_PortsMap()
 // Returns the SPI clock, MISO and MOSI pin numbers for a specified SPI module.
 void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GPIO_PIN &mosiPin)
 {
-    clockPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, 2);
-    misoPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, 1);
-    mosiPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, 0);
+    clockPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Clk);
+    misoPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Miso);
+    mosiPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Mosi);
 }
 
 // Return SPI minimum clock frequency
