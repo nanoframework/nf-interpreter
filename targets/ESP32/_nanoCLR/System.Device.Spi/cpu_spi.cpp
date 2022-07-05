@@ -88,19 +88,19 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 // Initialise the physical SPI bus
 // Bus index 0 or 1
 // return true of successful, false if error
-bool CPU_SPI_Initialize(uint8_t spiBus, SpiBusConfiguration spiConfiguration)
+bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     GPIO_PIN clockPin, misoPin, mosiPin;
 
-    // Get pins used by spi bus
-    CPU_SPI_GetPins(spiBus, clockPin, misoPin, mosiPin);
+    // Get pins used by SPI bus
+    CPU_SPI_GetPins(busIndex, clockPin, misoPin, mosiPin);
 
-    if (spiConfiguration == SpiBusConfiguration_FullDuplex)
+    if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_FullDuplex)
     {
         // Check that ALL pins have been configured
         if (clockPin == GPIO_PIN_NONE || misoPin == GPIO_PIN_NONE || mosiPin == GPIO_PIN_NONE)
         {
-            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", spiBus);
+            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", busIndex);
             return false;
         }
     }
@@ -109,7 +109,7 @@ bool CPU_SPI_Initialize(uint8_t spiBus, SpiBusConfiguration spiConfiguration)
         // Half duplex only requires CLK and MOSI
         if (clockPin == GPIO_PIN_NONE || mosiPin == GPIO_PIN_NONE)
         {
-            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", spiBus);
+            ESP_LOGE(TAG, "Spi pins for SPI%d not configured", busIndex);
             return false;
         }
     }
@@ -143,28 +143,28 @@ bool CPU_SPI_Initialize(uint8_t spiBus, SpiBusConfiguration spiConfiguration)
 
     // First available bus on ESP32 is HSPI_HOST(1)
     // Try with DMA first
-    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(spiBus + HSPI_HOST), &bus_config, SPI_DMA_CH_AUTO);
+    esp_err_t ret = spi_bus_initialize((spi_host_device_t)(busIndex + HSPI_HOST), &bus_config, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", spiBus + HSPI_HOST, ret);
+        ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + HSPI_HOST, ret);
         return false;
     }
 
-    nf_pal_spi[spiBus].BusIndex = spiBus;
-    nf_pal_spi[spiBus].status = SPI_OP_STATUS::SPI_OP_READY;
+    nf_pal_spi[busIndex].BusIndex = busIndex;
+    nf_pal_spi[busIndex].status = SPI_OP_STATUS::SPI_OP_READY;
 
-    haveAsyncTrans[spiBus] = false;
+    haveAsyncTrans[busIndex] = false;
 
     return true;
 }
 
 // Uninitialise the bus
-bool CPU_SPI_Uninitialize(uint8_t spiBus)
+bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(spiBus + HSPI_HOST));
+    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + HSPI_HOST));
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", spiBus + HSPI_HOST, ret);
+        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + HSPI_HOST, ret);
         return false;
     }
 
@@ -201,8 +201,11 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
     // fire callback for SPI transaction complete
     // only if callback set
     SPI_Callback callback = (SPI_Callback)pnf_pal_spi->callback;
+
     if (callback)
+    {
         callback(pnf_pal_spi->BusIndex);
+    }
 }
 
 //
@@ -275,11 +278,9 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
     // Add device to bus
     spi_device_handle_t deviceHandle;
 
-    // Bus index
-    int spiBusIndex = (spiDeviceConfig.Spi_Bus - 1);
-
     // First available bus on ESP32 is HSPI_HOST(1)
-    esp_err_t ret = spi_bus_add_device((spi_host_device_t)(spiBusIndex + HSPI_HOST), &dev_config, &deviceHandle);
+    esp_err_t ret =
+        spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus + HSPI_HOST), &dev_config, &deviceHandle);
     if (ret != ESP_OK)
     {
         ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
@@ -504,11 +505,11 @@ HRESULT CPU_SPI_nWrite16_nRead16(
 
 // Return status of current SPI operation
 // Used to find status of an Async SPI call
-SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
 {
     (void)deviceHandle;
 
-    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[spi_bus];
+    NF_PAL_SPI *pnf_pal_spi = &nf_pal_spi[busIndex];
 
     return pnf_pal_spi->status;
 }
@@ -521,17 +522,17 @@ uint32_t CPU_SPI_PortsMap()
 }
 
 // Returns the SPI clock, MISO and MOSI pin numbers for a specified SPI module.
-void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GPIO_PIN &mosiPin)
+void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clockPin, GPIO_PIN &misoPin, GPIO_PIN &mosiPin)
 {
-    clockPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Clk);
-    misoPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Miso);
-    mosiPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, spi_bus, Esp32SpiPin_Mosi);
+    clockPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, Esp32SpiPin_Clk);
+    misoPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, Esp32SpiPin_Miso);
+    mosiPin = (GPIO_PIN)Esp32_GetMappedDevicePins(DEV_TYPE_SPI, busIndex, Esp32SpiPin_Mosi);
 }
 
 // Return SPI minimum clock frequency
-HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
+HRESULT CPU_SPI_MinClockFrequency(uint32_t busIndex, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    if (busIndex >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -547,10 +548,9 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 // Maximum frequency will depend on current configuration
 // If using native SPI pins then maximum is 80mhz
 // if SPI pins are routed over GPIO matrix then 40mhz half duplex 26mhz full
-
-HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
+HRESULT CPU_SPI_MaxClockFrequency(uint32_t busIndex, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    if (busIndex >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -559,7 +559,7 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 
     GPIO_PIN clockPin, misoPin, mosiPin;
 
-    CPU_SPI_GetPins(spiBus, clockPin, misoPin, mosiPin);
+    CPU_SPI_GetPins(busIndex, clockPin, misoPin, mosiPin);
 
     // Check if direct pins being used
     switch (clockPin)
@@ -595,11 +595,9 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 //
 // Return the number of chip select lines available on the bus.
 //
-// ESP32 IDF/hardware allows only 3 devices per bus
-// TODO Subtract used chip select count ?
-uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus)
+uint32_t CPU_SPI_ChipSelectLineCount(uint32_t busIndex)
 {
-    (void)spi_bus;
+    (void)busIndex;
 
-    return 3;
+    return MAX_SPI_DEVICES;
 }
