@@ -844,7 +844,7 @@ void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN 
 HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
     // bus index is 0 based, here it's 1 based
-    if (spiBus + 1 > NUM_SPI_BUSES)
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -860,7 +860,7 @@ HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
     // bus index is 0 based, here it's 1 based
-    if (spiBus + 1 > NUM_SPI_BUSES)
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }

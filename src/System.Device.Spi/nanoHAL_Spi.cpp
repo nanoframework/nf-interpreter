@@ -242,7 +242,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     HRESULT hr;
 
     // spiBus index is 0 based so need to add 1 to get to 1 based index
-    if (spiDeviceConfig.Spi_Bus + 1 > NUM_SPI_BUSES)
+    if (spiDeviceConfig.Spi_Bus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
