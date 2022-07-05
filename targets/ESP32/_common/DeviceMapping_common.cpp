@@ -120,28 +120,43 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
         case DEV_TYPE_SPI:
             if (busIndex <= MAX_SPI_DEVICES && gpioMapping < Esp32SpiPin_Max)
             {
-                // validate if this is a valid output pin
-                // developer note: this is an oversimplified check for MISO which can be input only for simplex and
-                // half-duplex
-                if (GPIO_IS_VALID_OUTPUT_GPIO(pin))
+                // validate if this is a valid output pin (only required for CLK and MOSI)
+                if (gpioMapping != Esp32SpiPin_Miso)
                 {
-                    Esp32_SPI_DevicePinMap[busIndex][gpioMapping] = pin;
-                    return true;
+                    if (!GPIO_IS_VALID_OUTPUT_GPIO(pin))
+                    {
+                        return false;
+                    }
                 }
+
+                Esp32_SPI_DevicePinMap[busIndex][gpioMapping] = pin;
+                return true;
             }
             break;
 
         case DEV_TYPE_I2C:
-            if (busIndex <= 1 && gpioMapping <= 1)
+            if (busIndex <= I2C_NUM_MAX && gpioMapping <= 1)
             {
-                Esp32_I2C_DevicePinMap[busIndex][gpioMapping] = pin;
-                return true;
+                // validate if this is a valid output pin (required for both SDA and SCL)
+                if (GPIO_IS_VALID_OUTPUT_GPIO(pin))
+                {
+                    Esp32_I2C_DevicePinMap[busIndex][gpioMapping] = pin;
+                    return true;
+                }
             }
             break;
 
         case DEV_TYPE_SERIAL:
             if (busIndex < UART_NUM_MAX && gpioMapping < Esp32SerialPin_Max)
             {
+                // validate if this is a valid output pin (required for TX and RTS)
+                if (gpioMapping == Esp32SerialPin_Tx || gpioMapping == Esp32SerialPin_Rts)
+                {
+                    if (!GPIO_IS_VALID_OUTPUT_GPIO(pin))
+                    {
+                        return false;
+                    }
+                }
                 Esp32_SERIAL_DevicePinMap[busIndex][gpioMapping] = pin;
                 return true;
             }
