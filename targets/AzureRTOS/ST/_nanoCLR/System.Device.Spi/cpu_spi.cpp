@@ -139,7 +139,8 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     uint16_t divider = 0;
     int32_t maxSpiFrequency;
     int32_t requestedFrequency = config.Clock_RateHz;
-    int busIndex = config.Spi_Bus;
+    // bus index is 0 based, here it's 1 based
+    int busIndex = config.Spi_Bus + 1;
 
 #if defined(STM32L0XX)
 
@@ -147,8 +148,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     actualFrequency = STM32_PCLK2;
 
     // SPI2 is feed by APB1 (STM32_PCLK1)
-    // bus index is 0 based, here it's 1 based
-    if (busIndex + 1 == 2)
+    if (busIndex == 2)
     {
         actualFrequency = STM32_PCLK1;
     }
@@ -166,8 +166,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     maxSpiFrequency = STM32_PCLK2 / 2;
 
     // SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
-    // bus index is 0 based, here it's 1 based
-    if (busIndex + 1 == 2 || busIndex + 1 == 3)
+    if (busIndex == 2 || busIndex == 3)
     {
         actualFrequency = STM32_PCLK1;
 
@@ -192,8 +191,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     actualFrequency = STM32_PCLK2;
 
     // SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
-    // bus index is 0 based, here it's 1 based
-    if (busIndex + 1 == 2 || busIndex + 1 == 3)
+    if (busIndex == 2 || busIndex == 3)
     {
         actualFrequency = STM32_PCLK1;
     }
@@ -209,8 +207,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     maxSpiFrequency = STM32_SPI456_MAX;
 
     // SPI1, SPI2 and SPI3 are feed by APB1 (STM32_PCLK1)
-    // bus index is 0 based, here it's 1 based
-    if (busIndex + 1 == 2 || busIndex + 1 == 3)
+    if (busIndex == 2 || busIndex == 3)
     {
         actualFrequency = STM32_PCLK1;
         maxSpiFrequency = STM32_SPI123_MAX;
