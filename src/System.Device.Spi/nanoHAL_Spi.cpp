@@ -254,7 +254,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     }
 
     // Check not maximum devices per SPI bus reached
-    if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse > MAX_SPI_DEVICES)
+    if (spiconfig[spiDeviceConfig.Spi_Bus].devicesInUse >= MAX_SPI_DEVICES)
     {
         return CLR_E_INDEX_OUT_OF_RANGE;
     }
