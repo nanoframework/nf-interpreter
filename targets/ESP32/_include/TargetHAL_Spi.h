@@ -13,4 +13,4 @@
 // this is valid for all series, except S2, C3 and H2 (which support up to 6 devices, depending on the chip)
 #define MAX_SPI_DEVICES 3
 
-#endif //TARGET_HAL_SPI_H
+#endif // TARGET_HAL_SPI_H
