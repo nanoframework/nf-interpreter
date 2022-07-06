@@ -278,7 +278,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     NANOCLR_HEADER();
 
     uint32_t handle;
-    int32_t chipSelect;
     SPI_DEVICE_CONFIGURATION spiConfig;
     CLR_RT_HeapBlock *config = NULL;
 
@@ -289,8 +288,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     // Get reference to manage code SPI settings
     config = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
-    chipSelect = config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
-
     spiConfig.BusMode = SpiBusMode_master;
 
     // internally SPI bus ID is zero based, so better take care of that here
@@ -298,14 +295,15 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
 
     spiConfig.DeviceChipSelect = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
 
-    if (chipSelect == 0)
+    // sanity check chip select line
+    if (spiConfig.DeviceChipSelect < -1)
     {
-        spiConfig.ChipSelectActive = false;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
-    else
-    {
-        spiConfig.ChipSelectActive = true;
-    }
+
+    // load CS active state from config (which is always PinValue.Low or PinValue.High
+    spiConfig.ChipSelectActive =
+        (bool)config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
     spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;
     spiConfig.DataOrder16 = (DataBitOrder)config[SpiConnectionSettings::FIELD___dataFlow].NumericByRef().s4;

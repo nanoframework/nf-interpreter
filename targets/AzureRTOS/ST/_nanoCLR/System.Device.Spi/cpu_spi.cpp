@@ -53,7 +53,7 @@ static void CompleteTranfer(NF_PAL_SPI *palSpi)
     }
 }
 
-// Callback used when a async opertion completes
+// Callback used when a async operation completes
 static void SpiCallback(SPIDriver *spip)
 {
     (void)spip;
@@ -121,6 +121,13 @@ static void SpiCallback(SPIDriver *spip)
 
         // Tidy up, release etc
         CompleteTranfer(palSpi);
+
+        // if CS is to be controlled by the driver, set the GPIO
+        if (palSpi->ChipSelect >= 0)
+        {
+            // de-assert pin based on CS active level
+            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+        }
 
         // fire callback for SPI transaction complete
         // only if callback set
@@ -311,9 +318,6 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     llConfig->cr1 = 0;
     llConfig->cr2 = 0;
 
-    // get chip select pin
-    int csPin = config.DeviceChipSelect;
-
     // SPI mode
     switch (config.Spi_Mode)
     {
@@ -378,16 +382,6 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
-
-    // make sure the CS pin is properly configured as GPIO, output & pushpull
-    palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
-
-    // being SPI CS active low, default it to high
-    palSetPad(GPIO_PORT(csPin), csPin % 16);
-
-    // set port&pad for CS pin
-    llConfig->ssport = GPIO_PORT(csPin);
-    llConfig->sspad = csPin % 16;
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -492,6 +486,13 @@ HRESULT CPU_SPI_nWrite_nRead(
         // just to satisfy the driver ceremony, no actual implementation for STM32
         spiSelect(palSpi->Driver);
 
+        // if CS is to be controlled by the driver, set the GPIO
+        if (palSpi->ChipSelect >= 0)
+        {
+            // assert pin based on CS active level
+            CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+        }
+
         if (sync)
         {
             // Sync operation
@@ -517,6 +518,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
                     }
+
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
 
                     // receive operation
@@ -525,6 +527,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     }
+
                     spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
             }
@@ -557,12 +560,27 @@ HRESULT CPU_SPI_nWrite_nRead(
 
             // Release bus & cacheBufferInvalidate etc
             CompleteTranfer(palSpi);
+
+            // if CS is to be controlled by the driver, set the GPIO
+            if (palSpi->ChipSelect >= 0)
+            {
+                // de-assert pin based on CS active level
+                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+            }
         }
         else
-        // Start an Asyncronous SPI transfer
-        // perform SPI operation using driver's ASYNC API
-        // Completed on calling Spi Callback
         {
+            // Start an Asyncronous SPI transfer
+            // perform SPI operation using driver's ASYNC API
+            // Completed on calling Spi Callback
+
+            // if CS is to be controlled by the driver, set the GPIO
+            if (palSpi->ChipSelect >= 0)
+            {
+                // assert pin based on CS active level
+                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+            }
+
             // this is a Async operation
             // perform SPI operation using driver's ASYNC API
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
@@ -668,6 +686,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI1(spiDeviceConfig);
                 SPI1_PAL.Driver = &SPID1;
+                SPI1_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -677,6 +696,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI2(spiDeviceConfig);
                 SPI2_PAL.Driver = &SPID2;
+                SPI2_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -686,6 +706,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI3(spiDeviceConfig);
                 SPI3_PAL.Driver = &SPID3;
+                SPI3_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -695,6 +716,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI4(spiDeviceConfig);
                 SPI4_PAL.Driver = &SPID4;
+                SPI4_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -704,6 +726,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI5(spiDeviceConfig);
                 SPI5_PAL.Driver = &SPID5;
+                SPI5_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -713,6 +736,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
             {
                 ConfigPins_SPI6(spiDeviceConfig);
                 SPI6_PAL.Driver = &SPID6;
+                SPI6_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif

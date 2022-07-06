@@ -65,8 +65,8 @@ struct SPI_DEVICE_CONFIGURATION
     uint32_t Spi_Bus;
     // Slave or master(default)
     SpiBusMode BusMode;
-    // GPIO pin used for device Chip select
-    GPIO_PIN DeviceChipSelect;
+    // GPIO pin used for device Chip select, if -1 it means the ChipSelect is handled manually
+    int32_t DeviceChipSelect;
     // False = LOW active,      True = HIGH active
     bool ChipSelectActive;
     // SPI mode 0 -> 3

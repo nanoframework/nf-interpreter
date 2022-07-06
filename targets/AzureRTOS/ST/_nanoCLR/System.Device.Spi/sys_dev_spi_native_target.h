@@ -28,11 +28,18 @@ struct NF_PAL_SPI
 
     uint8_t *ReadBuffer;
     uint16_t ReadSize;
+
+    // -1 = Chip Select is not handled | >0 Chip Select is to be controlled with this GPIO
+    int32_t ChipSelect;
 };
 
 // the following macro defines a function that configures the GPIO pins for an STM32 SPI peripheral
 // it gets called in the Windows_Devices_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
+// configure:
+// - SCK, and MOSI pins with alternate
+// - MISO pin if this is not half duplex
+// - CS pin as GPIO if CS is not manually controlled
 #define SPI_CONFIG_PINS(                                                                                               \
     num,                                                                                                               \
     gpio_port_sck,                                                                                                     \
@@ -61,6 +68,21 @@ struct NF_PAL_SPI
                 miso_pin,                                                                                              \
                 (PAL_MODE_ALTERNATE(alternate_function) | PAL_STM32_OSPEED_HIGHEST | PAL_STM32_PUPDR_FLOATING |        \
                  PAL_STM32_OTYPE_PUSHPULL));                                                                           \
+        }                                                                                                              \
+        if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                     \
+        {                                                                                                              \
+            palSetPadMode(                                                                                             \
+                GPIO_PORT(spiDeviceConfig.DeviceChipSelect),                                                           \
+                spiDeviceConfig.DeviceChipSelect % 16,                                                                 \
+                (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));                                                \
+            if (spiDeviceConfig.ChipSelectActive)                                                                      \
+            {                                                                                                          \
+                palSetPad(GPIO_PORT(spiDeviceConfig.DeviceChipSelect), spiDeviceConfig.DeviceChipSelect % 16);         \
+            }                                                                                                          \
+            else                                                                                                       \
+            {                                                                                                          \
+                palClearPad(GPIO_PORT(spiDeviceConfig.DeviceChipSelect), spiDeviceConfig.DeviceChipSelect % 16);       \
+            }                                                                                                          \
         }                                                                                                              \
     }
 
