@@ -160,6 +160,7 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
     NANOCLR_NATIVE_DECLARE(
         DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
+    NANOCLR_NATIVE_DECLARE(DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
     NANOCLR_NATIVE_DECLARE(SetClippingRectangle___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_Width___I4);
     NANOCLR_NATIVE_DECLARE(get_Height___I4);
