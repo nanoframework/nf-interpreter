@@ -288,10 +288,6 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     // Get reference to manage code SPI settings
     config = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
-    chipSelect = config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
-
-    chipSelectPin = config[SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
-
     spiConfig.BusMode = SpiBusMode_master;
 
     // internally SPI bus ID is zero based, so better take care of that here
