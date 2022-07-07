@@ -1149,6 +1149,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static const CLR_UINT32 Deployed = 0x00000008;
     static const CLR_UINT32 PreparingForExecution = 0x00000010;
     static const CLR_UINT32 StaticConstructorsExecuted = 0x00000020;
+    // this flag should be set when the m_header was malloc'ed
+    static const CLR_UINT32 FreeOnDestroy = 0x00000100;
 
     CLR_UINT32 m_idx; // Relative to the type system (for static fields access).
     CLR_UINT32 m_flags;

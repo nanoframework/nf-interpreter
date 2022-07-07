@@ -130,10 +130,19 @@ static void SpiCallback(SPIDriver *spip)
         // Tidy up, release etc
         CompleteTranfer(palSpi);
 
+        // if CS is to be controlled by the driver, set the GPIO
+        if (palSpi->ChipSelect >= 0)
+        {
+            // de-assert pin based on CS active level
+            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
+        }
+
         // fire callback for SPI transaction complete
         // only if callback set
         if (palSpi->Callback)
+        {
             palSpi->Callback(palSpi->BusIndex);
+        }
     }
 
     NATIVE_INTERRUPT_END
@@ -145,7 +154,8 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     uint16_t divider = 0;
     int32_t maxSpiFrequency;
     int32_t requestedFrequency = config.Clock_RateHz;
-    int busIndex = config.Spi_Bus;
+    // bus index is 0 based, here it's 1 based
+    int busIndex = config.Spi_Bus + 1;
 
 #if defined(STM32L0XX)
 
@@ -153,7 +163,7 @@ uint16_t ComputeBaudRate(SPI_DEVICE_CONFIGURATION &config, int32_t &actualFreque
     actualFrequency = STM32_PCLK2;
 
     // SPI2 is feed by APB1 (STM32_PCLK1)
-    if (busIndex == 1)
+    if (busIndex == 2)
     {
         actualFrequency = STM32_PCLK1;
     }
@@ -239,38 +249,46 @@ NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
     NF_PAL_SPI *palSpi = NULL;
 
     // get the PAL struct for the SPI bus
-    switch (busIndex)
+    // bus index is 0 based, here it's 1 based
+    switch (busIndex + 1)
     {
+
 #if STM32_SPI_USE_SPI1
         case 1:
             palSpi = &SPI1_PAL;
             break;
 #endif
+
 #if STM32_SPI_USE_SPI2
         case 2:
             palSpi = &SPI2_PAL;
             break;
 #endif
+
 #if STM32_SPI_USE_SPI3
         case 3:
             palSpi = &SPI3_PAL;
             break;
 #endif
+
 #if STM32_SPI_USE_SPI4
         case 4:
             palSpi = &SPI4_PAL;
             break;
 #endif
+
 #if STM32_SPI_USE_SPI5
         case 5:
             palSpi = &SPI5_PAL;
             break;
 #endif
+
 #if STM32_SPI_USE_SPI6
         case 6:
             palSpi = &SPI6_PAL;
             break;
 #endif
+
         default:
             // the requested SPI bus is not valid
             break;
@@ -287,9 +305,6 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
     // clear values
     llConfig->cr1 = 0;
     llConfig->cr2 = 0;
-
-    // get chip select pin
-    int csPin = config.DeviceChipSelect;
 
     // SPI mode
     switch (config.Spi_Mode)
@@ -355,16 +370,6 @@ void GetSPIConfig(SPI_DEVICE_CONFIGURATION &config, SPI_WRITE_READ_SETTINGS &wrc
 
     // Create the low level configuration
     llConfig->data_cb = SpiCallback;
-
-    // make sure the CS pin is properly configured as GPIO, output & pushpull
-    palSetPadMode(GPIO_PORT(csPin), csPin % 16, (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));
-
-    // being SPI CS active low, default it to high
-    palSetPad(GPIO_PORT(csPin), csPin % 16);
-
-    // set port&pad for CS pin
-    llConfig->ssport = GPIO_PORT(csPin);
-    llConfig->sspad = csPin % 16;
 }
 
 // Performs a read/write operation on 8-bit word data.
@@ -469,6 +474,13 @@ HRESULT CPU_SPI_nWrite_nRead(
         // just to satisfy the driver ceremony, no actual implementation for STM32
         spiSelect(palSpi->Driver);
 
+        // if CS is to be controlled by the driver, set the GPIO
+        if (palSpi->ChipSelect >= 0)
+        {
+            // assert pin based on CS active level
+            CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+        }
+
         if (sync)
         {
             // Sync operation
@@ -494,6 +506,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
                     }
+
                     spiSend(palSpi->Driver, palSpi->WriteSize, palSpi->WriteBuffer);
 
                     // receive operation
@@ -502,6 +515,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     }
+
                     spiReceive(palSpi->Driver, palSpi->ReadSize, palSpi->ReadBuffer);
                 }
             }
@@ -534,12 +548,27 @@ HRESULT CPU_SPI_nWrite_nRead(
 
             // Release bus & cacheBufferInvalidate etc
             CompleteTranfer(palSpi);
+
+            // if CS is to be controlled by the driver, set the GPIO
+            if (palSpi->ChipSelect >= 0)
+            {
+                // de-assert pin based on CS active level
+                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+            }
         }
         else
-        // Start an Asyncronous SPI transfer
-        // perform SPI operation using driver's ASYNC API
-        // Completed on calling Spi Callback
         {
+            // Start an Asyncronous SPI transfer
+            // perform SPI operation using driver's ASYNC API
+            // Completed on calling Spi Callback
+
+            // if CS is to be controlled by the driver, set the GPIO
+            if (palSpi->ChipSelect >= 0)
+            {
+                // assert pin based on CS active level
+                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+            }
+
             // this is a Async operation
             // perform SPI operation using driver's ASYNC API
             if (palSpi->WriteSize != 0 && palSpi->ReadSize != 0)
@@ -603,9 +632,9 @@ HRESULT CPU_SPI_nWrite_nRead(
     NANOCLR_NOCLEANUP();
 }
 
-SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
+SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t busIndex, uint32_t deviceHandle)
 {
-    (void)spi_bus;
+    (void)busIndex;
 
     NF_PAL_SPI *palSpi = (NF_PAL_SPI *)deviceHandle;
     SPI_OP_STATUS os;
@@ -630,19 +659,22 @@ SPI_OP_STATUS CPU_SPI_OP_Status(uint8_t spi_bus, uint32_t deviceHandle)
     return os;
 }
 
-bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
+bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
     // init the PAL struct for this SPI bus and assign the respective driver
     // all this occurs if not already done
     // why do we need this? because several SPIDevice objects can be created associated to the same bus
+
+    // bus index is 0 based, here it's 1 based
     switch (busIndex + 1)
     {
 #if STM32_SPI_USE_SPI1
         case 1:
             if (SPI1_PAL.Driver == NULL)
             {
-                ConfigPins_SPI1(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI1(spiDeviceConfig);
                 SPI1_PAL.Driver = &SPID1;
+                SPI1_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -650,8 +682,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
         case 2:
             if (SPI2_PAL.Driver == NULL)
             {
-                ConfigPins_SPI2(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI2(spiDeviceConfig);
                 SPI2_PAL.Driver = &SPID2;
+                SPI2_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -659,8 +692,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
         case 3:
             if (SPI3_PAL.Driver == NULL)
             {
-                ConfigPins_SPI3(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI3(spiDeviceConfig);
                 SPI3_PAL.Driver = &SPID3;
+                SPI3_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -668,8 +702,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
         case 4:
             if (SPI4_PAL.Driver == NULL)
             {
-                ConfigPins_SPI4(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI4(spiDeviceConfig);
                 SPI4_PAL.Driver = &SPID4;
+                SPI4_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -677,8 +712,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
         case 5:
             if (SPI5_PAL.Driver == NULL)
             {
-                ConfigPins_SPI5(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI5(spiDeviceConfig);
                 SPI5_PAL.Driver = &SPID5;
+                SPI5_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -686,8 +722,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
         case 6:
             if (SPI6_PAL.Driver == NULL)
             {
-                ConfigPins_SPI6(busConfiguration == SpiBusConfiguration_HalfDuplex);
+                ConfigPins_SPI6(spiDeviceConfig);
                 SPI6_PAL.Driver = &SPID6;
+                SPI6_PAL.ChipSelect = spiDeviceConfig.DeviceChipSelect;
             }
             break;
 #endif
@@ -702,6 +739,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, SpiBusConfiguration busConfiguration)
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
     // get the PAL struct for the SPI bus
+    // bus index is 0 based, here it's 1 based
     switch (busIndex + 1)
     {
 #if STM32_SPI_USE_SPI1
@@ -802,9 +840,9 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
 }
 
 // Return pins used for SPI bus
-void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi)
+void CPU_SPI_GetPins(uint32_t busIndex, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &mosi)
 {
-    (void)spi_bus;
+    (void)busIndex;
 
     clk = (GPIO_PIN)-1;
     miso = (GPIO_PIN)-1;
@@ -814,21 +852,24 @@ void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clk, GPIO_PIN &miso, GPIO_PIN &
 // Minimum and Maximum clock frequency available based on bus and configured pins
 HRESULT CPU_SPI_MinClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    // bus index is 0 based, here it's 1 based
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
 
     // Max prescaler value = 256
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
+    // bus index is 0 based, here it's 1 based
+    *frequency = (spiBus + 1 == 2 or spiBus + 1 == 3) ? SystemCoreClock >>= 9 : SystemCoreClock >> 8;
 
     return S_OK;
 }
 
 HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
 {
-    if (spiBus - 1 >= NUM_SPI_BUSES)
+    // bus index is 0 based, here it's 1 based
+    if (spiBus >= NUM_SPI_BUSES)
     {
         return CLR_E_INVALID_PARAMETER;
     }
@@ -836,14 +877,16 @@ HRESULT CPU_SPI_MaxClockFrequency(uint32_t spiBus, int32_t *frequency)
     // According to STM : "At a minimum, the clock frequency should be twice the required communication frequency."
     // So maximum useable frequency is CoreClock / 2.
     // SPI2 or SPI3 are on APB1, so divide max frequency by four.
-    *frequency = (spiBus == 2 or spiBus == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
+    // bus index is 0 based, here it's 1 based
+    *frequency = (spiBus + 1 == 2 or spiBus + 1 == 3) ? SystemCoreClock >>= 2 : SystemCoreClock >> 1;
 
     return S_OK;
 }
 
 // Maximum number of SPI devices that can be opened on a bus
-uint32_t CPU_SPI_ChipSelectLineCount(uint32_t spi_bus)
+uint32_t CPU_SPI_ChipSelectLineCount(uint32_t busIndex)
 {
-    (void)spi_bus;
-    return 10;
+    (void)busIndex;
+
+    return MAX_SPI_DEVICES;
 }

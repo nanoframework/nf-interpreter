@@ -1865,6 +1865,12 @@ void CLR_RT_Assembly::DestroyInstance()
     }
 #endif
 
+    // check if header has to be freed (in case the assembly lives in RAM)
+    if ((this->m_flags & CLR_RT_Assembly::FreeOnDestroy) != 0)
+    {
+        platform_free((void *)this->m_header);
+    }
+
     //--//
 
     g_CLR_RT_EventCache.Append_Node(this);
