@@ -46,8 +46,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::DisposeNative___VOID,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SystemSpanByte__SystemSpanByte__BOOLEAN,
     Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer___VOID__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
@@ -62,7 +60,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Spi =
 {
     "System.Device.Spi",
-    0xB6C4B3BD,
+    0x3F6E2A7E,
     method_lookup,
     { 100, 1, 2, 0 }
 };
