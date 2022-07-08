@@ -118,6 +118,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::Clear___VOID,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont,
     NULL,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetClippingRectangle___VOID__I4__I4__I4__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Width___I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4,
@@ -977,9 +978,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
 {
     "nanoFramework.Graphics",
-    0xFA76FD3F,
+    0xD528A218,
     method_lookup,
-    { 100, 0, 0, 4 }
+    { 100, 0, 0, 5 }
 };
 
 // clang-format on

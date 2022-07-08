@@ -562,6 +562,18 @@ void CLR_GFX_Bitmap::SetPixelsHelper(
     GraphicsDriver::SetPixelsHelper(m_palBitmap, rect, config, callback, param);
 }
 
+void CLR_GFX_Bitmap::DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
+{
+    CLR_GFX_FontCharacterInfo chr;
+
+    font.GetCharInfo(c, chr);
+
+    if (chr.isValid)
+    {
+        font.DrawChar(this, chr, x, y, color);
+    }
+}
+
 void CLR_GFX_Bitmap::DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
 {
     // This is not implemented: need vectors for text orientation as parameters, and these need to be transformed.

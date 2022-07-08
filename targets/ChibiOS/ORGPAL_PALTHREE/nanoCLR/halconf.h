@@ -494,25 +494,9 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
-#define SPI_SELECT_MODE SPI_SELECT_MODE_PAD
+#define SPI_SELECT_MODE SPI_SELECT_MODE_NONE
 #endif
 
-// Not in the latest "official" config, disabling until known if needed.
-// /**
-//  * @brief   Handling method for SPI CS line.
-//  * @note    Disabling this option saves both code and data space.
-//  */
-// #if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
-// #define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
-// #endif
-
-// /**
-//  * @brief   Handling method for SPI CS line.
-//  * @note    Disabling this option saves both code and data space.
-//  */
-// #if !defined(SPI_SELECT_MODE) || defined(__DOXYGEN__)
-// #define SPI_SELECT_MODE                     SPI_SELECT_MODE_PAD
-// #endif
 /*===========================================================================*/
 /* UART driver related settings.                                             */
 /*===========================================================================*/
