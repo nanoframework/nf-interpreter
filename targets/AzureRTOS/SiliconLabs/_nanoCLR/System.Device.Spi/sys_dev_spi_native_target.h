@@ -81,6 +81,9 @@ struct NF_PAL_SPI
 
     uint8_t *ReadBuffer;
     uint16_t ReadSize;
+
+    // -1 = Chip Select is not handled | >0 Chip Select is to be controlled with this GPIO
+    int32_t ChipSelect;
 };
 
 ////////////////////////////////////////////
