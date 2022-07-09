@@ -187,12 +187,10 @@ NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
 // Give a complete low-level SPI configuration from passed SPI_DEVICE_CONFIGURATION
 void GetSPIConfig(const SPI_DEVICE_CONFIGURATION &config, SPIDRV_Init_t *spiDrivInit)
 {
-    // SPI mode
-    // matches SPIDRV_ClockMode_t
+    // SPI mode (matches SPIDRV_ClockMode_t)
     spiDrivInit->clockMode = config.Spi_Mode;
-
-    // baud rate
     spiDrivInit->bitRate = config.Clock_RateHz;
+    spiDrivInit->frameLength = config.MD16bits ? 16 : 8;
 
     // Sets the order of bytes transmission : MSB first or LSB first
     if (config.DataOrder16 == DataBitOrder_LSB)
@@ -559,7 +557,6 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
         {
             return false;
         }
-
         // allocate memory for the SPIDRV_Init_t
         SPIDRV_Init_t *initSpinConfig = (SPIDRV_Init_t *)platform_malloc(sizeof(SPIDRV_Init_t));
         // sanity check allocation
