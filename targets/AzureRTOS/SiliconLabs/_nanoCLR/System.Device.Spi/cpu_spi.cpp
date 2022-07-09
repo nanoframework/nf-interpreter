@@ -459,6 +459,10 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
     EUSART_TypeDef *usart = NULL;
 #endif
 
+    // create SPI init struct with the defaults:
+    // ports and pins with "invalid" values
+    // always MASTER mode
+    // we'll be controlling CS programmatically
     SPIDRV_Init_t spiInit = {
         NULL,
 #if defined(_USART_ROUTELOC0_MASK)
@@ -481,11 +485,9 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
         0,
         0,
         0,
-        // always MASTER mode
         spidrvMaster,
         0,
         0,
-        // we'll be controlling CS
         spidrvCsControlApplication,
         spidrvSlaveStartImmediate
     };

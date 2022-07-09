@@ -113,15 +113,7 @@ extern NF_PAL_SPI SPI5_PAL;
 // the following macro defines a function that configures the GPIO pins for an Gecko SPI peripheral
 // it gets called in the System_Device_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
-#define SPI_CONFIG_PINS(                                                                                               \
-    num,                                                                                                               \
-    port_location_mosi,                                                                                                \
-    port_location_miso,                                                                                                \
-    port_location_clk,                                                                                                 \
-    pin_mosi,                                                                                                          \
-    pin_miso,                                                                                                          \
-    pin_clk,                                                                                                           \
-    port_location)                                                                                                     \
+#define SPI_CONFIG_PINS(num, port_location_mosi, port_location_miso, port_location_clk)                                \
                                                                                                                        \
     void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit)                  \
     {                                                                                                                  \
@@ -133,7 +125,6 @@ extern NF_PAL_SPI SPI5_PAL;
         }                                                                                                              \
         if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                     \
         {                                                                                                              \
-            spiInit.portLocationCs = GPIO_PORT(spiDeviceConfig.DeviceChipSelect);                                      \
             if (spiDeviceConfig.ChipSelectActive)                                                                      \
             {                                                                                                          \
             }                                                                                                          \
