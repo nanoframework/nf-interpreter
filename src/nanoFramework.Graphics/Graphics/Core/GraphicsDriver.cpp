@@ -302,10 +302,7 @@ void GraphicsDriver::DrawRectangleNative(
     }
 }
 
-void GraphicsDriver::FillRectangleNative(
-    const PAL_GFX_Bitmap &bitmap,
-    GFX_Brush &brush,
-    const GFX_Rect &rectangle)
+void GraphicsDriver::FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush &brush, const GFX_Rect &rectangle)
 {
     int x = rectangle.left;
     int y = rectangle.top;
@@ -554,7 +551,7 @@ void GraphicsDriver::DrawRoundedRectangleNative(
                 EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Fill4PointLinesRoundedRect);
             }
             else
-            {            
+            {
                 EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &GradientFill4PointLinesRoundedRect);
             }
 
@@ -565,7 +562,7 @@ void GraphicsDriver::DrawRoundedRectangleNative(
             fillRect.right = x2 - 1 - pen.thickness;
             fillRect.bottom = rectangle.bottom - radiusY - 1;
 
-            FillRectangleNative(bitmap, brush, fillRect);            
+            FillRectangleNative(bitmap, brush, fillRect);
         }
 
         EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Draw4PointsRoundedRect);
@@ -617,11 +614,16 @@ void GraphicsDriver::Fill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, in
     DrawScanlineNative(bitmap, p->x1 - offsetX, p->x2 + offsetX, p->y2 + offsetY, color, opacity);
 }
 
-void GraphicsDriver::GradientFill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params)
+void GraphicsDriver::GradientFill4PointLinesRoundedRect(
+    const PAL_GFX_Bitmap &bitmap,
+    int offsetX,
+    int offsetY,
+    void *params)
 {
     Draw4PointsRoundedRectParams *p = (Draw4PointsRoundedRectParams *)params;
 
-    // Using the rectangle code for gradient fills. A version of DrawScanlineNative that supports gradients would be faster
+    // Using the rectangle code for gradient fills. A version of DrawScanlineNative that supports gradients would be
+    // faster
 
     GFX_Rect rectangle;
 
@@ -1314,7 +1316,13 @@ void GraphicsDriver::DrawBresLineNative(const PAL_GFX_Bitmap &bitmap, int x0, in
     }
 }
 
-void GraphicsDriver::DrawScanlineNative(const PAL_GFX_Bitmap &bitmap, int x1, int x2, int y, CLR_UINT32 color, CLR_UINT16 opacity)
+void GraphicsDriver::DrawScanlineNative(
+    const PAL_GFX_Bitmap &bitmap,
+    int x1,
+    int x2,
+    int y,
+    CLR_UINT32 color,
+    CLR_UINT16 opacity)
 {
     // Check clipping
     if ((y < bitmap.clipping.top) || (y >= bitmap.clipping.bottom))
@@ -1324,7 +1332,7 @@ void GraphicsDriver::DrawScanlineNative(const PAL_GFX_Bitmap &bitmap, int x1, in
 
     if (x1 < bitmap.clipping.left)
         x1 = bitmap.clipping.left;
-    
+
     if (x2 >= bitmap.clipping.right)
         x2 = bitmap.clipping.right - 1;
 
