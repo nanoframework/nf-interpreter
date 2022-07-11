@@ -689,6 +689,10 @@ struct GraphicsDriver
         GFX_Pen &pen,
         GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangleNative(
+        const PAL_GFX_Bitmap &bitmap,
+        GFX_Brush &brush,
+        const GFX_Rect &rectangle);
     static void DrawRoundedRectangleNative(
         const PAL_GFX_Bitmap &bitmap,
         GFX_Pen &pen,
@@ -730,6 +734,8 @@ struct GraphicsDriver
         int &ySrc);
 
     static void DrawBresLineNative(const PAL_GFX_Bitmap &bitmap, int x0, int y0, int x1, int y1, GFX_Pen &pen);
+
+    static void DrawScanlineNative(const PAL_GFX_Bitmap &bitmap, int x1, int x2, int y, CLR_UINT32 color, CLR_UINT16 opacity);
 
     static CLR_UINT32 NativeColorInterpolate(CLR_UINT32 colorTo, CLR_UINT32 colorFrom, CLR_UINT16 scalar);
 
@@ -818,6 +824,8 @@ struct GraphicsDriver
 
     static void Draw4PointsEllipse(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
     static void Draw4PointsRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void Fill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void GradientFill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
 };
 
 // The PAL Graphics API uses the 24bit BGR color space, the one that's used for the
