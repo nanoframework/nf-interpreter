@@ -27,6 +27,7 @@ option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option f
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
+option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
@@ -294,6 +295,12 @@ if(API_System.Device.I2c)
     PerformSettingsForApiEntry("System.Device.I2c")
 endif()
 
+# Com.SkyworksInc.NanoFramework.Devices.I2c
+if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.I2c")
+endif()
+
 # System.Device.Pwm
 if(API_System.Device.Pwm)
     ##### API name here (doted name)
@@ -304,6 +311,12 @@ endif()
 if(API_System.IO.Ports)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.IO.Ports")
+endif()
+
+# Com.SkyworksInc.NanoFramework.Devices.Spi
+if(API_Com.SkyworksInc.NanoFramework.Devices.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.Spi")
 endif()
 
 # System.Device.Spi
