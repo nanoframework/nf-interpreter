@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <sys_dev_i2c_native_target.h>
+#include <com_sky_nf_dev_i2c_native_target.h>
 
 //////////
 // I2C2 //
