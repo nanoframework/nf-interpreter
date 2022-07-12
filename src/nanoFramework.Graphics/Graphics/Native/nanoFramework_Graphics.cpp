@@ -130,6 +130,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__nanoFrameworkPresentationMediaColor,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2,
+    Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4,
     Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor,
@@ -978,9 +983,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Graphics =
 {
     "nanoFramework.Graphics",
-    0xD528A218,
+    0xDA56C3C3,
     method_lookup,
-    { 100, 0, 0, 5 }
+    { 100, 0, 0, 6 }
 };
 
 // clang-format on
