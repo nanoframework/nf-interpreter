@@ -311,7 +311,9 @@ void GraphicsDriver::FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush
 
     int xSrc = 0, ySrc = 0;
     if (ClipToVisible(bitmap, x, y, width, height, NULL, xSrc, ySrc) == false)
+    {
         return;
+    }
 
     int stride = GetWidthInWords(bitmap.width) * 2;
 
