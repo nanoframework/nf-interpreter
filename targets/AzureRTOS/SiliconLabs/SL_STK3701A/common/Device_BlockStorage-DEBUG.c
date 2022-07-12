@@ -10,10 +10,10 @@
 const BlockRange BlockRange1[] = {
 
     // 00000000 nanoBooter
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 9},
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 10},
 
-    // 0000A000 nanoCLR
-    {BlockRange_BLOCKTYPE_CODE, 10, 237},
+    // 0000B000 nanoCLR
+    {BlockRange_BLOCKTYPE_CODE, 11, 237},
 
     // 000EE000 deployment
     {BlockRange_BLOCKTYPE_DEPLOYMENT, 238, 510},
