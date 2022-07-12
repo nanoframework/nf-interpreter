@@ -12,8 +12,7 @@
 
 #include <em_device.h>
 #include <em_gpio.h>
-#include <em_usart.h>
-#include <em_ldma.h>
+#include <nf_gecko_spi_driver.h>
 
 #define SL_SPIDRV_EXP_BITRATE 1000000
 
@@ -70,8 +69,6 @@
 struct NF_PAL_SPI
 {
     int BusIndex;
-    USART_TypeDef *Usart;
-    USART_InitSync_TypeDef *Configuration;
     SpiBusConfiguration BusConfiguration;
 
     SPI_Callback Callback;
@@ -87,6 +84,9 @@ struct NF_PAL_SPI
 
     // -1 = Chip Select is not handled | >0 Chip Select is to be controlled with this GPIO
     int32_t ChipSelect;
+
+    // DMA transfer control
+    Gecko_SpiDriver *Driver;
 };
 
 ////////////////////////////////////////////
@@ -130,25 +130,27 @@ extern NF_PAL_SPI SPI5_PAL;
     void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
     {                                                                                                                  \
         GPIO_PinModeSet(gpio_port_sck, sck_pin, gpioModePushPull, 1);                                                  \
-        SPI##num##_PAL.Usart->ROUTELOC0 =                                                                              \
-            (SPI##num##_PAL.Usart->ROUTELOC0 & ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |           \
-                                                 _USART_ROUTELOC0_CLKLOC_MASK | _USART_ROUTELOC0_CSLOC_MASK)) |        \
-            mosi_port_location | (sck_port_location << _USART_ROUTELOC0_CLKLOC_SHIFT);                                 \
+        SPI##num##_PAL.Driver->Usart->ROUTELOC0 = (SPI##num##_PAL.Driver->Usart->ROUTELOC0 &                           \
+                                                   ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |       \
+                                                     _USART_ROUTELOC0_CLKLOC_MASK | _USART_ROUTELOC0_CSLOC_MASK)) |    \
+                                                  mosi_port_location |                                                 \
+                                                  (sck_port_location << _USART_ROUTELOC0_CLKLOC_SHIFT);                \
         if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
         {                                                                                                              \
             GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 1);                                            \
             GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 1);                                               \
-            SPI##num##_PAL.Usart->ROUTELOC0 |= (miso_port_location << _USART_ROUTELOC0_RXLOC_SHIFT);                   \
+            SPI##num##_PAL.Driver->Usart->ROUTELOC0 |= (miso_port_location << _USART_ROUTELOC0_RXLOC_SHIFT);           \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            SPI##num##_PAL.Usart->CTRL |= USART_CTRL_LOOPBK;                                                           \
+            SPI##num##_PAL.Driver->Usart->CTRL |= USART_CTRL_LOOPBK;                                                   \
             GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 0);                                            \
         }                                                                                                              \
-        SPI##num##_PAL.Usart->ROUTEPEN = USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN | USART_ROUTEPEN_TXPEN |         \
-                                                 (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)  \
-                                             ? USART_ROUTEPEN_RXPEN                                                    \
-                                             : 0;                                                                      \
+        SPI##num##_PAL.Driver->Usart->ROUTEPEN =                                                                       \
+            USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN | USART_ROUTEPEN_TXPEN |                                      \
+                    (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                               \
+                ? USART_ROUTEPEN_RXPEN                                                                                 \
+                : 0;                                                                                                   \
     }
 
 #else

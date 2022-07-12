@@ -27,66 +27,63 @@ NF_PAL_SPI SPI4_PAL;
 NF_PAL_SPI SPI5_PAL;
 #endif
 
-#if defined(USART_PRESENT)
-static USART_TypeDef *GetUsartFromHandle(struct SPIDRV_HandleData *handle)
-{
-    return handle->peripheral.usartPort;
-}
-#endif
 #if defined(EUSART_PRESENT)
-static EUSART_TypeDef *GetUsartFromHandle(struct SPIDRV_HandleData *handle)
-{
-    return handle->peripheral.eusartPort;
-}
+#error "Only USART type is supported. Drivar can't handle EUSART."
 #endif
 
+static USART_TypeDef *GetUsartFromHandle(struct Gecko_SpiDriver *handle)
+{
+    return handle->Usart;
+}
+
 // Callback used when a async transfer operation completes
-static void SpiTransferCompleteCallback(struct SPIDRV_HandleData *handle, Ecode_t transferStatus, int itemsTransferred)
+static void SpiTransferCompleteCallback(struct Gecko_SpiDriver *driver, Ecode_t transferStatus, int itemsTransferred)
 {
     (void)transferStatus;
     (void)itemsTransferred;
+
     NATIVE_INTERRUPT_START
 
     NF_PAL_SPI *palSpi = NULL;
 
     // Find the NF_PAL_SPI* for driver
 #if GECKO_USE_SPI0 == TRUE
-    if (GetUsartFromHandle(handle) == USART0)
+    if (GetUsartFromHandle(driver) == USART0)
     {
         palSpi = &SPI0_PAL;
     }
 #endif
 
 #if GECKO_USE_SPI1 == TRUE
-    if (GetUsartFromHandle(handle) == USART1)
+    if (GetUsartFromHandle(driver) == USART1)
     {
         palSpi = &SPI1_PAL;
     }
 #endif
 
 #if GECKO_USE_SPI2 == TRUE
-    if (GetUsartFromHandle(handle) == USART2)
+    if (GetUsartFromHandle(driver) == USART2)
     {
         palSpi = &SPI2_PAL;
     }
 #endif
 
 #if GECKO_USE_SPI3 == TRUE
-    if (GetUsartFromHandle(handle) == USART3)
+    if (GetUsartFromHandle(driver) == USART3)
     {
         palSpi = &SPI3_PAL;
     }
 #endif
 
 #if GECKO_USE_SPI4 == TRUE
-    if (GetUsartFromHandle(handle) == USART4)
+    if (GetUsartFromHandle(driver) == USART4)
     {
         palSpi = &SPI4_PAL;
     }
 #endif
 
 #if GECKO_USE_SPI5 == TRUE
-    if (GetUsartFromHandle(handle) == USART5)
+    if (GetUsartFromHandle(driver) == USART5)
     {
         palSpi = &SPI5_PAL;
     }
@@ -106,7 +103,7 @@ static void SpiTransferCompleteCallback(struct SPIDRV_HandleData *handle, Ecode_
         //     // half duplex operation, clear output enable bit
         //     palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
         // }
-        SPIDRV_MReceive(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
+        SpiReceive(palSpi->Driver, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
     }
     else
     {
@@ -274,6 +271,8 @@ HRESULT CPU_SPI_nWrite_nRead(
         // === Setup the operation and init buffers ===
         palSpi->BusIndex = sdev.Spi_Bus;
 
+        palSpi->Driver->DataIs16bits = wrc.Bits16ReadWrite;
+
         // set bus config flag
         busConfigIsHalfDuplex = (palSpi->BusConfiguration == SpiBusConfiguration_HalfDuplex);
 
@@ -292,8 +291,10 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
-        palSpi->Usart->FRAME =
-            (palSpi->Usart->FRAME & ~_USART_FRAME_DATABITS_MASK) | wrc.Bits16ReadWrite ? usartDatabits16 : usartDatabits8;
+        if (!SpiDmaStart(palSpi->Driver))
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_TOO_MANY_OPEN_HANDLES);
+        }
 
         // if CS is to be controlled by the driver, set the GPIO
         if (palSpi->ChipSelect >= 0)
@@ -313,8 +314,8 @@ HRESULT CPU_SPI_nWrite_nRead(
                 {
                     // Full duplex
                     // Uses the largest buffer size as transfer size
-                    SPIDRV_MTransferB(
-                        palSpi->Handle,
+                    SpiTransferBlocking(
+                        palSpi->Driver,
                         palSpi->WriteBuffer,
                         palSpi->ReadBuffer,
                         palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize);
@@ -328,7 +329,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
                     // }
-                    SPIDRV_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                    SpiTransmitBlocking(palSpi->Driver, palSpi->WriteBuffer, palSpi->WriteSize);
 
                     // receive operation
                     // TODO
@@ -337,7 +338,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     // }
-                    SPIDRV_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                    SpiReceiveBlocking(palSpi->Driver, palSpi->ReadBuffer, palSpi->ReadSize);
                 }
             }
             else
@@ -352,7 +353,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     //     // half duplex operation, set output enable
                     //     palSpi->Driver->spi->CR1 &= ~SPI_CR1_BIDIOE;
                     // }
-                    SPIDRV_MReceiveB(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize);
+                    SpiReceiveBlocking(palSpi->Driver, palSpi->ReadBuffer, palSpi->ReadSize);
                 }
                 else
                 {
@@ -363,7 +364,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                         // half duplex operation, set output enable
                         // palSpi->Driver->spi->CR1 |= SPI_CR1_BIDIOE;
                     }
-                    SPIDRV_MTransmitB(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
+                    SpiTransmitBlocking(palSpi->Driver, palSpi->WriteBuffer, palSpi->WriteSize);
                 }
             }
 
@@ -399,8 +400,8 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // Uses the largest buffer size as transfer size
-                    SPIDRV_MTransfer(
-                        palSpi->Handle,
+                    SpiTransfer(
+                        palSpi->Driver,
                         palSpi->WriteBuffer,
                         palSpi->ReadBuffer,
                         palSpi->WriteSize > palSpi->ReadSize ? palSpi->WriteSize : palSpi->ReadSize,
@@ -419,11 +420,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     }
 
                     // receive operation will be started in the callback after the above completes
-                    SPIDRV_MTransmit(
-                        palSpi->Handle,
-                        palSpi->WriteBuffer,
-                        palSpi->WriteSize,
-                        SpiTransferCompleteCallback);
+                    SpiTransmit(palSpi->Driver, palSpi->WriteBuffer, palSpi->WriteSize, SpiTransferCompleteCallback);
                 }
             }
             else
@@ -435,7 +432,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // start receive
-                    SPIDRV_MReceive(palSpi->Handle, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
+                    SpiReceive(palSpi->Driver, palSpi->ReadBuffer, palSpi->ReadSize, SpiTransferCompleteCallback);
                 }
                 else
                 {
@@ -443,11 +440,7 @@ HRESULT CPU_SPI_nWrite_nRead(
                     palSpi->SequentialTxRx = false;
 
                     // start send
-                    SPIDRV_MTransmit(
-                        palSpi->Handle,
-                        palSpi->WriteBuffer,
-                        palSpi->WriteSize,
-                        SpiTransferCompleteCallback);
+                    SpiTransmit(palSpi->Driver, palSpi->WriteBuffer, palSpi->WriteSize, SpiTransferCompleteCallback);
                 }
             }
 
@@ -462,6 +455,7 @@ HRESULT CPU_SPI_nWrite_nRead(
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busConfiguration)
 {
     NF_PAL_SPI *palSpi = NULL;
+    USART_TypeDef *usart = NULL;
     void (*configPinsHandler)(const struct SPI_DEVICE_CONFIGURATION &) = NULL;
 
     // create USART init struct with the defaults:
@@ -499,7 +493,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI0 == TRUE
         case 0:
             palSpi = &SPI0_PAL;
-            palSpi->Usart = USART0;
+            usart = USART0;
             configPinsHandler = &ConfigPins_SPI0;
             break;
 #endif
@@ -507,7 +501,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI1 == TRUE
         case 1:
             palSpi = &SPI1_PAL;
-            palSpi->Usart = USART1;
+            usart = USART1;
             configPinsHandler = &ConfigPins_SPI1;
             break;
 #endif
@@ -515,7 +509,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI2 == TRUE
         case 2:
             palSpi = &SPI2_PAL;
-            palSpi->Usart = USART2;
+            usart = USART2;
             configPinsHandler = &ConfigPins_SPI2;
 
             break;
@@ -524,7 +518,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI3 == TRUE
         case 3:
             palSpi = &SPI3_PAL;
-            palSpi->Usart = USART3;
+            usart = USART3;
             configPinsHandler = &ConfigPins_SPI3;
             break;
 #endif
@@ -532,7 +526,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI4 == TRUE
         case 4:
             palSpi = &SPI4_PAL;
-            palSpi->Usart = USART4;
+            usart = USART4;
             configPinsHandler = &ConfigPins_SPI4;
             break;
 #endif
@@ -540,7 +534,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #if GECKO_USE_SPI5 == TRUE
         case 5:
             palSpi = &SPI5_PAL;
-            palSpi->Usart = USART5;
+            usart = USART5;
             configPinsHandler = &ConfigPins_SPI5;
             break;
 #endif
@@ -550,29 +544,47 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
             return false;
     }
 
-    if (palSpi->Configuration == NULL)
+    if (palSpi->Driver == NULL)
     {
+
         // allocate memory for the USART_InitSync_TypeDef
-        palSpi->Configuration = (USART_InitSync_TypeDef *)platform_malloc(sizeof(USART_InitSync_TypeDef));
+        palSpi->Driver = (Gecko_SpiDriver *)platform_malloc(sizeof(Gecko_SpiDriver));
 
         // sanity check allocation
-        if (palSpi->Configuration == NULL)
+        if (palSpi->Driver == NULL)
         {
             return false;
         }
 
+        // allocate memory for the USART_InitSync_TypeDef
+        palSpi->Driver->Configuration = (USART_InitSync_TypeDef *)platform_malloc(sizeof(USART_InitSync_TypeDef));
+
+        // sanity check allocation
+        if (palSpi->Driver->Configuration == NULL)
+        {
+            platform_free(palSpi->Driver);
+
+            return false;
+        }
+
         // copy init struct
-        memcpy(palSpi->Configuration, &configInit, sizeof(USART_InitSync_TypeDef));
+        memcpy(palSpi->Driver->Configuration, &configInit, sizeof(USART_InitSync_TypeDef));
+
+        // set USART
+        palSpi->Driver->Usart = usart;
 
         // get the SPI configuration
-        GetSPIConfig(busConfiguration, palSpi->Configuration);
+        GetSPIConfig(busConfiguration, palSpi->Driver->Configuration);
 
-        USART_InitSync(palSpi->Usart, palSpi->Configuration);
+        SpiDriverInit(palSpi->Driver);
 
         palSpi->ChipSelect = busConfiguration.DeviceChipSelect;
 
         // call handler to configure pins
         configPinsHandler(busConfiguration);
+
+        // init DMA driver (don't bother check return value as if it's already started it won't fail)v
+        DMADRV_Init();
     }
 
     return true;
@@ -592,9 +604,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART0);
 
             // free memory
-            platform_free(SPI0_PAL.Configuration);
+            platform_free(SPI0_PAL.Driver->Configuration);
+            platform_free(SPI0_PAL.Driver);
 
-            SPI0_PAL.Configuration = NULL;
+            SPI0_PAL.Driver = NULL;
 
             break;
 #endif
@@ -604,9 +617,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART1);
 
             // free memory
-            platform_free(SPI1_PAL.Configuration);
+            platform_free(SPI1_PAL.Driver->Configuration);
+            platform_free(SPI1_PAL.Driver);
 
-            SPI1_PAL.Configuration = NULL;
+            SPI1_PAL.Driver = NULL;
 
             break;
 #endif
@@ -616,9 +630,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART2);
 
             // free memory
-            platform_free(SPI2_PAL.Configuration);
+            platform_free(SPI2_PAL.Driver->Configuration);
+            platform_free(SPI2_PAL.Driver);
 
-            SPI2_PAL.Configuration = NULL;
+            SPI2_PAL.Driver = NULL;
 
             break;
 #endif
@@ -628,9 +643,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART3);
 
             // free memory
-            platform_free(SPI3_PAL.Configuration);
+            platform_free(SPI3_PAL.Driver->Configuration);
+            platform_free(SPI3_PAL.Driver);
 
-            SPI3_PAL.Configuration = NULL;
+            SPI3_PAL.Driver = NULL;
 
             break;
 #endif
@@ -640,9 +656,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART4);
 
             // free memory
-            platform_free(SPI4_PAL.Configuration);
+            platform_free(SPI4_PAL.Driver->Configuration);
+            platform_free(SPI4_PAL.Driver);
 
-            SPI4_PAL.Configuration = NULL;
+            SPI4_PAL.Driver = NULL;
 
             break;
 #endif
@@ -652,9 +669,10 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
             USART_Reset(UART5);
 
             // free memory
-            platform_free(SPI5_PAL.Configuration);
+            platform_free(SPI5_PAL.Driver->Configuration);
+            platform_free(SPI5_PAL.Driver);
 
-            SPI5_PAL.Configuration = NULL;
+            SPI5_PAL.Driver = NULL;
 
             break;
 #endif
