@@ -16,6 +16,9 @@
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
 
+// flags for hardware events
+TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
+
 // byte pool configuration and definitions
 #define DEFAULT_BYTE_POOL_SIZE 4096
 TX_BYTE_POOL byte_pool_0;
@@ -92,7 +95,7 @@ void tx_application_define(void *first_unused_memory)
         "Blink Thread",
         BlinkThread_entry,
         0,
-        (uint8_t*)blinkThreadStack,
+        (uint8_t *)blinkThreadStack,
         BLINK_THREAD_STACK_SIZE,
         BLINK_THREAD_PRIORITY,
         BLINK_THREAD_PRIORITY,
@@ -112,7 +115,7 @@ void tx_application_define(void *first_unused_memory)
         "Blink Thread1",
         BlinkThread1_entry,
         0,
-        (uint8_t*)blinkThread1Stack,
+        (uint8_t *)blinkThread1Stack,
         BLINK_THREAD_STACK_SIZE,
         BLINK_THREAD_PRIORITY,
         BLINK_THREAD_PRIORITY,
@@ -139,6 +142,15 @@ void tx_application_define(void *first_unused_memory)
         TX_NO_TIME_SLICE,
         TX_AUTO_START);
 
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
+
+    // create HW event group
+    status = tx_event_flags_create(&nanoHardwareEvents, "");
     if (status != TX_SUCCESS)
     {
         while (1)
