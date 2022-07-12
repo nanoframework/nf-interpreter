@@ -333,29 +333,24 @@ void SpiTransmit(struct Gecko_SpiDriver *driver, const void *buffer, int count, 
 // Start a non-blocking receive transfer
 void SpiReceive(struct Gecko_SpiDriver *driver, void *buffer, int count, SpiDmaCallback callback)
 {
-    SpiDmaStart(driver);
     StartReceiveDma(driver, buffer, count, callback);
 }
 
 // Initialize DMA for SPI transfers
-bool SpiDmaStart(struct Gecko_SpiDriver *driver)
+bool SpiStart(struct Gecko_SpiDriver *driver)
 {
     // set frame size
     driver->Usart->FRAME =
         (driver->Usart->FRAME & ~_USART_FRAME_DATABITS_MASK) | driver->DataIs16bits ? usartDatabits16 : usartDatabits8;
 
-    // set DMA
-    if (DMADRV_AllocateChannel(&driver->TxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
-    {
-        return false;
-    }
-
-    if (DMADRV_AllocateChannel(&driver->RxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
-    {
-        return false;
-    }
+    USART_Enable(driver->Usart, usartEnable);
 
     return true;
+}
+
+void SpiRelease(struct Gecko_SpiDriver *driver)
+{
+    USART_Enable(driver->Usart, usartDisable);
 }
 
 void SpiDriverInit(struct Gecko_SpiDriver *driver)

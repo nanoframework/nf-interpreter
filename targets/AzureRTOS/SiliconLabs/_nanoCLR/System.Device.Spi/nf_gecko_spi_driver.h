@@ -70,7 +70,8 @@ extern "C"
     void DmaRequestRemove(struct Gecko_SpiDriver *driver);
     void DmaRequestAdd(struct Gecko_SpiDriver *driver);
     void SpiDriverInit(struct Gecko_SpiDriver *driver);
-    bool SpiDmaStart(struct Gecko_SpiDriver *driver);
+    bool SpiStart(struct Gecko_SpiDriver *driver);
+    void SpiRelease(struct Gecko_SpiDriver *driver);
 
 #ifdef __cplusplus
 }

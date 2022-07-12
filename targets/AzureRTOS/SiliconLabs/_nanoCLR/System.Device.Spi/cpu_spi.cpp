@@ -36,6 +36,11 @@ static USART_TypeDef *GetUsartFromHandle(struct Gecko_SpiDriver *handle)
     return handle->Usart;
 }
 
+static void CompleteTransfer(struct Gecko_SpiDriver *driver)
+{
+    SpiRelease(driver);
+}
+
 // Callback used when a async transfer operation completes
 static void SpiTransferCompleteCallback(struct Gecko_SpiDriver *driver, Ecode_t transferStatus, int itemsTransferred)
 {
@@ -291,7 +296,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             }
         }
 
-        if (!SpiDmaStart(palSpi->Driver))
+        if (!SpiStart(palSpi->Driver))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_TOO_MANY_OPEN_HANDLES);
         }
@@ -367,6 +372,8 @@ HRESULT CPU_SPI_nWrite_nRead(
                     SpiTransmitBlocking(palSpi->Driver, palSpi->WriteBuffer, palSpi->WriteSize);
                 }
             }
+
+            CompleteTransfer(palSpi->Driver);
 
             // if CS is to be controlled by the driver, set the GPIO
             if (palSpi->ChipSelect >= 0)
@@ -556,6 +563,8 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
             return false;
         }
 
+        memset(palSpi->Driver, 0, sizeof(Gecko_SpiDriver));
+
         // allocate memory for the USART_InitSync_TypeDef
         palSpi->Driver->Configuration = (USART_InitSync_TypeDef *)platform_malloc(sizeof(USART_InitSync_TypeDef));
 
@@ -585,6 +594,17 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 
         // init DMA driver (don't bother check return value as if it's already started it won't fail)v
         DMADRV_Init();
+
+        // set DMA
+        if (DMADRV_AllocateChannel(&palSpi->Driver->TxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
+        {
+            return false;
+        }
+
+        if (DMADRV_AllocateChannel(&palSpi->Driver->RxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
+        {
+            return false;
+        }
     }
 
     return true;
