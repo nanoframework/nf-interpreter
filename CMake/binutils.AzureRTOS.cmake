@@ -339,7 +339,7 @@ macro(nf_add_platform_include_directories target)
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
-            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}  
+            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}
         )
 
     endif()
@@ -361,7 +361,7 @@ macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
@@ -389,7 +389,7 @@ macro(nf_add_platform_sources target)
 
         # add header file for board definition
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
             
@@ -406,7 +406,7 @@ macro(nf_add_platform_sources target)
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}

@@ -423,6 +423,8 @@ else()
 
 endif()
 
+set(TARGET_BASE_LOCATION_BINARY ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_VENDOR}/${TARGET_BOARD})
+
 ##############################
 # AzureRTOS common directories
 add_subdirectory(_common)
