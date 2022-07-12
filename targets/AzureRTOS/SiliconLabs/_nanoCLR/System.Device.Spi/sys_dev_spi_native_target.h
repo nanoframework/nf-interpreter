@@ -135,19 +135,20 @@ extern NF_PAL_SPI SPI5_PAL;
                                                      _USART_ROUTELOC0_CLKLOC_MASK | _USART_ROUTELOC0_CSLOC_MASK)) |    \
                                                   mosi_port_location |                                                 \
                                                   (sck_port_location << _USART_ROUTELOC0_CLKLOC_SHIFT);                \
-        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
-        {                                                                                                              \
-            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 1);                                            \
-            GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 1);                                               \
-            SPI##num##_PAL.Driver->Usart->ROUTELOC0 |= (miso_port_location << _USART_ROUTELOC0_RXLOC_SHIFT);           \
-        }                                                                                                              \
-        else                                                                                                           \
+        if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_HalfDuplex)                                        \
         {                                                                                                              \
             SPI##num##_PAL.Driver->Usart->CTRL |= USART_CTRL_LOOPBK;                                                   \
             GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 0);                                            \
         }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 1);                                            \
+            GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 1);                                               \
+            SPI##num##_PAL.Driver->Usart->ROUTELOC0 |=                                                                 \
+                (miso_port_location) | (mosi_port_location << _USART_ROUTELOC0_TXLOC_SHIFT);                           \
+        }                                                                                                              \
         SPI##num##_PAL.Driver->Usart->ROUTEPEN =                                                                       \
-            USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN | USART_ROUTEPEN_TXPEN |                                      \
+            USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_TXPEN |                                                             \
                     (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                               \
                 ? USART_ROUTEPEN_RXPEN                                                                                 \
                 : 0;                                                                                                   \

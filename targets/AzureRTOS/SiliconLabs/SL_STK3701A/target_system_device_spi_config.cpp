@@ -12,9 +12,9 @@
 // Note: on SL_STK3701A SPI1 connects to the LCD-TFT Display
 
 // pin configuration for SPI1 (EMC encoded "port location")
-// SPI1_MOSI in PC6, location 1
+// SPI1_MOSI in PA14, location 6
 // SPI1_MISO: (not used for LCD)
-// SPI1_SCK in PC8, location 1
-// CS: PC14 (not used in SPI configuration)
+// SPI1_SCK in PC15, location 3
+// CS: PC11 (not used in SPI configuration)
 
-SPI_CONFIG_PINS(1, gpioPortC, 6, 1, 0, -1, -1, gpioPortC, 8, 1)
+SPI_CONFIG_PINS(1, gpioPortC, 15, 3, gpioPortA, 14, 6, 0, -1, -1)
