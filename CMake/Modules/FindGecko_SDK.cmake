@@ -10,8 +10,9 @@ FetchContent_GetProperties(gecko_sdk)
 
 # set include directories
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
 
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/common/bsp)
@@ -70,6 +71,7 @@ set(gecko_sdk_srcs
     em_vdac.c 
 
     # emdrv
+    dmactrl.c
     dmadrv.c
     uartdrv.c
     spidrv.c
@@ -108,6 +110,7 @@ set(gecko_sdk_srcs
 
     # nanoFramework implementations
     # nano_sl_i2cspm.c
+    nf_gecko_spi_driver.cpp
 
     # autogen at target level
 )
@@ -156,6 +159,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
             # nanoFramework implementations
             ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR/System.Device.I2c
+            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_nanoCLR/System.Device.Spi
 
             CMAKE_FIND_ROOT_PATH_BOTH
         )

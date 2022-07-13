@@ -18,7 +18,8 @@
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
 
-// extern TX_EVENT_FLAGS_GROUP wpUartEvent;
+// flags for hardware events
+TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
 extern CLR_SETTINGS clrSettings;
 
 // byte pool configuration and definitions
@@ -50,7 +51,6 @@ TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ClrStartupThread_entry(uint32_t parameter);
 
-
 void BlinkThread_entry(uint32_t parameter)
 {
     (void)parameter;
@@ -73,10 +73,10 @@ void tx_application_define(void *first_unused_memory)
     // start watchdog
     // Watchdog_Init();
 
-// #if (HAL_NF_USE_STM32_CRC == TRUE)
-//     // startup crc
-//     crcStart(NULL);
-// #endif
+    // #if (HAL_NF_USE_STM32_CRC == TRUE)
+    //     // startup crc
+    //     crcStart(NULL);
+    // #endif
 
 #if (TRACE_TO_STDIO == TRUE)
     StdioPort_Init();
@@ -148,14 +148,22 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
+
+    // create HW event group
+    status = tx_event_flags_create(&nanoHardwareEvents, "");
+    if (status != TX_SUCCESS)
+    {
+        while (1)
+        {
+        }
+    }
 }
 
 //  Application entry point.
 int main(void)
 {
-    sl_service_init();
-    sl_stack_init();
-    sl_internal_app_init();
+    // Initialize the board
+    sl_system_init();
 
     // Configure LED0 as output
     GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1, gpioModePushPull, 0);
@@ -163,6 +171,10 @@ int main(void)
     // turn off LEDs, just in case
     GPIO_PinModeSet(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN, gpioModeDisabled, 0);
     GPIO_PinModeSet(BSP_GPIO_LED1_PORT, BSP_GPIO_LED1_PIN, gpioModeDisabled, 0);
+
+    // enable display
+    GPIO_PinModeSet(BSP_DISP_ENABLE_PORT, BSP_DISP_ENABLE_PIN, gpioModePushPull, 0);
+    GPIO_PinOutSet(BSP_DISP_ENABLE_PORT, BSP_DISP_ENABLE_PIN);
 
     // init boot clipboard
     InitBootClipboard();
