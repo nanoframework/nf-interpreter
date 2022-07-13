@@ -16,6 +16,18 @@
 #include <em_ldma.h>
 #include <dmadrv.h>
 
+#include <platformHAL.h>
+
+#if defined(DMA_PRESENT) && (DMA_COUNT == 1)
+#define SPI_DMA_IRQ   DMA_IRQn
+
+#elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
+#define SPI_DMA_IRQ   LDMA_IRQn
+
+#else
+#error "No valid SPIDRV DMA engine defined."
+#endif
+
 // flags for hardware events
 extern TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
 
@@ -69,7 +81,7 @@ extern "C"
     bool RxDmaComplete(unsigned int channel, unsigned int sequenceNo, void *userParam);
     void DmaRequestRemove(struct Gecko_SpiDriver *driver);
     void DmaRequestAdd(struct Gecko_SpiDriver *driver);
-    void SpiDriverInit(struct Gecko_SpiDriver *driver);
+    bool SpiDriverInit(struct Gecko_SpiDriver *driver);
     bool SpiStart(struct Gecko_SpiDriver *driver);
     void SpiRelease(struct Gecko_SpiDriver *driver);
 

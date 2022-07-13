@@ -129,7 +129,7 @@ extern NF_PAL_SPI SPI5_PAL;
     miso_port_location)                                                                                                \
     void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
     {                                                                                                                  \
-        GPIO_PinModeSet(gpio_port_sck, sck_pin, gpioModePushPull, 1);                                                  \
+        GPIO_PinModeSet(gpio_port_sck, sck_pin, gpioModePushPull, 0);                                                  \
         SPI##num##_PAL.Driver->Usart->ROUTELOC0 = (SPI##num##_PAL.Driver->Usart->ROUTELOC0 &                           \
                                                    ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |       \
                                                      _USART_ROUTELOC0_CLKLOC_MASK | _USART_ROUTELOC0_CSLOC_MASK)) |    \
@@ -142,8 +142,8 @@ extern NF_PAL_SPI SPI5_PAL;
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 1);                                            \
-            GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 1);                                               \
+            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 0);                                            \
+            GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 0);                                               \
             SPI##num##_PAL.Driver->Usart->ROUTELOC0 |=                                                                 \
                 (miso_port_location) | (mosi_port_location << _USART_ROUTELOC0_TXLOC_SHIFT);                           \
         }                                                                                                              \

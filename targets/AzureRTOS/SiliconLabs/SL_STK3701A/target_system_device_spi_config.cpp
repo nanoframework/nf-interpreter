@@ -15,6 +15,6 @@
 // SPI1_MOSI in PA14, location 6
 // SPI1_MISO: (not used for LCD)
 // SPI1_SCK in PC15, location 3
-// CS: PC11 (not used in SPI configuration)
+// CS: PC14 (not used in SPI configuration)
 
-SPI_CONFIG_PINS(1, gpioPortC, 15, 3, gpioPortA, 14, 6, 0, -1, -1)
+SPI_CONFIG_PINS(1, gpioPortC, 15, 3, gpioPortA, 14, 6, 0, 0, 0)

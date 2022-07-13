@@ -82,31 +82,33 @@ void DmaBlockingComplete(struct Gecko_SpiDriver *driver, Ecode_t transferStatus,
     (void)transferStatus;
 
     driver->BlockingOpCompleted = true;
+
 }
 
 void WaitForTransferCompletion(struct Gecko_SpiDriver *driver)
 {
-    // TODO replace with RTOS semaphore
+    // RTOS semaphore
+    // (void)driver;
+    // uint32_t dummy;
 
-    // if (CORE_IrqIsBlocked(SPI_DMA_IRQ))
-    {
-        // Poll for completion by calling IRQ handler.
-        while (driver->BlockingOpCompleted == false)
-        {
+    // // wait forever for the SPI event
+    // tx_event_flags_get(&nanoHardwareEvents, NANO_HW_EVENTS_SPI_TRANSACTION_FLAG, TX_OR_CLEAR, &dummy, TX_WAIT_FOREVER);
+
+    // alternative approach with loop calling IRQ handlers    
+  if (CORE_IrqIsBlocked(SPI_DMA_IRQ)) {
+    // Poll for completion by calling IRQ handler.
+    while (driver->BlockingOpCompleted == false) {
 #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
-            DMA_IRQHandler();
+      DMA_IRQHandler();
 #elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
-            LDMA_IRQHandler();
+      LDMA_IRQHandler();
 #else
 #error "No valid SPIDRV DMA engine defined."
 #endif
-        }
     }
-    // else
-    {
-        while (driver->BlockingOpCompleted == false)
-            ;
-    }
+  } else {
+    while (driver->BlockingOpCompleted == false) ;
+  }    
 }
 
 void StartReceiveDma(struct Gecko_SpiDriver *driver, void *buffer, int count, SpiDmaCallback callback)
@@ -353,7 +355,26 @@ void SpiRelease(struct Gecko_SpiDriver *driver)
     USART_Enable(driver->Usart, usartDisable);
 }
 
-void SpiDriverInit(struct Gecko_SpiDriver *driver)
+bool SpiDriverInit(struct Gecko_SpiDriver *driver)
 {
+    // set DMA
+    if (DMADRV_AllocateChannel(&driver->TxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
+    {
+        return false;
+    }
+
+    if (DMADRV_AllocateChannel(&driver->RxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
+    {
+        return false;
+    }
+
     USART_InitSync(driver->Usart, driver->Configuration);
+
+    return true;
+}
+
+void SpiDriverDeInit(struct Gecko_SpiDriver *driver)
+{
+    DMADRV_FreeChannel(driver->TxDmaChannel);
+    DMADRV_FreeChannel(driver->RxDmaChannel);
 }

@@ -12,6 +12,8 @@
 #include <nanoHAL_ConfigurationManager.h>
 #include <nanoHAL_Graphics.h>
 
+#include <dmadrv.h>
+
 // #if (HAL_USE_CAN == TRUE)
 // #include <nf_device_can_native_target.h>
 // #endif
@@ -151,6 +153,9 @@ void nanoHAL_Initialize()
     // Ink_Initialize();
 #endif
 
+    // init DMA driver (don't bother check return value as if it's already started it won't fail)v
+    DMADRV_Init();
+
     // Initialise Network Stack
     Network_Initialize();
 }
@@ -172,6 +177,8 @@ void nanoHAL_Uninitialize()
     //         break;
     //     }
     // }
+
+    DMADRV_DeInit();
 
     // TODO
     SOCKETS_CloseConnections();

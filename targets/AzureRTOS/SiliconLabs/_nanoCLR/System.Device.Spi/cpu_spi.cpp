@@ -591,20 +591,6 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 
         // call handler to configure pins
         configPinsHandler(busConfiguration);
-
-        // init DMA driver (don't bother check return value as if it's already started it won't fail)v
-        DMADRV_Init();
-
-        // set DMA
-        if (DMADRV_AllocateChannel(&palSpi->Driver->TxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
-        {
-            return false;
-        }
-
-        if (DMADRV_AllocateChannel(&palSpi->Driver->RxDmaChannel, NULL) != ECODE_EMDRV_DMADRV_OK)
-        {
-            return false;
-        }
     }
 
     return true;
