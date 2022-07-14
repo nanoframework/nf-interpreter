@@ -11,6 +11,15 @@
 // Include instance config 
  #include "sl_iostream_usart_vcom_config.h"
 
+////////////////////////////////////////////////////////////////
+// Baudrate for the serial port                               //
+// Override default setting from board if build option is set //
+////////////////////////////////////////////////////////////////
+#ifdef  TARGET_SERIAL_BAUDRATE
+#undef SL_IOSTREAM_USART_VCOM_BAUDRATE
+#define SL_IOSTREAM_USART_VCOM_BAUDRATE TARGET_SERIAL_BAUDRATE
+#endif
+
 // MACROs for generating name and IRQ handler function  
 #define SL_IOSTREAM_USART_CONCAT_PASTER(first, second, third)        first ##  second ## third
  

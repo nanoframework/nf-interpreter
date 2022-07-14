@@ -137,7 +137,7 @@
             }
         },
         {
-            "name": "EFM32GG11",
+            "name": "SL_STK3701A",
             "inherits": [
                 "user-local-tools",
                 "user-prefs",
@@ -148,6 +148,22 @@
                     "type": "STRING",
                     "value": "${presetName}"
                 },
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "SL_STK3701A_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "SL_STK3701A"
+                },
+                "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -637,9 +653,14 @@
             "configurePreset": "ST_B_L475E_IOT01A"
         },
         {
-            "name": "EFM32GG11",
-            "displayName": "EFM32GG11",
-            "configurePreset": "EFM32GG11"
+            "name": "SL_STK3701A",
+            "displayName": "SL_STK3701A",
+            "configurePreset": "SL_STK3701A"
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "displayName": "SL_STK3701A_REVB",
+            "configurePreset": "SL_STK3701A_REVB"
         },
         {
             "name": "ESP32_PSRAM_REV0",
