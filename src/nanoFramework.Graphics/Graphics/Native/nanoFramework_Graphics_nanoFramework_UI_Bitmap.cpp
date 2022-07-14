@@ -534,7 +534,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -555,7 +556,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___
 
     pen.thickness = pArgs[4].NumericByRef().s4;
     pen.color = pArgs[5].NumericByRef().u4;
-    
+
     // No fill
     brush.opacity = PAL_GFX_Bitmap::c_OpacityTransparent;
 
@@ -564,7 +565,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -599,7 +601,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRoundRectang
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -620,7 +623,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___
 
     // No outline
     pen.thickness = 0;
-    
+
     brush.gradientStartColor = pArgs[4].NumericByRef().u4;
     brush.gradientEndColor = brush.gradientStartColor;
     brush.opacity = pArgs[5].NumericByRef().u2;
@@ -630,7 +633,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -656,7 +660,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRoundRectang
 
     // No outline
     pen.thickness = 0;
-    
+
     brush.gradientStartColor = pArgs[6].NumericByRef().u4;
     brush.gradientEndColor = brush.gradientStartColor;
     brush.opacity = pArgs[7].NumericByRef().u2;
@@ -666,7 +670,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRoundRectang
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -687,7 +693,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillGradientRect
 
     // No outline
     pen.thickness = 0;
-    
+
     brush.gradientStartColor = pArgs[4].NumericByRef().u4;
     brush.gradientStartX = pArgs[5].NumericByRef().s4;
     brush.gradientStartY = pArgs[6].NumericByRef().s4;
