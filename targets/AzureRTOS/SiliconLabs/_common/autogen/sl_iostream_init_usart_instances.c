@@ -9,7 +9,8 @@
 #include "sl_iostream_uart.h"
 #include "sl_iostream_usart.h"
 // Include instance config 
- #include "sl_iostream_usart_vcom_config.h"
+#include "sl_iostream_usart_vcom_config.h"
+#include <target_os.h>
 
 ////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                               //
