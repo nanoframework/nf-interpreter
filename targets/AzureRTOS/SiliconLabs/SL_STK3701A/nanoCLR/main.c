@@ -162,7 +162,6 @@ void tx_application_define(void *first_unused_memory)
 //  Application entry point.
 int main(void)
 {
-    // Initialize the board
     sl_system_init();
 
     // Configure LED0 as output
