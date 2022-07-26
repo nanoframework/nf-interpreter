@@ -9,6 +9,7 @@
 
 #include <em_device.h>
 #include <spidrv.h>
+#include <../System.Device.Spi/nf_gecko_spi_driver.h>
 
 #define SL_SPIDRV_EXP_BITRATE 1000000
 
@@ -61,11 +62,9 @@
 #define GECKO_USE_SPI5 FALSE
 #endif
 
-// struct representing the SPI bus
 struct NF_PAL_SPI
 {
     int BusIndex;
-    SPIDRV_Handle_t Handle;
     SpiBusConfiguration BusConfiguration;
 
     SPI_Callback Callback;
@@ -81,6 +80,9 @@ struct NF_PAL_SPI
 
     // -1 = Chip Select is not handled | >0 Chip Select is to be controlled with this GPIO
     int32_t ChipSelect;
+
+    // DMA transfer control
+    Gecko_SpiDriver *Driver;
 };
 
 ////////////////////////////////////////////
@@ -110,25 +112,42 @@ extern NF_PAL_SPI SPI5_PAL;
 // the following macro defines a function that configures the GPIO pins for an Gecko SPI peripheral
 // it gets called in the System_Device_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
-#define SPI_CONFIG_PINS(num, port_location_mosi, port_location_miso, port_location_clk)                                \
-                                                                                                                       \
-    void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit)                  \
+#define SPI_CONFIG_PINS(                                                                                               \
+    num,                                                                                                               \
+    gpio_port_sck,                                                                                                     \
+    sck_pin,                                                                                                           \
+    sck_port_location,                                                                                                 \
+    gpio_port_mosi,                                                                                                    \
+    mosi_pin,                                                                                                          \
+    mosi_port_location,                                                                                                \
+    gpio_port_miso,                                                                                                    \
+    miso_pin,                                                                                                          \
+    miso_port_location)                                                                                                \
+    void ConfigPins_SPI##num(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)                                          \
     {                                                                                                                  \
-        spiInit.portLocationTx = port_location_mosi;                                                                   \
-        spiInit.portLocationClk = port_location_clk;                                                                   \
-        if (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                                        \
+        GPIO_PinModeSet(gpio_port_sck, sck_pin, gpioModePushPull, 0);                                                  \
+        SPI##num##_PAL.Driver->Usart->ROUTELOC0 = (SPI##num##_PAL.Driver->Usart->ROUTELOC0 &                           \
+                                                   ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |       \
+                                                     _USART_ROUTELOC0_CLKLOC_MASK | _USART_ROUTELOC0_CSLOC_MASK)) |    \
+                                                  mosi_port_location |                                                 \
+                                                  (sck_port_location << _USART_ROUTELOC0_CLKLOC_SHIFT);                \
+        if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_HalfDuplex)                                        \
         {                                                                                                              \
-            spiInit.portLocationRx = port_location_miso;                                                               \
+            SPI##num##_PAL.Driver->Usart->CTRL |= USART_CTRL_LOOPBK;                                                   \
+            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 0);                                            \
         }                                                                                                              \
-        if (spiDeviceConfig.DeviceChipSelect >= 0)                                                                     \
+        else                                                                                                           \
         {                                                                                                              \
-            if (spiDeviceConfig.ChipSelectActive)                                                                      \
-            {                                                                                                          \
-            }                                                                                                          \
-            else                                                                                                       \
-            {                                                                                                          \
-            }                                                                                                          \
+            GPIO_PinModeSet(gpio_port_mosi, mosi_pin, gpioModePushPull, 0);                                            \
+            GPIO_PinModeSet(gpio_port_miso, miso_pin, gpioModeInput, 0);                                               \
+            SPI##num##_PAL.Driver->Usart->ROUTELOC0 |=                                                                 \
+                (miso_port_location) | (mosi_port_location << _USART_ROUTELOC0_TXLOC_SHIFT);                           \
         }                                                                                                              \
+        SPI##num##_PAL.Driver->Usart->ROUTEPEN =                                                                       \
+            USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_TXPEN |                                                             \
+                    (spiDeviceConfig.BusConfiguration != SpiBusConfiguration_HalfDuplex)                               \
+                ? USART_ROUTEPEN_RXPEN                                                                                 \
+                : 0;                                                                                                   \
     }
 
 #else
@@ -139,11 +158,11 @@ extern NF_PAL_SPI SPI5_PAL;
 // when an SPI is defined the declarations below will have the real function/configuration //
 // in the target folder @ target_windows_devices_spi_config.cpp                             //
 //////////////////////////////////////////////////////////////////////////////////////////////
-void ConfigPins_SPI0(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
-void ConfigPins_SPI1(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
-void ConfigPins_SPI2(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
-void ConfigPins_SPI3(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
-void ConfigPins_SPI4(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
-void ConfigPins_SPI5(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, SPIDRV_Init_t &spiInit);
+void ConfigPins_SPI0(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI1(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI2(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI3(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI4(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
+void ConfigPins_SPI5(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig);
 
-#endif // COM_SKY_NF_DEV_SPI_NATIVE_TARGET_H
+#endif // SYS_DEV_SPI_NATIVE_TARGET_H
