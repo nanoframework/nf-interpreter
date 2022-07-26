@@ -12,6 +12,7 @@ FetchContent_GetProperties(gecko_sdk)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
 

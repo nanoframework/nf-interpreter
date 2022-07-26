@@ -7,6 +7,7 @@
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
 #include <bsp.h>
+#include <em_cmu.h>
 
 #include <LaunchCLR.h>
 #include <targetHAL.h>
@@ -192,6 +193,10 @@ int main(void)
             if (CheckValidCLRImage((uint32_t)&__deployment_start__))
             {
                 // there seems to be a valid CLR image
+
+                // need to change HF clock to internal RCO so the CLR can boot smoothly
+                CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+
                 // launch nanoCLR
                 LaunchCLR((uint32_t)&__deployment_start__);
             }

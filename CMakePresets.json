@@ -57,7 +57,8 @@
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "256 * 1024"
             }
         },
         {
@@ -89,7 +90,8 @@
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "256 * 1024"
             }
         },
         {
@@ -298,7 +300,7 @@
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
                 "API_System.Device.Pwm": "OFF",
                 "API_System.IO.Ports": "OFF",
-                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "OFF",
                 "API_System.Net": "OFF",
                 "API_nanoFramework.Device.OneWire": "OFF",
@@ -565,7 +567,8 @@
                 "GRAPHICS_DISPLAY": "ILI9342_320x240_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
