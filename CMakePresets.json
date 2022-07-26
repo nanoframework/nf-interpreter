@@ -296,7 +296,7 @@
                 "API_System.Device.I2c": "ON",
                 "API_System.Device.Pwm": "OFF",
                 "API_System.IO.Ports": "OFF",
-                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "OFF",
                 "API_System.Net": "OFF",
                 "API_nanoFramework.Device.OneWire": "OFF",
