@@ -33,6 +33,11 @@ TX_EVENT_FLAGS_GROUP wifiEvents;
 static int wait_cmddata_rdy_high(int timeout);
 static void SPI_WIFI_DelayUs(uint32_t);
 
+///////////////
+// definitions
+#define CS_SELECT   palClearPad(PAL_PORT(LINE_ISM43362_CS), PAL_PAD(LINE_ISM43362_CS))
+#define CS_UNSELECT palSetPad(PAL_PORT(LINE_ISM43362_CS), PAL_PAD(LINE_ISM43362_CS))
+
 //  Initialize SPI3
 int8_t SPI_WIFI_Init(uint16_t mode)
 {
@@ -55,13 +60,11 @@ int8_t SPI_WIFI_Init(uint16_t mode)
         // 16bits
         spiConfiguration.cr2 = SPI_CR2_DS_3 | SPI_CR2_DS_2 | SPI_CR2_DS_1 | SPI_CR2_DS_0;
         spiConfiguration.slave = false;
-        spiConfiguration.sspad = 0;
-        spiConfiguration.ssport = GPIOE;
 
         spiStart(spiDriver, &spiConfiguration);
 
         // disable CS
-        spiUnselect(spiDriver);
+        CS_UNSELECT;
 
         // first call used for calibration
         SPI_WIFI_DelayUs(10);
@@ -86,7 +89,7 @@ int8_t SPI_WIFI_ResetModule(void)
         return ES_WIFI_STATUS_ERROR;
     }
 
-    spiSelect(spiDriver);
+    CS_SELECT;
 
     while (WIFI_IS_CMDDATA_READY() && readSucceed)
     {
@@ -107,7 +110,7 @@ int8_t SPI_WIFI_ResetModule(void)
         }
     }
 
-    spiUnselect(spiDriver);
+    CS_UNSELECT;
 
     if (!readSucceed || (rxBuffer[0] != 0x15) || (rxBuffer[1] != 0x15) || (rxBuffer[2] != '\r') ||
         (rxBuffer[3] != '\n') || (rxBuffer[4] != '>') || (rxBuffer[5] != ' '))
@@ -194,7 +197,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
     int16_t length = 0;
     uint8_t tmp[2];
 
-    spiUnselect(spiDriver);
+    CS_UNSELECT;
 
     SPI_WIFI_DelayUs(3);
 
@@ -205,7 +208,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
     // spiAcquireBus(spiDriver);
 
-    spiSelect(spiDriver);
+    CS_SELECT;
     SPI_WIFI_DelayUs(15);
 
     while (WIFI_IS_CMDDATA_READY())
@@ -216,7 +219,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
             if (spiReceive(spiDriver, 1, &tmp[0]) != HAL_RET_SUCCESS)
             {
-                spiUnselect(spiDriver);
+                CS_UNSELECT;
                 // spiReleaseBus(spiDriver);
 
                 return ES_WIFI_ERROR_SPI_FAILED;
@@ -228,7 +231,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
 
             if (length >= ES_WIFI_DATA_SIZE)
             {
-                spiUnselect(spiDriver);
+                CS_UNSELECT;
                 SPI_WIFI_ResetModule();
                 // spiReleaseBus(spiDriver);
 
@@ -241,7 +244,7 @@ int16_t SPI_WIFI_ReceiveData(uint8_t *data, uint16_t len, uint32_t timeout)
         }
     }
 
-    spiUnselect(spiDriver);
+    CS_UNSELECT;
 
     // spiReleaseBus(spiDriver);
 
@@ -267,7 +270,7 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
     cmddata_rdy_rising_event = 1;
     // spiAcquireBus(spiDriver);
 
-    spiSelect(spiDriver);
+    CS_SELECT;
 
     SPI_WIFI_DelayUs(15);
 
@@ -288,7 +291,7 @@ int16_t SPI_WIFI_SendData(uint8_t *data, uint16_t len, uint32_t timeout)
 
         if (spiSend(spiDriver, len / 2, txBuffer) != HAL_RET_SUCCESS)
         {
-            spiUnselect(spiDriver);
+            CS_UNSELECT;
             // spiReleaseBus(spiDriver);
 
             return ES_WIFI_ERROR_SPI_FAILED;

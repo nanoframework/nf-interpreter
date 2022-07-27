@@ -119,9 +119,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
     spiconfig = stack.Arg0().Dereference();
     screenconfig = stack.Arg1().Dereference();
+
     // Define SPI display configuration for the display
+    // internally SPI bus ID is zero based, so better take care of that here
     displayConfig.Spi.spiBus =
-        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1;
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1 -
+        1;
+
     displayConfig.Spi.chipSelect =
         spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___chipSelect]
             .NumericByRef()

@@ -17,12 +17,7 @@ resources:
       ref: refs/tags/v4.4.1
     
 # scheduled build
-schedules:
-- cron: "58 23 * * *"
-  branches:
-    include: [ main ]
-  always: true
-  displayName: Nightly build at 23:58
+# the schedule is defined at the AZDO web interface because of inconsistencies with time zones
 
 jobs:
 
