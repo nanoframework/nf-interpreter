@@ -19,3 +19,9 @@ ADC has enabled the following channels:
 
 :warning:
 Vref is 2.5V for all channels, except for VCC which is 5V.
+
+## PWM
+
+PWM has enabled the following GPIOs:
+0 - PC1 (pin 15 on the expansion header)
+1 - PI1 (through hole connector at bottom side)
