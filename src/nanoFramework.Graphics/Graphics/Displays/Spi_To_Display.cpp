@@ -51,8 +51,9 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     spiConfig.ChipSelectActive = false;
     spiConfig.Spi_Mode = SpiMode::SpiMode_Mode0;
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
+    spiConfig.BusConfiguration = SpiBusConfiguration_FullDuplex;
 
-    spiConfig.Clock_RateHz = 40 * 1000 * 1000; // Spi clock speed.
+    spiConfig.Clock_RateHz = 40 * 1000 * 1000; // SPI clock speed.
 
     currentBuffer = (CLR_UINT16 *)spiBuffer;
     bufferPtr = currentBuffer;
