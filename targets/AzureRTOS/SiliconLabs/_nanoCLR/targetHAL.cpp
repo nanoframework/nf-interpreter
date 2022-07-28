@@ -24,6 +24,10 @@
 // #include <win_dev_serial_native_target.h>
 // #endif
 
+#if (HAL_USE_PWM == TRUE)
+extern void DeInitPwm();
+#endif
+
 // global mutex protecting the internal state of the interpreter, including event flags
 // mutex_t interpreterGlobalMutex;
 
@@ -277,6 +281,10 @@ void nanoHAL_Uninitialize()
     // #endif
 
     // #endif
+
+#if (HAL_USE_PWM == TRUE)
+    DeInitPwm();
+#endif
 
     CPU_GPIO_Uninitialize();
 

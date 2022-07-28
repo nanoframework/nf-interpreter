@@ -15,10 +15,10 @@
 #define NF_FEATURE_USE_SPIFFS       @NF_FEATURE_USE_SPIFFS_OPTION@
 #define HAL_USE_RTC                 @HAL_USE_RTC_OPTION@
 
-// // takes care of enabling the HAL subsystems required for API options
+// takes care of enabling the HAL subsystems required for API options
 // #define HAL_USE_SPI                 @HAL_USE_SPI_OPTION@
 // #define HAL_USE_I2C                 @HAL_USE_I2C_OPTION@
-// #define HAL_USE_PWM                 @HAL_USE_PWM_OPTION@
+#define HAL_USE_PWM                 @HAL_USE_PWM_OPTION@
 // #define HAL_USE_ADC                 @HAL_USE_ADC_OPTION@
 // #define HAL_USE_DAC                 @HAL_USE_DAC_OPTION@
 // #define HAL_USE_UART                @HAL_USE_UART_OPTION@

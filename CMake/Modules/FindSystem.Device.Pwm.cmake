@@ -22,7 +22,8 @@ set(System.Device.Pwm_SRCS
 
 
     sys_dev_pwm_native_System_Device_Pwm_PwmChannel.cpp
-
+    
+    target_system_device_pwm_config.cpp
 )
 
 foreach(SRC_FILE ${System.Device.Pwm_SRCS})

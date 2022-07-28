@@ -298,7 +298,7 @@
                 "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "ON",
                 "API_System.Device.I2c": "OFF",
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
-                "API_System.Device.Pwm": "OFF",
+                "API_System.Device.Pwm": "ON",
                 "API_System.IO.Ports": "OFF",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "OFF",
