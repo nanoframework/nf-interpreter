@@ -33,6 +33,8 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
     && apt-get install -y \
     git \
+    git-svn \
+    subversion \
     curl \
     ninja-build \
     srecord
