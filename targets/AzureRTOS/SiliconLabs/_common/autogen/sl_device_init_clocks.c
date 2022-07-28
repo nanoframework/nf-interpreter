@@ -13,6 +13,8 @@ sl_status_t sl_device_init_clocks(void)
   CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
   CMU_ClockEnable(cmuClock_HFLE, true);
+  CMU_ClockEnable(cmuClock_HFPER, true);
+  CMU_ClockEnable(cmuClock_GPIO, true);
   CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
   CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
 #if defined(_CMU_LFCCLKSEL_MASK)
