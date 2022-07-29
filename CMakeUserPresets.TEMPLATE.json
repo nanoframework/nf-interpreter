@@ -42,7 +42,9 @@
                 "TI_SL_CC32xx_SDK_SOURCE": "/sources/SimpleLinkCC32",
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "/sources/SimpleLinkCC13",
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
-                "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig"
+                "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
+                "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
+                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo"
             }
         },
         {
