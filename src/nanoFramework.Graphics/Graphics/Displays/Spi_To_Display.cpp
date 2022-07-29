@@ -180,6 +180,7 @@ void DisplayInterface::DisplayBacklight(bool on) // true = on
 // Dummy callback to enable async spi writes
 void spi_callback(int busIndex)
 {
+    (void)busIndex;
 }
 
 void DisplayInterface::SendBytes(CLR_UINT8 *data, CLR_UINT32 length)
