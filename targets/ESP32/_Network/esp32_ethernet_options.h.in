@@ -11,80 +11,33 @@
 #ifndef ESP32_ETHERNET_OPTIONS_H
 #define ESP32_ETHERNET_OPTIONS_H
 
-// Phy
-#define lan8720  1
-#define ip101    2
-#define rtl8201  3
-#define dp83848  4
-#define ksz8041  5
+#define ESP32_ETHERNET_SUPPORT
 
-// Spi modules
-#define w5500    11
-#define dm9051   12
-#define enj28j60 13  // Currently not supported, driver in IDF examples 
-
-#cmakedefine ESP32_ETHERNET_SUPPORT
 #cmakedefine ETH_RMII_CLK_OUT_GPIO @ETH_RMII_CLK_OUT_GPIO@
 #cmakedefine ETH_RMII_CLK_IN_GPIO @ETH_RMII_CLK_IN_GPIO@
-#cmakedefine ETH_PHY_RST_GPIO  @ETH_PHY_RST_GPIO@
+#cmakedefine ETH_PHY_RST_GPIO @ETH_PHY_RST_GPIO@
 #cmakedefine ETH_MDIO_GPIO @ETH_MDIO_GPIO@
 #cmakedefine ETH_MDC_GPIO @ETH_MDC_GPIO@
-#cmakedefine ETH_ETHERNET_INTERFACE @ETH_ETHERNET_INTERFACE@
+#define ESP32_ETHERNET_INTERNAL @ESP32_ETHERNET_INTERNAL_OPTION@
+#define ESP32_ETHERNET_SPI      @ESP32_ETHERNET_SPI_OPTION@
 
-// Default for Phy adr is 0
+// Default for PHY address is 0
 #cmakedefine ETH_PHY_ADDR @ETH_PHY_ADDR@
 
-// if ETH_ETHERNET_INTERFACE not defined, default to lan8720
-#if !defined(ETH_ETHERNET_INTERFACE)
-#define ETH_ETHERNET_INTERFACE lan8720
-#endif
-
-// Select one of following PHY for Internal Ethernet, default LAN8720
-#if ETH_ETHERNET_INTERFACE == lan8720
-#define ESP32_ETHERNET_PHY_LAN8720
-#define ESP32_ETHERNET_INTERNAL
-#elif ETH_ETHERNET_INTERFACE == ip101
-#define ESP32_ETHERNET_PHY_IP101
-#define ESP32_ETHERNET_INTERNAL
-#elif ETH_ETHERNET_INTERFACE == rtl8201
-#define ESP32_ETHERNET_PHY_RTL8201
-#define ESP32_ETHERNET_INTERNAL
-#elif ETH_ETHERNET_INTERFACE == dp83848
-#define ESP32_ETHERNET_PHY_DP83848
-#define ESP32_ETHERNET_INTERNAL
-#elif ETH_ETHERNET_INTERFACE == ksz8041
-#define ESP32_ETHERNET_PHY_KSZ8041
-#define ESP32_ETHERNET_INTERNAL
-#elif ETH_ETHERNET_INTERFACE == w5500
-#define ESP32_ETHERNET_SPI_MODULE_W5500
-#define ESP32_ETHERNET_SPI
-#elif ETH_ETHERNET_INTERFACE == dm9051
-#define ESP32_ETHERNET_SPI_MODULE_DM9051
-#define ESP32_ETHERNET_SPI
-#elif ETH_ETHERNET_INTERFACE == enj28j60
-#define ESP32_ETHERNET_SPI_MODULE_ENJ28J60
-#define ESP32_ETHERNET_SPI
-#else
-// default if ETH_ETHERNET_INTERFACE unknown
-#define ESP32_ETHERNET_PHY_LAN8720
-#define ESP32_ETHERNET_INTERNAL
-#endif
-
-
-#ifdef ESP32_ETHERNET_SPI 
-// Experimental SPI (Untested) 
+#if ESP32_ETHERNET_SPI == TRUE
+// Experimental SPI (Untested)
 // Use an SPI Ethernet module
 // Pins choosen to work with wrover and jtag avoiding strapping pins (on same side of dev board)
-#define ESP32_ETHERNET_SPI_HOST  SPI2_HOST
+#define ESP32_ETHERNET_SPI_HOST      SPI2_HOST
 #define ESP32_ETHERNET_SPI_CLOCK_MHZ 8
-#define ESP32_ETHERNET_SPI_CS 5
-#define ESP32_ETHERNET_SPI_INT_GPIO 16
+#define ESP32_ETHERNET_SPI_CS        5
+#define ESP32_ETHERNET_SPI_INT_GPIO  16
 // also requires ETH_PHY_RST_GPIO 17
 
-// Define SPI pins to use 
-#define ESP32_ETHERNET_SPI_MISO_GPIO  23
-#define ESP32_ETHERNET_SPI_MOSI_GPIO  18
-#define ESP32_ETHERNET_SPI_SCLK_GPIO  19
+// Define SPI pins to use
+#define ESP32_ETHERNET_SPI_MISO_GPIO 23
+#define ESP32_ETHERNET_SPI_MOSI_GPIO 18
+#define ESP32_ETHERNET_SPI_SCLK_GPIO 19
 
 #endif
 
