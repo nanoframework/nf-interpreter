@@ -247,8 +247,6 @@ void GraphicsDriver::DrawRectangleNative(
 
     int stride = GetWidthInWords(bitmap.width) * 2;
 
-    const CLR_UINT16 opacity = brush.opacity;
-
     int xSrc = 0, ySrc = 0;
     // If the outset rect is completely outside of the drawing region, we can safely return (inset rect is always inside
     // the outset rect)
@@ -290,6 +288,37 @@ void GraphicsDriver::DrawRectangleNative(
         }
     }
 
+    // Fill
+    if (brush.opacity != PAL_GFX_Bitmap::c_OpacityTransparent)
+    {
+        GFX_Rect insetRect;
+
+        insetRect.left = insetX;
+        insetRect.top = insetY;
+        insetRect.right = insetX + insetWidth - 1;
+        insetRect.bottom = insetY + insetHeight - 1;
+
+        GraphicsDriver::FillRectangleNative(bitmap, brush, insetRect);
+    }
+}
+
+void GraphicsDriver::FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush &brush, const GFX_Rect &rectangle)
+{
+    int x = rectangle.left;
+    int y = rectangle.top;
+    int width = rectangle.Width();
+    int height = rectangle.Height();
+
+    int xSrc = 0, ySrc = 0;
+    if (ClipToVisible(bitmap, x, y, width, height, NULL, xSrc, ySrc) == false)
+    {
+        return;
+    }
+
+    int stride = GetWidthInWords(bitmap.width) * 2;
+
+    const CLR_UINT16 opacity = brush.opacity;
+
     // Fills (Gradient / Translucent / Solid)
     if (opacity != 0)
     {
@@ -301,9 +330,9 @@ void GraphicsDriver::DrawRectangleNative(
             // Solid fill (including Translucent fill)
             CLR_UINT32 fillColor = brush.gradientStartColor;
 
-            if (insetWidth > 0 && insetHeight > 0)
+            if (width > 0 && height > 0)
             {
-                CLR_UINT16 *curRow = ((CLR_UINT16 *)bitmap.data) + insetY * stride + insetX;
+                CLR_UINT16 *curRow = ((CLR_UINT16 *)bitmap.data) + y * stride + x;
                 CLR_UINT16 *curPixel = curRow;
 
                 if (opacity == PAL_GFX_Bitmap::c_OpacityOpaque)
@@ -313,33 +342,36 @@ void GraphicsDriver::DrawRectangleNative(
                     CLR_UINT16 *startRow = curRow;
 
                     // Draw the first row
-                    for (int col = 0; col < insetWidth; col++, curPixel++)
+                    for (int col = 0; col < width; col++, curPixel++)
                     {
                         *curPixel = fillColor;
                     }
 
                     // Just memcpy the first row to all subsequent rows, which is moderately faster
-                    for (int row = 1; row < insetHeight; row++)
+                    for (int row = 1; row < height; row++)
                     {
                         curRow += stride;
 
-                        memcpy(curRow, startRow, insetWidth * 2);
+                        memcpy(curRow, startRow, width * 2);
                     }
                 }
                 else
                 {
                     CLR_UINT16 lastPixel = *curPixel;
                     CLR_UINT16 interpolated = g_GraphicsDriver.NativeColorInterpolate(fillColor, lastPixel, opacity);
-                    for (int row = 0; row < insetHeight; row++, curRow += stride)
+
+                    for (int row = 0; row < height; row++, curRow += stride)
                     {
                         curPixel = curRow;
-                        for (int col = 0; col < insetWidth; col++, curPixel++)
+
+                        for (int col = 0; col < width; col++, curPixel++)
                         {
                             if (*curPixel != lastPixel)
                             {
                                 lastPixel = *curPixel;
                                 interpolated = g_GraphicsDriver.NativeColorInterpolate(fillColor, lastPixel, opacity);
                             }
+
                             *curPixel = interpolated;
                         }
                     }
@@ -375,7 +407,7 @@ void GraphicsDriver::DrawRectangleNative(
 
             const int LIMIT = 1 << 12;
 
-            CLR_UINT16 *curRow = ((CLR_UINT16 *)bitmap.data) + insetY * stride + insetX;
+            CLR_UINT16 *curRow = ((CLR_UINT16 *)bitmap.data) + y * stride + x;
 
             CLR_UINT32 scalar = (gradientDeltaY * gradientDeltaY * LIMIT) /
                                 (gradientDeltaY * gradientDeltaY + gradientDeltaX * gradientDeltaX);
@@ -399,16 +431,16 @@ void GraphicsDriver::DrawRectangleNative(
                 scaleGradientTopLeft = 0;
                 scaleGradientTopRight = LIMIT - scalar;
                 scaleGradientBottomLeft = scalar;
-                gradientTopLeftX = brush.gradientStartX - insetX;
-                gradientTopLeftY = brush.gradientStartY - insetY;
+                gradientTopLeftX = brush.gradientStartX - x;
+                gradientTopLeftY = brush.gradientStartY - y;
             }
             else
             {
                 scaleGradientTopLeft = scalar;
                 scaleGradientTopRight = LIMIT;
                 scaleGradientBottomLeft = 0;
-                gradientTopLeftX = brush.gradientStartX - insetX;
-                gradientTopLeftY = brush.gradientEndY - insetY;
+                gradientTopLeftX = brush.gradientStartX - x;
+                gradientTopLeftY = brush.gradientEndY - y;
             }
 
             int diffX = 0;
@@ -424,12 +456,13 @@ void GraphicsDriver::DrawRectangleNative(
             DivHelper widthDivHelper(scaleGradientTopRight - scaleGradientTopLeft, gradientDeltaX, 0);
             DivHelper heightDivHelper(scaleGradientBottomLeft - scaleGradientTopLeft, gradientDeltaY, scaleLeft);
 
-            for (int j = 0; j < insetHeight; j++, curRow += stride)
+            for (int j = 0; j < height; j++, curRow += stride)
             {
                 widthDivHelper.Reset(heightDivHelper.Next());
 
                 CLR_UINT16 *curPixel = curRow;
-                for (int i = 0; i < insetWidth; i++, curPixel++)
+
+                for (int i = 0; i < width; i++, curPixel++)
                 {
                     int scale = widthDivHelper.Next();
 
@@ -468,7 +501,7 @@ void GraphicsDriver::DrawRectangleNative(
                 }
             }
         }
-    } //(opacity != 0)
+    }
 }
 
 void GraphicsDriver::DrawRoundedRectangleNative(
@@ -507,16 +540,43 @@ void GraphicsDriver::DrawRoundedRectangleNative(
             return;
 
         params.pen = &pen;
-        params.brush = NULL;
+        params.brush = &brush;
 
-        EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Draw4PointsRoundedRect);
+        // Fill
+        if (brush.opacity != PAL_GFX_Bitmap::c_OpacityTransparent)
+        {
+            int gradientDeltaY = brush.gradientEndY - brush.gradientStartY;
+            int gradientDeltaX = brush.gradientEndX - brush.gradientStartX;
 
-        DrawBresLineNative(bitmap, params.x1, y, params.x2, y, pen);
-        DrawBresLineNative(bitmap, x, params.y1, x, params.y2, pen);
-        DrawBresLineNative(bitmap, x2, params.y1, x2, params.y2, pen);
-        DrawBresLineNative(bitmap, params.x1, y2, params.x2, y2, pen);
+            if (brush.gradientStartColor == brush.gradientEndColor || (gradientDeltaX == 0 && gradientDeltaY == 0))
+            {
+                EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Fill4PointLinesRoundedRect);
+            }
+            else
+            {
+                EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &GradientFill4PointLinesRoundedRect);
+            }
 
-        // TODO - fill rounded rectangle
+            GFX_Rect fillRect;
+
+            fillRect.left = x + pen.thickness;
+            fillRect.top = rectangle.top + radiusY + 1;
+            fillRect.right = x2 - 1 - pen.thickness;
+            fillRect.bottom = rectangle.bottom - radiusY - 1;
+
+            FillRectangleNative(bitmap, brush, fillRect);
+        }
+
+        // Outline
+        if (pen.thickness > 0)
+        {
+            EllipseAlgorithm(bitmap, radiusX, radiusY, &params, &Draw4PointsRoundedRect);
+
+            DrawBresLineNative(bitmap, params.x1, y, params.x2, y, pen);
+            DrawBresLineNative(bitmap, x, params.y1, x, params.y2, pen);
+            DrawBresLineNative(bitmap, x2, params.y1, x2, params.y2, pen);
+            DrawBresLineNative(bitmap, params.x1, y2, params.x2, y2, pen);
+        }
     }
 }
 
@@ -544,6 +604,48 @@ void GraphicsDriver::Draw4PointsRoundedRect(const PAL_GFX_Bitmap &bitmap, int of
             SetThickPixel(bitmap, p->x1 - offsetX, p->y1 - offsetY, *p->pen);
         }
     }
+}
+
+void GraphicsDriver::Fill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params)
+{
+    Draw4PointsRoundedRectParams *p = (Draw4PointsRoundedRectParams *)params;
+
+    CLR_UINT32 color = p->brush->gradientStartColor;
+    CLR_UINT16 opacity = p->brush->opacity;
+
+    // Top line
+    DrawScanlineNative(bitmap, p->x1 - offsetX, p->x2 + offsetX, p->y1 - offsetY, color, opacity);
+
+    // Bottom line
+    DrawScanlineNative(bitmap, p->x1 - offsetX, p->x2 + offsetX, p->y2 + offsetY, color, opacity);
+}
+
+void GraphicsDriver::GradientFill4PointLinesRoundedRect(
+    const PAL_GFX_Bitmap &bitmap,
+    int offsetX,
+    int offsetY,
+    void *params)
+{
+    Draw4PointsRoundedRectParams *p = (Draw4PointsRoundedRectParams *)params;
+
+    // Using the rectangle code for gradient fills. A version of DrawScanlineNative that supports gradients would be
+    // faster
+
+    GFX_Rect rectangle;
+
+    // Top line
+    rectangle.left = p->x1 - offsetX;
+    rectangle.right = p->x2 + offsetX - 1;
+    rectangle.top = p->y1 - offsetY;
+    rectangle.bottom = rectangle.top;
+
+    FillRectangleNative(bitmap, *(p->brush), rectangle);
+
+    // Bottom line
+    rectangle.top = p->y2 + offsetY;
+    rectangle.bottom = rectangle.top;
+
+    FillRectangleNative(bitmap, *(p->brush), rectangle);
 }
 
 void GraphicsDriver::DrawEllipseNative(
@@ -1216,6 +1318,46 @@ void GraphicsDriver::DrawBresLineNative(const PAL_GFX_Bitmap &bitmap, int x0, in
             }
 
             fValidY = y0 >= bitmap.clipping.top && y0 < bitmap.clipping.bottom;
+        }
+    }
+}
+
+void GraphicsDriver::DrawScanlineNative(
+    const PAL_GFX_Bitmap &bitmap,
+    int x1,
+    int x2,
+    int y,
+    CLR_UINT32 color,
+    CLR_UINT16 opacity)
+{
+    // Check clipping
+    if ((y < bitmap.clipping.top) || (y >= bitmap.clipping.bottom))
+    {
+        return;
+    }
+
+    if (x1 < bitmap.clipping.left)
+        x1 = bitmap.clipping.left;
+
+    if (x2 >= bitmap.clipping.right)
+        x2 = bitmap.clipping.right - 1;
+
+    int stride = GetWidthInWords(bitmap.width) * 2;
+
+    CLR_UINT16 *curPixel = ((CLR_UINT16 *)bitmap.data) + (stride * y) + x1;
+
+    if (opacity == PAL_GFX_Bitmap::c_OpacityOpaque)
+    {
+        for (int x = x1; x <= x2; x++, curPixel++)
+        {
+            *curPixel = color;
+        }
+    }
+    else
+    {
+        for (int x = x1; x <= x2; x++, curPixel++)
+        {
+            *curPixel = g_GraphicsDriver.NativeColorInterpolate(color, *curPixel, opacity);
         }
     }
 }
