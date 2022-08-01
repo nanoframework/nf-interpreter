@@ -61,7 +61,6 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     bufferWritten = 0;
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
-    // ASSERT(hr == ESP_OK); //for stm not defined ESP_OK
     if (hr == S_OK)
     {
         // TODO Reserve Pins
