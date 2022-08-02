@@ -33,7 +33,7 @@
                 "CHIBIOS_SOURCE_FOLDER": "/sources/ChibiOs",
                 "FREERTOS_SOURCE_FOLDER": "/sources/FreeRTOS",
                 "CHIBIOS_CONTRIB_SOURCE": "/sources/ChibiOs-Contrib",
-                "CHIBIOS_HAL_SOURCE": null,
+                "CHIBIOS_HAL_SOURCE": "/sources/ChibiOs",
                 "STM32_CUBE_PACKAGE_SOURCE": "/sources/STM32CubeL4",
                 "MBEDTLS_SOURCE": "/sources/mbedtls",
                 "FATFS_SOURCE": "/sources/fatfs",
