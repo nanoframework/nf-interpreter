@@ -17,6 +17,9 @@
 // #if (HAL_USE_CAN == TRUE)
 // #include <nf_device_can_native_target.h>
 // #endif
+#if (HAL_USE_I2C == TRUE)
+#include <sys_dev_i2c_native_target.h>
+#endif
 #if (HAL_USE_SPI == TRUE)
 #include <sys_dev_spi_native_target.h>
 #endif
@@ -94,13 +97,13 @@ void nanoHAL_Initialize()
     // #endif
 
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-    I2C0_PAL = {0};
+    memset(&I2C0_PAL, 0, sizeof(NF_PAL_I2C));
 #endif
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-    I2C1_PAL = {0};
+    memset(&I2C1_PAL, 0, sizeof(NF_PAL_I2C));
 #endif
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-    I2C1_PAL = {0};
+    memset(&I2C2_PAL, 0, sizeof(NF_PAL_I2C));
 #endif
 
 #if (HAL_USE_SPI == TRUE)
@@ -217,10 +220,6 @@ void nanoHAL_Uninitialize()
     // need to be sure that:
     // - all mutexes for drivers that use them are released
     // - all drivers are stopped
-
-    // #if (HAL_USE_SPI == TRUE)
-    //     nanoSPI_Uninitialize();
-    // #endif
 
     // #if (HAL_USE_CAN == TRUE)
 
