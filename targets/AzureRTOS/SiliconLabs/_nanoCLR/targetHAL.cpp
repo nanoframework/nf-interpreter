@@ -17,9 +17,9 @@
 // #if (HAL_USE_CAN == TRUE)
 // #include <nf_device_can_native_target.h>
 // #endif
-// #if (HAL_USE_SPI == TRUE)
-// #include <sys_dev_spi_native_target.h>
-// #endif
+#if (HAL_USE_SPI == TRUE)
+#include <sys_dev_spi_native_target.h>
+#endif
 // #if (HAL_USE_UART == TRUE)
 // #include <win_dev_serial_native_target.h>
 // #endif
@@ -103,9 +103,29 @@ void nanoHAL_Initialize()
     I2C1_PAL = {0};
 #endif
 
-    // #if (HAL_USE_SPI == TRUE)
-    //     nanoSPI_Initialize();
-    // #endif
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Initialize();
+
+#if (GECKO_USE_SPI0 == TRUE)
+    memset(&SPI0_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+#if (GECKO_USE_SPI1 == TRUE)
+    memset(&SPI1_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+#if (GECKO_USE_SPI2 == TRUE)
+    memset(&SPI0_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+#if (GECKO_USE_SPI3 == TRUE)
+    memset(&SPI3_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+#if (GECKO_USE_SPI4 == TRUE)
+    memset(&SPI4_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+#if (GECKO_USE_SPI5 == TRUE)
+    memset(&SPI5_PAL, 0, sizeof(NF_PAL_SPI));
+#endif
+
+#endif
 
     // #if (HAL_USE_UART == TRUE)
 
@@ -241,9 +261,9 @@ void nanoHAL_Uninitialize()
     I2C_Reset(I2C2);
 #endif
 
-    // #if (HAL_USE_SPI == TRUE)
-    //     nanoSPI_Uninitialize();
-    // #endif
+#if (HAL_USE_SPI == TRUE)
+    nanoSPI_Uninitialize();
+#endif
 
     // #if (HAL_USE_UART == TRUE)
 
