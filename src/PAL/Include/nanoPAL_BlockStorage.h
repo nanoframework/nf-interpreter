@@ -178,7 +178,7 @@ typedef enum BlockRegionAttribute
     // Flash word size 128 bits
     BlockRegionAttribute_ProgramWidthIs128bits = 0x0400,
     // Flash word size 256 bits
-    BlockRegionAttribute_ProgramWidthIs256bits = 0x0800, 
+    BlockRegionAttribute_ProgramWidthIs256bits = 0x0800,
 
 } BlockRegionAttribute;
 
