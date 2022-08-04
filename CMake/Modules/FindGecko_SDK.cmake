@@ -34,8 +34,6 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/common/toolc
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/system/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/sleeptimer/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/inc)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/spidrv/inc)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/spidrv/config)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/inc)
 
@@ -75,7 +73,6 @@ set(gecko_sdk_srcs
     dmactrl.c
     dmadrv.c
     uartdrv.c
-    spidrv.c
 
     sl_device_init_dcdc_s1.c
     sl_device_init_emu_s1.c
@@ -138,7 +135,6 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/dmadrv/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/gpiointerrupt/src
             ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdrv/src
-            ${gecko_sdk_SOURCE_DIR}/platform/emdrv/spidrv/src
             ${gecko_sdk_SOURCE_DIR}/platform/emlib/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/device_init/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/iostream/src
