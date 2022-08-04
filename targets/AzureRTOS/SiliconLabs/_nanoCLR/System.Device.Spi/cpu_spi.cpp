@@ -45,7 +45,7 @@ static void CompleteTransfer(NF_SpiDriver_Handle_t handle)
 }
 
 // Callback used when a async transfer operation completes
-static void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferStatus, int itemsTransferred)
+void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferStatus, int itemsTransferred)
 {
     (void)transferStatus;
     (void)itemsTransferred;

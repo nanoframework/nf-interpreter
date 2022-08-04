@@ -13,7 +13,8 @@ list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURC
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Com.SkyworksInc.NanoFramework.Devices.Spi)
+list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.Spi)
+list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Spi)
 
 # source files
 set(Com.SkyworksInc.NanoFramework.Devices.Spi_SRCS
@@ -22,6 +23,7 @@ set(Com.SkyworksInc.NanoFramework.Devices.Spi_SRCS
     com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus.cpp
 
     target_com_sky_nf_dev_spi_config.cpp
+    cpu_spi.cpp
 )
 
 foreach(SRC_FILE ${Com.SkyworksInc.NanoFramework.Devices.Spi_SRCS})
@@ -32,7 +34,8 @@ foreach(SRC_FILE ${Com.SkyworksInc.NanoFramework.Devices.Spi_SRCS})
         PATHS 
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${CMAKE_SOURCE_DIR}/src/PAL/Com.SkyworksInc.NanoFramework.Devices.Spi
+            ${CMAKE_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.Spi
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Spi
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )

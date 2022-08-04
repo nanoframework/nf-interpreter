@@ -8,13 +8,15 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-typedef enum __nfpack DataFlow
-{
-    DataFlow_MsbFirst = 0,
-    DataFlow_LsbFirst = 1,
-} DataFlow;
 
-// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
+// defined src\System.Device.Spi\sys_dev_spi_native.h
+// typedef enum __nfpack DataFlow
+// {
+//     DataFlow_MsbFirst = 0,
+//     DataFlow_LsbFirst = 1,
+// } DataFlow;
+
+// defined src\System.Device.Spi\sys_dev_spi_native.h
 // typedef enum __nfpack SpiBusConfiguration
 // {
 //     SpiBusConfiguration_FullDuplex = 0,
@@ -22,7 +24,7 @@ typedef enum __nfpack DataFlow
 //     SpiBusConfiguration_Simplex = 2,
 // } SpiBusConfiguration;
 
-// moved to src\PAL\Include\CPU_SPI_decl.h for convenience
+// defined src\System.Device.Spi\sys_dev_spi_native.h
 // typedef enum __nfpack SpiMode
 // {
 //     SpiMode_Mode0 = 0,
@@ -41,12 +43,12 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     static const int FIELD___busConfiguration = 6;
 
     //--//
-
 };
 
 struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus
 {
     static const int FIELD_STATIC___busConnectionSettings = 0;
+    static const int FIELD_STATIC___busSettingsChanged = 1;
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___bufferSingleOperation = 2;
@@ -55,7 +57,6 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
 
     //--//
-
 };
 
 struct Library_com_sky_nf_dev_spi_native_ThisAssembly
@@ -63,9 +64,8 @@ struct Library_com_sky_nf_dev_spi_native_ThisAssembly
     static const int FIELD_STATIC__GitCommitDate = 1;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_Spi;
 
-#endif  //_COM_SKY_NF_DEV_SPI_NATIVE_H_
+#endif //_COM_SKY_NF_DEV_SPI_NATIVE_H_
