@@ -655,7 +655,7 @@ jobs:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_8_0__versioncounter', 400)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml

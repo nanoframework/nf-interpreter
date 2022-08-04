@@ -31,14 +31,6 @@ steps:
         $counter = $env:REVISION
         $version = ([int]$counter).ToString()
 
-        if($env:Build_SourceBranch.StartsWith('release-') -or 
-            $env:Build_SourceBranch.StartsWith('main'))
-        {
-            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$env:NBGV_RevisionNumber"
-            Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(NBGV_RevisionNumber) ***"
-        }
-        else
-        {
-            Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
-            Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version ***"
-        }
+        Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
+        Write-Host "$("##vso[task.setvariable variable=NBGV_NuGetPackageVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+        Write-Host "*** BUILD NUMBER IS: $(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version ***"
