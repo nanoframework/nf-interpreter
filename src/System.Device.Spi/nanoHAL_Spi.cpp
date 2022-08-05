@@ -347,15 +347,15 @@ HRESULT nanoSPI_OpenDeviceEx(
         }
     }
 
+    // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
+    // Used to compute length of time for each IO to see if this is a long running operation
+    // Store for each device as each device could use a different bit rate
+    spiDeviceConfig.ByteTime = (1.0 / spiDeviceConfig.Clock_RateHz) * 1000.0 * 8;
+
     // Add next Device - Copy device config, save handle, increment number devices on bus
     nanoSPI_BusConfig *pBusConfig = &spiconfig[spiDeviceConfig.Spi_Bus];
     pBusConfig->deviceConfig[spiDeviceConfig.Spi_Bus] = spiDeviceConfig;
     pBusConfig->deviceHandles[spiDeviceConfig.Spi_Bus] = deviceHandle;
-
-    // Compute rough estimate on the time to tx/rx a byte (in milliseconds)
-    // Used to compute length of time for each IO to see if this is a long running operation
-    // Store for each device as each device could use a different bit rate
-    pBusConfig->byteTime[spiDeviceConfig.Spi_Bus] = (float)(1.0 / spiDeviceConfig.Clock_RateHz) * 1000 * 8;
 
     pBusConfig->devicesInUse++;
 
@@ -419,7 +419,7 @@ float nanoSPI_GetByteTime(uint32_t handle)
 
     getDevice(handle, spiBus, deviceIndex);
 
-    return spiconfig[spiBus].byteTime[deviceIndex];
+    return spiconfig[spiBus].deviceConfig->ByteTime;
 }
 
 void nanoSPI_Wait_Busy(uint32_t handle)
