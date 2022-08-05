@@ -26,7 +26,7 @@ bool System_Device_IsLongRunningOperation(
     uint32_t readSize,
     bool fullDuplex,
     bool bufferIs16bits,
-    float byteTime,
+    int32_t byteTime,
     uint32_t &estimatedDurationMiliseconds)
 {
     if (bufferIs16bits)
