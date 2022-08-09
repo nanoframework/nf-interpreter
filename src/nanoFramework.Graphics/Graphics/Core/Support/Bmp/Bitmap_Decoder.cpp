@@ -104,9 +104,8 @@ HRESULT BmpDecoder::BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize)
             if (pbmih->biClrUsed != 0)
             {
                 palette = source.source;
-                paletteDepth = (CLR_UINT8)(
-                    (pbmfh->bfOffBits - sizeof(BITMAPINFOHEADER) - sizeof(BITMAPFILEHEADER)) /
-                    pbmih->biClrUsed); // the rest is the palette
+                paletteDepth =
+                    (CLR_UINT8)((pbmfh->bfOffBits - sizeof(BITMAPINFOHEADER) - sizeof(BITMAPFILEHEADER)) / pbmih->biClrUsed); // the rest is the palette
                 encodingType = Bmp8Bit_Indexed;
             }
             break;

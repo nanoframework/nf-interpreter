@@ -394,7 +394,7 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(int x, int y, CLR_UINT32 fl
     return color;
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y,CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
     ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
