@@ -220,7 +220,7 @@ HRESULT BmpDecoder::BmpStartOutput(CLR_GFX_Bitmap *bitmap)
     NANOCLR_NOCLEANUP();
 }
 
-CLR_UINT32 BmpDecoder::BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 BmpDecoder::BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
     BmpOutputHelperParam *myParam = (BmpOutputHelperParam *)param;
 
