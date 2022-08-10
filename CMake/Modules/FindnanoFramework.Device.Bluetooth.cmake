@@ -30,10 +30,7 @@ set(nanoFramework.Device.Bluetooth_SRCS
 
     sys_dev_ble_native.cpp
 
-    sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider.cpp
-    sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest.cpp
-    sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest.cpp
-    sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic.cpp
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip.cpp
 
     esp32_nimble.cpp
 )

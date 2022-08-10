@@ -6,7 +6,8 @@
 
 #include "sys_dev_ble_native.h"
 
-//#define BLE_NANO_DEBUG  1
+extern uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characteristicId);
+extern EventGroupHandle_t ble_event_waitgroup;
 
 extern bool device_ble_init();
 extern void device_ble_dispose();
@@ -134,20 +135,6 @@ static void FreeContext(ble_services_context &srvContext)
             context->descriptorUuids = NULL;
         }
     }
-}
-
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeInitService___BOOLEAN(CLR_RT_StackFrame &stack)
-{
-    (void)stack;
-
-    NANOCLR_HEADER();
-    {
-        InitContext(&bleContext);
-
-        stack.SetResult_Boolean(true);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 ble_uuid_t *Ble_uuid16_declare(uint16_t id16)
@@ -663,7 +650,21 @@ void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 }
 #endif
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeInitService___BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    (void)stack;
+
+    NANOCLR_HEADER();
+    {
+        InitContext(&bleContext);
+
+        stack.SetResult_Boolean(true);
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
     NativeStartAdvertising___BOOLEAN(CLR_RT_StackFrame &stack)
 {
     bool result = false;
@@ -751,8 +752,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeStopAdvertising___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeStopAdvertising___VOID(
+    CLR_RT_StackFrame &stack)
 {
     (void)stack;
 
@@ -761,6 +762,183 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         device_ble_dispose();
 
         FreeContext(bleContext);
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+//
+//  Notify a Client
+//  Arg1 - Client Connection
+//  Arg2 - Characteristic ID
+//  Arg3 - Notify Byte buffer
+//
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeNotifyClient___I4__U2__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        uint16_t characteristicId;
+        uint16_t connectionHandle;
+        uint16_t attHandle;
+        CLR_RT_HeapBlock_Array *notifyBuffer;
+        uint8_t *bufPtr;
+        int bufLen;
+        // error characteristicId not known
+        int rc = 1;
+
+        connectionHandle = stack.Arg1().NumericByRef().u2;
+        characteristicId = stack.Arg2().NumericByRef().u2;
+
+        notifyBuffer = stack.Arg3().DereferenceArray();
+        FAULT_ON_NULL(notifyBuffer);
+
+        bufPtr = notifyBuffer->GetFirstElement();
+        bufLen = notifyBuffer->m_numOfElements;
+
+        // Find attr handle from Characteristic ID
+        attHandle = FindHandleIdFromId(bleContext, characteristicId);
+        if (attHandle != 0xffff)
+        {
+            // Send Notify buffer
+            struct os_mbuf *om = ble_hs_mbuf_from_flat(bufPtr, bufLen);
+            rc = ble_gattc_notify_custom(connectionHandle, attHandle, om);
+        }
+
+        stack.SetResult_I4(rc);
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeReadRespondWithValue___VOID__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock_Array *buffer;
+        uint8_t *bufPtr;
+        int bufLen;
+        int rc;
+
+        // debug_printf("NativeReadRespondWithValue\n");
+
+        // Response to correct event, or is it too late
+        // Otherwise ignore
+        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        {
+            // correct event
+            buffer = stack.Arg2().DereferenceArray();
+            FAULT_ON_NULL(buffer);
+
+            bufPtr = buffer->GetFirstElement();
+            bufLen = buffer->m_numOfElements;
+
+            // debug_printf("NativeReadRespondWithValue data length %d\n",bufLen);
+
+            rc = os_mbuf_append(ble_event_data.ctxt->om, bufPtr, bufLen);
+            ble_event_data.result = rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+
+            // Signal BLE callback, event complete
+            xEventGroupSetBits(ble_event_waitgroup, 1);
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeReadRespondWithProtocolError___VOID__U2__U1(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        // Response to correct event, or is it too late
+        // Otherwise ignore
+        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        {
+            // Get protocol error code
+            ble_event_data.result = stack.Arg2().NumericByRef().u2;
+
+            // Signal BLE callback, event complete
+            xEventGroupSetBits(ble_event_waitgroup, 1);
+        }
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+//
+//  Get data written to an attribute
+//
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeWriteGetData___SZARRAY_U1__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        uint8_t *pReturnBuffer;
+        uint16_t om_len;
+        uint16_t out_len;
+        uint16_t eventid = stack.Arg1().NumericByRef().u2;
+
+        // Make sure correct event, or is it too late
+        // Otherwise ignore
+        if (ble_event_data.eventId == eventid)
+        {
+            // Get length of available data
+            om_len = OS_MBUF_PKTLEN(ble_event_data.ctxt->om);
+
+            // Create managed byte array of correct size as per OM buffer
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                stack.PushValueAndClear(),
+                om_len,
+                g_CLR_RT_WellKnownTypes.m_UInt8));
+
+            // get a pointer to the first object in the array
+            pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
+
+            // Copy OM buffer to return byte buffer
+            ble_hs_mbuf_to_flat(ble_event_data.ctxt->om, pReturnBuffer, om_len, &out_len);
+        }
+        else
+        {
+            // Error return empty array, event not found ?
+            NANOCLR_CHECK_HRESULT(
+                CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 0, g_CLR_RT_WellKnownTypes.m_UInt8));
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::NativeWriteRespond___VOID__U2(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        // debug_printf("NativeWriteRespond\n");
+        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        {
+            ble_event_data.result = 0;
+
+            // Signal BLE callback, event complete
+            xEventGroupSetBits(ble_event_waitgroup, 1);
+        }
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_NativeDevices_OnChip::
+    NativeWriteRespondWithProtocolError___VOID__U2__U1(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    {
+        // debug_printf("NativeWriteRespondWithProtocolError\n");
+
+        // Response to correct event, or is it too late
+        // Otherwise ignore
+        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        {
+            // Get protocol error code
+            ble_event_data.result = stack.Arg2().NumericByRef().u2;
+
+            // Signal BLE callback, event complete
+            xEventGroupSetBits(ble_event_waitgroup, 1);
+        }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
