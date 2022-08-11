@@ -55,8 +55,8 @@
     <NBGV_VersionMajor Condition="'$(NBGV_VersionMajor)'==''">9</NBGV_VersionMajor>
     <NBGV_VersionMinor Condition="'$(NBGV_VersionMinor)'==''">99</NBGV_VersionMinor>
     <NBGV_BuildNumber Condition="'$(NBGV_BuildNumber)'==''">999</NBGV_BuildNumber>
-    <NBGV_VersionHeight Condition="'$(TARGET_BUILD_COUNTER)'==''">9999</NBGV_VersionHeight>
-    <NBGV_AssemblyInformationalVersion Condition="'$(NBGV_AssemblyInformationalVersion)'==''">$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_SemVerBuildSuffix)</NBGV_AssemblyInformationalVersion>
+    <TARGET_BUILD_COUNTER Condition="'$(TARGET_BUILD_COUNTER)'==''">9999</TARGET_BUILD_COUNTER>
+    <NF_AssemblyInformationalVersion>$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)</NF_AssemblyInformationalVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -107,7 +107,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;_DEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);VERSION_STRING="$(NF_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -134,7 +134,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;WIN32;NDEBUG;_CONSOLE;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);VERSION_STRING="$(NF_AssemblyInformationalVersion)";OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";TARGETINFOSTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\src\CLR\Core;..\..\..\src\CLR\CorLib;..\..\..\src\CLR\Helpers\Base64;.;..\Include;..\..\..\src\CLR\Include;..\..\..\src\HAL\Include;..\..\..\src\PAL\Include;..\..\..\src\nanoFramework.Runtime.Events</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
