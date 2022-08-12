@@ -177,7 +177,7 @@ typedef struct __nfpack Flash_BlockRegionInfo
     uint32_t Flags;
 } Flash_BlockRegionInfo;
 
-#define BlockRegionAttributes_MASK  ((uint32_t)0x0000FF00)
+#define BlockRegionAttributes_MASK  ((uint32_t)0xFFFFFF00)
 
 // clang-format on
 
