@@ -172,8 +172,14 @@ typedef enum BlockRegionAttribute
 {
     // block region is memory mapped
     BlockRegionAttribute_MemoryMapped = 0x0100,
-    // programming width is 64bits
+
+    // Flash word size 64 bits
+
     BlockRegionAttribute_ProgramWidthIs64bits = 0x0200,//8bytes
+    // Flash word size 128 bits
+    BlockRegionAttribute_ProgramWidthIs128bits = 0x0400,
+    // Flash word size 256 bits
+    BlockRegionAttribute_ProgramWidthIs256bits = 0x0800,
 
     BlockRegionAttribute_ProgramWidthIs32bits = 0x0400,//4bytes
 
@@ -185,7 +191,6 @@ typedef enum BlockRegionAttribute
 
     BlockRegionAttribute_ProgramWidthIs1024bits = 0x4000,//128bytes
 
-    BlockRegionAttribute_ProgramWidthIs2048bits = 0x8000,//256bytes
 
     BlockRegionAttribute_ProgramWidthIs4096bits = 0x10000,//512bytes
 
