@@ -137,6 +137,7 @@ extern "C"
         NF_SpiDriver_BitOrder_t bitOrder;         ///< A bit order on the SPI bus, MSB or LSB first.
         NF_SpiDriver_ClockMode_t clockMode;       ///< SPI mode, CLKPOL/CLKPHASE setting.
         NF_SpiDriver_CsControl_t csControl;       ///< A select master mode chip select (CS) control scheme.
+        bool isHalfDuplex;                 ///< True if the SPI is half duplex.
     } NF_SpiDriver_Init_t;
 
     /// An SPI driver instance handle data structure.

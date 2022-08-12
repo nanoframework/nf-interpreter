@@ -334,9 +334,13 @@ static Ecode_t NF_SpiDriver_InitUsart(NF_SpiDriver_Handle_t handle, NF_SpiDriver
         handle->peripheral.usartPort->CTRL |= USART_CTRL_AUTOCS;
     }
 
+    if (initData->isHalfDuplex)
+    {
+        handle->peripheral.usartPort->CTRL |= USART_CTRL_LOOPBK;
+    }
+
     if (initData->csControl == spidrvCsControlAuto)
     {
-        // SPI 4 wire mode
 #if defined(USART_ROUTEPEN_TXPEN)
         handle->peripheral.usartPort->ROUTELOC0 =
             (handle->peripheral.usartPort->ROUTELOC0 & ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |
@@ -371,7 +375,6 @@ static Ecode_t NF_SpiDriver_InitUsart(NF_SpiDriver_Handle_t handle, NF_SpiDriver
     }
     else
     {
-        // SPI 3 wire mode
 #if defined(USART_ROUTEPEN_TXPEN)
         handle->peripheral.usartPort->ROUTELOC0 =
             (handle->peripheral.usartPort->ROUTELOC0 &
@@ -1155,6 +1158,12 @@ static bool RxDMAComplete(unsigned int channel,
 
     handle = (NF_SpiDriver_Handle_t)userParam;
 
+    if (handle->initData->isHalfDuplex)
+    {
+        // Turn off TX tri-stating
+        handle->peripheral.usartPort->CMD = USART_CMD_TXTRIDIS;
+    }
+
     handle->transferStatus = ECODE_EMDRV_SPIDRV_OK;
     handle->state = spidrvStateIdle;
     handle->remaining = 0;
@@ -1191,6 +1200,12 @@ static void StartReceiveDMA(NF_SpiDriver_Handle_t handle,
     else if (handle->peripheralType == spidrvPeripheralTypeUsart)
     {
         handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
+        if (handle->initData->isHalfDuplex)
+        {
+            // Block RX while sending from master
+            handle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKEN;
+        }
 
         if (handle->initData->frameLength > 9)
         {
