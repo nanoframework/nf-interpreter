@@ -32,8 +32,6 @@ typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 
 ble_services_context bleContext;
 
-
-
 static void InitContext(ble_services_context *context)
 {
     memset(context, 0, sizeof(ble_services_context));
@@ -408,27 +406,30 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     BLE_DEBUG_PRINTF("characteristicsCount = %d size=%X\n ", CharacteristicsCount, sizeof(ble_gatt_chr_def));
     BLE_DEBUG_PRINTF("descriptorCount = %d  size=%X\n ", descriptorCount, sizeof(ble_gatt_dsc_def));
 
-    BLE_DEBUG_PRINTF("characteristicsDefs %X  end %X\n",
-                    context.characteristicsDefs,
-                    ((uint8_t *)context.characteristicsDefs) + (sizeof(ble_gatt_chr_def) *
-                    context.characteristicsCount));
+    BLE_DEBUG_PRINTF(
+        "characteristicsDefs %X  end %X\n",
+        context.characteristicsDefs,
+        ((uint8_t *)context.characteristicsDefs) + (sizeof(ble_gatt_chr_def) * context.characteristicsCount));
 
-    BLE_DEBUG_PRINTF("characteristicsUuids  %X  end %X\n",
-                    context.characteristicsUuids,
-                    ((uint8_t *)context.characteristicsUuids) + (sizeof(ble_uuid_any_t) *
-                    context.characteristicsCount));
+    BLE_DEBUG_PRINTF(
+        "characteristicsUuids  %X  end %X\n",
+        context.characteristicsUuids,
+        ((uint8_t *)context.characteristicsUuids) + (sizeof(ble_uuid_any_t) * context.characteristicsCount));
 
-    BLE_DEBUG_PRINTF("attrHandles  %X  end %X\n",
-                    context.attrHandles,
-                    ((uint8_t *)context.attrHandles) + (sizeof(uint16_t) * context.characteristicsCount));
+    BLE_DEBUG_PRINTF(
+        "attrHandles  %X  end %X\n",
+        context.attrHandles,
+        ((uint8_t *)context.attrHandles) + (sizeof(uint16_t) * context.characteristicsCount));
 
-    BLE_DEBUG_PRINTF("descriptorDefs  %X  end %X\n",
-                    context.descriptorDefs,
-                    ((uint8_t *)context.descriptorDefs) + (sizeof(ble_gatt_dsc_def) * context.descriptorCount));
+    BLE_DEBUG_PRINTF(
+        "descriptorDefs  %X  end %X\n",
+        context.descriptorDefs,
+        ((uint8_t *)context.descriptorDefs) + (sizeof(ble_gatt_dsc_def) * context.descriptorCount));
 
-    BLE_DEBUG_PRINTF("descriptorUuids  %X  end %X\n",
-                    context.descriptorUuids,
-                    ((uint8_t *)context.descriptorUuids) + (sizeof(ble_uuid_any_t) * context.descriptorCount));
+    BLE_DEBUG_PRINTF(
+        "descriptorUuids  %X  end %X\n",
+        context.descriptorUuids,
+        ((uint8_t *)context.descriptorUuids) + (sizeof(ble_uuid_any_t) * context.descriptorCount));
 
     // Build definitions required for Nimble
     for (charIndex = 0; charIndex < CharacteristicsCount; charIndex++)
@@ -581,8 +582,11 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
     // Terminate characteristics
     context.characteristicsDefs[CharacteristicsCount - 1].uuid = NULL;
 
-    BLE_DEBUG_PRINTF("characteristics start %X last def %X \n ", context.characteristicsDefs, &context.characteristicsDefs[CharacteristicsCount-1]); 
-    BLE_DEBUG_PRINTF("characteristics index %d  descriptor index %d\n",charIndex, descIndex);
+    BLE_DEBUG_PRINTF(
+        "characteristics start %X last def %X \n ",
+        context.characteristicsDefs,
+        &context.characteristicsDefs[CharacteristicsCount - 1]);
+    BLE_DEBUG_PRINTF("characteristics index %d  descriptor index %d\n", charIndex, descIndex);
 
     return true;
 }
@@ -696,7 +700,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         BLE_DEBUG_PRINTF("Gatt Services built\n");
 
 #ifdef NANO_BLE_DEBUG
-        //PrintSvrDefs(bleContext.gatt_service_def);
+        // PrintSvrDefs(bleContext.gatt_service_def);
 #endif
         result = device_ble_init();
         if (!result)
