@@ -19,7 +19,6 @@
 #include "services/gatt/ble_svc_gatt.h"
 #pragma GCC diagnostic pop
 
-
 #include "nimble_utils.h"
 
 typedef struct
@@ -27,8 +26,8 @@ typedef struct
     uint16_t eventId;
 
     // Control access to event data
-    SemaphoreHandle_t mutex;  
-    
+    SemaphoreHandle_t mutex;
+
     int result;
 
     // Client Fields
@@ -82,8 +81,7 @@ struct ble_services_context
     ble_context *bleSrvContexts;
 };
 
-
-void start_ble_task(char * deviceName);
+void start_ble_task(char *deviceName);
 bool device_ble_init();
 void device_ble_dispose();
 int esp32_gap_event(struct ble_gap_event *event, void *arg);
@@ -91,8 +89,8 @@ int esp32_gap_event(struct ble_gap_event *event, void *arg);
 extern ble_services_context bleContext;
 extern device_ble_event_data ble_event_data;
 extern EventGroupHandle_t ble_event_waitgroup;
-extern char * bleDeviceName;
+extern char *bleDeviceName;
 
-#define N_BLE_EVENT_HANDLED  1          // Bit 1 to signal event has been handled
-#define N_BLE_EVENT_STARTED  2          // Bit 2 to signal BLE stack has started
-#endif // SYS_BLE_H
+#define N_BLE_EVENT_HANDLED 1 // Bit 1 to signal event has been handled
+#define N_BLE_EVENT_STARTED 2 // Bit 2 to signal BLE stack has started
+#endif                        // SYS_BLE_H

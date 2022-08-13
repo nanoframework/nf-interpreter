@@ -6,7 +6,6 @@
 
 #include "sys_dev_ble_native.h"
 
-
 HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest::
     NativeReadRespondWithValue___VOID__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
