@@ -105,10 +105,10 @@ bool PostAndWaitManagedGapEvent(uint8_t op, uint16_t data1, uint32_t data2)
     BLE_DEBUG_PRINTF("wait handled ? complete %X\n", uxBits);
     if (uxBits & 1)
     {
-       // Reset event data
+        // Reset event data
         if (LockEventMutex())
         {
-            ble_event_data.eventId = -1;    // reset event ID
+            ble_event_data.eventId = -1; // reset event ID
             ble_event_data.gapEvent = 0;
 
             ReleaseEventMutex();
@@ -133,15 +133,18 @@ int esp32_gap_event(struct ble_gap_event *event, void *arg)
             if (LockEventMutex())
             {
                 ble_event_data.eventId = ble_event_next_id++;
-                ble_event_data.gapEvent = event;    // Save event ptr
+                ble_event_data.gapEvent = event; // Save event ptr
                 ble_event_data.result = -1;
 
-                BLE_DEBUG_PRINTF("BLE_GAP_EVENT_DISC event type:%d adr:%X rssi:%d\n", 
-                        event->disc.event_type, (unsigned int)event->disc.addr.val, event->disc.rssi);
+                BLE_DEBUG_PRINTF(
+                    "BLE_GAP_EVENT_DISC event type:%d adr:%X rssi:%d\n",
+                    event->disc.event_type,
+                    (unsigned int)event->disc.addr.val,
+                    event->disc.rssi);
 
                 ReleaseEventMutex();
 
-                // Post Discovery event to managed code 
+                // Post Discovery event to managed code
                 if (PostAndWaitManagedGapEvent(BluetoothEventType_AdvertisementDiscovered, 0, ble_event_data.eventId))
                 {
                     // Handled
@@ -160,7 +163,7 @@ int esp32_gap_event(struct ble_gap_event *event, void *arg)
             MODLOG_DFLT(INFO, "discovery complete; reason=%d\n", event->disc_complete.reason);
 
             // Post event to managed code
-            PostManagedEvent(EVENT_BLUETOOTH,  BluetoothEventType_ScanningComplete,  event->disc_complete.reason, 0);
+            PostManagedEvent(EVENT_BLUETOOTH, BluetoothEventType_ScanningComplete, event->disc_complete.reason, 0);
 
             return 0;
 
@@ -337,7 +340,7 @@ void esp32_ble_start_advertise(ble_services_context *context)
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0)
     {
-       BLE_DEBUG_PRINTF("error setting advertisement data; rc=%d\n", rc);
+        BLE_DEBUG_PRINTF("error setting advertisement data; rc=%d\n", rc);
     }
 
     if (useScanResponse)
@@ -345,7 +348,7 @@ void esp32_ble_start_advertise(ble_services_context *context)
         rc = ble_gap_adv_rsp_set_fields(&scanResp);
         if (rc != 0)
         {
-           BLE_DEBUG_PRINTF("setting scan response data; rc=%d\n", rc);
+            BLE_DEBUG_PRINTF("setting scan response data; rc=%d\n", rc);
         }
     }
 
@@ -384,7 +387,7 @@ static void esp32_ble_on_sync(void)
     int rc;
 
     BLE_DEBUG_PRINTF("esp32_ble_on_sync\n");
-    
+
     rc = ble_hs_id_infer_auto(0, &esp32_addr_type);
     if (rc != 0)
     {
@@ -410,7 +413,7 @@ static void esp32_ble_on_sync(void)
         addr_val[1],
         addr_val[0]);
 
-    switch(ble_operatingMode)
+    switch (ble_operatingMode)
     {
         case BluetoothNanoDevice_Mode_Server:
             // Begin advertising
@@ -419,12 +422,12 @@ static void esp32_ble_on_sync(void)
             break;
 
         case BluetoothNanoDevice_Mode_Scanning:
-             bleCentralStartScan();
-             BLE_DEBUG_PRINTF("Advertisement Watcher started\n");
-             break;
+            bleCentralStartScan();
+            BLE_DEBUG_PRINTF("Advertisement Watcher started\n");
+            break;
 
         case BluetoothNanoDevice_Mode_Central:
-             BLE_DEBUG_PRINTF("Central mode started\n");
+            BLE_DEBUG_PRINTF("Central mode started\n");
         default:
             break;
     }
@@ -474,7 +477,7 @@ void device_ble_dispose()
     vSemaphoreDelete(ble_event_data.mutex);
 
     ble_initialized = false;
-    
+
     BLE_DEBUG_PRINTF("device_ble_dispose exit %d\n", ble_initialized);
 }
 
@@ -496,7 +499,7 @@ bool device_ble_init()
     err = esp_nimble_hci_and_controller_init();
     if (err != ESP_OK)
     {
-        BLE_DEBUG_PRINTF("esp_nimble_hci_and_controller_init failed %d\n",err);
+        BLE_DEBUG_PRINTF("esp_nimble_hci_and_controller_init failed %d\n", err);
         return false;
     }
 
@@ -510,16 +513,16 @@ bool device_ble_init()
     ble_hs_cfg.reset_cb = esp32_ble_on_reset;
 
     ble_initialized = true;
- 
+
     return true;
 }
 
-void start_ble_task(char * deviceName)
+void start_ble_task(char *deviceName)
 {
     int rc;
 
     BLE_DEBUG_PRINTF("start_ble_task\n");
- 
+
     // Set the default device name
     rc = ble_svc_gap_device_name_set(deviceName);
     assert(rc == 0);
@@ -552,7 +555,7 @@ int device_ble_start(ble_services_context &con)
         return rc;
     }
 
-     // Set device name & start BLE task 
+    // Set device name & start BLE task
     start_ble_task(con.pDeviceName);
 
     return 0;
@@ -574,10 +577,14 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
         ble_event_data.ctxt = ctxt;
 
         ReleaseEventMutex();
-        
+
         BluetoothEventType op;
 
-        BLE_DEBUG_PRINTF("device_ble_callback attr %d op %d id %X\n", attr_handle, ctxt->op,  ble_event_data.characteristicId);
+        BLE_DEBUG_PRINTF(
+            "device_ble_callback attr %d op %d id %X\n",
+            attr_handle,
+            ctxt->op,
+            ble_event_data.characteristicId);
 
         switch (ctxt->op)
         {

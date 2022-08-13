@@ -11,11 +11,13 @@
 //#define NANO_BLE_DEBUG
 
 #if defined(NANO_BLE_DEBUG)
-#define BLE_DEBUG_PRINTF(format, ...)  { debug_printf(format, ##__VA_ARGS__); }
+#define BLE_DEBUG_PRINTF(format, ...)                                                                                  \
+    {                                                                                                                  \
+        debug_printf(format, ##__VA_ARGS__);                                                                           \
+    }
 #else
-#define BLE_DEBUG_PRINTF(format, ...);
+#define BLE_DEBUG_PRINTF(format, ...) ;
 #endif
-
 
 void NimbleUUID16ToGuid(ble_uuid16_t *b16, uint8_t *guid);
 void NimbleUUID32ToGuid(ble_uuid32_t *b32, uint8_t *guid);
@@ -24,14 +26,14 @@ void NimbleUUIDToGuid(ble_uuid_any_t *bAny, uint8_t *guid);
 
 void GuidToNimbleUUID(uint8_t *guid, ble_uuid_any_t *bAny);
 
-u64_t BleAddressToUlong(u8_t * address);
+u64_t BleAddressToUlong(u8_t *address);
 void ulongToBleAddress(u64_t address, ble_addr_t &bleAddr);
 
 void PrintAddress(ble_addr_t &bleAddr);
 void PrintBytes(uint8_t *pc, int len);
 void PrintUuid(const ble_uuid_t *puuid);
 
-HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf * om);
+HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf *om);
 HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack);
 
 bool LockEventMutex();
