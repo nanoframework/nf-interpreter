@@ -189,7 +189,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Buffer
     static const int FIELD___length = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisement
@@ -203,7 +202,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_B
     static const int FIELD___rawManufacturerData = 7;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementDataSection
@@ -212,7 +210,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_B
     static const int FIELD___buffer = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementReceivedEventArgs
@@ -226,15 +223,14 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_B
     NANOCLR_NATIVE_DECLARE(NativeCreateFromEvent___BOOLEAN__I4);
 
     //--//
-
 };
 
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementWatcherStoppedEventArgs
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementWatcherStoppedEventArgs
 {
     static const int FIELD___error = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEManufacturerData
@@ -243,7 +239,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_B
     static const int FIELD___companyId = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothDeviceId
@@ -251,7 +246,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothDevice
     static const int FIELD___id = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventCentral
@@ -263,7 +257,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventC
     static const int FIELD__characteristicHandle = 7;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventClient
@@ -274,7 +267,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventC
     static const int FIELD__descriptorId = 6;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptorParameters
@@ -284,7 +276,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___staticValue = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattPresentationFormat
@@ -296,7 +287,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___description = 5;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest
@@ -308,7 +298,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     NANOCLR_NATIVE_DECLARE(NativeReadRespondWithProtocolError___VOID__U2__U1);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequestedEventArgs
@@ -317,7 +306,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___session = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequestedEventArgs
@@ -326,7 +314,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___session = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptor
@@ -341,7 +328,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD__WriteRequested = 8;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattClientNotificationResult
@@ -352,7 +338,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___bytesSent = 4;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattSubscribedClient
@@ -360,7 +345,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___session = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattSession
@@ -368,7 +352,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___deviceId = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest
@@ -383,7 +366,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     NANOCLR_NATIVE_DECLARE(NativeWriteRespondWithProtocolError___VOID__U2__U1);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic
@@ -410,7 +392,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     NANOCLR_NATIVE_DECLARE(NativeNotifyClient___I4__U2__U2__SZARRAY_U1);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattDeviceServicesResult
@@ -420,7 +401,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___status = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattCharacteristicsResult
@@ -430,7 +410,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___status = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadResult
@@ -440,7 +419,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___buffer = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteResult
@@ -449,7 +427,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___protocolError = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_DataReader
@@ -458,7 +435,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_DataReader
     static const int FIELD___currentReadPosition = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattDescriptorsResult
@@ -468,7 +444,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___status = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattValueChangedEventArgs
@@ -477,7 +452,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___timeStammp = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattDescriptor
@@ -488,7 +462,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___device = 4;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattCharacteristic
@@ -507,11 +480,11 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD__ValueChanged = 12;
 
     NANOCLR_NATIVE_DECLARE(NativeStartDiscoveryDescriptors___U2__U2__U2__U2);
-    NANOCLR_NATIVE_DECLARE(NativeUpdateDescriptor___VOID__U2__U2__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattDescriptor);
+    NANOCLR_NATIVE_DECLARE(
+        NativeUpdateDescriptor___VOID__U2__U2__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattDescriptor);
     NANOCLR_NATIVE_DECLARE(NativeReadEventData___SZARRAY_U1__U2__U2);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattDeviceService
@@ -525,10 +498,10 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___eventComplete = 7;
 
     NANOCLR_NATIVE_DECLARE(NativeDiscoverCharacteristics___U2__U2__U2__U2__U2);
-    NANOCLR_NATIVE_DECLARE(NativeUpdateCharacteristic___VOID__U2__U2__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattCharacteristic);
+    NANOCLR_NATIVE_DECLARE(
+        NativeUpdateCharacteristic___VOID__U2__U2__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattCharacteristic);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice
@@ -555,13 +528,13 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevi
     NANOCLR_NATIVE_DECLARE(NativeDisconnect___VOID__U2);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID__U2);
     NANOCLR_NATIVE_DECLARE(NativeDiscoverServices___U2__U2);
-    NANOCLR_NATIVE_DECLARE(NativeUpdateService___VOID__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattDeviceService);
+    NANOCLR_NATIVE_DECLARE(
+        NativeUpdateService___VOID__U2__nanoFrameworkDeviceBluetoothGenericAttributeProfileGattDeviceService);
     NANOCLR_NATIVE_DECLARE(NativeStartReadValue___U2__U2__U2);
     NANOCLR_NATIVE_DECLARE(NativeReadValue___SZARRAY_U1__U2__U2);
     NANOCLR_NATIVE_DECLARE(NativeStartWriteValue___U2__U2__U2__BOOLEAN__SZARRAY_U1__U2);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventScan
@@ -570,7 +543,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventS
     static const int FIELD__id = 4;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventListener
@@ -582,7 +554,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventL
     static const int FIELD_STATIC___watcherQueue = 6;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignalStrengthFilter
@@ -592,7 +563,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignal
     static const int FIELD___outOfRangeTimeout = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice
@@ -601,10 +571,10 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDe
     static const int FIELD_STATIC___mode = 8;
 
     NANOCLR_NATIVE_DECLARE(NativeInitilise___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(NativeSetOperationMode___STATIC__VOID__nanoFrameworkDeviceBluetoothBluetoothNanoDeviceMode__STRING);
+    NANOCLR_NATIVE_DECLARE(
+        NativeSetOperationMode___STATIC__VOID__nanoFrameworkDeviceBluetoothBluetoothNanoDeviceMode__STRING);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher__ScanItem
@@ -614,7 +584,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdve
     static const int FIELD__outRangeTime = 3;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher
@@ -631,10 +600,10 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdve
     NANOCLR_NATIVE_DECLARE(NativeStopAdvertisementWatcher___VOID);
 
     //--//
-
 };
 
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristicParameters
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristicParameters
 {
     static const int FIELD___writeProtectionLevel = 1;
     static const int FIELD___readProtectionLevel = 2;
@@ -644,7 +613,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___presentationFormats = 6;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristicResult
@@ -653,7 +621,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___error = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptorResult
@@ -662,7 +629,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___descriptor = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalService
@@ -671,20 +637,20 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___characteristics = 2;
 
     //--//
-
 };
 
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadClientCharacteristicConfigurationDescriptorResult
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadClientCharacteristicConfigurationDescriptorResult
 {
     static const int FIELD___config = 1;
     static const int FIELD___protocolError = 2;
     static const int FIELD___status = 3;
 
     //--//
-
 };
 
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProviderAdvertisingParameters
+struct
+    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProviderAdvertisingParameters
 {
     static const int FIELD___deviceName = 1;
     static const int FIELD___isDiscoverable = 2;
@@ -692,7 +658,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___serviceData = 4;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider
@@ -711,7 +676,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     NANOCLR_NATIVE_DECLARE(NativeStopAdvertising___VOID);
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProviderResult
@@ -720,7 +684,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     static const int FIELD___error = 2;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_SppReceivedDataEventArgs
@@ -728,7 +691,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_SppReceived
     static const int FIELD___data = 1;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_NordicSpp
@@ -743,7 +705,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Spp_NordicSpp
     static const int FIELD__ConnectedEvent = 8;
 
     //--//
-
 };
 
 struct Library_sys_dev_ble_native_ThisAssembly
@@ -751,7 +712,6 @@ struct Library_sys_dev_ble_native_ThisAssembly
     static const int FIELD_STATIC__GitCommitDate = 10;
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth;

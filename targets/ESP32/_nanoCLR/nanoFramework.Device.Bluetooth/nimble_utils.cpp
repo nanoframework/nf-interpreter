@@ -18,7 +18,7 @@ void NimbleUUID16ToGuid(ble_uuid16_t *b16, uint8_t *guid)
 void NimbleUUID32ToGuid(ble_uuid32_t *b32, uint8_t *guid)
 {
     memcpy(guid, blueSig, sizeof(blueSig));
-    guid[3] = ((b32->value >> 24)  & 0xff);
+    guid[3] = ((b32->value >> 24) & 0xff);
     guid[2] = ((b32->value >> 16) & 0xff);
     guid[1] = ((b32->value >> 8) & 0xff);
     guid[0] = (b32->value & 0xff);
@@ -40,14 +40,14 @@ void NimbleUUID128ToGuid(ble_uuid128_t *b128, uint8_t *guid)
 void NimbleUUIDToGuid(ble_uuid_any_t *bAny, uint8_t *guid)
 {
 
-    switch(bAny->u.type)
+    switch (bAny->u.type)
     {
         case BLE_UUID_TYPE_16:
-            NimbleUUID16ToGuid(&bAny->u16, guid );
+            NimbleUUID16ToGuid(&bAny->u16, guid);
             break;
 
         case BLE_UUID_TYPE_32:
-            NimbleUUID32ToGuid(&bAny->u32, guid );
+            NimbleUUID32ToGuid(&bAny->u32, guid);
             break;
 
         default: // assume 128
@@ -66,7 +66,7 @@ void GuidToNimbleUUID(uint8_t *guid, ble_uuid_any_t *bAny)
     // xx xx xx xx       "       "      "           "          - 32 bits
 
     // 16 or 32 bit ?
-    if (memcmp(guid + 4, blueSig+4, sizeof(blueSig)-4) == 0)
+    if (memcmp(guid + 4, blueSig + 4, sizeof(blueSig) - 4) == 0)
     {
         // 16 Bit
         if (guid[0] == 0 && guid[1] == 0)
@@ -95,12 +95,12 @@ void GuidToNimbleUUID(uint8_t *guid, ble_uuid_any_t *bAny)
     }
 }
 
-u64_t BleAddressToUlong(u8_t * address)
+u64_t BleAddressToUlong(u8_t *address)
 {
     u64_t bleAdr = 0;
     address += 5;
 
-    for(int index=0; index<=5; index++)
+    for (int index = 0; index <= 5; index++)
     {
         bleAdr <<= 8;
         bleAdr += *address;
@@ -124,11 +124,11 @@ void ulongToBleAddress(u64_t address, ble_addr_t &bleAddr)
 
 void PrintAddress(ble_addr_t &bleAddr)
 {
-   BLE_DEBUG_PRINTF( "ble_addr type %d Adr:",bleAddr.type );
-   for (int i = 5; i >= 0; i--)
+    BLE_DEBUG_PRINTF("ble_addr type %d Adr:", bleAddr.type);
+    for (int i = 5; i >= 0; i--)
     {
         BLE_DEBUG_PRINTF("%0X ", bleAddr.val[i]);
-    }    
+    }
     BLE_DEBUG_PRINTF("\n");
 }
 
@@ -172,8 +172,7 @@ void PrintUuid(const ble_uuid_t *puuid)
     }
 }
 
-
-HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf * om)
+HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf *om)
 {
     NANOCLR_HEADER();
     {
@@ -185,10 +184,8 @@ HRESULT OmBufferToStack(CLR_RT_StackFrame &stack, os_mbuf * om)
         om_len = OS_MBUF_PKTLEN(om);
 
         // Create managed byte array of correct size as per OM buffer
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-            stack.PushValueAndClear(),
-            om_len,
-            g_CLR_RT_WellKnownTypes.m_UInt8));
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), om_len, g_CLR_RT_WellKnownTypes.m_UInt8));
 
         // get a pointer to the first object in the array
         pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
@@ -212,7 +209,7 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack)
 
 bool LockEventMutex()
 {
-    return xSemaphoreTake(ble_event_data.mutex, (TickType_t)(1000 / portTICK_PERIOD_MS) );
+    return xSemaphoreTake(ble_event_data.mutex, (TickType_t)(1000 / portTICK_PERIOD_MS));
 }
 
 void ReleaseEventMutex()
@@ -222,7 +219,8 @@ void ReleaseEventMutex()
 
 bool WaitForBleStackStart(int waitMs)
 {
-    EventBits_t uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(waitMs / portTICK_PERIOD_MS));
+    EventBits_t uxBits =
+        xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(waitMs / portTICK_PERIOD_MS));
     BLE_DEBUG_PRINTF("wait handled ? complete %X\n", uxBits);
     if (uxBits & N_BLE_EVENT_STARTED)
     {
