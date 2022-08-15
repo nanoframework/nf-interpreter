@@ -92,9 +92,9 @@ static void FreeContext(ble_services_context &srvContext)
         }
     }
 
-    if(srvContext.bleSrvContexts)
+    if (srvContext.bleSrvContexts)
     {
-        platform_free((void *) srvContext.bleSrvContexts);
+        platform_free((void *)srvContext.bleSrvContexts);
         srvContext.bleSrvContexts = NULL;
     }
 }
