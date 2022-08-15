@@ -91,6 +91,12 @@ static void FreeContext(ble_services_context &srvContext)
             context->descriptorUuids = NULL;
         }
     }
+
+    if(srvContext.bleSrvContexts)
+    {
+        platform_free((void *) srvContext.bleSrvContexts);
+        srvContext.bleSrvContexts = NULL;
+    }
 }
 
 HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::

@@ -82,6 +82,7 @@ void RemoveConnection(ushort connection)
     {
         // Remove from connection list
         ptr->Unlink();
+        platform_free(ptr);
     }
     else
     {
