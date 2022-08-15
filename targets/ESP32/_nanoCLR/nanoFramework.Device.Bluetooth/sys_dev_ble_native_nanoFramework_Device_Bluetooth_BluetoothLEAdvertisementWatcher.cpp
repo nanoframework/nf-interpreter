@@ -94,8 +94,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdv
 }
 
 HRESULT
-    Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementReceivedEventArgs::
-        NativeCreateFromEvent___BOOLEAN__I4(CLR_RT_StackFrame &stack)
+Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementReceivedEventArgs::
+    NativeCreateFromEvent___BOOLEAN__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
