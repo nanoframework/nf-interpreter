@@ -412,10 +412,18 @@ macro(nf_add_platform_sources target)
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
         )
 
-        if(AZURERTOS_NETXDUO_REQUIRED)         
+        if(USE_NETWORKING_OPTION)         
             target_link_libraries(${target}.elf
                 nano::NF_Network
                 azrtos::netxduo
+            )
+        endif()
+
+        if(USBX_FEATURE_HID_OPTION)
+            target_link_libraries(${target}.elf
+                azrtos::netxduo
+                azrtos::filex
+                azrtos::usbx
             )
         endif()
 

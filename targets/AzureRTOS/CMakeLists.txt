@@ -129,7 +129,8 @@ if(AZURERTOS_USBX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_usbx
-            SOURCE_DIR https://github.com/azure-rtos/usbx.git
+            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
+            GIT_TAG ${RTOS_VERSION}
         )
 
     else()
