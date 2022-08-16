@@ -93,7 +93,7 @@ bool PostAndWaitManagedGapEvent(uint8_t op, uint16_t data1, uint32_t data2)
     EventBits_t uxBits;
 
     // Make sure group clear before we post event
-    xEventGroupClearBits(ble_event_waitgroup, 1);
+    xEventGroupClearBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
 
     BLE_DEBUG_PRINTF("Postevent\n");
 
@@ -101,7 +101,7 @@ bool PostAndWaitManagedGapEvent(uint8_t op, uint16_t data1, uint32_t data2)
     PostManagedEvent(EVENT_BLUETOOTH, op, data1, data2);
 
     // Wait for 1 second for event to be handled in managed code otherwise fail request
-    uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(2000 / portTICK_PERIOD_MS));
+    uxBits = xEventGroupWaitBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED, pdTRUE, pdFALSE, (TickType_t)(2000 / portTICK_PERIOD_MS));
     BLE_DEBUG_PRINTF("wait handled ? complete %X\n", uxBits);
     if (uxBits & 1)
     {

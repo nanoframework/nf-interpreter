@@ -220,7 +220,7 @@ void ReleaseEventMutex()
 bool WaitForBleStackStart(int waitMs)
 {
     EventBits_t uxBits =
-        xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(waitMs / portTICK_PERIOD_MS));
+        xEventGroupWaitBits(ble_event_waitgroup, N_BLE_EVENT_STARTED, pdTRUE, pdFALSE, (TickType_t)(waitMs / portTICK_PERIOD_MS));
     BLE_DEBUG_PRINTF("wait handled ? complete %X\n", uxBits);
     if (uxBits & N_BLE_EVENT_STARTED)
     {

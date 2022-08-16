@@ -126,9 +126,10 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                 if (rc == 0)
                 {
                     // Fill in BluetoothLEAdvertisementReceivedEventArgs fields from event data
-                    BLE_DEBUG_PRINTF("Watch type:%d adr:", gEvent->disc.addr.type);
+                    BLE_DEBUG_PRINTF("Watch rssi:%d type:%d adr:", gEvent->disc.rssi, gEvent->disc.addr.type);
                     PrintBytes(gEvent->disc.addr.val, 6);
                     BLE_DEBUG_PRINTF("\n");
+
                     pThis[FIELD___bluetoothAddress].NumericByRef().u8 = BleAddressToUlong(gEvent->disc.addr.val);
                     pThis[FIELD___advertisementType].NumericByRef().s4 = 4; // TODO
                     pThis[FIELD___rawSignalStrengthInDBm].NumericByRef().s2 = (int16_t)gEvent->disc.rssi;
@@ -151,6 +152,7 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
 
                         platform_free(pname);
                     }
+                    BLE_DEBUG_PRINTF("local Name %X len %d", fields.name, fields.name_len);
 
                     // == Service UUIDs ====
                     // Create Array of all UUID 16bit, UUID 32 bit & UUID 128bit as 16 byte GUID in byte buffer
@@ -242,12 +244,18 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                         pAdvert[BluetoothLEAdvertisement::FIELD___rawManufacturerData],
                         fields.mfg_data_len,
                         g_CLR_RT_WellKnownTypes.m_UInt8));
+
                     buffer = pAdvert[BluetoothLEAdvertisement::FIELD___rawManufacturerData]
                                  .DereferenceArray()
                                  ->GetFirstElement();
                     memcpy(buffer, fields.mfg_data, fields.mfg_data_len);
 
+                    BLE_DEBUG_PRINTF("Manufacturer data %X len %d\n",fields.mfg_data, fields.mfg_data_len);
+
                     result = true;
+
+                    // Signal BLE callback, event complete
+                    xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
                 }
             }
 

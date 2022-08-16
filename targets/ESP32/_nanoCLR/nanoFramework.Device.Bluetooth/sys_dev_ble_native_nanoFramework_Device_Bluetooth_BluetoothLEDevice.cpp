@@ -137,14 +137,14 @@ bool PostAndWaitCentralEvent(
     BLE_DEBUG_PRINTF("PostManagedEvent->\n");
 
     // Make sure group clear before we post event
-    xEventGroupClearBits(ble_event_waitgroup, 1);
+    xEventGroupClearBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
 
     // Post central event to managed code
     PostCentralEvent(op, conn_handle, status, serviceHandle, characteristicHandle);
 
     // Wait for 1 second for event to be handled in managed code otherwise fail request
-    uxBits = xEventGroupWaitBits(ble_event_waitgroup, 1, pdTRUE, pdFALSE, (TickType_t)(2000 / portTICK_PERIOD_MS));
-    if (uxBits & 1)
+    uxBits = xEventGroupWaitBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED, pdTRUE, pdFALSE, (TickType_t)(2000 / portTICK_PERIOD_MS));
+    if (uxBits & N_BLE_EVENT_HANDLED)
     {
         // Handled
         return true;
