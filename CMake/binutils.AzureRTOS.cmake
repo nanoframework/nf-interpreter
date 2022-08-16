@@ -157,7 +157,8 @@ macro(nf_add_platform_packages)
             # need to add ThreadX extension in order to use BSD
             if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m7/gnu/inc/tx_port.h)
-            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx")
+            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx"
+                    OR "${TARGET_SERIES}" STREQUAL "EFM32GG11")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m4/gnu/inc/tx_port.h)
             else()
                 message(FATAL_ERROR "Support for NetX Duo is not implemented for ${TARGET_SERIES}.")
