@@ -454,6 +454,7 @@ macro(nf_add_platform_sources target)
                 ${target}
             EXTRA_INCLUDES
                 ${AZRTOS_INCLUDES}
+                ${NF_CoreCLR_INCLUDE_DIRS}
         )
                         
         add_dependencies(${target}.elf nano::gecko_sdk_${target})

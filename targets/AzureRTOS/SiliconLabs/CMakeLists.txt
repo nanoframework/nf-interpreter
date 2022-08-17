@@ -8,7 +8,18 @@ include(Gecko_SDK)
 
 set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
+option(GECKO_FEATURE_USBD_HID "option to use Gecko SDK HID class")
+
 ProcessGSDKPackage()
+
+if(GECKO_FEATURE_USBD_HID)
+
+    set(GECKO_FEATURE_USBD_HID_OPTION TRUE CACHE INTERNAL "GECKO_FEATURE_USBD_HID for USBD HID")
+
+else()
+    set(GECKO_FEATURE_USBD_HID_OPTION FALSE CACHE INTERNAL "GECKO_FEATURE_USBD_HID for USBD HID")
+endif()
+
 
 # check if GECKO_SDK_SOURCE was specified or if it's empty (default is empty)
 set(NO_GECKO_SDK_SOURCE TRUE)

@@ -18,6 +18,11 @@
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
 
+extern void usb_device_hid_app_init(void);
+extern void sli_usbd_configuration_config0_init(void);
+extern void sli_usbd_hid_mouse0_init(void);
+extern void sli_usbd_init(void);
+
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
 extern CLR_SETTINGS clrSettings;
@@ -157,6 +162,14 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
+
+#if GECKO_FEATURE_USBD_HID == TRUE
+    sli_usbd_init();
+    sli_usbd_configuration_config0_init();
+    sli_usbd_hid_mouse0_init();
+
+    usb_device_hid_app_init();
+#endif
 }
 
 //  Application entry point.

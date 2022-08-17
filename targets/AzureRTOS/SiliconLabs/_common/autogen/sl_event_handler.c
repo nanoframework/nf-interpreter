@@ -24,6 +24,7 @@
 #include "sl_power_manager.h"
 
 #include <tx_api.h>
+#include <nanoCLR_Headers.h>
 
 void sl_platform_init(void)
 {
@@ -49,6 +50,7 @@ void sl_driver_init(void)
 {
     sl_i2cspm_init_instances();
     sl_uartdrv_init_instances();
+    sl_driver_init_target();
 }
 
 void sl_service_init(void)
@@ -60,6 +62,7 @@ void sl_service_init(void)
 
 void sl_stack_init(void)
 {
+    sl_stack_init_target();
 }
 
 void sl_internal_app_init(void)
@@ -85,4 +88,14 @@ void sl_internal_app_process_action(void)
 void sl_iostream_init_instances(void)
 {
     sl_iostream_usart_init_instances();
+}
+
+// provided as weak so it can be replaced at target level
+__nfweak void sl_stack_init_target(void)
+{
+}
+
+// provided as weak so it can be replaced at target level
+__nfweak void sl_driver_init_target(void)
+{
 }
