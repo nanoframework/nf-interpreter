@@ -7,16 +7,15 @@ include(AzureRTOS_${TARGET_SERIES}_GCC_options)
 # Azure RTOS settings and inclusion of build system
 set(THREADX_ARCH "cortex_m4" )
 set(THREADX_TOOLCHAIN "gnu" )
-set(TX_USER_FILE ${TARGET_BASE_LOCATION}/target_tx_user.h CACHE STRING "Enable TX user configuration")
 # set(NX_USER_FILE ${TARGET_BASE_LOCATION}/target_nx_user.h CACHE STRING "Enable NX user configuration")
 # set(NXD_ENABLE_FILE_SERVERS OFF CACHE BOOL "Disable fileX dependency by netxduo")
 
 set(SL_BOARD_NAME "BRD2204A" PARENT_SCOPE)
 
 add_subdirectory(${azure_rtos_SOURCE_DIR} threadx)
-add_subdirectory(${azure_rtos_filex_SOURCE_DIR} filex)
-add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
-add_subdirectory(${azure_rtos_usbx_SOURCE_DIR} usbx)
+# add_subdirectory(${azure_rtos_filex_SOURCE_DIR} filex)
+# add_subdirectory(${azure_rtos_netxduo_SOURCE_DIR} netxduo)
+# add_subdirectory(${azure_rtos_usbx_SOURCE_DIR} usbx)
 
 nf_setup_target_build(
     HAS_NANOBOOTER
