@@ -6,8 +6,6 @@
 #ifndef _TARGET_HAL_H_
 #define _TARGET_HAL_H_
 
-#include <tx_api.h>
-
 #include <target_board.h>
 #include <nanoHAL_v2.h>
 

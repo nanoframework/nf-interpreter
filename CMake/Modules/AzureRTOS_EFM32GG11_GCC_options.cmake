@@ -34,7 +34,8 @@ macro(nf_set_compile_options)
 
     # enable:
     # - FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=FALSE -DUSE_FPU=FALSE)
+    # - user TX file
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=FALSE -DUSE_FPU=FALSE -DTX_INCLUDE_USER_DEFINE_FILE )
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
         target_compile_definitions(${NFSCO_TARGET} PUBLIC -DDEBUG_EFM=1)
