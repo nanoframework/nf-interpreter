@@ -74,7 +74,7 @@ extern "C"
 {
 #endif
 
-extern unsigned int interrupt_save;
+    extern unsigned int interrupt_save;
 
 #ifdef __cplusplus
 }
