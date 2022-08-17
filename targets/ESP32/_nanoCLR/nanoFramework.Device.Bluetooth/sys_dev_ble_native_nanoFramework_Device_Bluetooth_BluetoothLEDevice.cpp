@@ -143,7 +143,12 @@ bool PostAndWaitCentralEvent(
     PostCentralEvent(op, conn_handle, status, serviceHandle, characteristicHandle);
 
     // Wait for 1 second for event to be handled in managed code otherwise fail request
-    uxBits = xEventGroupWaitBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED, pdTRUE, pdFALSE, (TickType_t)(2000 / portTICK_PERIOD_MS));
+    uxBits = xEventGroupWaitBits(
+        ble_event_waitgroup,
+        N_BLE_EVENT_HANDLED,
+        pdTRUE,
+        pdFALSE,
+        (TickType_t)(2000 / portTICK_PERIOD_MS));
     if (uxBits & N_BLE_EVENT_HANDLED)
     {
         // Handled
