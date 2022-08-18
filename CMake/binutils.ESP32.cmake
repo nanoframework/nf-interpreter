@@ -519,6 +519,11 @@ macro(nf_add_idf_as_library)
 
     message(STATUS "\n-- SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
 
+    # Save original contents to be restored later
+    file(READ
+    "${SDKCONFIG_DEFAULTS_FILE}"
+    SDKCONFIG_ORIGINAL_CONTENTS)
+
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
     set(IDF_COMPONENTS_TO_ADD
@@ -654,6 +659,15 @@ macro(nf_add_idf_as_library)
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
     )
+
+    #Restore original sdkconfig back to defaults
+    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+    file(WRITE 
+        ${SDKCONFIG_DEFAULTS_FILE} 
+        ${SDKCONFIG_ORIGINAL_CONTENTS})
+
+    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 
     if(USE_NETWORKING_OPTION)
 
