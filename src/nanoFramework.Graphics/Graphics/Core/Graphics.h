@@ -485,8 +485,8 @@ struct CLR_GFX_Bitmap
     static HRESULT DeleteInstance(CLR_RT_HeapBlock &ref);
 
     static CLR_UINT32 CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
     void Bitmap_Initialize();
     void Clear();
@@ -890,7 +890,7 @@ struct BmpDecoder
     BmpEncodingType encodingType;
     HRESULT BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize);
     HRESULT BmpStartOutput(CLR_GFX_Bitmap *bitmap);
-    static CLR_UINT32 BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
   private:
     CLR_RT_ByteArrayReader source;

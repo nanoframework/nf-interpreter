@@ -38,11 +38,11 @@ endif()
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
-# check if RTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
-set(NO_RTOS_SOURCE_FOLDER TRUE)
-if(RTOS_SOURCE_FOLDER)
-    if(NOT "${RTOS_SOURCE_FOLDER}" STREQUAL "")
-        set(NO_RTOS_SOURCE_FOLDER FALSE)
+# check if AZURERTOS_SOURCE_FOLDER was specified or if it's empty (default is empty)
+set(NO_AZURERTOS_SOURCE_FOLDER TRUE)
+if(AZURERTOS_SOURCE_FOLDER)
+    if(NOT "${AZURERTOS_SOURCE_FOLDER}" STREQUAL "")
+        set(NO_AZURERTOS_SOURCE_FOLDER FALSE)
     endif()
 endif()
 
@@ -60,10 +60,10 @@ endif()
 # check if build was requested with a specifc AzureRTOS version
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(RTOS_VERSION "v6.1.11_rel")
+    set(RTOS_VERSION "v6.1.12_rel")
 endif()
 
-if(NO_RTOS_SOURCE_FOLDER)
+if(NO_AZURERTOS_SOURCE_FOLDER)
     # no AzureRTOS source specified, download it from it's repo
 
     message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} from GitHub repo")
@@ -78,16 +78,16 @@ else()
     # AzureRTOS source was specified
 
     # sanity check is source path exists
-    if(EXISTS "${RTOS_SOURCE_FOLDER}/")
-        message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} (source from: ${RTOS_SOURCE_FOLDER})")
+    if(EXISTS "${AZURERTOS_SOURCE_FOLDER}/")
+        message(STATUS "RTOS is: AzureRTOS ${RTOS_VERSION} (source from: ${AZURERTOS_SOURCE_FOLDER})")
 
         FetchContent_Declare(
             azure_rtos
-            SOURCE_DIR $(RTOS_SOURCE_FOLDER)
+            SOURCE_DIR $(AZURERTOS_SOURCE_FOLDER)
         )
 
     else()
-        message(FATAL_ERROR "Couldn't find AzureRTOS source at ${RTOS_SOURCE_FOLDER}/")
+        message(FATAL_ERROR "Couldn't find AzureRTOS source at ${AZURERTOS_SOURCE_FOLDER}/")
     endif()
 
 endif()
@@ -408,6 +408,9 @@ else()
     endif()
 
 endif()
+
+set(TARGET_BASE_LOCATION_BINARY ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_VENDOR}/${TARGET_BOARD})
+set(TX_USER_FILE ${TARGET_BASE_LOCATION}/target_tx_user.h CACHE STRING "Enable TX user configuration")
 
 ##############################
 # AzureRTOS common directories

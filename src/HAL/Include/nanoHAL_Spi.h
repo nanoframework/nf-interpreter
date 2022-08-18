@@ -20,7 +20,6 @@ struct nanoSPI_BusConfig
     int8_t devicesInUse;
     SPI_DEVICE_CONFIGURATION deviceConfig[MAX_SPI_DEVICES];
     uint32_t deviceHandles[MAX_SPI_DEVICES];
-    float byteTime[MAX_SPI_DEVICES];
     SPI_OP_STATUS spiStatus;
 };
 

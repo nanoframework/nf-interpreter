@@ -535,6 +535,179 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    pen.thickness = pArgs[4].NumericByRef().s4;
+    pen.color = pArgs[5].NumericByRef().u4;
+
+    // No fill
+    brush.opacity = PAL_GFX_Bitmap::c_OpacityTransparent;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+    int radiusX;
+    int radiusY;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    pen.thickness = pArgs[4].NumericByRef().s4;
+    pen.color = pArgs[7].NumericByRef().u4;
+
+    radiusX = pArgs[5].NumericByRef().s4;
+    radiusY = pArgs[6].NumericByRef().s4;
+
+    // No fill
+    brush.opacity = PAL_GFX_Bitmap::c_OpacityTransparent;
+
+    bitmap->DrawRoundedRectangle(pen, brush, rectangle, radiusX, radiusY);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[4].NumericByRef().u4;
+    brush.gradientEndColor = brush.gradientStartColor;
+    brush.opacity = pArgs[5].NumericByRef().u2;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+    int radiusX;
+    int radiusY;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    radiusX = pArgs[4].NumericByRef().s4;
+    radiusY = pArgs[5].NumericByRef().s4;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[6].NumericByRef().u4;
+    brush.gradientEndColor = brush.gradientStartColor;
+    brush.opacity = pArgs[7].NumericByRef().u2;
+
+    bitmap->DrawRoundedRectangle(pen, brush, rectangle, radiusX, radiusY);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
+    FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
+        CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *pArgs;
+    CLR_GFX_Bitmap *bitmap;
+    GFX_Pen pen;
+    GFX_Brush brush;
+    GFX_Rect rectangle;
+
+    NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
+
+    pArgs = &(stack.Arg1());
+
+    rectangle.left = pArgs[0].NumericByRef().s4;
+    rectangle.top = pArgs[1].NumericByRef().s4;
+    rectangle.right = rectangle.left + pArgs[2].NumericByRef().s4 - 1;
+    rectangle.bottom = rectangle.top + pArgs[3].NumericByRef().s4 - 1;
+
+    // No outline
+    pen.thickness = 0;
+
+    brush.gradientStartColor = pArgs[4].NumericByRef().u4;
+    brush.gradientStartX = pArgs[5].NumericByRef().s4;
+    brush.gradientStartY = pArgs[6].NumericByRef().s4;
+    brush.gradientEndColor = pArgs[7].NumericByRef().u4;
+    brush.gradientEndX = pArgs[8].NumericByRef().s4;
+    brush.gradientEndY = pArgs[9].NumericByRef().s4;
+    brush.opacity = pArgs[10].NumericByRef().u2;
+
+    bitmap->DrawRectangle(pen, brush, rectangle);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2(
         CLR_RT_StackFrame &stack)
 {

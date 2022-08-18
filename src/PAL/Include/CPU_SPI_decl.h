@@ -77,6 +77,9 @@ struct SPI_DEVICE_CONFIGURATION
     bool MD16bits;
     // Data order for 16 bit operation
     DataBitOrder DataOrder16;
+    // Rough estimate on the time it takes to send/receive one byte (in milliseconds)
+    // Used to compute length of time for each IO to see if this is a long running operation
+    float ByteTime;
 
     // Master Only
     uint32_t Clock_RateHz;   // Master - SPI bus clock frequency, in hertz (Hz).

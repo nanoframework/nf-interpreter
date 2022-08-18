@@ -18,7 +18,6 @@ set(THREADX_TOOLCHAIN "gnu")
 set(MCPU_FLAGS "-mthumb -mcpu=cortex-m0")
 set(VFP_FLAGS "")
 set(SPEC_FLAGS "--specs=nosys.specs")
-set(TX_USER_FILE ${TARGET_BASE_LOCATION}/tx_user.h)
 add_subdirectory(${azure_rtos_SOURCE_DIR} AzureSource)
 
 # add packages
