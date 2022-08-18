@@ -250,7 +250,7 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                                  ->GetFirstElement();
                     memcpy(buffer, fields.mfg_data, fields.mfg_data_len);
 
-                    BLE_DEBUG_PRINTF("Manufacturer data %X len %d\n",fields.mfg_data, fields.mfg_data_len);
+                    BLE_DEBUG_PRINTF("Manufacturer data %X len %d\n", fields.mfg_data, fields.mfg_data_len);
 
                     result = true;
 
