@@ -1,14 +1,7 @@
-//-----------------------------------------------------------------------------
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) Microsoft Corporation.  All rights reserved.
+// See LICENSE file in the project root for full license information.
 //
-//                   ** WARNING! **
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
-//
-//-----------------------------------------------------------------------------
 
 #include "sys_dev_ble_native.h"
 

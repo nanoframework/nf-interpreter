@@ -110,7 +110,7 @@ u64_t BleAddressToUlong(u8_t *address)
     return bleAdr;
 }
 
-void ulongToBleAddress(u64_t address, ble_addr_t &bleAddr)
+void UlongToBleAddress(u64_t address, ble_addr_t &bleAddr)
 {
     bleAddr.type = BLE_ADDR_PUBLIC;
 

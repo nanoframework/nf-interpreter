@@ -62,7 +62,7 @@ struct ble_context
     ble_uuid_any_t *descriptorUuids;
 };
 
-struct ble_services_context
+struct bleServicesContext
 {
     // The service definition is discoverable
     bool isDiscoverable;
@@ -81,12 +81,12 @@ struct ble_services_context
     ble_context *bleSrvContexts;
 };
 
-void start_ble_task(char *deviceName);
-bool device_ble_init();
-void device_ble_dispose();
-int esp32_gap_event(struct ble_gap_event *event, void *arg);
+void StartBleTask(char *deviceName);
+bool DeviceBleInit();
+void Device_ble_dispose();
+int Esp32GapEvent(struct ble_gap_event *event, void *arg);
 
-extern ble_services_context bleContext;
+extern bleServicesContext bleContext;
 extern device_ble_event_data ble_event_data;
 extern EventGroupHandle_t ble_event_waitgroup;
 extern char *bleDeviceName;

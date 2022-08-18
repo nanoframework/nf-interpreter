@@ -15,7 +15,7 @@ bool bleScanActive = false;
 //
 // Initiates the GAP general discovery procedure.
 //
-void bleCentralStartScan()
+void BleCentralStartScan()
 {
     uint8_t own_addr_type;
     struct ble_gap_disc_params disc_params;
@@ -41,7 +41,7 @@ void bleCentralStartScan()
     disc_params.filter_policy = 0;
     disc_params.limited = 0;
 
-    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, esp32_gap_event, NULL);
+    rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, Esp32GapEvent, NULL);
 
     BLE_DEBUG_PRINTF("ble_gap_disc; reason=%d  active %d\n", rc, ble_gap_disc_active());
 
@@ -51,7 +51,7 @@ void bleCentralStartScan()
     }
 }
 
-static void bleCentralCancelScan()
+static void BleCentralCancelScan()
 {
     if (ble_gap_disc_active() == 1)
     {
@@ -70,11 +70,11 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdv
         BLE_DEBUG_PRINTF("Start Advertisement Watcher - Mode %d\n", bleScanActive);
 
         // Initialise BLE stack
-        device_ble_init();
-        start_ble_task(bleDeviceName);
+        DeviceBleInit();
+        StartBleTask(bleDeviceName);
 
-        // Note:  bleCentralStartScan will be called when stack is ready (sync event called)
-        // see esp32_ble_on_sync()
+        // Note:  BleCentralStartScan will be called when stack is ready (sync event called)
+        // see Esp32BleOnSync()
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -86,9 +86,9 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdv
     {
         BLE_DEBUG_PRINTF("Stop Advertisement Watcher\n");
 
-        bleCentralCancelScan();
+        BleCentralCancelScan();
 
-        device_ble_dispose();
+        Device_ble_dispose();
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }

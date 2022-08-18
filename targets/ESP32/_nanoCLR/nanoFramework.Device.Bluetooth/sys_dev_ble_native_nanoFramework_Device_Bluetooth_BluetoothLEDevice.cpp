@@ -154,13 +154,13 @@ bool PostAndWaitCentralEvent(
     return false;
 }
 
-int central_gap_event(struct ble_gap_event *event, void *arg)
+int CentralGapEvent(struct ble_gap_event *event, void *arg)
 {
 
     central_context *con = (central_context *)arg;
     uint16_t conn_handle;
 
-    BLE_DEBUG_PRINTF("Central_gap_event type %d \n", event->type);
+    BLE_DEBUG_PRINTF("CentralGapEvent type %d \n", event->type);
 
     switch (event->type)
     {
@@ -292,8 +292,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         if (!ble_hs_is_enabled())
         {
             // Initialise BLE stack
-            device_ble_init();
-            start_ble_task(bleDeviceName);
+            DeviceBleInit();
+            StartBleTask(bleDeviceName);
 
             // Wait to be ready
             while (ble_hs_is_enabled() == 0)
@@ -334,7 +334,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         ble_addr_t peerAddr;
         peerAddr.type = 0;
 
-        ulongToBleAddress(bleAddress, peerAddr);
+        UlongToBleAddress(bleAddress, peerAddr);
 
         // We use a temporary connection handle for making the connection
         // if connection successful we update connection handle, unsuccessful we remove context.
@@ -344,7 +344,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         // Fill in details for Gap event to use.
         con->connectionHandle = eventRouting;
 
-        rc = ble_gap_connect(own_addr_type, &peerAddr, connectTimeout, NULL, central_gap_event, con);
+        rc = ble_gap_connect(own_addr_type, &peerAddr, connectTimeout, NULL, CentralGapEvent, con);
         BLE_DEBUG_PRINTF("ble_gap_connect exit %X\n", rc);
 
         if (rc == BLE_HS_EDONE)
@@ -412,7 +412,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         if (ConnectionCount() == 0)
         {
             BLE_DEBUG_PRINTF("NativeDispose last connection:%x\n", conn_Handle);
-            device_ble_dispose();
+            Device_ble_dispose();
         }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -794,7 +794,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
 }
 
 // Callback for writes with response
-static int writeCharWithResponseCallback(
+static int WriteCharWithResponseCallback(
     uint16_t conn_handle,
     const struct ble_gatt_error *error,
     struct ble_gatt_attr *attr,
@@ -864,7 +864,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
                     val_handle,
                     bufferPtr,
                     bufferLen,
-                    writeCharWithResponseCallback,
+                    WriteCharWithResponseCallback,
                     (void *)con);
             }
             else
@@ -886,14 +886,13 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
 
 // ======== Descriptors ================
 
-static int descriptorDiscoveryCallback(
+static int DescriptorDiscoveryCallback(
     uint16_t conn_handle,
     const struct ble_gatt_error *error,
     uint16_t chr_val_handle,
     const struct ble_gatt_dsc *dsc,
     void *arg)
 {
-
     central_context *con;
 
     con = (central_context *)arg;
@@ -952,7 +951,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         FAULT_ON_NULL(con);
 
         int rc =
-            ble_gattc_disc_all_dscs(conn_handle, start_handle, end_handle, descriptorDiscoveryCallback, (void *)con);
+            ble_gattc_disc_all_dscs(conn_handle, start_handle, end_handle, DescriptorDiscoveryCallback, (void *)con);
 
         BLE_DEBUG_PRINTF(
             "NativeStartDiscoveryDescriptors con:%d start:%d end:%d rc:%d\n",

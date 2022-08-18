@@ -12,8 +12,8 @@
 static const char *tag = "BLE";
 static uint8_t esp32_addr_type;
 
-void esp32_ble_start_advertise(ble_services_context *context);
-void bleCentralStartScan();
+void Esp32BleStartAdvertise(bleServicesContext *context);
+void BleCentralStartScan();
 
 uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
@@ -25,7 +25,7 @@ extern BluetoothNanoDevice_Mode ble_operatingMode;
 //
 // Look up Attr_handle in characteristicsDefs table to find our characteristicsId
 // return 0xffff if not found otherwise characteristicsId
-uint16_t FindIdFromHandle(ble_services_context *context, uint16_t attr_handle)
+uint16_t FindIdFromHandle(bleServicesContext *context, uint16_t attr_handle)
 {
     bool found = false;
     uint16_t id = 0xffff;
@@ -57,7 +57,7 @@ uint16_t FindIdFromHandle(ble_services_context *context, uint16_t attr_handle)
     return id;
 }
 
-uint16_t FindHandleIdFromId(ble_services_context &context, uint16_t characteristicId)
+uint16_t FindHandleIdFromId(bleServicesContext &context, uint16_t characteristicId)
 {
     bool found = false;
     uint16_t handle = 0xffff;
@@ -119,9 +119,9 @@ bool PostAndWaitManagedGapEvent(uint8_t op, uint16_t data1, uint32_t data2)
     return false;
 }
 
-int esp32_gap_event(struct ble_gap_event *event, void *arg)
+int Esp32GapEvent(struct ble_gap_event *event, void *arg)
 {
-    ble_services_context *con = (ble_services_context *)arg;
+    bleServicesContext *con = (bleServicesContext *)arg;
 
     switch (event->type)
     {
@@ -181,7 +181,7 @@ int esp32_gap_event(struct ble_gap_event *event, void *arg)
             ESP_LOGI(tag, "BLE_GAP_EVENT_DISCONNECT; reason=%d\n", event->disconnect.reason);
 
             // Connection terminated; resume advertising
-            esp32_ble_start_advertise(con);
+            Esp32BleStartAdvertise(con);
             break;
 
         case BLE_GAP_EVENT_ADV_COMPLETE:
@@ -273,7 +273,7 @@ int esp32_gap_event(struct ble_gap_event *event, void *arg)
 //     o General discoverable mode
 //     o Undirected connectable mode
 //
-void esp32_ble_start_advertise(ble_services_context *context)
+void Esp32BleStartAdvertise(bleServicesContext *context)
 {
     struct ble_gap_adv_params adv_params;
     struct ble_hs_adv_fields fields;
@@ -374,7 +374,7 @@ void esp32_ble_start_advertise(ble_services_context *context)
     {
         adv_params.conn_mode |= BLE_GAP_DISC_MODE_GEN;
     }
-    rc = ble_gap_adv_start(esp32_addr_type, NULL, BLE_HS_FOREVER, &adv_params, esp32_gap_event, (void *)&bleContext);
+    rc = ble_gap_adv_start(esp32_addr_type, NULL, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
     if (rc != 0)
     {
         BLE_DEBUG_PRINTF("error enabling advertisement; rc=%d\n", rc);
@@ -382,11 +382,11 @@ void esp32_ble_start_advertise(ble_services_context *context)
     }
 }
 
-static void esp32_ble_on_sync(void)
+static void Esp32BleOnSync(void)
 {
     int rc;
 
-    BLE_DEBUG_PRINTF("esp32_ble_on_sync\n");
+    BLE_DEBUG_PRINTF("Esp32BleOnSync\n");
 
     rc = ble_hs_id_infer_auto(0, &esp32_addr_type);
     if (rc != 0)
@@ -417,12 +417,12 @@ static void esp32_ble_on_sync(void)
     {
         case BluetoothNanoDevice_Mode_Server:
             // Begin advertising
-            esp32_ble_start_advertise(&bleContext);
+            Esp32BleStartAdvertise(&bleContext);
             BLE_DEBUG_PRINTF("Server advertise started\n");
             break;
 
         case BluetoothNanoDevice_Mode_Scanning:
-            bleCentralStartScan();
+            BleCentralStartScan();
             BLE_DEBUG_PRINTF("Advertisement Watcher started\n");
             break;
 
@@ -436,7 +436,7 @@ static void esp32_ble_on_sync(void)
     xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_STARTED);
 }
 
-static void esp32_ble_on_reset(int reason)
+static void Esp32BleOnReset(int reason)
 {
     ESP_LOGI(tag, "BLE on reset %d\n", reason);
 }
@@ -452,9 +452,9 @@ void esp32_ble_host_task(void *param)
     nimble_port_freertos_deinit();
 }
 
-void device_ble_dispose()
+void Device_ble_dispose()
 {
-    BLE_DEBUG_PRINTF("device_ble_dispose\n");
+    BLE_DEBUG_PRINTF("Device_ble_dispose\n");
 
     int rc = nimble_port_stop();
     if (rc == 0 || rc == 2)
@@ -478,21 +478,21 @@ void device_ble_dispose()
 
     ble_initialized = false;
 
-    BLE_DEBUG_PRINTF("device_ble_dispose exit %d\n", ble_initialized);
+    BLE_DEBUG_PRINTF("Device_ble_dispose exit %d\n", ble_initialized);
 }
 
-bool device_ble_init()
+bool DeviceBleInit()
 {
     esp_err_t err;
 
-    BLE_DEBUG_PRINTF("device_ble_init %d\n", ble_initialized);
+    BLE_DEBUG_PRINTF("DeviceBleInit %d\n", ble_initialized);
 
     // If already initialized then dispose first
     // This can happen when you start debugger
     if (ble_initialized)
     {
         BLE_DEBUG_PRINTF("ble_initialized true\n");
-        device_ble_dispose();
+        Device_ble_dispose();
     }
 
     //    ESP_ERROR_CHECK(esp_nimble_hci_and_controller_init());
@@ -509,19 +509,19 @@ bool device_ble_init()
     nimble_port_init();
 
     // Initialize the NimBLE host configuration
-    ble_hs_cfg.sync_cb = esp32_ble_on_sync;
-    ble_hs_cfg.reset_cb = esp32_ble_on_reset;
+    ble_hs_cfg.sync_cb = Esp32BleOnSync;
+    ble_hs_cfg.reset_cb = Esp32BleOnReset;
 
     ble_initialized = true;
 
     return true;
 }
 
-void start_ble_task(char *deviceName)
+void StartBleTask(char *deviceName)
 {
     int rc;
 
-    BLE_DEBUG_PRINTF("start_ble_task\n");
+    BLE_DEBUG_PRINTF("StartBleTask\n");
 
     // Set the default device name
     rc = ble_svc_gap_device_name_set(deviceName);
@@ -531,12 +531,12 @@ void start_ble_task(char *deviceName)
     nimble_port_freertos_init(esp32_ble_host_task);
 }
 
-int device_ble_start(ble_services_context &con)
+int DeviceBleStart(bleServicesContext &con)
 {
     int rc;
     ble_gatt_svc_def *gatt_svr_svcs = con.gatt_service_def;
 
-    BLE_DEBUG_PRINTF("device_ble_start\n");
+    BLE_DEBUG_PRINTF("DeviceBleStart\n");
 
     ble_svc_gap_init();
     ble_svc_gatt_init();
@@ -556,7 +556,7 @@ int device_ble_start(ble_services_context &con)
     }
 
     // Set device name & start BLE task
-    start_ble_task(con.pDeviceName);
+    StartBleTask(con.pDeviceName);
 
     return 0;
 }
@@ -566,7 +566,7 @@ int device_ble_start(ble_services_context &con)
 //  These are posted to Managed code and if not handled within 500ms an error is reported to Nimble back to client
 //  This could be due to no event handler set up in managed code or just taking too long.
 //
-int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+int DeviceBleCallback(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
     if (LockEventMutex())
     {
@@ -581,7 +581,7 @@ int device_ble_callback(uint16_t conn_handle, uint16_t attr_handle, struct ble_g
         BluetoothEventType op;
 
         BLE_DEBUG_PRINTF(
-            "device_ble_callback attr %d op %d id %X\n",
+            "DeviceBleCallback attr %d op %d id %X\n",
             attr_handle,
             ctxt->op,
             ble_event_data.characteristicId);

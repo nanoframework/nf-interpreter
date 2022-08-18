@@ -6,16 +6,16 @@
 
 #include "sys_dev_ble_native.h"
 
-extern bool device_ble_init();
-extern void device_ble_dispose();
-extern int device_ble_start(ble_services_context &context);
-extern int device_ble_callback(
+extern bool DeviceBleInit();
+extern void Device_ble_dispose();
+extern int DeviceBleStart(bleServicesContext &context);
+extern int DeviceBleCallback(
     uint16_t conn_handle,
     uint16_t attr_handle,
     struct ble_gatt_access_ctxt *ctxt,
     void *arg);
 
-extern void esp32_ble_start_advertise(ble_services_context *context);
+extern void Esp32BleStartAdvertise(bleServicesContext *context);
 
 extern const struct ble_gatt_chr_def gatt_char_device_info[];
 
@@ -30,14 +30,14 @@ typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptor
     GattLocalDescriptor;
 
-ble_services_context bleContext;
+bleServicesContext bleContext;
 
-static void InitContext(ble_services_context *context)
+static void InitContext(bleServicesContext *context)
 {
-    memset(context, 0, sizeof(ble_services_context));
+    memset(context, 0, sizeof(bleServicesContext));
 }
 
-static void FreeContext(ble_services_context &srvContext)
+static void FreeContext(bleServicesContext &srvContext)
 {
     if (srvContext.pDeviceName)
     {
@@ -113,6 +113,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+/*
 ble_uuid_t *Ble_uuid16_declare(uint16_t id16)
 {
     ble_uuid16_t *pU16 = (ble_uuid16_t *)platform_malloc(sizeof(ble_uuid16_t));
@@ -120,6 +121,7 @@ ble_uuid_t *Ble_uuid16_declare(uint16_t id16)
     pU16->value = id16;
     return (ble_uuid_t *)pU16;
 }
+*/
 
 // Assumes UUID is 16 bytes length
 void BuildUUID(uint8_t *pUuid, ble_uuid_any_t *pUany)
@@ -169,7 +171,7 @@ ble_uuid_any_t *BuildUuidAlloc(uint8_t *pUuid)
     return pUany;
 }
 
-bool BuildGattServices(ble_services_context &context)
+bool BuildGattServices(bleServicesContext &context)
 {
     int srvCount = context.serviceCount;
     ble_context *def = context.bleSrvContexts;
@@ -258,7 +260,7 @@ void AssignDescriptor(ble_gatt_dsc_def *pDsc, CLR_RT_HeapBlock *pPfItem, ble_uui
             break;
     }
 
-    pDsc->access_cb = device_ble_callback;
+    pDsc->access_cb = DeviceBleCallback;
 
     pDsc->arg = (void *)(int32_t)pPfItem[GattLocalDescriptor::FIELD___descriptorId].NumericByRef().u2;
 
@@ -529,7 +531,7 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
             context.characteristicsDefs[charIndex].flags = flags;
 
             // Set callback used for all characteristics
-            context.characteristicsDefs[charIndex].access_cb = device_ble_callback;
+            context.characteristicsDefs[charIndex].access_cb = DeviceBleCallback;
 
             context.characteristicsDefs[charIndex].min_key_size = 0; // TODO
 
@@ -708,13 +710,13 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 #ifdef NANO_BLE_DEBUG
         // PrintSvrDefs(bleContext.gatt_service_def);
 #endif
-        result = device_ble_init();
+        result = DeviceBleInit();
         if (!result)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
         }
 
-        result = (device_ble_start(bleContext) == 0);
+        result = (DeviceBleStart(bleContext) == 0);
 
         // Wait for stack to start
         // Otherwise you will have problems if Stop is called straight away before stack has started
@@ -730,7 +732,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 
     if (!result)
     {
-        device_ble_dispose();
+        Device_ble_dispose();
         FreeContext(bleContext);
     }
 
@@ -748,7 +750,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 
         ble_gap_adv_stop();
 
-        device_ble_dispose();
+        Device_ble_dispose();
 
         FreeContext(bleContext);
     }

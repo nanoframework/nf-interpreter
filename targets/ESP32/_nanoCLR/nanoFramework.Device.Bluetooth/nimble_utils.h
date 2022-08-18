@@ -27,7 +27,7 @@ void NimbleUUIDToGuid(ble_uuid_any_t *bAny, uint8_t *guid);
 void GuidToNimbleUUID(uint8_t *guid, ble_uuid_any_t *bAny);
 
 u64_t BleAddressToUlong(u8_t *address);
-void ulongToBleAddress(u64_t address, ble_addr_t &bleAddr);
+void UlongToBleAddress(u64_t address, ble_addr_t &bleAddr);
 
 void PrintAddress(ble_addr_t &bleAddr);
 void PrintBytes(uint8_t *pc, int len);
