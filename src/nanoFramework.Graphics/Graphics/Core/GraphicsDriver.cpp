@@ -70,11 +70,10 @@ DisplayOrientation GraphicsDriver::GetOrientation()
     return g_DisplayDriver.Attributes.Orientation;
 }
 
-void GraphicsDriver::ChangeOrientation(DisplayOrientation newOrientation)
+bool GraphicsDriver::ChangeOrientation(DisplayOrientation newOrientation)
 {
     // Not implemented ( Maybe in the future?)
-    UNUSED(newOrientation);
-    return;
+    return g_DisplayDriver.ChangeOrientation(newOrientation);
 }
 
 CLR_UINT32 GraphicsDriver::GetPixel(const PAL_GFX_Bitmap &bitmap, int x, int y)
