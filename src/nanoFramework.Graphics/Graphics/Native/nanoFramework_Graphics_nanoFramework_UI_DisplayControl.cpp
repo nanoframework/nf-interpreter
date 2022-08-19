@@ -64,7 +64,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 {
     NANOCLR_HEADER();
     CLR_INT32 orientation = stack.Arg0().NumericByRef().s4;
-    g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation);
+    stack.SetResult_Boolean(g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation));
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 

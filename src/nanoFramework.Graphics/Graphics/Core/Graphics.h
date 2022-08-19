@@ -620,7 +620,7 @@ struct GraphicsDriver
     static int GetHeight();
     static int GetBitsPerPixel();
     static DisplayOrientation GetOrientation();
-    static void ChangeOrientation(DisplayOrientation newOrientation);
+    static bool ChangeOrientation(DisplayOrientation newOrientation);
 
     static void Clear(const PAL_GFX_Bitmap &bitmap);
 
