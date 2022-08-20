@@ -335,7 +335,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         }
 
         ble_addr_t peerAddr;
-    
+
         UlongToBleAddress(bleAddress, (uint8_t)bleAddressType, peerAddr);
 
         // We use a temporary connection handle for making the connection
