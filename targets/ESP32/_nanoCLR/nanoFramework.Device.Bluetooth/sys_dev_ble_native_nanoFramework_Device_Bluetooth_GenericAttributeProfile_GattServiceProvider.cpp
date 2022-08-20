@@ -9,11 +9,7 @@
 extern bool DeviceBleInit();
 extern void Device_ble_dispose();
 extern int DeviceBleStart(bleServicesContext &context);
-extern int DeviceBleCallback(
-    uint16_t conn_handle,
-    uint16_t attr_handle,
-    struct ble_gatt_access_ctxt *ctxt,
-    void *arg);
+extern int DeviceBleCallback(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 
 extern void Esp32BleStartAdvertise(bleServicesContext *context);
 
