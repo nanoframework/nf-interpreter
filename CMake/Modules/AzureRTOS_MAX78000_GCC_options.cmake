@@ -27,8 +27,11 @@ macro(nf_set_compile_options)
     # can't include -Wundef because of MAXIM SDK
     target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO__EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m4 -mfloat-abi=soft -mfpu=fpv4-sp-d16 -mfloat-abi=soft -Wa,-mimplicit-it=thumb -Wall -Wextra -Werror -Wshadow -Wimplicit-fallthrough -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fcheck-new )
 
-    # this series has FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DTARGET=MAX78000 -DTARGET_REV=0x4131 -DFTHR_RevA ) 
+    # enable:
+    # - FPU 
+    # - user TX file
+    # - MAXIM target and revision
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DTARGET=MAX78000 -DTARGET_REV=0x4131 -DFTHR_RevA -DTX_INCLUDE_USER_DEFINE_FILE) 
 
 endmacro()
 
