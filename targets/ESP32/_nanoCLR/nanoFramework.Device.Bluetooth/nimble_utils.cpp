@@ -26,8 +26,8 @@ void NimbleUUID32ToGuid(ble_uuid32_t *b32, uint8_t *guid)
 
 void NimbleUUID128ToGuid(ble_uuid128_t *b128, uint8_t *guid)
 {
-    int map[16]{15, 14, 13, 12, 11, 10, 9, 8, 6, 7, 4, 5, 0, 1, 2, 3};
-
+    int map[16]{12, 13, 14, 15, 10, 11, 8, 9, 7, 6, 5, 4, 3, 2, 1, 0};
+    
     // Map bytes to correct LSB order
     uint8_t *pSource = b128->value;
     for (int x = 0; x < 16; x++)
@@ -110,9 +110,9 @@ u64_t BleAddressToUlong(u8_t *address)
     return bleAdr;
 }
 
-void UlongToBleAddress(u64_t address, ble_addr_t &bleAddr)
+void UlongToBleAddress(u64_t address, uint8_t adrType, ble_addr_t &bleAddr)
 {
-    bleAddr.type = BLE_ADDR_PUBLIC;
+    bleAddr.type = adrType;
 
     bleAddr.val[0] = address & 0xff;
     bleAddr.val[1] = (address >> 8) & 0xff;

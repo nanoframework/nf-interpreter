@@ -317,9 +317,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         // Get Params
         u64_t bleAddress = stack.Arg1().NumericByRef().u8;
 
-#if defined(NANO_BLE_DEBUG)
         BluetoothAddressType bleAddressType = (BluetoothAddressType)stack.Arg2().NumericByRef().u2;
-#endif
 
         // We use the eventrouting for routing the event to correct BluetoothLEDevice object during Connection
         // Once connected we use the connection handle.
@@ -337,9 +335,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         }
 
         ble_addr_t peerAddr;
-        peerAddr.type = 0;
-
-        UlongToBleAddress(bleAddress, peerAddr);
+    
+        UlongToBleAddress(bleAddress, (uint8_t)bleAddressType, peerAddr);
 
         // We use a temporary connection handle for making the connection
         // if connection successful we update connection handle, unsuccessful we remove context.

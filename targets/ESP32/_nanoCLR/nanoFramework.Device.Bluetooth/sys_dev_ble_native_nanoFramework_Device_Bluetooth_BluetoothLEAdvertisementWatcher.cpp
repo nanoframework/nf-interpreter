@@ -131,7 +131,9 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
                     BLE_DEBUG_PRINTF("\n");
 
                     pThis[FIELD___bluetoothAddress].NumericByRef().u8 = BleAddressToUlong(gEvent->disc.addr.val);
-                    pThis[FIELD___advertisementType].NumericByRef().s4 = 4; // TODO
+                    pThis[FIELD___bluetoothAddressType].NumericByRef().u1 = gEvent->disc.addr.type;
+
+                    pThis[FIELD___advertisementType].NumericByRef().s4 = (int)gEvent->disc.event_type;
                     pThis[FIELD___rawSignalStrengthInDBm].NumericByRef().s2 = (int16_t)gEvent->disc.rssi;
 
                     // Get reference to BluetoothLEAdvertisement object
