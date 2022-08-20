@@ -27,7 +27,7 @@ void NimbleUUID32ToGuid(ble_uuid32_t *b32, uint8_t *guid)
 void NimbleUUID128ToGuid(ble_uuid128_t *b128, uint8_t *guid)
 {
     int map[16]{12, 13, 14, 15, 10, 11, 8, 9, 7, 6, 5, 4, 3, 2, 1, 0};
-    
+
     // Map bytes to correct LSB order
     uint8_t *pSource = b128->value;
     for (int x = 0; x < 16; x++)
