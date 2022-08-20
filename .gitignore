@@ -25,6 +25,7 @@ InteropAssemblies/*
 .vscode/c_cpp_properties.json
 .vscode/cmake-kits.json
 .vscode/ipch
+.vscode/*.log
 
 # ignore CMake modules for Interop assemblies
 CMake/Modules/FindINTEROP*.cmake
