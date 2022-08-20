@@ -213,11 +213,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         backgroundColor = stack.Arg7().NumericByRef().u4;
 
         // Prepare all the elements for the colors
-        // GFX_Pen pen;
         GFX_Brush brush;
         GFX_Rect rectangle;
-        // pen.color = backgroundColor;
-        // pen.thickness = 0;
         brush.gradientStartColor = backgroundColor;
         brush.gradientEndColor = backgroundColor;
         rectangle.left = 0;
