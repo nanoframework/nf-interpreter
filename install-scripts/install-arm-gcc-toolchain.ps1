@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-# This PS installs the ARM GNU GCC toolchain from our Cloudsmith repository if it's not already available
+# This PS installs the ARM GNU GCC toolchain if it's not already available
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param (
@@ -51,7 +51,8 @@ $gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$Version/binrel/arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip
+    $host-target = "arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip"
+    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$Version/binrel/$host-target
     $output = "$zipRoot\gcc-arm.zip"
 
     # Don't download again if already exists
@@ -75,8 +76,9 @@ If ($gnuGccPathExists -eq $False -or $force) {
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # unzip toolchain
-        Expand-Archive -Force -LiteralPath $output -DestinationPath $Path > $null
-
+        Expand-Archive -Force -Path $output -DestinationPath $env:Agent_TempDirectory > $null
+        # move subfolder to expected location and delete old dir
+        Move-Item $env:Agent_TempDirectory\gcc-arm\$host-target $Path\gcc-arm\
         "OK" | Write-Host -ForegroundColor Green
     }
 }
