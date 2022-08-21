@@ -73,7 +73,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
     # unzip to install path, if not on Azure
     if ($IsAzurePipelines -eq $False) {
         # Install 7Zip4PowerShell module from PSGallery if not already installed
-        #Install-Module -Name 7Zip4Powershell -RequiredVersion 1.10.0 -Scope CurrentUser
+        # Install-Module -Name 7Zip4Powershell -RequiredVersion 1.10.0 -Scope CurrentUser
 
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
@@ -82,6 +82,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
         Expand-Archive -Force -Path $output -DestinationPath $env:Agent_TempDirectory > $null
         # move subfolder to expected location and delete old dir
         Move-Item $env:Agent_TempDirectory\gcc-arm\$host-target $Path
+        //TODO: rezip for cache?!
         "OK" | Write-Host -ForegroundColor Green
     }
 }
