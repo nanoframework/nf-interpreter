@@ -24,7 +24,7 @@ steps:
     displayName: Extracting ARM GCC toolchain
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.zip' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
 
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded\bin"
