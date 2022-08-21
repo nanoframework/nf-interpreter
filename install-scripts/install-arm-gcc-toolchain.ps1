@@ -52,7 +52,7 @@ $gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
     $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$Version/binrel/arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip
-    $output = "$zipRoot\gcc-arm.7z"
+    $output = "$zipRoot\gcc-arm.zip"
 
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
