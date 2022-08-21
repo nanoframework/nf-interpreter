@@ -75,7 +75,7 @@ If ($gnuGccPathExists -eq $False -or $force) {
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # unzip toolchain
-        Expand-Archive -LiteralPath $output -DestinationPath $Path > $null
+        Expand-Archive -Force -LiteralPath $output -DestinationPath $Path > $null
 
         "OK" | Write-Host -ForegroundColor Green
     }

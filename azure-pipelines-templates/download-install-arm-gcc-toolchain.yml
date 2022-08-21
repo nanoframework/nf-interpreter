@@ -17,7 +17,7 @@ steps:
     inputs:
         targetType: 'filePath'
         filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
-        arguments: '-Version "$(GccArm_Version)"'
+        arguments: '-Version "$(variables.GccArm_Version)"'
         failOnStderr: true
 
   - task: ExtractFiles@1
