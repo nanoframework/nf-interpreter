@@ -549,6 +549,11 @@ void CLR_GFX_Bitmap::DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, c
     GraphicsDriver::DrawRectangle(m_palBitmap, pen, brush, rectangle);
 }
 
+void CLR_GFX_Bitmap::FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle)
+{
+    GraphicsDriver::FillRectangle(m_palBitmap, brush, rectangle);
+}
+
 void CLR_GFX_Bitmap::DrawRoundedRectangle(
     const GFX_Pen &pen,
     const GFX_Brush &brush,
