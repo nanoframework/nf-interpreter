@@ -27,15 +27,23 @@ list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS "${NIMBLE_COMPONENT_PATH
 
 # source files
 set(nanoFramework.Device.Bluetooth_SRCS
-
+    
     sys_dev_ble_native.cpp
 
+    # Client
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic.cpp
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher.cpp
+ 
+    # Central
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice.cpp
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice.cpp
 
+    # Others
     esp32_nimble.cpp
+    nimble_utils.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Device.Bluetooth_SRCS})
