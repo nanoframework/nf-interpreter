@@ -497,6 +497,7 @@ struct CLR_GFX_Bitmap
 
     void DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1);
     void DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle);
+    void FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle);
     void DrawRoundedRectangle(
         const GFX_Pen &pen,
         const GFX_Brush &brush,
@@ -633,6 +634,7 @@ struct GraphicsDriver
         const GFX_Pen &pen,
         const GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangle(const PAL_GFX_Bitmap &bitmap, const GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangle(
         const PAL_GFX_Bitmap &bitmap,
         const GFX_Pen &pen,
