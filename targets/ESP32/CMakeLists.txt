@@ -23,7 +23,7 @@ if(ESP32_IDF_PATH)
 endif()
 
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.4.1" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4.2" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo

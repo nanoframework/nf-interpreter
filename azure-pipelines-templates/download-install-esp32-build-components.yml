@@ -7,8 +7,8 @@ steps:
   - task: Cache@2
     displayName: Cache ESP32 tools
     inputs:
-      key: 'esp32_tools | 4_4_1'
-      restoreKeys: 4_4_1
+      key: 'esp32_tools | 4_4_2'
+      restoreKeys: 4_4_2
       path: $(UserProfile)\.espressif\tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
@@ -28,6 +28,16 @@ steps:
       versionSpec: '3.7'
       addToPath: true
 
+  - task: PowerShell@2
+    displayName: Fix install.ps1
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      script: |
+        $filecontent = Get-Content('install.ps1')
+        attrib $file -r
+        $filecontent -replace '--features=' , ' ' | Out-File 'install.ps1' -Encoding utf8
+          
   # run IDF installers
   - task: PowerShell@2
     displayName: Install IDF (step 1)
