@@ -49,8 +49,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::SetupWriteLine(
 
             newLineLength = hal_strlen_s(newLine);
 
+            // update buffer length
+            *length += newLineLength;
+
             // allocate memory for buffer
-            *buffer = (char *)platform_malloc(textLength + newLineLength);
+            *buffer = (char *)platform_malloc(*length);
 
             // sanity check for successful allocation
             if (*buffer)
@@ -60,9 +63,6 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::SetupWriteLine(
 
                 // flag allocation
                 *isNewAllocation = true;
-
-                // update buffer length
-                *length += newLineLength;
 
                 // concatenate both strings
                 strcat(*buffer, text);
