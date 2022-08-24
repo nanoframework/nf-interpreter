@@ -16,9 +16,6 @@
 #pragma GCC diagnostic pop
 #endif
 
-
-
-
 #if GECKO_FEATURE_USBD_HID == TRUE
 #include "sl_usbd_class_hid.h"
 #endif
@@ -28,11 +25,6 @@
 #include "sl_usbd_class_cdc_acm.h"
 #endif
 
-
-
-
-
-
 //****************************************************************************
 // Global functions.
 
@@ -40,20 +32,14 @@
 void sli_usbd_init(void)
 {
 
-  sl_usbd_core_init();
+    sl_usbd_core_init();
 
+#if GECKO_FEATURE_USBD_HID == TRUE
+    sl_usbd_hid_init();
+#endif
 
-
-
-
-
-
-  sl_usbd_hid_init();
-
-
-
-
-
-
-
+#if HAL_WP_USE_USB_CDC == TRUE
+    sl_usbd_cdc_init();
+    sl_usbd_cdc_acm_init();
+#endif
 }

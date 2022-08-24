@@ -6,7 +6,8 @@
 #include <targetHAL.h>
 #include <WireProtocol_Message.h>
 
-__attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
+// defined as weak so it can be replaced with platform specific one
+__nfweak __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
 {
     (void)parameter;
 

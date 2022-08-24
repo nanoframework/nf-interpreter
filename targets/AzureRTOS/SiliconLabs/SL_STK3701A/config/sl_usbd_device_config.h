@@ -12,14 +12,12 @@
 // <h> USB Device Configuration
 
 // <o SL_USBD_DEVICE_VENDOR_ID> Device Vendor ID
-// <i> Default: 0xFFFE
-// <i> Device vendor ID.
-#define SL_USBD_DEVICE_VENDOR_ID                0xFFFE
+// <i> Device vendor ID: Silabs.
+#define SL_USBD_DEVICE_VENDOR_ID                0x10C4
 
 // <o SL_USBD_DEVICE_PRODUCT_ID> Device Product ID
-// <i> Default: 0x1234
-// <i> Device product ID.
-#define SL_USBD_DEVICE_PRODUCT_ID               0x1234
+// <i> Device product ID. PID assigned to .NET nanoFramework 
+#define SL_USBD_DEVICE_PRODUCT_ID               0x8DAD
 
 // <o SL_USBD_DEVICE_RELEASE_NUMBER> Device Release Number
 // <i> Default: 0x0100
@@ -34,7 +32,7 @@
 // <s SL_USBD_DEVICE_PRODUCT_STRING> Device Product Name
 // <i> Default: "Product"
 // <i> Device product string.
-#define SL_USBD_DEVICE_PRODUCT_STRING           "Product"
+#define SL_USBD_DEVICE_PRODUCT_STRING           "nanodevice"
 
 // <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
 // <i> Default: "1234567890ABCDEF"

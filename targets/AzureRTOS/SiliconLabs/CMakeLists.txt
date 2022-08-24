@@ -10,6 +10,23 @@ set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
 option(GECKO_FEATURE_USBD_HID "option to use Gecko SDK HID class")
 
+#################################################################
+# Options for Wire Protocol channel
+option(HAL_WP_USE_SERIAL "option to use serial port (UART) to route Wire Protocol")
+option(HAL_WP_USE_USB_CDC "option to use USB CDC to route Wire Protocol")
+
+if(HAL_WP_USE_SERIAL)
+    message(STATUS "Wire Protocol will use serial port (UART).")
+    set(HAL_WP_USE_SERIAL_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
+    set(HAL_WP_USE_USB_CDC_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+elseif(HAL_WP_USE_USB_CDC)
+    message(STATUS "Wire Protocol will use USB CDC.")
+    set(HAL_WP_USE_USB_CDC_OPTION TRUE CACHE INTERNAL "set HAL_WP_USE_USB_CDC")
+    set(HAL_WP_USE_SERIAL_OPTION FALSE CACHE INTERNAL "set HAL_WP_USE_SERIAL")
+else()
+    message(FATAL_ERROR "\n\nERROR: need to choose a channel for Wire Protocol. One of the build options HAL_WP_USE_SERIAL_OPTION or HAL_WP_USE_USB_CDC_OPTION have to be 'ON'.")
+endif()
+
 ProcessGSDKPackage()
 
 if(GECKO_FEATURE_USBD_HID)
