@@ -3,14 +3,14 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <LaunchCLR.h>
+#include <targetHAL.h>
+
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
 #include <bsp.h>
 #include <em_cmu.h>
-
-#include <LaunchCLR.h>
-#include <targetHAL.h>
 
 #include <tx_api.h>
 

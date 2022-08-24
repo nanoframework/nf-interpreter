@@ -3,15 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <targetHAL.h>
+#include <nanoCLR_Application.h>
+
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
 #include <bsp.h>
 #include <sl_event_handler.h>
 #include <sl_board_init.h>
-
-#include <targetHAL.h>
-#include <nanoCLR_Application.h>
 
 #include <tx_api.h>
 

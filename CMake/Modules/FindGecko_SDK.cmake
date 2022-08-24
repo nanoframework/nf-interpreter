@@ -197,6 +197,13 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         
     endforeach()
 
+    # unset this warning as error required for this source file
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core_ep.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+
     list(REMOVE_DUPLICATES Gecko_SDK_INCLUDE_DIRS)
 
 else()

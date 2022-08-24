@@ -12,6 +12,9 @@
 #include "sl_iostream_usart_vcom_config.h"
 #include <target_os.h>
 
+// need to define this here to avoid compiler warning (error)
+#define usartHwFlowControlNone 0
+
 ////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                               //
 // Override default setting from board if build option is set //

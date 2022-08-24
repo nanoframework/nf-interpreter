@@ -13,11 +13,31 @@
 
 #include <em_core.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
+
 #include <sl_usbd_core.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include <sl_usbd_core_config.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
 
 #include <sli_usbd_core.h>
 #include <sli_usbd_driver.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 
 TX_THREAD task_handle;
 uint32_t usbdCoreThreadStack[SL_USBD_TASK_STACK_SIZE / sizeof(uint32_t)];
