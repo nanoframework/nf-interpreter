@@ -77,7 +77,7 @@ RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/
 ENV GIT_SSL_NO_VERIFY=0
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.4.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
