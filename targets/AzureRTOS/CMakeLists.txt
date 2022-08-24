@@ -14,6 +14,7 @@ option(AZURERTOS_USBX_REQUIRED "option to include Azure RTOS USBX")
 option(AZURERTOS_FILEX_REQUIRED "option to include Azure RTOS FileX")
 option(AZURERTOS_NETXDUO_REQUIRED "option to include Azure RTOS NetX Duo")
 option(USBX_FEATURE_CDC "option to use USBX CDC class")
+option(USBX_FEATURE_HID "option to use USBX HID class")
 
 if(USBX_FEATURE_CDC)
 
@@ -28,6 +29,21 @@ if(USBX_FEATURE_CDC)
 
 else()
     set(USBX_FEATURE_CDC_OPTION FALSE CACHE INTERNAL "USBX_FEATURE_CDC_OPTION for USBX_FEATURE_CDC")
+endif()
+
+if(USBX_FEATURE_HID)
+
+    set(USBX_FEATURE_HID_OPTION TRUE CACHE INTERNAL "USBX_FEATURE_HID_OPTION for USBX_FEATURE_HID")
+    # requires:
+    # AZURERTOS_USBX_REQUIRED
+    set(AZURERTOS_USBX_REQUIRED ON CACHE INTERNAL "AZURERTOS_USBX_REQUIRED for USBX_FEATURE_HID")
+    # AZURERTOS_FILEX_REQUIRED
+    set(AZURERTOS_FILEX_REQUIRED ON CACHE INTERNAL "AZURERTOS_FILEX_REQUIRED for USBX_FEATURE_HID")
+    # AZURERTOS_NETXDUO_REQUIRED
+    set(AZURERTOS_NETXDUO_REQUIRED ON CACHE INTERNAL "AZURERTOS_NETXDUO_REQUIRED for USBX_FEATURE_HID")
+
+else()
+    set(USBX_FEATURE_HID_OPTION FALSE CACHE INTERNAL "USBX_FEATURE_HID_OPTION for USBX_FEATURE_HID")
 endif()
 
 if(USE_NETWORKING_OPTION)
@@ -129,7 +145,8 @@ if(AZURERTOS_USBX_REQUIRED)
 
         FetchContent_Declare(
             azure_rtos_usbx
-            SOURCE_DIR https://github.com/azure-rtos/usbx.git
+            GIT_REPOSITORY https://github.com/azure-rtos/usbx.git
+            GIT_TAG ${RTOS_VERSION}
         )
 
     else()
@@ -424,6 +441,7 @@ else()
 endif()
 
 set(TARGET_BASE_LOCATION_BINARY ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_VENDOR}/${TARGET_BOARD})
+set(TX_USER_FILE ${TARGET_BASE_LOCATION}/target_tx_user.h CACHE STRING "Enable TX user configuration")
 
 ##############################
 # AzureRTOS common directories

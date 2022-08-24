@@ -28,7 +28,9 @@ macro(nf_set_compile_options)
     target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m0plus -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # this series doesn't have FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DUSE_FPU=FALSE)
+    # enable:
+    # - user TX file
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DUSE_FPU=FALSE -DTX_INCLUDE_USER_DEFINE_FILE )
 
 endmacro()
 

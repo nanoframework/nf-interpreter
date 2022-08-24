@@ -157,7 +157,8 @@ macro(nf_add_platform_packages)
             # need to add ThreadX extension in order to use BSD
             if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m7/gnu/inc/tx_port.h)
-            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx")
+            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx"
+                    OR "${TARGET_SERIES}" STREQUAL "EFM32GG11")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m4/gnu/inc/tx_port.h)
             else()
                 message(FATAL_ERROR "Support for NetX Duo is not implemented for ${TARGET_SERIES}.")
@@ -255,7 +256,6 @@ macro(nf_add_platform_dependencies target)
                 ${AZRTOS_INCLUDES}
                 
             EXTRA_COMPILE_DEFINITIONS 
-                -DTX_INCLUDE_USER_DEFINE_FILE
                 -DNX_INCLUDE_USER_DEFINE_FILE            
         )
         
@@ -275,7 +275,6 @@ macro(nf_add_platform_dependencies target)
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
 
                 EXTRA_COMPILE_DEFINITIONS 
-                    -DTX_INCLUDE_USER_DEFINE_FILE
                     -DNX_INCLUDE_USER_DEFINE_FILE
                     -DUSE_HAL_DRIVER
                     -D${STM32_DRIVER_TARGET_DEVICE}
@@ -412,10 +411,18 @@ macro(nf_add_platform_sources target)
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
         )
 
-        if(AZURERTOS_NETXDUO_REQUIRED)         
+        if(USE_NETWORKING_OPTION)         
             target_link_libraries(${target}.elf
                 nano::NF_Network
                 azrtos::netxduo
+            )
+        endif()
+
+        if(USBX_FEATURE_HID_OPTION)
+            target_link_libraries(${target}.elf
+                azrtos::netxduo
+                azrtos::filex
+                azrtos::usbx
             )
         endif()
 
@@ -445,6 +452,7 @@ macro(nf_add_platform_sources target)
                 ${target}
             EXTRA_INCLUDES
                 ${AZRTOS_INCLUDES}
+                ${NF_CoreCLR_INCLUDE_DIRS}
         )
                         
         add_dependencies(${target}.elf nano::gecko_sdk_${target})

@@ -3,6 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <targetHAL.h>
+#include <nanoCLR_Application.h>
+
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
@@ -10,13 +13,18 @@
 #include <sl_event_handler.h>
 #include <sl_board_init.h>
 
-#include <targetHAL.h>
-#include <nanoCLR_Application.h>
-
 #include <tx_api.h>
 
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
+
+extern void usb_device_hid_app_init(void);
+extern void sli_usbd_configuration_config0_init(void);
+extern void sli_usbd_hid_mouse0_init(void);
+extern void sli_usbd_init(void);
+extern void sli_usbd_configuration_config0_init(void);
+extern void sli_usbd_cdc_acm_acm0_init(void);
+extern void usb_device_cdc_acm_app_init(void);
 
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
@@ -157,6 +165,24 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
+
+#if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE
+    // can't call USBD init twice
+    sli_usbd_init();
+#endif
+
+#if GECKO_FEATURE_USBD_HID == TRUE
+    sli_usbd_configuration_config0_init();
+    sli_usbd_hid_mouse0_init();
+
+    usb_device_hid_app_init();
+#endif
+
+#if HAL_WP_USE_USB_CDC == TRUE
+    sli_usbd_configuration_config0_init();
+    sli_usbd_cdc_acm_acm0_init();
+    usb_device_cdc_acm_app_init();
+#endif
 }
 
 //  Application entry point.

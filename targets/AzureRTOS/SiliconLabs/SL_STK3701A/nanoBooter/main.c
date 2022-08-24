@@ -3,19 +3,24 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <LaunchCLR.h>
+#include <targetHAL.h>
+
 #include <sl_system_init.h>
 #include <sl_system_kernel.h>
 #include <em_gpio.h>
 #include <bsp.h>
 #include <em_cmu.h>
 
-#include <LaunchCLR.h>
-#include <targetHAL.h>
-
 #include <tx_api.h>
 
 #include <nanoPAL_BlockStorage.h>
 // #include <nanoHAL_ConfigurationManager.h>
+
+extern void sli_usbd_init(void);
+extern void sli_usbd_configuration_config0_init(void);
+extern void sli_usbd_cdc_acm_acm0_init(void);
+extern void usb_device_cdc_acm_app_init(void);
 
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
@@ -158,6 +163,13 @@ void tx_application_define(void *first_unused_memory)
         {
         }
     }
+
+#if HAL_WP_USE_USB_CDC == TRUE
+    sli_usbd_init();
+    sli_usbd_configuration_config0_init();
+    sli_usbd_cdc_acm_acm0_init();
+    usb_device_cdc_acm_app_init();
+#endif
 
     // report successfull nanoBooter execution
     ReportSuccessfullNanoBooter();

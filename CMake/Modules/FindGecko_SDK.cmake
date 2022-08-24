@@ -37,7 +37,16 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/emdrv/uartdr
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/inc)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/inc)
 
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+if(GECKO_FEATURE_USBD_HID OR 
+   HAL_WP_USE_USB_CDC)
+
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/inc)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/src)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/util/silicon_labs/silabs_core/memory_manager)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
+    list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
+
+endif()
 
 # general files
 set(gecko_sdk_srcs
@@ -56,9 +65,9 @@ set(gecko_sdk_srcs
     em_ldma.c
     em_gpio.c
     em_i2c.c
-    em_lcd.c
-    em_leuart.c
-    em_lesense.c
+    # em_lcd.c
+    # em_leuart.c
+    # em_lesense.c
     em_msc.c
     em_prs.c
     em_rmu.c
@@ -93,9 +102,6 @@ set(gecko_sdk_srcs
     sl_udelay.c
     sl_udelay_armv6m_gcc.S
     sl_uartdrv_init.c
-    sl_iostream_usart.c
-    sl_iostream_uart.c
-    sl_iostream.c
     
     sl_device_init_clocks.c
     sl_event_handler.c
@@ -103,8 +109,7 @@ set(gecko_sdk_srcs
     sl_i2cspm_init.c
     # candidate for replacement with RTOS friendly version
     sl_i2cspm.c
-    sl_iostream_handles.c
-    sl_iostream_init_usart_instances.c
+    sl_string.c
 
     # nanoFramework implementations
     # nano_sl_i2cspm.c
@@ -120,6 +125,49 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     list(APPEND gecko_sdk_srcs system_efm32gg11b.c)
     list(APPEND gecko_sdk_srcs startup_efm32gg11b.c)
+
+    if(GECKO_FEATURE_USBD_HID)
+
+        list(APPEND gecko_sdk_srcs sl_usbd_class_hid_azurertos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_hid_report.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_hid.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_hid_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_init.c)
+        list(APPEND gecko_sdk_srcs sl_malloc.c)
+    
+    endif()
+
+    if(HAL_WP_USE_SERIAL)
+
+        list(APPEND gecko_sdk_srcs sl_iostream_usart.c)
+        list(APPEND gecko_sdk_srcs sl_iostream_uart.c)
+        list(APPEND gecko_sdk_srcs sl_iostream.c)
+        list(APPEND gecko_sdk_srcs sl_iostream_handles.c)
+        list(APPEND gecko_sdk_srcs sl_iostream_init_usart_instances.c)
+    
+
+    endif()
+
+    if(HAL_WP_USE_USB_CDC)
+
+        list(APPEND gecko_sdk_srcs sl_usbd_class_cdc_acm_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_cdc_acm.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_class_cdc.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_init.c)
+        list(APPEND gecko_sdk_srcs sl_malloc.c)
+
+    endif()
 
     foreach(src_file ${gecko_sdk_srcs})
 
@@ -143,7 +191,12 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
             ${gecko_sdk_SOURCE_DIR}/platform/service/system/src
             ${gecko_sdk_SOURCE_DIR}/platform/service/udelay/src
             ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/src
+            ${gecko_sdk_SOURCE_DIR}/util/silicon_labs/silabs_core/memory_manager
             
+            # USBD HID
+            ${gecko_sdk_SOURCE_DIR}/protocol/usb/src
+            ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common
+
             # device specific paths
             ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen
 
@@ -168,6 +221,14 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND Gecko_SDK_SOURCES ${gecko_sdk_src_file})
         
     endforeach()
+
+    # unset this warning as error required for this source file
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core_ep.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
 
     list(REMOVE_DUPLICATES Gecko_SDK_INCLUDE_DIRS)
 

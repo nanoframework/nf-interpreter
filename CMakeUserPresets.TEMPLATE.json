@@ -166,6 +166,8 @@
                     "value": "SL_STK3701A"
                 },
                 "TARGET_SERIAL_BAUDRATE": "115200",
+                "GECKO_FEATURE_USBD_HID": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
