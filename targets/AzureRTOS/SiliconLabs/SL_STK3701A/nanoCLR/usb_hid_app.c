@@ -11,10 +11,19 @@
 #include <tx_api.h>
 #include <targetHAL.h>
 
-#include "sl_usbd_core.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wundef"
+#endif
+
+#include <sl_usbd_core.h>
 #include "sl_usbd_class_hid.h"
 
-#include "sl_usbd_class_hid_instances.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
+#include <sl_usbd_class_hid_instances.h>
 
 // Task configuration
 #define TASK_STACK_SIZE 512u
