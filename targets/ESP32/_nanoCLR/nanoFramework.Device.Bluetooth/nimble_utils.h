@@ -39,7 +39,12 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack);
 bool LockEventMutex();
 void ReleaseEventMutex();
 
-void StartStack(char *devicename);
+bool StartBleStack(char *devicename);
+bool StopBleStack();
 bool WaitForBleStackStart(int waitMs);
+
+DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode);
+DevicePairingKinds PairingActionToDevicePairingKinds(int action);
+int DevicePairingKindsToPairingAction(DevicePairingKinds kinds);
 
 #endif

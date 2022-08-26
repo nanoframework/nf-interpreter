@@ -9,7 +9,16 @@ BluetoothNanoDevice_Mode ble_operatingMode = BluetoothNanoDevice_Mode_NotRunning
 
 char *bleDeviceName = NULL;
 
-void SetDeviceName(char *deviceName)
+void UpdateNameInContext()
+{
+    size_t nlen = hal_strlen_s(bleDeviceName);
+
+    bleContext.pDeviceName = (char *)platform_malloc(nlen + 1);
+    memcpy(bleContext.pDeviceName, bleDeviceName, nlen);
+    bleContext.pDeviceName[nlen] = 0;
+}
+
+void SetDeviceName(const char *deviceName)
 {
     if (bleDeviceName)
     {
@@ -21,10 +30,12 @@ void SetDeviceName(char *deviceName)
 
     bleDeviceName = (char *)platform_malloc(nlen + 1);
     hal_strcpy_s(bleDeviceName, nlen + 1, deviceName);
+
+    UpdateNameInContext();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice::NativeInitilise___STATIC__VOID(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice::
+    NativeInitilise___STATIC__VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -32,6 +43,12 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 
     // Set default device name
     SetDeviceName((char *)defaultName);
+
+    if (ble_operatingMode != BluetoothNanoDevice_Mode_NotRunning)
+    {
+        StopBleStack();
+        ble_operatingMode = BluetoothNanoDevice_Mode_NotRunning;
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -42,36 +59,40 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 {
     NANOCLR_HEADER();
     {
+        bool result = false;
+#if defined(NANO_BLE_DEBUG)
         BluetoothNanoDevice_Mode last_operatingMode = ble_operatingMode;
+#endif
 
         BluetoothNanoDevice_Mode newRunMode = (BluetoothNanoDevice_Mode)stack.Arg0().NumericByRef().u4;
-
         char *deviceName = (char *)stack.Arg1().RecoverString();
 
         SetDeviceName(deviceName);
 
-        ble_operatingMode = newRunMode;
-
-        BLE_DEBUG_PRINTF("run mode %d/%d device name %s\n", ble_operatingMode, last_operatingMode, bleDeviceName);
-
-        switch (ble_operatingMode)
+        if (ble_operatingMode != newRunMode)
         {
-            case BluetoothNanoDevice_Mode_NotRunning:
-                if (last_operatingMode == BluetoothNanoDevice_Mode_Client)
-                {
-                    // Only close stack when running in CLient mode
-                    Device_ble_dispose();
-                }
-                break;
 
-            case BluetoothNanoDevice_Mode_Server:
-                // Stack started in Servic provider , start advertising
-                break;
+            ble_operatingMode = newRunMode;
 
-            case BluetoothNanoDevice_Mode_Client:
-                StartStack(deviceName);
-                break;
+            BLE_DEBUG_PRINTF("run mode %d/%d device name %s\n", ble_operatingMode, last_operatingMode, bleDeviceName);
+            switch (ble_operatingMode)
+            {
+                case BluetoothNanoDevice_Mode_NotRunning:
+                    result = StopBleStack();
+                    break;
+
+                case BluetoothNanoDevice_Mode_Server:
+                case BluetoothNanoDevice_Mode_Client:
+                    result = StartBleStack(deviceName);
+                    break;
+            }
+
+            if (!result)
+            {
+                BLE_DEBUG_PRINTF("run mode %d/%d device name %s\n", ble_operatingMode, last_operatingMode, bleDeviceName);
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            }
         }
     }
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }

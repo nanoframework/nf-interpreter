@@ -255,6 +255,39 @@ int CentralGapEvent(struct ble_gap_event *event, void *arg)
         }
         break;
 
+        case BLE_GAP_EVENT_ENC_CHANGE:
+        {
+            struct ble_gap_conn_desc desc;
+
+            int rc = ble_gap_conn_find(event->enc_change.conn_handle, &desc);
+            if(rc != 0) {
+                return BLE_ATT_ERR_INVALID_HANDLE;
+            }
+    
+            uint16_t securityState = 0;
+            securityState += desc.sec_state.encrypted? 1: 0;
+            securityState += desc.sec_state.authenticated? 2: 0;
+            securityState += desc.sec_state.bonded? 4: 0;
+
+            DevicePairingResultStatus pairingStatus = MapNimbleErrorToStatus(event->enc_change.status);
+
+            BLE_DEBUG_PRINTF("BLE_GAP_EVENT_ENC_CHANGE conn_handle=%d status=%d security=%X\n", event->enc_change.conn_handle, event->enc_change.status, securityState);
+
+            PostManagedEvent(EVENT_BLUETOOTH, BluetoothEventType_AuthenticationComplete, event->enc_change.conn_handle, (securityState << 16) + pairingStatus);
+        }
+        break;
+
+        case BLE_GAP_EVENT_PASSKEY_ACTION: 
+        {
+            BLE_DEBUG_PRINTF("BLE_GAP_EVENT_PASSKEY_ACTION conn_handle=%d action=%d\n", event->passkey.conn_handle, event->passkey.params.action);
+
+            if (PostAndWaitManagedGapEvent(BluetoothEventType_PassKeyActions, event->passkey.conn_handle, PairingActionToDevicePairingKinds(event->passkey.params.action) << 16))
+            {
+                BLE_DEBUG_PRINTF(" BluetoothEventType_PassKeyActions handled");
+            }
+        }
+        break;
+
         default:
             break;
     }
@@ -406,6 +439,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
+
 // ======== Services ================
 
 //
@@ -657,7 +691,10 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         uint8_t *guid = chrUuidArray->GetFirstElement();
         NimbleUUIDToGuid(&characteristic->uuid, guid);
 
+#if defined(NANO_BLE_DEBUG)
+        PrintUuid((const ble_uuid_t *)&characteristic->uuid);
         BLE_DEBUG_PRINTF("NativeUpdateCharacteristic update complete\n");
+#endif
 
         // Signal BLE callback, event complete
         xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
@@ -702,7 +739,6 @@ static int ReadCharCallback(
                 con->serviceHandle,
                 attr->handle))
         {
-            // TODO ?
             BLE_DEBUG_PRINTF("Read complete handled\n");
         }
     }
