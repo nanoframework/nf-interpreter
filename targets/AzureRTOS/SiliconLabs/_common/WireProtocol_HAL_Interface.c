@@ -42,8 +42,13 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 {
     // save for later comparison
     uint32_t requestedSize = *size;
-    uint32_t bytesRead;
     sl_status_t requestResult;
+
+#if HAL_WP_USE_SERIAL == TRUE
+    size_t bytesRead;
+#elif HAL_WP_USE_USB_CDC == TRUE
+    uint32_t bytesRead;
+#endif    
 
     // check for requests with 0 size
     if (*size)
@@ -80,7 +85,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
 
 uint8_t WP_TransmitMessage(WP_Message *message)
 {
+#if HAL_WP_USE_USB_CDC == TRUE
     uint32_t dummy = 0;
+#endif
 
     TRACE_WP_HEADER(WP_TXMSG, message);
 
