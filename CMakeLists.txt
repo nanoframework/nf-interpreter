@@ -632,6 +632,13 @@ if(API_System.Net)
     endif()
 endif()
 
+# include nanoFramework.System.Text because of IO.Ports
+if( API_System.IO.Ports)
+
+    # thi API requires nanoFramework.System.Text
+    set(API_nanoFramework.System.Text ON CACHE INTERNAL "enable of API_nanoFramework.System.Text")
+
+endif()
 
 #################################################################
 # handles Networking support at HAL level
