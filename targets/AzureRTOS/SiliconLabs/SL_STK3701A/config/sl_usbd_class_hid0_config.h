@@ -38,7 +38,7 @@
 // <i> Default: SL_USBD_HID_PROTOCOL_MOUSE
 // <i> You can choose "Mouse" or "Keyboard" depending on what functionality
 // <i> this HID class instance will provide.
-#define SL_USBD_HID_HID0_PROTOCOL              SL_USBD_HID_PROTOCOL_MOUSE
+#define SL_USBD_HID_HID0_PROTOCOL              SL_USBD_HID_PROTOCOL_NONE
 
 // <o SL_USBD_HID_HID0_COUNTRY_CODE> Country code
 //   <SL_USBD_HID_COUNTRY_CODE_NOT_SUPPORTED=> Not supported
