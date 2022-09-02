@@ -227,6 +227,8 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_core_ep.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid_report.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
 

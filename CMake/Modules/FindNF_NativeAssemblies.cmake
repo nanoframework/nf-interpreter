@@ -44,6 +44,9 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
 option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
 
+# Silabs Giant Gecko only
+option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
+
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -237,6 +240,12 @@ endif()
 if(API_nanoFramework.Hardware.TI)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
+endif()
+
+# nanoFramework.Hardware.TI
+if(API_nanoFramework.GiantGecko.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
 endif()
 
 # nanoFramework.Runtime.Events

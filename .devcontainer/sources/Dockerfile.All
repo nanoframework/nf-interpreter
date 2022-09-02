@@ -3,13 +3,13 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
     curl \
-    bzip2 \
+    xz-utils \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
-    && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
+    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
+    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
@@ -77,7 +77,7 @@ RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/
 ENV GIT_SSL_NO_VERIFY=0
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.1 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.4.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \

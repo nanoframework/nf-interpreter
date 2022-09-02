@@ -150,6 +150,7 @@
                     "type": "STRING",
                     "value": "${presetName}"
                 },
+                "HAL_WP_USE_SERIAL": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -168,6 +169,7 @@
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "GECKO_FEATURE_USBD_HID": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
+                "API_nanoFramework.GiantGecko.Adc": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
