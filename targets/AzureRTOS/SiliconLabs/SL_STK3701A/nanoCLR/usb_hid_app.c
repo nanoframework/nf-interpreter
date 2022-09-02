@@ -85,7 +85,7 @@ void usb_device_hid_app_init(void)
         &task_handle,
         "USB HID Mouse task",
         hid_mouse_task,
-        (uint32_t)&sl_usbd_hid_mouse0_number,
+        (uint32_t)&sl_usbd_hid_hid0_number,
         hidThreadStack,
         TASK_STACK_SIZE,
         TASK_PRIO,
@@ -196,20 +196,20 @@ void sl_usbd_on_config_event(sl_usbd_config_event_t event, uint8_t config_nbr)
 }
 
 // HID mouse0 instance Enable event.
-void sl_usbd_hid_mouse0_on_enable_event(void)
+void sl_usbd_hid_hid0_on_enable_event(void)
 {
     // Called when the HID device is connected to the USB host and a
     // RESET transfer succeeded.
 }
 
 // HID mouse0 instance Disable event.
-void sl_usbd_hid_mouse0_on_disable_event(void)
+void sl_usbd_hid_hid0_on_disable_event(void)
 {
     // Called when the HID device is disconnected to the USB host (cable removed).
 }
 
 // Hook function to pass the HID descriptor of the mouse0 instance.
-void sl_usbd_hid_mouse0_on_get_report_desc_event(const uint8_t **p_report_ptr, uint16_t *p_report_len)
+void sl_usbd_hid_hid0_on_get_report_desc_event(const uint8_t **p_report_ptr, uint16_t *p_report_len)
 {
     // Called during the HID mouse0 instance initialization so the USB stack
     // can retrieve its HID descriptor.
@@ -219,7 +219,7 @@ void sl_usbd_hid_mouse0_on_get_report_desc_event(const uint8_t **p_report_ptr, u
 }
 
 // Hook function to pass the HID PHY descriptor.
-void sl_usbd_hid_mouse0_on_get_phy_desc_event(const uint8_t **p_report_ptr, uint16_t *p_report_len)
+void sl_usbd_hid_hid0_on_get_phy_desc_event(const uint8_t **p_report_ptr, uint16_t *p_report_len)
 {
     // Called during the HID mouse0 instance initialization so the USB stack
     // can retrieve the its HID physical descriptor.
@@ -232,7 +232,7 @@ void sl_usbd_hid_mouse0_on_get_phy_desc_event(const uint8_t **p_report_ptr, uint
 // @param  report_id     Report ID.
 // @param  p_report_buf  Pointer to report buffer.
 // @param  report_len    Length of report, in octets.
-void sl_usbd_hid_mouse0_on_set_output_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
+void sl_usbd_hid_hid0_on_set_output_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
 {
     // This function is called when host issues a SetReport request.
     // The application can take action in function of the report content.
@@ -247,7 +247,7 @@ void sl_usbd_hid_mouse0_on_set_output_report_event(uint8_t report_id, uint8_t *p
 // @param  p_report_buf  Pointer to feature report buffer.
 // @param  report_len    Length of report, in octets.
 // @note   (1) Report ID must not be written into the feature report buffer.
-void sl_usbd_hid_mouse0_on_get_feature_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
+void sl_usbd_hid_hid0_on_get_feature_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
 {
     // This function is called when host issues a GetReport(feature) request.
     // The application can provide the report to send by copying it in p_report_buf.
@@ -262,7 +262,7 @@ void sl_usbd_hid_mouse0_on_get_feature_report_event(uint8_t report_id, uint8_t *
 // @param  p_report_buf  Pointer to feature report buffer.
 // @param  report_len    Length of report, in octets.
 // @note   (1) Report ID is not present in the feature report buffer.
-void sl_usbd_hid_mouse0_on_set_feature_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
+void sl_usbd_hid_hid0_on_set_feature_report_event(uint8_t report_id, uint8_t *p_report_buf, uint16_t report_len)
 {
     // This function is called when host issues a SetReport(Feature) request.
     // The application can take action in function of the provided report in p_report_buf.
@@ -274,7 +274,7 @@ void sl_usbd_hid_mouse0_on_set_feature_report_event(uint8_t report_id, uint8_t *
 
 // Retrieve active protocol: BOOT or REPORT protocol.
 // @param  p_protocol Pointer to variable that will receive the protocol type.
-void sl_usbd_hid_mouse0_on_get_protocol_event(uint8_t *p_protocol)
+void sl_usbd_hid_hid0_on_get_protocol_event(uint8_t *p_protocol)
 {
     // This function is called when host issues a GetProtocol request.
     // The application should return the current protocol.
@@ -284,7 +284,7 @@ void sl_usbd_hid_mouse0_on_get_protocol_event(uint8_t *p_protocol)
 
 // Store active protocol: BOOT or REPORT protocol.
 // @param  protocol   Protocol.
-void sl_usbd_hid_mouse0_on_set_protocol_event(uint8_t protocol)
+void sl_usbd_hid_hid0_on_set_protocol_event(uint8_t protocol)
 {
     // This function is called when host issues a SetProtocol request.
     // The application should apply the new protocol.

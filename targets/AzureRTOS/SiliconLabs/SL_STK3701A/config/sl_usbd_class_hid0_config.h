@@ -4,43 +4,43 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef SL_USBD_HID_MOUSE0_CONFIG_H
-#define SL_USBD_HID_MOUSE0_CONFIG_H
+#ifndef SL_USBD_HID_HID0_CONFIG_H
+#define SL_USBD_HID_HID0_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Class Configuration
 
-// <s SL_USBD_HID_MOUSE0_CONFIGURATIONS> Configuration(s) to add this class instance to
+// <s SL_USBD_HID_HID0_CONFIGURATIONS> Configuration(s) to add this class instance to
 // <i> Default: all
 // <i> Comma separated list of configuration instances (like inst0, inst1)
 // <i> that this HID class instance will be attached to. You can
 // <i> use "all" to attach the class to all configs, or use an empty
 // <i> string if you do not want to attach the interface to any configuration.
-#define SL_USBD_HID_MOUSE0_CONFIGURATIONS        "all"
+#define SL_USBD_HID_HID0_CONFIGURATIONS        "all"
 
 // </h>
 
 // <h> Type Codes
 
-// <o SL_USBD_HID_MOUSE0_SUBCLASS> Subclass code
+// <o SL_USBD_HID_HID0_SUBCLASS> Subclass code
 //   <SL_USBD_HID_SUBCLASS_NONE=> None
 //   <SL_USBD_HID_SUBCLASS_BOOT=> Boot
 // <i> Default: SL_USBD_HID_SUBCLASS_BOOT
 // <i> This defines the standard USB subclass code for this interface.
 // <i> For most use cases, you can just select "Boot".
-#define SL_USBD_HID_MOUSE0_SUBCLASS              SL_USBD_HID_SUBCLASS_BOOT
+#define SL_USBD_HID_HID0_SUBCLASS              SL_USBD_HID_SUBCLASS_BOOT
 
-// <o SL_USBD_HID_MOUSE0_PROTOCOL> Protocol code
+// <o SL_USBD_HID_HID0_PROTOCOL> Protocol code
 //   <SL_USBD_HID_PROTOCOL_NONE=> None
 //   <SL_USBD_HID_PROTOCOL_KBD=> Keyboard
 //   <SL_USBD_HID_PROTOCOL_MOUSE=> Mouse
 // <i> Default: SL_USBD_HID_PROTOCOL_MOUSE
 // <i> You can choose "Mouse" or "Keyboard" depending on what functionality
 // <i> this HID class instance will provide.
-#define SL_USBD_HID_MOUSE0_PROTOCOL              SL_USBD_HID_PROTOCOL_MOUSE
+#define SL_USBD_HID_HID0_PROTOCOL              SL_USBD_HID_PROTOCOL_MOUSE
 
-// <o SL_USBD_HID_MOUSE0_COUNTRY_CODE> Country code
+// <o SL_USBD_HID_HID0_COUNTRY_CODE> Country code
 //   <SL_USBD_HID_COUNTRY_CODE_NOT_SUPPORTED=> Not supported
 //   <SL_USBD_HID_COUNTRY_CODE_ARABIC=> Arabic
 //   <SL_USBD_HID_COUNTRY_CODE_BELGIAN=> Belgian
@@ -82,13 +82,13 @@
 // <i> field helps the host operating system know which layout/language
 // <i> the keyboard is manufactured for, or which country/localization
 // <i> setting to use by default.
-#define SL_USBD_HID_MOUSE0_COUNTRY_CODE          SL_USBD_HID_COUNTRY_CODE_US
+#define SL_USBD_HID_HID0_COUNTRY_CODE          SL_USBD_HID_COUNTRY_CODE_US
 
 // </h>
 
 // <h> Protocol Details
 
-// <o SL_USBD_HID_MOUSE0_INTERVAL_IN> IN polling interval
+// <o SL_USBD_HID_HID0_INTERVAL_IN> IN polling interval
 //   <1=> 1ms
 //   <2=> 2ms
 //   <4=> 4ms
@@ -108,9 +108,9 @@
 // <i> Default: 2
 // <i> Polling interval for input transfers, in milliseconds.
 // <i> It must be a power of 2.
-#define SL_USBD_HID_MOUSE0_INTERVAL_IN          2
+#define SL_USBD_HID_HID0_INTERVAL_IN          2
 
-// <o SL_USBD_HID_MOUSE0_INTERVAL_OUT> OUT polling interval
+// <o SL_USBD_HID_HID0_INTERVAL_OUT> OUT polling interval
 //   <1=> 1ms
 //   <2=> 2ms
 //   <4=> 4ms
@@ -130,14 +130,14 @@
 // <i> Default: 2
 // <i> Polling interval for input transfers, in milliseconds.
 // <i> It must be a power of 2.
-#define SL_USBD_HID_MOUSE0_INTERVAL_OUT         2
+#define SL_USBD_HID_HID0_INTERVAL_OUT         2
 
-// <q SL_USBD_HID_MOUSE0_ENABLE_CTRL_RD> Enable Control Read
+// <q SL_USBD_HID_HID0_ENABLE_CTRL_RD> Enable Control Read
 // <i> Default: 1
 // <i> Enable read operations through the control transfers.
-#define SL_USBD_HID_MOUSE0_ENABLE_CTRL_RD       1
+#define SL_USBD_HID_HID0_ENABLE_CTRL_RD       1
 
 // </h>
 
 // <<< end of configuration section >>>
-#endif // SL_USBD_HID_MOUSE0_CONFIG_H
+#endif // SL_USBD_HID_HID0_CONFIG_H

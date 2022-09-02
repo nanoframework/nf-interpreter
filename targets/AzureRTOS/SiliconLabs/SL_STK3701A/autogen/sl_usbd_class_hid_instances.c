@@ -27,7 +27,7 @@
 
 /* include config file for the instances */
 
-#include "sl_usbd_class_mouse0_config.h"
+#include <sl_usbd_class_hid0_config.h>
 
 
 //****************************************************************************
@@ -35,38 +35,38 @@
 
 
 
-/* callback prototypes for mouse0 instance */
-void sli_usbd_hid_mouse0_enable(uint8_t class_nbr);
+/* callback prototypes for hid0 instance */
+void sli_usbd_hid_hid0_enable(uint8_t class_nbr);
 
-void sli_usbd_hid_mouse0_disable(uint8_t class_nbr);
+void sli_usbd_hid_hid0_disable(uint8_t class_nbr);
 
-void sli_usbd_hid_mouse0_get_report_desc(uint8_t         class_nbr,
+void sli_usbd_hid_hid0_get_report_desc(uint8_t         class_nbr,
                                                  const uint8_t **p_report_ptr,
                                                  uint16_t       *p_report_len);
 
-void sli_usbd_hid_mouse0_get_phy_desc(uint8_t         class_nbr,
+void sli_usbd_hid_hid0_get_phy_desc(uint8_t         class_nbr,
                                               const uint8_t **p_report_ptr,
                                               uint16_t       *p_report_len);
 
-void sli_usbd_hid_mouse0_set_output_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_set_output_report(uint8_t   class_nbr,
                                                    uint8_t   report_id,
                                                    uint8_t  *p_report_buf,
                                                    uint16_t  report_len);
 
-void sli_usbd_hid_mouse0_get_feature_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_get_feature_report(uint8_t   class_nbr,
                                                     uint8_t   report_id,
                                                     uint8_t  *p_report_buf,
                                                     uint16_t  report_len);
 
-void sli_usbd_hid_mouse0_set_feature_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_set_feature_report(uint8_t   class_nbr,
                                                     uint8_t   report_id,
                                                     uint8_t  *p_report_buf,
                                                     uint16_t  report_len);
 
-void sli_usbd_hid_mouse0_get_protocol(uint8_t  class_nbr,
+void sli_usbd_hid_hid0_get_protocol(uint8_t  class_nbr,
                                               uint8_t *p_protocol);
 
-void sli_usbd_hid_mouse0_set_protocol(uint8_t  class_nbr,
+void sli_usbd_hid_hid0_set_protocol(uint8_t  class_nbr,
                                               uint8_t  protocol);
 
 
@@ -78,11 +78,12 @@ void sli_usbd_hid_mouse0_set_protocol(uint8_t  class_nbr,
 
 /* variables for mouse0 instance */
 
-uint8_t sl_usbd_hid_mouse0_number = 0;
+uint8_t sl_usbd_hid_hid0_number = 0;
 
-uint8_t sl_usbd_hid_mouse0_default_protocol = 0;
+uint8_t sl_usbd_hid_hid0_default_protocol = 0;
 
-static const uint8_t sli_usbd_hid_mouse0_default_desc[] = {
+
+static const uint8_t sli_usbd_hid_hid0_default_desc[] = {
   SL_USBD_HID_GLOBAL_USAGE_PAGE   + 1, SL_USBD_HID_USAGE_PAGE_GENERIC_DESKTOP_CONTROLS,
   SL_USBD_HID_LOCAL_USAGE         + 1, SL_USBD_HID_CA_MOUSE,
   SL_USBD_HID_MAIN_COLLECTION     + 1, SL_USBD_HID_COLLECTION_APPLICATION,
@@ -111,16 +112,16 @@ static const uint8_t sli_usbd_hid_mouse0_default_desc[] = {
   SL_USBD_HID_MAIN_ENDCOLLECTION
 };
 
-sl_usbd_hid_callbacks_t sli_usbd_hid_mouse0_callbacks = {
-  sli_usbd_hid_mouse0_enable,
-  sli_usbd_hid_mouse0_disable,
-  sli_usbd_hid_mouse0_get_report_desc,
-  sli_usbd_hid_mouse0_get_phy_desc,
-  sli_usbd_hid_mouse0_set_output_report,
-  sli_usbd_hid_mouse0_get_feature_report,
-  sli_usbd_hid_mouse0_set_feature_report,
-  sli_usbd_hid_mouse0_get_protocol,
-  sli_usbd_hid_mouse0_set_protocol,
+sl_usbd_hid_callbacks_t sli_usbd_hid_hid0_callbacks = {
+  sli_usbd_hid_hid0_enable,
+  sli_usbd_hid_hid0_disable,
+  sli_usbd_hid_hid0_get_report_desc,
+  sli_usbd_hid_hid0_get_phy_desc,
+  sli_usbd_hid_hid0_set_output_report,
+  sli_usbd_hid_hid0_get_feature_report,
+  sli_usbd_hid_hid0_set_feature_report,
+  sli_usbd_hid_hid0_get_protocol,
+  sli_usbd_hid_hid0_set_protocol,
 };
 
 
@@ -131,39 +132,39 @@ sl_usbd_hid_callbacks_t sli_usbd_hid_mouse0_callbacks = {
 
 
 /* callback functions for mouse0 instance */
-void sli_usbd_hid_mouse0_enable(uint8_t class_nbr)
+void sli_usbd_hid_hid0_enable(uint8_t class_nbr)
 {
   (void)&class_nbr;
 
-  sl_usbd_hid_mouse0_on_enable_event();
+  sl_usbd_hid_hid0_on_enable_event();
 
   return;
 }
 
-void sli_usbd_hid_mouse0_disable(uint8_t class_nbr)
+void sli_usbd_hid_hid0_disable(uint8_t class_nbr)
 {
   (void)&class_nbr;
 
-  sl_usbd_hid_mouse0_on_disable_event();
+  sl_usbd_hid_hid0_on_disable_event();
 
   return;
 }
 
-void sli_usbd_hid_mouse0_get_report_desc(uint8_t         class_nbr,
+void sli_usbd_hid_hid0_get_report_desc(uint8_t         class_nbr,
                                                  const uint8_t **p_report_ptr,
                                                  uint16_t       *p_report_len)
 {
   (void)&class_nbr;
 
-  *p_report_ptr = sli_usbd_hid_mouse0_default_desc;
-  *p_report_len = sizeof(sli_usbd_hid_mouse0_default_desc);
+  *p_report_ptr = sli_usbd_hid_hid0_default_desc;
+  *p_report_len = sizeof(sli_usbd_hid_hid0_default_desc);
 
-  sl_usbd_hid_mouse0_on_get_report_desc_event(p_report_ptr, p_report_len);
+  sl_usbd_hid_hid0_on_get_report_desc_event(p_report_ptr, p_report_len);
 
   return;
 }
 
-void sli_usbd_hid_mouse0_get_phy_desc(uint8_t         class_nbr,
+void sli_usbd_hid_hid0_get_phy_desc(uint8_t         class_nbr,
                                               const uint8_t **p_report_ptr,
                                               uint16_t       *p_report_len)
 {
@@ -172,25 +173,25 @@ void sli_usbd_hid_mouse0_get_phy_desc(uint8_t         class_nbr,
   *p_report_ptr = NULL;
   *p_report_len = 0;
 
-  sl_usbd_hid_mouse0_on_get_phy_desc_event(p_report_ptr, p_report_len);
+  sl_usbd_hid_hid0_on_get_phy_desc_event(p_report_ptr, p_report_len);
 
   return;
 }
 
-void sli_usbd_hid_mouse0_set_output_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_set_output_report(uint8_t   class_nbr,
                                                     uint8_t   report_id,
                                                     uint8_t  *p_report_buf,
                                                     uint16_t  report_len)
 {
   (void)&class_nbr;
 
-  sl_usbd_hid_mouse0_on_set_output_report_event(report_id, p_report_buf, report_len);
+  sl_usbd_hid_hid0_on_set_output_report_event(report_id, p_report_buf, report_len);
 
   return;
 }
 
 
-void sli_usbd_hid_mouse0_get_feature_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_get_feature_report(uint8_t   class_nbr,
                                                     uint8_t   report_id,
                                                     uint8_t  *p_report_buf,
                                                     uint16_t  report_len)
@@ -199,43 +200,43 @@ void sli_usbd_hid_mouse0_get_feature_report(uint8_t   class_nbr,
 
   memset(p_report_buf, 0, report_len);
 
-  sl_usbd_hid_mouse0_on_get_feature_report_event(report_id, p_report_buf, report_len);
+  sl_usbd_hid_hid0_on_get_feature_report_event(report_id, p_report_buf, report_len);
 
   return;
 }
 
-void sli_usbd_hid_mouse0_set_feature_report(uint8_t   class_nbr,
+void sli_usbd_hid_hid0_set_feature_report(uint8_t   class_nbr,
                                                     uint8_t   report_id,
                                                     uint8_t  *p_report_buf,
                                                     uint16_t  report_len)
 {
   (void)&class_nbr;
 
-  sl_usbd_hid_mouse0_on_set_feature_report_event(report_id, p_report_buf, report_len);
+  sl_usbd_hid_hid0_on_set_feature_report_event(report_id, p_report_buf, report_len);
 
   return;
 }
 
-void sli_usbd_hid_mouse0_get_protocol(uint8_t  class_nbr,
+void sli_usbd_hid_hid0_get_protocol(uint8_t  class_nbr,
                                               uint8_t *p_protocol)
 {
   (void)&class_nbr;
 
-  *p_protocol = sl_usbd_hid_mouse0_default_protocol;
+  *p_protocol = sl_usbd_hid_hid0_default_protocol;
 
-  sl_usbd_hid_mouse0_on_get_protocol_event(p_protocol);
+  sl_usbd_hid_hid0_on_get_protocol_event(p_protocol);
 
   return;
 }
 
-void sli_usbd_hid_mouse0_set_protocol(uint8_t  class_nbr,
+void sli_usbd_hid_hid0_set_protocol(uint8_t  class_nbr,
                                               uint8_t  protocol)
 {
   (void)&class_nbr;
 
-  sl_usbd_hid_mouse0_default_protocol = protocol;
+  sl_usbd_hid_hid0_default_protocol = protocol;
 
-  sl_usbd_hid_mouse0_on_set_protocol_event(protocol);
+  sl_usbd_hid_hid0_on_set_protocol_event(protocol);
 
   return;
 }
@@ -246,8 +247,8 @@ void sli_usbd_hid_mouse0_set_protocol(uint8_t  class_nbr,
 
 
 
-/* initialize mouse0 instance */
-void sli_usbd_hid_mouse0_init()
+/* initialize hid0 instance */
+void sli_usbd_hid_hid0_init()
 {
   sl_usbd_hid_country_code_t country = SL_USBD_HID_COUNTRY_CODE_NOT_SUPPORTED;
 
@@ -264,17 +265,17 @@ void sli_usbd_hid_mouse0_init()
   char     *token           = NULL;
 
   /* configs to attach the class instance to */
-  configs = SL_USBD_HID_MOUSE0_CONFIGURATIONS;
+  configs = SL_USBD_HID_HID0_CONFIGURATIONS;
 
   /* read subclass, protocol, and country codes */
-  subclass = SL_USBD_HID_MOUSE0_SUBCLASS;
-  protocol = SL_USBD_HID_MOUSE0_PROTOCOL;
-  country  = SL_USBD_HID_MOUSE0_COUNTRY_CODE;
+  subclass = SL_USBD_HID_HID0_SUBCLASS;
+  protocol = SL_USBD_HID_HID0_PROTOCOL;
+  country  = SL_USBD_HID_HID0_COUNTRY_CODE;
 
   /* read endpoint parameters */
-  interval_in  = SL_USBD_HID_MOUSE0_INTERVAL_IN;
-  interval_out = SL_USBD_HID_MOUSE0_INTERVAL_OUT;
-  ctrl_rd_en   = SL_USBD_HID_MOUSE0_ENABLE_CTRL_RD;
+  interval_in  = SL_USBD_HID_HID0_INTERVAL_IN;
+  interval_out = SL_USBD_HID_HID0_INTERVAL_OUT;
+  ctrl_rd_en   = SL_USBD_HID_HID0_ENABLE_CTRL_RD;
 
   /* create HID instance */
   sl_usbd_hid_create_instance(subclass,
@@ -283,11 +284,11 @@ void sli_usbd_hid_mouse0_init()
                               interval_in,
                               interval_out,
                               ctrl_rd_en,
-                              &sli_usbd_hid_mouse0_callbacks,
+                              &sli_usbd_hid_hid0_callbacks,
                               &class_number);
 
   /* store class number globally */
-  sl_usbd_hid_mouse0_number = class_number;
+  sl_usbd_hid_hid0_number = class_number;
 
   /* tokenize configs by "," and spaces */
   token = strtok(configs, ", ");
