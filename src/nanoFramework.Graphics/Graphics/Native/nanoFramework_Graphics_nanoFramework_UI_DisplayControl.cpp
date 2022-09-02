@@ -64,7 +64,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 {
     NANOCLR_HEADER();
     CLR_INT32 orientation = stack.Arg0().NumericByRef().s4;
-    g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation);
+    stack.SetResult_Boolean(g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation));
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
@@ -213,11 +213,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         backgroundColor = stack.Arg7().NumericByRef().u4;
 
         // Prepare all the elements for the colors
-        GFX_Pen pen;
         GFX_Brush brush;
         GFX_Rect rectangle;
-        pen.color = backgroundColor;
-        pen.thickness = 0;
         brush.gradientStartColor = backgroundColor;
         brush.gradientEndColor = backgroundColor;
         rectangle.left = 0;
@@ -269,6 +266,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         CLR_UINT16 c;
 
         // Loop for each characters
+        heightChar = bm.m_height;
         for (int i = 0; i < textLength; i++)
         {
             // check if exceeded the height
@@ -288,19 +286,19 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                 if (chr.isValid)
                 {
                     widthChar = chr.width;
-                    // Set the start for the character
-                    if (chr.height > heightChar)
-                    {
-                        posY += chr.height - heightChar;
-                        heightChar = chr.height;
-                    }
+                    // calculate character max height for current line
+                    // seems better to use font height
 
-                    // set position using previous chars
+                    // set X position using previous char's width
                     posX += prevCharWidth;
                     if (posX + bm.m_width > width)
                     {
+                        // go to next line
                         posX = x;
+                        // add max character height of current line
                         posY += heightChar;
+                        // reset character height (will get new max height for next line)
+                        // heightChar=0;
                     }
 
                     // If there is a background, will fill the bitmap with it
@@ -308,7 +306,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     {
                         rectangle.right = bm.m_width;
                         rectangle.bottom = bm.m_height;
-                        bitmap->DrawRectangle(pen, brush, rectangle);
+                        // change bitmap->DrawRectangle(pen, brush, rectangle);
+                        // to FillRectangle (this function little bit faster than DrawRectangle)
+                        // In the future I plan to improve it too
+                        bitmap->FillRectangle(brush, rectangle);
                     }
                     else
                     {

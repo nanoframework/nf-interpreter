@@ -3,13 +3,13 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
     curl \
-    bzip2 \
+    xz-utils \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
-    && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
+    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
+    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
@@ -52,7 +52,7 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 # Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.28.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+RUN git clone --branch mbedtls-2.28.1 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
     && git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs \
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
