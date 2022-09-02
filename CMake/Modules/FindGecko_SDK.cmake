@@ -169,6 +169,9 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     endif()
 
+    list(APPEND gecko_sdk_srcs sl_usbd_class_vendor.c)
+
+
     foreach(src_file ${gecko_sdk_srcs})
 
         set(gecko_sdk_src_file src_file-NOTFOUND)

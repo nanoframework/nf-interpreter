@@ -42,4 +42,6 @@ void sli_usbd_init(void)
     sl_usbd_cdc_init();
     sl_usbd_cdc_acm_init();
 #endif
+
+sl_usbd_vendor_init();
 }
