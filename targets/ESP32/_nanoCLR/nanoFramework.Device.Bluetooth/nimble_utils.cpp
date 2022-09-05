@@ -225,10 +225,31 @@ bool WaitForBleStackStart(int waitMs)
         pdTRUE,
         pdFALSE,
         (TickType_t)(waitMs / portTICK_PERIOD_MS));
+
     BLE_DEBUG_PRINTF("wait handled ? complete %X\n", uxBits);
+
     if (uxBits & N_BLE_EVENT_STARTED)
     {
         return true;
     }
     return false;
 }
+
+void StartStack(char * devicename)
+{
+    // Ignore if already started
+    if (ble_hs_is_enabled())
+    {
+        return;
+    }
+
+    // Initialise BLE stack
+    DeviceBleInit();
+
+    // Start BLE host task running
+    StartBleTask(devicename);
+
+    // Wait for stack to be ready (Sync fired)
+    WaitForBleStackStart(5000);
+}
+
