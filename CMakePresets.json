@@ -1392,6 +1392,41 @@
                 "API_nanoFramework.TI.EasyLink": "ON",
                 "API_nanoFramework.Hardware.TI": "ON"
             }
+        },
+        {
+            "name": "ESP32_PSRAM_REV0_UI_preset",
+            "description": "",
+            "displayName": "",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_System.Math": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_System.Device.Dac": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "ILI9341_XXXxYYY_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
         }
     ]
 }

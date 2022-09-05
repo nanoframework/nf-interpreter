@@ -23,7 +23,7 @@ if(ESP32_IDF_PATH)
 endif()
 
 # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.4.1" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4.2" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo
@@ -76,9 +76,10 @@ endif()
 
 # if using FatFS need to remove IDF ffconfig.h so it can pick ours
 if(NF_FEATURE_HAS_SDCARD)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
-    )
+    add_custom_command(
+        OUTPUT ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
+        PRE_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
 endif()
 
 # target folder was added in main CMakeList

@@ -12,8 +12,8 @@ Document Language: [English](README.md) | [中文简体](README.zh-cn.md)
 
 | Component | Build Status |
 |:-|---|
-| nanoBooter + nanoCLR | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
-| Win32 test project | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nanoframework.nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
+| nanoBooter + nanoCLR | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
+| Win32 test project | [![Build Status](https://dev.azure.com/nanoframework/nf-interpreter/_apis/build/status/nf-interpreter?repoName=nanoframework%2Fnf-interpreter&branchName=main)](https://dev.azure.com/nanoframework/nf-interpreter/_build/latest?definitionId=34&repoName=nanoframework%2Fnf-interpreter&branchName=main) |
 
 ## .NET nanoFramework interpreter for reference boards
 

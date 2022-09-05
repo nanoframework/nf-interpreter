@@ -6,8 +6,6 @@
 
 #include "sys_dev_ble_native.h"
 
-extern EventGroupHandle_t ble_event_waitgroup;
-
 HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest::
     NativeReadRespondWithValue___VOID__U2__SZARRAY_U1(CLR_RT_StackFrame &stack)
 {
@@ -18,26 +16,31 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         int bufLen;
         int rc;
 
-        // debug_printf("NativeReadRespondWithValue\n");
+        // BLE_DEBUG_PRINTF("NativeReadRespondWithValue\n");
 
-        // Response to correct event, or is it too late
-        // Otherwise ignore
-        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        if (LockEventMutex())
         {
-            // correct event
-            buffer = stack.Arg2().DereferenceArray();
-            FAULT_ON_NULL(buffer);
+            // Response to correct event, or is it too late
+            // Otherwise ignore
+            if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+            {
+                // correct event
+                buffer = stack.Arg2().DereferenceArray();
+                FAULT_ON_NULL(buffer);
 
-            bufPtr = buffer->GetFirstElement();
-            bufLen = buffer->m_numOfElements;
+                bufPtr = buffer->GetFirstElement();
+                bufLen = buffer->m_numOfElements;
 
-            // debug_printf("NativeReadRespondWithValue data length %d\n",bufLen);
+                // BLE_DEBUG_PRINTF("NativeReadRespondWithValue data length %d\n",bufLen);
 
-            rc = os_mbuf_append(ble_event_data.ctxt->om, bufPtr, bufLen);
-            ble_event_data.result = rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+                rc = os_mbuf_append(ble_event_data.ctxt->om, bufPtr, bufLen);
+                ble_event_data.result = rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
 
-            // Signal BLE callback, event complete
-            xEventGroupSetBits(ble_event_waitgroup, 1);
+                // Signal BLE callback, event complete
+                xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
+            }
+
+            ReleaseEventMutex();
         }
     }
     NANOCLR_NOCLEANUP();
@@ -48,15 +51,20 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        // Response to correct event, or is it too late
-        // Otherwise ignore
-        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        if (LockEventMutex())
         {
-            // Get protocol error code
-            ble_event_data.result = stack.Arg2().NumericByRef().u2;
+            // Response to correct event, or is it too late
+            // Otherwise ignore
+            if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+            {
+                // Get protocol error code
+                ble_event_data.result = stack.Arg2().NumericByRef().u2;
 
-            // Signal BLE callback, event complete
-            xEventGroupSetBits(ble_event_waitgroup, 1);
+                // Signal BLE callback, event complete
+                xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
+            }
+
+            ReleaseEventMutex();
         }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
