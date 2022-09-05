@@ -70,11 +70,9 @@ DisplayOrientation GraphicsDriver::GetOrientation()
     return g_DisplayDriver.Attributes.Orientation;
 }
 
-void GraphicsDriver::ChangeOrientation(DisplayOrientation newOrientation)
+bool GraphicsDriver::ChangeOrientation(DisplayOrientation newOrientation)
 {
-    // Not implemented ( Maybe in the future?)
-    UNUSED(newOrientation);
-    return;
+    return g_DisplayDriver.ChangeOrientation(newOrientation);
 }
 
 CLR_UINT32 GraphicsDriver::GetPixel(const PAL_GFX_Bitmap &bitmap, int x, int y)
@@ -102,6 +100,12 @@ void GraphicsDriver::DrawRectangle(
     GFX_Pen nativePen = ConvertPenToNative(pen);
     GFX_Brush nativeBrush = ConvertBrushToNative(brush);
     DrawRectangleNative(bitmap, nativePen, nativeBrush, rectangle);
+}
+
+void GraphicsDriver::FillRectangle(const PAL_GFX_Bitmap &bitmap, const GFX_Brush &brush, const GFX_Rect &rectangle)
+{
+    GFX_Brush nativeBrush = ConvertBrushToNative(brush);
+    FillRectangleNative(bitmap, nativeBrush, rectangle);
 }
 
 void GraphicsDriver::DrawRoundedRectangle(

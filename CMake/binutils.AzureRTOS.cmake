@@ -252,7 +252,6 @@ macro(nf_add_platform_dependencies target)
                 ${AZRTOS_INCLUDES}
                 
             EXTRA_COMPILE_DEFINITIONS 
-                -DTX_INCLUDE_USER_DEFINE_FILE
                 -DNX_INCLUDE_USER_DEFINE_FILE            
         )
         
@@ -272,7 +271,6 @@ macro(nf_add_platform_dependencies target)
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
 
                 EXTRA_COMPILE_DEFINITIONS 
-                    -DTX_INCLUDE_USER_DEFINE_FILE
                     -DNX_INCLUDE_USER_DEFINE_FILE
                     -DUSE_HAL_DRIVER
                     -D${STM32_DRIVER_TARGET_DEVICE}

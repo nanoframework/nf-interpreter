@@ -485,8 +485,8 @@ struct CLR_GFX_Bitmap
     static HRESULT DeleteInstance(CLR_RT_HeapBlock &ref);
 
     static CLR_UINT32 CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
     void Bitmap_Initialize();
     void Clear();
@@ -497,6 +497,7 @@ struct CLR_GFX_Bitmap
 
     void DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1);
     void DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle);
+    void FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle);
     void DrawRoundedRectangle(
         const GFX_Pen &pen,
         const GFX_Brush &brush,
@@ -620,7 +621,7 @@ struct GraphicsDriver
     static int GetHeight();
     static int GetBitsPerPixel();
     static DisplayOrientation GetOrientation();
-    static void ChangeOrientation(DisplayOrientation newOrientation);
+    static bool ChangeOrientation(DisplayOrientation newOrientation);
 
     static void Clear(const PAL_GFX_Bitmap &bitmap);
 
@@ -633,6 +634,7 @@ struct GraphicsDriver
         const GFX_Pen &pen,
         const GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangle(const PAL_GFX_Bitmap &bitmap, const GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangle(
         const PAL_GFX_Bitmap &bitmap,
         const GFX_Pen &pen,
@@ -890,7 +892,7 @@ struct BmpDecoder
     BmpEncodingType encodingType;
     HRESULT BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize);
     HRESULT BmpStartOutput(CLR_GFX_Bitmap *bitmap);
-    static CLR_UINT32 BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
   private:
     CLR_RT_ByteArrayReader source;

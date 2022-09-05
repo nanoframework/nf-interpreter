@@ -374,8 +374,11 @@ void CLR_GFX_Bitmap::Decompress(const CLR_UINT8 *data, CLR_UINT32 size)
     }
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
+    (void)x;
+    (void)y;
+
     ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
@@ -394,8 +397,11 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT1
     return color;
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
+    (void)x;
+    (void)y;
+
     ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
@@ -541,6 +547,11 @@ void CLR_GFX_Bitmap::DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1
 void CLR_GFX_Bitmap::DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle)
 {
     GraphicsDriver::DrawRectangle(m_palBitmap, pen, brush, rectangle);
+}
+
+void CLR_GFX_Bitmap::FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle)
+{
+    GraphicsDriver::FillRectangle(m_palBitmap, brush, rectangle);
 }
 
 void CLR_GFX_Bitmap::DrawRoundedRectangle(

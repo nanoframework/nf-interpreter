@@ -14,9 +14,8 @@ include(AzureRTOS_${TARGET_SERIES}_GCC_options)
 # endif()
 
 # Azure RTOS settings and inclusion of build system
-set(THREADX_ARCH "cortex_m7" )
-set(THREADX_TOOLCHAIN "gnu" )
-set(TX_USER_FILE ${TARGET_BASE_LOCATION}/target_tx_user.h CACHE STRING "Enable TX user configuration")
+set(THREADX_ARCH "cortex_m7")
+set(THREADX_TOOLCHAIN "gnu")
 # set(UX_USER_FILE ${TARGET_BASE_LOCATION}/target_ux_user.h CACHE STRING "Enable UX user configuration")
 set(NX_USER_FILE ${TARGET_BASE_LOCATION}/target_nx_user.h CACHE STRING "Enable NX user configuration")
 set(NXD_ENABLE_FILE_SERVERS OFF CACHE BOOL "Disable fileX dependency by netxduo")

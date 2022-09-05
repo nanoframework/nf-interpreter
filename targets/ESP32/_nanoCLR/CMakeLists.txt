@@ -31,10 +31,6 @@ list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetH
 
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Time.cpp)
 
-
-# append files from Runtime.Native
-list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
-
 # append nanoHAL
 list(APPEND TARGET_ESP32_IDF_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetRandom.cpp)
 
