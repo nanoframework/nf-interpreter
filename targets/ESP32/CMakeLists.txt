@@ -76,10 +76,9 @@ endif()
 
 # if using FatFS need to remove IDF ffconfig.h so it can pick ours
 if(NF_FEATURE_HAS_SDCARD)
-    add_custom_command(
-        OUTPUT ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
-        PRE_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
+    )
 endif()
 
 # target folder was added in main CMakeList
