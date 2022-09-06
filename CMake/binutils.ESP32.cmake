@@ -122,6 +122,7 @@ macro(nf_add_platform_dependencies target)
             ${CMAKE_CURRENT_SOURCE_DIR}/${target}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${CMAKE_CURRENT_SOURCE_DIR}/Network
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -130,6 +131,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_wireprotocol(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -141,6 +143,7 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_debugger(
             EXTRA_INCLUDES
                 ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -151,6 +154,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_native_assemblies(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
     
@@ -166,6 +170,7 @@ macro(nf_add_platform_dependencies target)
             EXTRA_INCLUDES 
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
         )
 
@@ -198,6 +203,7 @@ macro(nf_add_platform_include_directories target)
     target_include_directories(${target}.elf PUBLIC
 
         ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}/targets/${RTOS}
         ${ESP32_IDF_INCLUDE_DIRS}
         ${NF_NativeAssemblies_INCLUDE_DIRS}
         ${NF_CoreCLR_INCLUDE_DIRS}
@@ -236,7 +242,7 @@ macro(nf_add_platform_sources target)
            
         # add header with target platform definitions
         configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/target_os.h @ONLY)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
                        ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
@@ -420,17 +426,24 @@ endmacro()
 # macro to add IDF as a library to the build and add the IDF components according to variant and options
 macro(nf_add_idf_as_library)
 
-    FetchContent_GetProperties(esp32_idf)
-
-    # discard any changes in the IDF git repo
-    # this is required to prevent IDF detecting dirty git repo and messing up the IDF version for bootloader
-    execute_process(COMMAND
-        ${GIT_EXECUTABLE}
-        checkout .
-        WORKING_DIRECTORY ${esp32_idf_SOURCE_DIR})
-
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
+    # "fix" the reported version so it doesn't show '-dirty' 
+    # this is because we could be deleting some files and tweaking others in the IDF
+    get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER)
+    string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+    set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+    set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
+
+    # for COMPILE DEFINITIONS it's a bit more work
+    get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
+
+    string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+    set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+    
+    message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
+
+    # add IDF app_main
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
