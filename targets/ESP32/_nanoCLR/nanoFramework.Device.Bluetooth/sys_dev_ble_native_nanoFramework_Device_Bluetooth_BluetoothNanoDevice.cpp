@@ -56,21 +56,21 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 
         switch (ble_operatingMode)
         {
-        case  BluetoothNanoDevice_Mode_NotRunning:
-            if (last_operatingMode == BluetoothNanoDevice_Mode_Client)
-            {
-                // Only close stack when running in CLient mode
-                Device_ble_dispose();
-            }
-            break;
-        
-        case  BluetoothNanoDevice_Mode_Server:
-            // Stack started in Servic provider , start advertising
-            break;
+            case BluetoothNanoDevice_Mode_NotRunning:
+                if (last_operatingMode == BluetoothNanoDevice_Mode_Client)
+                {
+                    // Only close stack when running in CLient mode
+                    Device_ble_dispose();
+                }
+                break;
 
-        case  BluetoothNanoDevice_Mode_Client:
-            StartStack(deviceName);
-            break;
+            case BluetoothNanoDevice_Mode_Server:
+                // Stack started in Servic provider , start advertising
+                break;
+
+            case BluetoothNanoDevice_Mode_Client:
+                StartStack(deviceName);
+                break;
         }
     }
     NANOCLR_NOCLEANUP_NOLABEL();

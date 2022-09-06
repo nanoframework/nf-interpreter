@@ -235,7 +235,7 @@ bool WaitForBleStackStart(int waitMs)
     return false;
 }
 
-void StartStack(char * devicename)
+void StartStack(char *devicename)
 {
     // Ignore if already started
     if (ble_hs_is_enabled())
@@ -252,4 +252,3 @@ void StartStack(char * devicename)
     // Wait for stack to be ready (Sync fired)
     WaitForBleStackStart(5000);
 }
-
