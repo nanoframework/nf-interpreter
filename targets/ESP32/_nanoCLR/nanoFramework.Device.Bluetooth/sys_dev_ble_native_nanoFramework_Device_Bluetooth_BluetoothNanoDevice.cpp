@@ -42,6 +42,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 {
     NANOCLR_HEADER();
     {
+        BluetoothNanoDevice_Mode last_operatingMode = ble_operatingMode;
+
         BluetoothNanoDevice_Mode newRunMode = (BluetoothNanoDevice_Mode)stack.Arg0().NumericByRef().u4;
 
         char *deviceName = (char *)stack.Arg1().RecoverString();
@@ -50,7 +52,26 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 
         ble_operatingMode = newRunMode;
 
-        BLE_DEBUG_PRINTF("run mode %d device name %s\n", ble_operatingMode, bleDeviceName);
+        BLE_DEBUG_PRINTF("run mode %d/%d device name %s\n", ble_operatingMode, last_operatingMode, bleDeviceName);
+
+        switch (ble_operatingMode)
+        {
+            case BluetoothNanoDevice_Mode_NotRunning:
+                if (last_operatingMode == BluetoothNanoDevice_Mode_Client)
+                {
+                    // Only close stack when running in CLient mode
+                    Device_ble_dispose();
+                }
+                break;
+
+            case BluetoothNanoDevice_Mode_Server:
+                // Stack started in Servic provider , start advertising
+                break;
+
+            case BluetoothNanoDevice_Mode_Client:
+                StartStack(deviceName);
+                break;
+        }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
