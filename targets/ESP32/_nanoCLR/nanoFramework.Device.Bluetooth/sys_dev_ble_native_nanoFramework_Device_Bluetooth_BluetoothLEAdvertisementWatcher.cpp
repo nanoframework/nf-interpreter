@@ -69,12 +69,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdv
 
         BLE_DEBUG_PRINTF("Start Advertisement Watcher - Mode %d\n", bleScanActive);
 
-        // Initialise BLE stack
-        DeviceBleInit();
-        StartBleTask(bleDeviceName);
-
-        // Note:  BleCentralStartScan will be called when stack is ready (sync event called)
-        // see Esp32BleOnSync()
+        // Start scan
+        BleCentralStartScan();
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -87,8 +83,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdv
         BLE_DEBUG_PRINTF("Stop Advertisement Watcher\n");
 
         BleCentralCancelScan();
-
-        Device_ble_dispose();
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }

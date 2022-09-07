@@ -101,8 +101,7 @@ typedef enum __nfpack BluetoothNanoDevice_Mode
 {
     BluetoothNanoDevice_Mode_NotRunning = 0,
     BluetoothNanoDevice_Mode_Server = 1,
-    BluetoothNanoDevice_Mode_Scanning = 2,
-    BluetoothNanoDevice_Mode_Central = 3,
+    BluetoothNanoDevice_Mode_Client = 2,
 } BluetoothNanoDevice_Mode;
 
 typedef enum __nfpack GattCharacteristicProperties
@@ -395,6 +394,18 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
     //--//
 };
 
+struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice
+{
+    static const int FIELD_STATIC___deviceName = 1;
+    static const int FIELD_STATIC___mode = 2;
+
+    NANOCLR_NATIVE_DECLARE(NativeInitilise___STATIC__VOID);
+    NANOCLR_NATIVE_DECLARE(
+        NativeSetOperationMode___STATIC__VOID__nanoFrameworkDeviceBluetoothBluetoothNanoDeviceMode__STRING);
+
+    //--//
+};
+
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattDeviceServicesResult
 {
     static const int FIELD___protocolError = 1;
@@ -507,7 +518,7 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribut
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice
 {
-    static const int FIELD_STATIC___routingHandle = 1;
+    static const int FIELD_STATIC___routingHandle = 3;
 
     static const int FIELD___connectionStatus = 1;
     static const int FIELD___bluetoothAddress = 2;
@@ -548,11 +559,11 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventS
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventListener
 {
-    static const int FIELD_STATIC___characteristicMap = 2;
-    static const int FIELD_STATIC___leDeviceMap = 3;
-    static const int FIELD_STATIC___watcher = 4;
-    static const int FIELD_STATIC___watcherEvent = 5;
-    static const int FIELD_STATIC___watcherQueue = 6;
+    static const int FIELD_STATIC___characteristicMap = 4;
+    static const int FIELD_STATIC___leDeviceMap = 5;
+    static const int FIELD_STATIC___watcher = 6;
+    static const int FIELD_STATIC___watcherEvent = 7;
+    static const int FIELD_STATIC___watcherQueue = 8;
 
     //--//
 };
@@ -562,18 +573,6 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignal
     static const int FIELD___inRangeThresholdInDBm = 1;
     static const int FIELD___outOfRangeThresholdInDBm = 2;
     static const int FIELD___outOfRangeTimeout = 3;
-
-    //--//
-};
-
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice
-{
-    static const int FIELD_STATIC___deviceName = 7;
-    static const int FIELD_STATIC___mode = 8;
-
-    NANOCLR_NATIVE_DECLARE(NativeInitilise___STATIC__VOID);
-    NANOCLR_NATIVE_DECLARE(
-        NativeSetOperationMode___STATIC__VOID__nanoFrameworkDeviceBluetoothBluetoothNanoDeviceMode__STRING);
 
     //--//
 };

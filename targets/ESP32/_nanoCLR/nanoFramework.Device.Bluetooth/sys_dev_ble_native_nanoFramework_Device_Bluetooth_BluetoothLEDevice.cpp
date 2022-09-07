@@ -61,6 +61,16 @@ central_context *GetContext(ushort connection)
     return NULL;
 }
 
+void InitConnectionList()
+{
+    // Init linked list on first connect
+    if (!ConnectionList_inited)
+    {
+        ConnectionList.Initialize();
+        ConnectionList_inited = true;
+    }
+}
+
 // Add connection by device connection(peer) handle to list
 central_context *AddConnection(ushort connection)
 {
@@ -103,6 +113,8 @@ void TerminateConnection(ushort connection)
 // Return number of active connections
 int ConnectionCount()
 {
+    InitConnectionList();
+
     return ConnectionList.NumOfNodes();
 }
 
@@ -293,26 +305,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        // If BLE stack not started then start it
-        if (!ble_hs_is_enabled())
-        {
-            // Initialise BLE stack
-            DeviceBleInit();
-            StartBleTask(bleDeviceName);
-
-            // Wait to be ready
-            while (ble_hs_is_enabled() == 0)
-            {
-                vTaskDelay(100);
-            }
-        }
-
-        // Init linked list on first connect
-        if (!ConnectionList_inited)
-        {
-            ConnectionList.Initialize();
-            ConnectionList_inited = true;
-        }
+        // Init list if not inited
+        InitConnectionList();
 
         // Get Params
         u64_t bleAddress = stack.Arg1().NumericByRef().u8;
@@ -409,13 +403,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
         BLE_DEBUG_PRINTF("NativeDispose handle:%x\n", conn_Handle);
 
         RemoveConnection(conn_Handle);
-
-        // If last connection then stop ble stack
-        if (ConnectionCount() == 0)
-        {
-            BLE_DEBUG_PRINTF("NativeDispose last connection:%x\n", conn_Handle);
-            Device_ble_dispose();
-        }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
