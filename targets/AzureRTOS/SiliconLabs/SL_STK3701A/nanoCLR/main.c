@@ -166,7 +166,7 @@ void tx_application_define(void *first_unused_memory)
         }
     }
 
-#if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE
+#if GECKO_FEATURE_USBD_HID == TRUE || HAL_WP_USE_USB_CDC == TRUE || GECKO_FEATURE_USBD_WINUSB == TRUE
     // can't call USBD init twice
     sli_usbd_init();
     sli_usbd_configuration_config0_init();
@@ -175,6 +175,11 @@ void tx_application_define(void *first_unused_memory)
 #if GECKO_FEATURE_USBD_HID == TRUE
     sli_usbd_hid_hid0_init();
     usb_device_hid_app_init();
+#endif
+
+#if GECKO_FEATURE_USBD_WINUSB == TRUE
+// TODO
+    //usb_device_winusb_app_init();
 #endif
 
 #if HAL_WP_USE_USB_CDC == TRUE

@@ -157,3 +157,17 @@ void sli_usbd_vendor_winusb_init()
   }
 }
 
+void sl_usbd_vendor_winusb_on_enable_event(void)
+{
+
+}
+
+void sl_usbd_vendor_winusb_on_disable_event(void)
+{
+
+}
+
+void sl_usbd_vendor_winusb_on_setup_request_event(const sl_usbd_setup_req_t *p_setup_req)
+{
+  
+}

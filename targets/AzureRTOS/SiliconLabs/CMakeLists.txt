@@ -9,6 +9,7 @@ include(Gecko_SDK)
 set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
 option(GECKO_FEATURE_USBD_HID "option to use Gecko SDK HID class")
+option(GECKO_FEATURE_USBD_WINUSB "option to use Gecko SDK USB vendor class for WinUSB")
 
 #################################################################
 # Options for Wire Protocol channel
@@ -35,6 +36,14 @@ if(GECKO_FEATURE_USBD_HID)
 
 else()
     set(GECKO_FEATURE_USBD_HID_OPTION FALSE CACHE INTERNAL "GECKO_FEATURE_USBD_HID for USBD HID")
+endif()
+
+if(GECKO_FEATURE_USBD_WINUSB)
+
+    set(GECKO_FEATURE_USBD_WINUSB_OPTION TRUE CACHE INTERNAL "GECKO_FEATURE_USBD_WINUSB for USBD HID")
+
+else()
+    set(GECKO_FEATURE_USBD_WINUSB_OPTION FALSE CACHE INTERNAL "GECKO_FEATURE_USBD_WINUSB for USBD HID")
 endif()
 
 

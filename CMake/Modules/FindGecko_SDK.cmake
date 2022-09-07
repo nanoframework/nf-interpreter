@@ -38,7 +38,8 @@ list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/service/udel
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/platform/driver/i2cspm/inc)
 
 if(GECKO_FEATURE_USBD_HID OR 
-   HAL_WP_USE_USB_CDC)
+   HAL_WP_USE_USB_CDC OR
+   GECKO_FEATURE_USBD_WINUSB)
 
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/inc)
     list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/protocol/usb/src)
@@ -139,7 +140,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
         list(APPEND gecko_sdk_srcs sl_malloc.c)
-    
+
     endif()
 
     if(HAL_WP_USE_SERIAL)
@@ -169,8 +170,19 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     endif()
 
-    list(APPEND gecko_sdk_srcs sl_usbd_class_vendor.c)
+    if(GECKO_FEATURE_USBD_WINUSB)
 
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_core.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c) 
+        list(APPEND gecko_sdk_srcs sl_usbd_class_vendor.c)
+        list(APPEND gecko_sdk_srcs sl_usbd_init.c)
+        list(APPEND gecko_sdk_srcs sl_malloc.c)
+
+    endif()
 
     foreach(src_file ${gecko_sdk_srcs})
 
@@ -232,6 +244,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid_report.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
 
