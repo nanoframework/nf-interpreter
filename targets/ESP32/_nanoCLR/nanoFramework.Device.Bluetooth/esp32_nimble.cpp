@@ -426,13 +426,9 @@ static void Esp32BleOnSync(void)
             BLE_DEBUG_PRINTF("Server advertise started\n");
             break;
 
-        case BluetoothNanoDevice_Mode_Scanning:
-            BleCentralStartScan();
-            BLE_DEBUG_PRINTF("Advertisement Watcher started\n");
-            break;
+        case BluetoothNanoDevice_Mode_Client:
+            BLE_DEBUG_PRINTF("Client mode started\n");
 
-        case BluetoothNanoDevice_Mode_Central:
-            BLE_DEBUG_PRINTF("Central mode started\n");
         default:
             break;
     }
