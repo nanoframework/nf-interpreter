@@ -67,7 +67,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
         phy_config.reset_timeout_ms,
         phy_config.phy_addr);
 
-#ifdef ESP32_ETHERNET_INTERNAL
+#if ESP32_ETHERNET_INTERNAL == TRUE
 
     // Internal Ethernet
 
@@ -106,7 +106,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     esp_eth_phy_t *phy = esp_eth_phy_new_ksz8041(&phy_config);
 #endif
 
-#elif defined(ESP32_ETHERNET_SPI)
+#elif ESP32_ETHERNET_SPI == TRUE
     // Or Use SPI ethernet module
     // Initialise SPI bus
     gpio_install_isr_service(0);
@@ -160,7 +160,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
     ESP_LOGI(TAG, "Ethernet W5500 spi\n");
 
-#elif defined(ESP32_ETHERNET_SPI_MODULE_ENJ28J60)
+#elif ESP32_ETHERNET_INTERFACE == ENJ28J60
     spi_device_interface_config_t devcfg = {
         .command_bits = 1,
         .address_bits = 7,
@@ -177,8 +177,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     ESP_LOGI(TAG, "Ethernet ENJ28J60 spi\n");
 
 #else
-// No SPI module defined
-#error "Ethernet SPI module type not defined"
+#error "Ethernet option not defined (has to be either SPI or INTERNAL)"
 #endif
 
 #endif // ESP32_ETHERNET_SPI

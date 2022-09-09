@@ -5,6 +5,57 @@
 
 include(binutils.common)
 
+# process ESP32 Ethernet options
+macro(nf_process_esp32_ethernet_options)
+
+    # need to process this?
+    if(ESP32_ETHERNET_SUPPORT)
+
+        if(NOT ESP32_ETHERNET_INTERFACE)
+            # default to LAN8720
+            set(ESP32_ETHERNET_INTERFACE "LAN8720" CACHE INTERNAL "Defaulting LAN8720")
+
+            message(STATUS "\n\n*** No Ethernet interface defined. Defaulting to LAN8720. ***\n\n")
+        endif()
+
+        # list of supported PHYs
+        set(ESP32_SUPPORTED_PHY "LAN8720" "IP101" "RTL8201" "DP83848" "KSZ8041" CACHE INTERNAL "supported ESP32 PHYs")
+        # list of supported ETH SPI PHYs
+        # ENJ28J60 currently not supported, driver in IDF examples (TODO)
+        set(ESP32_SUPPORTED_ETH_SPI "W5500" "DM9051" "ENJ28J60" CACHE INTERNAL "supported ESP32 ETH SPIs")
+
+        list(FIND ESP32_SUPPORTED_PHY ${ESP32_ETHERNET_INTERFACE} ESP32_PHY_INDEX)
+
+        if(ESP32_PHY_INDEX EQUAL -1)
+
+            # can't find this under supported PHYs
+        
+            # try with SPIs
+            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETH_SPI_INDEX)
+            
+            if(ESP32_ETH_SPI_INDEX EQUAL -1)
+                # can't find it under SPIs either
+                message(FATAL_ERROR "\n\nSomething wrong happening: can't find support for Ethernet interface ${ESP32_ETHERNET_INTERFACE}!\n\n")
+            else()
+                # store SPI option
+                set(ESP32_ETHERNET_SPI_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+                set(ESP32_ETHERNET_INTERNAL_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+                # set define with SPI module
+                set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_SPI_MODULE_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet SPI module option")
+            endif()
+
+        else()
+            # store PHY option
+            set(ESP32_ETHERNET_INTERNAL_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+            set(ESP32_ETHERNET_SPI_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+            # set define with PHY name
+            set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_PHY_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet PHY interface option")
+        endif()
+
+    endif()
+
+endmacro()
+
 # find a set of files on a list of possible locations
 macro(nf_find_esp32_files_at_location files locations)
 
@@ -165,6 +216,8 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_network(
             BUILD_TARGET
                 ${target}
+            EXTRA_COMPILE_DEFINITIONS
+                ${ESP32_ETHERNET_DEFINES}
             EXTRA_SOURCES 
                 ${TARGET_ESP32_IDF_NETWORK_SOURCES}
             EXTRA_INCLUDES 
@@ -621,7 +674,7 @@ macro(nf_add_idf_as_library)
     set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 
     if(USE_NETWORKING_OPTION)
-        
+
         FetchContent_GetProperties(esp32_idf)
 
         # get list of source files for lwIP
