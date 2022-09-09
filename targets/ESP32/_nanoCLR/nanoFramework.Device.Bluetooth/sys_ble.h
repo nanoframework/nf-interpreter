@@ -85,6 +85,7 @@ void StartBleTask(char *deviceName);
 bool DeviceBleInit();
 void Device_ble_dispose();
 int Esp32GapEvent(struct ble_gap_event *event, void *arg);
+int ConnectionCount();
 
 extern bleServicesContext bleContext;
 extern device_ble_event_data ble_event_data;
