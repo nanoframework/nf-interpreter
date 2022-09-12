@@ -9,12 +9,18 @@ include(FetchContent)
 FetchContent_GetProperties(gecko_sdk)
 
 # set include directories
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
-list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
+
+# these are locations for SDK config headers
+# the locations for the target need to come before the generic ones
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/autogen)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/config)
+# now the locations for the generic one (to be used in case there are none for the target)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/autogen)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/config)
+
+# now all the rest
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_include)
+list(APPEND Gecko_SDK_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
 
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/common/bsp)
 list(APPEND Gecko_SDK_INCLUDE_DIRS ${gecko_sdk_SOURCE_DIR}/hardware/kit/${TARGET_BOARD_SHORT}_${TARGET_SERIES}/config)
@@ -87,7 +93,9 @@ set(gecko_sdk_srcs
     sl_device_init_dcdc_s1.c
     sl_device_init_emu_s1.c
     sl_device_init_hfxo_s1.c
+    sl_device_init_hfrco.c
     sl_device_init_lfxo_s1.c
+    sl_device_init_lfrco.c
     sl_device_init_nvic.c 
     sl_power_manager.c
     sl_power_manager_hal_s0_s1.c
@@ -104,7 +112,9 @@ set(gecko_sdk_srcs
     sl_udelay_armv6m_gcc.S
     sl_uartdrv_init.c
     
+    sl_device_init_clocks_default.c
     sl_device_init_clocks.c
+    sl_event_handler_default.c
     sl_event_handler.c
     sl_board_default_init_stub.c
     sl_i2cspm_init.c
