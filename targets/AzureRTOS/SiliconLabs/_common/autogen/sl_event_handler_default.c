@@ -12,6 +12,8 @@
 #include "sl_device_init_dcdc.h"
 #include "sl_device_init_hfxo.h"
 #include "sl_device_init_lfxo.h"
+#include "sl_device_init_hfrco.h"
+#include "sl_device_init_lfrco.h"
 #include "sl_device_init_clocks.h"
 #include "sl_device_init_emu.h"
 #include "sl_board_control.h"
@@ -26,7 +28,8 @@
 #include <tx_api.h>
 #include <nanoCLR_Headers.h>
 
-void sl_platform_init(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_platform_init(void)
 {
     CHIP_Init();
     sl_device_init_nvic();
@@ -40,13 +43,15 @@ void sl_platform_init(void)
     sl_power_manager_init();
 }
 
-void sl_kernel_start(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_kernel_start(void)
 {
     // Enter the ThreadX kernel.
     tx_kernel_enter();
 }
 
-void sl_driver_init(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_driver_init(void)
 {
     sl_i2cspm_init_instances();
 
@@ -57,7 +62,8 @@ void sl_driver_init(void)
     sl_driver_init_target();
 }
 
-void sl_service_init(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_service_init(void)
 {
     sl_board_configure_vcom();
     sl_sleeptimer_init();
@@ -67,20 +73,24 @@ void sl_service_init(void)
 #endif
 }
 
-void sl_stack_init(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_stack_init(void)
 {
     sl_stack_init_target();
 }
 
-void sl_internal_app_init(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_internal_app_init(void)
 {
 }
 
-void sl_platform_process_action(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_platform_process_action(void)
 {
 }
 
-void sl_service_process_action(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_service_process_action(void)
 {
 }
 
@@ -88,11 +98,13 @@ void sl_stack_process_action(void)
 {
 }
 
-void sl_internal_app_process_action(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_internal_app_process_action(void)
 {
 }
 
-void sl_iostream_init_instances(void)
+// implemented as weak function to allow overriding at platform level
+__nfweak void sl_iostream_init_instances(void)
 {
 #if HAL_WP_USE_SERIAL == TRUE
     sl_iostream_usart_init_instances();
