@@ -11,6 +11,8 @@ set(THREADX_TOOLCHAIN "gnu" )
 # set(NXD_ENABLE_FILE_SERVERS OFF CACHE BOOL "Disable fileX dependency by netxduo")
 
 set(SL_BOARD_NAME "BRD2204A" PARENT_SCOPE)
+# include BSP from Gecko SDK
+set(GECKO_SDK_BSP TRUE CACHE BOOL "Setting Gecko BSP flag ")
 
 add_subdirectory(${azure_rtos_SOURCE_DIR} threadx)
 # add_subdirectory(${azure_rtos_filex_SOURCE_DIR} filex)
