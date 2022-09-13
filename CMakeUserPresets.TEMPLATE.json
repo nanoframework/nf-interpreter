@@ -671,6 +671,11 @@
             "configurePreset": "SL_STK3701A_REVB"
         },
         {
+            "name": "SKY_EEVB_PROTO1",
+            "displayName": "SKY_EEVB_PROTO1",
+            "configurePreset": "SKY_EEVB_PROTO1"
+        },
+        {
             "name": "ESP32_PSRAM_REV0",
             "displayName": "ESP32_PSRAM_REV0",
             "configurePreset": "ESP32_PSRAM_REV0"
