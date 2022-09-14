@@ -12,7 +12,7 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08004000, len = 2M - 16k - 1664k      /* flash size less the space reserved for nanoBooter and application deployment*/
+    flash0     (rx) : org = 0x08004000, len = 2M - 16k - 1536k      /* flash size less the space reserved for nanoBooter and application deployment*/
     flash1     (rx) : org = 0x00000000, len = 0
     flash2     (rx) : org = 0x00000000, len = 0
     flash3     (rx) : org = 0x00000000, len = 0
@@ -21,7 +21,7 @@ MEMORY
     flash6     (rx) : org = 0x00000000, len = 0
     flash7     (rx) : org = 0x00000000, len = 0
     config     (rw) : org = 0x00000000, len = 0                     /* space reserved for configuration block */
-    deployment (rx) : org = 0x08040000, len = 1664k                 /* space reserved for application deployment */
+    deployment (rx) : org = 0x08060000, len = 1536k                 /* space reserved for application deployment */
     ramvt      (wx) : org = 0x00000000, len = 0                     /* initial RAM address is reserved for a copy of the vector table */
     ram0       (wx) : org = 0x20000030, len = 192k-48               /* SRAM1 + SRAM2 + SRAM3 */
     ram1       (wx) : org = 0x20000000, len = 112k                  /* SRAM1 */
