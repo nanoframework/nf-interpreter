@@ -18,6 +18,7 @@ set(nanoFramework.GiantGecko.Adc_SRCS
     nano_gg_adc_native.cpp
 
 
+    nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel.cpp
     nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController.cpp
 
 )
