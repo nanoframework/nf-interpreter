@@ -51,7 +51,7 @@ macro(nf_set_link_options)
 
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -fuse-linker-plugin -Os ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -flto -fuse-linker-plugin -Os ")
     endif()
 
     # include libraries in build
