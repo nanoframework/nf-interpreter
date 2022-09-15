@@ -5,6 +5,11 @@
 //
 #include "Core.h"
 
+#ifdef __GNUC__
+#pragma GCC push_options
+#pragma GCC optimize("O1")
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HRESULT CLR_RT_HeapBlock_Lock::CreateInstance(
@@ -237,3 +242,7 @@ void CLR_RT_HeapBlock_Lock::Relocate_Owner()
 {
     NATIVE_PROFILE_CLR_CORE();
 }
+
+#ifdef __GNUC__
+#pragma GCC push_options
+#endif
