@@ -5,7 +5,9 @@
 //
 
 #include "nano_gg_adc_native.h"
+#include "nano_gg_adc_native_target.h"
 
+#define ADC_FREQ 16000000
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeInit___VOID( CLR_RT_StackFrame &stack )
 {
@@ -22,7 +24,56 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    int channel;
+    NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
+    ADC_Init_TypeDef adcInit;
+    CMU_Clock_TypeDef adcClock;
+    ADC_TypeDef *adcDriver = NULL;
+
+    adcInit = ADC_INIT_DEFAULT;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // Get channel from argument
+    channel = stack.Arg1().NumericByRef().s4;
+
+    adcDefinition = AdcPortPinConfig[channel];
+
+    // we should remove from the build the ADC options that aren't implemented
+    // plus we have to use the default to catch invalid ADC Ids
+    switch (adcDefinition.adcIndex)
+    {
+
+#if GECKO_USE_ADC0
+        case 0:
+            adcDriver = ADC0;
+            adcClock = cmuClock_ADC0;
+            break;
+#endif
+
+#if GECKO_USE_ADC1
+        case 1:
+            adcDriver = ADC1;
+            adcClock = cmuClock_ADC1;
+            break;
+#endif
+
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // Enable ADC clock
+    CMU_ClockEnable(cmuClock_HFPER, true);
+    CMU_ClockEnable(adcClock, true);
+
+    // Init to max ADC clock for Series 1
+    adcInit.prescale = ADC_PrescaleCalc(ADC_FREQ, 0);
+    adcInit.timebase = ADC_TimebaseCalc(0);
+
+    // start ADC
+    ADC_Init(adcDriver, &adcInit);
 
     NANOCLR_NOCLEANUP();
 }

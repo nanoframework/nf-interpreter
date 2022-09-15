@@ -5,7 +5,7 @@
 //
 
 #include "nano_gg_adc_native.h"
-
+#include "nano_gg_adc_native_target.h"
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::get_LastContinuousValue___I4( CLR_RT_StackFrame &stack )
 {
