@@ -6,20 +6,19 @@
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.GiantGecko.Adc)
 
-
 # set include directories
-list(APPEND nanoFramework.Device.OneWire_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND nanoFramework.Device.OneWire_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
-list(APPEND nanoFramework.GiantGecko.Adc_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/nanoFramework.GiantGecko.Adc)
+list(APPEND nanoFramework.GiantGecko.Adc_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND nanoFramework.GiantGecko.Adc_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 
 # source files
 set(nanoFramework.GiantGecko.Adc_SRCS
 
     nano_gg_adc_native.cpp
 
-
+    nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel.cpp
     nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController.cpp
 
+    target_nano_gg_adc_config.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.GiantGecko.Adc_SRCS})

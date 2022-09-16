@@ -9,10 +9,10 @@ include(binutils.common)
 function(nf_set_optimization_options target) 
 
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3>
-        $<$<CONFIG:MinSizeRel>:-Os>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3-ggdb>
     )
 
 endfunction()
