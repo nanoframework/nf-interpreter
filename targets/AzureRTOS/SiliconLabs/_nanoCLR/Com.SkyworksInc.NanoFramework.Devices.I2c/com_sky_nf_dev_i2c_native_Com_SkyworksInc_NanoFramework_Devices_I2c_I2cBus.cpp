@@ -139,7 +139,7 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
             {
                 I2C0_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
 
-                if (I2C1_PAL.Configuration == NULL)
+                if (I2C0_PAL.Configuration == NULL)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
@@ -150,7 +150,7 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
                 ConfigPins_I2C0();
 
                 I2C0_PAL.Configuration->port = I2C0;
-                palI2c = I2C1_PAL;
+                palI2c = &I2C0_PAL;
 
                 // increase device counter
                 I2C0_DeviceCounter++;
@@ -175,7 +175,7 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
                 ConfigPins_I2C1();
 
                 I2C1_PAL.Configuration->port = I2C1;
-                palI2c = I2C1_PAL;
+                palI2c = &I2C1_PAL;
 
                 // increase device counter
                 I2C1_DeviceCounter++;
