@@ -13,7 +13,7 @@ typedef Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannelConfig
 void ParseAdcChannelConfig(CLR_RT_HeapBlock *channelConfiguration, void *adcInit)
 {
     ADC_InitSingle_TypeDef channelInitSingle = ADC_INITSINGLE_DEFAULT;
-    ADC_InitScan_TypeDef channelInitScan = ADC_INITSINGLE_DEFAULT;
+    //ADC_InitScan_TypeDef channelInitScan = ADC_INITSCAN_DEFAULT;
 
     // now map the AdcChannelConfiguration object to the native structure
     channelInitSingle.prsSel =
