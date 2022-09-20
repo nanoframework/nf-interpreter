@@ -36,4 +36,14 @@ typedef struct
 extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
 extern const int AdcChannelCount;
 
+#if GECKO_USE_ADC0
+extern ADC_Init_TypeDef adc0Init;
+extern bool adc0Initialized;
+#endif
+#if GECKO_USE_ADC1
+extern ADC_Init_TypeDef adc1Init;
+extern bool adc1Initialized;
+#endif
+
+
 #endif // SYS_DEV_ADC_NATIVE_TARGET_H

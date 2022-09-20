@@ -13,6 +13,7 @@
 #include <nanoHAL_Graphics.h>
 
 #include <dmadrv.h>
+#include <target_nano_gg_adc_config.h>
 
 // #if (HAL_USE_CAN == TRUE)
 // #include <nf_device_can_native_target.h>
@@ -25,6 +26,10 @@
 
 #if (HAL_USE_PWM == TRUE)
 extern void DeInitPwm();
+#endif
+
+#if (GECKO_USE_ADC0 == TRUE) || (GECKO_USE_ADC1 == TRUE)
+#include <nano_gg_adc_native_target.h>
 #endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
@@ -126,6 +131,12 @@ void nanoHAL_Initialize()
 
 #endif
 
+#if GECKO_USE_ADC0
+adc0Initialized = false;
+#endif
+#if GECKO_USE_ADC1
+adc1Initialized = false;
+#endif
     // #if (HAL_USE_UART == TRUE)
 
     // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
@@ -258,6 +269,15 @@ void nanoHAL_Uninitialize()
 
 #if (HAL_USE_SPI == TRUE)
     nanoSPI_Uninitialize();
+#endif
+
+#if GECKO_USE_ADC0
+ADC_Reset(ADC0);
+adc0Initialized = false;
+#endif
+#if GECKO_USE_ADC1
+ADC_Reset(ADC1);
+adc1Initialized = false;
 #endif
 
     // #if (HAL_USE_UART == TRUE)
