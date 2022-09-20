@@ -104,7 +104,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
     )
     {
         // get a pointer to the managed AdcConfiguration object instance
-        adcConfiguration = pThis[FIELD___acdConfiguration].Dereference();
+        adcConfiguration = pThis[FIELD___adcConfiguration].Dereference();
 
         // init with default values
         *adcInit = ADC_INIT_DEFAULT;

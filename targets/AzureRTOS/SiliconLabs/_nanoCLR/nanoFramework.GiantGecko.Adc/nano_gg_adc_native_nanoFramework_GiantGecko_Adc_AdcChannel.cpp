@@ -41,7 +41,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::get_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeReadValue___I4(
+HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeReadValue___I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -99,7 +99,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::Nati
     samplesCount = averageCount;
 
     // get a pointer to the channel AdcChannelConfiguration object instance
-    ParseAdcChannelConfig(pThis[FIELD___averageCount].Dereference(), &channelInitSingle);
+    ParseAdcChannelConfig(pThis[FIELD___adcChannelConfiguration].Dereference(), &channelInitSingle);
 
     ADC_InitSingle(adcDriver, &channelInitSingle);
 
