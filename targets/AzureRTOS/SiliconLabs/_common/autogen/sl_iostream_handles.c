@@ -1,11 +1,18 @@
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
 #include "string.h"
+#include <target_platform.h>
 
 const sl_iostream_instance_info_t *sl_iostream_instances_info[] = {
 
+#if HAL_WP_USE_SERIAL == TRUE
     &sl_iostream_instance_vcom_info,
-  
+#endif
+
+#if HAL_USE_ONEWIRE == TRUE
+    &sl_iostream_instance_onewire_info,
+#endif
+
 };
 
 const uint32_t sl_iostream_instances_count = sizeof(sl_iostream_instances_info) / sizeof(sl_iostream_instances_info[0]);
