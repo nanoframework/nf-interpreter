@@ -12,51 +12,51 @@
 
 // set missing defines
 #if defined(USART0)
-#ifndef GECKO_USE_USART0
-#define GECKO_USE_USART0 FALSE
+#ifndef NF_ONEWIRE_USE_USART0
+#define NF_ONEWIRE_USE_USART0 FALSE
 #endif
 #else
-#define GECKO_USE_USART0 FALSE
+#define NF_ONEWIRE_USE_USART0 FALSE
 #endif
 
 #if defined(USART1)
-#ifndef GECKO_USE_USART1
-#define GECKO_USE_USART1 FALSE
+#ifndef NF_ONEWIRE_USE_USART1
+#define NF_ONEWIRE_USE_USART1 FALSE
 #endif
 #else
-#define GECKO_USE_USART1 FALSE
+#define NF_ONEWIRE_USE_USART1 FALSE
 #endif
 
 #if defined(USART2)
-#ifndef GECKO_USE_USART2
-#define GECKO_USE_USART2 FALSE
+#ifndef NF_ONEWIRE_USE_USART2
+#define NF_ONEWIRE_USE_USART2 FALSE
 #endif
 #else
-#define GECKO_USE_USART2 FALSE
+#define NF_ONEWIRE_USE_USART2 FALSE
 #endif
 
 #if defined(USART3)
-#ifndef GECKO_USE_USART3
-#define GECKO_USE_USART3 FALSE
+#ifndef NF_ONEWIRE_USE_USART3
+#define NF_ONEWIRE_USE_USART3 FALSE
 #endif
 #else
-#define GECKO_USE_USART3 FALSE
+#define NF_ONEWIRE_USE_USART3 FALSE
 #endif
 
 #if defined(USART4)
-#ifndef GECKO_USE_USART4
-#define GECKO_USE_USART4 FALSE
+#ifndef NF_ONEWIRE_USE_USART4
+#define NF_ONEWIRE_USE_USART4 FALSE
 #endif
 #else
-#define GECKO_USE_USART4 FALSE
+#define NF_ONEWIRE_USE_USART4 FALSE
 #endif
 
 #if defined(USART5)
-#ifndef GECKO_USE_USART5
-#define GECKO_USE_USART5 FALSE
+#ifndef NF_ONEWIRE_USE_USART5
+#define NF_ONEWIRE_USE_USART5 FALSE
 #endif
 #else
-#define GECKO_USE_USART5 FALSE
+#define NF_ONEWIRE_USE_USART5 FALSE
 #endif
 
 // struct with parameters for 1-Wire working thread
@@ -80,6 +80,7 @@ typedef enum
     ONEWIRE_ACTIVE
 } oneWireState;
 
+
 // character to send on the UART to mimic 1-Wire bus signals
 // 1-Wire write 0 time slot
 #define IWIRE_WR0 0x00
@@ -94,25 +95,15 @@ typedef enum
 // conditional search ROM
 #define COND_SEARCH_ROM 0xEC
 
-#if defined(_USART_ROUTELOC0_MASK)
+#include "sl_iostream.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// the following macro defines a function that configures the GPIO pins for an Gecko USART peripheral
-// it gets called in the oneWire_lld_start function
-// this is required because the USART peripherals can use multiple GPIO configuration combinations
-#define INIT_ONEWIRE_CONFIG(num, usart_tx_port_location, usart_rx_location)                                            \
-    void InitSpiConfig##num(NF_SpiDriver_Init_t &initSpiData, bool isHalfDuplex)                                       \
-    {                                                                                                                  \
-        initSpiData.port = USART##num;                                                                                 \
-        initSpiData.portLocationTx = mosi_port_location;                                                               \
-        initSpiData.portLocationClk = sck_port_location;                                                               \
-        if (!isHalfDuplex)                                                                                             \
-        {                                                                                                              \
-            initSpiData.portLocationRx = miso_port_location;                                                           \
-        }                                                                                                              \
-    }
+sl_status_t sl_iostream_usart_init_onewire(void);
 
-#else
-#error "This routing configuration is not supported. Need to have _USART_ROUTELOC0_MASK."
+#ifdef __cplusplus
+}
 #endif
 
 #endif // _NF_DEV_ONEWIRE_TARGET_H_

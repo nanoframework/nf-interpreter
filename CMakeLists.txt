@@ -580,8 +580,10 @@ endif()
 
 if(API_nanoFramework.Device.OneWire)
     set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################
