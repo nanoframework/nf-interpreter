@@ -8,5 +8,5 @@
 ///////////
 
 // enable USART0
-#define NF_ONEWIRE_STM32_UART_USE_USART0 TRUE
-#define GECKO_USE_USART0 TRUE
+#define NF_ONEWIRE_USE_USART0 TRUE
+#define GECKO_USE_USART0      TRUE
