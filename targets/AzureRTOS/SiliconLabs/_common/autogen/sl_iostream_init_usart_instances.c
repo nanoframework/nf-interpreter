@@ -58,12 +58,9 @@ static sl_power_manager_em_transition_event_info_t events_info = {
 static sl_power_manager_em_transition_event_handle_t events_handle;
 #endif
 
-#if HAL_WP_USE_SERIAL == TRUE
-sl_status_t sl_iostream_usart_init_vcom(void);
-#endif
-
 // Instance(s) handle and context variable
 #if HAL_WP_USE_SERIAL == TRUE
+sl_status_t sl_iostream_usart_init_vcom(void);
 static sl_iostream_uart_t sl_iostream_vcom;
 sl_iostream_t *sl_iostream_vcom_handle = &sl_iostream_vcom.stream;
 sl_iostream_uart_t *sl_iostream_uart_vcom_handle = &sl_iostream_vcom;
@@ -150,6 +147,21 @@ sl_status_t sl_iostream_usart_init_vcom(void)
 #endif
 
 #if HAL_USE_ONEWIRE == TRUE
+
+sl_status_t sl_iostream_usart_init_onewire(void);
+static sl_iostream_uart_t sl_iostream_onewire;
+sl_iostream_t *sl_iostream_onewire_handle = &sl_iostream_onewire.stream;
+sl_iostream_uart_t *sl_iostream_uart_onewire_handle = &sl_iostream_onewire;
+static sl_iostream_usart_context_t context_onewire;
+static uint8_t rx_buffer_onewire[SL_IOSTREAM_USART_ONEWIRE_RX_BUFFER_SIZE];
+sl_iostream_instance_info_t sl_iostream_instance_onewire_info = {
+    .handle = &sl_iostream_onewire.stream,
+    .name = "ONEWIRE",
+    .type = SL_IOSTREAM_TYPE_UART,
+    .periph_id = SL_IOSTREAM_USART_ONEWIRE_PERIPHERAL_NO,
+    .init = sl_iostream_usart_init_onewire,
+};
+
 sl_status_t sl_iostream_usart_init_onewire(void)
 {
     sl_status_t status;
@@ -240,6 +252,8 @@ void sl_iostream_usart_init_instances(void)
 #endif
 }
 
+#if HAL_WP_USE_SERIAL == TRUE
+
 // VCOM IRQ Handler
 void SL_IOSTREAM_USART_TX_IRQ_HANDLER(SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO)(void)
 {
@@ -251,6 +265,22 @@ void SL_IOSTREAM_USART_RX_IRQ_HANDLER(SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO)(void
     sl_iostream_usart_irq_handler(sl_iostream_vcom.stream.context);
 }
 
+#endif // HAL_WP_USE_SERIAL
+
+#if HAL_USE_ONEWIRE == TRUE
+
+// ONEWIRE IRQ Handler
+void SL_IOSTREAM_USART_TX_IRQ_HANDLER(SL_IOSTREAM_USART_ONEWIRE_PERIPHERAL_NO)(void)
+{
+  sl_iostream_usart_irq_handler(sl_iostream_onewire.stream.context);
+}
+
+void SL_IOSTREAM_USART_RX_IRQ_HANDLER(SL_IOSTREAM_USART_ONEWIRE_PERIPHERAL_NO)(void)
+{
+  sl_iostream_usart_irq_handler(sl_iostream_onewire.stream.context);
+}
+
+#endif // HAL_USE_ONEWIRE
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
 
 sl_power_manager_on_isr_exit_t sl_iostream_usart_vcom_sleep_on_isr_exit(void)
@@ -288,4 +318,11 @@ static void events_handler(sl_power_manager_em_t from, sl_power_manager_em_t to)
 void sli_iostream_on_uart_rx(sl_iostream_t *handle)
 {
     (void)handle;
+}
+
+void sli_iostream_change_baudrate(sl_iostream_t *handle, uint32_t baudrate)
+{
+    sl_iostream_usart_context_t *usart_context = (sl_iostream_usart_context_t *)handle->context;
+
+    USART_BaudrateAsyncSet(usart_context->usart, 0, baudrate, 0);
 }

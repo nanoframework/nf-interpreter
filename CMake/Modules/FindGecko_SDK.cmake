@@ -158,14 +158,13 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     endif()
 
-    if(HAL_WP_USE_SERIAL)
+    if(HAL_WP_USE_SERIAL OR HAL_USE_ONEWIRE_OPTION)
 
         list(APPEND gecko_sdk_srcs sl_iostream_usart.c)
         list(APPEND gecko_sdk_srcs sl_iostream_uart.c)
         list(APPEND gecko_sdk_srcs sl_iostream.c)
         list(APPEND gecko_sdk_srcs sl_iostream_handles.c)
         list(APPEND gecko_sdk_srcs sl_iostream_init_usart_instances.c)
-    
 
     endif()
 
