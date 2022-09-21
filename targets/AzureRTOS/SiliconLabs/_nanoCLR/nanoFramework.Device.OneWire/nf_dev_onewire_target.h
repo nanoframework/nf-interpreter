@@ -10,6 +10,8 @@
 #include <em_device.h>
 #include <em_gpio.h>
 
+#include <tx_api.h>
+
 // set missing defines
 #if defined(USART0)
 #ifndef NF_ONEWIRE_USE_USART0

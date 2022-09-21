@@ -9,14 +9,23 @@
 // 1-Wire API code //
 /////////////////////
 
+#define ONEWIRE_THREAD_STACK_SIZE 256
+#define ONEWIRE_THREAD_PRIORITY   5
+
 // struct for working threads
 static OneWireFindStruct FindStruct;
 static bool OneWireOperationResult;
-static TaskHandle_t WaitingTask;
+static TX_THREAD *WaitingTask;
+static uint32_t *workingThreadStack;
 static uint8_t LastDiscrepancy;
 static uint8_t LastFamilyDiscrepancy;
 static uint8_t LastDevice;
 static uint8_t SerialNum[8];
+
+typedef Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost OneWireHost;
+
+extern "C" void sli_iostream_change_baudrate(sl_iostream_t *handle, uint32_t baudrate);
+extern sl_iostream_t *sl_iostream_onewire_handle;
 
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
@@ -37,9 +46,6 @@ HRESULT oneWireInit()
 
     sl_iostream_usart_init_onewire();
 
-    // driver need to be deleted on soft reboot
-    HAL_AddSoftRebootHandler(oneWireStop);
-
     DriverState = ONEWIRE_READY;
 
     return S_OK;
@@ -49,18 +55,19 @@ uint8_t oneWireTouchReset(void)
 {
     char reset = 0xF0;
     uint8_t presence;
+    size_t bytesRead;
 
     // flush DMA buffer to ensure cache coherency
     // TODO uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
-    
-    // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
-    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 9600);
 
-    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&reset, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &presence, 1, 20 / portTICK_RATE_MS);
+    // set UART baud rate to 9600bps (required to send the RESET condition to the 1-Wire bus)
+    sli_iostream_change_baudrate(sl_iostream_onewire_handle, 9600);
+
+    sl_iostream_write(sl_iostream_onewire_handle, (uint8_t *)&reset, 1);
+    sl_iostream_read(sl_iostream_onewire_handle, &presence, 1, &bytesRead);
 
     // set UART baud rate to 115200bps (normal comm is performed at this baud rate)
-    uart_set_baudrate(NF_ONEWIRE_ESP32_UART_NUM, 115200);
+    sli_iostream_change_baudrate(sl_iostream_onewire_handle, 115200);
 
     // check for presence pulse
     return (presence != reset);
@@ -71,12 +78,13 @@ bool oneWireTouchBit(bool sendbit)
     // need to send 1-Wire write 1 or 0 according to sendbit
     char write = sendbit ? IWIRE_WR1 : IWIRE_WR0;
     uint8_t reply;
+    size_t bytesRead;
 
     // flush DMA buffer to ensure cache coherency
     // TODO uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)&write, 1);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, &reply, 1, 20 / portTICK_RATE_MS);
+    sl_iostream_write(sl_iostream_onewire_handle, (uint8_t *)&write, 1);
+    sl_iostream_read(sl_iostream_onewire_handle, &reply, 1, &bytesRead);
 
     // interpret 1-Wire reply
     return (reply == IWIRE_RD);
@@ -88,6 +96,7 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     uint8_t i = 0;
     char writeBuffer[8];
     uint8_t readBuffer[8];
+    size_t bytesRead;
 
     // send byte
     while (send_mask)
@@ -101,8 +110,8 @@ uint8_t oneWireTouchByte(uint8_t sendbyte)
     // flush DMA buffer to ensure cache coherency
     // TODO uart_flush(NF_ONEWIRE_ESP32_UART_NUM);
 
-    uart_write_bytes(NF_ONEWIRE_ESP32_UART_NUM, (const char *)writeBuffer, 8);
-    uart_read_bytes(NF_ONEWIRE_ESP32_UART_NUM, readBuffer, 8, 20 / portTICK_RATE_MS);
+    sl_iostream_write(sl_iostream_onewire_handle, (uint8_t *)&writeBuffer, 8);
+    sl_iostream_read(sl_iostream_onewire_handle, &readBuffer, 8, &bytesRead);
 
     // reset send mask to interpret the reply
     send_mask = 0x01;
@@ -128,7 +137,7 @@ void oneWireRelease()
 {
 }
 
-// compute CRC8 using running algorith (slower but saves FLASH)
+// compute CRC8 using running algorithm (slower but saves FLASH)
 uint8_t doCrc8(uint8_t oldCrc, uint8_t x)
 {
     uint8_t crc = oldCrc;
@@ -395,35 +404,33 @@ bool oneWireFindFirst(bool doReset, bool alarmOnly)
 }
 
 // OneWire Find First/Next working thread
-static void OneWireFindWorkingThread(void *pvParameters)
+static void OneWireFindWorkingThread_entry(uint32_t arg)
 {
-    OneWireFindStruct *findStruct = (OneWireFindStruct *)pvParameters;
+    OneWireFindStruct *findStruct = (OneWireFindStruct *)arg;
 
     OneWireOperationResult = findStruct->FindFirst ? oneWireFindFirst(findStruct->DoReset, findStruct->AlarmOnly)
                                                    : oneWireFindNext(findStruct->DoReset, findStruct->AlarmOnly);
 
-    // fire event for 1-Wire operation completed
-    xTaskNotifyGive(WaitingTask);
-    vTaskDelete(NULL);
+    // fire event for 1-Wire operarion completed
+    Events_Set(SYSTEM_EVENT_FLAG_ONEWIRE_MASTER);
+
+    // terminate this thread
+    tx_thread_terminate(WaitingTask);
 }
 
 HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
 {
+    NANOCLR_HEADER();
+
     uint8_t *serialNumberPointer;
     CLR_RT_HeapBlock hbTimeout;
     CLR_INT64 *timeout;
-    TaskHandle_t task;
-    HRESULT result;
+    bool eventResult = true;
 
     // set an infinite timeout to wait forever for the operation to complete
     // this value has to be in ticks to be properly loaded by SetupTimeoutFromTicks() below
     hbTimeout.SetInteger((CLR_INT64)-1);
-    result = stack.SetupTimeoutFromTicks(hbTimeout, timeout);
-
-    if (result != S_OK)
-    {
-        return result;
-    }
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
     // this is going to be used to check for the right event in case of simultaneous 1-Wire operations
     if (stack.m_customState == 1)
@@ -436,41 +443,79 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
         oneWireAquire();
 
         // spawn working thread to perform the 1-Wire operations
-        WaitingTask = xTaskGetCurrentTaskHandle();
-        xTaskCreate(OneWireFindWorkingThread, "OWWT", 2048, &FindStruct, 12, &task);
+
+        // 1. allocate memory for thread stack
+        workingThreadStack = (uint32_t *)platform_malloc(ONEWIRE_THREAD_STACK_SIZE);
+
+        if (workingThreadStack == NULL)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+        }
+
+        // 2. create thread
+        uint16_t status = tx_thread_create(
+            WaitingTask,
+#if !defined(BUILD_RTM)
+            (CHAR *)"1-Wire Thread",
+#else
+            NULL,
+#endif
+            OneWireFindWorkingThread_entry,
+            (uint32_t)&FindStruct,
+            workingThreadStack,
+            ONEWIRE_THREAD_STACK_SIZE,
+            ONEWIRE_THREAD_PRIORITY,
+            ONEWIRE_THREAD_PRIORITY,
+            TX_NO_TIME_SLICE,
+            TX_AUTO_START);
+
+        if (status != TX_SUCCESS)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
+        }
 
         // bump custom state
         stack.m_customState = 2;
     }
 
-    // wait for 1-Wire operation complete
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-    oneWireRelease();
-
-    // get the result from the working thread execution
-    if (OneWireOperationResult)
+    while (eventResult)
     {
-        // update serialNumber field
-
-        // get a pointer to the managed object instance and check that it's not NULL
-        CLR_RT_HeapBlock *pThis = stack.This();
-        if (pThis == NULL)
+        if (WaitingTask->tx_thread_state == TX_TERMINATED)
         {
-            return CLR_E_NULL_REFERENCE;
+            // ONEWIRE working thread is now complete
+            break;
         }
 
-        // get a pointer to the serial number field in the OneWireController instance
-        CLR_RT_HeapBlock_Array *serialNumberField =
-            pThis[Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FIELD___serialNumber]
-                .DereferenceArray();
+        // non-blocking wait allowing other threads to run while we wait for the 1-Wire operations to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_OneWireHost, eventResult));
+    }
 
-        _ASSERTE(serialNumberField->m_numOfElements == 8);
+    if (eventResult)
+    {
+        // event occurred
 
-        // get a pointer to the first element of the byte array
-        serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
+        oneWireRelease();
 
-        oneWireSerialNum(serialNumberPointer, TRUE);
+        // get the result from the working thread execution
+        if (OneWireOperationResult)
+        {
+            // update serialNumber field
+
+            // get a pointer to the managed object instance and check that it's not NULL
+            CLR_RT_HeapBlock *pThis = stack.This();
+            FAULT_ON_NULL(pThis);
+
+            // get a pointer to the serial number field in the OneWireController instance
+            CLR_RT_HeapBlock_Array *serialNumberField = pThis[OneWireHost::FIELD___serialNumber].DereferenceArray();
+
+            _ASSERTE(serialNumberField->m_numOfElements == 8);
+
+            // get a pointer to the first element of the byte array
+            serialNumberPointer = (uint8_t *)serialNumberField->GetFirstElement();
+
+            oneWireSerialNum(serialNumberPointer, TRUE);
+        }
     }
 
     // pop timeout heap block from stack
@@ -479,7 +524,7 @@ HRESULT FindOneDevice(CLR_RT_StackFrame &stack, bool findFirst)
     // set result
     stack.SetResult_Boolean(OneWireOperationResult);
 
-    return S_OK;
+    NANOCLR_NOCLEANUP();
 }
 
 //////////////////////////
@@ -548,8 +593,6 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindFir
 HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::FindNextDevice___BOOLEAN__BOOLEAN__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
-    (void)stack;
-
     NANOCLR_HEADER();
 
     NANOCLR_CHECK_HRESULT(FindOneDevice(stack, false));
@@ -570,7 +613,7 @@ HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeD
 
 HRESULT Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
-        (void)stack;
+    (void)stack;
 
     NANOCLR_HEADER();
 
