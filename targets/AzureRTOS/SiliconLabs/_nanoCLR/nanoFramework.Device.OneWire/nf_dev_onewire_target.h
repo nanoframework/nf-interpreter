@@ -10,6 +10,8 @@
 #include <em_device.h>
 #include <em_gpio.h>
 
+#include <sl_iostream_uart.h>
+
 #include <tx_api.h>
 
 // set missing defines

@@ -26,6 +26,7 @@ typedef Library_nf_dev_onewire_nanoFramework_Device_OneWire_OneWireHost OneWireH
 
 extern "C" void sli_iostream_change_baudrate(sl_iostream_t *handle, uint32_t baudrate);
 extern sl_iostream_t *sl_iostream_onewire_handle;
+extern sl_iostream_uart_t *sl_iostream_uart_onewire_handle;
 
 // Driver state.
 static oneWireState DriverState = ONEWIRE_UNINIT;
@@ -33,8 +34,7 @@ static oneWireState DriverState = ONEWIRE_UNINIT;
 void oneWireStop()
 {
     // stop UART
-    // TODO
-    // uart_driver_delete(NF_ONEWIRE_ESP32_UART_NUM);
+    sl_iostream_uart_deinit(sl_iostream_uart_onewire_handle);
 
     // driver is stopped
     DriverState = ONEWIRE_STOP;
