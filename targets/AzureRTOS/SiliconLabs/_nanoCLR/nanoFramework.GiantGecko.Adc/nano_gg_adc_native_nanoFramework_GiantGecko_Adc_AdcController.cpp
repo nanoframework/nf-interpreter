@@ -150,9 +150,10 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    // Return value to the managed application
+    stack.SetResult_I4(AdcChannelCount);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
@@ -160,9 +161,12 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    int mode = stack.Arg1().NumericByRef().s4;
 
-    NANOCLR_NOCLEANUP();
+    // Only support Single ended mode for now
+    stack.SetResult_Boolean((mode == (int)AdcChannelMode_SingleEnded));
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
