@@ -105,7 +105,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_Gpio =
     "System.Device.Gpio",
     0x097E7BC5,
     method_lookup,
-    { 100, 1, 0, 5 }
+    { 100, 1, 0, 6 }
 };
 
 // clang-format on
