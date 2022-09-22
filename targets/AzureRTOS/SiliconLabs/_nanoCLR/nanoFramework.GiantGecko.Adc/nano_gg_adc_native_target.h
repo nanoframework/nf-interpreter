@@ -33,8 +33,18 @@ typedef struct
     ADC_PosSel_TypeDef posSel;
 } NF_PAL_ADC_PORT_PIN_CHANNEL;
 
+typedef struct
+{
+    uint8_t channelCount;
+    uint32_t *dataBuffer;
+    uint32_t averageCount;
+    uint32_t currentIndex;
+} NF_PAL_GECKO_ADC_CONTINUOUS_SCAN;
+
+
 extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
 extern const int AdcChannelCount;
+extern NF_PAL_GECKO_ADC_CONTINUOUS_SCAN* ContinuousScanOperation;
 
 #if GECKO_USE_ADC0
 extern ADC_Init_TypeDef adc0Init;
