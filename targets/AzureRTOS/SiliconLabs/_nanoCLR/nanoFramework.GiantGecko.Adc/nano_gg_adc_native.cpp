@@ -14,7 +14,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::get_LastContinuousValue___I4,
     NULL,
     NULL,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeReadValue___I4__I4,
@@ -67,7 +66,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStartContinuousConversion___VOID__SZARRAY_I4__I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStopContinuousConversion___VOID,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetLastContinuousSamples___SZARRAY_I4,
-    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetLastScanSampleForChannel___I4__I4,
     NULL,
     NULL,
     NULL,
@@ -82,7 +80,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_GiantGecko_Adc =
 {
     "nanoFramework.GiantGecko.Adc",
-    0x8DC59CD0,
+    0x0516D85F,
     method_lookup,
     { 100, 1, 0, 0 }
 };

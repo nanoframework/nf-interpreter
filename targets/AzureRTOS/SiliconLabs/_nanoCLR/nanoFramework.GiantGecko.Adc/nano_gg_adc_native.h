@@ -130,7 +130,6 @@ struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel
     static const int FIELD___channelNumber = 4;
     static const int FIELD___adcChannelConfiguration = 5;
 
-    NANOCLR_NATIVE_DECLARE(get_LastContinuousValue___I4);
     NANOCLR_NATIVE_DECLARE(NativeReadValue___I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
 
@@ -175,7 +174,6 @@ struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController
     NANOCLR_NATIVE_DECLARE(NativeStartContinuousConversion___VOID__SZARRAY_I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeStopContinuousConversion___VOID);
     NANOCLR_NATIVE_DECLARE(NativeGetLastContinuousSamples___SZARRAY_I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetLastScanSampleForChannel___I4__I4);
 
     //--//
 };
