@@ -594,6 +594,31 @@
             }
         },
         {
+            "name": "LilygoTWatch2021_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "sdkconfig.default_pico_ble",
+                "TARGET_SERIAL_BAUDRATE": "115200",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "API_System.IO.FileSystem": "OFF",
+                "API_nanoFramework.Graphics": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_nanoFramework.Hardware.Esp32.Rmt": "OFF",
+                "GRAPHICS_DISPLAY": "GC9A01_240x240_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "CST816S.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
+        },
+        {
             "name": "M5StickC_preset",
             "inherits": [
                 "general-preset",
