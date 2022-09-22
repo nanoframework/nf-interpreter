@@ -338,7 +338,7 @@
 //     // Input:
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //    No other functions in this interface may be called
@@ -351,7 +351,7 @@
 //     //    Initializes a given block device for use
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   De initializes the device when no longer needed
@@ -379,7 +379,7 @@
 //     //                      for the extra sector information.
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
@@ -409,7 +409,7 @@
 //     //                      for the extra sector information.
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
@@ -456,7 +456,7 @@
 //     //    Address - Logical Sector Address
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //    Erases the block containing the sector address specified.
@@ -507,7 +507,7 @@
 //     //    Initializes a given block device for use
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //    No other functions in this interface may be called
@@ -520,7 +520,7 @@
 //     //    Initializes a given block device for use
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   De initializes the device when no longer needed
@@ -548,7 +548,7 @@
 //     //                      for the extra sector information.
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
@@ -581,7 +581,7 @@
 //     //                      for the extra sector information.
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //   This function reads the number of sectors specified from the device.
@@ -641,7 +641,7 @@
 //     //    Address - Logical Sector Address
 //     //
 //     // Returns:
-//     //   true if succesful; false if not
+//     //   true if successful; false if not
 //     //
 //     // Remarks:
 //     //    Erases the block containing the sector address specified.

@@ -1,42 +1,22 @@
-FROM debian:10.4-slim AS downloader
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
     curl \
-    bzip2 \
+    xz-utils \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
-    && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
-    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1
+    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
+    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
+    && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
+    && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.19/cmake-3.19.0-Linux-x86_64.sh
+ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-linux-x86_64.sh
 RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
     && chmod +x /tmp/dc-downloads/cmake.sh \
     && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
-
-ARG IDF_URI=https://dl.espressif.com/dl/esp-idf/releases/esp-idf-v3.3.5.zip
-RUN curl -o /tmp/dc-downloads/esp-idf.zip $IDF_URI \
-    && unzip -d /tmp/dc-extracted/esp-idf /tmp/dc-downloads/esp-idf.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5/IDF_libs-v3.3.5.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs /tmp/dc-downloads/esp-idf-libs.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_BLE/IDF_libs-v3.3.5_BLE.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs-ble.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs_BLE /tmp/dc-downloads/esp-idf-libs-ble.zip
-
-ARG IDF_LIBS_URI=https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/IDF_libs/versions/v3.3.5_V3/IDF_libs-v3.3.5_V3.zip
-RUN curl -o /tmp/dc-downloads/esp-idf-libs-v3.zip $IDF_LIBS_URI -L \
-    && unzip -d /tmp/dc-extracted/esp-idf-libs_V3 /tmp/dc-downloads/esp-idf-libs-v3.zip
-
-ARG XTENSA_URI=https://dl.espressif.com/dl/xtensa-esp32-elf-linux64-1.22.0-97-gc752ad5-5.2.0.tar.gz
-RUN  mkdir -p /tmp/dc-extracted/xtensa \
-    && curl -o /tmp/dc-downloads/xtensa.tar.gz $XTENSA_URI \
-    && tar -xzf /tmp/dc-downloads/xtensa.tar.gz -C /tmp/dc-extracted/xtensa --strip-components 1
 
 # This is TI XDC tools for linux. Cheack all versions here: http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
 ARG TI_TOOL_URL=http://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
@@ -44,7 +24,7 @@ RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
-FROM debian:10.4-slim AS devcontainer
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -61,16 +41,17 @@ RUN apt-get update \
     git \
     git-lfs \
     git-svn \
+    subversion \
     curl \
     ninja-build \
     srecord \
     python3 \
     python3-pip \
-    nodejs
+    nodejs \
+    libffi-dev
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
-    && mkdir -p /usr/local/bin/xtensa \
     && mkdir -p /usr/local/bin/titools
 
 # Clone repos for STM32 including AzureRTOS
@@ -78,45 +59,61 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
-    && git clone --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
-    && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.6.x -rHEAD ./sources/ChibiOs \
+    && git clone --branch v6.1.12_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
+    && git clone --branch v6.1.12_rel --recursive https://github.com/azure-rtos/netxduo.git --depth 1 ./sources/NextDuo \
+    && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 # Clone mbedtls and fatfs
-RUN git clone --branch mbedtls-2.26.0 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
-    && git clone --branch R0.14 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+RUN git clone --branch mbedtls-2.28.1 https://github.com/ARMmbed/mbedtls.git --depth 1 ./sources/mbedtls \
+    && git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 # Clone FreeRTOS and what is needed for ESP32
 RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-Kernel.git --depth 1 ./sources/FreeRTOS \
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5 \
-    && git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git --depth 1 ./sources/lwip \
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
+
+# The certificate of this one is not prolely propagated in the base image, ignoring the verification of this clone
+ENV GIT_SSL_NO_VERIFY=1
+RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git --depth 1 ./sources/lwip
+ENV GIT_SSL_NO_VERIFY=0
+
+# Clone ESP-IDF
+RUN git clone --branch v4.4.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
     # you can't use the nanoFramework repository as it's Windows only
     # && git clone --branch 3.61.00.16 https://github.com/nanoframework/TI_XDCTools.git --depth 1 ./sources/TI_XDCTools \
-    && git clone --branch 5.10.00.48 https://github.com/nanoframework/SimpleLink_CC13x2_26x2_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
-    && git clone --branch 1.8.1 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
+    && git clone --branch 5.40.00.40 https://github.com/nanoframework/SimpleLink_CC13xx_26xx_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
+    && git clone --branch 1.10.0 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
     && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
 
+# set gcc location
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
+ENV PATH=$ARM_GCC_PATH/bin:${PATH}
+
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
+COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
-COPY --from=downloader /tmp/dc-extracted/esp-idf /sources/esp-idf
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_BLE /sources/esp-idf-libs_BLE
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs_V3 /sources/esp-idf-libs_V3
-COPY --from=downloader /tmp/dc-extracted/esp-idf-libs /sources/esp-idf-libs
-COPY --from=downloader /tmp/dc-extracted/xtensa /usr/local/bin/xtensa
 COPY --from=downloader /tmp/dc-extracted/titools/xdctools_3_62_00_08_core /usr/local/bin/titools
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
 # Putting hex2dfu in the container
+ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
+
 ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
-RUN mkdir -p /usr/local/bin/hex2dfu \
-    && curl -o /usr/local/bin/hex2dfu/hex2dfu $HEX2DFU -L \
-    && chmod +x /usr/local/bin/hex2dfu/hex2dfu
+RUN mkdir -p  $HEX2DFU_PATH \
+    && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
+    && chmod +x  $HEX2DFU_PATH/hex2dfu
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
     && pip3 install pyserial
+
+# Install ESP-IDF
+ENV IDF_PATH=/sources/esp-idf
+RUN python -m pip install -r $IDF_PATH/requirements.txt
+RUN $IDF_PATH/install.sh
+ENV PATH=$PATH:$IDF_PATH/components/esptool_py/esptool:$IDF_PATH/components/espcoredump:$IDF_PATH/components/partition_table/:$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch3-8.4.0/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

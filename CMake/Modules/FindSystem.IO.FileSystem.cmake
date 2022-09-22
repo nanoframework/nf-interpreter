@@ -6,13 +6,15 @@
 # native code directory
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO.FileSystem)
 
+if(RTOS_FREERTOS_CHECK)
+    set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/FreeRTOS/NXP/_common)
+else()
+    set(PROJECT_COMMON_PATH ${PROJECT_SOURCE_DIR}/targets/${RTOS}/_common)
+endif()
 
 # set include directories
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
+list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/Include)
 list(APPEND System.IO.FileSystem_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem)
 
 # source files
@@ -20,11 +22,12 @@ set(System.IO.FileSystem_SRCS
 
     nf_sys_io_filesystem.cpp
 
-    
+    nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard.cpp
     nf_sys_io_filesystem_System_IO_Directory.cpp
     nf_sys_io_filesystem_System_IO_File.cpp
     nf_sys_io_filesystem_System_IO_FileStream.cpp
 
+    Target_Windows_Storage.c
 )
 
 foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
@@ -35,6 +38,7 @@ foreach(SRC_FILE ${System.IO.FileSystem_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
+            ${PROJECT_COMMON_PATH}
             ${PROJECT_SOURCE_DIR}/src/System.IO.FileSystem
 
 	    CMAKE_FIND_ROOT_PATH_BOTH

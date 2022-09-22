@@ -7,6 +7,20 @@
 #ifndef NANOHAL_V2_H
 #define NANOHAL_V2_H
 
+#if !defined(_WIN32)
+
+// need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
+#include <stdlib.h>
+
+// defines to prevent use of malloc, free and realloc
+// the platform implementations: platform_malloc(), platform_free and platform_realloc
+// are the preferred calls to use as they ensure thread safety and RTOS integration
+#define malloc  YOU_SHALL_NOT_USE_malloc
+#define free    YOU_SHALL_NOT_USE_free
+#define realloc YOU_SHALL_NOT_USE_realloc
+
+#endif
+
 #include <nanoCLR_Headers.h>
 
 #include <nanoHAL_Capabilites.h>
@@ -59,6 +73,7 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_SOCKET         0x00004000
 #define SYSTEM_EVENT_FLAG_ONEWIRE_MASTER 0x00008000
 #define SYSTEM_EVENT_FLAG_RADIO          0x00010000
+#define SYSTEM_EVENT_FLAG_BLUETOOTH      0x00020000
 
 //#define SYSTEM_EVENT_FLAG_SPI                       0x00008000
 //#define SYSTEM_EVENT_FLAG_OEM_RESERVED_1            0x00020000
@@ -82,15 +97,17 @@ typedef enum SLEEP_LEVEL
 // !!! KEEP IN SYNC WITH nanoFramework.Runtime.Events.EventCategory (in managed code) !!! //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#define EVENT_UNKNOWN 0
-#define EVENT_CUSTOM  10
-#define EVENT_GPIO    20
-#define EVENT_SERIAL  30
-#define EVENT_NETWORK 40
-#define EVENT_WIFI    50
-#define EVENT_CAN     60
-#define EVENT_STORAGE 70
-#define EVENT_RADIO   80
+#define EVENT_UNKNOWN               0
+#define EVENT_CUSTOM                10
+#define EVENT_GPIO                  20
+#define EVENT_SERIAL                30
+#define EVENT_NETWORK               40
+#define EVENT_WIFI                  50
+#define EVENT_CAN                   60
+#define EVENT_STORAGE               70
+#define EVENT_RADIO                 80
+#define EVENT_HIGH_RESOLUTION_TIMER 90
+#define EVENT_BLUETOOTH             100
 
 #define EVENT_TOUCH   120
 #define EVENT_GESTURE 130

@@ -7,11 +7,12 @@ include(binutils.common)
 
 function(nf_set_optimization_options target) 
 
+    # debug compile options: -Og (optimize for debugging) and -ggdb (produce debug symbols specifically for gdb)
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3 -flto -fuse-linker-plugin -fno-fat-lto-objects>
-        $<$<CONFIG:MinSizeRel>:-Os -flto>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:RelWithDebInfo>:-Os -ggdb>
     )
 
 endfunction()
@@ -95,18 +96,13 @@ macro(nf_add_platform_packages)
         # no packages for booter
     endif()
 
-    # packages specific for nanoCRL
+    # packages specific for nanoCLR
     if("${NFAPP_TARGET}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         if(USE_NETWORKING_OPTION)
 
             find_package(NF_Network REQUIRED QUIET)
             find_package(CHIBIOS_LWIP REQUIRED QUIET)
-
-            # security provider is mbedTLS
-            if(USE_SECURITY_MBEDTLS_OPTION)
-                find_package(mbedTLS REQUIRED QUIET)
-            endif()
 
         endif()
 
@@ -120,7 +116,7 @@ macro(nf_add_platform_dependencies target)
 
     nf_add_common_dependencies(${target})
 
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
 
         nf_add_lib_coreclr(
@@ -199,7 +195,12 @@ macro(nf_add_platform_dependencies target)
                     ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
                 EXTRA_COMPILE_DEFINITIONS -DHAL_USE_MAC=TRUE)
 
-        add_dependencies(${target}.elf nano::NF_Network)
+            add_dependencies(${target}.elf nano::NF_Network)
+
+            # security provider is mbedTLS
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                add_dependencies(NF_Network nano::NF_Network)
+            endif()
 
         endif()
 
@@ -235,7 +236,7 @@ macro(nf_add_platform_include_directories target)
 
     endif()
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -243,6 +244,23 @@ macro(nf_add_platform_include_directories target)
             ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
             ${CHIBIOS_FATFS_INCLUDE_DIRS}
         )
+
+                
+        if(USE_SECURITY_MBEDTLS_OPTION)
+
+            # need to add extra include directories for mbedTLS
+            target_include_directories(
+                mbedcrypto PUBLIC
+                ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${CHIBIOS_INCLUDE_DIRS}
+                ${ChibiOSnfOverlay_INCLUDE_DIRS}
+                ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
+                ${${TARGET_STM32_CUBE_PACKAGE}_CubePackage_INCLUDE_DIRS}
+                ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
+                ${CHIBIOS_LWIP_INCLUDE_DIRS}
+            )
+
+        endif()
 
     endif()
 
@@ -282,7 +300,7 @@ macro(nf_add_platform_sources target)
 
     endif()
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
@@ -299,15 +317,17 @@ macro(nf_add_platform_sources target)
             target_link_libraries(${target}.elf
                 nano::NF_Network
             )
+
+            if(USE_SECURITY_MBEDTLS_OPTION)
+                target_link_libraries(${target}.elf
+                mbedtls
+                )
+
+                add_dependencies(NF_Network mbedtls)
+            endif()
+
         endif()
 
-    endif()
-
-    # mbed TLS requires a config file
-    if(USE_SECURITY_MBEDTLS_OPTION)
-        # this seems to be only option to properly set a compiler define through the command line that needs to be a string literal
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMBEDTLS_CONFIG_FILE=\"<${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h>\"")
     endif()
 
 endmacro()

@@ -767,7 +767,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
     // point of the filter. Try to resume from the frame of the last filter executed.
     CLR_RT_StackFrame *stack = us.m_handlerStack;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     CLR_RT_InlineFrame tmpInline;
     memset(&tmpInline, 0, sizeof(tmpInline));
 #endif
@@ -849,7 +849,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                     us.m_handlerBlockEnd = eh.m_handlerEnd;
                     us.m_handlerStack = stack;
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                     if (tmpInline.m_IP)
                     {
                         us.m_flags |= UnwindStack::c_MagicCatchForInline;
@@ -987,7 +987,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (stack->m_inlineFrame != NULL && tmpInline.m_IP == NULL)
         {
             stack->SaveStack(tmpInline);
@@ -1038,7 +1038,7 @@ ContinueAndExit:
 
     NANOCLR_CLEANUP();
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
     if (tmpInline.m_IP)
     {
         stack->RestoreStack(tmpInline);
@@ -1091,72 +1091,36 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         else
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             if (iterStack->m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
-        {
-            if (iterStack->m_IP) // No IP? Either out of memory during allocation of iterStack frame or native method.
             {
-                // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler itself.
-                // NULL is used when we're not in the handler stack frame to make it work in the case of recursive
-                // functions with filtered handlers.
-                if (FindEhBlock(
-                        iterStack,
-                        iterStack->m_IP,
-                        (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : NULL,
-                        eh,
-                        true))
+                if (iterStack
+                        ->m_IP) // No IP? Either out of memory during allocation of iterStack frame or native method.
                 {
-                    // We have a finally block to process
-
-                    us.m_stack = iterStack;
-                    us.m_ip = NULL;
-                    us.m_currentBlockStart = eh.m_handlerStart;
-                    us.m_currentBlockEnd = eh.m_handlerEnd;
-                    us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
-
-                    m_currentException.SetObjectReference(NULL); // Reset exception flag.
-
-                    iterStack->ResetStack();
-                    iterStack->m_IP = eh.m_handlerStart;
-                    iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
-
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef CLR_NO_IL_INLINE
-                    if (iterStack->m_inlineFrame == NULL)
-#endif
+                    // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler
+                    // itself. NULL is used when we're not in the handler stack frame to make it work in the case of
+                    // recursive functions with filtered handlers.
+                    if (FindEhBlock(
+                            iterStack,
+                            iterStack->m_IP,
+                            (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : NULL,
+                            eh,
+                            true))
                     {
-                        g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
-                    }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                        // We have a finally block to process
 
-                    NANOCLR_SET_AND_LEAVE(S_OK);
-                }
+                        us.m_stack = iterStack;
+                        us.m_ip = NULL;
+                        us.m_currentBlockStart = eh.m_handlerStart;
+                        us.m_currentBlockEnd = eh.m_handlerEnd;
+                        us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
-                if (iterStack == us.m_handlerStack)
-                {
-#ifndef CLR_NO_IL_INLINE
-                    if (iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
-#endif
-                    {
-                        // We've popped off all stack frames above the target.
-                        // Now we should run the exception handler.
-
-                        // Store the range of the block and the stack frame we're executing for PopEH
-                        us.m_currentBlockStart = us.m_handlerBlockStart;
-                        us.m_currentBlockEnd = us.m_handlerBlockEnd;
-                        us.m_stack = us.m_handlerStack;
-                        us.SetPhase(UnwindStack::p_3_RunningHandler);
-
-                        // Set the IP and push the exception object on the stack.
-                        iterStack->m_IP = us.m_handlerBlockStart;
-                        iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
+                        m_currentException.SetObjectReference(NULL); // Reset exception flag.
 
                         iterStack->ResetStack();
-                        iterStack->PushValue().SetObjectReference(us.m_exception);
-
-                        // We are willing to execute IL again so clear the m_currentException flag.
-                        m_currentException.SetObjectReference(NULL);
+                        iterStack->m_IP = eh.m_handlerStart;
+                        iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
                         if (iterStack->m_inlineFrame == NULL)
 #endif
                         {
@@ -1164,13 +1128,50 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
                         }
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-                        // Return a success value to break out of ProcessException and to signal that execution of IL
-                        // can continue.
                         NANOCLR_SET_AND_LEAVE(S_OK);
+                    }
+
+                    if (iterStack == us.m_handlerStack)
+                    {
+#ifndef NANOCLR_NO_IL_INLINE
+                        if (iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
+#endif
+                        {
+                            // We've popped off all stack frames above the target.
+                            // Now we should run the exception handler.
+
+                            // Store the range of the block and the stack frame we're executing for PopEH
+                            us.m_currentBlockStart = us.m_handlerBlockStart;
+                            us.m_currentBlockEnd = us.m_handlerBlockEnd;
+                            us.m_stack = us.m_handlerStack;
+                            us.SetPhase(UnwindStack::p_3_RunningHandler);
+
+                            // Set the IP and push the exception object on the stack.
+                            iterStack->m_IP = us.m_handlerBlockStart;
+                            iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
+
+                            iterStack->ResetStack();
+                            iterStack->PushValue().SetObjectReference(us.m_exception);
+
+                            // We are willing to execute IL again so clear the m_currentException flag.
+                            m_currentException.SetObjectReference(NULL);
+
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#ifndef NANOCLR_NO_IL_INLINE
+                            if (iterStack->m_inlineFrame == NULL)
+#endif
+                            {
+                                g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
+                            }
+#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+
+                            // Return a success value to break out of ProcessException and to signal that execution of
+                            // IL can continue.
+                            NANOCLR_SET_AND_LEAVE(S_OK);
+                        }
                     }
                 }
             }
-        }
 
         // We didn't find a finally block at this level...
         // Check to see if we trickled up to a pseudoiterStack frame that we created to execute a filter handler:
@@ -1235,7 +1236,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
             if (iterStack->m_inlineFrame)
             {
                 iterStack->PopInline();
@@ -1268,7 +1269,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         CLR_EE_DBG_SET(BreakpointsDisabled);
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#ifndef CLR_NO_IL_INLINE
+#ifndef NANOCLR_NO_IL_INLINE
         if (iterStack->m_inlineFrame)
         {
             iterStack->PopInline();

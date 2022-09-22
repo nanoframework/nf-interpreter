@@ -41,15 +41,22 @@ struct BlockHeader *ptrlastBlockHeader;
 
 CLR_UINT8 *graphicsHeapBeginAddress;
 CLR_UINT8 *graphicsHeapEndAddress;
+CLR_UINT32 SizeInBytes;
+
 const int blockHeaderSize = sizeof(struct BlockHeader);
 
-bool GraphicsMemoryHeap::Initialize()
+uint32_t GraphicsMemoryHeap::GetMaxBuffer()
+{
+    return SizeInBytes;
+}
+
+bool GraphicsMemoryHeap::Initialize(CLR_UINT32 requested)
 {
     GraphicsMemory gm;
 
-    if (gm.GraphicsHeapLocation(graphicsHeapBeginAddress, graphicsHeapEndAddress))
+    if (gm.GraphicsHeapLocation(requested, graphicsHeapBeginAddress, graphicsHeapEndAddress))
     {
-        CLR_UINT32 SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
+        SizeInBytes = graphicsHeapEndAddress - graphicsHeapBeginAddress;
 
         memset(graphicsHeapBeginAddress, 0, SizeInBytes);
 
@@ -134,7 +141,7 @@ bool GraphicsMemoryHeap::Release(void *pHeapBlockData)
 
         currentBlk->status = blockFree;
         // If the next block is free, then subsume next block into current including data length and block header
-        if (nextBlock->status == blockFree) // end block status is always heap_end
+        if ((nextBlock != NOT_APPLICABLE) && (nextBlock->status == blockFree)) // end block status is always heap_end
         {
             currentBlk->dataLength += nextBlock->dataLength + blockHeaderSize;
             currentBlk->next = nextBlock->next;
@@ -142,7 +149,8 @@ bool GraphicsMemoryHeap::Release(void *pHeapBlockData)
         }
         // If the previous block is free, then subsume current block into previous including data length and block
         // header
-        if (prevBlock->status == blockFree && prevBlock != ptrfirstBlockHeader) // Guard against looking outside heap
+        if ((prevBlock != NOT_APPLICABLE) && (prevBlock->status == blockFree) &&
+            (prevBlock != ptrfirstBlockHeader)) // Guard against looking outside heap
         {
             prevBlock->dataLength += currentBlk->dataLength + blockHeaderSize;
             prevBlock->next = currentBlk->next;

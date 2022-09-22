@@ -14,159 +14,119 @@
 // Any changes here should be refelected in targets\win32\nanoCLR\base64.cpp //
 ///////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include "base64.h"
 
-static void mbedtls_base64_cond_assign_uint32(uint32_t *dest, const uint32_t src, uint32_t condition)
+// from mbedTLS common.h
+#define MBEDTLS_BYTE_0( x ) ( (uint8_t) (   ( x )         & 0xff ) )
+#define MBEDTLS_BYTE_1( x ) ( (uint8_t) ( ( ( x ) >> 8  ) & 0xff ) )
+#define MBEDTLS_BYTE_2( x ) ( (uint8_t) ( ( ( x ) >> 16 ) & 0xff ) )
+#define MBEDTLS_BYTE_3( x ) ( (uint8_t) ( ( ( x ) >> 24 ) & 0xff ) )
+#define MBEDTLS_BYTE_4( x ) ( (uint8_t) ( ( ( x ) >> 32 ) & 0xff ) )
+#define MBEDTLS_BYTE_5( x ) ( (uint8_t) ( ( ( x ) >> 40 ) & 0xff ) )
+#define MBEDTLS_BYTE_6( x ) ( (uint8_t) ( ( ( x ) >> 48 ) & 0xff ) )
+#define MBEDTLS_BYTE_7( x ) ( (uint8_t) ( ( ( x ) >> 56 ) & 0xff ) )
+
+unsigned char mbedtls_ct_uchar_mask_of_range( unsigned char low,
+                                              unsigned char high,
+                                              unsigned char c )
 {
-    /* MSVC has a warning about unary minus on unsigned integer types,
-     * but this is well-defined and precisely what we want to do here. */
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
-
-    /* Generate bitmask from condition, mask will either be 0xFFFFFFFF or 0 */
-    uint32_t mask = (condition | -condition);
-    mask >>= 31;
-    mask = -mask;
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-    *dest = (src & mask) | ((*dest) & ~mask);
+    /* low_mask is: 0 if low <= c, 0x...ff if low > c */
+    unsigned low_mask = ( (unsigned) c - low ) >> 8;
+    /* high_mask is: 0 if c <= high, 0x...ff if c > high */
+    unsigned high_mask = ( (unsigned) high - c ) >> 8;
+    return( ~( low_mask | high_mask ) & 0xff );
 }
 
-static unsigned char mbedtls_base64_eq(size_t in_a, size_t in_b)
+unsigned char mbedtls_ct_base64_enc_char( unsigned char value )
 {
-    size_t difference = in_a ^ in_b;
-
-    /* MSVC has a warning about unary minus on unsigned integer types,
-     * but this is well-defined and precisely what we want to do here. */
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
-
-    difference |= -difference;
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-    /* cope with the varying size of size_t per platform */
-    difference >>= (sizeof(difference) * 8 - 1);
-
-    return (unsigned char)(1 ^ difference);
+    unsigned char digit = 0;
+    /* For each range of values, if value is in that range, mask digit with
+     * the corresponding value. Since value can only be in a single range,
+     * only at most one masking will change digit. */
+    digit |= mbedtls_ct_uchar_mask_of_range(  0, 25, value ) & ( 'A' + value );
+    digit |= mbedtls_ct_uchar_mask_of_range( 26, 51, value ) & ( 'a' + value - 26 );
+    digit |= mbedtls_ct_uchar_mask_of_range( 52, 61, value ) & ( '0' + value - 52 );
+    digit |= mbedtls_ct_uchar_mask_of_range( 62, 62, value ) & '+';
+    digit |= mbedtls_ct_uchar_mask_of_range( 63, 63, value ) & '/';
+    return( digit );
 }
 
-static void mbedtls_base64_cond_assign_uchar(
-    unsigned char *dest,
-    const unsigned char *const src,
-    unsigned char condition)
+signed char mbedtls_ct_base64_dec_value( unsigned char c )
 {
-    /* MSVC has a warning about unary minus on unsigned integer types,
-     * but this is well-defined and precisely what we want to do here. */
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
-
-    /* Generate bitmask from condition, mask will either be 0xFF or 0 */
-    unsigned char mask = (condition | -condition);
-    mask >>= 7;
-    mask = -mask;
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-    *dest = ((*src) & mask) | ((*dest) & ~mask);
+    unsigned char val = 0;
+    /* For each range of digits, if c is in that range, mask val with
+     * the corresponding value. Since c can only be in a single range,
+     * only at most one masking will change val. Set val to one plus
+     * the desired value so that it stays 0 if c is in none of the ranges. */
+    val |= mbedtls_ct_uchar_mask_of_range( 'A', 'Z', c ) & ( c - 'A' +  0 + 1 );
+    val |= mbedtls_ct_uchar_mask_of_range( 'a', 'z', c ) & ( c - 'a' + 26 + 1 );
+    val |= mbedtls_ct_uchar_mask_of_range( '0', '9', c ) & ( c - '0' + 52 + 1 );
+    val |= mbedtls_ct_uchar_mask_of_range( '+', '+', c ) & ( c - '+' + 62 + 1 );
+    val |= mbedtls_ct_uchar_mask_of_range( '/', '/', c ) & ( c - '/' + 63 + 1 );
+    /* At this point, val is 0 if c is an invalid digit and v+1 if c is
+     * a digit with the value v. */
+    return( val - 1 );
 }
 
-static unsigned char mbedtls_base64_table_lookup(
-    const unsigned char *const table,
-    const size_t table_size,
-    const size_t table_index)
-{
-    size_t i;
-    unsigned char result = 0;
-
-    for (i = 0; i < table_size; ++i)
-    {
-        mbedtls_base64_cond_assign_uchar(&result, &table[i], mbedtls_base64_eq(i, table_index));
-    }
-
-    return result;
-}
-
-__nfweak int mbedtls_base64_encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
+__nfweak int mbedtls_base64_encode( unsigned char *dst, size_t dlen, size_t *olen,
+                   const unsigned char *src, size_t slen )
 {
     size_t i, n;
     int C1, C2, C3;
     unsigned char *p;
 
-    if (slen == 0)
+    if( slen == 0 )
     {
         *olen = 0;
-        return (0);
+        return( 0 );
     }
 
-    n = slen / 3 + (slen % 3 != 0);
+    n = slen / 3 + ( slen % 3 != 0 );
 
-    if (n > (BASE64_SIZE_T_MAX - 1) / 4)
+    if( n > ( BASE64_SIZE_T_MAX - 1 ) / 4 )
     {
         *olen = BASE64_SIZE_T_MAX;
-        return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+        return( MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL );
     }
 
     n *= 4;
 
-    if ((dlen < n + 1) || (NULL == dst))
+    if( ( dlen < n + 1 ) || ( NULL == dst ) )
     {
         *olen = n + 1;
-        return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+        return( MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL );
     }
 
-    n = (slen / 3) * 3;
+    n = ( slen / 3 ) * 3;
 
-    for (i = 0, p = dst; i < n; i += 3)
+    for( i = 0, p = dst; i < n; i += 3 )
     {
         C1 = *src++;
         C2 = *src++;
         C3 = *src++;
 
-        *p++ = mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), ((C1 >> 2) & 0x3F));
-
-        *p++ =
-            mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), ((((C1 & 3) << 4) + (C2 >> 4)) & 0x3F));
-
-        *p++ = mbedtls_base64_table_lookup(
-            base64_enc_map,
-            sizeof(base64_enc_map),
-            ((((C2 & 15) << 2) + (C3 >> 6)) & 0x3F));
-
-        *p++ = mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), (C3 & 0x3F));
+        *p++ = mbedtls_ct_base64_enc_char( ( C1 >> 2 ) & 0x3F );
+        *p++ = mbedtls_ct_base64_enc_char( ( ( ( C1 &  3 ) << 4 ) + ( C2 >> 4 ) )
+                                        & 0x3F );
+        *p++ = mbedtls_ct_base64_enc_char( ( ( ( C2 & 15 ) << 2 ) + ( C3 >> 6 ) )
+                                        & 0x3F );
+        *p++ = mbedtls_ct_base64_enc_char( C3 & 0x3F );
     }
 
-    if (i < slen)
+    if( i < slen )
     {
         C1 = *src++;
-        C2 = ((i + 1) < slen) ? *src++ : 0;
+        C2 = ( ( i + 1 ) < slen ) ? *src++ : 0;
 
-        *p++ = mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), ((C1 >> 2) & 0x3F));
+        *p++ = mbedtls_ct_base64_enc_char( ( C1 >> 2 ) & 0x3F );
+        *p++ = mbedtls_ct_base64_enc_char( ( ( ( C1 & 3 ) << 4 ) + ( C2 >> 4 ) )
+                                        & 0x3F );
 
-        *p++ =
-            mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), ((((C1 & 3) << 4) + (C2 >> 4)) & 0x3F));
-
-        if ((i + 1) < slen)
-        {
-            *p++ = mbedtls_base64_table_lookup(base64_enc_map, sizeof(base64_enc_map), (((C2 & 15) << 2) & 0x3F));
-        }
-        else
-        {
-            *p++ = '=';
-        }
+        if( ( i + 1 ) < slen )
+             *p++ = mbedtls_ct_base64_enc_char( ( ( C2 & 15 ) << 2 ) & 0x3F );
+        else *p++ = '=';
 
         *p++ = '=';
     }
@@ -174,121 +134,107 @@ __nfweak int mbedtls_base64_encode(unsigned char *dst, size_t dlen, size_t *olen
     *olen = p - dst;
     *p = 0;
 
-    return 0;
+    return( 0 );
 }
 
-__nfweak int mbedtls_base64_decode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
+__nfweak int mbedtls_base64_decode( unsigned char *dst, size_t dlen, size_t *olen,
+                   const unsigned char *src, size_t slen )
 {
-    size_t i, n;
-    uint32_t j, x;
+    size_t i; /* index in source */
+    size_t n; /* number of digits or trailing = in source */
+    uint32_t x; /* value accumulator */
+    unsigned accumulated_digits = 0;
+    unsigned equals = 0;
+    int spaces_present = 0;
     unsigned char *p;
-    unsigned char dec_map_lookup;
 
     /* First pass: check for validity and get output length */
-    for (i = n = j = 0; i < slen; i++)
+    for( i = n = 0; i < slen; i++ )
     {
         /* Skip spaces before checking for EOL */
-        x = 0;
-        while (i < slen && src[i] == ' ')
+        spaces_present = 0;
+        while( i < slen && src[i] == ' ' )
         {
             ++i;
-            ++x;
+            spaces_present = 1;
         }
 
         /* Spaces at end of buffer are OK */
-        if (i == slen)
-        {
+        if( i == slen )
             break;
-        }
 
-        if ((slen - i) >= 2 && src[i] == '\r' && src[i + 1] == '\n')
-        {
+        if( ( slen - i ) >= 2 &&
+            src[i] == '\r' && src[i + 1] == '\n' )
             continue;
-        }
 
-        if (src[i] == '\n')
-        {
+        if( src[i] == '\n' )
             continue;
-        }
 
         /* Space inside a line is an error */
-        if (x != 0)
+        if( spaces_present )
+            return( MBEDTLS_ERR_BASE64_INVALID_CHARACTER );
+
+        if( src[i] > 127 )
+            return( MBEDTLS_ERR_BASE64_INVALID_CHARACTER );
+
+        if( src[i] == '=' )
         {
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+            if( ++equals > 2 )
+                return( MBEDTLS_ERR_BASE64_INVALID_CHARACTER );
         }
-
-        if (src[i] == '=' && ++j > 2)
+        else
         {
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+            if( equals != 0 )
+                return( MBEDTLS_ERR_BASE64_INVALID_CHARACTER );
+            if( mbedtls_ct_base64_dec_value( src[i] ) < 0 )
+                return( MBEDTLS_ERR_BASE64_INVALID_CHARACTER );
         }
-
-        dec_map_lookup = mbedtls_base64_table_lookup(base64_dec_map, sizeof(base64_dec_map), src[i]);
-
-        if (src[i] > 127 || dec_map_lookup == 127)
-        {
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
-        }
-
-        if (dec_map_lookup < 64 && j != 0)
-        {
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
-        }
-
         n++;
     }
 
-    if (n == 0)
+    if( n == 0 )
     {
         *olen = 0;
-        return (0);
+        return( 0 );
     }
 
     /* The following expression is to calculate the following formula without
      * risk of integer overflow in n:
      *     n = ( ( n * 6 ) + 7 ) >> 3;
      */
-    n = (6 * (n >> 3)) + ((6 * (n & 0x7) + 7) >> 3);
-    n -= j;
+    n = ( 6 * ( n >> 3 ) ) + ( ( 6 * ( n & 0x7 ) + 7 ) >> 3 );
+    n -= equals;
 
-    if (dst == NULL || dlen < n)
+    if( dst == NULL || dlen < n )
     {
         *olen = n;
-        return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+        return( MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL );
     }
 
-    for (j = 3, n = x = 0, p = dst; i > 0; i--, src++)
+    equals = 0;
+    for( x = 0, p = dst; i > 0; i--, src++ )
     {
-        if (*src == '\r' || *src == '\n' || *src == ' ')
-        {
+        if( *src == '\r' || *src == '\n' || *src == ' ' )
             continue;
-        }
 
-        dec_map_lookup = mbedtls_base64_table_lookup(base64_dec_map, sizeof(base64_dec_map), *src);
+        x = x << 6;
+        if( *src == '=' )
+            ++equals;
+        else
+            x |= mbedtls_ct_base64_dec_value( *src );
 
-        mbedtls_base64_cond_assign_uint32(&j, j - 1, mbedtls_base64_eq(dec_map_lookup, 64));
-        x = (x << 6) | (dec_map_lookup & 0x3F);
-
-        if (++n == 4)
+        if( ++accumulated_digits == 4 )
         {
-            n = 0;
-            if (j > 0)
-            {
-                *p++ = (unsigned char)(x >> 16);
-            }
-
-            if (j > 1)
-            {
-                *p++ = (unsigned char)(x >> 8);
-            }
-
-            if (j > 2)
-            {
-                *p++ = (unsigned char)(x);
-            }
+            accumulated_digits = 0;
+            *p++ = MBEDTLS_BYTE_2( x );
+            if( equals <= 1 ) *p++ = MBEDTLS_BYTE_1( x );
+            if( equals <= 0 ) *p++ = MBEDTLS_BYTE_0( x );
         }
     }
 
     *olen = p - dst;
 
-    return (0);
+    return( 0 );
 }
+
+// clang-format on

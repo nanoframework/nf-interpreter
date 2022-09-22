@@ -223,7 +223,20 @@ __nfweak HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfig
     {
         if (g_TargetConfiguration.Wireless80211Configs->Configs[i]->Id == configurationId)
         {
-            return g_TargetConfiguration.Wireless80211Configs->Configs[i];
+            // need to make a copy
+            HAL_Configuration_Wireless80211 *configBlock =
+                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+
+            // check allocation
+            if (configBlock)
+            {
+                memcpy(
+                    configBlock,
+                    g_TargetConfiguration.Wireless80211Configs->Configs[i],
+                    sizeof(HAL_Configuration_Wireless80211));
+
+                return configBlock;
+            }
         }
     }
 
@@ -237,7 +250,70 @@ __nfweak HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigu
     {
         if (g_TargetConfiguration.WirelessAPConfigs->Configs[i]->Id == configurationId)
         {
-            return g_TargetConfiguration.WirelessAPConfigs->Configs[i];
+            // need to make a copy
+            HAL_Configuration_WirelessAP *configBlock =
+                (HAL_Configuration_WirelessAP *)platform_malloc(sizeof(HAL_Configuration_WirelessAP));
+
+            // check allocation
+            if (configBlock)
+            {
+                memcpy(
+                    configBlock,
+                    g_TargetConfiguration.WirelessAPConfigs->Configs[i],
+                    sizeof(HAL_Configuration_WirelessAP));
+
+                return configBlock;
+            }
+        }
+    }
+
+    // not found
+    return NULL;
+}
+
+__nfweak HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore()
+{
+    if (g_TargetConfiguration.CertificateStore->Count)
+    {
+        // need to make a copy
+        // need to compute size as the cert size is variable
+        int32_t blockSize = offsetof(HAL_Configuration_X509CaRootBundle, Certificate) +
+                            g_TargetConfiguration.CertificateStore->Certificates[0]->CertificateSize;
+
+        HAL_Configuration_X509CaRootBundle *configBlock =
+            (HAL_Configuration_X509CaRootBundle *)platform_malloc(blockSize);
+
+        // check allocation
+        if (configBlock)
+        {
+            memcpy(configBlock, g_TargetConfiguration.CertificateStore->Certificates[0], blockSize);
+
+            return configBlock;
+        }
+    }
+
+    // not found
+    return NULL;
+}
+
+__nfweak HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate()
+{
+    if (g_TargetConfiguration.DeviceCertificates->Count)
+    {
+        // need to make a copy
+        // need to compute size as the cert size is variable
+        int32_t blockSize = offsetof(HAL_Configuration_X509DeviceCertificate, Certificate) +
+                            g_TargetConfiguration.DeviceCertificates->Certificates[0]->CertificateSize;
+
+        HAL_Configuration_X509DeviceCertificate *configBlock =
+            (HAL_Configuration_X509DeviceCertificate *)platform_malloc(blockSize);
+
+        // check allocation
+        if (configBlock)
+        {
+            memcpy(configBlock, g_TargetConfiguration.DeviceCertificates->Certificates[0], blockSize);
+
+            return configBlock;
         }
     }
 
@@ -252,8 +328,8 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
     uint32_t newConfigBlockSize)
 {
     // config blocks parameters are addresses
-    volatile uint8_t *cursor1 = (volatile uint8_t *)existingConfigBlock;
-    volatile uint8_t *cursor2 = (volatile uint8_t *)newConfigBlock;
+    uint8_t *cursor1 = (uint8_t *)existingConfigBlock;
+    uint8_t *cursor2 = (uint8_t *)newConfigBlock;
 
     // obvious check
     if (existingConfigBlockSize != newConfigBlockSize)
@@ -261,14 +337,5 @@ __nfweak bool ConfigurationManager_CheckExistingConfigurationBlock(
         return false;
     }
 
-    while (existingConfigBlockSize--)
-    {
-        if (*cursor1++ != *cursor2++)
-        {
-            // content is different!!
-            return false;
-        }
-    }
-
-    return true;
+    return memcmp(cursor1, cursor2, existingConfigBlockSize) == 0;
 }

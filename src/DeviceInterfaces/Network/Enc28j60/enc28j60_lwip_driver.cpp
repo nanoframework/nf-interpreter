@@ -275,11 +275,11 @@ int ENC28J60_LWIP_Driver::Open(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
     /* Enable the INTERRUPT pin */
     if (CPU_GPIO_EnableInputPin(
             config->INT_Pin,
-            0,                                      // no de-bounce
-            &enc28j60_lwip_pre_interrupt,           // ISR
-            &g_ENC28J60_NetIF,                      // ISR parameter
-            GPIO_INT_EDGE_LOW,                      // Interrupt edge
-            GpioPinDriveMode_InputPullUp) == false) // Resistor Pull up mode
+            0,                             // no de-bounce
+            &enc28j60_lwip_pre_interrupt,  // ISR
+            &g_ENC28J60_NetIF,             // ISR parameter
+            GPIO_INT_EDGE_LOW,             // Interrupt edge
+            PinMode_InputPullUp) == false) // Resistor Pull up mode
     {
         return -1;
     }
@@ -305,11 +305,11 @@ bool ENC28J60_LWIP_Driver::Close(ENC28J60_LWIP_DRIVER_CONFIG *config, int index)
     /* Disable the INTERRUPT pin */
     CPU_GPIO_EnableInputPin(
         config->INT_Pin,
-        0,                             /* Glitch filter enable */
-        NULL,                          /* ISR                  */
-        0,                             /* minor number         */
-        GPIO_INT_NONE,                 /* Interrupt edge       */
-        GpioPinDriveMode_InputPullUp); /* Resistor State / mode*/
+        0,                    /* Glitch filter enable */
+        NULL,                 /* ISR                  */
+        0,                    /* minor number         */
+        GPIO_INT_NONE,        /* Interrupt edge       */
+        PinMode_InputPullUp); /* Resistor State / mode*/
 
     InterruptTaskContinuation.Abort();
 

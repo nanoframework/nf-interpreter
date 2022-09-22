@@ -4,6 +4,7 @@
 
 # ignore build folder
 /build/
+/out/
 /build/.gitkeep
 
 # ignore cmake-variants file (will change per user/board setup, developers should derive content from cmake-variants.TEMPLATE.json)
@@ -21,10 +22,10 @@ InteropAssemblies/*
 .vscode/.cmaketools.json
 .vscode/settings.json
 .vscode/tasks.json
-.vscode/extensions.json
 .vscode/c_cpp_properties.json
 .vscode/cmake-kits.json
 .vscode/ipch
+.vscode/*.log
 
 # ignore CMake modules for Interop assemblies
 CMake/Modules/FindINTEROP*.cmake
@@ -63,3 +64,9 @@ CMake/Modules/FindINTEROP*.cmake
 # except build/, which is used as an MSBuild target.
 !**/packages/build/
 /targets/os/win32/.vs/nanoCLR/v16
+
+# ESP32 sdkconfig file
+sdkconfig
+
+# CMake user presets
+CMakeUserPresets.json

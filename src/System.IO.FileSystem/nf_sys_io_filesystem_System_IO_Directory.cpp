@@ -231,15 +231,17 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
                 }
             }
         }
+
+        f_closedir(&currentDirectory);
     }
 
     NANOCLR_CLEANUP();
 
-    if (stringBuffer == NULL)
+    if (stringBuffer != NULL)
     {
         platform_free(stringBuffer);
     }
-    if (workingBuffer == NULL)
+    if (workingBuffer != NULL)
     {
         platform_free(workingBuffer);
     }
@@ -377,32 +379,67 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
     NANOCLR_CLEANUP_END();
 }
 
+// Enumerate drives in system
+// if array == null then only count drives
+// Return number of drives
+HRESULT EnumerateDrives(CLR_RT_HeapBlock *array, int &count)
+{
+    NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *storageFolder = NULL;
+        FRESULT operationResult;
+        NANO_DIR currentDirectory;
+        char workingDrive[] = INDEX0_DRIVE_PATH;
+
+        if (array)
+        {
+            // get a pointer to the first object in the array (which is of type <String>)
+            storageFolder = (CLR_RT_HeapBlock *)array->DereferenceArray()->GetFirstElement();
+        }
+
+        count = 0;
+        for (char drive = INDEX0_DRIVE_LETTER[0]; drive <= INTERNAL_DRIVE0_LETTER[0]; drive++)
+        {
+            workingDrive[0] = drive;
+
+            operationResult = f_opendir(&currentDirectory, workingDrive);
+            if (operationResult == FR_OK)
+            {
+                count++;
+                f_closedir(&currentDirectory);
+
+                if (array)
+                {
+                    // Add entry to array
+                    // set the drive letter in string array
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
+
+                    // Next element in array
+                    storageFolder++;
+                }
+            }
+        }
+    }
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative___STATIC__SZARRAY_STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
-        // TODO: implement retrieving more than one hardcoded drive
-        // multiple different boards can have different implementations
-        // for now just return "D:\\" as an only available drive
-        CLR_RT_HeapBlock *storageFolder;
         CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-        char workingDrive[sizeof(DRIVE_PATH_LENGTH)];
+        int count = 0;
 
-        // create an array of files paths <String>
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, 1, g_CLR_RT_WellKnownTypes.m_String));
+        // 1st pass find number of drives
+        NANOCLR_CHECK_HRESULT(EnumerateDrives(NULL, count));
 
-        // get a pointer to the first object in the array (which is of type <String>)
-        storageFolder = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+        // create an array of files paths <String> for count drives
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.m_String));
 
-        // as of now we only have one drive,
-        // in the future if more comes, we might want to iterate over all drives
-        memcpy(workingDrive, INDEX0_DRIVE_PATH, DRIVE_PATH_LENGTH);
-
-        // set the drive letter in string array
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*storageFolder, workingDrive));
+        // 2nd pass fill array with drives
+        NANOCLR_CHECK_HRESULT(EnumerateDrives(&top, count));
     }
-
     NANOCLR_NOCLEANUP();
 }
 

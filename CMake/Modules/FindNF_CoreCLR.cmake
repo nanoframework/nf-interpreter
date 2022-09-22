@@ -21,6 +21,7 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS  ${CMAKE_SOURCE_DIR}/src/CLR/Startup)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
@@ -75,7 +76,6 @@ set(NF_CoreCLR_SRCS
     TypeSystemLookup.cpp
     StringTableData.cpp
     TypeSystem.cpp
-    nanoSupport_CRC32.c
     nanoHAL_SystemInformation.cpp
     Various.cpp
 
@@ -131,6 +131,7 @@ set(NF_CoreCLR_SRCS
     nf_rt_native_nanoFramework_Runtime_Native_ExecutionConstraint.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Power.cpp
     nf_rt_native_nanoFramework_Runtime_Native_Rtc_stubs.cpp
+    nf_rt_native_System_Environment.cpp
     
     # Core stubs
     RPC_stub.cpp
@@ -141,6 +142,7 @@ set(NF_CoreCLR_SRCS
     
     # Helpers
     nanoprintf.c
+    nanoRingBuffer.c
 
     # HAL
     nanoHAL_Time.cpp
@@ -158,6 +160,15 @@ set(NF_CoreCLR_SRCS
     COM_stubs.c
     GenericPort_stubs.c
 )
+
+# append CRC32, if not already included with Wire Protocol
+if(NOT WireProtocol_FOUND)
+    list(APPEND NF_CoreCLR_SRCS nanoSupport_CRC32.c)
+endif()
+
+if(NF_TRACE_TO_STDIO)
+    list(APPEND NF_CoreCLR_SRCS GenericPort_stdio.c)
+endif()
 
 # include System.Reflection API files depending on build option
 if(NF_FEATURE_SUPPORT_REFLECTION)
@@ -190,6 +201,11 @@ if(NF_FEATURE_HAS_CONFIG_BLOCK)
 else()
     # feature disabled, stubs only
     list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
+endif()
+
+# include platform implementation for Runtime_Native_Rtc
+if(EXISTS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
+    list(APPEND NF_CoreCLR_SRCS nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
 endif()
 
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
@@ -225,6 +241,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             
             # Helpers
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
+            ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
 
             # HAL
@@ -241,6 +258,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/PAL/COM
             ${CMAKE_SOURCE_DIR}/src/PAL/Profiler
 
+            # platform specific implementations
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native
+
             # target
             ${TARGET_BASE_LOCATION}
 
@@ -254,7 +274,6 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
     list(APPEND NF_CoreCLR_SOURCES ${NF_CoreCLR_SRC_FILE})
     
 endforeach()
-
 
 include(FindPackageHandleStandardArgs)
 
@@ -284,7 +303,7 @@ macro(nf_add_lib_coreclr)
             ${NFALC_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
+    if(RTOS_ESP32_CHECK)
 
         nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
 

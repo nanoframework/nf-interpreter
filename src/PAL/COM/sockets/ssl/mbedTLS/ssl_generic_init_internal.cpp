@@ -16,8 +16,8 @@ bool ssl_generic_init_internal(
     int certLength,
     const uint8_t *privateKey,
     int privateKeyLength,
-    const char *password,
-    int passwordLength,
+    const char *pkPassword,
+    int pkPasswordLength,
     int &contextHandle,
     bool useDeviceCertificate,
     bool isServer)
@@ -32,9 +32,8 @@ bool ssl_generic_init_internal(
     int ret = 0;
 
     mbedtls_x509_crt *ownCertificate = NULL;
-
-    // we only have one CA root bundle, so this is fixed to 0
-    uint32_t configIndex = 0;
+    HAL_Configuration_X509CaRootBundle *certStore = NULL;
+    HAL_Configuration_X509DeviceCertificate *deviceCert = NULL;
 
     ///////////////////////
     mbedTLS_NFContext *context;
@@ -173,34 +172,44 @@ bool ssl_generic_init_internal(
     // CA root certs from store, if available
     if (g_TargetConfiguration.CertificateStore->Count > 0)
     {
-        /////////////////////////////////////////////////////////////////////////////////////////////////
-        // developer notes:                                                                            //
-        // don't care about failure in processing the CA cert bundle                                   //
-        // the outcome is that the CA certs won't be loaded into the trusted CA chain                  //
-        // this call parses certificates in both string and binary formats                             //
-        // when the formart is a string it has to include the terminator otherwise the parse will fail //
-        /////////////////////////////////////////////////////////////////////////////////////////////////
-        mbedtls_x509_crt_parse(
-            context->x509_crt,
-            (const unsigned char *)g_TargetConfiguration.CertificateStore->Certificates[configIndex]->Certificate,
-            g_TargetConfiguration.CertificateStore->Certificates[configIndex]->CertificateSize);
+        // get certificate store
+        certStore = ConfigurationManager_GetCertificateStore();
+
+        if (certStore)
+        {
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // developer notes:                                                                            //
+            // don't care about failure in processing the CA cert bundle                                   //
+            // the outcome is that the CA certs won't be loaded into the trusted CA chain                  //
+            // this call parses certificates in both string and binary formats                             //
+            // when the format is a string it has to include the terminator otherwise the parse will fail //
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            mbedtls_x509_crt_parse(
+                context->x509_crt,
+                (const unsigned char *)certStore->Certificate,
+                certStore->CertificateSize);
+
+            platform_free(certStore);
+        }
     }
 
     // check if the device certificate is to be used
     if (useDeviceCertificate)
     {
+        deviceCert = ConfigurationManager_GetDeviceCertificate();
+
         // check if there is a device certificate stored
-        if (g_TargetConfiguration.DeviceCertificates->Count > 0)
+        if (deviceCert)
         {
             // there is!
             // fill in the parameters like if it was supplied by the caller
             // OK to override, that's the intended behaviour
-            certificate = (const char *)g_TargetConfiguration.DeviceCertificates->Certificates[0]->Certificate;
-            certLength = g_TargetConfiguration.DeviceCertificates->Certificates[0]->CertificateSize;
+            certificate = (const char *)deviceCert->Certificate;
+            certLength = deviceCert->CertificateSize;
 
-            // clear private keys, just in case
-            privateKey = NULL;
-            privateKeyLength = 0;
+            // the private key is also part of the device certificate
+            privateKey = (const uint8_t *)deviceCert->Certificate;
+            privateKeyLength = deviceCert->CertificateSize;
         }
     }
 
@@ -225,8 +234,8 @@ bool ssl_generic_init_internal(
                     context->pk,
                     privateKey,
                     privateKeyLength,
-                    (const unsigned char *)password,
-                    passwordLength) < 0)
+                    (const unsigned char *)pkPassword,
+                    pkPasswordLength) < 0)
             {
                 // private key parse failed
                 goto error;
@@ -253,6 +262,12 @@ bool ssl_generic_init_internal(
             // configuring own certificate failed
             goto error;
         }
+
+        // free memory, if allocated
+        if (deviceCert)
+        {
+            platform_free(deviceCert);
+        }
     }
     else
     {
@@ -272,7 +287,7 @@ bool ssl_generic_init_internal(
 
     // setup debug stuff
     // only required if output debug is enabled in mbedtls_config.h
-#ifdef MBEDTLS_DEBUG_C
+#if defined(MBEDTLS_DEBUG_C) && defined(MBEDTLS_DEBUG_THRESHOLD)
     mbedtls_debug_set_threshold(MBEDTLS_DEBUG_THRESHOLD);
     mbedtls_ssl_conf_dbg(context->conf, nf_debug, stdout);
 #endif
@@ -303,29 +318,59 @@ error:
     mbedtls_ssl_free(context->ssl);
 
     // check for any memory allocation that needs to be freed before exiting
-    if (context->ssl != NULL)
+    if (context->ssl)
+    {
         platform_free(context->ssl);
-    if (context->conf != NULL)
-        platform_free(context->conf);
-    if (context->entropy != NULL)
-        platform_free(context->entropy);
-    if (context->ctr_drbg != NULL)
-        platform_free(context->ctr_drbg);
-    if (context->server_fd != NULL)
-        platform_free(context->server_fd);
-    if (context->x509_crt != NULL)
-        platform_free(context->x509_crt);
-    if (context->pk != NULL)
-        platform_free(context->pk);
+    }
 
-    if (ownCertificate != NULL)
+    if (context->conf)
+    {
+        platform_free(context->conf);
+    }
+
+    if (context->entropy)
+    {
+        platform_free(context->entropy);
+    }
+
+    if (context->ctr_drbg)
+    {
+        platform_free(context->ctr_drbg);
+    }
+
+    if (context->server_fd)
+    {
+        platform_free(context->server_fd);
+    }
+
+    if (context->x509_crt)
+    {
+        platform_free(context->x509_crt);
+    }
+
+    if (context->pk)
+    {
+        platform_free(context->pk);
+    }
+
+    if (ownCertificate)
     {
         mbedtls_x509_crt_free(ownCertificate);
         platform_free(ownCertificate);
     }
-    if (context->pk != NULL)
+    if (context->pk)
     {
         platform_free(context);
+    }
+
+    if (certStore)
+    {
+        platform_free(certStore);
+    }
+
+    if (deviceCert)
+    {
+        platform_free(deviceCert);
     }
 
     return false;

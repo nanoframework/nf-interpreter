@@ -9,9 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-// the Arm 3.0 compiler drags in a bunch of ABI methods (for initialization) if struct arrays are not initialized
-CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
-CLR_Messaging *g_CLR_Messaging;
+CLR_Messaging g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +92,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
     CLR_Messaging_Commands::Messaging_Query::Reply *cmd =
         (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
 
-    g_CLR_Messaging->AllocateAndQueueMessage(
+    g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Query,
         0,
         NULL,
@@ -117,7 +115,7 @@ bool CLR_Messaging::Messaging_Send(WP_Message *msg)
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
 
-    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Send,
         len,
         cmd->m_data,
@@ -156,7 +154,7 @@ bool CLR_Messaging::Messaging_Reply(WP_Message *msg)
     CLR_UINT32 len;
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
-    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Reply,
         len,
         cmd->m_data,
@@ -256,11 +254,9 @@ HRESULT CLR_Messaging::CreateInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    g_CLR_Messaging = (CLR_Messaging *)&g_scratchMessaging[0];
+    NANOCLR_CLEAR(g_CLR_Messaging);
 
-    CLR_RT_Memory::ZeroFill(g_CLR_Messaging, sizeof(CLR_Messaging));
-
-    g_CLR_Messaging->Initialize(NULL, 0, NULL, 0);
+    g_CLR_Messaging.Initialize(NULL, 0, NULL, 0);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -300,7 +296,7 @@ HRESULT CLR_Messaging::DeleteInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    g_CLR_Messaging->Cleanup();
+    g_CLR_Messaging.Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -312,7 +308,7 @@ void CLR_Messaging::Cleanup()
     if (!m_fInitialized)
         return;
 
-    // Some devices cannot reset the USB controller so we need to allow them to skip uninitialization
+    // Some devices cannot reset the USB controller so we need to allow them to skip un-initialization
     // of the debug transport
     if (!g_fDoNotUninitializeDebuggerPort)
     {
@@ -338,6 +334,7 @@ bool CLR_Messaging::ProcessHeader(WP_Message *msg)
 bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
+
     if (msg->m_header.m_flags & WP_Flags_c_NACK)
     {
         //
@@ -348,45 +345,67 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 
     //--//
 
-    const CLR_Messaging_CommandHandlerLookups *tables;
-    int tableCount = 0;
+    CLR_Messaging_CommandHandlerLookups *tables = NULL;
+    int tableCount = CMD_HANDLER_LOOKUP_TABLE_SIZE;
+    size_t num;
+    const CLR_Messaging_CommandHandlerLookup *cmd = NULL;
 
+    // developer note: load lookup tables, starting with the upper one
+    // until there is use for RPC Messaging, useful replies and request are in the second table
     if (msg->m_header.m_flags & WP_Flags_c_Reply)
     {
-        tables = m_Lookup_Replies;
-        tableCount = ARRAYSIZE(m_Lookup_Replies);
+        tables = &m_Lookup_Replies[CMD_HANDLER_LOOKUP_TABLE_SIZE - 1];
     }
     else
     {
-        tables = m_Lookup_Requests;
-        tableCount = ARRAYSIZE(m_Lookup_Requests);
+        tables = &m_Lookup_Requests[CMD_HANDLER_LOOKUP_TABLE_SIZE - 1];
     }
 
+    _ASSERTE(tables != NULL);
+
+    // go over lookup tables
     while (tableCount-- > 0)
     {
-        size_t num = tables->size;
-        const CLR_Messaging_CommandHandlerLookup *cmd = tables->table;
+        num = tables->size;
+        cmd = tables->table;
 
         while (num-- > 0 && cmd != NULL)
         {
             if (cmd->cmd == msg->m_header.m_cmd)
             {
-                WP_ReplyToCommand(msg, (*(cmd->hnd))(msg), false, NULL, 0);
+                // developer note:
+                // all command handlers have to take care of the respective reply
+                // if the handler fails to execute, it will return false and ONLY in that case the code here replies
+                // reporting the failure to execute the command
+
+                // execute command handler, returning execution result
+                if (!(*(cmd->hnd))(msg))
+                {
+                    // only need to reply if outcome is false
+                    WP_ReplyToCommand(msg, false, false, NULL, 0);
+                }
+
+                // done here
                 return true;
             }
 
+            // move to next command
             cmd++;
         }
-        tables++;
+
+        // move to next lookup table
+        // (backwards, because we've loaded the upper one above)
+        tables--;
     }
 
+    // getting here means failure, as no command handler was found for this request
     WP_ReplyToCommand(msg, false, false, NULL, 0);
 
     return true;
 }
 
 // wrapper function for CLR_Messaging::ProcessPayload(...)
-// has to mirror declaration of the function with the same name for platorms that implement nanoBooter
+// has to mirror declaration of the function with the same name for platforms that implement nanoBooter
 extern "C" uint8_t Messaging_ProcessPayload(WP_Message *msg)
 {
     if (g_CLR_DBG_Debugger == NULL)

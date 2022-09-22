@@ -6,7 +6,7 @@ steps:
   - task: PowerShell@2
     name: Check_Code_Style
     displayName: Check code style
-    condition: eq(variables['Build.Reason'], 'PullRequest')
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       failOnStderr: false
       targetType: 'inline'
@@ -25,7 +25,7 @@ steps:
 
         # find PR
         "Getting PR#$env:System_PullRequest_PullRequestNumber details..." | Write-Host -ForegroundColor White -NoNewline
-        $pr = Invoke-WebRequest "https://api.github.com/repos/nanoFramework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
+        $pr = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber" | ConvertFrom-Json
 
         if($($pr.number) -eq "$env:System_PullRequest_PullRequestNumber")
         {
@@ -53,7 +53,7 @@ steps:
         "Working branch is $branchName" | Write-Host -ForegroundColor White
 
         # list PR files
-        $prFiles = Invoke-WebRequest "https://api.github.com/repos/nanoFramework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
+        $prFiles = Invoke-WebRequest "https://api.github.com/repos/$env:Build_Repository_Name/pulls/$env:System_PullRequest_PullRequestNumber/files" | ConvertFrom-Json
 
         "Starting file check..." | Write-Host -ForegroundColor White
         
@@ -130,7 +130,8 @@ steps:
               'OK' | Write-Host -ForegroundColor Green
 
               # PR submitted, add a comment
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please click $($result.html_url), review the changes if you want and merge it.`n`nMake sure to follow the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html) on how it works and the tools required to help you with that."} | ConvertTo-Json
+              # include TAG comment that allows github nfbot to remove it after branch is merged
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`nA PR was submitted with the code style fixes. Please click $($result.html_url), review the changes if you want and merge it.`n`nMake sure to follow the project code style. Check the details [here](https://docs.nanoframework.net/content/contributing/cxx-coding-style.html) on how it works and the tools required to help you with that.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
           }
           catch 
@@ -147,7 +148,8 @@ steps:
 
               # most likely this is a permissions issue because the base repo is read only or protected
               # report to user
-              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/nanoframework/nf-interpreter/tree/$branchName."} | ConvertTo-Json
+              # include TAG comment that allows github nfbot to remove it after branch is merged
+              $codeStyleFixesComment = @{body="@$($pr.user.login) there are issues with the code style on the source files.`n`n:warning:Couldn't submit a PR with the fixes against your repo.:warning:`n`nPlease merge the changes from https://github.com/$env:Build_Repository_Name/tree/$branchName.`n`n<!-- nfbot fix request DO NOT REMOVE -->"} | ConvertTo-Json
               $result = Invoke-RestMethod -Method Post -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer -Uri $($pr.comments_url) -Header @{"Authorization"="$auth"} -ContentType "application/json" -Body $codeStyleFixesComment
 
               throw "Error starting PR: $responseBody"
@@ -163,7 +165,7 @@ steps:
   - task: PowerShell@2
     name: Check_Code_Style_SKIP
     displayName: Check code style (SKIP)
-    condition: ne(variables['Build.Reason'], 'PullRequest')
+    condition: eq(variables['System.PullRequest.PullRequestId'], '')
     inputs:
       targetType: 'inline'
       script: exit 0

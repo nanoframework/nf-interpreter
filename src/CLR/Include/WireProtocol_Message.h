@@ -18,6 +18,7 @@
 #define TRACE_NODATA  8
 #define TRACE_VERBOSE 16
 
+// General TRACE Macros only included in output if WP_TRACE_f option is ON
 #if defined(TRACE_MASK) && TRACE_MASK != 0
 #define TRACE0(f, msg)                                                                                                 \
     if ((f)&TRACE_MASK)                                                                                                \
@@ -25,21 +26,23 @@
 #define TRACE(f, msg, ...)                                                                                             \
     if ((f)&TRACE_MASK)                                                                                                \
     debug_printf(msg, __VA_ARGS__)
+#else
+#define TRACE0(f, msg)
+#define TRACE(f, msg, ...)
+#endif
 
-#if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
+// Rate limited TRACE Macros only included in output if WP_TRACE_VERPOSE is on
+// and WP_TRACE_f option is ON and only once every "modCount" times around the WP_Process loop.
+#if defined(TRACE_MASK) && ((TRACE_MASK & TRACE_VERBOSE) != 0)
 #define TRACE0_LIMIT(f, modCount, msg)                                                                                 \
     if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
     debug_printf(msg)
 #define TRACE_LIMIT(f, modCount, msg, ...)                                                                             \
     if (((traceLoopCounter++) % modCount == 0) && (f)&TRACE_MASK)                                                      \
     debug_printf(msg, __VA_ARGS__)
-#endif
-
 #else
-#define TRACE0(msg, ...)
-#define TRACE(msg, ...)
-#define TRACE0_LIMIT(...)
-#define TRACE_LIMIT(...)
+#define TRACE0_LIMIT(f, modCount, msg, ...)
+#define TRACE_LIMIT(f, modCount, msg, ...)
 #endif
 
 #if defined(TRACE_MASK) && TRACE_MASK & TRACE_HEADERS != 0
@@ -94,7 +97,7 @@ extern "C"
 {
 #endif
 
-    void WP_ReplyToCommand(WP_Message *message, int fSuccess, int fCritical, void *ptr, int size);
+    void WP_ReplyToCommand(WP_Message *message, uint8_t fSuccess, uint8_t fCritical, void *ptr, uint32_t size);
     void WP_SendProtocolMessage(WP_Message *message);
     void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_t *payload, uint32_t flags);
 

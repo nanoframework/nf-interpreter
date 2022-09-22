@@ -34,7 +34,7 @@ void *ConfigurationManagerCC32xx_FindNetworkConfigurationBlocks()
     // allocate memory for file list buffer
     fileList = (slGetfileList_t *)platform_malloc(sizeof(slGetfileList_t) * NETWORK_CONFIG_MAX_COUNT);
 
-    // check succesfull malloc
+    // check successful malloc
     if (fileList == NULL)
     {
         return NULL;

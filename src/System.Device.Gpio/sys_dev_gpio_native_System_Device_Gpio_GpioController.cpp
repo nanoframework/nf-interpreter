@@ -35,11 +35,11 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::
 {
     NANOCLR_HEADER();
 
-    GpioPinDriveMode driveMode;
+    PinMode driveMode;
 
     GPIO_PIN pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
 
-    driveMode = (GpioPinDriveMode)stack.Arg2().NumericByRef().s4;
+    driveMode = (PinMode)stack.Arg2().NumericByRef().s4;
 
     // Return value to the managed call
     stack.SetResult_Boolean(CPU_GPIO_DriveModeSupported(pinNumber, driveMode));
@@ -65,7 +65,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
     NANOCLR_HEADER();
 
     GPIO_PIN pinNumber;
-    GpioPinDriveMode driveMode;
+    PinMode driveMode;
     CLR_RT_HeapBlock *gpioPin = NULL;
 
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -77,7 +77,7 @@ HRESULT Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::SetPinMod
     }
 
     pinNumber = (GPIO_PIN)stack.Arg1().NumericByRef().s4;
-    driveMode = (GpioPinDriveMode)stack.Arg2().NumericByRef().s4;
+    driveMode = (PinMode)stack.Arg2().NumericByRef().s4;
 
     // try to get GpioPin object
     GetGpioPin(pinNumber, stack, gpioPin);
@@ -183,7 +183,11 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
     do
     {
         // try to get item from the array list
-        gpioPins->GetItem(index++, gpioPinBundle);
+        if (!SUCCEEDED(gpioPins->GetItem(index++, gpioPinBundle)))
+        {
+            // GetItem failed, clear to indicate failure.
+            gpioPinBundle = NULL;
+        }
 
         if (gpioPinBundle == NULL)
         {

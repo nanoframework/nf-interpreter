@@ -22,6 +22,7 @@ set(nanoFramework.Hardware.Esp32_SRCS
     nanoFramework_hardware_esp32_native_Hardware_Esp32_Logging.cpp
     nanoFramework_hardware_esp32_native_Hardware_Esp32_HighResTimer.cpp
 	nanoFramework_hardware_esp32_native_Hardware_Esp32_Configuration.cpp
+    nanoFramework_hardware_esp32_native_Hardware_Esp32_NativeMemory.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32_SRCS})

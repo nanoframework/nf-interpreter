@@ -22,7 +22,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size);
 /// @brief Sends a message through the Wire Protocol channel.
 ///
 /// @param message Message to send
-/// @return bool true for transmition succesfull, false otherwise.
+/// @return bool true for transmition successful, false otherwise.
 ///
 uint8_t WP_TransmitMessage(WP_Message *message);
 

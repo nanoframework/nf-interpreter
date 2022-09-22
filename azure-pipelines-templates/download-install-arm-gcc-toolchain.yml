@@ -4,9 +4,9 @@
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
-    displayName: Cache ARM GCC toolchain
+    displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: '9-2020-q2-update | gccUpdateKey'
+      key: 'gcc-11_3_rel1 | gccUpdateKey'
       restoreKeys: gccUpdateKey
       path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
       cacheHitVar: GCC_CACHE_RESTORED
@@ -16,7 +16,7 @@ steps:
     displayName: Downloading ARM GCC toolchain
     inputs:
         targetType: 'filePath'
-        filePath: 'install-scripts\install-arm-gcc-toolchain.ps1'
+        filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
         arguments: '-Version "$(GccArm_Version)"'
         failOnStderr: true
 
@@ -27,5 +27,10 @@ steps:
       archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
 
-  - script: echo "##vso[task.prependpath]C:\Windows\System32"
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded\bin"
+    displayName: Add GCC to PATH
+
+  - script: |
+      echo "##vso[task.prependpath]c:\windows\System32"
+      echo "##vso[task.prependpath]c:\windows\SysWoW64"
     displayName: Tweak PATH to reach cmd

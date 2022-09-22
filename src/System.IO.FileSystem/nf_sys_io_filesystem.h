@@ -10,6 +10,33 @@
 #include <nanoCLR_Runtime.h>
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
+#include <target_platform.h>
+
+typedef enum __nfpack RemovableDeviceEventArgs_RemovableDeviceEvent
+{
+    RemovableDeviceEventArgs_RemovableDeviceEvent_Inserted = 0,
+    RemovableDeviceEventArgs_RemovableDeviceEvent_Removed = 1,
+} RemovableDeviceEventArgs_RemovableDeviceEvent;
+
+typedef enum __nfpack SDCard_SDDataWidth
+{
+    SDCard_SDDataWidth__1_bit = 1,
+    SDCard_SDDataWidth__4_bit = 2,
+} SDCard_SDDataWidth;
+
+typedef enum __nfpack SDCard_SDInterfaceType
+{
+    SDCard_SDInterfaceType_System = 0,
+    SDCard_SDInterfaceType_Mmc = 1,
+    SDCard_SDInterfaceType_Spi = 2,
+} SDCard_SDInterfaceType;
+
+typedef enum __nfpack StorageEventManager_StorageEventType
+{
+    StorageEventManager_StorageEventType_Invalid = 0,
+    StorageEventManager_StorageEventType_RemovableDeviceInsertion = 1,
+    StorageEventManager_StorageEventType_RemovableDeviceRemoval = 2,
+} StorageEventManager_StorageEventType;
 
 typedef enum __nfpack FileAccess
 {
@@ -45,6 +72,70 @@ typedef enum __nfpack FileShare
     FileShare_ReadWrite = 3,
 } FileShare;
 
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_RemovableDeviceEventArgs
+{
+    static const int FIELD___path = 1;
+    static const int FIELD___event = 2;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard
+{
+    static const int FIELD___mounted = 1;
+    static const int FIELD___disposed = 2;
+    static const int FIELD___sdCardType = 3;
+    static const int FIELD___enableCardDetectPin = 4;
+    static const int FIELD___cardDetectPin = 5;
+    static const int FIELD___dataWidth = 6;
+    static const int FIELD___spiBus = 7;
+    static const int FIELD___chipSelectPin = 8;
+
+    NANOCLR_NATIVE_DECLARE(InitNative___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
+    NANOCLR_NATIVE_DECLARE(MountNative___VOID);
+    NANOCLR_NATIVE_DECLARE(UnmountNative___VOID);
+    NANOCLR_NATIVE_DECLARE(PollCardDetectNative___BOOLEAN);
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__SDCardMmcParameters
+{
+    static const int FIELD__dataWidth = 1;
+    static const int FIELD__enableCardDetectPin = 2;
+    static const int FIELD__cardDetectPin = 3;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard__SDCardSpiParameters
+{
+    static const int FIELD__spiBus = 1;
+    static const int FIELD__chipSelectPin = 2;
+    static const int FIELD__enableCardDetectPin = 3;
+    static const int FIELD__cardDetectPin = 4;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEventManager
+{
+    static const int FIELD_STATIC__RemovableDeviceInserted = 0;
+    static const int FIELD_STATIC__RemovableDeviceRemoved = 1;
+
+    //--//
+};
+
+struct Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_StorageEventManager__StorageEvent
+{
+    static const int FIELD__EventType = 3;
+    static const int FIELD__DriveIndex = 4;
+    static const int FIELD__Time = 5;
+
+    //--//
+};
+
 struct Library_nf_sys_io_filesystem_System_IO_Directory
 {
     NANOCLR_NATIVE_DECLARE(ExistsNative___STATIC__BOOLEAN__STRING);
@@ -73,14 +164,14 @@ struct Library_nf_sys_io_filesystem_System_IO_File
 
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
 {
-    static const int FIELD___canRead = 1;
-    static const int FIELD___canWrite = 2;
-    static const int FIELD___canSeek = 3;
-    static const int FIELD___seekLimit = 4;
-    static const int FIELD___position = 5;
-    static const int FIELD___disposed = 6;
-    static const int FIELD___name = 7;
-    static const int FIELD___path = 8;
+    static const int FIELD___canRead = 2;
+    static const int FIELD___canWrite = 3;
+    static const int FIELD___canSeek = 4;
+    static const int FIELD___seekLimit = 5;
+    static const int FIELD___position = 6;
+    static const int FIELD___disposed = 7;
+    static const int FIELD___name = 8;
+    static const int FIELD___path = 9;
 
     NANOCLR_NATIVE_DECLARE(OpenFileNative___VOID__STRING__STRING__I4);
     NANOCLR_NATIVE_DECLARE(ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4);
@@ -90,27 +181,15 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_System_IO_MemoryStream
-{
-    static const int FIELD___buffer = 1;
-    static const int FIELD___position = 2;
-    static const int FIELD___length = 3;
-    static const int FIELD___capacity = 4;
-    static const int FIELD___expandable = 5;
-    static const int FIELD___isOpen = 6;
-
-    //--//
-};
-
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 0;
-    static const int FIELD_STATIC__InvalidPathChars = 1;
-    static const int FIELD_STATIC__m_illegalCharacters = 2;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 2;
+    static const int FIELD_STATIC__InvalidPathChars = 3;
+    static const int FIELD_STATIC__m_illegalCharacters = 4;
 
     //--//
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_IO_FileSystem;
 
-#endif //NF_SYS_IO_FILESYSTEM_H
+#endif //_NF_SYS_IO_FILESYSTEM_H_

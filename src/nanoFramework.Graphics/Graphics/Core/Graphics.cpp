@@ -65,7 +65,6 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(CLR_RT_HeapBlock &ref, const CLR_GFX_Bitm
     CLR_GFX_Bitmap *bitmap;
     int size;
     size = sizeof(CLR_GFX_Bitmap) + bm.GetTotalSize();
-
     bitmap = (CLR_GFX_Bitmap *)g_GraphicsMemoryHeap.Allocate(size);
 
     ref.SetInteger((CLR_UINT32)bitmap);
@@ -375,8 +374,11 @@ void CLR_GFX_Bitmap::Decompress(const CLR_UINT8 *data, CLR_UINT32 size)
     }
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
+    (void)x;
+    (void)y;
+
     ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
@@ -395,8 +397,11 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT1
     return color;
 }
 
-CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
+CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param)
 {
+    (void)x;
+    (void)y;
+
     ConvertToNativeHelperParam *myParam = (ConvertToNativeHelperParam *)param;
     if (flags & PAL_GFX_Bitmap::c_SetPixels_NewRow)
     {
@@ -544,6 +549,11 @@ void CLR_GFX_Bitmap::DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, c
     GraphicsDriver::DrawRectangle(m_palBitmap, pen, brush, rectangle);
 }
 
+void CLR_GFX_Bitmap::FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle)
+{
+    GraphicsDriver::FillRectangle(m_palBitmap, brush, rectangle);
+}
+
 void CLR_GFX_Bitmap::DrawRoundedRectangle(
     const GFX_Pen &pen,
     const GFX_Brush &brush,
@@ -561,6 +571,18 @@ void CLR_GFX_Bitmap::SetPixelsHelper(
     void *param)
 {
     GraphicsDriver::SetPixelsHelper(m_palBitmap, rect, config, callback, param);
+}
+
+void CLR_GFX_Bitmap::DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)
+{
+    CLR_GFX_FontCharacterInfo chr;
+
+    font.GetCharInfo(c, chr);
+
+    if (chr.isValid)
+    {
+        font.DrawChar(this, chr, x, y, color);
+    }
 }
 
 void CLR_GFX_Bitmap::DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y)

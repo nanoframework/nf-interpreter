@@ -36,6 +36,7 @@ This implementation was initially written for 16 bit colour, SPI interface of a 
 
 struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
+extern DisplayInterfaceConfig g_DisplayInterfaceConfig;
 
 enum ST7789V_CMD : CLR_UINT8
 {
@@ -43,6 +44,8 @@ enum ST7789V_CMD : CLR_UINT8
     SOFTWARE_RESET = 0x01,
     Sleep_IN = 0x10,
     Sleep_OUT = 0x11,
+    Invertion_Off = 0x20,
+    Invertion_On = 0x21,
     Display_OFF = 0x28,
     Display_ON = 0x29,
     Column_Address_Set = 0x2A,
@@ -134,7 +137,7 @@ bool DisplayDriver::Initialize()
         0x18,
         0x16,
         0x19);
-
+    g_DisplayInterface.SendCommand(1, Invertion_On);
     g_DisplayInterface.SendCommand(1, Sleep_OUT);
     OS_DELAY(20); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, Display_ON);
@@ -167,7 +170,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
         case LANDSCAPE180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
-            g_DisplayInterface.SendCommand(2, Memory_Access_Control, (MADCTL_MV | MADCTL_MX)); // Landscape
+            g_DisplayInterface.SendCommand(2, Memory_Access_Control,
+                                           (MADCTL_ML | MADCTL_BGR)); // Landscape  + BGR
             break;
     }
     return true;
@@ -199,30 +203,15 @@ void DisplayDriver::PowerSave(PowerSaveState powerState)
     }
     return;
 }
+
 void DisplayDriver::Clear()
 {
-    // Clear the ST7789V controller
+    // Clear the ST7789V2 controller frame
     SetWindow(0, 0, Attributes.Width - 1, Attributes.Height - 1);
 
-    // Clear buffer
-    memset(Attributes.TransferBuffer, 0, Attributes.TransferBufferSize);
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
-    int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
-    int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
-
-    CLR_UINT8 command = Memory_Write;
-    for (int i = 0; i < fullTransferBuffersCount; i++)
-    {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, Attributes.TransferBufferSize);
-        command = Memory_Write_Continue;
-    }
-
-    if (remainderTransferBuffer > 0)
-    {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, remainderTransferBuffer);
-    }
-    return;
+    g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
 }
 
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
@@ -235,10 +224,10 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
 {
     CLR_UINT8 Column_Address_Set_Data[4];
-    Column_Address_Set_Data[0] = (x1 >> 8) & 0xFF;
-    Column_Address_Set_Data[1] = x1 & 0xFF;
-    Column_Address_Set_Data[2] = (x2 >> 8) & 0xFF;
-    Column_Address_Set_Data[3] = x2 & 0xFF;
+    Column_Address_Set_Data[0] = ((x1 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[1] = (x1 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
+    Column_Address_Set_Data[2] = ((x2 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[3] = (x2 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Column_Address_Set,
@@ -247,85 +236,41 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
         Column_Address_Set_Data[2],
         Column_Address_Set_Data[3]);
 
-    CLR_UINT8 Row_Address_Set_Data[4];
-    Row_Address_Set_Data[0] = (y1 >> 8) & 0xFF;
-    Row_Address_Set_Data[1] = y1 & 0xFF;
-    Row_Address_Set_Data[2] = (y2 >> 8) & 0xFF;
-    Row_Address_Set_Data[3] = y2 & 0xFF;
+    CLR_UINT8 Page_Address_Set_Data[4];
+    Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Row_Address_Set,
-        Row_Address_Set_Data[0],
-        Row_Address_Set_Data[1],
-        Row_Address_Set_Data[2],
-        Row_Address_Set_Data[3]);
+        Page_Address_Set_Data[0],
+        Page_Address_Set_Data[1],
+        Page_Address_Set_Data[2],
+        Page_Address_Set_Data[3]);
     return true;
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
-    SetWindow(x, y, (x + width - 1), (y + height - 1));
+    SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
-    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    // Position to offset in data[] for start of window
-    CLR_UINT16 offset = (y * Attributes.Width) + x;
-    StartOfLine_src += offset;
-
-    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
-    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
-    CLR_UINT8 command = Memory_Write;
-
-    while (height--)
-    {
-        CLR_UINT16 *src;
-        int xCount;
-
-        src = StartOfLine_src;
-        xCount = width;
-
-        while (xCount--)
-        {
-            CLR_UINT16 data = *src++;
-            // Swap bytes
-            *transferBufferIndex++ = (data >> 8);
-            *transferBufferIndex++ = data & 0xff;
-            transferBufferCount -= 2;
-
-            // Send over SPI if no room for another 2 bytes
-            if (transferBufferCount < 1)
-            {
-                // Transfer buffer full, send it
-                g_DisplayInterface.WriteToFrameBuffer(
-                    command,
-                    Attributes.TransferBuffer,
-                    (Attributes.TransferBufferSize - transferBufferCount));
-
-                // Reset transfer ptrs/count
-                transferBufferIndex = Attributes.TransferBuffer;
-                transferBufferCount = Attributes.TransferBufferSize;
-                command = Memory_Write_Continue;
-            }
-        }
-
-        // Next row in data[]
-        StartOfLine_src += Attributes.Width;
-    }
-
-    // Send remaining data in transfer buffer to SPI
-    if (transferBufferCount < Attributes.TransferBufferSize)
-    {
-        // Transfer buffer full, send it
-        g_DisplayInterface.WriteToFrameBuffer(
-            command,
-            Attributes.TransferBuffer,
-            (Attributes.TransferBufferSize - transferBufferCount));
-    }
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

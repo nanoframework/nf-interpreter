@@ -1109,6 +1109,7 @@ int lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
     {
         LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) operation in progress\n", s));
         sock_set_errno(sock, err_to_errno(err));
+        done_socket(sock);
         return -1;
     }
     // [END_NF_CHANGE]
@@ -1742,8 +1743,8 @@ ssize_t lwip_send(int s, const void *data, size_t size, int flags)
 #endif /* (LWIP_UDP || LWIP_RAW) */
     }
 
-    write_flags = (u8_t)(
-        NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
+    write_flags =
+        (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
     written = 0;
     err = netconn_write_partly(sock->conn, data, size, write_flags, &written);
 
@@ -1792,8 +1793,8 @@ ssize_t lwip_sendmsg(int s, const struct msghdr *msg, int flags)
     if (NETCONNTYPE_GROUP(netconn_type(sock->conn)) == NETCONN_TCP)
     {
 #if LWIP_TCP
-        write_flags = (u8_t)(
-            NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
+        write_flags =
+            (u8_t)(NETCONN_COPY | ((flags & MSG_MORE) ? NETCONN_MORE : 0) | ((flags & MSG_DONTWAIT) ? NETCONN_DONTBLOCK : 0));
 
         written = 0;
         err = netconn_write_vectors_partly(
@@ -4904,6 +4905,7 @@ static void lwip_socket_drop_registered_mld6_memberships(int s)
 uint32_t lwip_socket_get_err(int s)
 {
     struct lwip_sock *sock = get_socket(s);
+    done_socket(sock);
     return sock->err;
 }
 // [END_NF_CHANGE]

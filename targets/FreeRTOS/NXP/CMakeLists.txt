@@ -28,7 +28,7 @@ endif()
 # check if build was requested with a specifc FatFS version
 if(FATFS_VERSION_EMPTY)
     # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(FATFS_VERSION_TAG "R0.14")
+    set(FATFS_VERSION_TAG "R0.14b")
 else()
     # set version 
     set(FATFS_VERSION_TAG "${FATFS_VERSION}")
@@ -46,23 +46,20 @@ if(NO_FATFS_SOURCE)
 else()
     # FatFS source was specified
 
-    # sanity check is source path exists
-    if(EXISTS "${FATFS_SOURCE}/")
-        message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
+    message(STATUS "FatFS ${FATFS_VERSION_TAG} source from: ${FATFS_SOURCE})")
 
-        FetchContent_Declare(
-            fatfs
-            GIT_REPOSITORY ${FATFS_SOURCE}
-            GIT_TAG ${FATFS_VERSION_TAG}
-        )
-    else()
-        message(FATAL_ERROR "Couldn't find FatFS source at ${FATFS_SOURCE}/")
-    endif()
+    FetchContent_Declare(
+        fatfs
+        SOURCE_DIR ${FATFS_SOURCE}
+    )
 
 endif()
 
 FetchContent_GetProperties(fatfs)
-FetchContent_Populate(fatfs)
+if(NOT fatfs_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(fatfs)
+endif()
 
 # have to delete the ffconf.h template from the repo
 execute_process(
@@ -109,24 +106,20 @@ if(NO_LWIP_SOURCE)
 else()
     # LWIP source was specified
 
-    # sanity check is source path exists
-    if(EXISTS "${LWIP_SOURCE}/")
-        message(STATUS "lwIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
+    message(STATUS "lwIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
 
-        FetchContent_Declare(
-            lwip
-            GIT_REPOSITORY ${LWIP_SOURCE}
-            GIT_TAG ${LWIP_GIT_TAG}
-        )
-    
-    else()
-        message(FATAL_ERROR "Couldn't find LWIP source at ${LWIP_SOURCE}/")
-    endif()
+    FetchContent_Declare(
+        lwip
+        SOURCE_DIR ${LWIP_SOURCE}
+    )
 
 endif()
 
 FetchContent_GetProperties(lwip)
-FetchContent_Populate(lwip)
+if(NOT lwip_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(lwip)
+endif()
 
 # append FatFS files
 if(USE_FILESYSTEM_OPTION)

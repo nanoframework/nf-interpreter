@@ -131,6 +131,8 @@ extern "C"
 
     // StoreConfigurationBlock() is defined in targetHAL_ConfigurationManager.cpp at target level because the target
     // needs to be free to implement the storage of the configuration block as they see fit
+    // X509 certs can be large and are usually received in chunks. In this case, the block size parameter is the size of
+    // the current chunck.
     bool ConfigurationManager_StoreConfigurationBlock(
         void *configurationBlock,
         DeviceConfigurationOption configuration,
@@ -146,8 +148,8 @@ extern "C"
         DeviceConfigurationOption configuration,
         uint32_t configurationIndex);
 
-    // Checks if two configuration blocks are the same. Usefull to prevent going through the store process when the
-    // content is the same. Default implementation provided for memory addreasable implementations. defined as weak so
+    // Checks if two configuration blocks are the same. Useful to prevent going through the store process when the
+    // content is the same. Default implementation provided for memory addressable implementations. defined as weak so
     // targets are free to implement the storage of the configuration block as they see fit
     bool ConfigurationManager_CheckExistingConfigurationBlock(
         void *existingConfigBlock,
@@ -186,8 +188,22 @@ extern "C"
     HAL_Configuration_Wireless80211 *ConfigurationManager_GetWirelessConfigurationFromId(uint32_t configurationId);
 
     // gets the HAL_Configuration_WirelessAP configuration block that has the specified Id, if that exists
-    // defined as weak needs to be free to implement the storage of the configuration block as they see fit
+    // memory is allocated for the configuration block, has to be free by the caller
+    // defined as weak to allow replacement at platform/target level to allow different storage management
     HAL_Configuration_WirelessAP *ConfigurationManager_GetWirelessAPConfigurationFromId(uint32_t configurationId);
+
+    // gets the HAL_Configuration_X509CaRootBundle certificate store, if that exists
+    // memory is allocated for the configuration block, has to be free by the caller
+    // defined as weak to allow replacement at platform/target level to allow different storage management
+    HAL_Configuration_X509CaRootBundle *ConfigurationManager_GetCertificateStore();
+
+    // gets the HAL_Configuration_X509DeviceCertificate device certificate, if that exists
+    // memory is allocated for the configuration block, has to be free by the caller
+    // defined as weak to allow replacement at platform/target level to allow different storage management
+    HAL_Configuration_X509DeviceCertificate *ConfigurationManager_GetDeviceCertificate();
+
+    // gets the HAL_Configuration_NetworkInterface configuration block that has the SpecificConfig Id, if that exists
+    int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId);
 
 #ifdef __cplusplus
 }
@@ -196,4 +212,4 @@ extern "C"
 // declaration of Target configuration union as external, has to be provided at target level
 extern HAL_TARGET_CONFIGURATION g_TargetConfiguration;
 
-#endif //NANOHAL_CONFIG_MANAGER_H
+#endif // NANOHAL_CONFIG_MANAGER_H

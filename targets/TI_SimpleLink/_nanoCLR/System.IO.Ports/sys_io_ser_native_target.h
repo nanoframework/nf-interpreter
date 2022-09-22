@@ -6,7 +6,7 @@
 #ifndef SYS_IO_SER_NATIVE_TARGET_H
 #define SYS_IO_SER_NATIVE_TARGET_H
 
-#include <target_system_io_serial_config.h>
+#include <target_system_io_ports_config.h>
 #include <sys_io_ser_native.h>
 
 #include <ti/drivers/UART2.h>
@@ -21,7 +21,6 @@ typedef struct
 
     Task_Handle WorkingTask;
 
-    HAL_RingBuffer<uint8_t> TxRingBuffer;
     uint8_t *TxBuffer;
     uint16_t TxOngoingCount;
 
@@ -32,6 +31,9 @@ typedef struct
     bool IsLongRunning;
 
     uint8_t WatchChar;
+    uint8_t NewLineChar;
+    uint32_t ReceivedBytesThreshold;
+
 } NF_PAL_UART;
 
 ////////////////////////////////////////////
@@ -41,7 +43,4 @@ typedef struct
 extern NF_PAL_UART Uart1_PAL;
 #endif
 
-#define UART_TX_BUFFER_SIZE(num) UART##num##_TX_SIZE
-#define UART_RX_BUFFER_SIZE(num) UART##num##_RX_SIZE
-
-#endif //SYS_IO_SER_NATIVE_TARGET_H
+#endif // SYS_IO_SER_NATIVE_TARGET_H

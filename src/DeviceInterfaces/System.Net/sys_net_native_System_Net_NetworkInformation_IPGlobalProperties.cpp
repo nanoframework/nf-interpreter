@@ -17,6 +17,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties:
     CLR_RT_HeapBlock *ipAddressHbObj;
     CLR_RT_HeapBlock ipAddress;
     CLR_INT64 *pRes;
+    bool ipAddressValid = false;
 
     CLR_RT_HeapBlock &top = stack.PushValue();
 
@@ -35,8 +36,9 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties:
         CLR_RT_HeapBlock &addressFieldRef = ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD__Address];
         pRes = (CLR_INT64 *)&addressFieldRef.NumericByRef().s8;
 
-        // default to IP Any Address
-        *pRes = 0;
+        // IPAddress _family field
+        // IP v4: AddressFamily.InterNetwork
+        ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s4 = SOCK_AF_INET;
     }
 
     // loop through all the network interface and check if any is up
@@ -63,17 +65,25 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_IPGlobalProperties:
         {
             *pRes = config.IPv4Address;
 
-            // IPAddress _family field
-            // IP v4: AddressFamily.InterNetwork
-            ipAddressHbObj[Library_sys_net_native_System_Net_IPAddress::FIELD___family].NumericByRef().s4 =
-                SOCK_AF_INET;
+            // we have an IP...
+            ipAddressValid = true;
 
-            // set address field with IPAddress heap block object
-            top.SetObjectReference(ipAddressHbObj);
-
-            // we have an IP, no need to check any other
+            // .. no need to check any other
             break;
         }
+    }
+
+    if (ipAddressValid)
+    {
+        // set address field with IPAddress heap block object
+        top.SetObjectReference(ipAddressHbObj);
+    }
+    else
+    {
+        // default to IP Any Address
+        top.SetObjectReference(g_CLR_RT_TypeSystem.m_assemblies[ipAddressTypeDef.Assembly() - 1]
+                                   ->GetStaticField(Library_sys_net_native_System_Net_IPAddress::FIELD_STATIC__Any)
+                                   ->Dereference());
     }
 
     NANOCLR_NOCLEANUP();

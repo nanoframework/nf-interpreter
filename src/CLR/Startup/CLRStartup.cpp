@@ -247,6 +247,9 @@ struct Settings
 
                 if (assembliesBuffer == NULL)
                 {
+                    // release the headerBuffer which has being used and leave
+                    platform_free(headerBuffer);
+
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
 
@@ -270,7 +273,7 @@ struct Settings
             {
                 // check failed, try to continue to the next
 
-                if (!isXIP && assembliesBuffer != NULL)
+                if (!isXIP)
                 {
                     // release the assembliesBuffer
                     platform_free(assembliesBuffer);
@@ -287,7 +290,7 @@ struct Settings
             {
                 // load failed, try to continue to the next
 
-                if (!isXIP && assembliesBuffer != NULL)
+                if (!isXIP)
                 {
                     // release the assembliesBuffer which has being used and leave
                     platform_free(assembliesBuffer);
@@ -298,11 +301,17 @@ struct Settings
 
             // load successful, mark as deployed
             assm->m_flags |= CLR_RT_Assembly::Deployed;
+
+            // if header was malloced, set the flag to request freeing it
+            if (!isXIP)
+            {
+                assm->m_flags |= CLR_RT_Assembly::FreeOnDestroy;
+            }
         }
 
-        if (!isXIP && headerBuffer != NULL)
+        if (!isXIP)
         {
-            // release the headerbuffer which has being used and leave
+            // release the headerBuffer which has being used and leave
             platform_free(headerBuffer);
         }
 

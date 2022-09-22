@@ -17,17 +17,36 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
 
     double x = stack.Arg0().NumericByRefConst().r8;
     double y = stack.Arg1().NumericByRefConst().r8;
-    double res = x >= y ? x : y;
 
-    stack.SetResult_R8(res);
+    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
+    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    {
+        stack.SetResult_R8(NAN);
+    }
+    else
+    {
+        double res = x >= y ? x : y;
+
+        stack.SetResult_R8(res);
+    }
 
 #else
 
     float x = (float)stack.Arg0().NumericByRefConst().r8;
     float y = (float)stack.Arg1().NumericByRefConst().r8;
-    float res = x >= y ? x : y;
 
-    stack.SetResult_R8(res);
+    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
+    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    {
+        stack.SetResult_R8(NAN);
+    }
+    else
+    {
+        float res = x >= y ? x : y;
+
+        stack.SetResult_R8(res);
+    }
+
 #endif
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -208,6 +227,36 @@ HRESULT Library_nf_native_system_math_System_Math::Atan2___STATIC__R8__R8__R8(CL
     float x = (float)stack.Arg0().NumericByRefConst().r8;
     float y = (float)stack.Arg1().NumericByRefConst().r8;
     float res = atan2f(x, y);
+
+    stack.SetResult_R8(res);
+
+#endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+
+#endif
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Cbrt___STATIC__R8__R8(CLR_RT_StackFrame &stack)
+{
+#if (NANOCLR_LIGHT_MATH == TRUE)
+    return stack.NotImplementedStub();
+#else
+
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+#if (DP_FLOATINGPOINT == TRUE)
+
+    double d = stack.Arg0().NumericByRefConst().r8;
+    double res = cbrt(d);
+
+    stack.SetResult_R8(res);
+
+#else
+
+    float d = (float)stack.Arg0().NumericByRefConst().r8;
+    float res = cbrt(d);
 
     stack.SetResult_R8(res);
 

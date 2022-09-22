@@ -47,7 +47,7 @@ struct DisplayDriver
     void Clear();
     void DisplayBrightness(CLR_INT16 brightness);
     bool SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2);
-    void BitBlt(int x, int y, int width, int height, CLR_UINT32 data[]);
+    void BitBlt(int srcX, int srcY, int width, int height, int stride, int screenX, int screenY, CLR_UINT32 data[]);
     void PowerSave(PowerSaveState powerState);
     void SetDefaultOrientation();
     bool ChangeOrientation(DisplayOrientation orientation);

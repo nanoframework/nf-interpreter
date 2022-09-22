@@ -16,6 +16,7 @@ macro(nf_common_compiler_definitions)
     endif()
    
     if(NOT NFCCF_TARGET OR "${NFCCF_TARGET}" STREQUAL "")
+        message(AUTHOR_WARNING "No TARGET argument specified when calling nf_common_compiler_definitions(), defaulting to '${BUILD_TARGET}'")
         set(NFCCF_TARGET ${NFCCF_BUILD_TARGET})
     endif()
 
@@ -24,9 +25,25 @@ macro(nf_common_compiler_definitions)
     string(FIND ${NFCCF_BUILD_TARGET} ${NANOCLR_PROJECT_NAME} CLR_INDEX)
     
     if(${BOOTER_INDEX} EQUAL 0)
-        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DI_AM_NANOBOOTER)
+
+        # set global define for nanoBooter
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DI_AM_NANOBOOTER )
+
+        # add global defines for nanoBooter
+        foreach(DEFINITION ${BOOTER_EXTRA_COMPILE_DEFINITIONS})
+            target_compile_definitions(${NFCCF_TARGET} PUBLIC ${DEFINITION})
+        endforeach()
+        
     elseif(${CLR_INDEX} EQUAL 0)
+    
+        # set global define for nanoCLR
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DI_AM_NANOCLR)
+        
+        # add global defines for nanoCLR
+        foreach(DEFINITION ${CLR_EXTRA_COMPILE_DEFINITIONS})
+            target_compile_definitions(${NFCCF_TARGET} PUBLIC ${DEFINITION})
+        endforeach()
+    
     else()
         message(FATAL_ERROR "\n\n Build target name '${NFCCF_BUILD_TARGET}' is not any of the expected ones: '${NANOBOOTER_PROJECT_NAME}' or '${NANOCLR_PROJECT_NAME}'")
     endif()
@@ -64,6 +81,11 @@ macro(nf_common_compiler_definitions)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_NO_IL_INLINE=1)
     endif()
 
+    # set compiler definition for implementing (or not) TRACE to stdio
+    if(NF_TRACE_TO_STDIO)
+        target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNF_TRACE_TO_STDIO)
+    endif()
+
 endmacro()
 
 # Add packages that are common to ALL builds
@@ -91,7 +113,7 @@ macro(nf_add_common_dependencies target)
 
     endif()
     
-    # dependencies specific to nanoCRL
+    # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
     
         configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
@@ -132,7 +154,7 @@ macro(nf_add_common_include_directories target)
 
     endif()
 
-    # includes specific to nanoCRL
+    # includes specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
@@ -193,7 +215,7 @@ macro(nf_add_common_sources)
 
     endif()
 
-    # sources specific to nanoCRL
+    # sources specific to nanoCLR
     if(${NFACS_TARGET} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         target_link_libraries(${NFACS_TARGET}.elf
@@ -305,7 +327,7 @@ function(nf_generate_build_output_files target)
                 COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
                 COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
-                # copy target file to build folder (this is only usefull for debugging in VS Code because of path in launch.json)
+                # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
                 COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
 
                 COMMENT "Generate nanoBooter HEX and BIN files for deployment")
@@ -318,7 +340,7 @@ function(nf_generate_build_output_files target)
                 COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
                 COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
-                # copy target file to build folder (this is only usefull for debugging in VS Code because of path in launch.json)
+                # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
                 COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
 
                 # dump target image as source code listing 
@@ -352,11 +374,11 @@ function(nf_set_linker_options_and_file target linker_file_name)
 endfunction()
 
 # check if a directory exists
-# going throuhg the directory to find if it's not empty takes a lot of time because it sweeps all files
+# going through the directory to find if it's not empty takes a lot of time because it sweeps all files
 # simplifying this now to speed up local builds
 macro(nf_directory_exists_not_empty path pathExists)
 
-    if(EXISTS "${path}")
+    if(IS_DIRECTORY "${path}")
         set(${pathExists} TRUE)
     else()
         set(${pathExists} FALSE)
@@ -443,8 +465,8 @@ macro(nf_setup_target_build_common)
     cmake_parse_arguments(
         NFSTBC 
         "HAS_NANOBOOTER" 
-        "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES;BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS;BOOTER_EXTRA_LINK_FLAGS;CLR_EXTRA_LINK_FLAGS" 
-        "BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES;BOOTER_EXTRA_LIBRARIES;CLR_EXTRA_LIBRARIES" 
+        "BOOTER_LINKER_FILE;CLR_LINKER_FILE;BOOTER_EXTRA_LINKMAP_PROPERTIES;CLR_EXTRA_LINKMAP_PROPERTIES" 
+        "BOOTER_EXTRA_COMPILE_DEFINITIONS;CLR_EXTRA_COMPILE_DEFINITIONS;BOOTER_EXTRA_COMPILE_OPTIONS;CLR_EXTRA_COMPILE_OPTIONS;BOOTER_EXTRA_LINK_FLAGS;CLR_EXTRA_LINK_FLAGS;BOOTER_EXTRA_SOURCE_FILES;CLR_EXTRA_SOURCE_FILES;BOOTER_EXTRA_LIBRARIES;CLR_EXTRA_LIBRARIES" 
         ${ARGN})
 
     if(NOT NFSTBC_HAS_NANOBOOTER 
@@ -456,9 +478,13 @@ macro(nf_setup_target_build_common)
         message(FATAL_ERROR "Need to provide BOOTER_LINKER_FILE argument when target has HAS_NANOBOOTER defined")
     endif()
     
-    if(NOT NFSTBC_BOOTER_LINKER_FILE OR "${NFSTBC_BOOTER_LINKER_FILE}" STREQUAL "")
+    if(NOT NFSTBC_CLR_LINKER_FILE OR "${NFSTBC_CLR_LINKER_FILE}" STREQUAL "")
         message(FATAL_ERROR "Need to provide CLR_LINKER_FILE argument")
     endif()
+
+    # store these so they can be used to add the compiler definitions globally
+    set(BOOTER_EXTRA_COMPILE_DEFINITIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_DEFINITIONS})
+    set(CLR_EXTRA_COMPILE_DEFINITIONS ${NFSTBC_CLR_EXTRA_COMPILE_DEFINITIONS})
 
     #######################################
     # now the actual calls for building a target
@@ -503,7 +529,7 @@ macro(nf_setup_target_build_common)
         nf_set_compile_options(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_OPTIONS})
         
         # set compile definitions
-        nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOBOOTER_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET ${NANOBOOTER_PROJECT_NAME}.elf BUILD_TARGET ${NANOBOOTER_PROJECT_NAME})
 
         # set linker files
         if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
@@ -548,10 +574,41 @@ macro(nf_setup_target_build_common)
     nf_add_platform_include_directories(${NANOCLR_PROJECT_NAME})
 
     # set compile options
-    nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_BOOTER_EXTRA_COMPILE_OPTIONS})
+    nf_set_compile_options(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_OPTIONS ${NFSTBC_CLR_EXTRA_COMPILE_OPTIONS})
+
+    if(USE_SECURITY_MBEDTLS_OPTION AND NOT RTOS_ESP32_CHECK)
+
+        # mbedTLS requires setting a compiler definition in order to pass a config file
+        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h\"")
+        
+        # need to add extra include directories for mbedTLS
+        target_include_directories(
+            mbedcrypto PUBLIC
+            ${CMAKE_SOURCE_DIR}/src/CLR/Include
+            ${CMAKE_SOURCE_DIR}/src/HAL/Include
+            ${CMAKE_SOURCE_DIR}/src/PAL
+            ${CMAKE_SOURCE_DIR}/src/PAL/Include
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+            ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
+            ${TARGET_BASE_LOCATION}/nanoCLR
+            ${TARGET_BASE_LOCATION}
+        )
+        # platform implementation of hardware random provider
+        target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
+
+        nf_set_compile_options(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_definitions(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+    endif()
 
     # set compile definitions
-    nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf EXTRA_COMPILE_DEFINITIONS ${NFSTBC_CLR_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME} )
+    nf_set_compile_definitions(TARGET ${NANOCLR_PROJECT_NAME}.elf BUILD_TARGET ${NANOCLR_PROJECT_NAME} )
 
     # set linker files
     if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

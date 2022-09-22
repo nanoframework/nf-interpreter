@@ -172,8 +172,13 @@ typedef enum BlockRegionAttribute
 {
     // block region is memory mapped
     BlockRegionAttribute_MemoryMapped = 0x0100,
-    // programming width is 64bits
+
+    // Flash word size 64 bits
     BlockRegionAttribute_ProgramWidthIs64bits = 0x0200,
+    // Flash word size 128 bits
+    BlockRegionAttribute_ProgramWidthIs128bits = 0x0400,
+    // Flash word size 256 bits
+    BlockRegionAttribute_ProgramWidthIs256bits = 0x0800,
 
 } BlockRegionAttribute;
 
@@ -315,7 +320,7 @@ struct IBLOCKSTORAGEDEVICE
     //    Initializes a given block device for use
     //
     // Returns:
-    //   true if succesful; false if not
+    //   true if successful; false if not
     //
     // Remarks:
     //   De initializes the device when no longer needed

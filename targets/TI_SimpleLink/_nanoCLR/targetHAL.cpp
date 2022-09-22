@@ -10,15 +10,16 @@
 #include <nanoPAL_Events.h>
 #include <nanoPAL_BlockStorage.h>
 #include <nanoHAL_ConfigurationManager.h>
-// #include <FreeRTOS.h>
+
+#include <ti/drivers/pin/PINCC26XX.h>
 
 #if (HAL_USE_I2C_OPTION == TRUE)
 #include <ti/drivers/I2C.h>
-#include <win_dev_i2c_native_target.h>
+#include <sys_dev_i2c_native_target.h>
 #endif
 #if (HAL_USE_SPI_OPTION == TRUE)
 #include <ti/drivers/SPI.h>
-#include <win_dev_spi_native_target.h>
+#include <sys_dev_spi_native_target.h>
 #endif
 #if (HAL_USE_SPI == ON)
 #include <easylink/EasyLink.h>
@@ -95,11 +96,11 @@ void nanoHAL_Initialize()
     // PalEvent_Initialize();
 
 #if (HAL_USE_I2C_OPTION == TRUE)
-    I2C1_PAL.i2c = NULL;
+    memset(&I2C1_PAL, 0, sizeof(I2C1_PAL));
 #endif
 
 #if (HAL_USE_SPI_OPTION == TRUE)
-    SPI1_PAL.masterSpi = NULL;
+    memset(&SPI1_PAL, 0, sizeof(SPI1_PAL));
 #endif
 
     // Init Networking
@@ -148,6 +149,15 @@ void nanoHAL_Uninitialize()
 #if (HAL_USE_EASYLINK == ON)
     EasyLink_abort();
 #endif
+
+    // disable UART pins and ADC
+    PIN_Config BoardGpioInitTable[] = {
+        12 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
+        13 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
+        24 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
+        PIN_TERMINATE};
+
+    PIN_init(BoardGpioInitTable);
 
     Events_Uninitialize();
 

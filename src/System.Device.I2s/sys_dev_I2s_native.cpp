@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include "sys_dev_I2s_native.h"
+#include "sys_dev_i2s_native.h"
 
 // clang-format off
 

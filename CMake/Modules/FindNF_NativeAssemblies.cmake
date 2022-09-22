@@ -6,11 +6,11 @@
 ############################################################################################
 # WHEN ADDING A NEW API add the name that corresponds to the CMake option here
 # e.g.: for namespace System.Device.Gpio, the CMake option is 'API_System.Device.Gpio' 
-# and the namespace designation is 'Windows.Devices.Gpio'
+# and the namespace designation is 'System.Device.Gpio'
 ###########################################################################################
 
-option(API_nanoFramework.Devices.Can            "option for nanoFramework.Devices.Can")
-option(API_nanoFramework.Devices.OneWire        "option for nanoFramework.Devices.OneWire")
+option(API_nanoFramework.Device.Can             "option for nanoFramework.Device.Can")
+option(API_nanoFramework.Device.OneWire         "option for nanoFramework.Device.OneWire")
 option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
 option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
 option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
@@ -19,27 +19,21 @@ option(API_nanoFramework.System.Text            "option for nanoFramework.System
 option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
 option(API_System.Math                          "option for System.Math")
 option(API_System.Net                           "option for System.Net")
-option(API_Windows.Devices.Adc                  "option for Windows.Devices.Adc API")
+option(API_System.Device.Adc                    "option for System.Device.Adc API")
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
 option(API_System.Device.I2s                    "option for System.Device.I2s API")
-option(API_Windows.Devices.Gpio                 "option for Windows.Devices.Gpio API")
-option(API_Windows.Devices.I2c                  "option for Windows.Devices.I2c API")
-option(API_Windows.Devices.Pwm                  "option for Windows.Devices.Pwm API")
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
-option(API_Windows.Devices.SerialCommunication  "option for Windows.Devices.SerialCommunication API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
-option(API_Windows.Devices.Spi                  "option for Windows.Devices.Spi API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
-
+option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
 option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
-option(API_nanoFramework.Hardware.Esp32.Ble     "option for nanoFramework.Hardware.Esp32.Ble")
 
 
 # Stm32 only
@@ -178,10 +172,10 @@ if(API_nanoFramework.Hardware.Esp32.Rmt)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Rmt")
 endif()
 
-# nanoFramework.Hardware.Esp32.Ble
-if(API_nanoFramework.Hardware.Esp32.Ble)
+# nanoFramework.Device.Bluetooth
+if(API_nanoFramework.Device.Bluetooth)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Hardware.Esp32.Ble")
+    PerformSettingsForApiEntry("nanoFramework.Device.Bluetooth")
 endif()
 
 # Hardware.Stm32
@@ -190,10 +184,10 @@ if(API_Hardware.Stm32)
     PerformSettingsForApiEntry("nanoFramework.Hardware.Stm32")
 endif()
 
-# nanoFramework.Devices.Can
-if(API_nanoFramework.Devices.Can)
+# nanoFramework.Device.Can
+if(API_nanoFramework.Device.Can)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Devices.Can")
+    PerformSettingsForApiEntry("nanoFramework.Device.Can")
 endif()
 
 # nanoFramework.Graphics
@@ -202,10 +196,10 @@ if(API_nanoFramework.Graphics)
     PerformSettingsForApiEntry("nanoFramework.Graphics")
 endif()
 
-# nanoFramework.Devices.OneWire
-if(API_nanoFramework.Devices.OneWire)
+# nanoFramework.Device.OneWire
+if(API_nanoFramework.Device.OneWire)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("nanoFramework.Devices.OneWire")
+    PerformSettingsForApiEntry("nanoFramework.Device.OneWire")
 endif()
 
 # nanoFramework.Networking.Sntp
@@ -276,10 +270,10 @@ if(API_System.Net)
     PerformSettingsForApiEntry("System.Net")
 endif()
 
-# Windows.Devices.Adc
-if(API_Windows.Devices.Adc)
+# System.Device.Adc
+if(API_System.Device.Adc)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Adc")
+    PerformSettingsForApiEntry("System.Device.Adc")
 endif()
 
 # System.Device.Dac
@@ -294,18 +288,6 @@ if(API_System.Device.Gpio)
     PerformSettingsForApiEntry("System.Device.Gpio")
 endif()
 
-# Windows.Devices.Gpio
-if(API_Windows.Devices.Gpio)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Gpio")
-endif()
-
-# Windows.Devices.I2c
-if(API_Windows.Devices.I2c)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.I2c")
-endif()
-
 # System.Device.I2c
 if(API_System.Device.I2c)
     ##### API name here (doted name)
@@ -318,22 +300,10 @@ if(API_System.Device.I2s)
     PerformSettingsForApiEntry("System.Device.I2s")
 endif()
 
-# Windows.Devices.Pwm
-if(API_Windows.Devices.Pwm)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Pwm")
-endif()
-
 # System.Device.Pwm
 if(API_System.Device.Pwm)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Pwm")
-endif()
-
-# Windows.Devices.SerialCommunication
-if(API_Windows.Devices.SerialCommunication)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.SerialCommunication")
 endif()
 
 # API_System.IO.Ports
@@ -342,22 +312,16 @@ if(API_System.IO.Ports)
     PerformSettingsForApiEntry("System.IO.Ports")
 endif()
 
-# Windows.Devices.Spi
-if(API_Windows.Devices.Spi)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Spi")
-endif()
-
 # System.Device.Spi
 if(API_System.Device.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
-# Windows.Devices.Wifi
-if(API_Windows.Devices.Wifi)
+# System.Device.Wifi
+if(API_System.Device.Wifi)
     ##### API name here (doted name)
-    PerformSettingsForApiEntry("Windows.Devices.Wifi")
+    PerformSettingsForApiEntry("System.Device.Wifi")
 endif()
 
 # Windows.Storage
@@ -439,16 +403,19 @@ macro(nf_add_lib_native_assemblies)
             ${NFALNA_EXTRA_INCLUDES})   
 
     # TODO can be removed later
-    if(RTOS_FREERTOS_ESP32_CHECK)
-
-        nf_common_compiler_definitions(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-
+    if(RTOS_ESP32_CHECK)
         # this is the only one different
-        target_compile_definitions(
-            ${LIB_NAME} PUBLIC
-            -DPLATFORM_ESP32
-            ${NFALNA_EXTRA_COMPILER_DEFINITIONS}
-        )
+
+        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        nf_set_compile_definitions(
+            TARGET ${LIB_NAME} 
+            EXTRA_COMPILE_DEFINITIONS
+                -DPLATFORM_ESP32
+                ${NFALNA_EXTRA_COMPILE_DEFINITIONS} 
+            BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+
+        nf_set_link_options(TARGET ${LIB_NAME})
 
     else() 
         nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})

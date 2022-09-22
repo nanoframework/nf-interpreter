@@ -1865,6 +1865,12 @@ void CLR_RT_Assembly::DestroyInstance()
     }
 #endif
 
+    // check if header has to be freed (in case the assembly lives in RAM)
+    if ((this->m_flags & CLR_RT_Assembly::FreeOnDestroy) != 0)
+    {
+        platform_free((void *)this->m_header);
+    }
+
     //--//
 
     g_CLR_RT_EventCache.Append_Node(this);
@@ -2840,7 +2846,6 @@ static const TypeIndexLookup c_TypeIndexLookup[] = {
     TIL("System.Net.Sockets", "SocketException", m_SocketException),
 
     TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
-    TIL("Windows.Devices.I2c", "I2cTransferResult", m_I2cTransferResult_old),
 
     TIL("nanoFramework.Hardware.Esp32.Rmt", "RmtCommand", m_RmtCommand),
 
@@ -4641,49 +4646,100 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
     }
     else if ((m_currentPos < m_fixed_Count) && !m_constructorParsed)
     {
-        // Attribute class has a constructor
+        // Attribute class has a constructor with parameter(s)
 
         m_lastValue.m_mode = Value::c_ConstructorArgument;
         m_lastValue.m_name = NULL;
 
-        ////////////////////////////////////////////////
-        // need to read the arguments from the blob
-
+        // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));
-        //
-        // Skip value info.
-        //
-        m_blob += sizeof(CLR_UINT8);
 
-        const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[m_res.m_dt];
+        CLR_RT_DataTypeLookup dtl = c_CLR_RT_DataTypeLookup[m_res.m_dt];
 
-        if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+        ////////////////////////////////////////////////
+        // now read the arguments from the blob
+
+        if ((m_res.m_dt == DATATYPE_OBJECT && m_res.m_levels == 1) || m_fixed_Count > 1)
         {
+            // this is either an array of objects or a constructor with multiple parameters
+
+            uint8_t paramCount;
+
+            if (m_res.m_dt == DATATYPE_OBJECT && m_res.m_levels == 1)
+            {
+                // get element count of array (from blob)
+                NANOCLR_READ_UNALIGNED_UINT8(paramCount, m_blob);
+            }
+            else
+            {
+                // load parameter count from constructor info because this is not an array of objects
+                paramCount = m_fixed_Count;
+            }
+
+            // instantiate array to hold parameters values
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                m_lastValue.m_value,
+                paramCount,
+                g_CLR_RT_WellKnownTypes.m_Object));
+
+            // get a pointer to the first element
+            CLR_RT_HeapBlock *currentParam =
+                (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
+
+            do
+            {
+                // read element type
+                uint8_t elementType;
+                NANOCLR_READ_UNALIGNED_UINT8(elementType, m_blob);
+
+                CLR_DataType dt = CLR_RT_TypeSystem::MapElementTypeToDataType(elementType);
+
+                dtl = c_CLR_RT_DataTypeLookup[dt];
+
+                if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+                {
+                    CLR_UINT32 size = dtl.m_sizeInBytes;
+
+                    NANOCLR_CHECK_HRESULT(ReadNumericValue(currentParam, dt, dtl.m_cls, size));
+                }
+                else if (dt == DATATYPE_STRING)
+                {
+                    NANOCLR_CHECK_HRESULT(ReadString(currentParam));
+                }
+                else
+                {
+                    NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                }
+
+                // move pointer to next array element
+                currentParam++;
+
+            } while (--paramCount > 0);
+        }
+        else if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
+        {
+            // single parameter of numeric type
+            // OK to skip element type
+            m_blob += sizeof(CLR_UINT8);
+
             // size of value
             CLR_UINT32 size = dtl.m_sizeInBytes;
 
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(m_lastValue.m_value, g_CLR_RT_WellKnownTypes.m_TypeStatic));
-
-            // need to setup reflection and data type Id to properly setup the object
-            m_lastValue.m_value.SetReflection(*dtl.m_cls);
-
-            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1));
-
-            // because this is a numeric object, performa a raw copy of the numeric value data from the blob to the
-            // return value
-            memcpy((CLR_UINT8 *)&m_lastValue.m_value.NumericByRef(), m_blob, size);
-            m_blob += size;
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadNumericValue(currentParam, m_res.m_dt, dtl.m_cls, size));
         }
         else if (m_res.m_dt == DATATYPE_STRING)
         {
-            CLR_UINT32 tk;
-            NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
+            // single parameter of string type
+            // OK to skip element type
+            m_blob += sizeof(CLR_UINT8);
 
-            CLR_RT_HeapBlock_String::CreateInstance(m_lastValue.m_value, CLR_TkFromType(TBL_Strings, tk), m_assm);
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadString(currentParam));
         }
         else
         {
+            // whatever this parameter is we don't have support for it
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
@@ -4761,22 +4817,15 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_Numeric)
         {
-            // need to setup reflection and data type Id to properly setup the object
-            m_lastValue.m_value.SetReflection(m_res.m_cls);
-
-            m_lastValue.m_value.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(m_res.m_dt, 0, 1));
-
             CLR_UINT32 size = dtl.m_sizeInBytes;
 
-            memcpy(&m_lastValue.m_value.NumericByRef(), m_blob, size);
-            m_blob += size;
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadNumericValue(currentParam, m_res.m_dt, dtl.m_cls, size));
         }
         else if (m_res.m_dt == DATATYPE_STRING)
         {
-            CLR_UINT32 tk;
-            NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
-
-            CLR_RT_HeapBlock_String::CreateInstance(m_lastValue.m_value, CLR_TkFromType(TBL_Strings, tk), m_assm);
+            CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
+            NANOCLR_CHECK_HRESULT(ReadString(currentParam));
         }
         else
         {
@@ -4785,6 +4834,65 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
     }
 
     m_lastValue.m_pos = m_currentPos++;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_AttributeParser::ReadString(CLR_RT_HeapBlock *&value)
+{
+    NANOCLR_HEADER();
+
+    CLR_UINT32 tk;
+
+    CLR_RT_TypeDescriptor desc;
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromType(g_CLR_RT_WellKnownTypes.m_String));
+
+    NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
+
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(*value, CLR_TkFromType(TBL_Strings, tk), m_assm));
+
+    // need to box this
+    value->PerformBoxing(desc.m_handlerCls);
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_AttributeParser::ReadNumericValue(
+    CLR_RT_HeapBlock *&value,
+    const CLR_DataType dt,
+    const CLR_RT_TypeDef_Index *m_cls,
+    const CLR_UINT32 size)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDescriptor desc;
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromType(*m_cls));
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*value, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+
+    // need to setup reflection and data type Id to properly setup the object
+    value->SetReflection(*m_cls);
+
+    value->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, 0, 1));
+
+    if (dt == DATATYPE_BOOLEAN)
+    {
+        uint8_t boolValue;
+        NANOCLR_READ_UNALIGNED_UINT8(boolValue, m_blob);
+
+        value->SetBoolean((bool)boolValue);
+    }
+    else
+    {
+        // because this is a numeric object, perform a a raw copy of the numeric value data from the
+        // blob to the return value
+        memcpy((CLR_UINT8 *)&value->NumericByRef(), m_blob, size);
+
+        m_blob += size;
+    }
+
+    // need to box this
+    value->PerformBoxing(desc.m_handlerCls);
 
     NANOCLR_NOCLEANUP();
 }

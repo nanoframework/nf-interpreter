@@ -35,6 +35,7 @@ This implementation was initially written for 16 bit colour.
 
 struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
+extern DisplayInterfaceConfig g_DisplayInterfaceConfig;
 
 enum ILI9341_CMD : CLR_UINT8
 {
@@ -42,6 +43,7 @@ enum ILI9341_CMD : CLR_UINT8
     SOFTWARE_RESET = 0x01,
     POWER_STATE = 0x10,
     Sleep_Out = 0x11,
+    Normal_Display_On = 0x13,
     Gamma_Set = 0x26,
     Display_OFF = 0x28,
     Display_ON = 0x29,
@@ -145,14 +147,26 @@ bool DisplayDriver::Initialize()
         0x38,
         0x3A,
         0x1F);
-    g_DisplayInterface.SendCommand(5, Column_Address_Set, 0x00, 0x00, 0x00, 0xEF); // Size = 239
-    g_DisplayInterface.SendCommand(5, Page_Address_Set, 0x00, 0x00, 0x01, 0x3f);   // Size = 319
+    g_DisplayInterface.SendCommand(
+        5,
+        Column_Address_Set,
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.y >> 8),
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.y & 0xFF),
+        (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.height - 1) >> 8),
+        (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.height - 1) & 0xFF)); // Size = 239
+    g_DisplayInterface.SendCommand(
+        5,
+        Page_Address_Set,
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.x >> 8),
+        (CLR_UINT8)(g_DisplayInterfaceConfig.Screen.x & 0xFF),
+        (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.width - 1) >> 8),
+        (CLR_UINT8)((g_DisplayInterfaceConfig.Screen.width - 1) & 0xFF)); // Size = 319
     g_DisplayInterface.SendCommand(1, Memory_Write);
     g_DisplayInterface.SendCommand(2, Entry_Mode_Set, 0x07); // Entry mode set
     g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x0A, 0x82, 0x27, 0x00);
 
-    g_DisplayInterface.SendCommand(1, Sleep_Out);
-    OS_DELAY(20); // Send Sleep Out command to display : no parameter
+    g_DisplayInterface.SendCommand(1, Normal_Display_On);
+    OS_DELAY(10);
     g_DisplayInterface.SendCommand(1, Display_ON);
     OS_DELAY(20);                           // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, NOP); // End of sequence
@@ -166,8 +180,8 @@ bool DisplayDriver::Initialize()
 void DisplayDriver::SetupDisplayAttributes()
 {
     // Define the LCD/TFT resolution
-    Attributes.LongerSide = 320;
-    Attributes.ShorterSide = 240;
+    Attributes.LongerSide = g_DisplayInterfaceConfig.Screen.width;
+    Attributes.ShorterSide = g_DisplayInterfaceConfig.Screen.height;
     Attributes.PowerSave = PowerSaveState::NORMAL;
     Attributes.BitsPerPixel = 16;
     g_DisplayInterface.GetTransferBuffer(Attributes.TransferBuffer, Attributes.TransferBufferSize);
@@ -229,24 +243,9 @@ void DisplayDriver::Clear()
     // Clear the ILI9341 controller frame
     SetWindow(0, 0, Attributes.Width - 1, Attributes.Height - 1);
 
-    // Clear buffer
-    memset(Attributes.TransferBuffer, 0, Attributes.TransferBufferSize);
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    int totalBytesToClear = Attributes.Width * Attributes.Height * 2;
-    int fullTransferBuffersCount = totalBytesToClear / Attributes.TransferBufferSize;
-    int remainderTransferBuffer = totalBytesToClear % Attributes.TransferBufferSize;
-
-    CLR_UINT8 command = Memory_Write;
-    for (int i = 0; i < fullTransferBuffersCount; i++)
-    {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, Attributes.TransferBufferSize);
-        command = Memory_Write_Continue;
-    }
-
-    if (remainderTransferBuffer > 0)
-    {
-        g_DisplayInterface.WriteToFrameBuffer(command, Attributes.TransferBuffer, remainderTransferBuffer);
-    }
+    g_DisplayInterface.FillData16(0, Attributes.Width * Attributes.Height);
 }
 
 void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
@@ -258,10 +257,10 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
 {
     CLR_UINT8 Column_Address_Set_Data[4];
-    Column_Address_Set_Data[0] = (x1 >> 8) & 0xFF;
-    Column_Address_Set_Data[1] = x1 & 0xFF;
-    Column_Address_Set_Data[2] = (x2 >> 8) & 0xFF;
-    Column_Address_Set_Data[3] = x2 & 0xFF;
+    Column_Address_Set_Data[0] = ((x1 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[1] = (x1 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
+    Column_Address_Set_Data[2] = ((x2 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[3] = (x2 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Column_Address_Set,
@@ -271,10 +270,10 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
         Column_Address_Set_Data[3]);
 
     CLR_UINT8 Page_Address_Set_Data[4];
-    Page_Address_Set_Data[0] = (y1 >> 8) & 0xFF;
-    Page_Address_Set_Data[1] = y1 & 0xFF;
-    Page_Address_Set_Data[2] = (y2 >> 8) & 0xFF;
-    Page_Address_Set_Data[3] = y2 & 0xFF;
+    Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
     g_DisplayInterface.SendCommand(
         5,
         Page_Address_Set,
@@ -285,69 +284,26 @@ bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT1
     return true;
 }
 
-void DisplayDriver::BitBlt(int x, int y, int width, int height, CLR_UINT32 data[])
+void DisplayDriver::BitBlt(
+    int srcX,
+    int srcY,
+    int width,
+    int height,
+    int stride,
+    int screenX,
+    int screenY,
+    CLR_UINT32 data[])
 {
     // 16 bit colour  RRRRRGGGGGGBBBBB mode 565
 
-    ASSERT((x >= 0) && ((x + width) <= Attributes.Width));
-    ASSERT((y >= 0) && ((y + height) <= Attributes.Height));
+    ASSERT((screenX >= 0) && ((screenX + width) <= Attributes.Width));
+    ASSERT((screenY >= 0) && ((screenY + height) <= Attributes.Height));
 
-    SetWindow(x, y, (x + width - 1), (y + height - 1));
+    SetWindow(screenX, screenY, (screenX + width - 1), (screenY + height - 1));
 
-    CLR_UINT16 *StartOfLine_src = (CLR_UINT16 *)&data[0];
+    g_DisplayInterface.SendCommand(1, Memory_Write);
 
-    // Position to offset in data[] for start of window
-    CLR_UINT16 offset = (y * Attributes.Width) + x;
-    StartOfLine_src += offset;
-
-    CLR_UINT8 *transferBufferIndex = Attributes.TransferBuffer;
-    CLR_UINT32 transferBufferCount = Attributes.TransferBufferSize;
-    CLR_UINT8 command = Memory_Write;
-
-    while (height--)
-    {
-        CLR_UINT16 *src;
-        int xCount;
-
-        src = StartOfLine_src;
-        xCount = width;
-
-        while (xCount--)
-        {
-            CLR_UINT16 data = *src++;
-            *transferBufferIndex++ = (data >> 8);
-            *transferBufferIndex++ = data & 0xff;
-            transferBufferCount -= 2;
-
-            // Send over SPI if no room for another 2 bytes
-            if (transferBufferCount < 1)
-            {
-                // Transfer buffer full, send it
-                g_DisplayInterface.WriteToFrameBuffer(
-                    command,
-                    Attributes.TransferBuffer,
-                    (Attributes.TransferBufferSize - transferBufferCount));
-
-                // Reset transfer ptrs/count
-                transferBufferIndex = Attributes.TransferBuffer;
-                transferBufferCount = Attributes.TransferBufferSize;
-                command = Memory_Write_Continue;
-            }
-        }
-
-        // Next row in data[]
-        StartOfLine_src += Attributes.Width;
-    }
-
-    // Send remaining data in transfer buffer to SPI
-    if (transferBufferCount < Attributes.TransferBufferSize)
-    {
-        // Transfer buffer full, send it
-        g_DisplayInterface.WriteToFrameBuffer(
-            command,
-            Attributes.TransferBuffer,
-            (Attributes.TransferBufferSize - transferBufferCount));
-    }
+    g_DisplayInterface.SendData16Windowed((CLR_UINT16 *)&data[0], srcX, srcY, width, height, stride, true);
 
     return;
 }

@@ -18,7 +18,7 @@
     {
       "label": "Flash nanoCLR to ESP32",
       "type": "shell",
-      "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"40m\" --flash_size detect 0x1000 <absolute-path-to-the-esp32-bootloader-folder-mind-the-forward-slashes>/bootloader.bin 0x10000 <absolute-path-to-the-build-folder-mind-the-forward-slashes>/nanoCLR.bin 0x8000 <absolute-path-to-the-build-folder-mind-the-forward-slashes>/partitions_${input:esp32Partitions}.bin",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"keep\" --flash_size detect 0x1000 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
@@ -28,7 +28,7 @@
     {
       "label": "Erase ESP32 flash",
       "type": "shell",
-      "command": "python <absolute-path-to-the-IDF-folder-mind-the-forward-slashes>/components/esptool_py/esptool/esptool.py --chip esp32 --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip detect --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" erase_flash",
       "presentation": {
         "reveal": "always",
         "panel": "shared"

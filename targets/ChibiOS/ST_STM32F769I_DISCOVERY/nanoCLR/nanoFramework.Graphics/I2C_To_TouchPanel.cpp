@@ -12,19 +12,18 @@
 #include "TouchInterface.h"
 #include "hal_i2c.h"
 #include "CPU_GPIO_decl.h"
-#include "Core_Cm7.h"
-#include "STM32f769xx.h"
+#include "core_cm7.h"
+#include "stm32f769xx.h"
 
-#define UNUSED(x)  (void)x
+#define UNUSED(x) (void)x
 
-// This code module is written for a STM32F769I DISCOVERY board 
+// This code module is written for a STM32F769I DISCOVERY board
 // with MB1166 daughter board (K.O.D Optica Technology 480x800 TFT and touch screen)
 // The touch screen driver IC is a FT6206 by Focal Tech.
-#define FT6206_I2C_Address  0x54
+#define FT6206_I2C_Address 0x54
 
-extern  I2CDriver touchDriver;
+extern I2CDriver touchDriver;
 static CLR_UINT16 I2C_Address;
-
 
 bool TouchInterface::Initialize()
 {
@@ -34,26 +33,24 @@ bool TouchInterface::Initialize()
 
     // #define STM32_I2C_USE_I2C4                  TRUE
 
-
     I2C_Address = FT6206_I2C_Address;
-
 
     return true;
 }
-CLR_UINT8* TouchInterface::Write_Read(CLR_UINT8* valuesToSend, CLR_UINT16 numberOfValuesToSend, CLR_UINT16 numberValuesExpected)
+CLR_UINT8 *TouchInterface::Write_Read(
+    CLR_UINT8 *valuesToSend,
+    CLR_UINT16 numberOfValuesToSend,
+    CLR_UINT16 numberValuesExpected)
 {
     // TO BE DEVELOPED
     UNUSED(valuesToSend);
     UNUSED(numberOfValuesToSend);
     UNUSED(numberValuesExpected);
 
-    //CLR_UINT8* receivedValues = NULL;
-    //msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend, receivedValues, numberValuesExpected, TIME_MS2I(20));
-    //return receivedValues;
+    // CLR_UINT8* receivedValues = NULL;
+    // msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend,
+    // receivedValues, numberValuesExpected, TIME_MS2I(20)); return receivedValues;
 
     return 0U;
-
 }
 #endif // I2C_TO_TOUCHPANEL_H
-
-

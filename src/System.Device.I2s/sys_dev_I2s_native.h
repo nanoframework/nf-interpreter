@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef _SYS_DEV_I2S_NATIVE_H_
-#define _SYS_DEV_I2S_NATIVE_H_
+#ifndef SYS_DEV_I2S_NATIVE_H
+#define SYS_DEV_I2S_NATIVE_H
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
@@ -65,7 +65,6 @@ struct Library_sys_dev_I2s_native_System_Device_I2s_I2sConnectionSettings
     static const int FIELD___i2sConnectionFormat = 6;
 
     //--//
-
 };
 
 struct Library_sys_dev_I2s_native_System_Device_I2s_I2sDevice
@@ -81,9 +80,8 @@ struct Library_sys_dev_I2s_native_System_Device_I2s_I2sDevice
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2s;
 
-#endif  //_SYS_DEV_I2S_NATIVE_H_
+#endif // SYS_DEV_I2S_NATIVE_H
