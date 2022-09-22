@@ -57,13 +57,15 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeInit___VOID,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeOpenChannel___VOID__I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetChannelCount___I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeIsChannelModeSupported___BOOLEAN__I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetSupportedResolutionsInBits___SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution,
-    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStartContinuousConversion___BOOLEAN,
-    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStoptContinuousConversion___BOOLEAN,
+    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStartContinuousConversion___VOID__SZARRAY_I4__I4,
+    Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeStopContinuousConversion___VOID,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetLastContinuousSamples___SZARRAY_I4,
     Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetLastScanSampleForChannel___I4__I4,
     NULL,
@@ -80,7 +82,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_GiantGecko_Adc =
 {
     "nanoFramework.GiantGecko.Adc",
-    0x175512A5,
+    0x8DC59CD0,
     method_lookup,
     { 100, 1, 0, 0 }
 };
