@@ -30,6 +30,7 @@ extern void DeInitPwm();
 
 #if (GECKO_USE_ADC0 == TRUE) || (GECKO_USE_ADC1 == TRUE)
 #include <nano_gg_adc_native_target.h>
+#include <sys_dev_adc_native_target.h>
 #endif
 
 // global mutex protecting the internal state of the interpreter, including event flags
@@ -131,12 +132,13 @@ void nanoHAL_Initialize()
 
 #endif
 
-#if GECKO_USE_ADC0
+#if (GECKO_USE_ADC0 == TRUE) && defined(NANO_GG_ADC_NATIVE_TARGET_H)
 adc0Initialized = false;
 #endif
-#if GECKO_USE_ADC1
+#if (GECKO_USE_ADC1 == TRUE) && defined(NANO_GG_ADC_NATIVE_TARGET_H)
 adc1Initialized = false;
 #endif
+
     // #if (HAL_USE_UART == TRUE)
 
     // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
@@ -271,11 +273,11 @@ void nanoHAL_Uninitialize()
     nanoSPI_Uninitialize();
 #endif
 
-#if GECKO_USE_ADC0
+#if (GECKO_USE_ADC0 == TRUE) && defined(NANO_GG_ADC_NATIVE_TARGET_H)
 ADC_Reset(ADC0);
 adc0Initialized = false;
 #endif
-#if GECKO_USE_ADC1
+#if (GECKO_USE_ADC1 == TRUE) && defined(NANO_GG_ADC_NATIVE_TARGET_H)
 ADC_Reset(ADC1);
 adc1Initialized = false;
 #endif

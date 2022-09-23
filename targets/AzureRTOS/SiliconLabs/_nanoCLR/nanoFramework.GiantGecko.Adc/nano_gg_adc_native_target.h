@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef SYS_DEV_ADC_NATIVE_TARGET_H
-#define SYS_DEV_ADC_NATIVE_TARGET_H
+#ifndef NANO_GG_ADC_NATIVE_TARGET_H
+#define NANO_GG_ADC_NATIVE_TARGET_H
 
 #include <em_device.h>
 #include <em_adc.h>
@@ -33,8 +33,18 @@ typedef struct
     ADC_PosSel_TypeDef posSel;
 } NF_PAL_ADC_PORT_PIN_CHANNEL;
 
+typedef struct
+{
+    uint8_t channelCount;
+    uint32_t *dataBuffer;
+    uint32_t averageCount;
+    uint32_t currentIndex;
+} NF_PAL_GECKO_ADC_CONTINUOUS_SCAN;
+
+
 extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
 extern const int AdcChannelCount;
+extern NF_PAL_GECKO_ADC_CONTINUOUS_SCAN* ContinuousScanOperation;
 
 #if GECKO_USE_ADC0
 extern ADC_Init_TypeDef adc0Init;
@@ -46,4 +56,4 @@ extern bool adc1Initialized;
 #endif
 
 
-#endif // SYS_DEV_ADC_NATIVE_TARGET_H
+#endif // NANO_GG_ADC_NATIVE_TARGET_H

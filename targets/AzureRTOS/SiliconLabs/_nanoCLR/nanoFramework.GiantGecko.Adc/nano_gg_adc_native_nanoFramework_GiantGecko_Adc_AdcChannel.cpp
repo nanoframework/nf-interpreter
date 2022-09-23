@@ -31,22 +31,12 @@ void ParseAdcChannelConfig(CLR_RT_HeapBlock *channelConfiguration, void *adcInit
     memcpy(adcInit, &channelInitSingle, sizeof(ADC_InitSingle_TypeDef));
 }
 
-HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::get_LastContinuousValue___I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::NativeReadValue___I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    int channelNumber;
+    int32_t channelNumber;
     NF_PAL_ADC_PORT_PIN_CHANNEL adcDefinition;
 
     // ADC related variables

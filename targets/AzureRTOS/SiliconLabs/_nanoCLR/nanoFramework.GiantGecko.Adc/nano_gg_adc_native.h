@@ -130,7 +130,6 @@ struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel
     static const int FIELD___channelNumber = 4;
     static const int FIELD___adcChannelConfiguration = 5;
 
-    NANOCLR_NATIVE_DECLARE(get_LastContinuousValue___I4);
     NANOCLR_NATIVE_DECLARE(NativeReadValue___I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeDisposeChannel___VOID);
 
@@ -163,20 +162,18 @@ struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcConfiguration
 struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController
 {
     static const int FIELD___syncLock = 1;
-    static const int FIELD___scanChannels = 2;
-    static const int FIELD___averageCount = 3;
-    static const int FIELD___continuousSamplingStarted = 4;
-    static const int FIELD___adcConfiguration = 5;
+    static const int FIELD___continuousSamplingStarted = 2;
+    static const int FIELD___adcConfiguration = 3;
+    static const int FIELD___adcChannelConfiguration = 4;
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpenChannel___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetChannelCount___I4);
     NANOCLR_NATIVE_DECLARE(NativeIsChannelModeSupported___BOOLEAN__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetSupportedResolutionsInBits___SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution);
-    NANOCLR_NATIVE_DECLARE(NativeStartContinuousConversion___BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeStoptContinuousConversion___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeStartContinuousConversion___VOID__SZARRAY_I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeStopContinuousConversion___VOID);
     NANOCLR_NATIVE_DECLARE(NativeGetLastContinuousSamples___SZARRAY_I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetLastScanSampleForChannel___I4__I4);
 
     //--//
 };
