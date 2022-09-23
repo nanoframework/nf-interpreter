@@ -15,15 +15,12 @@ list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.I2s_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.I2s)
 
-# TODO remove the following when Windows.Devices.Gpio is removed
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/Windows.Devices.I2s)
-
 # source files
 set(System.Device.I2s_SRCS
 
-    sys_dev_I2s_native.cpp
+    sys_dev_i2s_native.cpp
 
-    sys_dev_I2s_native_System_Device_I2s_I2sDevice.cpp
+    sys_dev_i2s_native_System_Device_I2s_I2sDevice.cpp
     target_system_device_I2s_config.cpp
 )
 
