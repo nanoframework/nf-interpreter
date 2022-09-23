@@ -424,27 +424,22 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 {
     NANOCLR_HEADER();
 
+    CLR_INT32 *sample = NULL;
+    // assuming that, at 12 bits resolution, this will be enough to hold the average
     uint64_t samplesAccumulator = 0;
 
     CLR_RT_HeapBlock_Array *sampleArray;
-    CLR_RT_HeapBlock &top = stack.PushValue();
 
     // create an array of <int>
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-        top,
+        stack.PushValueAndClear(),
         ContinuousScanOperation->channelCount,
         g_CLR_RT_WellKnownTypes.m_Int32));
 
-    sampleArray = top.DereferenceArray();
+    sampleArray = stack.TopValue().DereferenceArray();
 
     for (uint32_t channelIndex = 0; channelIndex < ContinuousScanOperation->channelCount; channelIndex++)
     {
-        // // Read data from ADC
-        // data = ADC_DataIdScanGet(ADC0, &id);
-
-        // ContinuousScanOperation
-        //     ->dataBuffer[i * ContinuousScanOperation->averageCount + ContinuousScanOperation->currentIndex] = data;
-
         // compute average
         // 1. accumulate samples
         for (uint32_t sampleIndex = 0; sampleIndex < ContinuousScanOperation->averageCount; sampleIndex++)
@@ -454,8 +449,8 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
         }
 
         // 2. set array element with the average
-        ((CLR_RT_HeapBlock *)sampleArray->GetElement(channelIndex))
-            ->SetInteger((CLR_INT32)(samplesAccumulator / ContinuousScanOperation->averageCount));
+        sample = ((CLR_INT32 *)sampleArray->GetElement(channelIndex));
+        *sample = (CLR_INT32)(samplesAccumulator / ContinuousScanOperation->averageCount);
     }
 
     NANOCLR_NOCLEANUP();
