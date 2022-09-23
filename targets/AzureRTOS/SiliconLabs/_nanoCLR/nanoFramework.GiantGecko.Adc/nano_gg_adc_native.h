@@ -11,6 +11,12 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack AdcChannelMode
+{
+    AdcChannelMode_SingleEnded = 0,
+    AdcChannelMode_Differential = 1,
+} AdcChannelMode;
+
 typedef enum __nfpack AquisitionTime
 {
     AquisitionTime__1Cyle = 1,
@@ -74,6 +80,13 @@ typedef enum __nfpack ReferenceVoltage
     ReferenceVoltage_SingleEndedExternalPin6 = 4,
     ReferenceVoltage_DiffExternalPin6And7 = 5,
     ReferenceVoltage_Unbuffered2Vdd = 6,
+    ReferenceVoltage_InternalBandgap = 128,
+    ReferenceVoltage_ScaledAvdd = 129,
+    ReferenceVoltage_ScaledSingleEndedExternalPin6 = 130,
+    ReferenceVoltage_RawSingleEndedExternalPin6 = 131,
+    ReferenceVoltage_EntropyGeneration = 132,
+    ReferenceVoltage_ScaledExternalPin6And7 = 133,
+    ReferenceVoltage_RawExternalPin6And7 = 134,
 } ReferenceVoltage;
 
 typedef enum __nfpack SampleResolution
@@ -116,12 +129,6 @@ typedef enum __nfpack WarmUpMode
     WarmUpMode_KeepScanRefWarm = 2,
     WarmUpMode_KeepAdcWarm = 3,
 } WarmUpMode;
-
-typedef enum __nfpack AdcChannelMode
-{
-    AdcChannelMode_SingleEnded = 0,
-    AdcChannelMode_Differential = 1,
-} AdcChannelMode;
 
 struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel
 {
@@ -168,12 +175,13 @@ struct Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpenChannel___VOID__I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetChannelCount___I4);
     NANOCLR_NATIVE_DECLARE(NativeIsChannelModeSupported___BOOLEAN__I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetSupportedResolutionsInBits___SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution);
     NANOCLR_NATIVE_DECLARE(NativeStartContinuousConversion___VOID__SZARRAY_I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeStopContinuousConversion___VOID);
     NANOCLR_NATIVE_DECLARE(NativeGetLastContinuousSamples___SZARRAY_I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetChannelCount___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeGetSupportedResolutionsInBits___STATIC__SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution);
 
     //--//
 };

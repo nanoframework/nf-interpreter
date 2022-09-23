@@ -160,7 +160,7 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetChannelCount___I4(
+HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetChannelCount___STATIC__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -185,14 +185,13 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 }
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
-    NativeGetSupportedResolutionsInBits___SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution(CLR_RT_StackFrame &stack)
+    NativeGetSupportedResolutionsInBits___STATIC__SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *adcSampleResolution;
     CLR_RT_TypeDef_Index adcSampleResolutionTypeDef;
-    CLR_RT_HeapBlock *hbObj;
-    CLR_RT_HeapBlock &top = stack.PushValue();
+    CLR_RT_HeapBlock_Array *supportedResolutions;
+    CLR_INT32 *resolution = NULL;
 
     uint16_t resolutionsCount = 0;
 
@@ -214,49 +213,36 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     g_CLR_RT_TypeSystem.FindTypeDef("SampleResolution", "nanoFramework.GiantGecko.Adc", adcSampleResolutionTypeDef);
 
     // create an array of <SampleResolution>
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, resolutionsCount, adcSampleResolutionTypeDef));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+        stack.PushValueAndClear(),
+        resolutionsCount,
+        adcSampleResolutionTypeDef));
+
+    // the code below is assigning INT32 values to the elements, which aren't exactly the same as the enum values
+    // but the enum values are the same as the INT32 values, so it's ok
 
     if (resolutionsCount > 0)
     {
-        // get a pointer to the first object in the array (which is of type <SampleResolution>)
-        adcSampleResolution = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
-
-        // create an instance of <SampleResolution>
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*adcSampleResolution, adcSampleResolutionTypeDef));
+        supportedResolutions = stack.TopValue().DereferenceArray();
 
 #if defined(_ADC_SINGLECTRL_RES_12BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes12Bit);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes12Bit;
 #endif
 
 #if defined(_ADC_SINGLECTRL_RES_8BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes8Bit);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes8Bit;
 #endif
 
 #if defined(_ADC_SINGLECTRL_RES_6BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcResOVS);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes6Bit;
 #endif
 
-#if defined(_ADC_SINGLECTRL_RES_6BIT)
-        // dereference the object in order to reach its fields
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes6Bit);
-        hbObj->PerformBoxingIfNeeded();
+#if defined(_ADC_SINGLECTRL_RES_OVS)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcResOVS;
 #endif
     }
 
