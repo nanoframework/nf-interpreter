@@ -160,6 +160,17 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::N
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetChannelCount___I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    // Return value to the managed application
+    stack.SetResult_I4(AdcChannelCount);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     NativeIsChannelModeSupported___BOOLEAN__I4(CLR_RT_StackFrame &stack)
 {
@@ -171,6 +182,71 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     stack.SetResult_Boolean((mode == (int)AdcChannelMode_SingleEnded));
 
     NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
+    NativeGetSupportedResolutionsInBits___SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeDef_Index adcSampleResolutionTypeDef;
+    CLR_RT_HeapBlock_Array *supportedResolutions;
+    CLR_INT32 *resolution = NULL;
+
+    uint16_t resolutionsCount = 0;
+
+#if defined(_ADC_SINGLECTRL_RES_12BIT)
+    resolutionsCount++;
+#endif
+#if defined(_ADC_SINGLECTRL_RES_8BIT)
+    resolutionsCount++;
+#endif
+#if defined(_ADC_SINGLECTRL_RES_6BIT)
+    resolutionsCount++;
+#endif
+#if defined(_ADC_SINGLECTRL_RES_OVS)
+    resolutionsCount++;
+#endif
+
+    // start composing the reply
+    // find <SampleResolution> type definition, don't bother checking the result as it exists for sure
+    g_CLR_RT_TypeSystem.FindTypeDef("SampleResolution", "nanoFramework.GiantGecko.Adc", adcSampleResolutionTypeDef);
+
+    // create an array of <SampleResolution>
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+        stack.PushValueAndClear(),
+        resolutionsCount,
+        adcSampleResolutionTypeDef));
+
+    // the code below is assigning INT32 values to the elements, which aren't exactly the same as the enum values
+    // but the enum values are the same as the INT32 values, so it's ok
+
+    if (resolutionsCount > 0)
+    {
+        supportedResolutions = stack.TopValue().DereferenceArray();
+
+#if defined(_ADC_SINGLECTRL_RES_12BIT)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes12Bit;
+#endif
+
+#if defined(_ADC_SINGLECTRL_RES_8BIT)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes8Bit;
+#endif
+
+#if defined(_ADC_SINGLECTRL_RES_6BIT)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes6Bit;
+#endif
+
+#if defined(_ADC_SINGLECTRL_RES_OVS)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcResOVS;
+#endif
+    }
+
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
@@ -361,82 +437,6 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
         // 2. set array element with the average
         sample = ((CLR_INT32 *)sampleArray->GetElement(channelIndex));
         *sample = (CLR_INT32)(samplesAccumulator / ContinuousScanOperation->averageCount);
-    }
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::NativeGetChannelCount___STATIC__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    // Return value to the managed application
-    stack.SetResult_I4(AdcChannelCount);
-
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
-    NativeGetSupportedResolutionsInBits___STATIC__SZARRAY_nanoFrameworkGiantGeckoAdcSampleResolution(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_TypeDef_Index adcSampleResolutionTypeDef;
-    CLR_RT_HeapBlock_Array *supportedResolutions;
-    CLR_INT32 *resolution = NULL;
-
-    uint16_t resolutionsCount = 0;
-
-#if defined(_ADC_SINGLECTRL_RES_12BIT)
-    resolutionsCount++;
-#endif
-#if defined(_ADC_SINGLECTRL_RES_8BIT)
-    resolutionsCount++;
-#endif
-#if defined(_ADC_SINGLECTRL_RES_6BIT)
-    resolutionsCount++;
-#endif
-#if defined(_ADC_SINGLECTRL_RES_OVS)
-    resolutionsCount++;
-#endif
-
-    // start composing the reply
-    // find <SampleResolution> type definition, don't bother checking the result as it exists for sure
-    g_CLR_RT_TypeSystem.FindTypeDef("SampleResolution", "nanoFramework.GiantGecko.Adc", adcSampleResolutionTypeDef);
-
-    // create an array of <SampleResolution>
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-        stack.PushValueAndClear(),
-        resolutionsCount,
-        adcSampleResolutionTypeDef));
-
-    // the code below is assigning INT32 values to the elements, which aren't exactly the same as the enum values
-    // but the enum values are the same as the INT32 values, so it's ok
-
-    if (resolutionsCount > 0)
-    {
-        supportedResolutions = stack.TopValue().DereferenceArray();
-
-#if defined(_ADC_SINGLECTRL_RES_12BIT)
-        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
-        *resolution = adcRes12Bit;
-#endif
-
-#if defined(_ADC_SINGLECTRL_RES_8BIT)
-        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
-        *resolution = adcRes8Bit;
-#endif
-
-#if defined(_ADC_SINGLECTRL_RES_6BIT)
-        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
-        *resolution = adcRes6Bit;
-#endif
-
-#if defined(_ADC_SINGLECTRL_RES_OVS)
-        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
-        *resolution = adcResOVS;
-#endif
     }
 
     NANOCLR_NOCLEANUP();
