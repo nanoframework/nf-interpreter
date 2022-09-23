@@ -189,10 +189,9 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *adcSampleResolution;
     CLR_RT_TypeDef_Index adcSampleResolutionTypeDef;
-    CLR_RT_HeapBlock *hbObj;
-    CLR_RT_HeapBlock &top = stack.PushValue();
+    CLR_RT_HeapBlock_Array *supportedResolutions;
+    CLR_INT32 *resolution = NULL;
 
     uint16_t resolutionsCount = 0;
 
@@ -214,49 +213,36 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
     g_CLR_RT_TypeSystem.FindTypeDef("SampleResolution", "nanoFramework.GiantGecko.Adc", adcSampleResolutionTypeDef);
 
     // create an array of <SampleResolution>
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, resolutionsCount, adcSampleResolutionTypeDef));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+        stack.PushValueAndClear(),
+        resolutionsCount,
+        adcSampleResolutionTypeDef));
+
+    // the code below is assigning INT32 values to the elements, which aren't exactly the same as the enum values
+    // but the enum values are the same as the INT32 values, so it's ok
 
     if (resolutionsCount > 0)
     {
-        // get a pointer to the first object in the array (which is of type <SampleResolution>)
-        adcSampleResolution = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
-
-        // create an instance of <SampleResolution>
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*adcSampleResolution, adcSampleResolutionTypeDef));
+        supportedResolutions = stack.TopValue().DereferenceArray();
 
 #if defined(_ADC_SINGLECTRL_RES_12BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes12Bit);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes12Bit;
 #endif
 
 #if defined(_ADC_SINGLECTRL_RES_8BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes8Bit);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes8Bit;
 #endif
 
 #if defined(_ADC_SINGLECTRL_RES_6BIT)
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcResOVS);
-        hbObj->PerformBoxingIfNeeded();
-
-        // move pointer to the next resolution item
-        adcSampleResolution++;
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcRes6Bit;
 #endif
 
-#if defined(_ADC_SINGLECTRL_RES_6BIT)
-        // dereference the object in order to reach its fields
-        hbObj = adcSampleResolution->Dereference();
-        hbObj->SetInteger((CLR_INT32)adcRes6Bit);
-        hbObj->PerformBoxingIfNeeded();
+#if defined(_ADC_SINGLECTRL_RES_OVS)
+        resolution = (CLR_INT32 *)supportedResolutions->GetElement(--resolutionsCount);
+        *resolution = adcResOVS;
 #endif
     }
 
@@ -424,27 +410,22 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
 {
     NANOCLR_HEADER();
 
+    CLR_INT32 *sample = NULL;
+    // assuming that, at 12 bits resolution, this will be enough to hold the average
     uint64_t samplesAccumulator = 0;
 
     CLR_RT_HeapBlock_Array *sampleArray;
-    CLR_RT_HeapBlock &top = stack.PushValue();
 
     // create an array of <int>
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-        top,
+        stack.PushValueAndClear(),
         ContinuousScanOperation->channelCount,
         g_CLR_RT_WellKnownTypes.m_Int32));
 
-    sampleArray = top.DereferenceArray();
+    sampleArray = stack.TopValue().DereferenceArray();
 
     for (uint32_t channelIndex = 0; channelIndex < ContinuousScanOperation->channelCount; channelIndex++)
     {
-        // // Read data from ADC
-        // data = ADC_DataIdScanGet(ADC0, &id);
-
-        // ContinuousScanOperation
-        //     ->dataBuffer[i * ContinuousScanOperation->averageCount + ContinuousScanOperation->currentIndex] = data;
-
         // compute average
         // 1. accumulate samples
         for (uint32_t sampleIndex = 0; sampleIndex < ContinuousScanOperation->averageCount; sampleIndex++)
@@ -454,8 +435,8 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcController::
         }
 
         // 2. set array element with the average
-        ((CLR_RT_HeapBlock *)sampleArray->GetElement(channelIndex))
-            ->SetInteger((CLR_INT32)(samplesAccumulator / ContinuousScanOperation->averageCount));
+        sample = ((CLR_INT32 *)sampleArray->GetElement(channelIndex));
+        *sample = (CLR_INT32)(samplesAccumulator / ContinuousScanOperation->averageCount);
     }
 
     NANOCLR_NOCLEANUP();
