@@ -39,6 +39,7 @@
 #include <spi_master.h>
 #include <gpio.h>
 #include <i2c.h>
+#include <i2s.h>
 #include <uart.h>
 #include <ledc.h>
 #include <adc.h>
