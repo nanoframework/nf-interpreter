@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#ifndef SYS_DEV_ADC_NATIVE_TARGET_H
-#define SYS_DEV_ADC_NATIVE_TARGET_H
+#ifndef NANO_GG_ADC_NATIVE_TARGET_H
+#define NANO_GG_ADC_NATIVE_TARGET_H
 
 #include <em_device.h>
 #include <em_adc.h>
@@ -56,4 +56,4 @@ extern bool adc1Initialized;
 #endif
 
 
-#endif // SYS_DEV_ADC_NATIVE_TARGET_H
+#endif // NANO_GG_ADC_NATIVE_TARGET_H
