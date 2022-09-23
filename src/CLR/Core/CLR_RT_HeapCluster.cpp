@@ -221,6 +221,9 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 
                 int len = next->DataSize();
 
+                // length of the block can not be 0, so something very wrong happened
+                _ASSERTE(len > 0);
+
                 next   += len;
                 lenTot += len;
 
