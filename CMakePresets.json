@@ -185,7 +185,13 @@
                 "API_nanoFramework.Device.Can": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+                "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "STM32_Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "STMPE811QTR_I2C.cpp",
+                "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp"
             }
         },
         {
