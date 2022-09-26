@@ -41,12 +41,13 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     i2s_config_t conf;
     conf.mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
     conf.sample_rate = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
-    conf.bits_per_sample = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4;
+    conf.bits_per_sample =
+        (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4;
     conf.channel_format = (i2s_channel_fmt_t)config[I2sConnectionSettings::FIELD___i2sChannelFormat].NumericByRef().s4;
 
     // Important: this will have to be adjusted for IDF5
     int commformat = config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
-    switch(commformat)
+    switch (commformat)
     {
         case I2sCommunicationFormat_PcmLong:
             commformat = I2S_COMM_FORMAT_STAND_PCM_LONG;
@@ -72,7 +73,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             break;
     }
     // I2sCommunicationFormat
-    
+
     conf.communication_format = (i2s_comm_format_t)commformat;
     conf.tx_desc_auto_clear = false;
 
@@ -82,7 +83,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     conf.dma_buf_count = 8;
     conf.dma_buf_len = 64;
     conf.use_apll = false;
-    
+
     // If this is first device on Bus then init driver
     if (Esp_I2S_Initialised_Flag[bus] == 0)
     {
@@ -101,7 +102,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 
     // Set pin
     i2s_set_pin(bus, &pin_config);
-    
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -180,7 +181,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
 
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
-                
+
                 // get buffer
                 writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
@@ -193,9 +194,14 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
                 if (writeSize > 0)
                 {
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
-                    
+
                     // setup write transaction
-                    opResult = i2s_write(bus, (uint8_t *)writeBuffer->GetElement(writeOffset), writeSize, &bytesWritten, portMAX_DELAY);
+                    opResult = i2s_write(
+                        bus,
+                        (uint8_t *)writeBuffer->GetElement(writeOffset),
+                        writeSize,
+                        &bytesWritten,
+                        portMAX_DELAY);
                     if (opResult != ESP_OK)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);

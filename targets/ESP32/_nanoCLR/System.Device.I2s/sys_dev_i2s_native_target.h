@@ -11,4 +11,4 @@
 #include <targetPAL.h>
 #include <Esp32_DeviceMapping.h>
 
-#endif //SYS_DEV_I2S_NATIVE_TARGET_H
+#endif // SYS_DEV_I2S_NATIVE_TARGET_H
