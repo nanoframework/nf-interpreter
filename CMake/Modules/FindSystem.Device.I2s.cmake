@@ -8,20 +8,21 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.De
 
 
 # set include directories
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Device.I2s_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Device.I2s_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Device.I2s_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Device.I2s_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Device.I2s_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.I2s_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.I2s)
+list(APPEND System.Device.I2s_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.I2s)
 
 # source files
 set(System.Device.I2s_SRCS
 
     sys_dev_i2s_native.cpp
 
+
     sys_dev_i2s_native_System_Device_I2s_I2sDevice.cpp
-    target_system_device_I2s_config.cpp
+
 )
 
 foreach(SRC_FILE ${System.Device.I2s_SRCS})
@@ -32,7 +33,7 @@ foreach(SRC_FILE ${System.Device.I2s_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
-            ${CMAKE_SOURCE_DIR}/src/System.Device.I2s
+            ${PROJECT_SOURCE_DIR}/src/System.Device.I2s
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -42,7 +43,7 @@ foreach(SRC_FILE ${System.Device.I2s_SRCS})
     endif()
 
     list(APPEND System.Device.I2s_SOURCES ${System.Device.I2s_SRC_FILE})
-    
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)

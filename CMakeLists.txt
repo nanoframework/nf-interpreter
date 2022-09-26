@@ -557,6 +557,13 @@ else()
 endif()
 
 
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+endif()
+
+
 if(API_System.Device.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
