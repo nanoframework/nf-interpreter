@@ -22,7 +22,7 @@ CLR_INT16 lcdReset;
 CLR_INT16 lcdDC;
 CLR_INT16 lcdBacklight;
 
-//CLR_UINT32 spiDeviceHandle = 0;
+// CLR_UINT32 spiDeviceHandle = 0;
 uint32_t spiDeviceHandle = 0;
 CLR_INT16 outputBufferSize;
 CLR_UINT8 spiBuffer[SPI_MAX_TRANSFER_SIZE];
@@ -43,7 +43,7 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // SPI clock speed.
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
-    //ASSERT(hr == ESP_OK); //for STM32 not defined as specific to ESP32. 
+    // ASSERT(hr == ESP_OK); //for STM32 not defined as specific to ESP32.
     if (hr == S_OK)
     {
         // TODO Reserve Pins
