@@ -1362,12 +1362,24 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                     // boxed primitive or enum type
                     obj = &rightObj[1];
                 }
+                else
+                {
+                    // boxed value type
+                    obj = rightObj;
+                }
 
                 return ObjectsEqual(*leftObj, *obj, false);
             }
             else
             {
-                return ObjectsEqual(*leftObj, *rightObj, false);
+                if (rightObj == NULL)
+                {
+                    return false;
+                }
+                else
+                {
+                    return ObjectsEqual(*leftObj, *rightObj, false);
+                }
             }
         }
         else
