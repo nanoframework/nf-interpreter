@@ -10,6 +10,7 @@
 #include "Esp32_DeviceMapping.h"
 
 typedef Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings I2sConnectionSettings;
+typedef Library_corlib_native_System_SpanByte SpanByte;
 
 static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {0, 0};
 
@@ -36,8 +37,6 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     pin_config.ws_io_num = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2S, bus, 2);
     pin_config.data_out_num = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2S, bus, 3);
     pin_config.data_in_num = (gpio_num_t)Esp32_GetMappedDevicePins(DEV_TYPE_I2S, bus, 4);
-
-    CLR_Debug::Printf("mxk=%d,bck=%d,ws=%d,dto=%d,dti=%d\n",pin_config.mck_io_num,pin_config.bck_io_num,pin_config.ws_io_num,pin_config.data_out_num,pin_config.data_in_num);
 
     i2s_config_t conf;
     conf.mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
@@ -84,8 +83,6 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     conf.dma_buf_len = 64;
     conf.use_apll = false;
     
-    CLR_Debug::Printf("mod=%d,rate=%d,chfrmt=%d,chfrmt=%d,commfrmt=%d\n",conf.mode,conf.sample_rate,conf.bits_per_sample,conf.channel_format,conf.communication_format);
-
     // If this is first device on Bus then init driver
     if (Esp_I2S_Initialised_Flag[bus] == 0)
     {
@@ -140,11 +137,20 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
     NANOCLR_HEADER();
 
     {
+        int writeOffset = 0;
+        int writeSize = 0;
+        size_t bytesWritten;
+
         CLR_RT_HeapBlock *pConfig;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
+
+        CLR_RT_HeapBlock *writeSpanByte = NULL;
+        CLR_RT_HeapBlock_Array *writeData = NULL;
+        CLR_RT_HeapBlock_Array *writeBuffer = NULL;
+        esp_err_t opResult;
 
         // get a pointer to the managed spi connectionSettings object instance
         pConfig = pThis[FIELD___connectionSettings].Dereference();
@@ -153,8 +159,6 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        CLR_Debug::Printf("bus=%d\n", bus);
-
         if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -162,6 +166,43 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
 
         // Set the Bus parameters
         NANOCLR_CHECK_HRESULT(SetI2sConfig(bus, pConfig));
+
+        // dereference the write and read SpanByte from the arguments
+        writeSpanByte = stack.Arg1().Dereference();
+        if (writeSpanByte != NULL)
+        {
+            writeData = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+
+            if (writeData != NULL)
+            {
+                // Get the write offset, only the elements defined by the span must be written, not the whole array
+                writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+
+                // use the span length as write size, only the elements defined by the span must be written
+                writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                
+                // get buffer
+                writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+
+                if (writeBuffer == NULL)
+                {
+                    // nothing to write, have to zero this
+                    writeSize = 0;
+                }
+
+                if (writeSize > 0)
+                {
+                    CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
+                    
+                    // setup write transaction
+                    opResult = i2s_write(bus, (uint8_t *)writeBuffer->GetElement(writeOffset), writeSize, &bytesWritten, portMAX_DELAY);
+                    if (opResult != ESP_OK)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                    }
+                }
+            }
+        }
     }
 
     NANOCLR_NOCLEANUP();
@@ -170,9 +211,25 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
 HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+    {
+        CLR_RT_HeapBlock *pConfig;
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
 
+        // get a pointer to the managed I2s connectionSettings object instance
+        pConfig = pThis[FIELD___connectionSettings].Dereference();
+
+        // get bus index
+        // subtract 1 to get ESP32 bus number
+        i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
+
+        if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+    }
     NANOCLR_NOCLEANUP();
 }
 
