@@ -84,7 +84,7 @@ int8_t Esp32_DAC_DevicePinMap[2] = {
 //  I2S
 //  2 devices I2S1 & I2S2
 //  Map pins various pins. If not used, I2S_PIN_NO_CHANGE is used
-int8_t Esp32_I2S_DevicePinMap[2][5] = {
+int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5] = {
     // No pin pre configured
     {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE},
     // No pin pre configured
