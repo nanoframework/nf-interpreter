@@ -380,6 +380,18 @@
             }
         },
         {
+            "name": "LilygoTWatch2021",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "LilygoTWatch2021_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "M5StickC",
             "inherits": [
                 "user-local-tools",
@@ -768,6 +780,11 @@
             "name": "LilygoTWatch2020",
             "displayName": "LilygoTWatch2020",
             "configurePreset": "LilygoTWatch2020"
+        },
+        {
+            "name": "LilygoTWatch2021",
+            "displayName": "LilygoTWatch2021",
+            "configurePreset": "LilygoTWatch2021"
         },
         {
             "name": "M5StickC",
