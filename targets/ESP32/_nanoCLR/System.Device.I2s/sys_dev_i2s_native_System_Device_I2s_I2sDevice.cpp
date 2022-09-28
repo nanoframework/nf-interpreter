@@ -188,12 +188,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
                     writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
 
                     // setup write transaction
-                    opResult = i2s_write(
-                        bus,
-                        writeData,
-                        writeSize,
-                        &bytesWritten,
-                        portMAX_DELAY);
+                    opResult = i2s_write(bus, writeData, writeSize, &bytesWritten, portMAX_DELAY);
                     if (opResult != ESP_OK)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
