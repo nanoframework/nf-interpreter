@@ -11,9 +11,9 @@
 #include <target_platform.h>
 #include "TouchInterface.h"
 #include "hal_i2c.h"
-#include "CPU_GPIO_decl.h"
-#include "Core_Cm7.h"
-#include "STM32f4xx.h"
+//#include "CPU_GPIO_decl.h"
+//#include "core_cm7.h"
+//#include "STM32f4xx.h"
 
 #define UNUSED(x) (void)x
 
