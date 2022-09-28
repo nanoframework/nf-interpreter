@@ -441,9 +441,9 @@ struct Library_corlib_native_System_Byte
 
 struct Library_corlib_native_System_Collections_ArrayList
 {
-
     static const int FIELD___items = 1;
     static const int FIELD___size = 2;
+    static const int FIELD___syncRoot = 3;
 
     NANOCLR_NATIVE_DECLARE(get_Item___OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(set_Item___VOID__I4__OBJECT);
