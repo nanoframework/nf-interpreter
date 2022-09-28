@@ -22,7 +22,9 @@ if(ESP32_IDF_PATH)
     endif()
 endif()
 
-# WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+# WHEN CHANGING THIS MAKE SURE TO UPDATE:
+# 1. the dev containers
+# 2. ref in AZDO pipeline yaml in Community Targets repo
 set(ESP32_IDF_TAG "4.4.2" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)

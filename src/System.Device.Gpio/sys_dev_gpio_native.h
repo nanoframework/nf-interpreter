@@ -75,7 +75,7 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioController
     static const int FIELD_STATIC___syncLock = 2;
 
     static const int FIELD___disposedValue = 1;
-    static const int FIELD___NumberingScheme_k__BackingField = 2;
+    static const int FIELD___numberingScheme = 2;
 
     NANOCLR_NATIVE_DECLARE(get_PinCount___I4);
     NANOCLR_NATIVE_DECLARE(DisposeNative___VOID);
@@ -97,6 +97,14 @@ struct Library_sys_dev_gpio_native_System_Device_Gpio_GpioPinBundle
     static const int FIELD__GpioEvents = 3;
     static const int FIELD__GpioPinChange = 4;
     static const int FIELD__GpioEventsHappening = 5;
+
+    //--//
+};
+
+struct Library_sys_dev_gpio_native_System_Device_Gpio_PinValuePair
+{
+    static const int FIELD___pinNumber = 1;
+    static const int FIELD___pinValue = 2;
 
     //--//
 };
