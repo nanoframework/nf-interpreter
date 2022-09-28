@@ -1386,7 +1386,7 @@
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.Graphics": "ON",
-                "GRAPHICS_DISPLAY": "ILI9342_XXXxYYY_SPI.cpp",
+                "GRAPHICS_DISPLAY": "ILI9341_XXXxYYY_SPI.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
