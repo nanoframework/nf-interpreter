@@ -87,6 +87,9 @@ REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
 /* RAM region to be used for the nanoFramework graphics heap.*/
 REGION_ALIAS("GRAPHICS_HEAP_RAM", graphics_ram);
 
+/* RAM region to be used for the nanoFramework graphics heap.*/
+REGION_ALIAS("GRAPHICS_VIDEO_FRAME_BUFFER", graphics_vfb);
+
 /* RAM region to be used for the boot clipboard.*/
 REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
@@ -104,8 +107,8 @@ INCLUDE rules_memory.ld
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
 
+/* Graphics rules inclusion.*/
+INCLUDE rules_graphics.ld
+
 /* boot clipboard rules inclusion.*/
 INCLUDE rules_bootclipboard.ld
-
-/* Graphics rules inclusion.*/
-INCLUDE rules_graphics.ld 
