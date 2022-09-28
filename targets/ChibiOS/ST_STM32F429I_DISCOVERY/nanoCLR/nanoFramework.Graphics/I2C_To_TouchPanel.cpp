@@ -11,7 +11,7 @@
 #include <target_platform.h>
 #include "TouchInterface.h"
 #include "hal_i2c.h"
-//#include "CPU_GPIO_decl.h"
+#include "CPU_GPIO_decl.h"
 //#include "core_cm7.h"
 //#include "STM32f4xx.h"
 
