@@ -4,7 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// For a  FT6206 by Focal Tech. ( Originally developed for the STM32F79iDiscovery board
+// For a STMPE811QTR (WIP)
+// see here for example: https://github.com/mfauzi/STM32F4/blob/master/STM32F4%20Discovery%20Software%20Examples/STM32F4xx_LCD_Example/Project/LCD_Touch/src/STMPE811QTR.c
 
 #ifndef stmpe811qtr_H
 #define stmpe811qtr_H
@@ -50,6 +51,7 @@ bool TouchDevice::Initialize()
 
 bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
 {
+    UNUSED(touchIsrProc);
     /*
         // Connect the Interrupt Service routine to the interrupt pin
         // G3# - PI13  ( GPIOI_LCD_INT )

@@ -17,7 +17,7 @@
 
 #define UNUSED(x) (void)x
 
-// This code module is written for a STM32F429I DISCOVERY board with display 240x320 TFT and touch screen
+// This code module is written for a STM32F429I-DISCO board with display 240x320 TFT and touch screen
 // The touch screen driver IC is a STMPE811QTR
 #define STMPE811QTR_I2C_Address 0x41
 
@@ -26,7 +26,7 @@ static CLR_UINT16 I2C_Address;
 
 bool TouchInterface::Initialize()
 {
-    // The FT6206 is connected to I2C4 of the STM32F769.
+    // The STMPE811QTR is connected to I2C4 of the STM32F429I-DISCO.
     // This is already configured by the chibios system in the file
     // mcuconf.h
 
