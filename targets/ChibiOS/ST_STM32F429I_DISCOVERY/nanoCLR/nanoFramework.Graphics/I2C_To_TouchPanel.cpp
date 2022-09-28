@@ -26,11 +26,11 @@ static CLR_UINT16 I2C_Address;
 
 bool TouchInterface::Initialize()
 {
-    // The STMPE811QTR is connected to I2C4 of the STM32F429I-DISCO.
-    // This is already configured by the chibios system in the file
+    // The STMPE811QTR is connected to I2C?? of the STM32F429I-DISCO.
+    // This is should be configured by the chibios system in the file
     // mcuconf.h
 
-    // #define STM32_I2C_USE_I2C4                  TRUE
+    // e.g. #define STM32_I2C_USE_I2C4                  TRUE
 
     I2C_Address = STMPE811QTR_I2C_Address;
 
@@ -45,10 +45,11 @@ CLR_UINT8 *TouchInterface::Write_Read(
     UNUSED(valuesToSend);
     UNUSED(numberOfValuesToSend);
     UNUSED(numberValuesExpected);
-
-    // CLR_UINT8* receivedValues = NULL;
-    // msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend,
-    // receivedValues, numberValuesExpected, TIME_MS2I(20)); return receivedValues;
+    /*
+        CLR_UINT8* receivedValues = NULL;
+        msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend,
+        receivedValues, numberValuesExpected, TIME_MS2I(20)); return receivedValues;
+    */
 
     return 0U;
 }
