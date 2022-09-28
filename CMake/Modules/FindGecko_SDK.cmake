@@ -186,6 +186,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     if(GECKO_FEATURE_USBD_WINUSB)
 
+        list(APPEND gecko_sdk_srcs sl_usbd_class_vendor_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c)
         list(APPEND gecko_sdk_srcs sl_usbd_driver_dwc_otg_fs.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core_ep.c)
@@ -268,6 +269,24 @@ else()
     # series is NOT supported
     message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
 endif()
+
+###################################################################
+# change required to define the description of the USB Vendor Class
+file(READ
+    ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
+    SL_USBD_CLASS_VENDOR_CONTENT)
+
+
+string(REPLACE
+    "\"Vendor-specific class\""
+    NANO_VENDOR_SPECIFIC_DESCRIPTION
+    SL_USBD_CLASS_VENDOR__NEW_CONTENTS
+    "${SL_USBD_CLASS_VENDOR_CONTENT}")
+
+file(WRITE 
+    ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
+    "${SL_USBD_CLASS_VENDOR__NEW_CONTENTS}")
+####################################################################
 
 include(FindPackageHandleStandardArgs)
 
