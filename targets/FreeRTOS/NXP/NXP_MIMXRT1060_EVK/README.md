@@ -50,7 +50,6 @@ Pre-configured cmake-variants.json for this board
           "API_System.Device.Gpio": "ON",
           "API_System.Device.Spi": "OFF",
           "API_System.Device.I2c": "OFF",
-          "API_System.Device.I2s": "OFF",
           "API_System.Device.Adc": "OFF",
           "API_System.Device.Pwm": "OFF",
           "API_System.Device.Wifi": "OFF",
