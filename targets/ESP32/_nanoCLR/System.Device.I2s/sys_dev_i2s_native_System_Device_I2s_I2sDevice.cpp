@@ -138,10 +138,6 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
     NANOCLR_HEADER();
 
     {
-        int writeOffset = 0;
-        int writeSize = 0;
-        size_t bytesWritten;
-
         CLR_RT_HeapBlock *pConfig;
 
         // get a pointer to the managed object instance and check that it's not NULL
@@ -149,8 +145,12 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         FAULT_ON_NULL(pThis);
 
         CLR_RT_HeapBlock *writeSpanByte = NULL;
-        CLR_RT_HeapBlock_Array *writeData = NULL;
         CLR_RT_HeapBlock_Array *writeBuffer = NULL;
+        uint8_t *writeData = NULL;
+        int writeSize = 0;
+        int writeOffset = 0;
+        size_t bytesWritten;
+
         esp_err_t opResult;
 
         // get a pointer to the managed spi connectionSettings object instance
@@ -172,9 +172,9 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         writeSpanByte = stack.Arg1().Dereference();
         if (writeSpanByte != NULL)
         {
-            writeData = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
+            writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
-            if (writeData != NULL)
+            if (writeBuffer != NULL)
             {
                 // Get the write offset, only the elements defined by the span must be written, not the whole array
                 writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
@@ -182,23 +182,15 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
                 // use the span length as write size, only the elements defined by the span must be written
                 writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
 
-                // get buffer
-                writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-                if (writeBuffer == NULL)
-                {
-                    // nothing to write, have to zero this
-                    writeSize = 0;
-                }
-
                 if (writeSize > 0)
                 {
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
+                    writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
 
                     // setup write transaction
                     opResult = i2s_write(
                         bus,
-                        (uint8_t *)writeBuffer->GetElement(writeOffset),
+                        writeData,
                         writeSize,
                         &bytesWritten,
                         portMAX_DELAY);
