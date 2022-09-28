@@ -5,7 +5,8 @@
 //
 
 // For a STMPE811QTR (WIP)
-// see here for example: https://github.com/mfauzi/STM32F4/blob/master/STM32F4%20Discovery%20Software%20Examples/STM32F4xx_LCD_Example/Project/LCD_Touch/src/STMPE811QTR.c
+// see here for example:
+// https://github.com/mfauzi/STM32F4/blob/master/STM32F4%20Discovery%20Software%20Examples/STM32F4xx_LCD_Example/Project/LCD_Touch/src/STMPE811QTR.c
 
 #ifndef stmpe811qtr_H
 #define stmpe811qtr_H
