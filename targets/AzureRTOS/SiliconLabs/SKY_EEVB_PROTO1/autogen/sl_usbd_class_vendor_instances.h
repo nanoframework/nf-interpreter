@@ -13,17 +13,14 @@
 
 extern uint8_t sl_usbd_vendor_winusb_number;
 
-
 /* event handlers for all vendor instances */
 
 __WEAK void sl_usbd_vendor_winusb_on_enable_event(void);
 __WEAK void sl_usbd_vendor_winusb_on_disable_event(void);
 __WEAK void sl_usbd_vendor_winusb_on_setup_request_event(const sl_usbd_setup_req_t *p_setup_req);
 
-
 /* init functions for all vendor instances */
 
 void sli_usbd_vendor_winusb_init(void);
-
 
 #endif
