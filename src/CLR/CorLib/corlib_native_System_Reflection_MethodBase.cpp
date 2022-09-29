@@ -256,6 +256,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         hbObj = paraTypeHB.Dereference();
         hbObj->SetReflection(paramElement.m_cls);
 
+        // deal with array types
+        if (paramElement.m_levels > 0)
+        {
+            hbObj->ReflectionData().m_levels = (CLR_UINT16)paramElement.m_levels;
+        }
+
         // move pointer to the next element
         paramInfoElement++;
     }

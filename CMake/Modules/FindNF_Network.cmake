@@ -517,7 +517,7 @@ macro(nf_add_lib_network)
         target_compile_definitions(
             ${LIB_NAME} PUBLIC
             -DPLATFORM_ESP32
-            ${NFALN_EXTRA_COMPILER_DEFINITIONS}
+            ${NFALN_EXTRA_COMPILE_DEFINITIONS}
         )
 
     else()
