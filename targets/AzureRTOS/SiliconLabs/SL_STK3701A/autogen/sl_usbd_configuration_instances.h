@@ -11,10 +11,8 @@
 
 extern uint8_t sl_usbd_configuration_config0_number;
 
-
 /* init functions for all configuration instances */
 
 void sli_usbd_configuration_config0_init(void);
-
 
 #endif
