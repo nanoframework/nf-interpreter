@@ -272,21 +272,23 @@ endif()
 
 ###################################################################
 # change required to define the description of the USB Vendor Class
-file(READ
-    ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
-    SL_USBD_CLASS_VENDOR_CONTENT)
+if(GECKO_FEATURE_USBD_WINUSB)
+    file(READ
+        ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
+        SL_USBD_CLASS_VENDOR_CONTENT)
 
 
-string(REPLACE
-    "\"Vendor-specific class\""
-    NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION
-    SL_USBD_CLASS_VENDOR__NEW_CONTENTS
-    "${SL_USBD_CLASS_VENDOR_CONTENT}")
+    string(REPLACE
+        "\"Vendor-specific class\""
+        NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION
+        SL_USBD_CLASS_VENDOR__NEW_CONTENTS
+        "${SL_USBD_CLASS_VENDOR_CONTENT}")
 
-file(WRITE 
-    ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
-    "${SL_USBD_CLASS_VENDOR__NEW_CONTENTS}")
-####################################################################
+    file(WRITE 
+        ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
+        "${SL_USBD_CLASS_VENDOR__NEW_CONTENTS}")
+
+endif()
 
 include(FindPackageHandleStandardArgs)
 
