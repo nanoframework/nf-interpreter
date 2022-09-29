@@ -14,4 +14,4 @@ In order to add a WinUSB device configuration, the follow is required:
 
     [sl_usbd_class_winusb_config.h](SL_STK3701A/config/sl_usbd_class_winusb_config.h)
 
-1. Add the following compiler definition to the target CMakelists.txt `NANO_VENDOR_SPECIFIC_DESCRIPTION=\"Description-of-your-deice-goes-here\"` (mind the maximum length of 32).
+1. Add the following compiler definition to the target CMakelists.txt `NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION=\"Description-of-your-deice-goes-here\"` (mind the maximum length of 32).
