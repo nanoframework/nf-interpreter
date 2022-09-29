@@ -7,6 +7,8 @@
 #ifndef SL_USBD_DEVICE_CONFIG_H
 #define SL_USBD_DEVICE_CONFIG_H
 
+extern char *UsbSerialNumber[];
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> USB Device Configuration
@@ -37,7 +39,7 @@
 // <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
 // <i> Default: "1234567890ABCDEF"
 // <i> Device serial number string.
-#define SL_USBD_DEVICE_SERIAL_NUMBER_STRING     "1234567890ABCDEF"
+#define SL_USBD_DEVICE_SERIAL_NUMBER_STRING     (const char *)&UsbSerialNumber
 
 // <o SL_USBD_DEVICE_LANGUAGE_ID> Device Language ID
 //   <SL_USBD_LANG_ID_ARABIC_SAUDI_ARABIA=> Arabic
