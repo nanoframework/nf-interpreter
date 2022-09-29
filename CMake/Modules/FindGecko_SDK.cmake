@@ -323,6 +323,20 @@ macro(nf_add_gecko_sdk)
 
     nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NFGCKSDK_BUILD_TARGET})
     nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFGCKSDK_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFGCKSDK_BUILD_TARGET})
+
+    # add compile definitions required for WinUSB
+    if(GECKO_FEATURE_USBD_WINUSB)
+        nf_set_compile_definitions(
+            TARGET ${LIB_NAME}
+
+            EXTRA_COMPILE_DEFINITIONS
+                USBD_CFG_MS_OS_DESC_EN=1
+                SL_USBD_VENDOR_MS_EXTENDED_PROPERTIES_QUANTITY=1
+
+            BUILD_TARGET ${NFGCKSDK_BUILD_TARGET}
+        )
+    endif()
+
     nf_set_link_options(TARGET ${LIB_NAME})
 
     # add alias
