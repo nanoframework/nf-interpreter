@@ -18,8 +18,8 @@ extern char *UsbSerialNumber[];
 #define SL_USBD_DEVICE_VENDOR_ID                0x10C4
 
 // <o SL_USBD_DEVICE_PRODUCT_ID> Device Product ID
-// <i> Device product ID. PID assigned to .NET nanoFramework 
-#define SL_USBD_DEVICE_PRODUCT_ID               0x8DAD
+// <i> Device product ID. PID assigned to Skyworks Timing Gecko Dev Board
+#define SL_USBD_DEVICE_PRODUCT_ID               0x8DAC
 
 // <o SL_USBD_DEVICE_RELEASE_NUMBER> Device Release Number
 // <i> Default: 0x0100
