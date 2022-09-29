@@ -2,6 +2,12 @@
 
 ## Configuration for USB devices and classes
 
+### USB serial number
+
+The USB serial number string is defined with `SL_USBD_DEVICE_SERIAL_NUMBER_STRING` in sl_usbd_device_config.h.
+It can be hardcoded by setting it to a string like `"1234567890ABCDEF"`.
+As an alternative it can be generated from the device unique ID. For this the define has to be set to `(const char *)&UsbSerialNumber` and the following declaration has to be added `extern char *UsbSerialNumber[];`. Please check the example [here](SL_STK3701A/config/sl_usbd_device_config.h).
+
 ### WinUSB devices
 
 In order to add a WinUSB device configuration, the follow is required:
