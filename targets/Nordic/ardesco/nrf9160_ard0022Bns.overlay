@@ -1,0 +1,35 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/* 	current-speed = <115200>; 
+	current-speed = <921600>; */
+
+/* set UART1 out the Grove Connector */
+&uart1 {
+	compatible = "nordic,nrf-uarte";
+	current-speed = <921600>;
+	status = "okay";
+	pinctrl-0 = <&uart1_default>;
+	pinctrl-1 = <&uart1_sleep>;
+	pinctrl-names = "default", "sleep";
+	/delete-property/ rts-pin;
+	/delete-property/ cts-pin;
+};
+
+&pinctrl {
+
+	uart1_default: uart1_default {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 13)>,
+				<NRF_PSEL(UART_RX, 0, 14)>;
+		};
+	};
+
+	uart1_sleep: uart1_sleep {
+		group1 {
+			psels = <NRF_PSEL(UART_TX, 0, 13)>,
+				<NRF_PSEL(UART_RX, 0, 14)>;
+			low-power-enable;
+		};
+	};
+
+};
