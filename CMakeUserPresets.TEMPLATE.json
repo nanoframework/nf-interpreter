@@ -953,6 +953,42 @@
             "configurePreset": "WEACT_F411CE"
         },
         {
+            "name": "Nordic_Ardesco",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "Nordic_Ardesco_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "Ardesco",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "Nordic_9160DK",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "Nordic_9160DK_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "9160_DK",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "Nordic_52840DK",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "Nordic_52840DK_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "52840_DK",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "TI_CC1352P1_LAUNCHXL",
             "displayName": "TI_CC1352P1_LAUNCHXL",
             "configurePreset": "TI_CC1352P1_LAUNCHXL"

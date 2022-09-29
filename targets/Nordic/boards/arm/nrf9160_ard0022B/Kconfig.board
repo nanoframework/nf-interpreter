@@ -1,0 +1,66 @@
+# Kconfig - nRF91 Combi Dev board configuration
+#
+# Copyright (c) 2019 Nordic Semiconductor ASA
+# Copyright (c) Ericsson AB 2020, all rights reserved
+#
+# SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
+
+if SOC_NRF9160_SICA
+
+config BOARD_NRF9160_ARD0022B
+	bool "nRF9160 ARD0022B"
+	depends on !TRUSTED_EXECUTION_NONSECURE
+
+config BOARD_NRF9160_ARD0022BNS
+	bool "nRF9160 ARD0022B non-secure"
+	depends on TRUSTED_EXECUTION_NONSECURE
+
+endif # SOC_NRF9160_SICA
+
+
+#if CONFIG_SENSOR
+
+menu "Accel"
+config ACCEL_DEV_NAME
+	string "Accelerometer device name"
+	default "ADXL362" 
+	help
+		Device from which accelerometer data will be fetched and used
+		for orientation detection and sent to nRF Cloud.
+endmenu # Accel
+	
+menu "Environment sensors"		
+
+config TEMP_DEV_NAME
+	string "Temperature device name"
+	default "BME680" 
+
+config USE_BME680_BSEC
+	bool "Use Bosch BME680 BSEC lib"
+	default n
+	help
+	  Enable use of Bosch BSEC library. The library itself is not a part of
+	  NCS and must be downloaded from Bosch Sensortec.
+
+config BOSCH_BSEC_LIBRARY_PATH
+	string "Path to Bosch BSEC library folder"
+	default "$(ZEPHYR_BASE)/../nrf/ext/BSEC_1.4.7.4_Generic_Release"
+	help
+	  Path to the folder where the Bosch BSEC library is placed.
+
+endmenu # Environment sensors
+
+menu "Light"
+
+config 	LIGHT_SENSOR
+	bool "Light sensor"
+	select BH1749 
+	default n
+
+config LIGHT_SENSOR_DEV_NAME
+	string "Light sensor device name"
+	default "BH1749" 
+
+endmenu #Light
+
+#endif

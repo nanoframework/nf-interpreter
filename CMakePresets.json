@@ -1,5 +1,5 @@
 {
-    "version": 3,
+    "version": 2,
     "configurePresets": [
         {
             "name": "general-preset",
@@ -26,6 +26,20 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/CMake/toolchain.arm-none-eabi.cmake"
                 }
+            }
+        },
+        {
+            "name": "nordic-zephyr-preset",
+            "description": "Preset for Nordic Connect SDK",
+            "hidden": true,
+            "cacheVariables": {
+              "CMAKE_TOOLCHAIN_FILE": {
+                "type": "FILEPATH",
+                "value": "c:/ncs/toolchains/v2.0.0/cmake/NcsToolchainConfig.cmake"
+                },
+                "RTOS": "NORDIC",
+                "RTOS_SOURCE_FOLDER": "c:/ncs/v2.0.0",
+                "TOOLCHAIN_PREFIX": "C:/ncs/toolchains/v2.0.0/opt"
             }
         },
         {
@@ -1396,6 +1410,114 @@
                 "API_System.Device.Pwm": "ON",
                 "API_System.IO.Ports": "ON",
                 "API_System.Device.Spi": "ON",
+                "API_Windows.Storage": "OFF"
+            }
+        },
+        {
+            "name": "Nordic_Ardesco_preset",
+            "inherits": [
+                "general-preset",
+                "nordic-zephyr-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_SERIES": "nrf9160",
+                "TARGET_BOARD": "Ardesco",
+                "USE_RNG": "OFF",
+                "DP_FLOATINGPOINT": "OFF",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "RTOS": "NORDIC",
+                "RTOS_SOURCE_FOLDER": "c:/ncs/v2.0.0",
+                "TOOLCHAIN_PREFIX": "C:/ncs/toolchains/v2.0.0/opt",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_USB_MSD": "OFF",
+                "NF_NETWORKING_SNTP": "OFF",
+                "API_nanoFramework.Device.Can": "OFF",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_System.Math": "ON",
+                "API_System.Net": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_Windows.Devices.Gpio": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "OFF",
+                "API_System.IO.Ports": "OFF",
+                "API_System.Device.Spi": "OFF",
+                "API_Windows.Storage": "OFF"
+            }
+        },
+        {
+            "name": "Nordic_9160DK_preset",
+            "inherits": [
+                "general-preset",
+                "nordic-zephyr-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_SERIES": "nrf9160",
+                "TARGET_BOARD": "9160_DK",
+                "USE_RNG": "OFF",
+                "DP_FLOATINGPOINT": "OFF",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_USB_MSD": "OFF",
+                "NF_NETWORKING_SNTP": "OFF",
+                "API_nanoFramework.Device.Can": "OFF",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_System.Math": "ON",
+                "API_System.Net": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_Windows.Devices.Gpio": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "OFF",
+                "API_System.IO.Ports": "OFF",
+                "API_System.Device.Spi": "OFF",
+                "API_Windows.Storage": "OFF"
+            }
+        },
+        {
+            "name": "Nordic_52840DK_preset",
+            "inherits": [
+                "general-preset",
+                "nordic-zephyr-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "TARGET_SERIES": "nrf52840",
+                "TARGET_BOARD": "52840_DK",
+                "USE_RNG": "OFF",
+                "DP_FLOATINGPOINT": "OFF",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_USB_MSD": "OFF",
+                "NF_NETWORKING_SNTP": "OFF",
+                "API_nanoFramework.Device.Can": "OFF",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_System.Math": "ON",
+                "API_System.Net": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_Windows.Devices.Gpio": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "OFF",
+                "API_System.IO.Ports": "OFF",
+                "API_System.Device.Spi": "OFF",
                 "API_Windows.Storage": "OFF"
             }
         },

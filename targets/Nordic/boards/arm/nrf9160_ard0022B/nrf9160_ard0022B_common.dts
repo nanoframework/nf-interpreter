@@ -1,0 +1,261 @@
+/*
+ * Copyright (c) 2019 Nordic Semiconductor ASA
+ * Copyright (c) Ericsson AB 2020, all rights reserved
+ *
+ * SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
+ */
+#include "nrf9160_ard0022B_common-pinctrl.dtsi"
+
+/ {
+	model = "Ardesco ARD0022B";
+	compatible = "nordic,ard0022B";
+
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,uart-mcumgr = &uart0;
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+
+		button0: button_0 {
+			gpios = <&gpio0 26 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Button 1";
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		red_led: led_1 {
+			gpios = <&gpio0 29 0>;
+			label = "RGB red channel";
+		};
+		green_led: led_2 {
+			gpios = <&gpio0 30 0>;
+			label = "RGB green channel";
+		};
+		blue_led: led_3 {
+			gpios = <&gpio0 31 0>;
+			label = "RGB blue channel";
+		};
+	};
+	pwmleds {
+		compatible = "pwm-leds";
+		pwm_led0: pwm_led_0 {
+			pwms = <&pwm0 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+		pwm_led1: pwm_led_1 {
+			pwms = <&pwm0 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+		pwm_led2: pwm_led_2 {
+			pwms = <&pwm0 2 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+
+	};
+	pwmbuzzer {
+		/* compatible = "pwm-buzzer"; this doesn't work */ 
+		compatible = "pwm-leds"; 
+
+		buzzer: pwm_buzzer {
+			pwms = <&pwm1 0 PWM_HZ(100) PWM_POLARITY_NORMAL>;
+		};
+	};
+
+	aliases {
+		sw0 = &button0;
+		led0 = &red_led;
+		led1 = &green_led;
+		led2 = &blue_led;
+		pwm-led0 = &pwm_led0;
+		pwm-led1 = &pwm_led1;
+		pwm-led2 = &pwm_led2;
+		rgb-pwm = &pwm0;
+		/* to reference the buzzer, use the macro DT_ALIAS(buzzer_pwm) with the _ not the - */
+		buzzer-pwm = &buzzer;
+	};
+};
+
+&adc {
+	status = "okay";
+};
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+/* PWM0 is intended for RGB LED control */
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0_default>;
+	pinctrl-1 = <&pwm0_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+/* PWM1 is intended for buzzer control */
+&pwm1 {
+	status = "okay";
+	pinctrl-0 = <&pwm1_default>;
+	pinctrl-1 = <&pwm1_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+/*
+&pwm2 {
+	status = "okay";
+	pinctrl-0 = <&pwm2_default>;
+	pinctrl-1 = <&pwm2_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+*/
+
+&i2c2 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+	pinctrl-0 = <&i2c2_default>;
+	pinctrl-1 = <&i2c2_sleep>;
+	pinctrl-names = "default", "sleep";
+
+	bme680@76 {
+		compatible = "bosch,bme680";
+		label = "BME680";
+		reg = <0x76>;
+	};
+
+	bh1749@38 {
+			compatible = "rohm,bh1749";
+			label = "BH1749";
+			reg = <0x38>;
+			int-gpios = <&gpio0 28 0>;
+	};
+};
+
+&spi3 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	pinctrl-0 = <&spi3_default>;
+	pinctrl-1 = <&spi3_sleep>;
+	pinctrl-names = "default", "sleep";
+/*	cs-gpios = <&gpio0 1 0>, <&gpio0 8 0>, <&gpio0 6 0>;*/
+	cs-gpios = <&gpio0 1 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>, <&gpio0 8 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>, <&gpio0 6 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; 
+/*	cs-gpios = <&gpio0 1 0>, <&gpio0 8 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>, <&gpio0 6 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; */
+
+	mx25r64: mx25r6435f@0 {
+		compatible = "jedec,spi-nor";
+		label = "MX25R6435F";
+		spi-max-frequency = <8000000>;
+		reg = <0>;
+		/* spi-max-frequency = <104000000>; */
+		/* wp-gpios = <&gpio0 3 0>; */
+		/* reset-gpios = <&gpio0 0 0>; */
+		size = <0x4000000>;
+		/* has-be32k; */
+		jedec-id = [c2 28 17];
+	};
+
+	adxl362@1 {
+		compatible = "adi,adxl362";
+		label = "ADXL362";
+		spi-max-frequency = <8000000>;
+		reg = <1>;
+		int1-gpios = <&gpio0 9 0>;
+	};
+
+	adxl372@2 {
+		compatible = "adi,adxl372";
+		label = "ADXL372";
+		spi-max-frequency = <8000000>;
+		reg = <2>;
+		int1-gpios = <&gpio0 7 0>;
+	};
+
+};
+
+
+&timer0 {
+	status = "okay";
+};
+
+&timer1 {
+	status = "okay";
+};
+
+&timer2 {
+	status = "okay";
+};
+
+&uart0 {
+	compatible = "nordic,nrf-uarte";
+	current-speed = <115200>;
+	status = "okay";
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-1 = <&uart0_sleep>;
+	pinctrl-names = "default", "sleep";
+};
+
+&flash0 {
+	/*
+	 * For more information, see:
+	 * http://docs.zephyrproject.org/devices/dts/flash_partitions.html
+	 */
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 0x10000>;
+		};
+		slot0_partition: partition@10000 {
+			label = "image-0";
+		};
+		slot0_ns_partition: partition@40000 {
+			label = "image-0-nonsecure";
+		};
+		slot1_partition: partition@80000 {
+			label = "image-1";
+		};
+		slot1_ns_partition: partition@b0000 {
+			label = "image-1-nonsecure";
+		};
+		scratch_partition: partition@f0000 {
+			label = "image-scratch";
+			reg = <0x000f0000 0xa000>;
+		};
+		storage_partition: partition@fa000 {
+			label = "storage";
+			reg = <0x000fa000 0x00006000>;
+		};
+	};
+};
+
+/ {
+	/* SRAM allocated and used by the partitions */
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		sram0_s: image_s@20000000 {
+			/* Secure image memory */
+		};
+
+		sram0_bsd: image_bsd@20010000 {
+			/* BSD (shared) memory */
+		};
+
+		sram0_ns: image_ns@20020000 {
+			/* Non-Secure image memory */
+		};
+	};
+};
+
+/* Include partition configuration file */
+#include "nrf9160_ard0022B_partition_conf.dts"
