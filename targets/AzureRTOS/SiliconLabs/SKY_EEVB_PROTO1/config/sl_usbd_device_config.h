@@ -29,12 +29,12 @@ extern char *UsbSerialNumber[];
 // <s SL_USBD_DEVICE_MANUFACTURER_STRING> Device Manufacturer Name
 // <i> Default: "Silicon Labs"
 // <i> Device manufacturer string.
-#define SL_USBD_DEVICE_MANUFACTURER_STRING      "Silicon Labs"
+#define SL_USBD_DEVICE_MANUFACTURER_STRING      "Skyworks"
 
 // <s SL_USBD_DEVICE_PRODUCT_STRING> Device Product Name
 // <i> Default: "Product"
 // <i> Device product string.
-#define SL_USBD_DEVICE_PRODUCT_STRING           "nanodevice"
+#define SL_USBD_DEVICE_PRODUCT_STRING           "Skyworks EEVB"
 
 // <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
 // <i> Default: "1234567890ABCDEF"
