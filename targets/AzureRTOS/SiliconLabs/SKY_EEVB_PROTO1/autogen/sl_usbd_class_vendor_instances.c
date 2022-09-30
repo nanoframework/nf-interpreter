@@ -132,6 +132,15 @@ void sli_usbd_vendor_winusb_init()
         /* next token */
         token = strtok(NULL, ", ");
     }
+
+    // add device class GUID to WinUSB properties
+    sl_usbd_vendor_add_microsoft_ext_property(
+        config_number,
+        SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_SZ,
+        (const uint8_t *)DEVICEINTERFACE_GUID_PROP_NAME,
+        DEVICEINTERFACE_GUID_PROP_NAME_LEN,
+        (const uint8_t *)DEVICE_CLASS_GUID_PROPERTY,
+        sizeof(DEVICE_CLASS_GUID_PROPERTY));
 }
 
 void sl_usbd_vendor_winusb_on_enable_event(void)

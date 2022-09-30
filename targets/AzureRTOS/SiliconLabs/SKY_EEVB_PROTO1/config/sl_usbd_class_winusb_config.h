@@ -7,6 +7,11 @@
 #ifndef SL_USBD_VENDOR_WINUSB_CONFIG_H
 #define SL_USBD_VENDOR_WINUSB_CONFIG_H
 
+#include <sl_usbd_class_winusb.h>
+
+/// device class GUID for WinUSB (going into DeviceInterfaceGUID extended property)
+#define DEVICE_CLASS_GUID_PROPERTY L"{432aeecd-f29b-48c7-a2ec-3261e85aca67}"
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Class Configuration
