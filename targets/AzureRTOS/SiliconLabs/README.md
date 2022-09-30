@@ -13,6 +13,7 @@ As an alternative it can be generated from the device unique ID. For this the de
 In order to add a WinUSB device configuration, the follow is required:
 
 1. Set build option `GECKO_FEATURE_USBD_WINUSB` to `ON`.
+
 1. Add the following files to the target folder (mind the location)
     [sl_usbd_class_vendor_instances.c](SL_STK3701A/autogen/sl_usbd_class_vendor_instances.c)
 
@@ -21,3 +22,6 @@ In order to add a WinUSB device configuration, the follow is required:
     [sl_usbd_class_winusb_config.h](SL_STK3701A/config/sl_usbd_class_winusb_config.h)
 
 1. Add the following compiler definition to the target CMakelists.txt `NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION=\"Description-of-your-deice-goes-here\"` (mind the maximum length of 32).
+
+1. Define a GUID for the device class and set define `DEVICE_CLASS_GUID_PROPERTY` with it. Check [sl_usbd_class_winusb_config.h](SL_STK3701A/config/sl_usbd_class_winusb_config.h).
+For details check [Microsoft documentation](https://learn.microsoft.com/en-us/windows-hardware/drivers/usbcon/automatic-installation-of-winusb#registering-a-device-interface-guid) about setting a WinUSB device that does not require an INF file to install.
