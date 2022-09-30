@@ -110,13 +110,17 @@ macro(nf_setup_target_build)
     list(APPEND ZEPHYR_EXTRA_MODULES
         ${TARGET_RTOS_ROOT}/module)
 
-    #HACK:: These are normally set by now in the project statement
-    #HACK:: in the top level cmakelists.txt file. We skip that so,
-    #HACK:: need some other way of doing it.
-    set(nanoFramework_VERSION_MAJOR 1)
-    set(nanoFramework_VERSION_MINOR 7)
-    set(nanoFramework_VERSION_PATCH 4)
-    set(nanoFramework_VERSION_TWEAK 1)
+    # HACK::
+    # We need to parse the build version in to seperate elements.
+    # Normally, this is done by CMAKE in the project command in the 
+    # main CMakelist.txt file. Since we skip that, but need the 
+    # parsed values during the Zephyr build below, we do it manually.
+    string(REPLACE "." ";" BV1 ${BUILD_VERSION})
+    set(BVLIST ${BV1})
+    list(GET BVLIST 0 nanoFramework_VERSION_MAJOR)
+    list(GET BVLIST 1 nanoFramework_VERSION_MINOR)
+    list(GET BVLIST 2 nanoFramework_VERSION_PATCH)
+    list(GET BVLIST 3 nanoFramework_VERSION_TWEAK)
 
     #       
     # Continue build with standard NRF/Zephyr build 
@@ -135,7 +139,6 @@ macro(nf_setup_target_build)
     zephyr_include_directories("../module/nf_lib/include")
 
     # The Zephyr build system requires project to be defined here
-    #project(zephyr_nf )
     project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 
     zephyr_compile_definitions(PROJECT_NAME=${PROJECT_NAME})
