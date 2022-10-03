@@ -688,6 +688,39 @@
             }
         },
         {
+            "name": "Nordic_Ardesco",
+            "inherits": [
+                "user-prefs",
+                "Nordic_Ardesco_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "Ardesco",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "Nordic_9160DK",
+            "inherits": [
+                "user-prefs",
+                "Nordic_9160DK_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "9160_DK",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "Nordic_52840DK",
+            "inherits": [
+                "user-prefs",
+                "Nordic_52840DK_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "52840_DK",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "TI_CC1352P1_LAUNCHXL",
             "inherits": [
                 "user-local-tools",
@@ -954,39 +987,18 @@
         },
         {
             "name": "Nordic_Ardesco",
-            "inherits": [
-                "user-local-tools",
-                "user-prefs",
-                "Nordic_Ardesco_preset"
-            ],
-            "cacheVariables": {
-                "TARGET_BOARD": "Ardesco",
-                "NF_INTEROP_ASSEMBLIES": null
-            }
+            "displayName": "Nordic_Ardesco",
+            "configurePreset": "Nordic_Ardesco"
         },
         {
             "name": "Nordic_9160DK",
-            "inherits": [
-                "user-local-tools",
-                "user-prefs",
-                "Nordic_9160DK_preset"
-            ],
-            "cacheVariables": {
-                "TARGET_BOARD": "9160_DK",
-                "NF_INTEROP_ASSEMBLIES": null
-            }
+            "displayName": "Nordic_9160DK",
+            "configurePreset": "Nordic_9160DK"
         },
         {
             "name": "Nordic_52840DK",
-            "inherits": [
-                "user-local-tools",
-                "user-prefs",
-                "Nordic_52840DK_preset"
-            ],
-            "cacheVariables": {
-                "TARGET_BOARD": "52840_DK",
-                "NF_INTEROP_ASSEMBLIES": null
-            }
+            "displayName": "Nordic_52840DK",
+            "configurePreset": "Nordic_52840DK"
         },
         {
             "name": "TI_CC1352P1_LAUNCHXL",
