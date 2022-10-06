@@ -7,6 +7,8 @@
 #ifndef SL_USBD_CONFIG_H
 #define SL_USBD_CONFIG_H
 
+extern char UsbClassVendorDescription[32 + 1];
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> USB Configuration
@@ -187,6 +189,11 @@
 // <i> Default: 1
 // <i> Number of configurations.
 #define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           1
+
+// <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
+// <i> Default: "1234567890ABCDEF"
+// <i> Device serial number string.
+#define NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION (const char *)&UsbClassVendorDescription
 
 // </h>
 

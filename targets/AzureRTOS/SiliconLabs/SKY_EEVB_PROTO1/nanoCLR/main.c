@@ -11,6 +11,7 @@
 #include <em_gpio.h>
 #include <sl_event_handler.h>
 #include <sl_board_init.h>
+#include <sl_status.h>
 
 #include <tx_api.h>
 
@@ -24,7 +25,6 @@ extern void sli_usbd_init(void);
 extern void sli_usbd_configuration_config0_init(void);
 extern void sli_usbd_cdc_acm_acm0_init(void);
 extern void usb_device_cdc_acm_app_init(void);
-extern void sli_usbd_vendor_winusb_init(void);
 
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
@@ -59,14 +59,47 @@ TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ClrStartupThread_entry(uint32_t parameter);
 
+extern sl_status_t sl_usbd_vendor_read_bulk_sync(uint8_t  class_nbr,
+                                          void     *p_buf,
+                                          uint32_t buf_len,
+                                          uint16_t timeout,
+                                          uint32_t *p_xfer_len);
+extern sl_status_t sl_usbd_vendor_is_enabled(uint8_t  class_nbr,
+                                      bool     *p_enabled);
+
 void BlinkThread_entry(uint32_t parameter)
 {
     (void)parameter;
+// uint8_t buffer[10];
+// uint32_t p_xfer_len;
+// sl_status_t reqStatus;
+// bool conn;
 
     while (1)
     {
         //GPIO_PinOutToggle(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(250));
+
+    //     // Wait for device connection.
+    //     reqStatus = sl_usbd_vendor_is_enabled(1, &conn);
+    //     _ASSERTE(reqStatus == SL_STATUS_OK);
+
+    //     while (conn != true)
+    //     {
+    //         tx_thread_sleep(TX_TICKS_PER_MILLISEC(250));
+
+    //         reqStatus = sl_usbd_vendor_is_enabled(1, &conn);
+
+    //         _ASSERTE(reqStatus == SL_STATUS_OK);
+    //     }
+
+    //    reqStatus = sl_usbd_vendor_read_bulk_sync(1,
+    //                                       (void     *)buffer,
+    //                                       3,
+    //                                       0,
+    //                                       &p_xfer_len);
+
+    //    _ASSERTE(reqStatus == SL_STATUS_OK);                                   
     }
 }
 
@@ -178,7 +211,7 @@ void tx_application_define(void *first_unused_memory)
 #endif
 
 #if GECKO_FEATURE_USBD_WINUSB == TRUE
-    sli_usbd_vendor_winusb_init();
+    //sli_usbd_vendor_winusb_init();
 #endif
 
 #if HAL_WP_USE_USB_CDC == TRUE
