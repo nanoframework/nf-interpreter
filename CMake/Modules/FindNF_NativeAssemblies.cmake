@@ -31,6 +31,7 @@ option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option f
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
+option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
@@ -338,6 +339,12 @@ endif()
 if(API_System.Device.Wifi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Wifi")
+endif()
+
+# System.Device.UsbStream
+if(API_System.Device.UsbStream)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
 # Windows.Storage
