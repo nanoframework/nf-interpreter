@@ -25,7 +25,6 @@ extern void sli_usbd_init(void);
 extern void sli_usbd_configuration_config0_init(void);
 extern void sli_usbd_cdc_acm_acm0_init(void);
 extern void usb_device_cdc_acm_app_init(void);
-extern void sli_usbd_vendor_winusb_init(void);
 
 // flags for hardware events
 TX_EVENT_FLAGS_GROUP nanoHardwareEvents;
@@ -176,10 +175,6 @@ void tx_application_define(void *first_unused_memory)
 #if GECKO_FEATURE_USBD_HID == TRUE
     sli_usbd_hid_hid0_init();
     usb_device_hid_app_init();
-#endif
-
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
-    sli_usbd_vendor_winusb_init();
 #endif
 
 #if HAL_WP_USE_USB_CDC == TRUE

@@ -7,6 +7,8 @@
 #ifndef SL_USBD_CONFIG_H
 #define SL_USBD_CONFIG_H
 
+extern char UsbClassVendorDescription[32 + 1];
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> USB Configuration
