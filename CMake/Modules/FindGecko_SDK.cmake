@@ -281,12 +281,12 @@ if(GECKO_FEATURE_USBD_WINUSB)
     string(REPLACE
         "\"Vendor-specific class\""
         NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION
-        SL_USBD_CLASS_VENDOR__NEW_CONTENTS
+        SL_USBD_CLASS_VENDOR_NEW_CONTENTS
         "${SL_USBD_CLASS_VENDOR_CONTENT}")
 
     file(WRITE 
         ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
-        "${SL_USBD_CLASS_VENDOR__NEW_CONTENTS}")
+        "${SL_USBD_CLASS_VENDOR_NEW_CONTENTS}")
 
 endif()
 
@@ -310,7 +310,7 @@ macro(nf_add_gecko_sdk)
 
     # add THESE has a library
     set(LIB_NAME gecko_sdk_${NFGCKSDK_BUILD_TARGET})
-
+    
     add_library(
         ${LIB_NAME} STATIC 
         ${Gecko_SDK_SOURCES}
