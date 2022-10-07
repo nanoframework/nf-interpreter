@@ -11,6 +11,41 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// moved to targets\AzureRTOS\SiliconLabs\_common\autogen\sl_usbd_class_vendor_instances.c for convenience //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// typedef enum __nfpack UsbEventType
+// {
+//     UsbEventType_Invalid = 0,
+//     UsbEventType_DeviceConnected = 1,
+//     UsbEventType_DeviceDisconnected = 2,
+// } UsbEventType;
+
+struct Library_sys_dev_usbstream_native_System_Device_UsbClient_DeviceConnectionEventArgs
+{
+    static const int FIELD___isConnected = 1;
+
+    //--//
+};
+
+struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbClient
+{
+    static const int FIELD_STATIC__UsbDeviceConnectionChanged = 0;
+
+    NANOCLR_NATIVE_DECLARE(get_IsConnected___BOOLEAN);
+
+    //--//
+};
+
+struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbDeviceEvent
+{
+    static const int FIELD___eventType = 3;
+    static const int FIELD___eventData = 4;
+    static const int FIELD___interfaceIndex = 5;
+
+    //--//
+};
+
 struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream
 {
     static const int FIELD___streamIndex = 2;

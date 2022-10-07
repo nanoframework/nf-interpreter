@@ -19,8 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="sys_dev_usbstream_native_System_Device_UsbClient_UsbClient_stubs.cpp" />
     <ClCompile Include="sys_dev_usbstream_native_System_Device_UsbClient_UsbStream_stubs.cpp" />
-    <ClCompile Include="sys_dev_usbstream_native.cpp" />
+   <ClCompile Include="sys_dev_usbstream_native.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sys_dev_usbstream_native.h" />

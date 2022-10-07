@@ -8,6 +8,7 @@
 // Includes.
 
 #include "sl_status.h"
+#include <nanoHAL_v2.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -31,9 +32,19 @@
 
 #include <sl_usbd_class_winusb_config.h>
 
+// need to declare this here as extern
+extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+
 // storage for USB class vendor description
 char UsbClassVendorDescription[32 + 1];
 char UsbClassVendorDeviceInterfaceGuid[DEVICE_CLASS_GUID_PROPERTY_LEN];
+
+typedef enum __nfpack UsbEventType
+{
+    UsbEventType_Invalid = 0,
+    UsbEventType_DeviceConnected = 1,
+    UsbEventType_DeviceDisconnected = 2,
+} UsbEventType;
 
 //****************************************************************************
 // Function declarations.
@@ -167,10 +178,12 @@ void sl_usbd_on_bus_event(sl_usbd_bus_event_t event)
     {
         case SL_USBD_EVENT_BUS_CONNECT:
             // called when usb cable is inserted in a host controller
+            PostManagedEvent(EVENT_USB, 0, UsbEventType_DeviceConnected, 0);
             break;
 
         case SL_USBD_EVENT_BUS_DISCONNECT:
             // called when usb cable is removed from a host controller
+            PostManagedEvent(EVENT_USB, 0, UsbEventType_DeviceDisconnected, 0);
             break;
 
         case SL_USBD_EVENT_BUS_RESET:
