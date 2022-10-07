@@ -168,11 +168,11 @@
                 },
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "GECKO_FEATURE_USBD_HID": "OFF",
-                "GECKO_FEATURE_USBD_WINUSB": "OFF",
                 "HAL_WP_USE_SERIAL": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.Device.Adc": "OFF",
                 "API_nanoFramework.GiantGecko.Adc": "ON",
+                "API_System.Device.UsbStream": "OFF",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
