@@ -61,6 +61,8 @@ typedef enum SLEEP_LEVEL
 #define SYSTEM_EVENT_FLAG_COM_OUT      0x00000002
 #define SYSTEM_EVENT_FLAG_STORAGE_IO   0x00000004
 #define SYSTEM_EVENT_FLAG_SYSTEM_TIMER 0x00000010
+#define SYSTEM_EVENT_FLAG_USB_IN       0x00000020
+#define SYSTEM_EVENT_FLAG_USB_OUT      0x00000040
 //#define SYSTEM_EVENT_FLAG_TIMER1                    0x00000020
 //#define SYSTEM_EVENT_FLAG_TIMER2                    0x00000040
 //#define SYSTEM_EVENT_FLAG_BUTTON                    0x00000080
@@ -108,9 +110,9 @@ typedef enum SLEEP_LEVEL
 #define EVENT_RADIO                 80
 #define EVENT_HIGH_RESOLUTION_TIMER 90
 #define EVENT_BLUETOOTH             100
-
-#define EVENT_TOUCH   120
-#define EVENT_GESTURE 130
+#define EVENT_USB                   110
+#define EVENT_TOUCH                 120
+#define EVENT_GESTURE               130
 
 #define PAL_EVENT_TOUCH 0x1
 #define PAL_EVENT_KEY   0x2
