@@ -295,6 +295,20 @@
             }
         },
         {
+            "name": "ESP32_LILYGO_BLE",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_LILYGO_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null,
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_ble.esp32",
+                "API_nanoFramework.Device.Bluetooth": "ON"
+            }
+        },
+        {
             "name": "ESP32_OLIMEX",
             "inherits": [
                 "user-local-tools",
@@ -307,11 +321,101 @@
             }
         },
         {
+            "name": "ESP32_OLIMEX_BLE",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_OLIMEX_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null,
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_ble.esp32",
+                "API_nanoFramework.Device.Bluetooth": "ON"
+            }
+        },
+        {
+            "name": "ESP32_ETHERNET_KIT_1.2",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_ETHERNET_KIT_1.2_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_WT32_ETH01",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_WT32_ETH01_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_WT32_ETH01_BLE",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_WT32_ETH01_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null,
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_ble.esp32",
+                "API_nanoFramework.Device.Bluetooth": "ON"
+            }
+        },
+        {
+            "name": "ESP32_WESP32",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_WESP32_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "ESP32_WESP32_BLE",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_WESP32_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null,
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_ble.esp32",
+                "API_nanoFramework.Device.Bluetooth": "ON"
+            }
+        },
+        {
             "name": "LilygoTWatch2020",
             "inherits": [
                 "user-local-tools",
                 "user-prefs",
                 "LilygoTWatch2020_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "LilygoTWatch2021",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "LilygoTWatch2021_preset"
             ],
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
@@ -689,14 +793,54 @@
             "configurePreset": "ESP32_LILYGO"
         },
         {
+            "name": "ESP32_LILYGO_BLE",
+            "displayName": "ESP32_LILYGO_BLE",
+            "configurePreset": "ESP32_LILYGO_BLE"
+        },
+        {
             "name": "ESP32_OLIMEX",
             "displayName": "ESP32_OLIMEX",
             "configurePreset": "ESP32_OLIMEX"
         },
         {
+            "name": "ESP32_OLIMEX_BLE",
+            "displayName": "ESP32_OLIMEX_BLE",
+            "configurePreset": "ESP32_OLIMEX_BLE"
+        },
+        {
+            "name": "ESP32_ETHERNET_KIT_1.2",
+            "displayName": "ESP32_ETHERNET_KIT_1.2",
+            "configurePreset": "ESP32_ETHERNET_KIT_1.2"
+        },
+        {
+            "name": "ESP32_WT32_ETH01",
+            "displayName": "ESP32_WT32_ETH01",
+            "configurePreset": "ESP32_WT32_ETH01"
+        },
+        {
+            "name": "ESP32_WT32_ETH01_BLE",
+            "displayName": "ESP32_WT32_ETH01_BLE",
+            "configurePreset": "ESP32_WT32_ETH01_BLE"
+        },
+        {
+            "name": "ESP32_WESP32",
+            "displayName": "ESP32_WESP32",
+            "configurePreset": "ESP32_WESP32"
+        },
+        {
+            "name": "ESP32_WESP32_BLE",
+            "displayName": "ESP32_WESP32_BLE",
+            "configurePreset": "ESP32_WESP32_BLE"
+        },
+        {
             "name": "LilygoTWatch2020",
             "displayName": "LilygoTWatch2020",
             "configurePreset": "LilygoTWatch2020"
+        },
+        {
+            "name": "LilygoTWatch2021",
+            "displayName": "LilygoTWatch2021",
+            "configurePreset": "LilygoTWatch2021"
         },
         {
             "name": "M5StickC",
