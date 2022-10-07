@@ -1,23 +1,25 @@
-//-----------------------------------------------------------------------------
 //
-//                   ** WARNING! ** 
-//    This file was generated automatically by a tool.
-//    Re-running the tool will overwrite this file.
-//    You should copy this file to a custom location
-//    before adding any customization in the copy to
-//    prevent loss of your changes when the tool is
-//    re-run.
+// Copyright (c) .NET Foundation and Contributors
+// See LICENSE file in the project root for full license information.
 //
-//-----------------------------------------------------------------------------
 
 #include "sys_dev_usbstream_native.h"
-
+#include "sys_dev_usbstream_native_target.h"
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbClient::get_IsConnected___BOOLEAN( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    bool conn;
+    
+    if(sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
+    {
+        stack.SetResult_Boolean(conn);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
 
     NANOCLR_NOCLEANUP();
 }
