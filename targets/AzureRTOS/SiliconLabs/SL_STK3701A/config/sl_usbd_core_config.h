@@ -190,6 +190,9 @@ extern char UsbClassVendorDescription[32 + 1];
 // <i> Number of configurations.
 #define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           1
 
+// pointer to USB Class Vendor description
+#define NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION (const char *)&UsbClassVendorDescription
+
 // </h>
 
 // </h>
