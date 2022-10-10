@@ -14,17 +14,17 @@ ADC has enabled the following channels:
 
 ## I2C
 
-I2C0
+I2C0 (this is referenced as I2C1 in C#)
 SCL is: PA1
 SDA is: PA0
 
-I2C1
+I2C1 (this is referenced as I2C2 in C#)
 SCL is: PC5
 SDA is: PC4
 
 ## SPI
 
-SPI1
+US1 (this is referenced as SPI2 in C#)
 SCK: PD2
 MOSI: PD0
 MISO: PD1
