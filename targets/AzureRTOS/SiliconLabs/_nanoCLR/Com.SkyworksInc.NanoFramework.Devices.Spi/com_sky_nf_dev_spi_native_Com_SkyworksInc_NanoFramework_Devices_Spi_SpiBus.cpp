@@ -93,6 +93,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     int8_t busIndex;
     SPI_WRITE_READ_SETTINGS rws;
     NF_PAL_SPI *palSpi = NULL;
+    SPI_DEVICE_CONFIGURATION* spiDeviceConfig = NULL;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -101,10 +102,14 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     // get bus index
     busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
 
+    // SPI bux index is 1 based, but the array is 0 based
+    spiDeviceConfig = &SpiConfigs[busIndex - 1];
+
     if (stack.m_customState == 0)
     {
         // check if this SPI has been initialized
         palSpi = GetNfPalfromBusIndex(busIndex);
+
         if (palSpi->Handle == NULL)
         {
             // compose SPI_DEVICE_CONFIGURATION
@@ -114,25 +119,25 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
                          ->GetElement(busIndex);
 
             // CS is always active low
-            SpiConfigs[busIndex].ChipSelectActive = false;
+            spiDeviceConfig->ChipSelectActive = false;
             // always bus master
-            SpiConfigs[busIndex].BusMode = SpiBusMode_master;
+            spiDeviceConfig->BusMode = SpiBusMode_master;
 
-            SpiConfigs[busIndex].Spi_Bus = busIndex;
+            spiDeviceConfig->Spi_Bus = busIndex;
 
-            SpiConfigs[busIndex].Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiMode].NumericByRef().s4;
-            SpiConfigs[busIndex].DataOrder16 =
+            spiDeviceConfig->Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiMode].NumericByRef().s4;
+            spiDeviceConfig->DataOrder16 =
                 (DataBitOrder)config[SpiBaseConfiguration::FIELD___dataFlow].NumericByRef().s4;
-            SpiConfigs[busIndex].Clock_RateHz = config[SpiBaseConfiguration::FIELD___clockFrequency].NumericByRef().s4;
-            SpiConfigs[busIndex].ByteTime = (1.0 / SpiConfigs[busIndex].Clock_RateHz) * 1000 * 8;
-            SpiConfigs[busIndex].BusConfiguration =
+            spiDeviceConfig->Clock_RateHz = config[SpiBaseConfiguration::FIELD___clockFrequency].NumericByRef().s4;
+            spiDeviceConfig->ByteTime = (1.0 / spiDeviceConfig->Clock_RateHz) * 1000 * 8;
+            spiDeviceConfig->BusConfiguration =
                 (SpiBusConfiguration)config[SpiBaseConfiguration::FIELD___busConfiguration].NumericByRef().s4;
-            SpiConfigs[busIndex].MD16bits =
+            spiDeviceConfig->MD16bits =
                 config[SpiBaseConfiguration::FIELD___databitLength].NumericByRef().s4 == 16 ? true : false;
             // store this here too
-            palSpi->BufferIs16bits = SpiConfigs[busIndex].MD16bits;
+            palSpi->BufferIs16bits = spiDeviceConfig->MD16bits;
 
-            CPU_SPI_Initialize(busIndex, SpiConfigs[busIndex]);
+            CPU_SPI_Initialize(busIndex, *spiDeviceConfig);
         }
 
         // Buffers used either for the SpanBye either for the Byte array
@@ -226,7 +231,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
             readSize,
             fullDuplex,
             palSpi->BufferIs16bits,
-            SpiConfigs[busIndex].ByteTime,
+            spiDeviceConfig->ByteTime,
             (uint32_t &)estimatedDurationMiliseconds);
 
         if (isLongRunningOperation)
