@@ -144,39 +144,42 @@ NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex)
     // get the PAL struct for the SPI bus
     switch (busIndex)
     {
+        //////////////////////////////////
+        // Gecko USART index is 0 based //
+        //////////////////////////////////
 
 #if GECKO_USE_SPI0 == TRUE
-        case 0:
+        case 1:
             palSpi = &SPI0_PAL;
             break;
 #endif
 
 #if GECKO_USE_SPI1 == TRUE
-        case 1:
+        case 2:
             palSpi = &SPI1_PAL;
             break;
 #endif
 
 #if GECKO_USE_SPI2 == TRUE
-        case 2:
+        case 3:
             palSpi = &SPI2_PAL;
             break;
 #endif
 
 #if GECKO_USE_SPI3 == TRUE
-        case 3:
+        case 4:
             palSpi = &SPI3_PAL;
             break;
 #endif
 
 #if GECKO_USE_SPI4 == TRUE
-        case 4:
+        case 5:
             palSpi = &SPI4_PAL;
             break;
 #endif
 
 #if GECKO_USE_SPI5 == TRUE
-        case 5:
+        case 6:
             palSpi = &SPI5_PAL;
             break;
 #endif
@@ -497,21 +500,21 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
         //////////////////////////////////
 
 #if GECKO_USE_SPI0 == TRUE
-        case 0:
+        case 1:
             palSpi = &SPI0_PAL;
             initSpiConfig = &InitSpiConfig0;
             break;
 #endif
 
 #if GECKO_USE_SPI1 == TRUE
-        case 1:
+        case 2:
             palSpi = &SPI1_PAL;
             initSpiConfig = &InitSpiConfig1;
             break;
 #endif
 
 #if GECKO_USE_SPI2 == TRUE
-        case 2:
+        case 3:
             palSpi = &SPI2_PAL;
             initSpiConfig = &InitSpiConfig2;
 
@@ -519,21 +522,21 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 #endif
 
 #if GECKO_USE_SPI3 == TRUE
-        case 3:
+        case 4:
             palSpi = &SPI3_PAL;
             initSpiConfig = &InitSpiConfig3;
             break;
 #endif
 
 #if GECKO_USE_SPI4 == TRUE
-        case 4:
+        case 5:
             palSpi = &SPI4_PAL;
             initSpiConfig = &InitSpiConfig4;
             break;
 #endif
 
 #if GECKO_USE_SPI5 == TRUE
-        case 5:
+        case 6:
             palSpi = &SPI5_PAL;
             initSpiConfig = &InitSpiConfig5;
             break;
