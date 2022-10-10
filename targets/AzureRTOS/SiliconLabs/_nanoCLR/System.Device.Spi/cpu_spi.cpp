@@ -218,7 +218,11 @@ void GetSpiConfig(const SPI_DEVICE_CONFIGURATION &config, NF_SpiDriver_Init_t &i
             break;
     }
 
+#if defined(SPI_CS_CONTROL)
+    initSpiData.csControl = SPI_CS_CONTROL;
+#else
     initSpiData.csControl = spidrvCsControlApplication;
+#endif
     initSpiData.dummyTxValue = 0;
     // Sets the order of bytes transmission : MSB first or LSB first
     initSpiData.bitOrder = config.DataOrder16 == DataBitOrder_MSB ? spidrvBitOrderMsbFirst : spidrvBitOrderLsbFirst;
