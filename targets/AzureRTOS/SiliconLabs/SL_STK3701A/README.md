@@ -25,3 +25,30 @@ Vref is 2.5V for all channels, except for VCC which is 5V.
 PWM has enabled the following GPIOs:
 0 - PC1 (pin 15 on the expansion header)
 1 - PI1 (through hole connector at bottom side)
+
+## I2C
+
+I2C2 (this is referenced as I2C3 in C#)
+Connected to the following devices on the GG11 board:
+Si7021: Relative Humidity and Temperature Sensor
+Si7210: Hall-Effect Sensor
+
+I2C2_SCL is: PI5
+I2C2_SDA is: PI4
+
+## SPI
+
+SPI0 (this is referenced as SPI1 in C#)
+Available in EXP header
+
+SPI0_SCK: PE12, EXP Header Pin 8
+SPI0_MOSI: PE10, EXP Header Pin 4
+SPI0_MISO: PE11, EXP Header Pin 6
+SPI0_CS: PE13, EXP Header Pin 10
+
+SPI0 (this is referenced as SPI2 in C#)
+Connected to board LCD module
+
+SPI1_SCK: PC15
+SPI1_MOSI: PA14
+SPI1_CS: PC14
