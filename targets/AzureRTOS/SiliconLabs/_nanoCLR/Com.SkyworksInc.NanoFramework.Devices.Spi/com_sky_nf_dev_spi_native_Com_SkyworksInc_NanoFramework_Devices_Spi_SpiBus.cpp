@@ -118,16 +118,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
             // always bus master
             SpiConfigs[busIndex].BusMode = SpiBusMode_master;
 
-            // internally SPI bus ID is zero based, so better take care of that here
             SpiConfigs[busIndex].Spi_Bus = busIndex;
-
-            SpiConfigs[busIndex].DeviceChipSelect = config[SpiBaseConfiguration::FIELD___csLine].NumericByRef().s4;
-
-            // sanity check chip select line
-            if (SpiConfigs[busIndex].DeviceChipSelect < -1)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-            }
 
             SpiConfigs[busIndex].Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiMode].NumericByRef().s4;
             SpiConfigs[busIndex].DataOrder16 =
@@ -370,13 +361,6 @@ static HRESULT SPI_nWrite_nRead(
         }
     }
 
-    // if CS is to be controlled by the driver, set the GPIO
-    if (palSpi->ChipSelect >= 0)
-    {
-        // assert pin based on CS active level
-        CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
-    }
-
     if (sync)
     {
         // Sync operation
@@ -441,26 +425,12 @@ static HRESULT SPI_nWrite_nRead(
                 NF_SpiDriver_TransmitBlocking(palSpi->Handle, palSpi->WriteBuffer, palSpi->WriteSize);
             }
         }
-
-        // if CS is to be controlled by the driver, set the GPIO
-        if (palSpi->ChipSelect >= 0)
-        {
-            // de-assert pin based on CS active level
-            CPU_GPIO_TogglePinState(palSpi->ChipSelect);
-        }
     }
     else
     {
         // Start an Asyncronous SPI transfer
         // perform SPI operation using driver's ASYNC API
         // Completed on calling SPI Callback
-
-        // if CS is to be controlled by the driver, set the GPIO
-        if (palSpi->ChipSelect >= 0)
-        {
-            // assert pin based on CS active level
-            CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
-        }
 
         // this is a Async operation
         // perform SPI operation using driver's ASYNC API

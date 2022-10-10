@@ -110,6 +110,8 @@ extern NF_PAL_SPI SPI5_PAL;
 
 #if defined(_USART_ROUTELOC0_MASK)
 
+#if !defined(INIT_SPI_CONFIG)
+
 // the following macro defines a function that configures the GPIO pins for an Gecko SPI peripheral
 // it gets called in the System_Device_SPi_SPiDevice::NativeInit function
 // this is required because the SPI peripherals can use multiple GPIO configuration combinations
@@ -124,6 +126,8 @@ extern NF_PAL_SPI SPI5_PAL;
             initSpiData.portLocationRx = miso_port_location;                                                           \
         }                                                                                                              \
     }
+
+#endif // INIT_SPI_CONFIG
 
 #else
 #error "This routing configuration is not supported. Need to have _USART_ROUTELOC0_MASK."

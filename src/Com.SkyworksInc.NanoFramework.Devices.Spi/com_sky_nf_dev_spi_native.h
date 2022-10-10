@@ -35,12 +35,11 @@
 
 struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBaseConfiguration
 {
-    static const int FIELD___csLine = 1;
-    static const int FIELD___clockFrequency = 2;
-    static const int FIELD___databitLength = 3;
-    static const int FIELD___spiMode = 4;
-    static const int FIELD___dataFlow = 5;
-    static const int FIELD___busConfiguration = 6;
+    static const int FIELD___clockFrequency = 1;
+    static const int FIELD___databitLength = 2;
+    static const int FIELD___spiMode = 3;
+    static const int FIELD___dataFlow = 4;
+    static const int FIELD___busConfiguration = 5;
 
     //--//
 };
@@ -61,7 +60,7 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
 
 struct Library_com_sky_nf_dev_spi_native_ThisAssembly
 {
-    static const int FIELD_STATIC__GitCommitDate = 1;
+    static const int FIELD_STATIC__GitCommitDate = 2;
 
     //--//
 };

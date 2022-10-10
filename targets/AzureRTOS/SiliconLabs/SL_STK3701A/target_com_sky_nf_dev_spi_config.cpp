@@ -15,9 +15,9 @@
 // SPI0_SCK: PE12, location 0, EXP Header Pin 8
 // SPI0_MOSI: PE10, location 0, EXP Header Pin 4
 // SPI0_MISO: PE11, location 0, EXP Header Pin 6
-// CS: PE13, EXP Header Pin 10
+// SPI0_CS: PE13, location 0, EXP Header Pin 10
 
-INIT_SPI_CONFIG(0, 0, 0, 0)
+INIT_SPI_CONFIG(0, 0, 0, 0, 0)
 
 //////////
 // SPI1 //
@@ -29,6 +29,6 @@ INIT_SPI_CONFIG(0, 0, 0, 0)
 // SPI1_SCK: PC15, location 3
 // SPI1_MOSI: PA14, location 6
 // SPI1_MISO: (not used for LCD)
-// CS: PC14 (not used in SPI configuration)
+// SPI1_CS: PC14, location 3
 
-INIT_SPI_CONFIG(1, 3, 6, 0)
+INIT_SPI_CONFIG(1, 3, 6, 0, 3)

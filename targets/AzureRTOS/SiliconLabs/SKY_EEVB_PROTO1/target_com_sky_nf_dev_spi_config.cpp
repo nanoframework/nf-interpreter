@@ -9,11 +9,11 @@
 // SPI1 //
 //////////
 
-// pin configuration for SPI1 
+// pin configuration for SPI1 (mapped to USART1 on this device)
 // SPI1_SCK: PD2, location 1
 // SPI1_MOSI: PD0, location 1
 // SPI1_MISO: PD1, location 1
-// CS: PD3 (not used in SPI configuration)
+// SPI1_CS: PD3, location 1
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(1, 1, 1, 1)
+INIT_SPI_CONFIG(1, 1, 1, 1, 1)
