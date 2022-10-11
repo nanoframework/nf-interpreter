@@ -112,7 +112,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     uint32_t offset = 0;
     sl_status_t reqStatus;
     bool conn;
-    uint32_t bytesTransfered;
+    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -157,6 +157,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
 
     // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
+
+    // rough estimation!!
+    estimatedDurationMiliseconds = count / 64;
 
     // setup timeout
     hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
@@ -218,6 +221,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     sl_status_t reqStatus;
     bool conn;
     uint32_t bytesTransfered;
+    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -262,6 +266,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
 
     // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
+
+    // rough estimation!!
+    estimatedDurationMiliseconds = count / 64;
 
     // setup timeout
     hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
