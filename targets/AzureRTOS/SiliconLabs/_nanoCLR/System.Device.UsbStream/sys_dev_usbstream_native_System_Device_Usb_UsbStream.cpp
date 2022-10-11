@@ -44,7 +44,7 @@ static void UsbAsyncReadCompleted(
 
 // -- //
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::Flush___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -53,7 +53,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::Flus
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -62,7 +62,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::NativeOpen___I4__STRING__STRING(
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen___I4__STRING__STRING(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -96,7 +96,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::NativeWrite___VOID__SZARRAY_U1__I4__I4(
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrite___VOID__SZARRAY_U1__I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -245,7 +245,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::Nati
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4(
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
