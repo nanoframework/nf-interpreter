@@ -21,14 +21,14 @@
 //     UsbEventType_DeviceDisconnected = 2,
 // } UsbEventType;
 
-struct Library_sys_dev_usbstream_native_System_Device_UsbClient_DeviceConnectionEventArgs
+struct Library_sys_dev_usbstream_native_System_Device_Usb_DeviceConnectionEventArgs
 {
     static const int FIELD___isConnected = 1;
 
     //--//
 };
 
-struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbClient
+struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient
 {
     static const int FIELD_STATIC__UsbDeviceConnectionChanged = 0;
 
@@ -37,7 +37,7 @@ struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbClient
     //--//
 };
 
-struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbDeviceEvent
+struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbDeviceEvent
 {
     static const int FIELD___eventType = 3;
     static const int FIELD___eventData = 4;
@@ -46,10 +46,12 @@ struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbDeviceEvent
     //--//
 };
 
-struct Library_sys_dev_usbstream_native_System_Device_UsbClient_UsbStream
+struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
 {
-    static const int FIELD___streamIndex = 2;
-    static const int FIELD___disposed = 3;
+    static const int FIELD___streamIndex = 1;
+    static const int FIELD___disposed = 2;
+    static const int FIELD___writeTimeout = 3;
+    static const int FIELD___readTimeout = 4;
 
     NANOCLR_NATIVE_DECLARE(Flush___VOID);
     NANOCLR_NATIVE_DECLARE(NativeClose___VOID);
