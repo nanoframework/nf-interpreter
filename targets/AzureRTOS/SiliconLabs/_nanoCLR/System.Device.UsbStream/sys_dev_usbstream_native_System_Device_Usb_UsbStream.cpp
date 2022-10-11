@@ -105,8 +105,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     CLR_RT_HeapBlock hbTimeout;
     int64_t *timeoutTicks;
     bool eventResult = true;
-    bool isLongRunningOperation = false;
-    uint32_t estimatedDurationMiliseconds;
 
     uint8_t *data;
     uint32_t length = 0;
@@ -148,25 +146,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // get a the pointer to the array by using the offset
-    data = dataBuffer->GetElement(offset);
-
-    // check for long runnign operation: over 10 blocks of 64 bytes (USB payload)
-    if (count > 64 * 10)
-    {
-        isLongRunningOperation = true;
-
-        // rough estimation!!
-        estimatedDurationMiliseconds = count / 64;
-    }
-
-    if (isLongRunningOperation)
-    {
-        // setup timeout
-        hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-    }
-
     // check if device is connected (enabled)
     sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
 
@@ -176,71 +155,48 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    if (isLongRunningOperation)
+    // get a the pointer to the array by using the offset
+    data = dataBuffer->GetElement(offset);
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // this is a long running operation...
+    if (stack.m_customState == 1)
     {
-        // this is a long running operation...
-        if (stack.m_customState == 1)
-        {
-            // ... and hasn't started yet
-            // push onto the eval stack how many bytes are being pushed to the USB
-            stack.PushValueI4(count);
+        // ... and hasn't started yet
+        // push onto the eval stack how many bytes are being pushed to the USB
+        stack.PushValueI4(count);
 
-            // bump custom state
-            stack.m_customState = 2;
+        // bump custom state
+        stack.m_customState = 2;
 
-            // start write operation with async API
-            // requesting handling of "End-of-transfer"
-            reqStatus = sl_usbd_vendor_write_bulk_async(
-                sl_usbd_vendor_winusb_number,
-                (void *)data,
-                count,
-                UsbAsyncWriteCompleted,
-                NULL,
-                true);
-
-            _ASSERTE(reqStatus == SL_STATUS_OK);
-        }
-    }
-    else
-    {
-        // this is NOT a long running operation
-        // perform write operation with sync API
-        reqStatus = sl_usbd_vendor_write_bulk_sync(
+        // start write operation with async API
+        // requesting handling of "End-of-transfer"
+        reqStatus = sl_usbd_vendor_write_bulk_async(
             sl_usbd_vendor_winusb_number,
             (void *)data,
             count,
-            0,
-            true,
-            &bytesTransfered);
+            UsbAsyncWriteCompleted,
+            NULL,
+            true);
 
         _ASSERTE(reqStatus == SL_STATUS_OK);
-
-        // check bytes transfered
-        if (bytesTransfered != count)
-        {
-            // something went wrong
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
     }
 
     while (eventResult)
     {
-        if (!isLongRunningOperation)
-        {
-            // this is not a long running operation so nothing to do here
-            break;
-        }
-
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
     }
 
-    if (isLongRunningOperation)
-    {
-        // pop timeout heap block from stack
-        stack.PopValue();
-    }
+    // pop "count" heap block from stack
+    stack.PopValue();
+
+    // pop timeout heap block from stack
+    stack.PopValue();
 
     NANOCLR_NOCLEANUP();
 }
@@ -254,8 +210,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     CLR_RT_HeapBlock hbTimeout;
     int64_t *timeoutTicks;
     bool eventResult = true;
-    bool isLongRunningOperation = false;
-    uint32_t estimatedDurationMiliseconds;
 
     uint8_t *data;
     uint32_t length = 0;
@@ -297,25 +251,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    // get a the pointer to the array by using the offset
-    data = dataBuffer->GetElement(offset);
-
-    // check for long runnign operation: over 10 blocks of 64 bytes (USB payload)
-    if (count > 64 * 10)
-    {
-        isLongRunningOperation = true;
-
-        // rough estimation!!
-        estimatedDurationMiliseconds = count / 64;
-    }
-
-    if (isLongRunningOperation)
-    {
-        // setup timeout
-        hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
-        NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-    }
-
     // check if device is connected (enabled)
     sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
 
@@ -325,65 +260,47 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
-    if (isLongRunningOperation)
+    // get a the pointer to the array by using the offset
+    data = dataBuffer->GetElement(offset);
+
+    // setup timeout
+    hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // this is a long running operation...
+    if (stack.m_customState == 1)
     {
-        // this is a long running operation...
-        if (stack.m_customState == 1)
-        {
-            // ... and hasn't started yet
-            // push onto the eval stack how many bytes are being pushed to the USB
-            stack.PushValueI4(count);
+        // ... and hasn't started yet
+        // push onto the eval stack how many bytes are being pushed to the USB
+        stack.PushValueI4(count);
 
-            // bump custom state
-            stack.m_customState = 2;
+        // bump custom state
+        stack.m_customState = 2;
 
-            // start read operation with async API
-            // requesting handling of "End-of-transfer"
-            reqStatus = sl_usbd_vendor_read_bulk_async(
-                sl_usbd_vendor_winusb_number,
-                (void *)data,
-                count,
-                UsbAsyncReadCompleted,
-                NULL);
-
-            _ASSERTE(reqStatus == SL_STATUS_OK);
-        }
-    }
-    else
-    {
-        // this is NOT a long running operation
-        // perform read operation with sync API
-        reqStatus =
-            sl_usbd_vendor_read_bulk_sync(sl_usbd_vendor_winusb_number, (void *)data, count, 0, &bytesTransfered);
+        // start read operation with async API
+        // requesting handling of "End-of-transfer"
+        reqStatus = sl_usbd_vendor_read_bulk_async(
+            sl_usbd_vendor_winusb_number,
+            (void *)data,
+            count,
+            UsbAsyncReadCompleted,
+            NULL);
 
         _ASSERTE(reqStatus == SL_STATUS_OK);
-
-        // check bytes transfered
-        if (bytesTransfered != count)
-        {
-            // something went wrong
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
     }
 
     while (eventResult)
     {
-        if (!isLongRunningOperation)
-        {
-            // this is not a long running operation so nothing to do here
-            break;
-        }
-
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
     }
 
-    if (isLongRunningOperation)
-    {
-        // pop timeout heap block from stack
-        stack.PopValue();
-    }
+    // pop "count" heap block from stack
+    stack.PopValue();
+
+    // pop timeout heap block from stack
+    stack.PopValue();
 
     stack.SetResult_I4(bytesTransfered);
 
