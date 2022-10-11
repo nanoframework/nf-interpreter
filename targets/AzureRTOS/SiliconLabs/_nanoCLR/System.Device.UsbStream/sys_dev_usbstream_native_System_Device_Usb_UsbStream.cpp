@@ -120,7 +120,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
@@ -269,7 +269,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    if (pThis[FIELD___disposed].NumericByRef().u1 != 0)
+    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
