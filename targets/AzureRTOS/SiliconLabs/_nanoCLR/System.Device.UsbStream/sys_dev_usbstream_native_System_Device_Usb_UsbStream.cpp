@@ -6,6 +6,8 @@
 #include <sys_dev_usbstream_native.h>
 #include "sys_dev_usbstream_native_target.h"
 
+NF_PAL_USB UsbStream_PAL;
+
 static void UsbAsyncWriteCompleted(
     uint8_t class_nbr,
     void *p_buf,
@@ -17,9 +19,12 @@ static void UsbAsyncWriteCompleted(
     (void)class_nbr;
     (void)p_buf;
     (void)buf_len;
-    (void)xfer_len;
-    (void)p_callback_arg;
     (void)status;
+
+    NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
+
+    // store TX count
+    usbPal->TxBytesSent = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
 }
@@ -35,9 +40,12 @@ static void UsbAsyncReadCompleted(
     (void)class_nbr;
     (void)p_buf;
     (void)buf_len;
-    (void)xfer_len;
-    (void)p_callback_arg;
     (void)status;
+
+    NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
+
+    // store RX count
+    usbPal->RxBytesReceived = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
 }
@@ -69,6 +77,12 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
 
     const char *deviceDescription;
     const char *deviceClassGuid;
+
+    // int32_t bufferSize;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
     // get device class GUID
     deviceClassGuid = stack.Arg1().RecoverString();
@@ -113,7 +127,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -150,11 +163,8 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
 
-    // rough estimation!!
-    estimatedDurationMiliseconds = count / 10;
-
-    // setup timeout
-    hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+    // setup timeout from managed property
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // this is a long running operation...
@@ -174,7 +184,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
             (void *)data,
             count,
             UsbAsyncWriteCompleted,
-            NULL,
+            &UsbStream_PAL,
             true);
 
         if (reqStatus == SL_STATUS_INVALID_STATE)
@@ -194,6 +204,13 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
+    }
+
+    // timeout expired
+    if (!eventResult)
+    {
+        // timeout has expired, return exception
+        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
     NANOCLR_CLEANUP();
@@ -225,8 +242,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    uint32_t bytesTransfered = 0;
-    uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -263,11 +278,8 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     // get a the pointer to the array by using the offset
     data = dataBuffer->GetElement(offset);
 
-    // rough estimation!!
-    estimatedDurationMiliseconds = count / 10;
-
-    // setup timeout
-    hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
+    // setup timeout from managed property
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
     // this is a long running operation...
@@ -280,6 +292,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
         // bump custom state
         stack.m_customState = 2;
 
+        // clear RX counter
+        UsbStream_PAL.RxBytesReceived = 0;
+
         // start read operation with async API
         // requesting handling of "End-of-transfer"
         reqStatus = sl_usbd_vendor_read_bulk_async(
@@ -287,7 +302,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
             (void *)data,
             count,
             UsbAsyncReadCompleted,
-            NULL);
+            &UsbStream_PAL);
 
         if (reqStatus == SL_STATUS_INVALID_STATE)
         {
@@ -308,6 +323,13 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
     }
 
+    // timeout expired
+    if (!eventResult)
+    {
+        // timeout has expired, return exception
+        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+    }
+
     NANOCLR_CLEANUP();
 
     if (stack.m_customState > 1)
@@ -321,7 +343,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
 
     if (SUCCEEDED(hr))
     {
-        stack.SetResult_I4(bytesTransfered);
+        stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
     }
 
     NANOCLR_CLEANUP_END();
