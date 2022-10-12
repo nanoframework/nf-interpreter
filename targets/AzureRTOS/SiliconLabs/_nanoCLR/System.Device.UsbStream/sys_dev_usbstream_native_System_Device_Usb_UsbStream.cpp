@@ -89,7 +89,10 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
     // store device description
     hal_strcpy_s(UsbClassVendorDescription, sizeof(UsbClassVendorDescription), deviceDescription);
 
-    sli_usbd_vendor_winusb_init();
+    if (sli_usbd_vendor_winusb_init() != SL_STATUS_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
 
     stack.SetResult_I4(sl_usbd_vendor_winusb_number);
 

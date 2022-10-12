@@ -39,6 +39,9 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 char UsbClassVendorDescription[32 + 1];
 char UsbClassVendorDeviceInterfaceGuid[DEVICE_CLASS_GUID_PROPERTY_LEN];
 
+// flag for USB WinUSB intialized
+static bool usbdVendorWinusbInited = false;
+
 typedef enum __nfpack UsbEventType
 {
     UsbEventType_Invalid = 0,
@@ -104,7 +107,7 @@ void sli_usbd_vendor_winusb_setup_req(uint8_t class_nbr, const sl_usbd_setup_req
 // Global functions.
 
 /* initialize winusb instance */
-void sli_usbd_vendor_winusb_init()
+sl_status_t sli_usbd_vendor_winusb_init()
 {
     bool intr_en = true;
     uint16_t interval = 0;
@@ -114,6 +117,12 @@ void sli_usbd_vendor_winusb_init()
 
     char *configs = NULL;
     char *token = NULL;
+
+    // check if already initialized
+    if (usbdVendorWinusbInited)
+    {
+        return SL_STATUS_OK;
+    }
 
     /* configs to attach the class instance to */
     configs = SL_USBD_VENDOR_WINUSB_CONFIGURATIONS;
@@ -141,7 +150,11 @@ void sli_usbd_vendor_winusb_init()
         if (!strcmp(token, "config0") || !strcmp(token, "all"))
         {
             config_number = sl_usbd_configuration_config0_number;
-            sl_usbd_vendor_add_to_configuration(class_number, config_number);
+            if(sl_usbd_vendor_add_to_configuration(class_number, config_number) != SL_STATUS_OK)
+            {
+                // error adding class to configuration
+                return SL_STATUS_FAIL;
+            }
         }
 
         /* next token */
@@ -156,6 +169,11 @@ void sli_usbd_vendor_winusb_init()
         DEVICEINTERFACE_GUID_PROP_NAME_LEN,
         (const uint8_t *)UsbClassVendorDeviceInterfaceGuid,
         sizeof(UsbClassVendorDeviceInterfaceGuid));
+
+    // all good here, update flag
+    usbdVendorWinusbInited = true;
+
+    return SL_STATUS_OK;
 }
 
 void sl_usbd_vendor_winusb_on_enable_event(void)
