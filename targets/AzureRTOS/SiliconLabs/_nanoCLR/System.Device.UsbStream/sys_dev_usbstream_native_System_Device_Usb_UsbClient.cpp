@@ -6,7 +6,7 @@
 #include "sys_dev_usbstream_native.h"
 #include "sys_dev_usbstream_native_target.h"
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient::get_IsConnected___BOOLEAN( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient::get_IsConnected___STATIC__BOOLEAN( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
 
