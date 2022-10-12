@@ -11,8 +11,8 @@ static const CLR_RT_MethodHandler method_lookup[] =
 {
     NULL,
     NULL,
-    Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient::get_IsConnected___BOOLEAN,
     NULL,
+    Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient::get_IsConnected___STATIC__BOOLEAN,
     NULL,
     NULL,
     NULL,
@@ -61,7 +61,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_UsbStream =
 {
     "System.Device.UsbStream",
-    0x0024FE8B,
+    0x74531012,
     method_lookup,
     { 1, 0, 0, 0 }
 };

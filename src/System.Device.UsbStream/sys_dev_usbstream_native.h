@@ -32,7 +32,7 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient
 {
     static const int FIELD_STATIC__UsbDeviceConnectionChanged = 0;
 
-    NANOCLR_NATIVE_DECLARE(get_IsConnected___BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(get_IsConnected___STATIC__BOOLEAN);
 
     //--//
 };
