@@ -34,7 +34,9 @@ macro(nf_set_compile_options)
 
     # enable:
     # - FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE -DSTM32F7XX)
+    # - user TX file
+    # - STM series
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DUSE_FPU=TRUE -DSTM32F7XX -DTX_INCLUDE_USER_DEFINE_FILE )
 
 endmacro()
 
@@ -50,13 +52,13 @@ macro(nf_set_link_options)
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_link_options()")
     endif()
 
-    # request specs from newlib nano
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs")
-
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os ")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -flto ")
     endif()
+
+    # request specs from newlib nano
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs")
 
     # include libraries in build
     nf_include_libraries_in_build(${NFSLO_TARGET})

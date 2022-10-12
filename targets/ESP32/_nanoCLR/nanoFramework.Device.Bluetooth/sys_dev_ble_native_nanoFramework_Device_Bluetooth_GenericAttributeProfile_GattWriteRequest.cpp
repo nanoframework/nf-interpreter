@@ -20,27 +20,36 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         uint16_t om_len;
         uint16_t out_len;
         uint16_t eventid = stack.Arg1().NumericByRef().u2;
+        bool error = true;
 
-        // Make sure correct event, or is it too late
-        // Otherwise ignore
-        if (ble_event_data.eventId == eventid)
+        if (LockEventMutex())
         {
-            // Get length of available data
-            om_len = OS_MBUF_PKTLEN(ble_event_data.ctxt->om);
+            // Make sure correct event, or is it too late
+            // Otherwise ignore
+            if (ble_event_data.eventId == eventid)
+            {
+                // Get length of available data
+                om_len = OS_MBUF_PKTLEN(ble_event_data.ctxt->om);
 
-            // Create managed byte array of correct size as per OM buffer
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                stack.PushValueAndClear(),
-                om_len,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+                // Create managed byte array of correct size as per OM buffer
+                NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
+                    stack.PushValueAndClear(),
+                    om_len,
+                    g_CLR_RT_WellKnownTypes.m_UInt8));
 
-            // get a pointer to the first object in the array
-            pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
+                // get a pointer to the first object in the array
+                pReturnBuffer = stack.TopValue().DereferenceArray()->GetFirstElement();
 
-            // Copy OM buffer to return byte buffer
-            ble_hs_mbuf_to_flat(ble_event_data.ctxt->om, pReturnBuffer, om_len, &out_len);
+                // Copy OM buffer to return byte buffer
+                ble_hs_mbuf_to_flat(ble_event_data.ctxt->om, pReturnBuffer, om_len, &out_len);
+
+                error = false;
+            }
+
+            ReleaseEventMutex();
         }
-        else
+
+        if (error)
         {
             // Error return empty array, event not found ?
             NANOCLR_CHECK_HRESULT(
@@ -55,13 +64,18 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        // debug_printf("NativeWriteRespond\n");
-        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        if (LockEventMutex())
         {
-            ble_event_data.result = 0;
+            // BLE_DEBUG_PRINTF("NativeWriteRespond\n");
+            if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+            {
+                ble_event_data.result = 0;
 
-            // Signal BLE callback, event complete
-            xEventGroupSetBits(ble_event_waitgroup, 1);
+                // Signal BLE callback, event complete
+                xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
+
+                ReleaseEventMutex();
+            }
         }
     }
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -72,17 +86,22 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 {
     NANOCLR_HEADER();
     {
-        // debug_printf("NativeWriteRespondWithProtocolError\n");
+        // BLE_DEBUG_PRINTF("NativeWriteRespondWithProtocolError\n");
 
-        // Response to correct event, or is it too late
-        // Otherwise ignore
-        if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+        if (LockEventMutex())
         {
-            // Get protocol error code
-            ble_event_data.result = stack.Arg2().NumericByRef().u2;
+            // Response to correct event, or is it too late
+            // Otherwise ignore
+            if (ble_event_data.eventId == stack.Arg1().NumericByRef().u2)
+            {
+                // Get protocol error code
+                ble_event_data.result = stack.Arg2().NumericByRef().u2;
 
-            // Signal BLE callback, event complete
-            xEventGroupSetBits(ble_event_waitgroup, 1);
+                // Signal BLE callback, event complete
+                xEventGroupSetBits(ble_event_waitgroup, N_BLE_EVENT_HANDLED);
+
+                ReleaseEventMutex();
+            }
         }
     }
     NANOCLR_NOCLEANUP_NOLABEL();

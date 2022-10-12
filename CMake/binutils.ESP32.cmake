@@ -5,6 +5,57 @@
 
 include(binutils.common)
 
+# process ESP32 Ethernet options
+macro(nf_process_esp32_ethernet_options)
+
+    # need to process this?
+    if(ESP32_ETHERNET_SUPPORT)
+
+        if(NOT ESP32_ETHERNET_INTERFACE)
+            # default to LAN8720
+            set(ESP32_ETHERNET_INTERFACE "LAN8720" CACHE INTERNAL "Defaulting LAN8720")
+
+            message(STATUS "\n\n*** No Ethernet interface defined. Defaulting to LAN8720. ***\n\n")
+        endif()
+
+        # list of supported PHYs
+        set(ESP32_SUPPORTED_PHY "LAN8720" "IP101" "RTL8201" "DP83848" "KSZ8041" CACHE INTERNAL "supported ESP32 PHYs")
+        # list of supported ETH SPI PHYs
+        # ENJ28J60 currently not supported, driver in IDF examples (TODO)
+        set(ESP32_SUPPORTED_ETH_SPI "W5500" "DM9051" "ENJ28J60" CACHE INTERNAL "supported ESP32 ETH SPIs")
+
+        list(FIND ESP32_SUPPORTED_PHY ${ESP32_ETHERNET_INTERFACE} ESP32_PHY_INDEX)
+
+        if(ESP32_PHY_INDEX EQUAL -1)
+
+            # can't find this under supported PHYs
+        
+            # try with SPIs
+            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETH_SPI_INDEX)
+            
+            if(ESP32_ETH_SPI_INDEX EQUAL -1)
+                # can't find it under SPIs either
+                message(FATAL_ERROR "\n\nSomething wrong happening: can't find support for Ethernet interface ${ESP32_ETHERNET_INTERFACE}!\n\n")
+            else()
+                # store SPI option
+                set(ESP32_ETHERNET_SPI_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+                set(ESP32_ETHERNET_INTERNAL_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+                # set define with SPI module
+                set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_SPI_MODULE_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet SPI module option")
+            endif()
+
+        else()
+            # store PHY option
+            set(ESP32_ETHERNET_INTERNAL_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+            set(ESP32_ETHERNET_SPI_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+            # set define with PHY name
+            set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_PHY_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet PHY interface option")
+        endif()
+
+    endif()
+
+endmacro()
+
 # find a set of files on a list of possible locations
 macro(nf_find_esp32_files_at_location files locations)
 
@@ -122,6 +173,7 @@ macro(nf_add_platform_dependencies target)
             ${CMAKE_CURRENT_SOURCE_DIR}/${target}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${CMAKE_CURRENT_SOURCE_DIR}/Network
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -130,6 +182,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_wireprotocol(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -141,6 +194,7 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_debugger(
             EXTRA_INCLUDES
                 ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -151,6 +205,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_native_assemblies(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
     
@@ -161,11 +216,14 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_network(
             BUILD_TARGET
                 ${target}
+            EXTRA_COMPILE_DEFINITIONS
+                ${ESP32_ETHERNET_DEFINES}
             EXTRA_SOURCES 
                 ${TARGET_ESP32_IDF_NETWORK_SOURCES}
             EXTRA_INCLUDES 
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
         )
 
@@ -198,6 +256,7 @@ macro(nf_add_platform_include_directories target)
     target_include_directories(${target}.elf PUBLIC
 
         ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}/targets/${RTOS}
         ${ESP32_IDF_INCLUDE_DIRS}
         ${NF_NativeAssemblies_INCLUDE_DIRS}
         ${NF_CoreCLR_INCLUDE_DIRS}
@@ -236,7 +295,7 @@ macro(nf_add_platform_sources target)
            
         # add header with target platform definitions
         configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/target_os.h @ONLY)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
                        ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
@@ -353,32 +412,35 @@ macro(nf_setup_partition_tables_generator)
     # create partition tables for other memory sizes
     set(ESP32_PARTITION_TABLE_UTILITY ${IDF_PATH_CMAKED}/components/partition_table/gen_esp32part.py )
 
+    # create command line for partition table generator
+    set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
+
     if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
-        
+
         # partition tables for ESP32
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 16MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
             COMMENT "Generate ESP32 partition table for 16MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 8MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
             ${CMAKE_BINARY_DIR}/partitions_8mb.bin
             COMMENT "Generate ESP32 partition table for 8MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 4MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
             COMMENT "Generate Esp32 partition table for 4MB flash" )
-
+        
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table}  
             --flash-size 2MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
             ${CMAKE_BINARY_DIR}/partitions_2mb.bin
@@ -390,21 +452,21 @@ macro(nf_setup_partition_tables_generator)
                 
         # partition tables for ESP32
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 16MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
             COMMENT "Generate ESP32 partition table for 16MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 8MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
             ${CMAKE_BINARY_DIR}/partitions_8mb.bin
             COMMENT "Generate ESP32 partition table for 8MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 4MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
@@ -419,27 +481,22 @@ macro(nf_add_idf_as_library)
 
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
-    # if running on Azure Pipeline, tweak the reported version so it doesn't show '-dirty'
-    # because it is not!
-    set(RUNNING_ON_AZURE ($ENV{Agent_HomeDirectory} AND $ENV{Build_BuildNumber}))
+    # "fix" the reported version so it doesn't show '-dirty' 
+    # this is because we could be deleting some files and tweaking others in the IDF
+    get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER)
+    string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+    set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+    set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
 
-    if(RUNNING_ON_AZURE)
-        get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER )
+    # for COMPILE DEFINITIONS it's a bit more work
+    get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
 
-        string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
- 
-        set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+    string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+    set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+    
+    message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
 
-        # for COMPILE DEFINITIONS it's a bit more work
-        get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
-
-        string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
-
-        set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
-
-        message(STATUS "Fixing IDF version. It is now: ${MY_IDF_VER_FIXED}")
-    endif()
-
+    # add IDF app_main
     target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
@@ -465,6 +522,11 @@ macro(nf_add_idf_as_library)
     endif()
 
     message(STATUS "\n-- SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
+
+    # Save original contents to be restored later
+    file(READ
+    "${SDKCONFIG_DEFAULTS_FILE}"
+    SDKCONFIG_ORIGINAL_CONTENTS)
 
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
@@ -494,40 +556,6 @@ macro(nf_add_idf_as_library)
     if(ESP32_ETHERNET_SUPPORT)
         list(APPEND IDF_COMPONENTS_TO_ADD esp_eth)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
-
-        # check for ETH_RMII_CLK_OUT_GPIO in the build options
-        if(ETH_RMII_CLK_OUT_GPIO)
-
-            message(STATUS "\nETH_RMII_CLK_OUT_GPIO specified. Updating SDK CONFIG to enable CLK output on GPIO${ETH_RMII_CLK_OUT_GPIO}.\n")
-            
-            # need to read the supplied SDK CONFIG file and replace the appropriate options            
-            file(READ
-                "${SDKCONFIG_DEFAULTS_FILE}"
-                SDKCONFIG_DEFAULT_CONTENTS)
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                "CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                SDKCONFIG_DEFAULT_NEW_CONTENTS
-                "${SDKCONFIG_DEFAULT_CONTENTS}")
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUT_GPIO=n"
-                "CONFIG_ETH_RMII_CLK_OUT_GPIO=${ETH_RMII_CLK_OUT_GPIO}"
-                SDKCONFIG_DEFAULT_FINAL_CONTENTS
-                "${SDKCONFIG_DEFAULT_NEW_CONTENTS}")
-
-            # need to temporarilly allow changes in source files
-            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-            file(WRITE 
-                ${SDKCONFIG_DEFAULTS_FILE} 
-                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
-
-            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-            
-        endif()
-
     endif()
 
     # handle specifics for ESP32S2 series
@@ -636,8 +664,17 @@ macro(nf_add_idf_as_library)
         PROJECT_VER ${BUILD_VERSION}
     )
 
+    #Restore original sdkconfig back to defaults
+    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+    file(WRITE 
+        ${SDKCONFIG_DEFAULTS_FILE} 
+        ${SDKCONFIG_ORIGINAL_CONTENTS})
+
+    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+
     if(USE_NETWORKING_OPTION)
-        
+
         FetchContent_GetProperties(esp32_idf)
 
         # get list of source files for lwIP

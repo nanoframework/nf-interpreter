@@ -135,7 +135,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 {
                     // start connect
                     result = esp_wifi_connect();
+#ifdef PRINT_NET_EVENT
                     ets_printf("connect... %d \n", result);
+#endif
                 }
 
                 break;
@@ -172,7 +174,9 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
                 {
                     // better re-connect
                     result = esp_wifi_connect();
+#ifdef PRINT_NET_EVENT
                     ets_printf("connect... %d \n", result);
+#endif
                 }
 
                 break;

@@ -96,11 +96,11 @@ void nanoHAL_Initialize()
     // PalEvent_Initialize();
 
 #if (HAL_USE_I2C_OPTION == TRUE)
-    I2C1_PAL.i2c = NULL;
+    memset(&I2C1_PAL, 0, sizeof(I2C1_PAL));
 #endif
 
 #if (HAL_USE_SPI_OPTION == TRUE)
-    SPI1_PAL.masterSpi = NULL;
+    memset(&SPI1_PAL, 0, sizeof(SPI1_PAL));
 #endif
 
     // Init Networking

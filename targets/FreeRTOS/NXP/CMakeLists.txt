@@ -28,7 +28,7 @@ endif()
 # check if build was requested with a specifc FatFS version
 if(FATFS_VERSION_EMPTY)
     # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(FATFS_VERSION_TAG "R0.14")
+    set(FATFS_VERSION_TAG "R0.14b")
 else()
     # set version 
     set(FATFS_VERSION_TAG "${FATFS_VERSION}")
