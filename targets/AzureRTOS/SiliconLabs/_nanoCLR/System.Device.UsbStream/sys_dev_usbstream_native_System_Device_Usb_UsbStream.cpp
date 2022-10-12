@@ -111,7 +111,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    bool conn;
     uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -144,15 +143,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     if (offset + count > length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // check if device is connected (enabled)
-    sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
-
-    if (!conn)
-    {
-        // device is not connected, return exception
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     // get a the pointer to the array by using the offset
@@ -219,7 +209,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    bool conn;
     uint32_t bytesTransfered;
     uint32_t estimatedDurationMiliseconds;
 
@@ -253,15 +242,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     if (offset + count > length)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // check if device is connected (enabled)
-    sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
-
-    if (!conn)
-    {
-        // device is not connected, return exception
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     // get a the pointer to the array by using the offset
