@@ -18,7 +18,7 @@
 extern char UsbClassVendorDescription[32 + 1];
 extern char UsbClassVendorDeviceInterfaceGuid[38 * 2 + 2];
 extern uint8_t sl_usbd_vendor_winusb_number;
-extern "C" void sli_usbd_vendor_winusb_init(void);
+extern "C" sl_status_t sli_usbd_vendor_winusb_init(void);
 
 // struct representing the UART
 typedef struct

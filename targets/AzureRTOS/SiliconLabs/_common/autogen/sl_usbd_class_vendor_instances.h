@@ -31,6 +31,6 @@ __WEAK void sl_usbd_vendor_winusb_on_setup_request_event(const sl_usbd_setup_req
 
 /* init functions for all vendor instances */
 
-void sli_usbd_vendor_winusb_init(void);
+sl_status_t sli_usbd_vendor_winusb_init(void);
 
 #endif
