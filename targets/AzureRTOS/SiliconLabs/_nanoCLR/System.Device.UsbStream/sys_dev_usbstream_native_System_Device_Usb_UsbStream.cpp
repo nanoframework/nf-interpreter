@@ -72,7 +72,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
 
     // get device class GUID
     deviceClassGuid = stack.Arg1().RecoverString();
-    ;
 
     // clear destination
     memset(UsbClassVendorDeviceInterfaceGuid, 0, sizeof(UsbClassVendorDeviceInterfaceGuid));
@@ -152,7 +151,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     data = dataBuffer->GetElement(offset);
 
     // rough estimation!!
-    estimatedDurationMiliseconds = count / 64;
+    estimatedDurationMiliseconds = count / 10;
 
     // setup timeout
     hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
@@ -178,7 +177,16 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
             NULL,
             true);
 
-        _ASSERTE(reqStatus == SL_STATUS_OK);
+        if (reqStatus == SL_STATUS_INVALID_STATE)
+        {
+            // device is not connected, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+        else if (reqStatus == SL_STATUS_NOT_READY)
+        {
+            // transfer already in progress, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
     }
 
     while (eventResult)
@@ -188,13 +196,18 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
     }
 
-    // pop "count" heap block from stack
-    stack.PopValue();
+    NANOCLR_CLEANUP();
 
-    // pop timeout heap block from stack
-    stack.PopValue();
+    if (stack.m_customState > 1)
+    {
+        // pop "count" heap block from stack
+        stack.PopValue();
 
-    NANOCLR_NOCLEANUP();
+        // pop timeout heap block from stack
+        stack.PopValue();
+    }
+
+    NANOCLR_CLEANUP_END();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4(
@@ -212,7 +225,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    uint32_t bytesTransfered;
+    uint32_t bytesTransfered = 0;
     uint32_t estimatedDurationMiliseconds;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -251,7 +264,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     data = dataBuffer->GetElement(offset);
 
     // rough estimation!!
-    estimatedDurationMiliseconds = count / 64;
+    estimatedDurationMiliseconds = count / 10;
 
     // setup timeout
     hbTimeout.SetInteger((CLR_INT64)estimatedDurationMiliseconds * TIME_CONVERSION__TO_MILLISECONDS);
@@ -276,7 +289,16 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
             UsbAsyncReadCompleted,
             NULL);
 
-        _ASSERTE(reqStatus == SL_STATUS_OK);
+        if (reqStatus == SL_STATUS_INVALID_STATE)
+        {
+            // device is not connected, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+        else if (reqStatus == SL_STATUS_NOT_READY)
+        {
+            // transfer already in progress, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
     }
 
     while (eventResult)
@@ -286,13 +308,21 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
     }
 
-    // pop "count" heap block from stack
-    stack.PopValue();
+    NANOCLR_CLEANUP();
 
-    // pop timeout heap block from stack
-    stack.PopValue();
+    if (stack.m_customState > 1)
+    {
+        // pop "count" heap block from stack
+        stack.PopValue();
 
-    stack.SetResult_I4(bytesTransfered);
+        // pop timeout heap block from stack
+        stack.PopValue();
+    }
 
-    NANOCLR_NOCLEANUP();
+    if (SUCCEEDED(hr))
+    {
+        stack.SetResult_I4(bytesTransfered);
+    }
+
+    NANOCLR_CLEANUP_END();
 }
