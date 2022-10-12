@@ -641,7 +641,7 @@
             ],
             "hidden": true,
             "cacheVariables": {
-                "SDK_CONFIG_FILE": "sdkconfig.default_pico_ble",
+                "SDK_CONFIG_FILE": "sdkconfig.default_pico_ble_rev3",
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
