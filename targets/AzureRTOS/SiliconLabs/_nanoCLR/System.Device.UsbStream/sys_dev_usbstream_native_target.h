@@ -26,7 +26,11 @@ typedef struct
     HAL_RingBuffer<uint8_t> RxRingBuffer;
     uint8_t *RxBuffer;
     uint16_t RxBytesToRead;
-
+    uint16_t RxBytesReceived;
     uint32_t ReceivedBytesThreshold;
 
+    uint16_t TxBytesSent;
+
 } NF_PAL_USB;
+
+extern NF_PAL_USB UsbStream_PAL;
