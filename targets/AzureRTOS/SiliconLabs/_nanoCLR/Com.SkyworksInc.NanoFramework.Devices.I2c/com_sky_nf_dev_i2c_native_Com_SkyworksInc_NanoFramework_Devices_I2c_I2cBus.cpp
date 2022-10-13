@@ -663,7 +663,7 @@ HRESULT Library_com_sky_nf_dev_i2c_native_Com_SkyworksInc_NanoFramework_Devices_
     FAULT_ON_NULL(pThis);
 
     // get bus index
-    busIndex = (uint8_t)stack.Arg2().NumericByRef().s4;
+    busIndex = (uint8_t)stack.Arg1().NumericByRef().s4;
 
     // get a pointer to the managed I2C connectionSettings object instance
     busSpeedCollection = (CLR_RT_HeapBlock_Array *)pThis[FIELD_STATIC___busSpeed].DereferenceArray();
