@@ -13,7 +13,7 @@ list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURC
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Com.SkyworksInc.NanoFramework.Devices.I2c)
+list(APPEND Com.SkyworksInc.NanoFramework.Devices.I2c_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.I2c)
 
 # source files
 set(Com.SkyworksInc.NanoFramework.Devices.I2c_SRCS
@@ -34,7 +34,7 @@ foreach(SRC_FILE ${Com.SkyworksInc.NanoFramework.Devices.I2c_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/PAL/Com.SkyworksInc.NanoFramework.Devices.I2c
+            ${PROJECT_SOURCE_DIR}/src/Com.SkyworksInc.NanoFramework.Devices.I2c
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
