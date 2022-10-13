@@ -46,20 +46,20 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
 struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus
 {
     static const int FIELD_STATIC___busConnectionSettings = 0;
-    static const int FIELD_STATIC___busSettingsChanged = 1;
 
     static const int FIELD___syncLock = 1;
     static const int FIELD___bufferSingleOperation = 2;
 
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeReportBusSettingsChanged___VOID__I4);
 
     //--//
 };
 
 struct Library_com_sky_nf_dev_spi_native_ThisAssembly
 {
-    static const int FIELD_STATIC__GitCommitDate = 2;
+    static const int FIELD_STATIC__GitCommitDate = 1;
 
     //--//
 };

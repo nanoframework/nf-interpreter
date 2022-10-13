@@ -27,6 +27,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN,
     Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN,
+    Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::NativeReportBusSettingsChanged___VOID__I4,
     NULL,
     NULL,
     NULL,
@@ -39,9 +40,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_Spi =
 {
     "Com.SkyworksInc.NanoFramework.Devices.Spi",
-    0x6E9C1C37,
+    0xCFFC5E97,
     method_lookup,
-    { 1, 0, 0, 1 }
+    { 100, 0, 0, 2 }
 };
 
 // clang-format on

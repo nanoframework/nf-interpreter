@@ -84,6 +84,7 @@ struct NF_PAL_SPI
     int32_t ChipSelect;
 
     NF_SpiDriver_Handle_t Handle;
+    NF_SpiDriver_Init_t *InitSpiData;
 };
 
 ////////////////////////////////////////////

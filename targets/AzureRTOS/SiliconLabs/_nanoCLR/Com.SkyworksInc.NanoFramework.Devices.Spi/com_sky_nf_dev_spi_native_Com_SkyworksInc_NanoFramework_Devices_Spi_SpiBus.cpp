@@ -4,6 +4,10 @@
 
 extern NF_PAL_SPI *GetNfPalfromBusIndex(uint8_t busIndex);
 extern void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferStatus, int itemsTransferred);
+extern bool CPU_SPI_Initialize_Extended(
+    uint8_t busIndex,
+    const SPI_DEVICE_CONFIGURATION &busConfiguration,
+    bool reconfigure);
 
 typedef Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus Devices_Spi_SpiBus;
 typedef Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBaseConfiguration
@@ -21,6 +25,9 @@ static HRESULT SPI_nWrite_nRead(
 
 // Saved config for each available SPI bus
 SPI_DEVICE_CONFIGURATION SpiConfigs[NUM_SPI_BUSES];
+
+// flags for bus config changes pending
+bool BusConfigChangesPending[NUM_SPI_BUSES];
 
 void Com_Sky_Spi_Callback(int busIndex)
 {
@@ -113,8 +120,10 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         // check if this SPI has been initialized
         palSpi = GetNfPalfromBusIndex(busIndex);
 
-        if (palSpi->Handle == NULL)
+        if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex - 1])
         {
+            // SPI bus not initialized or config changes pending
+
             // compose SPI_DEVICE_CONFIGURATION
             // get ref to SpiBaseConfiguration from static _busConnectionSettings array...
             // need to access it through the assembly
@@ -147,7 +156,10 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
             // store this here too
             palSpi->BufferIs16bits = spiDeviceConfig->MD16bits;
 
-            CPU_SPI_Initialize(busIndex, *spiDeviceConfig);
+            CPU_SPI_Initialize_Extended(busIndex, *spiDeviceConfig, true);
+
+            // lower changes pending flag
+            BusConfigChangesPending[busIndex - 1] = false;
         }
 
         // Buffers used either for the SpanBye either for the Byte array
@@ -534,6 +546,26 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     NANOCLR_HEADER();
 
     NANOCLR_CHECK_HRESULT(ExecuteTransfer(stack, false));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::
+    NativeReportBusSettingsChanged___VOID__I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    int8_t busIndex;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get bus index
+    busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
+
+    // SPI bus index is 1 based, but the array is 0 based
+    BusConfigChangesPending[busIndex - 1] = true;
 
     NANOCLR_NOCLEANUP();
 }
