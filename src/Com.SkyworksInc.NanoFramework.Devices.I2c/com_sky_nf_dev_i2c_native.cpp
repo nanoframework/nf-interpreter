@@ -20,15 +20,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_I2c =
 {
     "Com.SkyworksInc.NanoFramework.Devices.I2c",
-    0xF6A356D7,
+    0x913E3D1E,
     method_lookup,
-    { 1, 0, 0, 0 }
+    { 100, 0, 0, 1 }
 };
 
 // clang-format on

@@ -57,13 +57,6 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     //--//
 };
 
-struct Library_com_sky_nf_dev_spi_native_ThisAssembly
-{
-    static const int FIELD_STATIC__GitCommitDate = 1;
-
-    //--//
-};
-
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_Spi;
 
 #endif //_COM_SKY_NF_DEV_SPI_NATIVE_H_

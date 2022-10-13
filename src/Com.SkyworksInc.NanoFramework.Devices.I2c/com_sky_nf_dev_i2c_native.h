@@ -42,13 +42,6 @@ struct Library_com_sky_nf_dev_i2c_native_Com_SkyworksInc_NanoFramework_Devices_I
     //--//
 };
 
-struct Library_com_sky_nf_dev_i2c_native_ThisAssembly
-{
-    static const int FIELD_STATIC__GitCommitDate = 1;
-
-    //--//
-};
-
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_Com_SkyworksInc_NanoFramework_Devices_I2c;
 
 #endif //_COM_SKY_NF_DEV_I2C_NATIVE_H_
