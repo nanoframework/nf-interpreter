@@ -102,7 +102,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     // get bus index
     busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
 
-    // SPI bux index is 1 based, but the array is 0 based
+    // SPI bus index is 1 based, but the array is 0 based
     spiDeviceConfig = &SpiConfigs[busIndex - 1];
 
     if (stack.m_customState == 0)
@@ -114,12 +114,15 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         {
             // compose SPI_DEVICE_CONFIGURATION
             // get ref to SpiBaseConfiguration from static _busConnectionSettings array, access it by index
+            // which is 0 based
             config = (CLR_RT_HeapBlock *)pThis[Devices_Spi_SpiBus::FIELD_STATIC___busConnectionSettings]
                          .DereferenceArray()
-                         ->GetElement(busIndex);
+                         ->GetElement(busIndex - 1);
 
             // CS is always active low
             spiDeviceConfig->ChipSelectActive = false;
+            // CS is controled by the Gecko SDK driver
+            spiDeviceConfig->DeviceChipSelect = -1;
             // always bus master
             spiDeviceConfig->BusMode = SpiBusMode_master;
 
@@ -145,7 +148,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         if (isSpanByte)
         {
             // dereference the write and read SpanByte from the arguments
-            writeSpanByte = stack.Arg1().Dereference();
+            writeSpanByte = stack.Arg2().Dereference();
 
             if (writeSpanByte != NULL)
             {
@@ -170,7 +173,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
                 writeSize = 0;
             }
 
-            readSpanByte = stack.Arg2().Dereference();
+            readSpanByte = stack.Arg3().Dereference();
 
             if (readSpanByte != NULL)
             {
@@ -196,7 +199,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         }
         else
         {
-            writeBuffer = stack.Arg1().DereferenceArray();
+            writeBuffer = stack.Arg2().DereferenceArray();
 
             if (writeBuffer != NULL)
             {
@@ -207,7 +210,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
                 writeSize = writeBuffer->m_numOfElements;
             }
 
-            readBuffer = stack.Arg2().DereferenceArray();
+            readBuffer = stack.Arg3().DereferenceArray();
 
             if (readBuffer != NULL)
             {
