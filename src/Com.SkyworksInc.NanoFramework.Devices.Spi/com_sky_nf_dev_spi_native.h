@@ -8,7 +8,6 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
-
 // defined src\System.Device.Spi\sys_dev_spi_native.h
 // typedef enum __nfpack DataFlow
 // {
