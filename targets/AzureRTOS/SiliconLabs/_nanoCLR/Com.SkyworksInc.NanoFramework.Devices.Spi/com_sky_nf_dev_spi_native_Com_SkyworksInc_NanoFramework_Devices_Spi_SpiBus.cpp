@@ -72,7 +72,10 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
 {
     NANOCLR_HEADER();
 
+    CLR_IDX assemblyIdx;
+    CLR_RT_Assembly *thisAssembly = NULL;
     CLR_RT_HeapBlock *config = NULL;
+    CLR_RT_HeapBlock_Array *busConnectionSettings;
     CLR_RT_HeapBlock_Array *writeBuffer;
     CLR_RT_HeapBlock_Array *readBuffer;
     CLR_RT_HeapBlock *writeSpanByte;
@@ -93,7 +96,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     int8_t busIndex;
     SPI_WRITE_READ_SETTINGS rws;
     NF_PAL_SPI *palSpi = NULL;
-    SPI_DEVICE_CONFIGURATION* spiDeviceConfig = NULL;
+    SPI_DEVICE_CONFIGURATION *spiDeviceConfig = NULL;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -113,11 +116,15 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         if (palSpi->Handle == NULL)
         {
             // compose SPI_DEVICE_CONFIGURATION
-            // get ref to SpiBaseConfiguration from static _busConnectionSettings array, access it by index
-            // which is 0 based
-            config = (CLR_RT_HeapBlock *)pThis[Devices_Spi_SpiBus::FIELD_STATIC___busConnectionSettings]
-                         .DereferenceArray()
-                         ->GetElement(busIndex - 1);
+            // get ref to SpiBaseConfiguration from static _busConnectionSettings array...
+            // need to access it through the assembly
+            assemblyIdx = pThis->ObjectCls().Assembly();
+            thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIdx - 1];
+            busConnectionSettings =
+                thisAssembly->GetStaticField(Devices_Spi_SpiBus::FIELD_STATIC___busConnectionSettings)
+                    ->DereferenceArray();
+            // ...access it by index, which is 0 based
+            config = ((CLR_RT_HeapBlock *)busConnectionSettings->GetElement(busIndex - 1))->Dereference();
 
             // CS is always active low
             spiDeviceConfig->ChipSelectActive = false;
