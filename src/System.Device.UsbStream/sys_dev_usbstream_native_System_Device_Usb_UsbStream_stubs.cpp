@@ -14,6 +14,16 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VO
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -63,16 +73,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeReceivedBytesThreshold___VOID__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___STATIC__BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
