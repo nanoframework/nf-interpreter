@@ -61,22 +61,43 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VO
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    bool conn;
+
+    if (sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
+    {
+        stack.SetResult_Boolean(conn);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    // get length of Rx ring buffer
+    stack.SetResult_U4(UsbStream_PAL.RxRingBuffer.Length());
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-    // platform_free(UsbStream_PAL.RxBuffer);
-    // UsbStream_PAL.RxBuffer = NULL;
+    (void)stack;
+
+    platform_free(UsbStream_PAL.RxBuffer);
+    UsbStream_PAL.RxBuffer = NULL;
 
     NANOCLR_NOCLEANUP();
 }
@@ -88,6 +109,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
 
     const char *deviceDescription;
     const char *deviceClassGuid;
+    int32_t bufferSize;
 
     // int32_t bufferSize;
 
@@ -118,18 +140,18 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    // // alloc buffer memory
-    // bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
-    // UsbStream_PAL.RxBuffer = (uint8_t *)platform_malloc(bufferSize);
+    // alloc buffer memory
+    bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    UsbStream_PAL.RxBuffer = (uint8_t *)platform_malloc(bufferSize);
 
-    // // sanity check
-    // if (UsbStream_PAL.RxBuffer == NULL)
-    // {
-    //     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
-    // }
+    // sanity check
+    if (UsbStream_PAL.RxBuffer == NULL)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    }
 
-    // // init buffer
-    // UsbStream_PAL.RxRingBuffer.Initialize(UsbStream_PAL.RxBuffer, bufferSize);
+    // init buffer
+    UsbStream_PAL.RxRingBuffer.Initialize(UsbStream_PAL.RxBuffer, bufferSize);
 
     stack.SetResult_I4(sl_usbd_vendor_winusb_number);
 
@@ -378,25 +400,31 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRece
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    int32_t threshold;
 
-    NANOCLR_NOCLEANUP();
-}
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
 
-HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___STATIC__BOOLEAN(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
+    // check if threshold is valid
+    threshold = (int32_t)stack.Arg1().NumericByRef().s4;
 
-    bool conn;
-
-    if (sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
+    if (threshold <= 0)
     {
-        stack.SetResult_Boolean(conn);
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
-    else
+
+    // update field
+    pThis[FIELD___receivedBytesThreshold].NumericByRef().s4 = threshold;
+
+    // update threshold value
+    UsbStream_PAL.ReceivedBytesThreshold = threshold;
+
+    // fake call to event handler in case the new threshold was set
+    // to a value lower than the bytes that are already available
+    if ((uint32_t)threshold <= UsbStream_PAL.RxRingBuffer.Length())
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+        // PostManagedEvent(EVENT_SERIAL, 0, portIndex, SerialData_Chars);
     }
 
     NANOCLR_NOCLEANUP();
