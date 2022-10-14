@@ -13,15 +13,21 @@ typedef Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannelConfig
 void ParseAdcChannelConfig(CLR_RT_HeapBlock *channelConfiguration, void *adcInit)
 {
     ADC_InitSingle_TypeDef channelInitSingle = ADC_INITSINGLE_DEFAULT;
-    //ADC_InitScan_TypeDef channelInitScan = ADC_INITSCAN_DEFAULT;
+    // ADC_InitScan_TypeDef channelInitScan = ADC_INITSCAN_DEFAULT;
 
     // now map the AdcChannelConfiguration object to the native structure
-    channelInitSingle.prsSel =
-        (ADC_PRSSEL_TypeDef)channelConfiguration[AdcChannelConfiguration::FIELD___prsSampleTrigger].NumericByRef().s4;
+
+    // handle PRS differently because it's a C# enum and -1 is the disabled value
+    // if PRS is disabled, use the default value
+    int32_t prsSel = channelConfiguration[AdcChannelConfiguration::FIELD___prsSampleTrigger].NumericByRef().s4;
+    channelInitSingle.prsSel = prsSel == -1 ? adcPRSSELCh0 : (ADC_PRSSEL_TypeDef)prsSel;
+
     channelInitSingle.acqTime =
         (ADC_AcqTime_TypeDef)channelConfiguration[AdcChannelConfiguration::FIELD___aquisitionTime].NumericByRef().s4;
     channelInitSingle.reference =
         (ADC_Ref_TypeDef)channelConfiguration[AdcChannelConfiguration::FIELD___referenceVoltage].NumericByRef().s4;
+    channelInitSingle.resolution =
+        (ADC_Res_TypeDef)channelConfiguration[AdcChannelConfiguration::FIELD___sampleResolution].NumericByRef().s4;
     channelInitSingle.diff =
         (AdcChannelMode)channelConfiguration[AdcChannelConfiguration::FIELD___channelMode].NumericByRef().s4 ==
                 AdcChannelMode_Differential
