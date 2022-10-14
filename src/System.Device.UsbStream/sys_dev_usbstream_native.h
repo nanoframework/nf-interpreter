@@ -28,15 +28,6 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_DeviceConnectionEventA
     //--//
 };
 
-struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbClient
-{
-    static const int FIELD_STATIC__UsbDeviceConnectionChanged = 0;
-
-    NANOCLR_NATIVE_DECLARE(get_IsConnected___STATIC__BOOLEAN);
-
-    //--//
-};
-
 struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbDeviceEvent
 {
     static const int FIELD___eventType = 3;
@@ -46,18 +37,35 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbDeviceEvent
     //--//
 };
 
+struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbDeviceEventListener
+{
+    static const int FIELD___usbStream = 1;
+
+    //--//
+};
+
 struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
 {
+    static const int FIELD_STATIC___streamCreated = 0;
+
     static const int FIELD___streamIndex = 1;
-    static const int FIELD___disposed = 2;
-    static const int FIELD___writeTimeout = 3;
-    static const int FIELD___readTimeout = 4;
+    static const int FIELD___useDeviceEventListener = 2;
+    static const int FIELD___disposed = 3;
+    static const int FIELD___writeTimeout = 4;
+    static const int FIELD___readTimeout = 5;
+    static const int FIELD___receivedBytesThreshold = 6;
+    static const int FIELD___bufferSize = 7;
+    static const int FIELD__UsbDeviceConnectionChanged = 8;
+    static const int FIELD__DataReceived = 9;
 
     NANOCLR_NATIVE_DECLARE(Flush___VOID);
+    NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
     NANOCLR_NATIVE_DECLARE(NativeClose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpen___I4__STRING__STRING);
     NANOCLR_NATIVE_DECLARE(NativeWrite___VOID__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeRead___I4__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeReceivedBytesThreshold___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(get_IsConnected___STATIC__BOOLEAN);
 
     //--//
 };

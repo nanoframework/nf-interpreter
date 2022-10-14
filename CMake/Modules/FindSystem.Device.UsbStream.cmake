@@ -20,8 +20,6 @@ set(System.Device.UsbStream_SRCS
 
     sys_dev_usbstream_native.cpp
 
-
-    sys_dev_usbstream_native_System_Device_Usb_UsbClient.cpp
     sys_dev_usbstream_native_System_Device_Usb_UsbStream.cpp
 
 )
