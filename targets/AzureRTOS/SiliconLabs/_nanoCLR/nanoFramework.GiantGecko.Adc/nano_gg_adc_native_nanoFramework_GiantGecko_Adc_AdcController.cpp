@@ -101,7 +101,6 @@ HRESULT OpenAdcChannel(int32_t channelNumber, CLR_RT_HeapBlock *adcConfiguration
         adcInit->tailgate = (bool)adcConfiguration[AdcConfiguration::FIELD___tailgating].NumericByRef().u1;
 
         // Enable ADC clock
-        CMU_ClockEnable(cmuClock_HFPER, true);
         CMU_ClockEnable(adcClock, true);
 
         // init to max possible ADC clock
