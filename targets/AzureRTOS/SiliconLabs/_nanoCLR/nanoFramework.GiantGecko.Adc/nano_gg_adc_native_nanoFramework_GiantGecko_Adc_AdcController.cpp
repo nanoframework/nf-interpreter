@@ -73,14 +73,14 @@ HRESULT OpenAdcChannel(int32_t channelNumber, CLR_RT_HeapBlock *adcConfiguration
 
     // is this ADC already initialized?
     if (
-#if GECKO_USE_ADC0
-        (adcDriver == ADC0 && !adcInitialized)
+#if GECKO_USE_ADC0 && !GECKO_USE_ADC1
+        (adcDriver == ADC0 && !*adcInitialized)
 #endif
 #if GECKO_USE_ADC0 && GECKO_USE_ADC1
         ||
 #endif
-#if GECKO_USE_ADC1
-        (adcDriver == ADC1 && !adcInitialized)
+#if !GECKO_USE_ADC0 && GECKO_USE_ADC1
+        (adcDriver == ADC1 && !*adcInitialized)
 #endif
     )
     {
