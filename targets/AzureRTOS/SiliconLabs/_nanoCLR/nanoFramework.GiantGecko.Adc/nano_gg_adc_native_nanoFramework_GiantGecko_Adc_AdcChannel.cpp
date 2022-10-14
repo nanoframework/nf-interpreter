@@ -97,6 +97,11 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::Nati
     // get a pointer to the channel AdcChannelConfiguration object instance
     ParseAdcChannelConfig(pThis[FIELD___adcChannelConfiguration].Dereference(), &channelInitSingle);
 
+    // sanity check (only support single ended mode at this time)
+    if (channelInitSingle.diff)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_NOTIMPL);
+    }
 
     // select positive input
     channelInitSingle.posSel = (ADC_PosSel_TypeDef)adcDefinition.posSel;
