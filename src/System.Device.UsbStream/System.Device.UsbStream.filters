@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sys_dev_usbstream_native_System_Device_UsbClient_UsbClient_stubs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sys_dev_usbstream_native_System_Device_UsbClient_UsbStream_stubs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

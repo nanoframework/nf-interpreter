@@ -61,11 +61,22 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VO
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_BytesToRead___I4(CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    // platform_free(UsbStream_PAL.RxBuffer);
+    // UsbStream_PAL.RxBuffer = NULL;
 
     NANOCLR_NOCLEANUP();
 }
@@ -106,6 +117,19 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
+
+    // // alloc buffer memory
+    // bufferSize = pThis[FIELD___bufferSize].NumericByRef().s4;
+    // UsbStream_PAL.RxBuffer = (uint8_t *)platform_malloc(bufferSize);
+
+    // // sanity check
+    // if (UsbStream_PAL.RxBuffer == NULL)
+    // {
+    //     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+    // }
+
+    // // init buffer
+    // UsbStream_PAL.RxRingBuffer.Initialize(UsbStream_PAL.RxBuffer, bufferSize);
 
     stack.SetResult_I4(sl_usbd_vendor_winusb_number);
 
@@ -347,4 +371,33 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     }
 
     NANOCLR_CLEANUP_END();
+}
+
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeReceivedBytesThreshold___VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___STATIC__BOOLEAN(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    bool conn;
+
+    if (sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
+    {
+        stack.SetResult_Boolean(conn);
+    }
+    else
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    NANOCLR_NOCLEANUP();
 }

@@ -33,6 +33,11 @@ extern void DeInitPwm();
 #include <sys_dev_adc_native_target.h>
 #endif
 
+#if GECKO_FEATURE_USBD_WINUSB == TRUE
+#include <sys_dev_usbstream_native_target.h>
+#endif
+
+
 // global mutex protecting the internal state of the interpreter, including event flags
 // mutex_t interpreterGlobalMutex;
 
@@ -137,6 +142,10 @@ adc0Initialized = false;
 #endif
 #if (GECKO_USE_ADC1 == TRUE) && defined(NANO_GG_ADC_NATIVE_TARGET_H)
 adc1Initialized = false;
+#endif
+
+#if GECKO_FEATURE_USBD_WINUSB == TRUE
+    memset(&UsbStream_PAL, 0, sizeof(UsbStream_PAL));
 #endif
 
     // #if (HAL_USE_UART == TRUE)
