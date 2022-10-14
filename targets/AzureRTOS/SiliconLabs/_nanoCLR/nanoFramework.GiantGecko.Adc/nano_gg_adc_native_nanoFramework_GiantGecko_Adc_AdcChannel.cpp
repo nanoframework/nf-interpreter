@@ -49,8 +49,8 @@ HRESULT Library_nano_gg_adc_native_nanoFramework_GiantGecko_Adc_AdcChannel::Nati
     ADC_TypeDef *adcDriver = NULL;
     ADC_InitSingle_TypeDef channelInitSingle;
     uint64_t samplesAccumulator = 0;
-    uint32_t averageCount;
-    uint32_t samplesCount;
+    int32_t averageCount;
+    int32_t samplesCount;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
