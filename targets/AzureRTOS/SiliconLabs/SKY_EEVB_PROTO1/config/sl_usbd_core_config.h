@@ -181,12 +181,10 @@ extern char UsbClassVendorDescription[32 + 1];
 // <h> Vendor Pools
 
 // <o SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY> Number of class instances <1-255>
-// <i> Default: 2
 // <i> Number of class instances.
-#define SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY          2
+#define SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY          1
 
 // <o SL_USBD_VENDOR_CONFIGURATION_QUANTITY> Number of configurations <1-255>
-// <i> Default: 1
 // <i> Number of configurations.
 #define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           1
 
