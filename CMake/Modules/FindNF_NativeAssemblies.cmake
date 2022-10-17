@@ -45,6 +45,7 @@ option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardwa
 
 # Silabs Giant Gecko only
 option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
+option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko")
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -245,6 +246,12 @@ endif()
 if(API_nanoFramework.GiantGecko.Adc)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
+endif()
+
+# nanoFramework.Hardware.GiantGecko
+if(API_Hardware.GiantGecko)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
 endif()
 
 # nanoFramework.Runtime.Events

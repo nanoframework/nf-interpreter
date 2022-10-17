@@ -292,7 +292,7 @@
                 "SWO_OUTPUT": "OFF",
                 "NF_BUILD_RTM": "OFF",
                 "API_System.Math": "ON",
-                "API_Hardware.Stm32": "OFF",
+                "API_Hardware.GiantGecko": "ON",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.Spi": "ON",
                 "API_System.Device.I2c": "ON",
