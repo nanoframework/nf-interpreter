@@ -99,7 +99,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClos
     platform_free(UsbStream_PAL.RxBuffer);
     UsbStream_PAL.RxBuffer = NULL;
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen___I4__STRING__STRING(
