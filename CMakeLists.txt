@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -84,7 +84,9 @@ endif()
 if(NOT BUILD_VERSION)
     set(BUILD_VERSION 0.0.0.0)
 endif()
+if(NOT RTOS_NORDIC_CHECK)
 project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
+endif()
 
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
 set(NANOCLR_PROJECT_NAME "nanoCLR")
