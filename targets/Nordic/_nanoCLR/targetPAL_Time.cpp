@@ -5,7 +5,7 @@
 
 #include <nanoPAL.h>
 
-#include <Zephyr.h>
+#include <zephyr.h>
 
 static struct k_timer nextEventTimer;
 

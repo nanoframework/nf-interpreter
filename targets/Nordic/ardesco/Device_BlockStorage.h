@@ -32,7 +32,7 @@
 #define FLASH_DRIVER_NAME DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL
 #else
 //#define FLASH_DRIVER DT_NODELABEL(flash0)
-#define FLASH_DRIVER_NAME         DT_LABEL(DT_CHOSEN(zephyr_flash_controller))
+#define FLASH_DRIVER_NAME DT_LABEL(DT_CHOSEN(zephyr_flash_controller))
 #endif
 
 #endif

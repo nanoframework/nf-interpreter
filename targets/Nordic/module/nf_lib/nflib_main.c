@@ -57,8 +57,9 @@ int start_nf(const char *wire_uart_name)
         BlockStorage_AddDevices();
 
         // Open the wire protocol UART device
-//        g_wire_uart = device_get_binding(CONFIG_DBG_PORT_NAME);
+        //        g_wire_uart = device_get_binding(CONFIG_DBG_PORT_NAME);
         g_wire_uart = device_get_binding(wire_uart_name);
+
         if (g_wire_uart)
         {
             // Create thread for wire protocol debugger
@@ -94,6 +95,7 @@ int start_nf(const char *wire_uart_name)
         printk("ClrStartup returned.\n");
 
         printk("Clr returned. HALT!!!");
+
         while (1)
         {
             k_sleep(K_MSEC(1000));
@@ -104,5 +106,6 @@ int start_nf(const char *wire_uart_name)
         printk("**** Error failed to allocate managed heap of %d bytes.\n", g_heapsize);
         rc = -1;
     }
+
     return rc;
 }

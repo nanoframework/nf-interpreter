@@ -1,9 +1,9 @@
+# Copyright (c) .NET Foundation and Contributors
+# Portions Copyright (c) 2018 Nordic Semiconductor ASA
+# Portions Copyright (c) Ericsson AB 2020, all rights reserved
+# See LICENSE file in the project root for full license information.
+
 # Kconfig - nRF91 PCA20035 board configuration
-#
-# Copyright (c) 2019 Nordic Semiconductor ASA
-# Copyright (c) Ericsson AB 2020, all rights reserved
-#
-# SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
 
 if(CONFIG_BOARD_NRF9160_ARD0022B AND NOT DEFINED CONFIG_MCUBOOT)
 	zephyr_library()

@@ -1,9 +1,13 @@
-/* SPDX-License-Identifier: Apache-2.0 */
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) 2021 Nordic Semiconductor ASA
+// See LICENSE file in the project root for full license information.
+//
 
-/* 	current-speed = <115200>; 
-	current-speed = <921600>; */
+// 	current-speed = <115200>; 
+//	current-speed = <921600>; 
 
-/* set UART1 out the Grove Connector */
+// set UART1 out the Grove Connector
 &uart1 {
 	compatible = "nordic,nrf-uarte";
 	current-speed = <921600>;

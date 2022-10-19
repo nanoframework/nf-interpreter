@@ -1,18 +1,17 @@
-/*
- * Copyright (c) Ericsson AB 2020, all rights reserved
- */
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) Ericsson AB 2020, all rights reserved
+// See LICENSE file in the project root for full license information.
+//
 
 #include <zephyr.h>
-#include "nf_lib.h"
+#include <nf_lib.h>
 
 // fallback define for non-kconfig builds.
 #ifndef CONFIG_DBG_PORT_NAME
 #define CONFIG_DBG_PORT_NAME "UART_1"
 #endif // CONFIG_DBG_PORT_NAME
 
-//========================================================
-// Program Entry Point
-//========================================================
 void main(void)
 {
     printk("\nnrf52840DK greets\n");

@@ -5,5 +5,7 @@
 
 #ifndef TARGET_BOARD_H
 #define TARGET_BOARD_H
+
 #include <targethal.h>
+
 #endif // TARGET_BOARD_H

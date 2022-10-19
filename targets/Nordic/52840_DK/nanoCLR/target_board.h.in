@@ -13,6 +13,8 @@
 
 #include <target_common.h>
 
-#define OEMSYSTEMINFOSTRING "nanoCLR running @ @TARGET_BOARD@ built with Nordic Connect SDK v@NCS_VERSION_MAJOR@.@NCS_VERSION_MINOR@.@NCS_VERSION_PATCH@"
+#define OEMSYSTEMINFOSTRING                                                                                            \
+    "nanoCLR running @ @TARGET_BOARD@ built with Nordic Connect SDK "                                                  \
+    "v@NCS_VERSION_MAJOR@.@NCS_VERSION_MINOR@.@NCS_VERSION_PATCH@"
 
 #endif // TARGET_BOARD_NANOCLR_H

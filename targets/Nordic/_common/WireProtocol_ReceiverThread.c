@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <Zephyr.h>
+#include <zephyr.h>
 
 #include "WireProtocol_HAL_Interface.h"
 

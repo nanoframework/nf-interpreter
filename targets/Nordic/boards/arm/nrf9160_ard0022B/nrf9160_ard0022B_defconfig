@@ -1,6 +1,7 @@
-#
-# Copyright (c) Ericsson AB 2020, all rights reserved
-#
+# Copyright (c) .NET Foundation and Contributors
+# Portions Copyright (c) Ericsson AB 2020, all rights reserved
+# See LICENSE file in the project root for full license information.
+
 CONFIG_SOC_SERIES_NRF91X=y
 CONFIG_SOC_NRF9160_SICA=y
 CONFIG_BOARD_NRF9160_ARD0022B=y

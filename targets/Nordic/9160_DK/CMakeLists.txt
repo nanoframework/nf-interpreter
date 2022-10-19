@@ -5,7 +5,7 @@
 
 # If board not specified set it now...
 if(NOT BOARD)
-set(BOARD "nrf9160dk_nrf9160_ns" CACHE INTERNAL "make global")
+    set(BOARD "nrf9160dk_nrf9160_ns" CACHE INTERNAL "make global")
 endif()
 
 # invoke the zephyr build.
@@ -14,4 +14,3 @@ nf_setup_target_build()
 # NORDIC SDK APP START
 target_sources(app PRIVATE main.c )
 # NORDIC SDK APP END
-
