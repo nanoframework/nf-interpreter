@@ -6,44 +6,41 @@ The development kit board for the Nordic Semiconductor nrf52840.
 
 - Detailed documentation for this target reference can be found [here](https://www.nordicsemi.com/Products/Development-hardware/nRF52840-DK).
 
-- More detailed information on building and flashing the .NET NF on Nordic devices, see the
-readme.md file in the Nordic directory immediately above this one.
+- More detailed information on building and flashing the .NET NF on Nordic devices, see the [readme](../README.md)..
 
-- This build expects the 52840DK to be set in its configuration as described in the 
-User Guide.
+- This build expects the 52840DK to be set in its configuration as described in the User Guide.
 
-- This build has been tested using the Nordic Connect SDK v2.0.0. 
+- This build has been tested using the Nordic Connect SDK v2.0.0.
 
-- This build has been tested on 52840DK version 1.1.0. 
+- This build has been tested on 52840DK version 1.1.0.
 
 ## Board resources used in this build:
 
 The current build uses UART1 to communicate with the Visual Studio debugger. The pins for UART1
 are exposed as follows:
     Function   Label   Connector  
-       GND      GND       P4      
-       RX       P1.01     P3      
-       TX       P1.02     P3      
+       GND      GND       P4
+       RX       P1.01     P3
+       TX       P1.02     P3
 
 The logging output is directed out UART0 which by default is directed out
 one of the USB virtual COM ports.
 
 The LEDs are available via GPIO:
-    LED      GPIO Pin   
+    LED      GPIO Pin
      1          13
      2          14
      3          15
      4          16
 
-The buttons are available via GPIO 
+The buttons are available via GPIO
    Button    GPIO pin (default)
      1          11
      2          12
      3          24
      4          25
 
-Other GPIOs are exposed on the board in Arduino-style connectors and are 
-clearly labled on the board.
+Other GPIOs are exposed on the board in Arduino-style connectors and are clearly labelled on the board.
 
 ## I2C
 
@@ -57,20 +54,6 @@ Meaning that `System.Math` API supports only the `float` overloads. The `double`
 ## nanoBooter
 
 This hardware uses a proprietary bootloader.
-
-## Building nanoCLR for the 52840DK
-
-Follow the instructions in the Nordic directory for installing the Nordic Connect SDK. This must 
-be done manually before building.
-
-The instructions in the Nordic directory provide the generic instructions for building. Specifically for this target, type:
-    cmake --preset Nordic_52840DK
-    cmake –build --preset Nordic_52840DK
-
-The resulting binary named zephyr.hex will be located in the build directory under 
-    .\build\targets\Nordic\52840DK\zephyr
-as in
-    .\build\targets\Nordic\52840DK\zephyr\zephyr.hex
 
 ## Flashing nanoCLR
 
