@@ -20,7 +20,8 @@
                 "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
                 "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
-                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>"
+                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
+                "NRF_CONNECT_SDK_SOURCE_FOLDER": "<path-to-local-NORDIC-NRF-Connect-SDK-mind-the-forward-slash>"
             }
         },
         {
@@ -44,7 +45,8 @@
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
                 "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
                 "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
-                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo"
+                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo",
+                "NRF_CONNECT_SDK_SOURCE_FOLDER": "/sources/ncs"
             }
         },
         {
