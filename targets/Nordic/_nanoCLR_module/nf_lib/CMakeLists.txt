@@ -185,10 +185,10 @@ endmacro()
 #
 
 # add platform dirs
-add_subdirectory(${TARGET_RTOS_ROOT}/_include ${TARGET_RTOS_BINDIR}/_include)
-add_subdirectory(${TARGET_RTOS_ROOT}/_common ${TARGET_RTOS_BINDIR}/_common)
+add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_include nordic__include)
+add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_common nordic__common)
 #add_subdirectory(${TARGET_RTOS_ROOT}/_nanoBooter ${TARGET_RTOS_BINDIR}/_nanoBooter)
-add_subdirectory(${TARGET_RTOS_ROOT}/_nanoCLR ${TARGET_RTOS_BINDIR}/_nanoCLR)
+add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_nanoCLR nordic__nanoCLR)
 
 
 # (binutils.zephyr.cmake) Calls FindPackage for platform specific needs. Nop right now.
