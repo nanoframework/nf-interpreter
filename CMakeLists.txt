@@ -84,8 +84,10 @@ endif()
 if(NOT BUILD_VERSION)
     set(BUILD_VERSION 0.0.0.0)
 endif()
+
+# can only add project here if this is not a build with Nordic SDK
 if(NOT RTOS_NORDIC_CHECK)
-project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
+    project(nanoFramework VERSION ${BUILD_VERSION} LANGUAGES C CXX ASM)
 endif()
 
 set(NANOBOOTER_PROJECT_NAME "nanoBooter")
