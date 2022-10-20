@@ -701,24 +701,24 @@
             }
         },
         {
-            "name": "Nordic_9160DK",
+            "name": "NRF9160_DK",
             "inherits": [
                 "user-prefs",
-                "Nordic_9160DK_preset"
+                "NRF9160_DK_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "9160_DK",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
         {
-            "name": "Nordic_52840DK",
+            "name": "NRF52840_DK",
             "inherits": [
                 "user-prefs",
-                "Nordic_52840DK_preset"
+                "NRF52840_DK_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "52840_DK",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -993,14 +993,14 @@
             "configurePreset": "Nordic_Ardesco"
         },
         {
-            "name": "Nordic_9160DK",
-            "displayName": "Nordic_9160DK",
-            "configurePreset": "Nordic_9160DK"
+            "name": "NRF9160_DK",
+            "displayName": "NRF9160_DK",
+            "configurePreset": "NRF9160_DK"
         },
         {
-            "name": "Nordic_52840DK",
-            "displayName": "Nordic_52840DK",
-            "configurePreset": "Nordic_52840DK"
+            "name": "NRF52840_DK",
+            "displayName": "NRF52840_DK",
+            "configurePreset": "NRF52840_DK"
         },
         {
             "name": "TI_CC1352P1_LAUNCHXL",

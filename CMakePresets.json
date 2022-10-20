@@ -1440,7 +1440,7 @@
             }
         },
         {
-            "name": "Nordic_9160DK_preset",
+            "name": "NRF9160_DK_preset",
             "inherits": [
                 "general-preset",
                 "nordic-zephyr-preset"
@@ -1448,7 +1448,7 @@
             "hidden": true,
             "cacheVariables": {
                 "TARGET_SERIES": "nrf9160",
-                "TARGET_BOARD": "9160_DK",
+                "TARGET_BOARD": "NRF9160_DK",
                 "USE_RNG": "OFF",
                 "DP_FLOATINGPOINT": "OFF",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -1475,7 +1475,7 @@
             }
         },
         {
-            "name": "Nordic_52840DK_preset",
+            "name": "NRF52840_DK_preset",
             "inherits": [
                 "general-preset",
                 "nordic-zephyr-preset"
@@ -1483,7 +1483,7 @@
             "hidden": true,
             "cacheVariables": {
                 "TARGET_SERIES": "nrf52840",
-                "TARGET_BOARD": "52840_DK",
+                "TARGET_BOARD": "NRF52840_DK",
                 "USE_RNG": "OFF",
                 "DP_FLOATINGPOINT": "OFF",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
