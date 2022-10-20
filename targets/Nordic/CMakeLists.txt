@@ -31,8 +31,13 @@ endif()
 # check if build was requested with a specifc nRF Connect SDK version
 if(NRF_CONNECT_SDK_VERSION_EMPTY)
     # no nRF Connect SDK version actualy specified, must be empty which is fine, we'll default to a known good version
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+
+    ##########################################
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE:
+    # - THE DEV CONTAINERS
+    # - azure-pipelines-templates\download-install-ncs-zephyr-toolchain.yml
     set(NRF_CONNECT_SDK_VERSION "v2.0.0")
+
 endif()
 
 if(NO_NRF_CONNECT_SDK_SOURCE_FOLDER)
@@ -108,7 +113,10 @@ set(ZEPHYR_TOOLCHAIN_VARIANT "zephyr" CACHE STRING "Zephyr toolchain variant")
 # need to set this to let Zephyr build system know the location we're using
 set(ENV{ZEPHYR_BASE} ${NCS_BASE_LOCATION}/zephyr)
 
-# WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+##########################################
+# WHEN CHANGING THIS MAKE SURE TO UPDATE:
+# - THE DEV CONTAINERS
+# - azure-pipelines-templates\download-install-ncs-zephyr-toolchain.yml
 set(ZEPHYR_SDK_VERSION 0.13.1 CACHE STRING "Zephyr SDK version")
 
 # need to set this as environment variable to be available for Zephyr modules
