@@ -207,3 +207,22 @@ macro(nf_setup_target_build)
     #######################################################
 
 endmacro()
+
+macro(nf_copy_build_artifacts)
+
+    # copy build artifacts to build output folder
+    add_custom_command( 
+        TARGET app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex
+        ${CMAKE_BINARY_DIR}/nanoCLR.hex
+        COMMENT "Copy build artifacts 1" )
+
+    add_custom_command( 
+        TARGET app POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/zephyr.bin
+        ${CMAKE_BINARY_DIR}/nanoCLR.bin
+        COMMENT "Copy build artifacts 1" )
+
+endmacro()
