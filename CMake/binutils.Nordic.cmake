@@ -206,23 +206,61 @@ macro(nf_setup_target_build)
 
     #######################################################
 
+    nf_clear_output_files_nanoclr()
+
+    nf_copy_build_artifacts()
+
 endmacro()
 
 macro(nf_copy_build_artifacts)
 
     # copy build artifacts to build output folder
-    add_custom_command( 
-        TARGET app POST_BUILD
+    add_custom_command(
+        OUTPUT 
+            ${CMAKE_BINARY_DIR}/nanoCLR.hex
+            ${CMAKE_BINARY_DIR}/nanoCLR.bin
+        
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex
         ${CMAKE_BINARY_DIR}/nanoCLR.hex
-        COMMENT "Copy build artifacts 1" )
 
-    add_custom_command( 
-        TARGET app POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/zephyr.bin
         ${CMAKE_BINARY_DIR}/nanoCLR.bin
-        COMMENT "Copy build artifacts 1" )
+
+        DEPENDS
+            ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex
+
+        COMMENT "Copy build artifacts"
+    )
+
+    add_custom_target(
+        copy_build_artifacts ALL
+        
+        DEPENDS
+            ${CMAKE_BINARY_DIR}/nanoCLR.hex
+            ${CMAKE_BINARY_DIR}/nanoCLR.bin
+    )
+
+    add_dependencies(
+        copy_build_artifacts
+        ${logical_target_for_zephyr_elf})
+
+endmacro()
+
+# macro to clear binary files related with nanoCLR from output
+# to make sure that the build file it's up to date
+macro(nf_clear_output_files_nanoclr)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/nanoCLR.bin)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/nanoCLR.hex)
+    list(APPEND CLR_BUILD_FILES_TO_REMOVE ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex)
+
+    add_custom_command(
+        TARGET app PRE_BUILD
+        DEPENDS ${logical_target_for_zephyr_elf}
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${CLR_BUILD_FILES_TO_REMOVE}
+        COMMAND_EXPAND_LISTS
+        COMMENT "Removing nanoCLR artifacts from build folder"
+    )
 
 endmacro()
