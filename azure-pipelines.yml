@@ -667,7 +667,14 @@ jobs:
         TargetBoard: NRF9160_DK
         TargetSeries: 'nrf9160'
         BuildOptions: 
-        GccArm_Version: 
+      NRF52840_DK:
+        TargetBoard: NRF52840_DK
+        TargetSeries: 'nrf52840'
+        BuildOptions: 
+      ARDESCO:
+        TargetBoard: ARDESCO
+        TargetSeries: 'nrf9160'
+        BuildOptions: 
 
   variables:
     # creates a counter and assigns it to the revision variable
