@@ -63,6 +63,7 @@ struct Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings
     static const int FIELD___i2sBitsPerSample = 4;
     static const int FIELD___i2sChannelFormat = 5;
     static const int FIELD___i2sConnectionFormat = 6;
+    static const int FIELD___bufferSize = 7;
 
     //--//
 };
@@ -73,8 +74,6 @@ struct Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice
     static const int FIELD___disposed = 2;
 
     NANOCLR_NATIVE_DECLARE(Read___VOID__SystemSpanByte);
-    NANOCLR_NATIVE_DECLARE(Read___VOID__SZARRAY_U2);
-    NANOCLR_NATIVE_DECLARE(Write___VOID__SZARRAY_U2);
     NANOCLR_NATIVE_DECLARE(Write___VOID__SystemSpanByte);
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
