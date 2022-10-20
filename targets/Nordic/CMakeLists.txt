@@ -42,35 +42,42 @@ endif()
 
 if(NO_NRF_CONNECT_SDK_SOURCE_FOLDER)
     # no nRF Connect SDK source specified, use west to init and download everything
+    # unless this has been done before
 
-    message(STATUS "Downloading Nordic nRF Connect SDK and friends. This can take a while...")
+    if(NOT NCS_SOURCES_DOWNLOADED)
+        message(STATUS "Downloading Nordic nRF Connect SDK and friends. This can take a while...")
 
-    # make NCS folder
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs)
+        # make NCS folder
+        file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs)
 
-    # 1. get nRF Connect SDK code
-    execute_process(
-        COMMAND ${WEST_EXE} init -m https://github.com/nrfconnect/sdk-nrf --mr ${NRF_CONNECT_SDK_VERSION}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
-        COMMAND_ECHO STDOUT
-    )
+        # 1. get nRF Connect SDK code
+        execute_process(
+            COMMAND ${WEST_EXE} init -m https://github.com/nrfconnect/sdk-nrf --mr ${NRF_CONNECT_SDK_VERSION}
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
+            COMMAND_ECHO STDOUT
+        )
 
-    # 2. clone the project repositories
-    execute_process(
-        COMMAND ${WEST_EXE} update
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
-        COMMAND_ECHO STDOUT
-    )
+        # 2. clone the project repositories
+        execute_process(
+            COMMAND ${WEST_EXE} update
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
+            COMMAND_ECHO STDOUT
+        )
 
-    # 3. export Zephyr CMake package
-    execute_process(
-        COMMAND ${WEST_EXE} zephyr-export
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
-        COMMAND_ECHO STDOUT
-    )
+        # 3. export Zephyr CMake package
+        execute_process(
+            COMMAND ${WEST_EXE} zephyr-export
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/ncs
+            COMMAND_ECHO STDOUT
+        )
 
-    # save path for later
-    set(NCS_BASE_LOCATION ${CMAKE_BINARY_DIR}/_deps/ncs CACHE INTERNAL "NCS base location")
+        # save path for later
+        set(NCS_BASE_LOCATION ${CMAKE_BINARY_DIR}/_deps/ncs CACHE INTERNAL "NCS base location")
+
+        # set flag for NCS downloaded
+        set(NCS_SOURCES_DOWNLOADED TRUE CACHE INTERNAL "Flag to indicate that NCS sources have been downloaded" FORCE)
+
+    endif()
 
 else()
     # nRF Connect SDK source was specified
