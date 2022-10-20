@@ -1402,7 +1402,7 @@
             }
         },
         {
-            "name": "Nordic_Ardesco_preset",
+            "name": "ARDESCO_preset",
             "inherits": [
                 "general-preset",
                 "nordic-zephyr-preset"
@@ -1410,7 +1410,6 @@
             "hidden": true,
             "cacheVariables": {
                 "TARGET_SERIES": "nrf9160",
-                "TARGET_BOARD": "Ardesco",
                 "USE_RNG": "OFF",
                 "DP_FLOATINGPOINT": "OFF",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -1448,7 +1447,6 @@
             "hidden": true,
             "cacheVariables": {
                 "TARGET_SERIES": "nrf9160",
-                "TARGET_BOARD": "NRF9160_DK",
                 "USE_RNG": "OFF",
                 "DP_FLOATINGPOINT": "OFF",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -1483,7 +1481,6 @@
             "hidden": true,
             "cacheVariables": {
                 "TARGET_SERIES": "nrf52840",
-                "TARGET_BOARD": "NRF52840_DK",
                 "USE_RNG": "OFF",
                 "DP_FLOATINGPOINT": "OFF",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",

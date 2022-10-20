@@ -690,13 +690,13 @@
             }
         },
         {
-            "name": "Nordic_Ardesco",
+            "name": "ARDESCO",
             "inherits": [
                 "user-prefs",
-                "Nordic_Ardesco_preset"
+                "ARDESCO_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "Ardesco",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -988,9 +988,9 @@
             "configurePreset": "WEACT_F411CE"
         },
         {
-            "name": "Nordic_Ardesco",
-            "displayName": "Nordic_Ardesco",
-            "configurePreset": "Nordic_Ardesco"
+            "name": "ARDESCO",
+            "displayName": "ARDESCO",
+            "configurePreset": "ARDESCO"
         },
         {
             "name": "NRF9160_DK",
