@@ -91,16 +91,16 @@ else()
         
         # Fetch the version from the installed directory.
         if (EXISTS  ${NRF_CONNECT_SDK_SOURCE_FOLDER}/nrf/VERSION)
-            file(READ ${NCS_DIR}/nrf/VERSION NRF_CONNECT_SDK_FOUND_VERSION)
+            file(READ ${NRF_CONNECT_SDK_SOURCE_FOLDER}/nrf/VERSION NRF_CONNECT_SDK_FOUND_VERSION)
             string(STRIP ${NRF_CONNECT_SDK_FOUND_VERSION} NRF_CONNECT_SDK_FOUND_VERSION)
         endif()
 
-        if (NOT ${NRF_CONNECT_SDK_FOUND_VERSION} STREQUAL ${NRF_CONNECT_SDK_VERSION})
-            message(FATAL_ERROR "\n\nFound nRF Connect SDK v${NRF_CONNECT_SDK_FOUND_VERSION}.\nExpecting v${NRF_CONNECT_SDK_VERSION}.\n\n") 
+        if (NOT "v${NRF_CONNECT_SDK_FOUND_VERSION}" STREQUAL ${NRF_CONNECT_SDK_VERSION})
+            message(FATAL_ERROR "\n\nFound nRF Connect SDK ${NRF_CONNECT_SDK_FOUND_VERSION}.\nExpecting ${NRF_CONNECT_SDK_VERSION}.\n\n") 
         endif()
 
         # save path for later
-        set(NCS_BASE_LOCATION ${CMAKE_BINARY_DIR}/_deps/ncs CACHE INTERNAL "NCS base location")
+        set(NCS_BASE_LOCATION ${NRF_CONNECT_SDK_SOURCE_FOLDER} CACHE INTERNAL "NCS base location")
 
     else()
         message(FATAL_ERROR "Couldn't find nRF Connect SDK source at ${NRF_CONNECT_SDK_SOURCE_FOLDER}/")
