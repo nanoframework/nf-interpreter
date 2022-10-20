@@ -10,7 +10,7 @@ The Ardesco supports:
     NFC
     3-color LED
     Button
-    Piezzo buzzer 
+    Piezzo buzzer
     8MB flash
     USB-C
     Debug interface and Grove interface for Ardesco development kit
@@ -24,11 +24,11 @@ Size: 45x80x12.7mm
 
 - More detailed information on building and flashing the .NET NF, see the readme.md file in the Nordic directory immediately above this one.
 
-- This build has been tested using the Ardesco "Combi". 
+- This build has been tested using the Ardesco "Combi".
 
 - This build target only supports the nrf9160 on the Ardesco. Support for building the nanoFramework for the nrf52840 on Ardesco may be supported in the future.
 
-- NOTE: Network support using the cellular connectivity function on the Ardesco is not supported in the inital release. It is targeted for support in the near future.
+- NOTE: Network support using the cellular connectivity function on the Ardesco is not supported in the initial release. It is targeted for support in the near future.
 
 ## Board resources used in this build:
 
@@ -42,12 +42,12 @@ The current build uses UART1 to communicate with the Visual Studio debugger. UAR
 The logging output is directed out UART0 which by default is directed out the USB virtual COM ports.
 
 The 3 color LED is connected via GPIO to the 9160:
-    LED Color     GPIO Pin   
+    LED Color     GPIO Pin
      Red            2
      Green          3
      Blue           4
 
-The user accessable button is available through GPIO 
+The user accessable button is available through GPIO
     Function      GPIO pin
      Button          6
 
@@ -62,20 +62,6 @@ Meaning that `System.Math` API supports only the `float` overloads. The `double`
 
 This hardware uses a proprietary bootloader.
 
-## Building nanoCLR for the Ardesco
-
-Follow the instructions in the Nordic directory for installing the Nordic Connect SDK. This must 
-be done manually before building.
-
-The instructions in the Nordic directory provide the generic instructions for building. Specifically for this target, type:
-    cmake --preset Nordic_Ardesco
-    cmake –build --preset Nordic_Ardesco
-
-The resulting binary named merged.hex will be located in the build directory under 
-    .\build\targets\Nordic\Ardesco\zephyr
-as in
-    .\build\targets\Nordic\Ardesco\zephyr\merged.hex
-
 ## Flashing nanoCLR
 
-The Ardesco requires external JTAG debugging hardware to flash. The Ardesco Combi as a stanard 10 pin debuging connector labeled "CORTEX".
+The Ardesco requires external JTAG debugging hardware to flash. The Ardesco Combi as a standard 10 pin debugging connector labelled "CORTEX".
