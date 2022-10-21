@@ -25,7 +25,7 @@ steps:
       archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: >-
       and(
         succeeded(),
@@ -43,6 +43,7 @@ steps:
         $(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - task: ArchiveFiles@2
     condition: >-
@@ -62,7 +63,7 @@ steps:
       archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: >-
       and(
         succeeded(),
@@ -79,6 +80,7 @@ steps:
         $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - task: PublishBuildArtifacts@1
     condition: succeeded()
