@@ -2,8 +2,12 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  partitionsDirectory: '$(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)'
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)\nf-interpreter
+  - name: partitionsDirectory
+    type: string
+    default: $(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)
 
 steps:
 
