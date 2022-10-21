@@ -55,6 +55,23 @@
         "panel": "dedicated"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Flash Nordic targets",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/flash_NRF9160_DK.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          },
+          "cwd": "${workspaceFolder}/Build"
+        }
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [
