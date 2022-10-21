@@ -22,7 +22,7 @@ steps:
       rootFolderOrFile: $(Build.ArtifactStagingDirectory)\$(TargetPublishName)
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip'
+      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)\$(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
   - task: CopyFiles@2
@@ -38,9 +38,9 @@ steps:
       )
     displayName: Collecting deployable artifacts (release & PR)
     inputs:
-      sourceFolder: $(Agent.TempDirectory)
-      Contents: $(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip
-      TargetFolder: $(Build.ArtifactStagingDirectory)\$(TargetPublishName)
+      sourceFolder: $(Agent.TempDirectory)\$(TargetPublishName)
+      contents: $(TargetPublishName)-$(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER).zip
+      targetFolder: $(Build.ArtifactStagingDirectory)\$(TargetPublishName)
       ignoreMakeDirErrors: true
       retryCount: 10
       delayBetweenRetries: 2000
@@ -60,7 +60,7 @@ steps:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)' 
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip'
+      archiveFile: '$(Agent.TempDirectory)\$(TargetPublishName)\$(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip'
       replaceExistingArchive: true
 
   - task: CopyFiles@2
@@ -75,9 +75,9 @@ steps:
       )
     displayName: Collecting deployable artifacts (preview)
     inputs:
-      sourceFolder: $(Agent.TempDirectory)
-      Contents: $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
-      TargetFolder: $(Build.ArtifactStagingDirectory)\$(TargetPublishName)
+      sourceFolder: $(Agent.TempDirectory)\$(TargetPublishName)
+      contents: $(TargetPublishName)-$(NBGV_SimpleVersion)-preview.$(TARGET_BUILD_COUNTER).zip
+      targetFolder: $(Build.ArtifactStagingDirectory)\$(TargetPublishName)
       ignoreMakeDirErrors: true
       retryCount: 10
       delayBetweenRetries: 2000
