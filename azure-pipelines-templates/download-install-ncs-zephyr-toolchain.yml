@@ -27,7 +27,11 @@ steps:
       cacheHitVar: NCS_CACHE_RESTORED
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.NCS_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.NCS_CACHE_RESTORED, 'true')
+      )
     displayName: Install pre-requisites for NCS
     inputs:
         targetType: 'inline'
@@ -37,7 +41,11 @@ steps:
           pip3 install west
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.NCS_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.NCS_CACHE_RESTORED, 'true')
+      )
     displayName: Downloading NCS
     inputs:
         targetType: 'inline'
@@ -59,7 +67,11 @@ steps:
   #     cacheHitVar: PIP_PACKAGES_RESTORED
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.PIP_PACKAGES_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.PIP_PACKAGES_RESTORED, 'true')
+      )
     displayName: Install more pre-requisites
     inputs:
         targetType: 'inline'
@@ -79,7 +91,11 @@ steps:
       cacheHitVar: ZEPHYR_SDK_CACHE_RESTORED
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
     displayName: Install Zephyr SDK and toolchain
     inputs:
         workingDirectory: $(Agent.TempDirectory)
@@ -90,7 +106,11 @@ steps:
           Invoke-WebRequest -Uri "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ parameters.zephyrSdkVersion }}/$sdkFileName" -OutFile $sdkFileName
 
   - task: ExtractFiles@1
-    condition: and(succeeded(), ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
     displayName: Extract Zephyr SDK
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}_windows-x86_64_minimal.zip' 
@@ -98,7 +118,11 @@ steps:
       cleanDestinationFolder: false 
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
     displayName: Download Zephyr toolchain
     inputs:
         workingDirectory: $(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}
@@ -110,7 +134,11 @@ steps:
           Invoke-WebRequest -Uri "$toolchainUrl/$toolchainFilename" -OutFile $toolchainFilename
 
   - task: ExtractFiles@1
-    condition: and(succeeded(), ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true'))
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
     displayName: Extract Zephyr toolchain
     inputs:
       archiveFilePatterns: '$(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}/toolchain_windows-x86_64_arm-zephyr-eabi.zip' 
