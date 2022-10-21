@@ -430,7 +430,7 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -439,6 +439,7 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml

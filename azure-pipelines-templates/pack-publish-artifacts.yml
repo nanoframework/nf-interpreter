@@ -5,7 +5,7 @@ parameters:
   buildDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     inputs:
       sourceFolder: ${{ parameters.buildDirectory }}
       Contents: |
@@ -17,3 +17,4 @@ steps:
       flattenFolders: true
     condition: succeeded()
     displayName: Collecting deployable artifacts
+    ignoreMakeDirErrors: true

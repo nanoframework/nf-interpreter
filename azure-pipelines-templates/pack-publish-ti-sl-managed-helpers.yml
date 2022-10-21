@@ -41,7 +41,7 @@ steps:
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Pack managed helpers NuGet
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
@@ -50,6 +50,7 @@ steps:
       flattenFolders: true
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Collecting managed helpers deployable artifacts
+    ignoreMakeDirErrors: true
 
   # push NuGet packages to NuGet (happens except on PR builds)
   - task: NuGetCommand@2
