@@ -34,11 +34,11 @@ macro(nf_add_platform_packages)
     #
     # packages common to all targets
     #
-    # (binutils.common.cmake) Calls FindPackage on the 4 main libs: 
-    # NF_HALCore NF_CoreCLR NF_NativeAssemblies WireProtocol 
+    # (binutils.common.cmake) Calls FindPackage on the 4 main libs:
+    # NF_HALCore NF_CoreCLR NF_NativeAssemblies WireProtocol
     # and optionally NF_Diagnostics and NF_Debugger
     nf_add_common_packages()
-    
+
     # packages specific for nanoBooter
     if("${NFAPP_TARGET}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
         # no packages for booter
@@ -53,7 +53,7 @@ macro(nf_add_platform_packages)
         endif()
 
     endif()
- 
+
 endmacro()
 
 # Add Zephyr platform dependencies to a specific CMake target
@@ -72,12 +72,12 @@ macro(nf_add_platform_include_directories target)
 
         ${TARGET_NORDIC_COMMON_INCLUDE_DIRS}
     )
-    
+
     # includes specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
-            
+
             ${TARGET_NORDIC_NANOBOOTER_INCLUDE_DIRS}
         )
 
@@ -102,14 +102,14 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_platform_sources target)
 
-    # add header files with common OS definitions and board definitions 
+    # add header files with common OS definitions and board definitions
     configure_file(${TARGET_BASE_LOCATION}/target_common.h.in
                    ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
 
     # sources specific to nanoCLR
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
-        # add header files with common OS definitions and board definitions 
+        # add header files with common OS definitions and board definitions
         configure_file(${TARGET_BASE_LOCATION}/nanoCLR/target_board.h.in
                        ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
@@ -128,21 +128,18 @@ macro(nf_setup_target_build)
     # add our location for board directories search
     list(APPEND BOARD_ROOT ${CMAKE_SOURCE_DIR}/targets/Nordic/_zephyr_boards)
 
-    # handle merged.hex "thing"
-    nf_check_zephyr_merged_hex()
-
     # take care of composing nanoCLR version
     nf_zephyr_compose_nano_version()
 
     # During this invocation nanoCLR will be built as a Zephyr 'module'.
     find_package(Zephyr REQUIRED QUIET HINTS ${NCS_BASE_LOCATION})
-    
+
     if(NOT Zephyr_FOUND)
         # Zephyr SDK not found report error
         message(FATAL_ERROR "\n\nCouldn't find Zephyr SDK v${ZEPHYR_SDK_VERSION}!\n\nMake sure to install it using Toolchain Manager from Nordic Connect SDK or manually from the Zephyr SDK GitHub repository.\n\n")
     endif()
 
-    # At this point nanoCLR module (library) has been built. 
+    # At this point nanoCLR module (library) has been built.
     # Add a trivial app that invokes nanoCLR.
 
     zephyr_include_directories(${CMAKE_SOURCE_DIR}/targets/Nordic/nf_lib_module/zephyr/include)
@@ -157,7 +154,7 @@ macro(nf_setup_target_build)
     #######################################################
     # the following are nanoCLR common compile definitions
     # for "regular" targets they are set in nf_common_compiler_definitions
-    
+
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
     if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
         zephyr_compile_definitions(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -206,34 +203,38 @@ macro(nf_setup_target_build)
 
 endmacro()
 
+# copy build artifacts to build output folder
 macro(nf_copy_build_artifacts)
 
-    # copy build artifacts to build output folder
+    get_property(HEX_FILES_TO_MERGE GLOBAL PROPERTY HEX_FILES_TO_MERGE)
+
+    if(NOT HEX_FILES_TO_MERGE)
+        # there is no merged.hex being generated, stick with zephyr.hex
+        set(HEX_NAME "zephyr")
+    else()
+        # use merged.hex
+        set(HEX_NAME "merged")
+    endif()
+
     add_custom_command(
-        OUTPUT 
+        OUTPUT
             ${CMAKE_BINARY_DIR}/nanoCLR.hex
-            ${CMAKE_BINARY_DIR}/nanoCLR.bin
-        
+
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex
+        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/${HEX_NAME}.hex
         ${CMAKE_BINARY_DIR}/nanoCLR.hex
 
-        COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/zephyr.bin
-        ${CMAKE_BINARY_DIR}/nanoCLR.bin
-
         DEPENDS
-            ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/merged.hex
+            ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/${HEX_NAME}.hex
 
         COMMENT "Copy build artifacts"
     )
 
     add_custom_target(
         copy_build_artifacts ALL
-        
+
         DEPENDS
             ${CMAKE_BINARY_DIR}/nanoCLR.hex
-            ${CMAKE_BINARY_DIR}/nanoCLR.bin
     )
 
     add_dependencies(
@@ -259,25 +260,11 @@ macro(nf_clear_output_files_nanoclr)
 
 endmacro()
 
-# this macro checks if the hex files to merge list exists and if not it creates a dummy one, otherwise the build will fail
-macro(nf_check_zephyr_merged_hex)
-
-    get_property(HEX_FILES_TO_MERGE GLOBAL PROPERTY HEX_FILES_TO_MERGE)
-
-    if(NOT HEX_FILES_TO_MERGE)
-        set(DUMMY_LIST
-            ${CMAKE_SOURCE_DIR}/targets/Nordic/_common/dummy.hex
-        )
-        set_property(GLOBAL APPEND PROPERTY HEX_FILES_TO_MERGE ${DUMMY_LIST})
-    endif()
-
-endmacro()
-
 # this macro composes the nanoCLR version components
 macro(nf_zephyr_compose_nano_version)
 
     # We need to parse the build version in to seperate elements.
-    # Normally, this is done by CMAKE in the project command which is in the main CMakelist.txt file. 
+    # Normally, this is done by CMAKE in the project command which is in the main CMakelist.txt file.
     # Since we need to set the project here for Zephyr builds, and still need the  parsed values during the Zephyr build, we do it manually.
     string(REPLACE "." ";" BV1 ${BUILD_VERSION})
     set(BVLIST ${BV1})
