@@ -48,9 +48,9 @@ steps:
         **\nanoFramework.Targets*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Collecting managed helpers deployable artifacts
-    ignoreMakeDirErrors: true
 
   # push NuGet packages to NuGet (happens except on PR builds)
   - task: NuGetCommand@2

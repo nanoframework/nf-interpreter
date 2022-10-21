@@ -15,6 +15,6 @@ steps:
         *.dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
     condition: succeeded()
     displayName: Collecting deployable artifacts
-    ignoreMakeDirErrors: true
