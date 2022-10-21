@@ -41,15 +41,16 @@ steps:
     condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
     displayName: Pack managed helpers NuGet
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
+    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
+    displayName: Collecting managed helpers deployable artifacts
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.Targets*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-    condition: and( succeeded(), eq(variables['BUILD_NUGET_PACKAGE'], true) )
-    displayName: Collecting managed helpers deployable artifacts
+      ignoreMakeDirErrors: true
 
   # push NuGet packages to NuGet (happens except on PR builds)
   - task: NuGetCommand@2
