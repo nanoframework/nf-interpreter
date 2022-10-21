@@ -5,7 +5,9 @@ parameters:
   buildDirectory: '$(Build.SourcesDirectory)\build'
 
 steps:
-  - task: CopyFiles@1
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Collecting deployable artifacts
     inputs:
       sourceFolder: ${{ parameters.buildDirectory }}
       Contents: |
@@ -15,5 +17,4 @@ steps:
         *.dfu
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
-    condition: succeeded()
-    displayName: Collecting deployable artifacts
+      ignoreMakeDirErrors: true
