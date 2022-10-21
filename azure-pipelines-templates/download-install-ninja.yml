@@ -2,7 +2,9 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  repoDirectory: '$(Build.SourcesDirectory)'
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
 
 steps:
   - task: Cache@2
