@@ -11,11 +11,11 @@ parameters:
 
 steps:
 
-  # Use Python Version 3.8 and add it to path
+  # Use Python Version 3.10 and add it to path
   - task: UsePythonVersion@0
-    displayName: Set Python to v3.8
+    displayName: Set Python to v3.10
     inputs:
-      versionSpec: '3.8'
+      versionSpec: '3.10'
       addToPath: true
 
   - task: Cache@2
@@ -48,18 +48,18 @@ steps:
           west update
           west zephyr-export
 
-  # cache pip packages
-  - task: Cache@2
-    displayName: Cache pip packages
-    condition: succeeded()
-    inputs:
-      key: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
-      restoreKeys: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
-      path: $(PIP_CACHE_DIR)
-      cacheHitVar: PIP_PACKAGES_RESTORED
+  # # cache pip packages
+  # - task: Cache@2
+  #   displayName: Cache pip packages
+  #   condition: succeeded()
+  #   inputs:
+  #     key: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
+  #     restoreKeys: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
+  #     path: $(PIP_CACHE_DIR)
+  #     cacheHitVar: PIP_PACKAGES_RESTORED
 
   - task: PowerShell@2
-    condition: and(succeeded(), ne(variables.NCS_CACHE_RESTORED, 'true'))
+    condition: and(succeeded(), ne(variables.PIP_PACKAGES_RESTORED, 'true'))
     displayName: Install more pre-requisites
     inputs:
         targetType: 'inline'
