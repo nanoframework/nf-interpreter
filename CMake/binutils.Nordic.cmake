@@ -131,17 +131,8 @@ macro(nf_setup_target_build)
     # handle merged.hex "thing"
     nf_check_zephyr_merged_hex()
 
-    # HACK::
-    # We need to parse the build version in to seperate elements.
-    # Normally, this is done by CMAKE in the project command in the 
-    # main CMakelist.txt file. Since we skip that, but need the 
-    # parsed values during the Zephyr build below, we do it manually.
-    string(REPLACE "." ";" BV1 ${BUILD_VERSION})
-    set(BVLIST ${BV1})
-    list(GET BVLIST 0 nanoFramework_VERSION_MAJOR)
-    list(GET BVLIST 1 nanoFramework_VERSION_MINOR)
-    list(GET BVLIST 2 nanoFramework_VERSION_PATCH)
-    list(GET BVLIST 3 nanoFramework_VERSION_TWEAK)
+    # take care of composing nanoCLR version
+    nf_zephyr_compose_nano_version()
 
     # During this invocation nanoCLR will be built as a Zephyr 'module'.
     find_package(Zephyr REQUIRED QUIET HINTS ${NCS_BASE_LOCATION})
@@ -279,5 +270,20 @@ macro(nf_check_zephyr_merged_hex)
         )
         set_property(GLOBAL APPEND PROPERTY HEX_FILES_TO_MERGE ${DUMMY_LIST})
     endif()
+
+endmacro()
+
+# this macro composes the nanoCLR version components
+macro(nf_zephyr_compose_nano_version)
+
+    # We need to parse the build version in to seperate elements.
+    # Normally, this is done by CMAKE in the project command which is in the main CMakelist.txt file. 
+    # Since we need to set the project here for Zephyr builds, and still need the  parsed values during the Zephyr build, we do it manually.
+    string(REPLACE "." ";" BV1 ${BUILD_VERSION})
+    set(BVLIST ${BV1})
+    list(GET BVLIST 0 nanoFramework_VERSION_MAJOR)
+    list(GET BVLIST 1 nanoFramework_VERSION_MINOR)
+    list(GET BVLIST 2 nanoFramework_VERSION_PATCH)
+    list(GET BVLIST 3 nanoFramework_VERSION_TWEAK)
 
 endmacro()
