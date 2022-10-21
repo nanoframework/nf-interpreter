@@ -3,7 +3,7 @@
 # Portions Copyright (c) Ericsson AB 2020, all rights reserved
 # See LICENSE file in the project root for full license information.
 
-if BOARD_NRF9160_ARD0022B || BOARD_NRF9160_ARD0022BNS
+if BOARD_NRF9160_ARD0022B || BOARD_NRF9160_ARD0022B_NS
 
 config BOARD
 	default "nrf9160_ard0022B"
@@ -61,7 +61,7 @@ config FLASH_LOAD_SIZE
 
 endif # BOARD_NRF9160_ARD0022B && TRUSTED_EXECUTION_SECURE
 
-if BOARD_NRF9160_ARD0022BNS
+if BOARD_NRF9160_ARD0022B_NS
 
 config FLASH_LOAD_OFFSET
 	default $(dt_chosen_reg_addr_hex,$(DT_CHOSEN_Z_CODE_PARTITION))
@@ -69,6 +69,6 @@ config FLASH_LOAD_OFFSET
 config FLASH_LOAD_SIZE
 	default $(dt_chosen_reg_size_hex,$(DT_CHOSEN_Z_CODE_PARTITION))
 
-endif # BOARD_NRF9160_ARD0022BNS
+endif # BOARD_NRF9160_ARD0022B_NS
 
-endif # BOARD_NRF9160_ARD0022B || BOARD_NRF9160_ARD0022BNS
+endif # BOARD_NRF9160_ARD0022B || BOARD_NRF9160_ARD0022B_NS

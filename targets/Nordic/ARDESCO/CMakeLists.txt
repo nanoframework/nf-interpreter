@@ -7,7 +7,7 @@ include(binutils.Nordic)
 
 if(NOT BOARD)
     # If board not specified set it now...
-    set(BOARD "nrf9160_ard0022Bns" CACHE INTERNAL "make global")
+    set(BOARD "nrf9160_ard0022B_ns" CACHE INTERNAL "make global")
 endif()
 
 # invoke the zephyr build.
