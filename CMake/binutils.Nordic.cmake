@@ -128,6 +128,9 @@ macro(nf_setup_target_build)
     # add our location for board directories search
     list(APPEND BOARD_ROOT ${CMAKE_SOURCE_DIR}/targets/Nordic/_zephyr_boards)
 
+    # handle merged.hex "thing"
+    nf_check_zephyr_merged_hex()
+
     # HACK::
     # We need to parse the build version in to seperate elements.
     # Normally, this is done by CMAKE in the project command in the 
@@ -262,5 +265,19 @@ macro(nf_clear_output_files_nanoclr)
         COMMAND_EXPAND_LISTS
         COMMENT "Removing nanoCLR artifacts from build folder"
     )
+
+endmacro()
+
+# this macro checks if the hex files to merge list exists and if not it creates a dummy one, otherwise the build will fail
+macro(nf_check_zephyr_merged_hex)
+
+    get_property(HEX_FILES_TO_MERGE GLOBAL PROPERTY HEX_FILES_TO_MERGE)
+
+    if(NOT HEX_FILES_TO_MERGE)
+        set(DUMMY_LIST
+            ${CMAKE_SOURCE_DIR}/targets/Nordic/_common/dummy.hex
+        )
+        set_property(GLOBAL APPEND PROPERTY HEX_FILES_TO_MERGE ${DUMMY_LIST})
+    endif()
 
 endmacro()
