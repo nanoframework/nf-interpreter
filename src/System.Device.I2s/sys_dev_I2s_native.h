@@ -36,12 +36,11 @@ typedef enum __nfpack I2sChannelFormat
 
 typedef enum __nfpack I2sCommunicationFormat
 {
-    I2sCommunicationFormat_StandardI2s = 0,
-    I2sCommunicationFormat_StandardI2sLsb = 1,
-    I2sCommunicationFormat_StandardI2sMsb = 2,
-    I2sCommunicationFormat_StandardI2sPcm = 3,
-    I2sCommunicationFormat_PcmShort = 4,
-    I2sCommunicationFormat_PcmLong = 5,
+    I2sCommunicationFormat_I2S = 0,
+    I2sCommunicationFormat_Msb = 1,
+    I2sCommunicationFormat_PcmShort = 2,
+    I2sCommunicationFormat_PcmLong = 3,
+    I2sCommunicationFormat_Max = 4,
 } I2sCommunicationFormat;
 
 typedef enum __nfpack I2sMode
