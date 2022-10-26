@@ -29,9 +29,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__SystemSpanByte,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__SystemSpanByte,
-    NULL,
     NULL,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOID,
     Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___VOID,
@@ -41,7 +41,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2s =
 {
     "System.Device.I2s",
-    0x824F0CC7,
+    0x478490FE,
     method_lookup,
     { 100, 0, 0, 1 }
 };

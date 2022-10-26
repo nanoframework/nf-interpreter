@@ -19,12 +19,6 @@ typedef enum __nfpack I2sBitsPerSample
     I2sBitsPerSample_Bit32 = 32,
 } I2sBitsPerSample;
 
-typedef enum __nfpack I2sChannel
-{
-    I2sChannel_Mono = 1,
-    I2sChannel_Stereo = 2,
-} I2sChannel;
-
 typedef enum __nfpack I2sChannelFormat
 {
     I2sChannelFormat_RightLeft = 0,
@@ -36,11 +30,11 @@ typedef enum __nfpack I2sChannelFormat
 
 typedef enum __nfpack I2sCommunicationFormat
 {
-    I2sCommunicationFormat_I2S = 0,
-    I2sCommunicationFormat_Msb = 1,
-    I2sCommunicationFormat_PcmShort = 2,
-    I2sCommunicationFormat_PcmLong = 3,
-    I2sCommunicationFormat_Max = 4,
+    I2sCommunicationFormat_I2S = 1,
+    I2sCommunicationFormat_Msb = 3,
+    I2sCommunicationFormat_PcmShort = 4,
+    I2sCommunicationFormat_PcmLong = 12,
+    I2sCommunicationFormat_Max = 13,
 } I2sCommunicationFormat;
 
 typedef enum __nfpack I2sMode
@@ -69,8 +63,8 @@ struct Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings
 
 struct Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice
 {
-    static const int FIELD___connectionSettings = 1;
-    static const int FIELD___disposed = 2;
+    static const int FIELD___disposed = 1;
+    static const int FIELD___connectionSettings = 2;
 
     NANOCLR_NATIVE_DECLARE(Read___VOID__SystemSpanByte);
     NANOCLR_NATIVE_DECLARE(Write___VOID__SystemSpanByte);
