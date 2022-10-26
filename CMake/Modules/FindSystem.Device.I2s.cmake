@@ -20,7 +20,6 @@ set(System.Device.I2s_SRCS
 
     sys_dev_i2s_native.cpp
 
-
     sys_dev_i2s_native_System_Device_I2s_I2sDevice.cpp
 
 )

@@ -12,6 +12,14 @@
 
 #include "Graphics.h"
 
+typedef enum __nfpack TouchInputFlags
+{
+    TouchInputFlags_None = 0,
+    TouchInputFlags_Primary = 16,
+    TouchInputFlags_Pen = 64,
+    TouchInputFlags_Palm = 128,
+} TouchInputFlags;
+
 struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEvent
 {
     static const int FIELD_STATIC___eventCount = 0;
@@ -746,13 +754,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput
     static const int FIELD__ContactHeight = 6;
 
     //--//
-    //_The following was not generated___________
-    //___________________________________________
-    static const CLR_UINT32 FLAG__None = 0x00;
-    static const CLR_UINT32 FLAG__Primary = 0x10;
-    static const CLR_UINT32 FLAG__Pen = 0x40;
-    static const CLR_UINT32 FLAG__Palm = 0x80;
-    //___________________________________________
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchDevice
@@ -765,8 +766,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchDevice
 
 struct Library_nanoFramework_Graphics_nanoFramework_Runtime_Events_GenericEventEx
 {
-    static const int FIELD__X = 1;
-    static const int FIELD__Y = 2;
+    static const int FIELD__X = 6;
+    static const int FIELD__Y = 7;
 
     //--//
 };
@@ -849,7 +850,9 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
-    static const int FIELD_STATIC___fullScreen = 20;
+    static const int FIELD_STATIC___maximumBufferSize = 20;
+    static const int FIELD_STATIC___fullScreen = 21;
+    static const int FIELD_STATIC___point = 22;
 
     NANOCLR_NATIVE_DECLARE(get_LongerSide___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_ShorterSide___STATIC__I4);
@@ -903,19 +906,19 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonDevice
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_Buttons
 {
-    static const int FIELD_STATIC__PreviewButtonDownEvent = 21;
-    static const int FIELD_STATIC__PreviewButtonUpEvent = 22;
-    static const int FIELD_STATIC__ButtonDownEvent = 23;
-    static const int FIELD_STATIC__ButtonUpEvent = 24;
-    static const int FIELD_STATIC__GotFocusEvent = 25;
-    static const int FIELD_STATIC__LostFocusEvent = 26;
+    static const int FIELD_STATIC__PreviewButtonDownEvent = 23;
+    static const int FIELD_STATIC__PreviewButtonUpEvent = 24;
+    static const int FIELD_STATIC__ButtonDownEvent = 25;
+    static const int FIELD_STATIC__ButtonUpEvent = 26;
+    static const int FIELD_STATIC__GotFocusEvent = 27;
+    static const int FIELD_STATIC__LostFocusEvent = 28;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEvents
 {
-    static const int FIELD_STATIC__GenericStandardEvent = 27;
+    static const int FIELD_STATIC__GenericStandardEvent = 29;
 
     //--//
 };
@@ -964,16 +967,16 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchCapture
 {
-    static const int FIELD_STATIC___captureElement = 28;
+    static const int FIELD_STATIC___captureElement = 30;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEvents
 {
-    static const int FIELD_STATIC__TouchDownEvent = 29;
-    static const int FIELD_STATIC__TouchMoveEvent = 30;
-    static const int FIELD_STATIC__TouchUpEvent = 31;
+    static const int FIELD_STATIC__TouchDownEvent = 31;
+    static const int FIELD_STATIC__TouchMoveEvent = 32;
+    static const int FIELD_STATIC__TouchUpEvent = 33;
 
     //--//
 };
@@ -1018,8 +1021,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherTimer
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Touch
 {
-    static const int FIELD_STATIC___initialized = 32;
-    static const int FIELD_STATIC___activeTouchPanel = 33;
+    static const int FIELD_STATIC___initialized = 34;
+    static const int FIELD_STATIC___activeTouchPanel = 35;
 
     //--//
 };
@@ -1034,10 +1037,10 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollector
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration
 {
-    static const int FIELD_STATIC___collectionMode = 34;
-    static const int FIELD_STATIC___collectionMethod = 35;
-    static const int FIELD_STATIC___touchCollector = 36;
-    static const int FIELD_STATIC___collectionBufferSize = 37;
+    static const int FIELD_STATIC___collectionMode = 36;
+    static const int FIELD_STATIC___collectionMethod = 37;
+    static const int FIELD_STATIC___touchCollector = 38;
+    static const int FIELD_STATIC___collectionBufferSize = 39;
 
     NANOCLR_NATIVE_DECLARE(GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2);
     NANOCLR_NATIVE_DECLARE(
@@ -1050,8 +1053,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfigurati
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent
 {
-    static const int FIELD__Time = 1;
-    static const int FIELD__Touches = 2;
+    static const int FIELD__Time = 3;
+    static const int FIELD__Touches = 4;
 
     //--//
 };
