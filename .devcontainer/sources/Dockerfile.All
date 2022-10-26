@@ -42,6 +42,7 @@ RUN apt-get update \
     git-lfs \
     git-svn \
     subversion \
+    clang-format \
     curl \
     ninja-build \
     srecord \
