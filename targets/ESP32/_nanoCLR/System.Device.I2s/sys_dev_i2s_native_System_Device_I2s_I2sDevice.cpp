@@ -11,6 +11,15 @@
 
 #define DMA_BUF_LEN_IN_I2S_FRAMES (256)
 
+// The transform buffer is used with the readinto() method to bridge the opaque DMA memory on the ESP devices
+// with the app buffer.  It facilitates audio sample transformations.  e.g.  32-bits samples to 16-bit samples.
+// The size of 240 bytes is an engineering optimum that balances transfer performance with an acceptable use of heap
+// space
+#define SIZEOF_TRANSFORM_BUFFER_IN_BYTES (240)
+
+#define NUM_I2S_USER_FORMATS       (8)
+#define I2S_RX_FRAME_SIZE_IN_BYTES (8)
+
 typedef Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings I2sConnectionSettings;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
@@ -65,6 +74,56 @@ uint32_t get_dma_buf_count(uint8_t mode, i2s_bits_per_sample_t bits, i2s_channel
 
     return dma_buf_count;
 }
+
+int8_t get_frame_mapping_index(i2s_bits_per_sample_t bits, i2s_channel_fmt_t format)
+{
+    if (format != I2S_CHANNEL_FMT_RIGHT_LEFT)
+    {
+        // Mono
+        switch (bits)
+        {
+            case I2S_BITS_PER_SAMPLE_8BIT:
+                return 0;
+            case I2S_BITS_PER_SAMPLE_16BIT:
+                return 1;
+            case I2S_BITS_PER_SAMPLE_24BIT:
+                return 2;
+            case I2S_BITS_PER_SAMPLE_32BIT:
+                return 3;
+        }
+    }
+    else
+    {
+        // Stereo
+        switch (bits)
+        {
+            case I2S_BITS_PER_SAMPLE_8BIT:
+                return 4;
+            case I2S_BITS_PER_SAMPLE_16BIT:
+                return 5;
+            case I2S_BITS_PER_SAMPLE_24BIT:
+                return 6;
+            case I2S_BITS_PER_SAMPLE_32BIT:
+                return 7;
+        }
+    }
+
+    return 0;
+}
+
+// The frame map is used with the readinto() method to transform the audio sample data coming
+// from DMA memory (32-bit stereo, with the L and R channels reversed) to the format specified
+// in the I2S constructor.  e.g.  16-bit mono
+const int8_t i2s_frame_map[NUM_I2S_USER_FORMATS][I2S_RX_FRAME_SIZE_IN_BYTES] = {
+    {7, -1, -1, -1, -1, -1, -1, -1}, // Mono, 8-bits
+    {6, 7, -1, -1, -1, -1, -1, -1},  // Mono, 16-bits
+    {5, 6, 7, -1, -1, -1, -1, -1},   // Mono, 24-bits
+    {4, 5, 6, 7, -1, -1, -1, -1},    // Mono, 32-bits
+    {7, 3, -1, -1, -1, -1, -1, -1},  // Stereo, 8-bits
+    {6, 7, 2, 3, -1, -1, -1, -1},    // Stereo, 16-bits
+    {5, 6, 7, 1, 2, 3, -1, -1},      // Stereo, 24-bits
+    {4, 5, 6, 7, 0, 1, 2, 3},        // Stereo, 32-bits
+};
 
 i2s_comm_format_t get_i2s_commformat(int commformat)
 {
@@ -183,7 +242,115 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
 {
     NANOCLR_HEADER();
 
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+    {
+        CLR_RT_HeapBlock *pConfig;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        CLR_RT_HeapBlock *readSpanByte = NULL;
+        CLR_RT_HeapBlock_Array *readBuffer = NULL;
+        uint8_t *readData = NULL;
+        int readSize = 0;
+        int readOffset = 0;
+        uint8_t transform_buffer[SIZEOF_TRANSFORM_BUFFER_IN_BYTES];
+        uint32_t a_index = 0;
+
+        // get a pointer to the managed spi connectionSettings object instance
+        pConfig = pThis[FIELD___connectionSettings].Dereference();
+
+        // get bus index
+        // subtract 1 to get ESP32 bus number
+        i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
+
+        // fetch some configs to calculate some things later on:
+        i2s_bits_per_sample_t bitsPerSample =
+            (i2s_bits_per_sample_t)(pConfig[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4);
+        i2s_channel_fmt_t format =
+            (i2s_channel_fmt_t)pConfig[I2sConnectionSettings::FIELD___i2sChannelFormat].NumericByRef().s4;
+        uint8_t channels = (format == I2S_CHANNEL_FMT_RIGHT_LEFT ? 2 : 1);
+        uint8_t appbuf_sample_size_in_bytes = (bitsPerSample / 8) * channels;
+
+        if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+
+        // dereference the SpanByte from the arguments
+        readSpanByte = stack.Arg1().Dereference();
+        if (readSpanByte != NULL)
+        {
+            readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
+
+            if (readBuffer != NULL)
+            {
+                // Get the read offset, only the elements defined by the span must be read, not the whole array
+                readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
+
+                // use the span length as read size, only the elements defined by the span must be read
+                readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+
+                if (readSize > 0)
+                {
+                    readData = (uint8_t *)readBuffer->GetElement(readOffset);
+
+                    uint32_t num_bytes_needed_from_dma =
+                        readSize * (I2S_RX_FRAME_SIZE_IN_BYTES / appbuf_sample_size_in_bytes);
+
+                    CLR_RT_ProtectFromGC gcWriteBuffer(*readBuffer);
+
+                    while (num_bytes_needed_from_dma)
+                    {
+                        size_t num_bytes_requested_from_dma = MIN(sizeof(transform_buffer), num_bytes_needed_from_dma);
+                        size_t num_bytes_received_from_dma = 0;
+
+                        esp_err_t ret = i2s_read(
+                            bus,
+                            transform_buffer,
+                            num_bytes_requested_from_dma,
+                            &num_bytes_received_from_dma,
+                            portMAX_DELAY);
+
+                        if (ret != ESP_OK)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+                        }
+
+                        // process the transform buffer one frame at a time.
+                        // copy selected bytes from the transform buffer into the user supplied readBuffer.
+                        // Example:
+                        //   a I2S object is configured for 16-bit mono.  This configuration associates to
+                        //   a frame map index of 0 = { 6,  7, -1, -1, -1, -1, -1, -1 } in the i2s_frame_map array
+                        //   This mapping indicates:
+                        //      readBuffer[x+0] = frame[6]
+                        //      readBuffer[x+1] = frame[7]
+                        //      frame bytes 0-5 are not used
+
+                        uint32_t t_index = 0;
+                        uint8_t f_index = get_frame_mapping_index(bitsPerSample, format);
+                        while (t_index < num_bytes_received_from_dma)
+                        {
+                            uint8_t *transform_p = transform_buffer + t_index;
+
+                            for (uint8_t i = 0; i < I2S_RX_FRAME_SIZE_IN_BYTES; i++)
+                            {
+                                int8_t t_to_a_mapping = i2s_frame_map[f_index][i];
+                                if (t_to_a_mapping != -1)
+                                {
+                                    *readData++ = transform_p[t_to_a_mapping];
+                                    a_index++;
+                                }
+                                t_index++;
+                            }
+                        }
+
+                        num_bytes_needed_from_dma -= num_bytes_received_from_dma;
+                    }
+                }
+            }
+        }
+    }
 
     NANOCLR_NOCLEANUP();
 }
