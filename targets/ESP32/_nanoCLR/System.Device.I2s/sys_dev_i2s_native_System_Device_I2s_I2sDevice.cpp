@@ -16,12 +16,14 @@ typedef Library_corlib_native_System_SpanByte SpanByte;
 
 static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {0, 0};
 
-void swap_32_bit_stereo_channels(unsigned char *buffer, int length) {
+void swap_32_bit_stereo_channels(unsigned char *buffer, int length)
+{
     uint32_t swap_sample;
     uint32_t *sample = (uint32_t *)buffer;
     uint32_t num_samples = length / 4;
 
-    for (uint32_t i = 0; i < num_samples; i += 2) {
+    for (uint32_t i = 0; i < num_samples; i += 2)
+    {
         swap_sample = sample[i + 1];
         sample[i + 1] = sample[i];
         sample[i] = swap_sample;
@@ -41,26 +43,31 @@ void Esp32_I2s_UnitializeAll()
     }
 }
 
-i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits) {
-    if (mode == (I2S_MODE_MASTER | I2S_MODE_TX)) {
+i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits)
+{
+    if (mode == (I2S_MODE_MASTER | I2S_MODE_TX))
+    {
         return bits;
-    } else { // Master Rx
+    }
+    else
+    { // Master Rx
         // read 32 bit samples for I2S hardware.  e.g. MEMS microphones
         return I2S_BITS_PER_SAMPLE_32BIT;
     }
 }
 
-uint32_t get_dma_buf_count(uint8_t mode, i2s_bits_per_sample_t bits, i2s_channel_fmt_t format, int32_t ibuf) {
+uint32_t get_dma_buf_count(uint8_t mode, i2s_bits_per_sample_t bits, i2s_channel_fmt_t format, int32_t ibuf)
+{
     // calculate how many DMA buffers need to be allocated
-    uint32_t dma_frame_size_in_bytes =
-        (get_dma_bits(mode, bits) / 8) * (format == I2S_CHANNEL_FMT_RIGHT_LEFT ? 2: 1);
+    uint32_t dma_frame_size_in_bytes = (get_dma_bits(mode, bits) / 8) * (format == I2S_CHANNEL_FMT_RIGHT_LEFT ? 2 : 1);
 
     uint32_t dma_buf_count = ibuf / (DMA_BUF_LEN_IN_I2S_FRAMES * dma_frame_size_in_bytes);
 
     return dma_buf_count;
 }
 
-i2s_comm_format_t get_i2s_commformat(int commformat) {
+i2s_comm_format_t get_i2s_commformat(int commformat)
+{
     switch (commformat)
     {
         case I2sCommunicationFormat_I2S:
@@ -70,15 +77,15 @@ i2s_comm_format_t get_i2s_commformat(int commformat) {
         case I2sCommunicationFormat_Msb:
             commformat = I2S_COMM_FORMAT_STAND_MSB;
             break;
-            
+
         case I2sCommunicationFormat_PcmShort:
             commformat = I2S_COMM_FORMAT_STAND_PCM_SHORT;
             break;
-            
+
         case I2sCommunicationFormat_PcmLong:
             commformat = I2S_COMM_FORMAT_STAND_PCM_LONG;
             break;
-            
+
         case I2sCommunicationFormat_Max:
             commformat = I2S_COMM_FORMAT_STAND_MAX;
             break;
@@ -101,10 +108,13 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     // Important: this will have to be adjusted for IDF5
     i2s_config_t conf;
     int commformat = config[I2sConnectionSettings::FIELD___i2sConnectionFormat].NumericByRef().s4;
-    i2s_mode_t  mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
-    i2s_bits_per_sample_t bits = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4;
-    i2s_channel_fmt_t format = (i2s_channel_fmt_t)config[I2sConnectionSettings::FIELD___i2sChannelFormat].NumericByRef().s4;
-    i2s_bits_per_sample_t sample_rate = (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
+    i2s_mode_t mode = (i2s_mode_t)config[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4;
+    i2s_bits_per_sample_t bits =
+        (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4;
+    i2s_channel_fmt_t format =
+        (i2s_channel_fmt_t)config[I2sConnectionSettings::FIELD___i2sChannelFormat].NumericByRef().s4;
+    i2s_bits_per_sample_t sample_rate =
+        (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
     int bufferSize = config[I2sConnectionSettings::FIELD___bufferSize].NumericByRef().s4;
 
     conf.communication_format = get_i2s_commformat(commformat);
@@ -118,10 +128,10 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     conf.use_apll = false;
     conf.tx_desc_auto_clear = true;
     conf.fixed_mclk = 0;
-    #if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
+#if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
     conf.mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT;
     conf.bits_per_chan = (i2s_bits_per_chan_t)0;
-    #endif
+#endif
 
     // If this is first device on Bus then init driver
     if (Esp_I2S_Initialised_Flag[bus] == 0)
@@ -139,24 +149,27 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         Esp_I2S_Initialised_Flag[bus]++;
     }
 
-    // apply low-level workaround for bug in some ESP-IDF versions that swap
-    // the left and right channels
-    // https://github.com/espressif/esp-idf/issues/6625
-    #if CONFIG_IDF_TARGET_ESP32S3
+// apply low-level workaround for bug in some ESP-IDF versions that swap
+// the left and right channels
+// https://github.com/espressif/esp-idf/issues/6625
+#if CONFIG_IDF_TARGET_ESP32S3
     REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_TX_MSB_SHIFT);
     REG_SET_BIT(I2S_TX_CONF_REG(bus), I2S_RX_MSB_SHIFT);
-    #else
+#else
     REG_SET_BIT(I2S_CONF_REG(bus), I2S_TX_MSB_RIGHT);
     REG_SET_BIT(I2S_CONF_REG(bus), I2S_RX_MSB_RIGHT);
-    #endif
+#endif
 
-    #if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
+#if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
     pin_config.mck_io_num = I2S_PIN_NO_CHANGE;
-    #endif
+#endif
 
-    if (mode == (I2S_MODE_MASTER | I2S_MODE_RX)) {
+    if (mode == (I2S_MODE_MASTER | I2S_MODE_RX))
+    {
         pin_config.data_out_num = I2S_PIN_NO_CHANGE;
-    } else { // TX
+    }
+    else
+    { // TX
         pin_config.data_in_num = I2S_PIN_NO_CHANGE;
     }
 
@@ -201,7 +214,8 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         // get bus index
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
-        i2s_bits_per_sample_t bitsPerSample = (i2s_bits_per_sample_t)(pConfig[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4);
+        i2s_bits_per_sample_t bitsPerSample =
+            (i2s_bits_per_sample_t)(pConfig[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4);
 
         if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
         {
@@ -227,7 +241,8 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
                     CLR_RT_ProtectFromGC gcWriteBuffer(*writeBuffer);
                     writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
 
-                    if (bitsPerSample == I2S_BITS_PER_SAMPLE_32BIT) {
+                    if (bitsPerSample == I2S_BITS_PER_SAMPLE_32BIT)
+                    {
                         swap_32_bit_stereo_channels(writeData, writeSize);
                     }
 
