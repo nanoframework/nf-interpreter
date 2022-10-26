@@ -252,14 +252,12 @@ jobs:
         TargetBoard: ORGPAL_PALTHREE
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: true
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
 
@@ -268,6 +266,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -430,7 +429,7 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -439,6 +438,7 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml

@@ -332,7 +332,6 @@ jobs:
         TargetBoard: ST_STM32F429I_DISCOVERY
         TargetSeries: 'stm32f4xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: false
       ST_STM32F769I_DISCOVERY:
@@ -347,6 +346,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -443,7 +443,7 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -452,6 +452,8 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
+
   - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
     parameters:
@@ -721,7 +723,7 @@ jobs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Collecting managed helpers deployable artifacts
     inputs:
@@ -730,8 +732,9 @@ jobs:
         **\nanoFramework.nanoCLR.Win32*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-  
-  - task: CopyFiles@1
+      ignoreMakeDirErrors: true
+
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Collecting EXE to deployable artifacts
     inputs:
@@ -740,6 +743,7 @@ jobs:
         **\nanoFramework.nanoCLR.exe
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - pwsh: |
       .\SignClient "Sign" `
