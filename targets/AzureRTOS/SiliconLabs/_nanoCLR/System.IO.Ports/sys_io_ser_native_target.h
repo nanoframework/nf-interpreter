@@ -10,8 +10,8 @@
 #include <sys_io_ser_native.h>
 
 #include <em_device.h>
-#include <em_gpio.h>
-#include <nf_gecko_spi_driver.h>
+#include <em_cmu.h>
+#include <em_usart.h>
 
 // set missing defines
 #if defined(USART0)
