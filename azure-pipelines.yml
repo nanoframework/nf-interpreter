@@ -332,7 +332,6 @@ jobs:
         TargetBoard: ST_STM32F429I_DISCOVERY
         TargetSeries: 'stm32f4xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: false
       ST_STM32F769I_DISCOVERY:
@@ -347,6 +346,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
