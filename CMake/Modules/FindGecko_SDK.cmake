@@ -193,7 +193,8 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
         list(APPEND gecko_sdk_srcs sl_usbd_core_azuretos.c)
         list(APPEND gecko_sdk_srcs sl_usbd_core.c)
         list(APPEND gecko_sdk_srcs sl_usbd_configuration_instances.c) 
-        list(APPEND gecko_sdk_srcs sl_usbd_class_vendor.c)
+        # this one is our own implementation
+        list(APPEND gecko_sdk_srcs nano_sl_usbd_class_vendor.c)
         list(APPEND gecko_sdk_srcs sl_usbd_init.c)
         list(APPEND gecko_sdk_srcs sl_malloc.c)
 
@@ -259,7 +260,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_cdc_acm.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_hid_report.c PROPERTIES COMPILE_FLAGS -Wno-undef)
-    SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/nano_sl_usbd_class_vendor.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
 
@@ -268,26 +269,6 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 else()
     # series is NOT supported
     message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
-endif()
-
-###################################################################
-# change required to define the description of the USB Vendor Class
-if(GECKO_FEATURE_USBD_WINUSB)
-    file(READ
-        ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
-        SL_USBD_CLASS_VENDOR_CONTENT)
-
-
-    string(REPLACE
-        "\"Vendor-specific class\""
-        NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION
-        SL_USBD_CLASS_VENDOR_NEW_CONTENTS
-        "${SL_USBD_CLASS_VENDOR_CONTENT}")
-
-    file(WRITE 
-        ${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_class_vendor.c
-        "${SL_USBD_CLASS_VENDOR_NEW_CONTENTS}")
-
 endif()
 
 include(FindPackageHandleStandardArgs)
