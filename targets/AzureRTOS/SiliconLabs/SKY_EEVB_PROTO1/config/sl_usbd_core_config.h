@@ -182,11 +182,11 @@ extern char UsbClassVendorDescription[32 + 1];
 
 // <o SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY> Number of class instances <1-255>
 // <i> Number of class instances.
-#define SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY          1
+#define SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY          2
 
 // <o SL_USBD_VENDOR_CONFIGURATION_QUANTITY> Number of configurations <1-255>
 // <i> Number of configurations.
-#define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           1
+#define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           2
 
 // pointer to USB Class Vendor description
 #define NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION (const char *)&UsbClassVendorDescription
