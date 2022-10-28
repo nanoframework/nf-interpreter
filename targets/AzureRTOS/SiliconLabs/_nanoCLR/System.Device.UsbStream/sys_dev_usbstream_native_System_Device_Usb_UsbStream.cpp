@@ -217,8 +217,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     if (stack.m_customState == 1)
     {
         // ... and hasn't started yet
-        // push onto the eval stack how many bytes are being pushed to the USB
-        stack.PushValueI4(count);
 
         // bump custom state
         stack.m_customState = 2;
@@ -255,22 +253,18 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
     // timeout expired
     if (!eventResult)
     {
-        // timeout has expired, return exception
+        // timeout has expired
+        // cancel the async operation...
+        sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+
+        // ... return exception
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
-    NANOCLR_CLEANUP();
+    // pop timeout heap block from stack
+    stack.PopValue();
 
-    if (stack.m_customState > 1)
-    {
-        // pop "count" heap block from stack
-        stack.PopValue();
-
-        // pop timeout heap block from stack
-        stack.PopValue();
-    }
-
-    NANOCLR_CLEANUP_END();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4(
@@ -332,8 +326,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     if (stack.m_customState == 1)
     {
         // ... and hasn't started yet
-        // push onto the eval stack how many bytes are being pushed to the USB
-        stack.PushValueI4(count);
 
         // bump custom state
         stack.m_customState = 2;
@@ -372,27 +364,20 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
     // timeout expired
     if (!eventResult)
     {
-        // timeout has expired, return exception
+        // timeout has expired
+        // cancel the async operation...
+        sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+
+        // ... return exception
         NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
     }
 
-    NANOCLR_CLEANUP();
+    // pop timeout heap block from stack
+    stack.PopValue();
+    // set result with count of bytes received
+    stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
 
-    if (stack.m_customState > 1)
-    {
-        // pop "count" heap block from stack
-        stack.PopValue();
-
-        // pop timeout heap block from stack
-        stack.PopValue();
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
-    }
-
-    NANOCLR_CLEANUP_END();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeReceivedBytesThreshold___VOID__I4(

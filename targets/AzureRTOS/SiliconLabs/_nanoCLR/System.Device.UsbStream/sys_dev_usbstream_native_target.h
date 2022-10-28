@@ -12,7 +12,7 @@
 #define USBD_CFG_EP_ISOC_EN 0
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <sl_usbd_class_vendor.h>
+#include <nano_sl_usbd_class_vendor.h>
 
 // need these declared here as they are scattered throughout Gecko SDK and config files
 extern char UsbClassVendorDescription[32 + 1];
