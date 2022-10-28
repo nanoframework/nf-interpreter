@@ -134,7 +134,12 @@ sl_status_t sli_usbd_vendor_winusb_init()
     interval = SL_USBD_VENDOR_WINUSB_INTERVAL;
 
     /* create vendor instance */
-    sl_usbd_vendor_create_instance(intr_en, interval, &sli_usbd_vendor_winusb_callbacks, &class_number);
+    if (sl_usbd_vendor_create_instance(intr_en, interval, &sli_usbd_vendor_winusb_callbacks, &class_number) !=
+        SL_STATUS_OK)
+    {
+        // error creating instance
+        return SL_STATUS_FAIL;
+    }
 
     /* store class number globally */
     sl_usbd_vendor_winusb_number = class_number;
@@ -150,7 +155,7 @@ sl_status_t sli_usbd_vendor_winusb_init()
         if (!strcmp(token, "config0") || !strcmp(token, "all"))
         {
             config_number = sl_usbd_configuration_config0_number;
-            if(sl_usbd_vendor_add_to_configuration(class_number, config_number) != SL_STATUS_OK)
+            if (sl_usbd_vendor_add_to_configuration(class_number, config_number) != SL_STATUS_OK)
             {
                 // error adding class to configuration
                 return SL_STATUS_FAIL;
