@@ -755,7 +755,8 @@
                 "ESP32_CONFIG_PIN_PHY_POWER": "",
                 "ESP32_CONFIG_PHY_CLOCK_MODE": "",
                 "ESP32_USB_CDC": "ON",
-                "API_nanoFramework.Device.OneWire": "OFF"
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_System.Device.I2s": "OFF"
             }
         },
         {
