@@ -94,6 +94,7 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int
 
             case DEV_TYPE_I2S:
                 Esp32_I2S_DevicePinMap[busIndex][pinIndex] = ioPinNumber;
+                break;
 
             default:
                 break;
@@ -180,7 +181,9 @@ int Esp32_SetMappedDevicePins(uint8_t pin, int32_t alternateFunction)
             if (busIndex <= 1 && gpioMapping <= 4)
             {
                 Esp32_I2S_DevicePinMap[busIndex][gpioMapping] = pin;
+                return true;
             }
+            break;
 
         default:
             // invalid device type

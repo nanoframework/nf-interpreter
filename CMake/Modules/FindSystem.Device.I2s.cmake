@@ -21,7 +21,7 @@ set(System.Device.I2s_SRCS
     sys_dev_i2s_native.cpp
 
     sys_dev_i2s_native_System_Device_I2s_I2sDevice.cpp
-    target_system_device_I2s_config.cpp
+
 )
 
 foreach(SRC_FILE ${System.Device.I2s_SRCS})
@@ -42,7 +42,7 @@ foreach(SRC_FILE ${System.Device.I2s_SRCS})
     endif()
 
     list(APPEND System.Device.I2s_SOURCES ${System.Device.I2s_SRC_FILE})
-    
+
 endforeach()
 
 include(FindPackageHandleStandardArgs)

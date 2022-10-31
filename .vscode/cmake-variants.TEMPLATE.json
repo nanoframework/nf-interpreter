@@ -111,6 +111,7 @@
           "API_System.Device.Dac": "OFF-default-ON-to-add-this-API",
           "API_System.Device.Gpio": "OFF-default-ON-to-add-this-API",
           "API_System.Device.I2c": "OFF-default-ON-to-add-this-API",
+          "API_System.Device.I2s": "OFF-default-ON-to-add-this-API",
           "API_System.Device.Pwm": "OFF-default-ON-to-add-this-API",
           "API_System.IO.Ports": "OFF-default-ON-to-add-this-API",
           "API_System.Device.Spi": "OFF-default-ON-to-add-this-API",
