@@ -21,12 +21,16 @@ static void UsbAsyncWriteCompleted(
     (void)buf_len;
     (void)status;
 
+    NATIVE_INTERRUPT_START
+
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
     // store TX count
     usbPal->TxBytesSent = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+
+    NATIVE_INTERRUPT_END
 }
 
 static void UsbAsyncReadCompleted(
@@ -42,12 +46,16 @@ static void UsbAsyncReadCompleted(
     (void)buf_len;
     (void)status;
 
+    NATIVE_INTERRUPT_START
+
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
     // store RX count
     usbPal->RxBytesReceived = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+
+    NATIVE_INTERRUPT_END
 }
 
 // -- //
@@ -95,6 +103,10 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClos
     NANOCLR_HEADER();
 
     (void)stack;
+
+    // abort any transfer in progress, just in case
+    sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+    sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
 
     platform_free(UsbStream_PAL.RxBuffer);
     UsbStream_PAL.RxBuffer = NULL;

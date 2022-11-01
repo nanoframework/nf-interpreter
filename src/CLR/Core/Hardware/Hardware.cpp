@@ -183,6 +183,16 @@ void CLR_HW_Hardware::ProcessActivity()
         eventsCLR |= Event_Bluetooth;
     }
 
+    if (events & SYSTEM_EVENT_FLAG_USB_IN)
+    {
+        eventsCLR |= Event_UsbIn;
+    }
+
+    if (events & SYSTEM_EVENT_FLAG_USB_OUT)
+    {
+        eventsCLR |= Event_UsbOut;
+    }
+
     if (eventsCLR)
     {
         g_CLR_RT_ExecutionEngine.SignalEvents(eventsCLR);
