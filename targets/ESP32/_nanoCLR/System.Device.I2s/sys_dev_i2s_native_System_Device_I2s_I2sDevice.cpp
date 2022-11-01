@@ -23,7 +23,12 @@
 typedef Library_sys_dev_i2s_native_System_Device_I2s_I2sConnectionSettings I2sConnectionSettings;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
-static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {0, 0};
+static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
+    0,
+#if (I2S_NUM_MAX > 1)
+    0
+#endif
+};
 
 void swap_32_bit_stereo_channels(unsigned char *buffer, int length)
 {
@@ -272,7 +277,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
         uint8_t channels = (format == I2S_CHANNEL_FMT_RIGHT_LEFT ? 2 : 1);
         uint8_t appbuf_sample_size_in_bytes = (bitsPerSample / 8) * channels;
 
-        if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
+        if (bus != I2S_NUM_0
+#if (I2S_NUM_MAX > 1)
+            && bus != I2S_NUM_1
+#endif
+        )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -384,7 +393,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Write___VOID__Sy
         i2s_bits_per_sample_t bitsPerSample =
             (i2s_bits_per_sample_t)(pConfig[I2sConnectionSettings::FIELD___i2sBitsPerSample].NumericByRef().s4);
 
-        if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
+        if (bus != I2S_NUM_0
+#if (I2S_NUM_MAX > 1)
+            && bus != I2S_NUM_1
+#endif
+        )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
@@ -445,7 +458,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        if (bus != I2S_NUM_0 && bus != I2S_NUM_1)
+        if (bus != I2S_NUM_0
+#if (I2S_NUM_MAX > 1)
+            && bus != I2S_NUM_1
+#endif
+        )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
