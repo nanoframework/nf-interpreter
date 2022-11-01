@@ -76,6 +76,8 @@ jobs:
         # get commit details, if this is a PR
         if($env:System_PullRequest_PullRequestId -ne $null)
         {
+          Write-Host "**This is a PR build**"
+
           $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
           if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
@@ -89,6 +91,8 @@ jobs:
         }
         else
         {
+          Write-Host "**build for other reasons**"
+
           echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
         }
       }
