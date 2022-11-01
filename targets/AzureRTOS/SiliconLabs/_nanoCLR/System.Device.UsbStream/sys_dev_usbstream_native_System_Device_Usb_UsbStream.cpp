@@ -21,12 +21,16 @@ static void UsbAsyncWriteCompleted(
     (void)buf_len;
     (void)status;
 
+    NATIVE_INTERRUPT_START
+
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
     // store TX count
     usbPal->TxBytesSent = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+
+    NATIVE_INTERRUPT_END
 }
 
 static void UsbAsyncReadCompleted(
@@ -42,12 +46,16 @@ static void UsbAsyncReadCompleted(
     (void)buf_len;
     (void)status;
 
+    NATIVE_INTERRUPT_START
+
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
     // store RX count
     usbPal->RxBytesReceived = xfer_len;
 
     Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+
+    NATIVE_INTERRUPT_END
 }
 
 // -- //
