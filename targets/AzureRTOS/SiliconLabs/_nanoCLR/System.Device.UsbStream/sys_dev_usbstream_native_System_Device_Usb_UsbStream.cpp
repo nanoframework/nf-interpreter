@@ -260,17 +260,21 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrit
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
-    }
 
-    // timeout expired
-    if (!eventResult)
-    {
-        // timeout has expired
-        // cancel the async operation...
-        sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+        if (eventResult)
+        {
+            // done here
+            break;
+        }
+        else
+        {
+            // timeout has expired
+            // cancel the async operation...
+            sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
 
-        // ... return exception
-        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            // ... return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
     }
 
     // pop timeout heap block from stack
@@ -371,17 +375,21 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
-    }
 
-    // timeout expired
-    if (!eventResult)
-    {
-        // timeout has expired
-        // cancel the async operation...
-        sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+        if (eventResult)
+        {
+            // done here
+            break;
+        }
+        else
+        {
+            // timeout has expired
+            // cancel the async operation...
+            sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
 
-        // ... return exception
-        NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            // ... return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
     }
 
     // pop timeout heap block from stack
