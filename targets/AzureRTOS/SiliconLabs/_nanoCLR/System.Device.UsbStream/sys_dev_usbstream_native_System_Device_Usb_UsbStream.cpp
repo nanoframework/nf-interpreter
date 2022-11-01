@@ -96,6 +96,10 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClos
 
     (void)stack;
 
+    // abort any transfer in progress, just in case
+    sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+    sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+
     platform_free(UsbStream_PAL.RxBuffer);
     UsbStream_PAL.RxBuffer = NULL;
 

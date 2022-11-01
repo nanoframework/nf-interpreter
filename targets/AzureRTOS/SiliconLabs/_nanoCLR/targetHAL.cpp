@@ -291,6 +291,17 @@ ADC_Reset(ADC1);
 adc1Initialized = false;
 #endif
 
+#if GECKO_FEATURE_USBD_WINUSB == TRUE
+    
+    // abort any transfer in progress, just in case
+    sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+    sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+
+    platform_free(UsbStream_PAL.RxBuffer);
+    UsbStream_PAL.RxBuffer = NULL;
+
+#endif
+
     // #if (HAL_USE_UART == TRUE)
 
     // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
