@@ -6,6 +6,8 @@
 include(FetchContent)
 include(binutils.ESP32)
 
+option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)" 0)
+
 # Set target series in lower case
 nf_set_esp32_target_series()
 

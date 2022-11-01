@@ -431,6 +431,7 @@
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "TARGET_SERIAL_BAUDRATE": "115200",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -564,6 +565,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -630,6 +632,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_ble_rev3.esp32",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -653,6 +656,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -674,6 +678,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -696,6 +701,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
@@ -721,6 +727,7 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_FEATURE_RTC": "ON",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
