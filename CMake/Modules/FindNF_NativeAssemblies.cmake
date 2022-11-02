@@ -317,11 +317,6 @@ endif()
 if(API_System.Device.I2s)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.I2s")
-
-# Com.SkyworksInc.NanoFramework.Devices.I2c
-if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.I2c")
 endif()
 
 # System.Device.Pwm
@@ -334,12 +329,6 @@ endif()
 if(API_System.IO.Ports)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.IO.Ports")
-endif()
-
-# Com.SkyworksInc.NanoFramework.Devices.Spi
-if(API_Com.SkyworksInc.NanoFramework.Devices.Spi)
-    ##### API name here (doted name)
-    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.Spi")
 endif()
 
 # System.Device.Spi
@@ -364,6 +353,18 @@ endif()
 if(API_Windows.Storage)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Windows.Storage")
+endif()
+
+# Com.SkyworksInc.NanoFramework.Devices.I2c
+if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.I2c")
+endif()
+
+# Com.SkyworksInc.NanoFramework.Devices.Spi
+if(API_Com.SkyworksInc.NanoFramework.Devices.Spi)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.Spi")
 endif()
 
 # Interop assemblies
