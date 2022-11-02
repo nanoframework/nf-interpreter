@@ -25,8 +25,8 @@ static const char *TAG = "Memory";
 #define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (30 * 1024)
 #else
 // Space to leave free in internal RAM for allocation by IDF malloc
-// no need to leave any RAM free at this time
-#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (0 * 1024)
+// We leave 10K free to allow room for Wifi initialisation
+#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (10 * 1024)
 #endif
 
 // Saved memory allocation for when heap is reset so we can return same value.

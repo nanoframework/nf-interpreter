@@ -557,6 +557,13 @@ else()
 endif()
 
 
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+endif()
+
+
 if(API_System.Device.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
@@ -676,7 +683,7 @@ if(USE_NETWORKING_OPTION)
     # which is required for network
 
     if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
-        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that in your CMakePresets or in the build command line.")
     endif()
 
 else()

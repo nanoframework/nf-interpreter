@@ -23,6 +23,7 @@ option(API_System.Device.Adc                    "option for System.Device.Adc AP
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
+option(API_System.Device.I2s                    "option for System.Device.I2s API")
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
@@ -308,6 +309,12 @@ endif()
 if(API_System.Device.I2c)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.I2c")
+endif()
+
+# System.Device.I2s
+if(API_System.Device.I2s)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.I2s")
 endif()
 
 # System.Device.Pwm
