@@ -23,15 +23,16 @@ option(API_System.Device.Adc                    "option for System.Device.Adc AP
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
-option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option for Skyworks I2C API")
+option(API_System.Device.I2s                    "option for System.Device.I2s API")
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
-option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
 option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
+option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option for Skyworks I2C API")
+option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
@@ -311,6 +312,11 @@ if(API_System.Device.I2c)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.I2c")
 endif()
+
+# System.Device.I2s
+if(API_System.Device.I2s)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.I2s")
 
 # Com.SkyworksInc.NanoFramework.Devices.I2c
 if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)

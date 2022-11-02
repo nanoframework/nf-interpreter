@@ -12,13 +12,14 @@
 #include <corlib_native.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// moved to targets\AzureRTOS\SiliconLabs\_common\autogen\sl_usbd_class_vendor_instances.c for convenience //
+// moved to targets\AzureRTOS\SiliconLabs\_common\autogen\sl_usbd_class_vendor_instances.h for convenience //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // typedef enum __nfpack UsbEventType
 // {
 //     UsbEventType_Invalid = 0,
 //     UsbEventType_DeviceConnected = 1,
 //     UsbEventType_DeviceDisconnected = 2,
+//     UsbEventType_DataAvailable = 3,
 // } UsbEventType;
 
 struct Library_sys_dev_usbstream_native_System_Device_Usb_DeviceConnectionEventArgs

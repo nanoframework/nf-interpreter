@@ -42,13 +42,6 @@ char UsbClassVendorDeviceInterfaceGuid[DEVICE_CLASS_GUID_PROPERTY_LEN];
 // flag for USB WinUSB intialized
 static bool usbdVendorWinusbInited = false;
 
-typedef enum __nfpack UsbEventType
-{
-    UsbEventType_Invalid = 0,
-    UsbEventType_DeviceConnected = 1,
-    UsbEventType_DeviceDisconnected = 2,
-} UsbEventType;
-
 //****************************************************************************
 // Function declarations.
 

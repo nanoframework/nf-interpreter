@@ -9,6 +9,14 @@
 
 #include <sl_usbd_class_vendor.h>
 
+typedef enum __nfpack UsbEventType
+{
+    UsbEventType_Invalid = 0,
+    UsbEventType_DeviceConnected = 1,
+    UsbEventType_DeviceDisconnected = 2,
+    UsbEventType_DataAvailable = 3,
+} UsbEventType;
+
 #define DEVICEINTERFACE_GUID_PROP_NAME L"DeviceInterfaceGUID"
 
 /// Length of GUID Property Name
@@ -31,6 +39,14 @@ __WEAK void sl_usbd_vendor_winusb_on_setup_request_event(const sl_usbd_setup_req
 
 /* init functions for all vendor instances */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 sl_status_t sli_usbd_vendor_winusb_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
