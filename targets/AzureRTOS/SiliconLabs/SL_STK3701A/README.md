@@ -30,8 +30,8 @@ PWM has enabled the following GPIOs:
 
 I2C0 (this is referenced as I2C1 in C#)
 Available in EXP header
-I2C0_SDA: PC6, EXP Header Pin 19
-I2C0_SCL: PC7, EXP Header Pin 17
+I2C0_SDA: PC0, EXP Header Pin 16
+I2C0_SCL: PC1, EXP Header Pin 15
 
 I2C2 (this is referenced as I2C3 in C#)
 Connected to the following devices on the GG11 board:

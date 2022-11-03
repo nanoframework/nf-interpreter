@@ -10,11 +10,11 @@
 //////////
 
 // pin configuration for I2C0
-// port for I2C0_SCL is: PC7
-// port for I2C0_SDA is: PC6
+// port for I2C0_SCL is: PC1
+// port for I2C0_SDA is: PC0
 
-// GPIO alternate pin function is 2 for both pins (see Alternate Functionality mapping table in device datasheet)
-I2C_CONFIG_PINS(0, gpioPortC, gpioPortC, 7, 6, 2, 2)
+// GPIO alternate pin function is 4 for both pins (see Alternate Functionality mapping table in device datasheet)
+I2C_CONFIG_PINS(0, gpioPortC, gpioPortC, 1, 0, 4, 4)
 
 //////////
 // I2C2 //
