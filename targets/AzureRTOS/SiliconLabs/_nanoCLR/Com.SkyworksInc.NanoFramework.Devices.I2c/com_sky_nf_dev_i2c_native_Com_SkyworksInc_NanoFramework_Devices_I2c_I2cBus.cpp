@@ -129,12 +129,8 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
     switch (busIndex)
     {
 
-        ////////////////////////////////////
-        // Gecko I2C bus index is 0 based //
-        ////////////////////////////////////
-
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-        case 1:
+        case 0:
             if (I2C0_PAL.Configuration == NULL)
             {
                 I2C0_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
@@ -159,7 +155,7 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
 #endif
 
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-        case 2:
+        case 1:
             if (I2C1_PAL.Configuration == NULL)
             {
                 I2C1_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
@@ -184,7 +180,7 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
 #endif
 
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-        case 3:
+        case 2:
             if (I2C2_PAL.Configuration == NULL)
             {
                 I2C2_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
@@ -256,12 +252,9 @@ HRESULT DisposeI2c(uint8_t busIndex, NF_PAL_I2C *&palI2c)
     // Gecko I2C bus index is 0 based
     switch (busIndex)
     {
-        ////////////////////////////////////
-        // Gecko I2C bus index is 0 based //
-        ////////////////////////////////////
 
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-        case 1:
+        case 0:
             palI2c = &I2C0_PAL;
 
             // free memory
@@ -274,7 +267,7 @@ HRESULT DisposeI2c(uint8_t busIndex, NF_PAL_I2C *&palI2c)
 #endif
 
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-        case 2:
+        case 1:
             // free memory
             platform_free(I2C1_PAL.Configuration);
 
@@ -285,7 +278,7 @@ HRESULT DisposeI2c(uint8_t busIndex, NF_PAL_I2C *&palI2c)
 #endif
 
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-        case 3:
+        case 2:
             // free memory
             platform_free(I2C2_PAL.Configuration);
 
@@ -384,24 +377,21 @@ static HRESULT NativeTransmit(uint8_t busIndex, NF_PAL_I2C *&palI2c, CLR_RT_Stac
         // get the driver for the I2C bus
         switch (busIndex)
         {
-            ////////////////////////////////////
-            // Gecko I2C bus index is 0 based //
-            ////////////////////////////////////
 
 #if defined(I2C0) && (GECKO_USE_I2C0 == TRUE)
-            case 1:
+            case 0:
                 palI2c = &I2C0_PAL;
                 break;
 #endif
 
 #if defined(I2C1) && (GECKO_USE_I2C1 == TRUE)
-            case 2:
+            case 1:
                 palI2c = &I2C1_PAL;
                 break;
 #endif
 
 #if defined(I2C2) && (GECKO_USE_I2C2 == TRUE)
-            case 3:
+            case 2:
                 palI2c = &I2C2_PAL;
                 break;
 #endif
