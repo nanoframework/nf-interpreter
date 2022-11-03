@@ -172,7 +172,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
             {
                 I2C0_PAL.Configuration = (I2CSPM_Init_TypeDef *)platform_malloc(sizeof(I2CSPM_Init_TypeDef));
 
-                if (I2C1_PAL.Configuration == NULL)
+                if (I2C0_PAL.Configuration == NULL)
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
@@ -183,7 +183,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
                 ConfigPins_I2C0();
 
                 I2C0_PAL.Configuration->port = I2C0;
-                palI2c = &I2C1_PAL;
+                palI2c = &I2C0_PAL;
 
                 // increase device counter
                 I2C0_DeviceCounter++;

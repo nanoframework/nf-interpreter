@@ -6,6 +6,17 @@
 #include <com_sky_nf_dev_i2c_native_target.h>
 
 //////////
+// I2C0 //
+//////////
+
+// pin configuration for I2C0
+// port for I2C0_SCL is: PC1
+// port for I2C0_SDA is: PC0
+
+// GPIO alternate pin function is 4 for both pins (see Alternate Functionality mapping table in device datasheet)
+I2C_CONFIG_PINS(0, gpioPortC, gpioPortC, 1, 0, 4, 4)
+
+//////////
 // I2C2 //
 //////////
 
@@ -18,5 +29,5 @@
 // port for I2C2_SCL is: GPIOI_5
 // port for I2C2_SDA is: GPIOI_4
 
-// GPIO alternate pin function is 7 for both pins (see alternate function mapping table in device datasheet)
+// GPIO alternate pin function is 7 for both pins (see Alternate Functionality mapping table in device datasheet)
 I2C_CONFIG_PINS(2, gpioPortI, gpioPortI, 5, 4, 7, 7)

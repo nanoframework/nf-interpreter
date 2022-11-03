@@ -28,6 +28,11 @@ PWM has enabled the following GPIOs:
 
 ## I2C
 
+I2C0 (this is referenced as I2C1 in C#)
+Available in EXP header
+I2C0_SDA: PC0, EXP Header Pin 16
+I2C0_SCL: PC1, EXP Header Pin 15
+
 I2C2 (this is referenced as I2C3 in C#)
 Connected to the following devices on the GG11 board:
 Si7021: Relative Humidity and Temperature Sensor
@@ -46,7 +51,7 @@ SPI0_MOSI: PE10, EXP Header Pin 4
 SPI0_MISO: PE11, EXP Header Pin 6
 SPI0_CS: PE13, EXP Header Pin 10
 
-SPI0 (this is referenced as SPI2 in C#)
+SPI1 (this is referenced as SPI2 in C#)
 Connected to board LCD module
 
 SPI1_SCK: PC15
