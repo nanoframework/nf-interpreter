@@ -51,7 +51,7 @@ SPI0_MOSI: PE10, EXP Header Pin 4
 SPI0_MISO: PE11, EXP Header Pin 6
 SPI0_CS: PE13, EXP Header Pin 10
 
-SPI0 (this is referenced as SPI2 in C#)
+SPI1 (this is referenced as SPI2 in C#)
 Connected to board LCD module
 
 SPI1_SCK: PC15
