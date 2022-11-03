@@ -576,7 +576,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
-        },       
+        },
         {
             "name": "LilygoTWatch2020_preset",
             "inherits": [
@@ -639,13 +639,13 @@
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ESP32_ETHERNET_INTERFACE": "IP101",
                 "ETH_PHY_RST_GPIO": "5",
-                "ETH_RMII_CLK_IN_GPIO" : "0",
+                "ETH_RMII_CLK_IN_GPIO": "0",
                 "ETH_PHY_ADDR": "1",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.Device.Bluetooth": "ON"
             }
-        },        
+        },
         {
             "name": "ESP32_WT32_ETH01_preset",
             "inherits": [
@@ -661,13 +661,13 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
-                "ETH_RMII_CLK_IN_GPIO" : "0",
-                "ETH_PHY_ADDR":"1",
+                "ETH_RMII_CLK_IN_GPIO": "0",
+                "ETH_PHY_ADDR": "1",
                 "ETH_PHY_RST_GPIO": "16",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
-        },        
+        },
         {
             "name": "ESP32_WESP32_preset",
             "inherits": [
@@ -684,13 +684,13 @@
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ESP32_ETHERNET_INTERFACE": "RTL8201",
-                "ETH_RMII_CLK_IN_GPIO" : "0",
-                "ETH_MDIO_GPIO":"17",
+                "ETH_RMII_CLK_IN_GPIO": "0",
+                "ETH_MDIO_GPIO": "17",
                 "ETH_MDC_GPIO": "16",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
-        },        
+        },
         {
             "name": "M5StickC_preset",
             "inherits": [
