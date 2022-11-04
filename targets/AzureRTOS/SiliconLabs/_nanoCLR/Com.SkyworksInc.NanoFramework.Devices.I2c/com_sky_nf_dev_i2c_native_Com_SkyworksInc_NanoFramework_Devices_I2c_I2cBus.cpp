@@ -646,6 +646,9 @@ HRESULT Library_com_sky_nf_dev_i2c_native_Com_SkyworksInc_NanoFramework_Devices_
     uint8_t busIndex;
     I2cBusSpeed busSpeed;
     NF_PAL_I2C *palI2c = NULL;
+
+    CLR_IDX assemblyIdx;
+    CLR_RT_Assembly *thisAssembly = NULL;
     CLR_RT_HeapBlock_Array *busSpeedCollection = NULL;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -655,10 +658,13 @@ HRESULT Library_com_sky_nf_dev_i2c_native_Com_SkyworksInc_NanoFramework_Devices_
     // get bus index
     busIndex = (uint8_t)stack.Arg1().NumericByRef().s4;
 
-    // get a pointer to the managed I2C connectionSettings object instance
-    busSpeedCollection = (CLR_RT_HeapBlock_Array *)pThis[FIELD_STATIC___busSpeed].DereferenceArray();
-
-    busSpeed = (I2cBusSpeed)*busSpeedCollection->GetElement(busIndex);
+    // get ref to SpiBaseConfiguration from static _busConnectionSettings array...
+    // need to access it through the assembly
+    assemblyIdx = pThis->ObjectCls().Assembly();
+    thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIdx - 1];
+    busSpeedCollection = thisAssembly->GetStaticField(FIELD_STATIC___busSpeed)->DereferenceArray();
+    // ...access it by index
+    busSpeed = (I2cBusSpeed) * ((I2cBusSpeed *)busSpeedCollection->GetElement(busIndex));
 
     // init I2C bus
     NANOCLR_CHECK_HRESULT(InitI2c(busIndex, busSpeed, palI2c));
