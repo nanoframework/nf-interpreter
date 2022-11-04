@@ -297,8 +297,11 @@ adc1Initialized = false;
     sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
     sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
 
-    platform_free(UsbStream_PAL.RxBuffer);
-    UsbStream_PAL.RxBuffer = NULL;
+    if(UsbStream_PAL.RxBuffer != NULL)
+    {
+        platform_free(UsbStream_PAL.RxBuffer);
+        UsbStream_PAL.RxBuffer = NULL;
+    }
 
 #endif
 
