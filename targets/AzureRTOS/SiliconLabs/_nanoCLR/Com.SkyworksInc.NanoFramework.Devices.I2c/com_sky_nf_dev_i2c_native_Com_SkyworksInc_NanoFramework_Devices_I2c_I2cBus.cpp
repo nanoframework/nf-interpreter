@@ -28,6 +28,10 @@ uint8_t I2C1_DeviceCounter = 0;
 uint8_t I2C2_DeviceCounter = 0;
 #endif
 
+// these values have adjust following characterization of Skyworks EVB rev2.0
+#define I2C_FREQ_STANDARD_SKYWORKS_EVB 110000
+#define I2C_FREQ_FAST_SKYWORKS_EVB     676000
+
 // estimate the time required to perform the I2C transaction
 bool IsLongRunningOperation(
     uint16_t writeSize,
@@ -214,12 +218,12 @@ HRESULT InitI2c(uint8_t busIndex, I2cBusSpeed busSpeed, struct NF_PAL_I2C *palI2
     // Get a general low-level I2C configuration, depending on user's managed parameters
     if (busSpeed == I2cBusSpeed_StandardMode)
     {
-        palI2c->Configuration->i2cMaxFreq = I2C_FREQ_STANDARD_MAX;
+        palI2c->Configuration->i2cMaxFreq = I2C_FREQ_STANDARD_SKYWORKS_EVB;
         palI2c->Configuration->i2cClhr = i2cClockHLRStandard;
     }
     else
     {
-        palI2c->Configuration->i2cMaxFreq = I2C_FREQ_FAST_MAX;
+        palI2c->Configuration->i2cMaxFreq = I2C_FREQ_FAST_SKYWORKS_EVB;
         palI2c->Configuration->i2cClhr = i2cClockHLRAsymetric;
     }
 
