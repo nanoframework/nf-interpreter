@@ -36,6 +36,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Decode ESP32 backtrace",
+      "type": "shell",
+      "command": "xtensa-${input:esp32series}-elf-addr2line -apsfCire \"${input:espBacktraceElfFile}\" \"${input:espBacktrace}\"",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Flash MIMXRT1060",
       "type": "shell",
       "command": "C:/nxp/MCUXpressoIDE_10.2.1_795/ide/bin/crt_emu_cm_redlink.exe",
@@ -92,6 +102,29 @@
         "8mb",
         "16mb"
       ]
+    },
+    {
+      "id": "esp32series",
+      "type": "pickString",
+      "description": "ESP32 series",
+      "default": "esp32",
+      "options": [
+        "esp32",
+        "esp32s2",
+        "esp32s3"
+      ]
+    },
+    {
+      "id": "espBacktrace",
+      "type": "promptString",
+      "default": "",
+      "description": "Backtrace information from 'Guru Meditation Error' output. *** JUST THE BACKTRACE line, NOT the whole output! ***"
+    },
+    {
+      "id": "espBacktraceElfFile",
+      "type": "promptString",
+      "default": "${workspaceFolder}/build/nanoCLR.elf",
+      "description": "Path to ELF file. Default is the current build executable."
     }
   ]
 }
