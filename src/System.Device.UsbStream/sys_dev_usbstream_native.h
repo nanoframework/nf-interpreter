@@ -71,7 +71,6 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
     //--//
 };
 
-
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_UsbStream;
 
 #endif // SYS_DEV_USBSTREAM_NATIVE_H
