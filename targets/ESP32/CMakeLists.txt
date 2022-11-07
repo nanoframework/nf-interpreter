@@ -9,6 +9,13 @@ include(binutils.ESP32)
 # Set target series in lower case
 nf_set_esp32_target_series()
 
+# option to reserve RAM for IDF allocator
+option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
+if(NOT (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION EQUAL OFF))
+    unset(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION CACHE)
+    set(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION")
+endif()
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
