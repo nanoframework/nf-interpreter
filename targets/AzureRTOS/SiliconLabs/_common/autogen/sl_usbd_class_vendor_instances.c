@@ -9,6 +9,7 @@
 
 #include "sl_status.h"
 #include <nanoHAL_v2.h>
+#include <target_platform.h>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -34,6 +35,7 @@
 
 // need to declare this here as extern
 extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t data1, uint32_t data2);
+extern sl_status_t sl_usbd_vendor_update_device_product_string(const char *product_string);
 
 // storage for USB class vendor description
 char UsbClassVendorDescription[32 + 1];
@@ -159,9 +161,18 @@ sl_status_t sli_usbd_vendor_winusb_init()
         token = strtok(NULL, ", ");
     }
 
+#if HAL_WP_USE_USB_CDC == FALSE
+    // no USB CDC so this won't be a composite device
+    // need to set the description here from USB Class vendor description
+    sl_usbd_vendor_update_device_product_string((const char *)UsbClassVendorDescription);
+
+    // also need to adjust the class number for the Microsoft extend property
+    class_number--;
+#endif
+
     // add device class GUID to WinUSB properties
     sl_usbd_vendor_add_microsoft_ext_property(
-        config_number,
+        class_number,
         SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_SZ,
         (const uint8_t *)DEVICEINTERFACE_GUID_PROP_NAME,
         DEVICEINTERFACE_GUID_PROP_NAME_LEN,

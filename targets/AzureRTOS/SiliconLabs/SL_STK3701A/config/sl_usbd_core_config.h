@@ -96,7 +96,7 @@ extern char UsbClassVendorDescription[32 + 1];
 // <o SL_USBD_CDC_CONFIGURATION_QUANTITY> Number of configurations <1-255>
 // <i> Default: 1
 // <i> Number of configurations.
-#define SL_USBD_CDC_CONFIGURATION_QUANTITY           1
+#define SL_USBD_CDC_CONFIGURATION_QUANTITY           2
 
 // <o SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY> Number of subclass instances <1-255>
 // <i> Default: 2
@@ -188,7 +188,7 @@ extern char UsbClassVendorDescription[32 + 1];
 // <o SL_USBD_VENDOR_CONFIGURATION_QUANTITY> Number of configurations <1-255>
 // <i> Default: 1
 // <i> Number of configurations.
-#define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           1
+#define SL_USBD_VENDOR_CONFIGURATION_QUANTITY           2
 
 // pointer to USB Class Vendor description
 #define NANO_SL_USBD_CLASS_VENDOR_DESCRIPTION (const char *)&UsbClassVendorDescription
