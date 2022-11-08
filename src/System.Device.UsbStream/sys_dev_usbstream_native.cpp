@@ -42,11 +42,11 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VOID,
+    Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4__SZARRAY_U1__I4__I4,
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
+    Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VOID__SZARRAY_U1__I4__I4,
     NULL,
     NULL,
     Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___BOOLEAN,
@@ -61,10 +61,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
     Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID,
     Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen___I4__STRING__STRING,
-    Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrite___VOID__SZARRAY_U1__I4__I4,
-    Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4,
     Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeReceivedBytesThreshold___VOID__I4,
     NULL,
     NULL,
@@ -76,9 +75,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_UsbStream =
 {
     "System.Device.UsbStream",
-    0x2ADFC2C3,
+    0x6F6BE161,
     method_lookup,
-    { 100, 0, 0, 3 }
+    { 100, 0, 0, 4 }
 };
 
 // clang-format on

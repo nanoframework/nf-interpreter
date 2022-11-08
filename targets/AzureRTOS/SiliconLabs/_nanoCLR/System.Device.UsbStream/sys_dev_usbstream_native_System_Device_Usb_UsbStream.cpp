@@ -69,6 +69,240 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Flush___VO
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VOID__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *dataBuffer;
+    CLR_RT_HeapBlock hbTimeout;
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    uint8_t *data;
+    uint32_t length = 0;
+    uint32_t count = 0;
+    uint32_t offset = 0;
+    sl_status_t reqStatus;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // perform parameter validation and setup TX operation
+
+    // dereference the data buffer from the argument
+    dataBuffer = stack.Arg1().DereferenceArray();
+    FAULT_ON_NULL_ARG(dataBuffer);
+
+    offset = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+
+    // get the size of the buffer
+    length = dataBuffer->m_numOfElements;
+
+    // check parameters
+    FAULT_ON_NULL_ARG(dataBuffer);
+
+    if ((offset > length) || (count > length))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    if (offset + count > length)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // get a the pointer to the array by using the offset
+    data = dataBuffer->GetElement(offset);
+
+    // setup timeout from managed property
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // this is a long running operation...
+    if (stack.m_customState == 1)
+    {
+        // ... and hasn't started yet
+
+        // bump custom state
+        stack.m_customState = 2;
+
+        // start write operation with async API
+        // requesting handling of "End-of-transfer"
+        reqStatus = sl_usbd_vendor_write_bulk_async(
+            sl_usbd_vendor_winusb_number,
+            (void *)data,
+            count,
+            UsbAsyncWriteCompleted,
+            &UsbStream_PAL,
+            true);
+
+        if (reqStatus == SL_STATUS_INVALID_STATE)
+        {
+            // device is not connected, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+        else if (reqStatus == SL_STATUS_NOT_READY)
+        {
+            // transfer already in progress, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+    }
+
+    while (eventResult)
+    {
+        // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
+
+        if (eventResult)
+        {
+            // done here
+            break;
+        }
+        else
+        {
+            // timeout has expired
+            // cancel the async operation...
+            sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
+
+            // ... return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    // pop timeout heap block from stack
+    stack.PopValue();
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4__SZARRAY_U1__I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_Array *dataBuffer;
+    CLR_RT_HeapBlock hbTimeout;
+    int64_t *timeoutTicks;
+    bool eventResult = true;
+
+    uint8_t *data;
+    uint32_t length = 0;
+    uint32_t count = 0;
+    uint32_t offset = 0;
+    sl_status_t reqStatus;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    // perform parameter validation and setup TX operation
+
+    // dereference the data buffer from the argument
+    dataBuffer = stack.Arg1().DereferenceArray();
+    FAULT_ON_NULL_ARG(dataBuffer);
+
+    offset = stack.Arg2().NumericByRef().s4;
+    count = stack.Arg3().NumericByRef().s4;
+
+    // get the size of the buffer
+    length = dataBuffer->m_numOfElements;
+
+    // check parameters
+    FAULT_ON_NULL_ARG(dataBuffer);
+
+    if ((offset > length) || (count > length))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
+    }
+
+    if (offset + count > length)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    // get a the pointer to the array by using the offset
+    data = dataBuffer->GetElement(offset);
+
+    // setup timeout from managed property
+    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
+    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
+
+    // this is a long running operation...
+    if (stack.m_customState == 1)
+    {
+        // ... and hasn't started yet
+
+        // bump custom state
+        stack.m_customState = 2;
+
+        // clear RX counter
+        UsbStream_PAL.RxBytesReceived = 0;
+
+        // start read operation with async API
+        // requesting handling of "End-of-transfer"
+        reqStatus = sl_usbd_vendor_read_bulk_async(
+            sl_usbd_vendor_winusb_number,
+            (void *)data,
+            count,
+            UsbAsyncReadCompleted,
+            &UsbStream_PAL);
+
+        if (reqStatus == SL_STATUS_INVALID_STATE)
+        {
+            // device is not connected, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        }
+        else if (reqStatus == SL_STATUS_NOT_READY)
+        {
+            // transfer already in progress, return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
+        }
+    }
+
+    while (eventResult)
+    {
+        // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
+        NANOCLR_CHECK_HRESULT(
+            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
+
+        if (eventResult)
+        {
+            // done here
+            break;
+        }
+        else
+        {
+            // timeout has expired
+            // cancel the async operation...
+            sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+
+            // ... return exception
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+        }
+    }
+
+    // pop timeout heap block from stack
+    stack.PopValue();
+    // set result with count of bytes received
+    stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConnected___BOOLEAN(
     CLR_RT_StackFrame &stack)
 {
@@ -166,236 +400,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
     UsbStream_PAL.RxRingBuffer.Initialize(UsbStream_PAL.RxBuffer, bufferSize);
 
     stack.SetResult_I4(sl_usbd_vendor_winusb_number);
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeWrite___VOID__SZARRAY_U1__I4__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock_Array *dataBuffer;
-    CLR_RT_HeapBlock hbTimeout;
-    int64_t *timeoutTicks;
-    bool eventResult = true;
-
-    uint8_t *data;
-    uint32_t length = 0;
-    uint32_t count = 0;
-    uint32_t offset = 0;
-    sl_status_t reqStatus;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-    }
-
-    // perform parameter validation and setup TX operation
-
-    // dereference the data buffer from the argument
-    dataBuffer = stack.Arg1().DereferenceArray();
-    offset = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
-
-    // get the size of the buffer
-    length = dataBuffer->m_numOfElements;
-
-    // check parameters
-    FAULT_ON_NULL_ARG(dataBuffer);
-
-    if ((offset > length) || (count > length))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-    }
-
-    if (offset + count > length)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // get a the pointer to the array by using the offset
-    data = dataBuffer->GetElement(offset);
-
-    // setup timeout from managed property
-    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-
-    // this is a long running operation...
-    if (stack.m_customState == 1)
-    {
-        // ... and hasn't started yet
-
-        // bump custom state
-        stack.m_customState = 2;
-
-        // start write operation with async API
-        // requesting handling of "End-of-transfer"
-        reqStatus = sl_usbd_vendor_write_bulk_async(
-            sl_usbd_vendor_winusb_number,
-            (void *)data,
-            count,
-            UsbAsyncWriteCompleted,
-            &UsbStream_PAL,
-            true);
-
-        if (reqStatus == SL_STATUS_INVALID_STATE)
-        {
-            // device is not connected, return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-        else if (reqStatus == SL_STATUS_NOT_READY)
-        {
-            // transfer already in progress, return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
-    }
-
-    while (eventResult)
-    {
-        // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbOut, eventResult));
-
-        if (eventResult)
-        {
-            // done here
-            break;
-        }
-        else
-        {
-            // timeout has expired
-            // cancel the async operation...
-            sl_usbd_vendor_abort_write_bulk(sl_usbd_vendor_winusb_number);
-
-            // ... return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
-        }
-    }
-
-    // pop timeout heap block from stack
-    stack.PopValue();
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeRead___I4__SZARRAY_U1__I4__I4(
-    CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock_Array *dataBuffer;
-    CLR_RT_HeapBlock hbTimeout;
-    int64_t *timeoutTicks;
-    bool eventResult = true;
-
-    uint8_t *data;
-    uint32_t length = 0;
-    uint32_t count = 0;
-    uint32_t offset = 0;
-    sl_status_t reqStatus;
-
-    // get a pointer to the managed object instance and check that it's not NULL
-    CLR_RT_HeapBlock *pThis = stack.This();
-    FAULT_ON_NULL(pThis);
-
-    if ((bool)pThis[FIELD___disposed].NumericByRef().u1)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-    }
-
-    // perform parameter validation and setup TX operation
-
-    // dereference the data buffer from the argument
-    dataBuffer = stack.Arg1().DereferenceArray();
-    offset = stack.Arg2().NumericByRef().s4;
-    count = stack.Arg3().NumericByRef().s4;
-
-    // get the size of the buffer
-    length = dataBuffer->m_numOfElements;
-
-    // check parameters
-    FAULT_ON_NULL_ARG(dataBuffer);
-
-    if ((offset > length) || (count > length))
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-    }
-
-    if (offset + count > length)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
-
-    // get a the pointer to the array by using the offset
-    data = dataBuffer->GetElement(offset);
-
-    // setup timeout from managed property
-    hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___readTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
-    NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
-
-    // this is a long running operation...
-    if (stack.m_customState == 1)
-    {
-        // ... and hasn't started yet
-
-        // bump custom state
-        stack.m_customState = 2;
-
-        // clear RX counter
-        UsbStream_PAL.RxBytesReceived = 0;
-
-        // start read operation with async API
-        // requesting handling of "End-of-transfer"
-        reqStatus = sl_usbd_vendor_read_bulk_async(
-            sl_usbd_vendor_winusb_number,
-            (void *)data,
-            count,
-            UsbAsyncReadCompleted,
-            &UsbStream_PAL);
-
-        if (reqStatus == SL_STATUS_INVALID_STATE)
-        {
-            // device is not connected, return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
-        else if (reqStatus == SL_STATUS_NOT_READY)
-        {
-            // transfer already in progress, return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
-        }
-    }
-
-    while (eventResult)
-    {
-        // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeoutTicks, Event_UsbIn, eventResult));
-
-        if (eventResult)
-        {
-            // done here
-            break;
-        }
-        else
-        {
-            // timeout has expired
-            // cancel the async operation...
-            sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
-
-            // ... return exception
-            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
-        }
-    }
-
-    // pop timeout heap block from stack
-    stack.PopValue();
-    // set result with count of bytes received
-    stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
 
     NANOCLR_NOCLEANUP();
 }

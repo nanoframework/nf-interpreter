@@ -60,12 +60,12 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
     static const int FIELD__DataReceived = 9;
 
     NANOCLR_NATIVE_DECLARE(Flush___VOID);
+    NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4);
+    NANOCLR_NATIVE_DECLARE(Write___VOID__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_IsConnected___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
     NANOCLR_NATIVE_DECLARE(NativeClose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpen___I4__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(NativeWrite___VOID__SZARRAY_U1__I4__I4);
-    NANOCLR_NATIVE_DECLARE(NativeRead___I4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeReceivedBytesThreshold___VOID__I4);
 
     //--//
