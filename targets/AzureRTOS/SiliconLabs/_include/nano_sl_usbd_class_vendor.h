@@ -409,6 +409,8 @@ sl_status_t sl_usbd_vendor_abort_read_bulk(uint8_t class_nbr);
 // Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
 sl_status_t sl_usbd_vendor_abort_write_bulk(uint8_t class_nbr);
 
+sl_status_t sl_usbd_vendor_update_device_product_string(const char *product_string);
+
 // [END_NF_CHANGE]
 
 #ifdef __cplusplus

@@ -1376,4 +1376,13 @@ sl_status_t sl_usbd_vendor_abort_write_bulk(uint8_t class_nbr)
     return status;
 }
 
+sl_status_t sl_usbd_vendor_update_device_product_string(const char *product_string)
+{
+    sli_usbd_device_t *p_dev;
+    p_dev = &usbd_ptr->device;
+    p_dev->device_config.product_str_ptr = product_string;
+
+    return SL_STATUS_OK;
+}
+
 // [END_NF_CHANGE]
