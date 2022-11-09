@@ -9,38 +9,37 @@
 // 2kB blocks
 const BlockRange BlockRange1[] = {
 
-    // 08000000 nanoBooter
-    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 10},
+    // 00000000 nanoBooter
+    {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 11},
 
-    // 0800B000 nanoCLR
-    {BlockRange_BLOCKTYPE_CODE, 11, 158},
+    // 0000C00 nanoCLR
+    {BlockRange_BLOCKTYPE_CODE, 12, 64},
 
-    // 0804F800 deployment
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 159, 509},
+    // 00041000 deployment
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 65, 510},
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
     // configuration manager files to the CMake and call ConfigurationManager_Initialize()
     // in nanoBooter so the configuration can be managed when in booter mode
     ///////////////////////////////////////////////////////////////////////////////////////
-    // 080FF800 configuration block
-    {BlockRange_BLOCKTYPE_CONFIG, 510, 511},
+    // 001FF000 configuration block
+    {BlockRange_BLOCKTYPE_CONFIG, 511, 511},
     ///////////////////////////////////////////////////////////////////////////////////////
 };
 
 const BlockRegionInfo BlockRegions[] = {
     {
-        // STM32L4 flash requires 64bits width programming
-        (BlockRegionAttribute_ProgramWidthIs64bits),
+        (0),
 
         // start address for block region
-        0x08000000,
+        0x00000000,
 
         // total number of blocks in this region
         512,
 
         // total number of bytes per block
-        0x800,
+        0x1000,
 
         ARRAYSIZE_CONST_EXPR(BlockRange1),
         BlockRange1,

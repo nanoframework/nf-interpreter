@@ -32,11 +32,11 @@ __RAM_segment_used_end__ = 0;
 
 MEMORY
 {
-  flash0      (rx) : org = 0x00013000, len = 2M - 76k - 4k - 904k /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
-  deployment  (rx) : org = 0x000EE000, len = 904k                 /* space reserved for application deployment */
-  config      (rw) : org = 0x001FF000, len = 4k                   /* space reserved for configuration block */
-  RAM         (rwx): org = 0x20000000, len = 512k - 48            /* RAM */
-  bootclpbrd  (rwx): org = 0x2007FFD0, len = 48                   /* boot clipboard area */
+  flash0      (rx) : org = 0x00000000, len = 48k        /* space reserved for nanoBooter */
+  deployment  (rx) : org = 0x0000C000, len = 0          /* space reserved for application deployment */
+  config      (rw) : org = 0x001FF000, len = 4k         /* space reserved for configuration block */
+  RAM         (rwx): org = 0x20000000, len = 512k - 48  /* RAM */
+  bootclpbrd  (rwx): org = 0x2007FFD0, len = 48         /* boot clipboard area */
 }
 
 /* Linker script to place sections and symbol values. Should be used together
@@ -73,12 +73,6 @@ MEMORY
  *   __Vectors_Size
  */
 ENTRY(Reset_Handler)
-
-/* RAM region to be used for the boot clipboard.*/
-REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
-
-/* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", RAM);
 
 SECTIONS
 {
@@ -124,6 +118,7 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
   } > flash0
   __exidx_end = .;
+
 
   .copy.table :
   {
@@ -193,13 +188,13 @@ SECTIONS
     . = ALIGN(4);
     __bss_start__ = .;
     *(.bss)
-    *(.bss.*)
+    *(.bss.*)    
     *(COMMON)
     . = ALIGN(4);
     __bss_end__ = .;
   } > RAM
 
-  .heap (COPY) :
+  .heap (COPY):
   {
     __HeapBase = .;
     __end__ = .;
@@ -212,32 +207,26 @@ SECTIONS
   /* .stack_dummy section doesn't contains any symbols. It is only
    * used for linker to calculate size of stack sections, and assign
    * values to stack symbols later */
-   .stack_dummy (COPY):
+  .stack_dummy (COPY):
   {
     KEEP(*(.stack*))
   } > RAM
 
   /* Set stack top to end of RAM, and stack limit move down by
    * size of stack_dummy section */
-  __StackTop = .;
+  __StackTop = ORIGIN(RAM) + LENGTH(RAM);
   __StackLimit = __StackTop - SIZEOF(.stack_dummy);
   PROVIDE(__stack = __StackTop);
 
-  /* nanoFramework CLR managed heap section at the specified RAM section.*/
-  .clr_managed_heap (NOLOAD) :
-  {
-      . = ALIGN(8);
-      __clr_managed_heap_base__ = .;
-      PROVIDE(HeapBegin = .);
-      . = ORIGIN(CLR_MANAGED_HEAP_RAM) + LENGTH(CLR_MANAGED_HEAP_RAM);
-      . = ALIGN(8);
-      __clr_managed_heap_end__ = .;
-      PROVIDE(HeapEnd = .);
-  } > CLR_MANAGED_HEAP_RAM
-
   /* Check if data + heap + stack exceeds RAM limit */
   ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
+
+  /* Check if flash0 usage exceeds flash0 size */
+  ASSERT( LENGTH(flash0) >= (__etext + SIZEOF(.data)), "flash0 memory overflowed !")
 }
+
+/* RAM region to be used for the boot clipboard.*/
+REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
 /* Code rules inclusion.*/
 INCLUDE rules_code.ld
