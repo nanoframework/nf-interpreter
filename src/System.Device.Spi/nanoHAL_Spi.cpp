@@ -360,7 +360,7 @@ HRESULT nanoSPI_OpenDeviceEx(
     pBusConfig->devicesInUse++;
 
     // Return unique generated device handle
-    handle = CreateSpiHandle(spiDeviceConfig.Spi_Bus, spiDeviceConfig.Spi_Bus);
+    handle = CreateSpiHandle(spiDeviceConfig.Spi_Bus, deviceIndex);
 
     return S_OK;
 }
