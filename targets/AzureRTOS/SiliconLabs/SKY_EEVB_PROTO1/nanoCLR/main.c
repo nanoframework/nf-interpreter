@@ -77,29 +77,8 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        //GPIO_PinOutToggle(BSP_GPIO_LED0_PORT, BSP_GPIO_LED0_PIN + 1);
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(250));
-
-    //     // Wait for device connection.
-    //     reqStatus = sl_usbd_vendor_is_enabled(1, &conn);
-    //     _ASSERTE(reqStatus == SL_STATUS_OK);
-
-    //     while (conn != true)
-    //     {
-    //         tx_thread_sleep(TX_TICKS_PER_MILLISEC(250));
-
-    //         reqStatus = sl_usbd_vendor_is_enabled(1, &conn);
-
-    //         _ASSERTE(reqStatus == SL_STATUS_OK);
-    //     }
-
-    //    reqStatus = sl_usbd_vendor_read_bulk_sync(1,
-    //                                       (void     *)buffer,
-    //                                       3,
-    //                                       0,
-    //                                       &p_xfer_len);
-
-    //    _ASSERTE(reqStatus == SL_STATUS_OK);                                   
+        GPIO_PinOutToggle(gpioPortE, 9);
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1500));                             
     }
 }
 
@@ -224,6 +203,9 @@ void tx_application_define(void *first_unused_memory)
 int main(void)
 {
     sl_system_init();
+
+    // configure LED READY for output
+    GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
 
     // init boot clipboard
     InitBootClipboard();

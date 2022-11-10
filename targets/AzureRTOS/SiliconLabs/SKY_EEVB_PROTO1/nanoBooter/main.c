@@ -45,8 +45,6 @@ extern void ReceiverThread_entry(uint32_t parameter);
 
 TX_THREAD blinkThread;
 ALIGN_TYPE blinkThreadStack[BLINK_THREAD_STACK_SIZE / sizeof(ALIGN_TYPE)];
-TX_THREAD blinkThread1;
-ALIGN_TYPE blinkThread1Stack[BLINK_THREAD_STACK_SIZE / sizeof(ALIGN_TYPE)];
 
 void BlinkThread_entry(uint32_t parameter)
 {
@@ -54,19 +52,8 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        GPIO_PinOutToggle(gpioPortB, 0);
+        GPIO_PinOutToggle(gpioPortE, 9);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
-    }
-}
-
-void BlinkThread1_entry(uint32_t parameter)
-{
-    (void)parameter;
-
-    while (1)
-    {
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
-        //GPIO_PinOutToggle(gpioPortB, 1);
     }
 }
 
@@ -180,16 +167,13 @@ int main(void)
     // Initialize the board
     sl_system_init();
 
-    // configure
-    // GPIO_PinModeSet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN, gpioModeInput, 0);
-    GPIO_PinModeSet(gpioPortB, 0, gpioModePushPull, 0);
-
-// // output HFRCO onto PD7
-//   GPIO_PinModeSet(gpioPortD, 7, gpioModePushPull, 0);
-//   CMU->ROUTELOC0 = CMU_ROUTELOC0_CLKOUT0LOC_LOC2;
-//   CMU->CTRL |= CMU_CTRL_CLKOUTSEL0_USHFRCOQ;
-//   CMU->ROUTEPEN = CMU_ROUTEPEN_CLKOUT0PEN;
-
+    // configure LED READY for output
+    GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
+    // while (1)
+    // {
+    //     __NOP();
+    // } 
+    /* Hang here forever... */
     // init boot clipboard
     InitBootClipboard();
 
