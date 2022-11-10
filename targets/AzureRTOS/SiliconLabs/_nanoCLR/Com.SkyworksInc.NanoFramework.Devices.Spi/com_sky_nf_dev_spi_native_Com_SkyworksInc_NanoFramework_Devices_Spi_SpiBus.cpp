@@ -118,7 +118,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     if (stack.m_customState == 0)
     {
         // check if this SPI has been initialized
-        palSpi = GetNfPalfromBusIndex(busIndex);
+        palSpi = GetNfPalfromBusIndex(busIndex - 1);
 
         if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex - 1])
         {
@@ -289,7 +289,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
         // return of CLR_E_BUSY means async started
         hr = SPI_nWrite_nRead(
             palSpi,
-            SpiConfigs[busIndex],
+            SpiConfigs[busIndex - 1],
             rws,
             (uint8_t *)writeData,
             (int32_t)writeSize,
