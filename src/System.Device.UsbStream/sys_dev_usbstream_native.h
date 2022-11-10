@@ -19,7 +19,6 @@
 //     UsbEventType_Invalid = 0,
 //     UsbEventType_DeviceConnected = 1,
 //     UsbEventType_DeviceDisconnected = 2,
-//     UsbEventType_DataAvailable = 3,
 // } UsbEventType;
 
 struct Library_sys_dev_usbstream_native_System_Device_Usb_DeviceConnectionEventArgs
@@ -54,19 +53,13 @@ struct Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream
     static const int FIELD___disposed = 3;
     static const int FIELD___writeTimeout = 4;
     static const int FIELD___readTimeout = 5;
-    static const int FIELD___receivedBytesThreshold = 6;
-    static const int FIELD___bufferSize = 7;
-    static const int FIELD__UsbDeviceConnectionChanged = 8;
-    static const int FIELD__DataReceived = 9;
+    static const int FIELD__UsbDeviceConnectionChanged = 6;
 
-    NANOCLR_NATIVE_DECLARE(Flush___VOID);
     NANOCLR_NATIVE_DECLARE(Read___I4__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(Write___VOID__SZARRAY_U1__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_IsConnected___BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(get_BytesToRead___I4);
     NANOCLR_NATIVE_DECLARE(NativeClose___VOID);
     NANOCLR_NATIVE_DECLARE(NativeOpen___I4__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(NativeReceivedBytesThreshold___VOID__I4);
 
     //--//
 };
