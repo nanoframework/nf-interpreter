@@ -14,7 +14,6 @@ typedef enum __nfpack UsbEventType
     UsbEventType_Invalid = 0,
     UsbEventType_DeviceConnected = 1,
     UsbEventType_DeviceDisconnected = 2,
-    UsbEventType_DataAvailable = 3,
 } UsbEventType;
 
 #define DEVICEINTERFACE_GUID_PROP_NAME L"DeviceInterfaceGUID"
