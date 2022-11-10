@@ -564,8 +564,9 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     // get bus index
     busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
 
-    // SPI bus index is 1 based, but the array is 0 based
-    BusConfigChangesPending[busIndex - 1] = true;
+    BusConfigChangesPending[busIndex] = true;
+
+    NANOCLR_NOCLEANUP();
 
     NANOCLR_NOCLEANUP();
 }
