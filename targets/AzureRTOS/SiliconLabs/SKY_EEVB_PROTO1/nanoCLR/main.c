@@ -189,10 +189,6 @@ void tx_application_define(void *first_unused_memory)
     usb_device_hid_app_init();
 #endif
 
-#if GECKO_FEATURE_USBD_WINUSB == TRUE
-    //sli_usbd_vendor_winusb_init();
-#endif
-
 #if HAL_WP_USE_USB_CDC == TRUE
     sli_usbd_cdc_acm_acm0_init();
     usb_device_cdc_acm_app_init();
