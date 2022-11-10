@@ -101,26 +101,6 @@ void tx_application_define(void *first_unused_memory)
         }
     }
 
-    // Create blink thread
-    status = tx_thread_create(
-        &blinkThread1,
-        "Blink Thread1",
-        BlinkThread1_entry,
-        0,
-        (uint8_t *)blinkThread1Stack,
-        BLINK_THREAD_STACK_SIZE,
-        BLINK_THREAD_PRIORITY,
-        BLINK_THREAD_PRIORITY,
-        TX_NO_TIME_SLICE,
-        TX_AUTO_START);
-
-    if (status != TX_SUCCESS)
-    {
-        while (1)
-        {
-        }
-    }
-
     // Create receiver thread
     status = tx_thread_create(
         &receiverThread,
