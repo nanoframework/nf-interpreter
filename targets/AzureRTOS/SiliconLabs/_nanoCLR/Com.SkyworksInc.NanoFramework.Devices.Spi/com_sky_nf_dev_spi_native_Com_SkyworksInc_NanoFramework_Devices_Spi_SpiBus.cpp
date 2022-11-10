@@ -567,6 +567,99 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     BusConfigChangesPending[busIndex] = true;
 
     NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::NativeGetBusSpeed___I4__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+
+    NF_PAL_SPI *palSpi = NULL;
+    int8_t busIndex;
+    uint32_t clockDivValue;
+    uint32_t refFreq;
+
+    // get a pointer to the managed object instance and check that it's not NULL
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get bus index
+    // Gecko SPI bus index is 0 based
+    busIndex = (int8_t)stack.Arg1().NumericByRef().s4 - 1;
+
+    // get the PAL struct for the SPI bus
+    switch (busIndex)
+    {
+#if GECKO_USE_SPI0 == TRUE
+        case 0:
+            palSpi = &SPI0_PAL;
+
+            break;
+#endif
+
+#if GECKO_USE_SPI1 == TRUE
+        case 1:
+            palSpi = &SPI1_PAL;
+
+            break;
+#endif
+
+#if GECKO_USE_SPI2 == TRUE
+        case 2:
+            palSpi = &SPI2_PAL;
+
+            break;
+#endif
+
+#if GECKO_USE_SPI3 == TRUE
+        case 3:
+            palSpi = &SPI3_PAL;
+
+            break;
+#endif
+
+#if GECKO_USE_SPI4 == TRUE
+        case 4:
+            palSpi = &SPI4_PAL;
+            break;
+#endif
+
+#if GECKO_USE_SPI5 == TRUE
+        case 5:
+            palSpi = &SPI5_PAL;
+
+            break;
+#endif
+
+        default:
+            // the requested SPI bus is not valid
+            return false;
+    }
+
+    // The divider field of the USART->CLKDIV register is of the following form:
+    // xxxxxxxxxxxxxxx.yyyyy where x is the 15 bits integral part of the divider
+    // The driver it's only setting the integral part of the divider, so we just need to
+    // rotate the value 5 + 3 bits to the right to get the actual divider value
+
+    clockDivValue = palSpi->Handle->peripheral.usartPort->CLKDIV >> 8;
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    refFreq = CMU_ClockFreqGet(cmuClock_PCLK);
+#else
+#if defined(_CMU_HFPERPRESCB_MASK)
+    if (palSpi->Handle->peripheral.usartPort == USART2)
+    {
+        refFreq = CMU_ClockFreqGet(cmuClock_HFPERB);
+    }
+    else
+    {
+        refFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+    }
+#else
+    refFreq = CMU_ClockFreqGet(cmuClock_HFPER);
+#endif
+#endif
+
+    stack.SetResult_I4(clockDivValue * refFreq);
 
     NANOCLR_NOCLEANUP();
 }

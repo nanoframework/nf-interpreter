@@ -53,6 +53,7 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeReportBusSettingsChanged___VOID__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetBusSpeed___I4__I4);
 
     //--//
 };
