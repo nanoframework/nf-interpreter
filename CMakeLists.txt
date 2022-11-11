@@ -855,12 +855,6 @@ elseif(RTOS_ESP32_CHECK)
         endif()
     endif()
 
-    # need to add this here to keep IDF build system happy
-    add_executable(
-        ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
-    )
-
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)
 

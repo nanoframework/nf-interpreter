@@ -97,6 +97,40 @@
             }
         },
         {
+            "name": "xtensa-esp32c3-preset",
+            "description": "Preset for ESP32-C3 series",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "type": "FILEPATH",
+                    "value": "${sourceDir}/CMake/toolchain.riscv32-esp-elf.cmake"
+                },
+                "NF_TARGET_HAS_NANOBOOTER": "OFF",
+                "RTOS": "ESP32",
+                "TARGET_SERIES": "ESP32_C3",
+                "TARGET_BOARD": "ESP32_C3",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "API_System.Net": "ON",
+                "API_System.Math": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_System.Device.Dac": "OFF",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.I2s": "OFF",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.Device.Wifi": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_Hardware.Esp32": "ON",
+                "API_nanoFramework.Hardware.Esp32.Rmt": "OFF",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10"
+            }
+        },
+        {
             "name": "ORGPAL_PALTHREE_preset",
             "inherits": [
                 "general-preset",
@@ -462,6 +496,24 @@
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
                 "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
+        },
+        {
+            "name": "ESP32_C3_DEVKITM_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32c3-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "API_System.IO.FileSystem": "ON",
+                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF"
             }
         },
         {

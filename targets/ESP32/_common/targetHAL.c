@@ -9,7 +9,11 @@
 
 inline void HAL_AssertEx()
 {
+#if defined(__riscv)
+    asm("ebreak");
+#else
     asm("break.n 1");
+#endif
 
     while (true)
     { // nop
@@ -20,7 +24,11 @@ inline void HAL_AssertEx()
 
 inline void HARD_Breakpoint()
 {
+#if defined(__riscv)
+    asm("ebreak");
+#else
     asm("break.n 1");
+#endif
 
     while (true)
     { // nop

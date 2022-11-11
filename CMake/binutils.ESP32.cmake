@@ -135,6 +135,13 @@ function(nf_set_esp32_target_series)
     # store the series name for later use
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
 
+    # set the CPU type
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2")
+        set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
+    else()
+        set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
+    endif()
+
 endfunction()
 
 # Add packages that are common to ESP32 platform builds
@@ -281,7 +288,7 @@ macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
@@ -415,63 +422,40 @@ macro(nf_setup_partition_tables_generator)
     # create command line for partition table generator
     set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
 
-        # partition tables for ESP32
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
             --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
+            COMMENT "Generate partition table for 16MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
             --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
             ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
+            COMMENT "Generate partition table for 8MB flash" )
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
             --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
-        
+            COMMENT "Generate partition table for 4MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
+        # 2MB partition table for ESP32
+       
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table}  
             --flash-size 2MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
             ${CMAKE_BINARY_DIR}/partitions_2mb.bin
-            COMMENT "Generate Esp32 partition table for 2MB flash" )
-
-    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
-        # partition tables for ESP32-S2)
-
-                
-        # partition tables for ESP32
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
-
+            COMMENT "Generate partition table for 2MB flash" )
     endif()
 
 endmacro()
@@ -495,10 +479,6 @@ macro(nf_add_idf_as_library)
     set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
     
     message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
-
-    # add IDF app_main
-    target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)
@@ -546,7 +526,7 @@ macro(nf_add_idf_as_library)
         idf::esptool_py
         idf::spiffs
         idf::fatfs
-    )
+  )
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -662,6 +642,15 @@ macro(nf_add_idf_as_library)
             ${SDKCONFIG_DEFAULTS_FILE}
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
+        PROJECT_DIR ${CMAKE_SOURCE_DIR}
+    )
+
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+    # add IDF app_main
+    add_executable(
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
     )
 
     #Restore original sdkconfig back to defaults
