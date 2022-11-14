@@ -764,10 +764,15 @@ macro(nf_add_idf_as_library)
         SDKCONFIG_DEFAULT_CONTENTS)
 
     # find out if there is support for PSRAM
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" CONFIG_ESP32_SPIRAM_SUPPORT_POS)
+    set(SPIRAM_SUPPORT_PRESENT -1)
+    if(TARGET_SERIES_SHORT STREQUAL "esp32" OR TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    endif()
 
     # set variable
-    if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
+    if(${SPIRAM_SUPPORT_PRESENT} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
         message(STATUS "Support for PSRAM included")
     else()
@@ -775,7 +780,7 @@ macro(nf_add_idf_as_library)
         message(STATUS "Support for PSRAM **IS NOT** included")
     endif()
 
-    # find out revision info
+    # find out revision info (ESP32)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_0=y" CONFIG_ESP32_REV_MIN_0_POS)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_3=y" CONFIG_ESP32_REV_MIN_3_POS)
 
@@ -786,6 +791,23 @@ macro(nf_add_idf_as_library)
     elseif(${CONFIG_ESP32_REV_MIN_3_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. 3")
         message(STATUS "Building for chip revision 3")
+    endif()
+
+    # find out revision info (ESP32-C3)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_2=y" CONFIG_ESP32C3_REV_MIN_2_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_3=y" CONFIG_ESP32C3_REV_MIN_3_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_4=y" CONFIG_ESP32C3_REV_MIN_4_POS)
+
+    # set variable
+    if(${CONFIG_ESP32C3_REV_MIN_2_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 2")
+        message(STATUS "Building for chip revision >= 2")
+    elseif(${CONFIG_ESP32C3_REV_MIN_3_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 3")
+        message(STATUS "Building for chip revision >= 3")
+    elseif(${CONFIG_ESP32C3_REV_MIN_4_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. 4")
+        message(STATUS "Building for chip revision 4")
     endif()
 
     # find out if there is support for BLE
