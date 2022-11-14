@@ -50,8 +50,8 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     static const int FIELD___syncLock = 1;
     static const int FIELD___bufferSingleOperation = 2;
 
-    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN);
-    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(
+        NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration);
     NANOCLR_NATIVE_DECLARE(NativeReportBusSettingsChanged___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetBusSpeed___I4__I4);
 

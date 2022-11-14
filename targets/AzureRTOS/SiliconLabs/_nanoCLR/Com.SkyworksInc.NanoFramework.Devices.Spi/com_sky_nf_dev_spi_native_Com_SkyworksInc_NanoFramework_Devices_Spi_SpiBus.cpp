@@ -75,14 +75,11 @@ bool System_Device_IsLongRunningOperation(
     }
 }
 
-HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
+HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_IDX assemblyIdx;
-    CLR_RT_Assembly *thisAssembly = NULL;
     CLR_RT_HeapBlock *config = NULL;
-    CLR_RT_HeapBlock_Array *busConnectionSettings;
     CLR_RT_HeapBlock_Array *writeBuffer;
     CLR_RT_HeapBlock_Array *readBuffer;
     CLR_RT_HeapBlock *writeSpanByte;
@@ -113,27 +110,22 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
     busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
 
     // SPI bus index is 1 based, but the array is 0 based
-    spiDeviceConfig = &SpiConfigs[busIndex - 1];
+    busIndex--;
+
+    spiDeviceConfig = &SpiConfigs[busIndex];
 
     if (stack.m_customState == 0)
     {
         // check if this SPI has been initialized
-        palSpi = GetNfPalfromBusIndex(busIndex - 1);
+        palSpi = GetNfPalfromBusIndex(busIndex);
 
-        if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex - 1])
+        if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex])
         {
             // SPI bus not initialized or config changes pending
 
             // compose SPI_DEVICE_CONFIGURATION
-            // get ref to SpiBaseConfiguration from static _busConnectionSettings array...
-            // need to access it through the assembly
-            assemblyIdx = pThis->ObjectCls().Assembly();
-            thisAssembly = g_CLR_RT_TypeSystem.m_assemblies[assemblyIdx - 1];
-            busConnectionSettings =
-                thisAssembly->GetStaticField(Devices_Spi_SpiBus::FIELD_STATIC___busConnectionSettings)
-                    ->DereferenceArray();
-            // ...access it by index, which is 0 based
-            config = ((CLR_RT_HeapBlock *)busConnectionSettings->GetElement(busIndex - 1))->Dereference();
+            // get SpiBaseConfiguration from argument
+            config = stack.Arg5().Dereference();
 
             // CS is always active low
             spiDeviceConfig->ChipSelectActive = false;
@@ -142,7 +134,8 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
             // always bus master
             spiDeviceConfig->BusMode = SpiBusMode_master;
 
-            spiDeviceConfig->Spi_Bus = busIndex;
+            // SPI bus index is 1 based, but the array is 0 based
+            spiDeviceConfig->Spi_Bus = busIndex + 1;
 
             spiDeviceConfig->Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiMode].NumericByRef().s4;
             spiDeviceConfig->DataOrder16 =
@@ -159,86 +152,57 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack, bool isSpanByte)
             CPU_SPI_Initialize_Extended(busIndex, *spiDeviceConfig, true);
 
             // lower changes pending flag
-            BusConfigChangesPending[busIndex - 1] = false;
+            BusConfigChangesPending[busIndex] = false;
         }
 
-        // Buffers used either for the SpanBye either for the Byte array
+        // dereference the write and read SpanByte from the arguments
+        writeSpanByte = stack.Arg2().Dereference();
 
-        if (isSpanByte)
+        if (writeSpanByte != NULL)
         {
-            // dereference the write and read SpanByte from the arguments
-            writeSpanByte = stack.Arg2().Dereference();
-
-            if (writeSpanByte != NULL)
-            {
-                // get buffer
-                writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-                if (writeBuffer != NULL)
-                {
-                    // Get the write offset, only the elements defined by the span must be written, not the whole
-                    // array
-                    writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-
-                    // use the span length as write size, only the elements defined by the span must be written
-                    writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
-                    writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
-                }
-            }
-
-            if (writeData == NULL)
-            {
-                // nothing to write, have to zero this
-                writeSize = 0;
-            }
-
-            readSpanByte = stack.Arg3().Dereference();
-
-            if (readSpanByte != NULL)
-            {
-                // get buffer
-                readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
-
-                if (readBuffer != NULL)
-                {
-                    // Get the read offset, only the elements defined by the span must be read, not the whole array
-                    readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
-
-                    // use the span length as read size, only the elements defined by the span must be read
-                    readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
-                    readData = (unsigned char *)readBuffer->GetElement(readOffset);
-                }
-            }
-
-            if (readData == NULL)
-            {
-                // nothing to read, have to zero this
-                readSize = 0;
-            }
-        }
-        else
-        {
-            writeBuffer = stack.Arg2().DereferenceArray();
+            // get buffer
+            writeBuffer = writeSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
             if (writeBuffer != NULL)
             {
-                // grab the pointer to the array by getting the first element of the array
-                writeData = (unsigned char *)writeBuffer->GetFirstElementUInt16();
+                // Get the write offset, only the elements defined by the span must be written, not the whole
+                // array
+                writeOffset = writeSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                writeSize = writeBuffer->m_numOfElements;
+                // use the span length as write size, only the elements defined by the span must be written
+                writeSize = writeSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                writeData = (unsigned char *)writeBuffer->GetElement(writeOffset);
             }
+        }
 
-            readBuffer = stack.Arg3().DereferenceArray();
+        if (writeData == NULL)
+        {
+            // nothing to write, have to zero this
+            writeSize = 0;
+        }
+
+        readSpanByte = stack.Arg3().Dereference();
+
+        if (readSpanByte != NULL)
+        {
+            // get buffer
+            readBuffer = readSpanByte[SpanByte::FIELD___array].DereferenceArray();
 
             if (readBuffer != NULL)
             {
-                // grab the pointer to the array by getting the first element of the array
-                readData = (unsigned char *)readBuffer->GetFirstElementUInt16();
+                // Get the read offset, only the elements defined by the span must be read, not the whole array
+                readOffset = readSpanByte[SpanByte::FIELD___start].NumericByRef().s4;
 
-                // get the size of the buffer by reading the number of elements in the HeapBlock array
-                readSize = readBuffer->m_numOfElements;
+                // use the span length as read size, only the elements defined by the span must be read
+                readSize = readSpanByte[SpanByte::FIELD___length].NumericByRef().s4;
+                readData = (unsigned char *)readBuffer->GetElement(readOffset);
             }
+        }
+
+        if (readData == NULL)
+        {
+            // nothing to read, have to zero this
+            readSize = 0;
         }
 
         // assuming full duplex all the time
@@ -531,21 +495,12 @@ static HRESULT SPI_nWrite_nRead(
 }
 
 HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::
-    NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN(CLR_RT_StackFrame &stack)
+    NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration(
+        CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    NANOCLR_CHECK_HRESULT(ExecuteTransfer(stack, true));
-
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::
-    NativeTransfer___VOID__I4__SZARRAY_U2__SZARRAY_U2__BOOLEAN(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-
-    NANOCLR_CHECK_HRESULT(ExecuteTransfer(stack, false));
+    NANOCLR_CHECK_HRESULT(ExecuteTransfer(stack));
 
     NANOCLR_NOCLEANUP();
 }
@@ -561,8 +516,8 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
 
-    // get bus index
-    busIndex = (int8_t)stack.Arg1().NumericByRef().s4;
+    // SPI bus index is 1 based, but the array is 0 based
+    busIndex = (int8_t)stack.Arg1().NumericByRef().s4 - 1;
 
     BusConfigChangesPending[busIndex] = true;
 
@@ -578,6 +533,7 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     int8_t busIndex;
     uint32_t clockDivValue;
     uint32_t refFreq;
+    uint32_t realClk;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -633,7 +589,13 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
 
         default:
             // the requested SPI bus is not valid
-            return false;
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex])
+    {
+        // the configuration has not been set yet, or there are pending changes
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     // The divider field of the USART->CLKDIV register is of the following form:
@@ -659,7 +621,9 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
 #endif
 #endif
 
-    stack.SetResult_I4(clockDivValue * refFreq);
+    realClk = (refFreq - 1) / (2 * clockDivValue);
+
+    stack.SetResult_I4(realClk);
 
     NANOCLR_NOCLEANUP();
 }
