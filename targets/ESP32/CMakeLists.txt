@@ -11,10 +11,12 @@ nf_set_esp32_target_series()
 
 # option to reserve RAM for IDF allocator
 option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
-if(NOT (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION EQUAL OFF))
+
+if(NOT ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION)
     unset(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION CACHE)
     set(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION")
 endif()
+message(STATUS "Reserved RAM for allocation by IDF: ${ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION}k")
 
 # option to reserve SPI RAM for IDF allocator
 option(ESP32_SPIRAM_FOR_IDF_ALLOCATION "Reserved SPI RAM for IDF allocation (in kBytes)")
