@@ -14,7 +14,7 @@
 // need this include here when not using SDCARD so it can load the one from IDF
 #include <ffconf.h>
 #endif
- 
+
 /*---------------------------------------------------------------------------/
 /  FatFs Functional Configurations
 /---------------------------------------------------------------------------*/

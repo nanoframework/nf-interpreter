@@ -99,6 +99,11 @@ if(NF_FEATURE_HAS_SDCARD)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
     )
+else()
+    # if not using FatFS need to check if IDF ffconfig.h exists
+    if(NOT(IS_ABSOLUTE ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h))
+        message(FATAL_ERROR "'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\rIf this was deleted on a previous build using SDCard, just revert the change and restore the file.")
+    endif()
 endif()
 
 # target folder was added in main CMakeList
