@@ -53,7 +53,7 @@ steps:
           md $(Agent.TempDirectory)\ncs
           cd $(Agent.TempDirectory)\ncs
           west init -m https://github.com/nrfconnect/sdk-nrf --mr v${{ parameters.ncsVersion }}
-          west update
+          west update --narrow -o=--depth=1
           west zephyr-export
 
   # # cache pip packages
