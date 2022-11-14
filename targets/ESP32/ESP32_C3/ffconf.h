@@ -6,17 +6,14 @@
 
 // clang-format off
 
-#include <target_platform.h>
-
-#if HAL_USE_SDC == FALSE
-
-// need this include here when not using SDCARD so it can load the one from IDF
-#include <ffconf.h>
-
-#else
-
 #include <sys/param.h>
 #include <sdkconfig.h>
+#include <target_platform.h>
+
+#if (HAL_USE_SDC != TRUE)
+// need this include here when not using SDCARD so it can load the one from IDF
+#include <ffconf.h>
+#endif
 
 /*---------------------------------------------------------------------------/
 /  FatFs Functional Configurations
@@ -343,5 +340,3 @@ void ff_memfree(void*);
 #define disk_ioctl          ff_disk_ioctl
 
 // clang-format on
-
-#endif // (HAL_USE_SDC != TRUE)
