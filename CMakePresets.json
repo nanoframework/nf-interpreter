@@ -126,8 +126,7 @@
                 "API_nanoFramework.Hardware.Esp32.Rmt": "OFF",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10"
+                "API_nanoFramework.System.Text": "ON"
             }
         },
         {
@@ -513,7 +512,8 @@
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
-                "API_nanoFramework.Device.OneWire": "OFF"
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10"
             }
         },
         {
