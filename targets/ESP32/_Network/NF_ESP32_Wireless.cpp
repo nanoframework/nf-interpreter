@@ -349,9 +349,7 @@ int NF_ESP32_Wireless_Scan()
 
     // Start a Wi-Fi scan
     // When complete a Scan Complete event will be fired
-    esp_err_t res = esp_wifi_scan_start(&config, false);
-
-    return (int)res;
+    return esp_wifi_scan_start(&config, false);
 }
 
 wifi_auth_mode_t MapAuthentication(AuthenticationType type)
