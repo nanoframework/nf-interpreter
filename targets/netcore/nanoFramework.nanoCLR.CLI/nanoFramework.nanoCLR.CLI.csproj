@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp5</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Platforms>x64;x86</Platforms>
 	  <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
