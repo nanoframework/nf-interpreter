@@ -513,7 +513,7 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10"
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },
         {
