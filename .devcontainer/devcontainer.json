@@ -6,6 +6,7 @@
 	// - Dockerfile.ChibiOS = for ChibiOS based targets (ex: STM32, Netduino, Orgpal)
 	// - Dockerfile.ESP32 = for ESP32 targets
 	// - Dockerfile.TI = for TI targets
+	// - Dockerfile.Zephyr.Nordic = for Nordic targets
 	// If you prefer, you can use the source files and adjust them they are located, with the same names in ./sources. This will alow you to customize them and add anything you may need on top.
 	"dockerFile": "Dockerfile.All",
 	"context": ".",

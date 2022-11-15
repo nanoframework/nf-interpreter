@@ -1,0 +1,1 @@
+FROM ghcr.io/nanoframework/dev-container-zephyr-nordic:v0.1
