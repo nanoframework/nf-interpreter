@@ -192,24 +192,24 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAs
 
     switch (startScanResult)
     {
-        case StartScanOutcome_FailedToGetConfiguration:
-            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-            break;
 
         case StartScanOutcome_WrongInterfaceType:
         case StartScanOutcome_Esp32WifiNotInit:
         case StartScanOutcome_Esp32WifiNotStarted:
-        case StartScanOutcome_Esp32WifiState:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            break;
+
+        case StartScanOutcome_Esp32WifiState:
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
             break;
 
         case StartScanOutcome_Esp32WifiTimeout:
             NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
             break;
 
+        case StartScanOutcome_FailedToGetConfiguration:
         default:
-        debug_printf("START SCAN  error %d", startScanResult);
-            NANOCLR_SET_AND_LEAVE(CLR_E_UNKNOWN_TYPE);
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             break;
     }
 
