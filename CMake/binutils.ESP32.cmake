@@ -474,13 +474,6 @@ macro(nf_setup_partition_tables_generator)
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate partition table for 8MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
             --flash-size 4MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
@@ -492,6 +485,13 @@ macro(nf_setup_partition_tables_generator)
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
+            --flash-size 8MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
+            COMMENT "Generate partition table for 8MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
             --flash-size 16MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_16mb.csv
             ${CMAKE_BINARY_DIR}/partitions_16mb.bin
@@ -499,7 +499,7 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" )
         # 2MB partition table for ESP32
        
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
