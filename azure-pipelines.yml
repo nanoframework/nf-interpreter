@@ -45,7 +45,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.1
+      ref: refs/tags/v4.4.3
       
 jobs:
 
@@ -76,6 +76,8 @@ jobs:
         # get commit details, if this is a PR
         if($env:System_PullRequest_PullRequestId -ne $null)
         {
+          Write-Host "**This is a PR build**"
+
           $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
           if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
@@ -89,6 +91,8 @@ jobs:
         }
         else
         {
+          Write-Host "**build for other reasons**"
+
           echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
         }
       }
@@ -306,6 +310,7 @@ jobs:
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
       )
     )
@@ -349,7 +354,6 @@ jobs:
         TargetBoard: ST_STM32F429I_DISCOVERY
         TargetSeries: 'stm32f4xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: false
       ST_STM32F769I_DISCOVERY:
@@ -365,6 +369,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -374,7 +379,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32.yml
+  - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -459,9 +464,9 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-esp32.yml
+  - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -470,11 +475,14 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
+  - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
     parameters:
       buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
   - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/publish-sdkconfig.yml
 
 #################
 # NXP
@@ -518,7 +526,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-freertos-nxp.yml
+  - template: azure-pipelines-templates/build-freertos-nxp-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -587,7 +595,7 @@ jobs:
   - template: azure-pipelines-templates/nb-gitversioning.yml
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink.yml
+  - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml
@@ -610,7 +618,7 @@ jobs:
   - Check_Code_Style
 
   pool:
-    vmImage: 'windows-2019'
+    vmImage: 'windows-latest'
 
   strategy:
     matrix:
@@ -632,7 +640,7 @@ jobs:
 
   variables:
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('AZUREROTOS_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('AZURERTOS_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'azure_rtos'
 
@@ -643,7 +651,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-hexdfu.yml
   - template: azure-pipelines-templates/download-srecord.yml
-  - template: azure-pipelines-templates/build-azurertos.yml
+  - template: azure-pipelines-templates/build-azurertos-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -672,7 +680,7 @@ jobs:
     DOTNET_NOLOGO: true
     TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('WIN32_1_8_0__versioncounter', 400)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -762,7 +770,7 @@ jobs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Collecting managed helpers deployable artifacts
     inputs:
@@ -771,8 +779,9 @@ jobs:
         **\nanoFramework.nanoCLR.Win32*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-  
-  - task: CopyFiles@1
+      ignoreMakeDirErrors: true
+
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Collecting nanoCLR to deployable artifacts
     inputs:
@@ -782,6 +791,7 @@ jobs:
         **\nanoFramework.nanoCLR.dll
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - pwsh: |
       .\SignClient "Sign" `

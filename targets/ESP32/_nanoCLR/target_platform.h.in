@@ -8,10 +8,12 @@
 
 #include "esp32_ethernet_options.h"
 
-#define NANOCLR_GRAPHICS  @NANOCLR_GRAPHICS@
-#define HAL_USE_SPI       @HAL_USE_SPI_OPTION@
-#define HAL_USE_SDC       @HAL_USE_SDC_OPTION@
-#define HAL_USE_BLE       @HAL_USE_BLE_OPTION@
+#define NANOCLR_GRAPHICS                      @NANOCLR_GRAPHICS@
+#define ESP32_SPIRAM_FOR_IDF_ALLOCATION       @ESP32_SPIRAM_FOR_IDF_ALLOCATION@
+#define ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION @ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION@
+#define HAL_USE_SPI                           @HAL_USE_SPI_OPTION@
+#define HAL_USE_SDC                           @HAL_USE_SDC_OPTION@
+#define HAL_USE_BLE                           @HAL_USE_BLE_OPTION@
 
 #if (HAL_USE_SDC == TRUE)
 #define SDC_MAX_OPEN_FILES 5

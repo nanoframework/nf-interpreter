@@ -20,16 +20,12 @@
 
 static const char *TAG = "Memory";
 
-// Space to leave free in SPIRAM for allocation by IDF malloc
-#define SPIRAM_MEMORY_LEAVE_FOR_ALLOCATION (256 * 1024)
-
 #if HAL_USE_BLE
 // Reduce Managed heap if using BLE without spiram
 #define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (30 * 1024)
 #else
 // Space to leave free in internal RAM for allocation by IDF malloc
-// no need to leave any RAM free at this time
-#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (0 * 1024)
+#define INTERNAL_RAM_LEAVE_FREE_FOR_ALLOCATION (ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION * 1024)
 #endif
 
 // Saved memory allocation for when heap is reset so we can return same value.
@@ -120,7 +116,7 @@ void HeapLocation(unsigned char *&baseAddress, unsigned int &sizeInBytes)
             largestFreeBlock = spiramMaxSize;
 
             // get heap size to allocate
-            managedHeapSize = spiramMaxSize - SPIRAM_MEMORY_LEAVE_FOR_ALLOCATION;
+            managedHeapSize = spiramMaxSize - ESP32_SPIRAM_FOR_IDF_ALLOCATION;
 
             ESP_LOGI(TAG, "Allocating managed heap from SPIRAM");
         }

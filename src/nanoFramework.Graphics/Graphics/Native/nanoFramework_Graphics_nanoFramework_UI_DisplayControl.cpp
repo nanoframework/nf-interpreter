@@ -64,7 +64,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 {
     NANOCLR_HEADER();
     CLR_INT32 orientation = stack.Arg0().NumericByRef().s4;
-    g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation);
+    stack.SetResult_Boolean(g_GraphicsDriver.ChangeOrientation((DisplayOrientation)orientation));
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
@@ -90,10 +90,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
         writeData = (CLR_UINT32 *)colors->GetFirstElement();
         g_DisplayDriver.BitBlt(
-            stack.Arg0().NumericByRef().u2,
-            stack.Arg1().NumericByRef().u2,
-            stack.Arg2().NumericByRef().u2,
-            stack.Arg3().NumericByRef().u2,
+            0,                              // srcX
+            0,                              // srcY
+            stack.Arg2().NumericByRef().u2, // width
+            stack.Arg3().NumericByRef().u2, // height
+            stack.Arg2().NumericByRef().u2, // stride
+            stack.Arg0().NumericByRef().u2, // screenX
+            stack.Arg1().NumericByRef().u2, // screenY
             writeData);
     }
     NANOCLR_NOCLEANUP();
@@ -116,9 +119,13 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 
     spiconfig = stack.Arg0().Dereference();
     screenconfig = stack.Arg1().Dereference();
+
     // Define SPI display configuration for the display
+    // internally SPI bus ID is zero based, so better take care of that here
     displayConfig.Spi.spiBus =
-        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1;
+        spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___spiBus].NumericByRef().u1 -
+        1;
+
     displayConfig.Spi.chipSelect =
         spiconfig[Library_nanoFramework_Graphics_nanoFramework_UI_SpiConfiguration::FIELD___chipSelect]
             .NumericByRef()
@@ -206,11 +213,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         backgroundColor = stack.Arg7().NumericByRef().u4;
 
         // Prepare all the elements for the colors
-        GFX_Pen pen;
         GFX_Brush brush;
         GFX_Rect rectangle;
-        pen.color = backgroundColor;
-        pen.thickness = 0;
         brush.gradientStartColor = backgroundColor;
         brush.gradientEndColor = backgroundColor;
         rectangle.left = 0;
@@ -262,6 +266,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         CLR_UINT16 c;
 
         // Loop for each characters
+        heightChar = bm.m_height;
         for (int i = 0; i < textLength; i++)
         {
             // check if exceeded the height
@@ -281,19 +286,19 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                 if (chr.isValid)
                 {
                     widthChar = chr.width;
-                    // Set the start for the character
-                    if (chr.height > heightChar)
-                    {
-                        posY += chr.height - heightChar;
-                        heightChar = chr.height;
-                    }
+                    // calculate character max height for current line
+                    // seems better to use font height
 
-                    // set position using previous chars
+                    // set X position using previous char's width
                     posX += prevCharWidth;
                     if (posX + bm.m_width > width)
                     {
+                        // go to next line
                         posX = x;
+                        // add max character height of current line
                         posY += heightChar;
+                        // reset character height (will get new max height for next line)
+                        // heightChar=0;
                     }
 
                     // If there is a background, will fill the bitmap with it
@@ -301,7 +306,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     {
                         rectangle.right = bm.m_width;
                         rectangle.bottom = bm.m_height;
-                        bitmap->DrawRectangle(pen, brush, rectangle);
+                        // change bitmap->DrawRectangle(pen, brush, rectangle);
+                        // to FillRectangle (this function little bit faster than DrawRectangle)
+                        // In the future I plan to improve it too
+                        bitmap->FillRectangle(brush, rectangle);
                     }
                     else
                     {
@@ -316,7 +324,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
                     // to fit into the rectangle.
                     if (posY <= height)
                     {
-                        g_GraphicsDriver.Screen_Flush(*bitmap, posX, posY, bm.m_width, bm.m_height);
+                        g_GraphicsDriver.Screen_Flush(*bitmap, 0, 0, bm.m_width, bm.m_height, posX, posY);
                     }
 
                     prevCharWidth = widthChar;

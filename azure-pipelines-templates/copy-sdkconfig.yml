@@ -1,0 +1,13 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+steps:
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Copying SDKCONFIG
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)\nf-interpreter'
+      Contents: |
+        sdkconfig
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)_sdkconfig'
+      ignoreMakeDirErrors: true

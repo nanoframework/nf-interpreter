@@ -557,6 +557,13 @@ else()
 endif()
 
 
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+endif()
+
+
 if(API_System.Device.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
@@ -632,6 +639,13 @@ if(API_System.Net)
     endif()
 endif()
 
+# include nanoFramework.System.Text because of IO.Ports
+if( API_System.IO.Ports)
+
+    # thi API requires nanoFramework.System.Text
+    set(API_nanoFramework.System.Text ON CACHE INTERNAL "enable of API_nanoFramework.System.Text")
+
+endif()
 
 #################################################################
 # handles Networking support at HAL level
@@ -667,7 +681,7 @@ if(USE_NETWORKING_OPTION)
     # which is required for network
 
     if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
-        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that in your CMakePresets or in the build command line.")
     endif()
 
 else()
@@ -725,7 +739,8 @@ endif()
 
 ########################################################
 # check availability of hex2dfu tool if specified
-if(DEFINED TOOL_HEX2DFU_PREFIX)
+# only required for CHIBIOS and Azure RTOS
+if(DEFINED TOOL_HEX2DFU_PREFIX AND RTOS_AZURERTOS_CHECK AND RTOS_CHIBIOS_CHECK)
     if(NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe AND NOT EXISTS ${TOOL_HEX2DFU_PREFIX}/hex2dfu)
         message(STATUS "")
         message(STATUS "Couldn't find the hex2dfu tool at the specified path: ${TOOL_HEX2DFU_PREFIX}/hex2dfu.exe or ${TOOL_HEX2DFU_PREFIX}/hex2dfu")
@@ -836,7 +851,7 @@ elseif(RTOS_ESP32_CHECK)
 
         else()
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
 

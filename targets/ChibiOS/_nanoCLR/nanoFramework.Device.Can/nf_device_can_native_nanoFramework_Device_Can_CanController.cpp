@@ -470,7 +470,10 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::Get
             ;
 
         // replace the last comma with a terminator
-        deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+        if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')
+        {
+            deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] = '\0';
+        }
 
         // because the caller is expecting a result to be returned
         // we need set a return result in the stack argument using the appropriate SetResult according to the variable

@@ -33,20 +33,23 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::MountSpiNativ
     NANOCLR_HEADER();
 
 #if (HAL_USE_SDC == TRUE)
-    // Get passed SPi bus number 1 or 2
-    int spiBus = stack.Arg0().NumericByRef().s4;
 
-    // get Gpio pin for Chip select
-    uint32_t CSPin = stack.Arg1().NumericByRef().s4;
+    SPI_DEVICE_CONFIGURATION spiConfig;
 
-    // Get current Gpio pins used by SPI device
-    spiBus--; // Spi devnumber 0 & 1
+    // internally SPI bus ID is zero based
+    uint32_t busIndex = stack.Arg0().NumericByRef().s4 - 1;
+
+    // get GPIO pin for Chip select
+    uint32_t csPin = stack.Arg1().NumericByRef().s4;
+
+    // set SPI bus configuration
+    spiConfig.BusConfiguration = SpiBusConfiguration_FullDuplex;
 
     // Try to initialised SPI bus in case it's not open, mount requires bus to be already initialised
     // Ignore errors as it may already been opened by managed code if trying to share bus
-    CPU_SPI_Initialize(spiBus, SpiBusConfiguration_FullDuplex);
+    CPU_SPI_Initialize(busIndex, spiConfig);
 
-    if (!Storage_MountSpi(spiBus, CSPin, 0))
+    if (!Storage_MountSpi(busIndex, csPin, 0))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_VOLUME_NOT_FOUND);
     }

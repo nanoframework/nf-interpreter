@@ -75,19 +75,19 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
             (CLR_UINT8)(location >> 28));
 
         CLR_UINT32 contact = touchPoint->contact;
-        CLR_UINT32 flags = Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput::FLAG__None;
+        CLR_UINT32 flags = TouchInputFlags_None;
 
         if ((contact & TouchPointContactFlags_Primary) != 0)
         {
-            flags |= Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput::FLAG__Primary;
+            flags |= TouchInputFlags_Primary;
         }
         if ((contact & TouchPointContactFlags_Pen) != 0)
         {
-            flags |= Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput::FLAG__Pen;
+            flags |= TouchInputFlags_Pen;
         }
         if ((contact & TouchPointContactFlags_Palm) != 0)
         {
-            flags |= Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput::FLAG__Palm;
+            flags |= TouchInputFlags_Palm;
         }
 
         touchInput[Library_nanoFramework_Graphics_nanoFramework_UI_TouchInput::FIELD__Flags].SetInteger(

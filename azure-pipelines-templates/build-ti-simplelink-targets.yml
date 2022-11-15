@@ -2,7 +2,9 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  repoDirectory: '$(Build.SourcesDirectory)'
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
 
 steps:
 
@@ -12,7 +14,7 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)'
+      cmakeArgs: ' --preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)'
       workingDirectory:  ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 

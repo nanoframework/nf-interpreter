@@ -203,6 +203,11 @@ else()
     list(APPEND NF_CoreCLR_SRCS nanoHAL_ConfigurationManager_stubs.c)
 endif()
 
+# include platform implementation for Runtime_Native_Rtc
+if(EXISTS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native/nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
+    list(APPEND NF_CoreCLR_SRCS nf_rt_native_nanoFramework_Runtime_Native_Rtc.cpp)
+endif()
+
 foreach(SRC_FILE ${NF_CoreCLR_SRCS})
 
     set(NF_CoreCLR_SRC_FILE SRC_FILE-NOTFOUND)
@@ -252,6 +257,9 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
             ${CMAKE_SOURCE_DIR}/src/PAL/COM
             ${CMAKE_SOURCE_DIR}/src/PAL/Profiler
+
+            # platform specific implementations
+            ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Runtime.Native
 
             # target
             ${TARGET_BASE_LOCATION}

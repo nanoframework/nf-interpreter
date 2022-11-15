@@ -245,8 +245,16 @@ struct DivHelper
         //       initY is the initial value of Y
         a = _a;
         b = _b;
+
         if (b != 0)
+        {
             stride = a / b;
+        }
+        else
+        {
+            stride = 0;
+        }
+
         DIncStride = 2 * (a - b * stride);
         DIncStridePlus1 = 2 * (a - b * (stride + 1));
         Reset(initY);
@@ -477,8 +485,8 @@ struct CLR_GFX_Bitmap
     static HRESULT DeleteInstance(CLR_RT_HeapBlock &ref);
 
     static CLR_UINT32 CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative1BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
-    static CLR_UINT32 ConvertToNative16BppHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative1BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 ConvertToNative16BppHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
     void Bitmap_Initialize();
     void Clear();
@@ -489,6 +497,7 @@ struct CLR_GFX_Bitmap
 
     void DrawLine(const GFX_Pen &pen, int x0, int y0, int x1, int y1);
     void DrawRectangle(const GFX_Pen &pen, const GFX_Brush &brush, const GFX_Rect &rectangle);
+    void FillRectangle(const GFX_Brush &brush, const GFX_Rect &rectangle);
     void DrawRoundedRectangle(
         const GFX_Pen &pen,
         const GFX_Brush &brush,
@@ -505,6 +514,7 @@ struct CLR_GFX_Bitmap
         const GFX_Rect &src,
         CLR_UINT16 opacity);
 
+    void DrawChar(CLR_UINT16 c, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     void DrawText(LPCSTR str, CLR_GFX_Font &font, CLR_UINT32 color, int x, int y);
     static HRESULT DrawTextInRect(
         LPCSTR &szText,
@@ -611,7 +621,7 @@ struct GraphicsDriver
     static int GetHeight();
     static int GetBitsPerPixel();
     static DisplayOrientation GetOrientation();
-    static void ChangeOrientation(DisplayOrientation newOrientation);
+    static bool ChangeOrientation(DisplayOrientation newOrientation);
 
     static void Clear(const PAL_GFX_Bitmap &bitmap);
 
@@ -624,6 +634,7 @@ struct GraphicsDriver
         const GFX_Pen &pen,
         const GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangle(const PAL_GFX_Bitmap &bitmap, const GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangle(
         const PAL_GFX_Bitmap &bitmap,
         const GFX_Pen &pen,
@@ -659,7 +670,14 @@ struct GraphicsDriver
         const GFX_Rect &srcRect,
         CLR_UINT16 opacity);
 
-    static void Screen_Flush(CLR_GFX_Bitmap &bitmap, CLR_UINT16 x, CLR_UINT16 y, CLR_UINT16 width, CLR_UINT16 height);
+    static void Screen_Flush(
+        CLR_GFX_Bitmap &bitmap,
+        CLR_UINT16 srcX,
+        CLR_UINT16 srcY,
+        CLR_UINT16 width,
+        CLR_UINT16 height,
+        CLR_UINT16 screenX,
+        CLR_UINT16 screenY);
 
   private:
     static const CLR_UINT32 c_MaxSize = 2097152; // 2MB
@@ -673,6 +691,7 @@ struct GraphicsDriver
         GFX_Pen &pen,
         GFX_Brush &brush,
         const GFX_Rect &rectangle);
+    static void FillRectangleNative(const PAL_GFX_Bitmap &bitmap, GFX_Brush &brush, const GFX_Rect &rectangle);
     static void DrawRoundedRectangleNative(
         const PAL_GFX_Bitmap &bitmap,
         GFX_Pen &pen,
@@ -714,6 +733,14 @@ struct GraphicsDriver
         int &ySrc);
 
     static void DrawBresLineNative(const PAL_GFX_Bitmap &bitmap, int x0, int y0, int x1, int y1, GFX_Pen &pen);
+
+    static void DrawScanlineNative(
+        const PAL_GFX_Bitmap &bitmap,
+        int x1,
+        int x2,
+        int y,
+        CLR_UINT32 color,
+        CLR_UINT16 opacity);
 
     static CLR_UINT32 NativeColorInterpolate(CLR_UINT32 colorTo, CLR_UINT32 colorFrom, CLR_UINT16 scalar);
 
@@ -802,6 +829,12 @@ struct GraphicsDriver
 
     static void Draw4PointsEllipse(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
     static void Draw4PointsRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void Fill4PointLinesRoundedRect(const PAL_GFX_Bitmap &bitmap, int offsetX, int offsetY, void *params);
+    static void GradientFill4PointLinesRoundedRect(
+        const PAL_GFX_Bitmap &bitmap,
+        int offsetX,
+        int offsetY,
+        void *params);
 };
 
 // The PAL Graphics API uses the 24bit BGR color space, the one that's used for the
@@ -859,7 +892,7 @@ struct BmpDecoder
     BmpEncodingType encodingType;
     HRESULT BmpInitOutput(const CLR_UINT8 *src, CLR_UINT32 srcSize);
     HRESULT BmpStartOutput(CLR_GFX_Bitmap *bitmap);
-    static CLR_UINT32 BmpOutputHelper(CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
+    static CLR_UINT32 BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
 
   private:
     CLR_RT_ByteArrayReader source;

@@ -14,15 +14,10 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.1
+      ref: refs/tags/v4.4.3
     
 # scheduled build
-schedules:
-- cron: "58 23 * * *"
-  branches:
-    include: [ main ]
-  always: true
-  displayName: Nightly build at 23:58
+# the schedule is defined at the AZDO web interface because of inconsistencies with time zones
 
 jobs:
 
@@ -49,7 +44,8 @@ jobs:
           $commitDate = git show -s --format=%cd --date=short
           $commitDate = [DateTime]$commitDate
           
-          if($commitDate -eq [System.DateTime]::UtcNow.Date)
+          # shceduled build is at start of day, so check if commit date was from yesterday
+          if($commitDate -eq [System.DateTime]::UtcNow.AddDays(-1).Date)
           {
               # last commit is from today, build images
               echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
@@ -68,7 +64,15 @@ jobs:
       {
           # build for other reasons: build depending on target tag
           echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
-          "**build for other reasons**" | Write-Host  
+
+          if ($env:System_PullRequest_PullRequestId -ne $null)
+          {
+            "**This is a PR build**" | Write-Host
+          }
+          else
+          {
+            "**build for other reasons**" | Write-Host
+          }
       }
 
     name: BuildOptions
@@ -139,13 +143,13 @@ jobs:
               {
                   # ChibiOS targets are the only ones needing to be build on a global change
                   echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                  Write-host "Building ChibiOS targets"
               }
               else
               {
                   echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-              }
-              
-              Write-host "Building ALL targets"
+                  Write-host "Building ALL targets"
+              }              
           }
 
           if($buildingPr)
@@ -213,10 +217,10 @@ jobs:
 
   condition: >-
     or(
-      eq(variables['BUILD_ALL'], 'true'),
-      eq(variables['BUILD_CHIBIOS'], 'true'),
-      eq(variables['BUILD_ESP32'], 'true'),
-      eq(variables['BUILD_TI'], 'true')
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true')
     )
 
   pool:
@@ -256,14 +260,12 @@ jobs:
         TargetBoard: ORGPAL_PALTHREE
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: true
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
 
@@ -272,6 +274,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -281,7 +284,7 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/download-hexdfu.yml
-  - template: azure-pipelines-templates/build-chibios-stm32.yml
+  - template: azure-pipelines-templates/build-chibios-stm32-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -432,9 +435,9 @@ jobs:
   - template: azure-pipelines-templates/download-install-ninja.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  - template: azure-pipelines-templates/build-esp32.yml
+  - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -443,11 +446,14 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
+  - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
     parameters:
       buildDirectory: '$(Build.SourcesDirectory)\nf-interpreter\build'
   - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/publish-sdkconfig.yml
 
 #################
 # TI SimpleLink
@@ -508,7 +514,7 @@ jobs:
   - template: azure-pipelines-templates/nb-gitversioning.yml
   - template: azure-pipelines-templates/download-install-arm-gcc-toolchain.yml
   - template: azure-pipelines-templates/download-install-ninja.yml
-  - template: azure-pipelines-templates/build-ti-simplelink.yml
+  - template: azure-pipelines-templates/build-ti-simplelink-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-ti-sl-managed-helpers.yml

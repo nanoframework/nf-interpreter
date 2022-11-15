@@ -1149,6 +1149,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static const CLR_UINT32 Deployed = 0x00000008;
     static const CLR_UINT32 PreparingForExecution = 0x00000010;
     static const CLR_UINT32 StaticConstructorsExecuted = 0x00000020;
+    // this flag should be set when the m_header was malloc'ed
+    static const CLR_UINT32 FreeOnDestroy = 0x00000100;
 
     CLR_UINT32 m_idx; // Relative to the type system (for static fields access).
     CLR_UINT32 m_flags;
@@ -3390,6 +3392,8 @@ typedef enum Events
     Event_Radio             = 0x00000400,
     Event_Wifi_Station      = 0x00000800,
     Event_Bluetooth         = 0x00001000,
+    Event_UsbIn             = 0x00002000,
+    Event_UsbOut            = 0x00004000,
     Event_AppDomain         = 0x02000000,
     Event_Socket            = 0x20000000,
     Event_IdleCPU           = 0x40000000,

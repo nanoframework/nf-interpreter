@@ -49,15 +49,17 @@
                 "API_System.Device.Dac": "ON",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.I2c": "ON",
+                "API_System.Device.I2s": "ON",
                 "API_System.Device.Spi": "ON",
-                "API_System.Device.Pwm": "ON", 
+                "API_System.Device.Pwm": "ON",
                 "API_System.Device.Wifi": "ON",
                 "API_System.IO.Ports": "ON",
                 "API_Hardware.Esp32": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "256 * 1024"
             }
         },
         {
@@ -81,6 +83,7 @@
                 "API_System.Device.Dac": "ON",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.I2c": "ON",
+                "API_System.Device.I2s": "ON",
                 "API_System.Device.Spi": "ON",
                 "API_System.Device.Pwm": "ON",
                 "API_System.Device.Wifi": "ON",
@@ -89,7 +92,8 @@
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "256 * 1024"
             }
         },
         {
@@ -427,10 +431,11 @@
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "TARGET_SERIAL_BAUDRATE": "115200",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
-                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "ON",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
                 "API_Windows.Storage": "ON"
@@ -527,7 +532,8 @@
                 "GRAPHICS_DISPLAY": "ILI9342_320x240_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
-                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "1024 * 1024"
             }
         },
         {
@@ -544,6 +550,7 @@
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_ETHERNET_SUPPORT": "ON",
+                "ETH_PHY_RST_GPIO": "5",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
@@ -558,6 +565,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -565,6 +573,119 @@
                 "ESP32_ETHERNET_SUPPORT": "ON",
                 "ETH_PHY_RST_GPIO": "12",
                 "ETH_RMII_CLK_OUT_GPIO": "17",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON"
+            }
+        },
+        {
+            "name": "LilygoTWatch2020_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "ST7789V_240x320_SPI.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
+        },
+        {
+            "name": "LilygoTWatch2021_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "sdkconfig.default_pico_ble_rev3",
+                "TARGET_SERIAL_BAUDRATE": "115200",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "OFF",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "API_System.IO.FileSystem": "OFF",
+                "API_nanoFramework.Graphics": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "API_nanoFramework.Hardware.Esp32.Rmt": "OFF",
+                "GRAPHICS_DISPLAY": "GC9A01_240x240_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "CST816S.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
+            }
+        },
+        {
+            "name": "ESP32_ETHERNET_KIT_1.2_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "sdkconfig.default_ble_rev3.esp32",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ESP32_ETHERNET_INTERFACE": "IP101",
+                "ETH_PHY_RST_GPIO": "5",
+                "ETH_RMII_CLK_IN_GPIO": "0",
+                "ETH_PHY_ADDR": "1",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON"
+            }
+        },
+        {
+            "name": "ESP32_WT32_ETH01_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram.esp32",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ETH_RMII_CLK_IN_GPIO": "0",
+                "ETH_PHY_ADDR": "1",
+                "ETH_PHY_RST_GPIO": "16",
+                "API_System.IO.FileSystem": "ON",
+                "API_nanoFramework.Device.OneWire": "ON"
+            }
+        },
+        {
+            "name": "ESP32_WESP32_preset",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "ESP32_ETHERNET_SUPPORT": "ON",
+                "ESP32_ETHERNET_INTERFACE": "RTL8201",
+                "ETH_RMII_CLK_IN_GPIO": "0",
+                "ETH_MDIO_GPIO": "17",
+                "ETH_MDC_GPIO": "16",
                 "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Device.OneWire": "ON"
             }
@@ -578,6 +699,7 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
@@ -1300,6 +1422,41 @@
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.TI.EasyLink": "ON",
                 "API_nanoFramework.Hardware.TI": "ON"
+            }
+        },
+        {
+            "name": "ESP32_PSRAM_REV0_UI_preset",
+            "description": "",
+            "displayName": "",
+            "inherits": [
+                "general-preset",
+                "xtensa-esp32-preset"
+            ],
+            "hidden": true,
+            "cacheVariables": {
+                "SDK_CONFIG_FILE": "",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_System.Math": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_System.Device.Dac": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_DISPLAY": "ILI9341_XXXxYYY_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "XPT2046.cpp",
+                "TOUCHPANEL_INTERFACE": "Spi_To_TouchPanel.cpp"
             }
         }
     ]

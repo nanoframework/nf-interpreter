@@ -183,7 +183,11 @@ void Library_sys_dev_gpio_native_System_Device_Gpio_GpioController::GetGpioPin(
     do
     {
         // try to get item from the array list
-        gpioPins->GetItem(index++, gpioPinBundle);
+        if (!SUCCEEDED(gpioPins->GetItem(index++, gpioPinBundle)))
+        {
+            // GetItem failed, clear to indicate failure.
+            gpioPinBundle = NULL;
+        }
 
         if (gpioPinBundle == NULL)
         {

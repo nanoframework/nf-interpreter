@@ -698,6 +698,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
         uint8_t *bufPtr = buf;
         signed int accessLenInBytes = lengthInBytes;
+        bool isMemoryMapped;
         signed int blockOffset =
             BlockRegionInfo_OffsetFromBlock(((BlockRegionInfo *)(&deviceInfo->Regions[iRegion])), accessAddress);
 
@@ -746,6 +747,10 @@ void CLR_DBG_Debugger::AccessMemory(
                 {
                     case AccessMemory_Check:
                     case AccessMemory_Read:
+
+                        // command execute
+                        proceed = true;
+
                         if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
                         {
                             // memory block support XIP, OK to read directly from address
@@ -760,16 +765,27 @@ void CLR_DBG_Debugger::AccessMemory(
                                 // copy memory segment to buffer
                                 memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
                             }
-
-                            // done here
-                            proceed = true;
                         }
                         else
                         {
-                            // need to use driver to access storage block
-                            if (mode == AccessMemory_Check)
+                            // no XIP, need to figure out the best way to read storage block
+                            isMemoryMapped = pRegion->Attributes & BlockRegionAttribute_MemoryMapped;
+
+                            if (isMemoryMapped)
                             {
-                                bufPtr = (unsigned char *)CLR_RT_Memory::Allocate(lengthInBytes, true);
+                                // memory mapped region, get mapped address for read
+                                BlockStorageDevice_GetMemoryMappedAddress(
+                                    m_deploymentStorageDevice,
+                                    iRegion,
+                                    iRange,
+                                    &accessAddress);
+                            }
+
+                            if (mode == AccessMemory_Check && !isMemoryMapped)
+                            {
+                                // allocate buffer large enough to read the block
+                                // for READ memory access, the buffer has already been allocated in the caller
+                                bufPtr = (unsigned char *)platform_malloc(lengthInBytes);
 
                                 if (!bufPtr)
                                 {
@@ -783,19 +799,36 @@ void CLR_DBG_Debugger::AccessMemory(
                                 }
                             }
 
-                            proceed = BlockStorageDevice_Read(
-                                m_deploymentStorageDevice,
-                                accessAddress,
-                                NumOfBytes,
-                                (unsigned char *)bufPtr);
-
-                            if (mode == AccessMemory_Check)
+                            if (!isMemoryMapped)
                             {
-                                // compute CRC32 of the memory segment
-                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                    SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
+                                // read block from storage
+                                proceed = BlockStorageDevice_Read(
+                                    m_deploymentStorageDevice,
+                                    accessAddress,
+                                    NumOfBytes,
+                                    (unsigned char *)bufPtr);
+                            }
 
-                                CLR_RT_Memory::Release(bufPtr);
+                            if (mode == AccessMemory_Read && isMemoryMapped)
+                            {
+                                // copy memory segment to buffer
+                                memcpy((unsigned char *)bufPtr, (const void *)accessAddress, NumOfBytes);
+
+                                // done here
+                                return;
+                            }
+
+                            // adjust buffer pointer to match access address
+                            bufPtr = (unsigned char *)accessAddress;
+
+                            // compute CRC32 of the memory segment
+                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
+                                SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
+
+                            // free buffer if allocated
+                            if (!isMemoryMapped)
+                            {
+                                platform_free(bufPtr);
                             }
                         }
                         break;

@@ -3,13 +3,13 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
     curl \
-    bzip2 \
+    xz-utils \
     unzip
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake \
-    && curl -o /tmp/dc-downloads/gcc-arm.tar.bz2  $GCC_URI \
-    && bunzip2 -d /tmp/dc-downloads/gcc-arm.tar.bz2 \
+    && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
+    && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
@@ -39,6 +39,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog icu-devtools 2>&1 \
     && apt-get install -y \
     git \
+    clang-format \
     curl \
     ninja-build \
     srecord \

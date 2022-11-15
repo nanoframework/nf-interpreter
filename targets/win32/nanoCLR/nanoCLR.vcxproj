@@ -55,8 +55,8 @@
     <NBGV_VersionMajor Condition="'$(NBGV_VersionMajor)'==''">9</NBGV_VersionMajor>
     <NBGV_VersionMinor Condition="'$(NBGV_VersionMinor)'==''">99</NBGV_VersionMinor>
     <NBGV_BuildNumber Condition="'$(NBGV_BuildNumber)'==''">999</NBGV_BuildNumber>
-    <NBGV_VersionHeight Condition="'$(NBGV_VersionHeight)'==''">9999</NBGV_VersionHeight>
-    <NBGV_AssemblyInformationalVersion Condition="'$(NBGV_AssemblyInformationalVersion)'==''">9.99.999.9999</NBGV_AssemblyInformationalVersion>
+    <TARGET_BUILD_COUNTER Condition="'$(TARGET_BUILD_COUNTER)'==''">9999</TARGET_BUILD_COUNTER>
+    <NF_AssemblyInformationalVersion>$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)</NF_AssemblyInformationalVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

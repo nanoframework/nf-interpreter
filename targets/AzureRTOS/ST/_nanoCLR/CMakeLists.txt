@@ -3,10 +3,6 @@
 # See LICENSE file in the project root for full license information.
 #
 
-# add header file with common target definitions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_platform.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/target_platform.h @ONLY)
-
 # append target Azure RTOS nanoCLR source files 
 list(APPEND TARGET_AZURERTOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetHAL.cpp)
 list(APPEND TARGET_AZURERTOS_NANOCLR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/targetPAL.c)
