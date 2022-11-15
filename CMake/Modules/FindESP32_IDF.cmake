@@ -80,7 +80,3 @@ list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/i
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/include/esp_additions/freertos)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/port/${ESP32_CPU_TYPE}/include)
 list(APPEND ESP32_IDF_INCLUDE_DIRS ${esp32_idf_SOURCE_DIR}/components/freertos/port/${ESP32_CPU_TYPE}/include/freertos)
-
-# if(NOT ${ESP32_C3_ROM_FILE_FIXED} AND ${TARGET_SERIES_SHORT} STREQUAL "esp32c3")
-
-# endif()

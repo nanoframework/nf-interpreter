@@ -102,6 +102,54 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
+# fixes the ESP32_C3 rom linker script for rom_temp_to_power symbol
+# this is required if the CPU it's a revision <= 2 
+macro(nf_fix_esp32c3_rom_file)
+
+    if((${TARGET_SERIES_SHORT} STREQUAL "esp32c3"))
+        # build is for esp32c3
+
+        if(${ESP32_REVISION} LESS_EQUAL 2)
+            # need to UNcomment the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+        
+            string(REPLACE
+                    "/* rom_temp_to_power = 0x40001ab4; */"
+                    "rom_temp_to_power = 0x40001ab4;"
+                    ESP32_C3_ROM_LD_NEW_CONTENT
+                    "${ESP32_C3_ROM_LD_CONTENT}")
+        
+            file(WRITE 
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+        else()
+            # need to COMMENT the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+
+            string(FIND "${ESP32_C3_ROM_LD_CONTENT}" "/* rom_temp_to_power = 0x40001ab4; */" ROM_TEMP_SYMBOL_INDEX)
+        
+            if(ROM_TEMP_SYMBOL_INDEX EQUAL -1)
+             
+                string(REPLACE
+                        "rom_temp_to_power = 0x40001ab4;"
+                        "/* rom_temp_to_power = 0x40001ab4; */"
+                        ESP32_C3_ROM_LD_NEW_CONTENT
+                        "${ESP32_C3_ROM_LD_CONTENT}")
+            
+                file(WRITE 
+                    ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                    "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+            endif()
+
+        endif()
+
+    endif()
+    
+endmacro()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
@@ -794,6 +842,7 @@ macro(nf_add_idf_as_library)
     endif()
 
     # find out revision info (ESP32-C3)
+    unset(ESP32_REVISION)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_2=y" CONFIG_ESP32C3_REV_MIN_2_POS)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_3=y" CONFIG_ESP32C3_REV_MIN_3_POS)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_4=y" CONFIG_ESP32C3_REV_MIN_4_POS)
@@ -802,13 +851,18 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_ESP32C3_REV_MIN_2_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 2")
         message(STATUS "Building for chip revision >= 2")
+        set(ESP32_REVISION "2" CACHE STRING "ESP32 revision")
     elseif(${CONFIG_ESP32C3_REV_MIN_3_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. >= 3")
         message(STATUS "Building for chip revision >= 3")
+        set(ESP32_REVISION "3" CACHE STRING "ESP32 revision")
     elseif(${CONFIG_ESP32C3_REV_MIN_4_POS} GREATER -1)
         set(REVISION_INFO ", chip rev. 4")
         message(STATUS "Building for chip revision 4")
+        set(ESP32_REVISION "4" CACHE STRING "ESP32 revision")
     endif()
+
+    nf_fix_esp32c3_rom_file()
 
     # find out if there is support for BLE
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)
