@@ -498,7 +498,7 @@
             }
         },
         {
-            "name": "ESP32_C3_DEVKITM_preset",
+            "name": "ESP32_C3_preset",
             "inherits": [
                 "general-preset",
                 "xtensa-esp32c3-preset"

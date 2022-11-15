@@ -247,6 +247,18 @@
             }
         },
         {
+            "name": "ESP32_C3",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "ESP32_C3_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
             "name": "M5Stack",
             "inherits": [
                 "user-local-tools",
@@ -771,6 +783,11 @@
             "name": "ESP_WROVER_KIT",
             "displayName": "ESP_WROVER_KIT",
             "configurePreset": "ESP_WROVER_KIT"
+        },
+        {
+            "name": "ESP32_C3",
+            "displayName": "ESP32_C3",
+            "configurePreset": "ESP32_C3"
         },
         {
             "name": "M5Stack",
