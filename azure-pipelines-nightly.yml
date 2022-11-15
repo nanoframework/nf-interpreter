@@ -414,6 +414,15 @@ jobs:
         TargetName: M5Core2
         PackageName: M5Core2
 
+      ESP32_C3_REV3:
+        TargetBoard: ESP32_C3
+        TargetSeries: 'esp32c3'
+        BuildOptions: 
+        SDK_config: sdkconfig.default_rev3.esp32c3
+        IDF_Target: esp32c3
+        TargetName: ESP32_C3_REV3
+        PackageName: ESP32_C3_REV3
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
