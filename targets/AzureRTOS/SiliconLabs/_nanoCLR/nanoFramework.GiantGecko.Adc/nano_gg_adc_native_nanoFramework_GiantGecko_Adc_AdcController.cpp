@@ -73,13 +73,13 @@ HRESULT OpenAdcChannel(int32_t channelNumber, CLR_RT_HeapBlock *adcConfiguration
 
     // is this ADC already initialized?
     if (
-#if GECKO_USE_ADC0 && !GECKO_USE_ADC1
+#if GECKO_USE_ADC0
         (adcDriver == ADC0 && !*adcInitialized)
 #endif
 #if GECKO_USE_ADC0 && GECKO_USE_ADC1
         ||
 #endif
-#if !GECKO_USE_ADC0 && GECKO_USE_ADC1
+#if GECKO_USE_ADC1
         (adcDriver == ADC1 && !*adcInitialized)
 #endif
     )
@@ -109,8 +109,10 @@ HRESULT OpenAdcChannel(int32_t channelNumber, CLR_RT_HeapBlock *adcConfiguration
         adcInit->timebase = ADC_TimebaseCalc(0);
 
 #if defined(_ADC_CTRL_ADCCLKMODE_MASK)
-        adcInit->em2ClockConfig = adcEm2ClockOnDemand;
+        adcInit->em2ClockConfig = adcEm2Disabled;
 #endif
+
+        ADC_Reset(adcDriver);
 
         // init ADC
         ADC_Init(adcDriver, adcInit);
