@@ -325,7 +325,11 @@ static void gpio_isr(void *arg)
 
         if (xHigherPriorityTaskWoken != pdFAIL)
         {
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+            portYIELD_FROM_ISR();
+#else
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+#endif            
         }
     }
     else

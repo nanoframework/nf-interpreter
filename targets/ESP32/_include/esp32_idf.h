@@ -11,6 +11,10 @@
 #include <sys/time.h>
 #include <time.h>
 
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#include <stddef.h>
+#endif
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/timers.h>
@@ -34,7 +38,17 @@
 #define CONFIG_LOG_TIMESTAMP_SOURCE_RTOS 1
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 #include <esp_log.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
 
 #include <spi_master.h>
 #include <gpio.h>
@@ -43,7 +57,9 @@
 #include <uart.h>
 #include <ledc.h>
 #include <adc.h>
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
 #include <dac.h>
+#endif
 #include <timer.h>
 #include <esp_spiffs.h>
 #include <pcnt.h>
