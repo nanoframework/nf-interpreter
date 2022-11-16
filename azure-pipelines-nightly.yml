@@ -418,7 +418,6 @@ jobs:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
         BuildOptions: 
-        SDK_config: sdkconfig.default_rev3.esp32c3
         IDF_Target: esp32c3
         TargetName: ESP32_C3_REV3
         PackageName: ESP32_C3_REV3
