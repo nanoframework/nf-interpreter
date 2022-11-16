@@ -57,7 +57,7 @@
 #include <uart.h>
 #include <ledc.h>
 #include <adc.h>
-#ifdef DAC_CHANNEL_1
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
 #include <dac.h>
 #endif
 #include <timer.h>
