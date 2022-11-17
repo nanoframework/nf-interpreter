@@ -48,8 +48,12 @@ RUN git clone --branch mbedtls-2.28.1 https://github.com/ARMmbed/mbedtls.git --d
 # Clone ESP-IDF
 RUN git clone --branch v4.4.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
+# set gcc location
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
+ENV PATH=$ARM_GCC_PATH/bin:${PATH}
+
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
+COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
 # COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
