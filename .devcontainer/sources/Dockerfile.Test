@@ -1,0 +1,7 @@
+FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils \
+    && apt-get install -y \
+    curl \
+    bzip2 \
+    unzip
