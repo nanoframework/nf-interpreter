@@ -12,9 +12,10 @@ env:
   GCR_SOURCE_FILE: .devcontainer/sources/Dockerfile.TEST
   GCR_RELEASEABLE: false
 
-on: [push, pr]
-  paths:
-    - ${{ env.GCR_SOURCE_FILE }}
+on:
+  push:
+    paths:
+      - ${{ env.GCR_SOURCE_FILE }}
 
 jobs:
   build:
