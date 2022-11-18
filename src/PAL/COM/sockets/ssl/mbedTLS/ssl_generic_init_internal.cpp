@@ -169,6 +169,10 @@ bool ssl_generic_init_internal(
     // configure random generator
     mbedtls_ssl_conf_rng(context->conf, mbedtls_ctr_drbg_random, context->ctr_drbg);
 
+#if defined(PLATFORM_ESP32) && defined(CONFIG_MBEDTLS_DEBUG)
+    mbedtls_esp_enable_debug_log(context->conf, CONFIG_MBEDTLS_DEBUG_LEVEL);
+#endif
+
     // CA root certs from store, if available
     if (g_TargetConfiguration.CertificateStore->Count > 0)
     {
