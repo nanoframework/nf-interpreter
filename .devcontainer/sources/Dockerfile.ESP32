@@ -49,9 +49,7 @@ RUN git clone --branch mbedtls-2.28.1 https://github.com/ARMmbed/mbedtls.git --d
 RUN git clone --branch v4.4.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
 COPY --from=downloader /tmp/dc-extracted/cmake /usr
-# COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
@@ -59,9 +57,19 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
+ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH:$IDF_PATH/components/esptool_py/esptool:$IDF_PATH/components/espcoredump:$IDF_PATH/components/partition_table/:$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch3-8.4.0/riscv32-esp-elf/bin
+
+ENV PATH=$PATH:\
+$IDF_PATH/components/esptool_py/esptool:\
+$IDF_PATH/components/espcoredump:\ 
+$IDF_PATH/components/partition_table/:\
+$IDF_PATH/tools/:\
+$IDF_PATH/components/app_update:\
+/root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
+/root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
+/root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
