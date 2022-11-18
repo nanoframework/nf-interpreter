@@ -14,8 +14,8 @@ env:
 
 on:
   push:
-    paths:
-      - '**/sources/Dockerfile.TEST'
+    # paths:
+    #   - '**/sources/Dockerfile.TEST'
 
 jobs:
   build:
