@@ -76,6 +76,10 @@
 #include <tusb_cdc_acm.h>
 #endif
 
+#if CONFIG_MBEDTLS_DEBUG
+#include <mbedtls/esp_debug.h>
+#endif
+
 // Uncomment to support Ethernet
 //#define ESP32_ETHERNET_SUPPORT
 

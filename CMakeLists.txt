@@ -37,6 +37,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(binutils.common)
 include(binutils.ESP32)
 
+nf_check_path_limits()
+
 ######################################################
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)

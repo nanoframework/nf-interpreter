@@ -18,3 +18,9 @@ steps:
             }
         errorActionPreference: 'stop'
         failOnStderr: 'true'
+
+  - task: PowerShell@2
+    displayName: Enable long paths
+    inputs:
+      targetType: 'inline'
+      script: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
