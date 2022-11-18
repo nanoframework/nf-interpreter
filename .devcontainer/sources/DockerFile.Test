@@ -2,6 +2,6 @@ FROM ghcr.io/linuxcontainers/debian-slim:latest AS base_container
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
-    curl # \
-    # xz-utils \
-    # unzip
+    curl \
+    xz-utils \
+    unzip
