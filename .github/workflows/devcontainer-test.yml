@@ -15,12 +15,17 @@ env:
 on:
   push:
     paths:
-      - .devcontainer/sources/Dockerfile.TEST
+      - ${{ env.GCR_SOURCE_FILE }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: release check
       if: github.ref == 'refs/heads/main'
