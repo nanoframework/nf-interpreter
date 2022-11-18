@@ -15,7 +15,7 @@ env:
 on:
   push:
     paths:
-      - ${{ env.GCR_SOURCE_FILE }}
+      - '${{ env.GCR_SOURCE_FILE }}'
 
 jobs:
   build:
