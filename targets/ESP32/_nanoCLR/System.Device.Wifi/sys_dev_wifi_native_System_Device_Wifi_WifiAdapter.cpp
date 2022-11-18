@@ -7,8 +7,9 @@
 #include <sys_dev_wifi_native.h>
 #include <nf_rt_events_native.h>
 #include <esp_wifi_types.h>
+#include <NF_ESP32_Network.h>
 
-///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Device.Wifi (in managed code) !!! //
 ///////////////////////////////////////////////////////////////////////////////////////
 struct ScanRecord
@@ -180,17 +181,38 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeDiscon
 HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAsync___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    int netIndex;
+    int startScanResult;
+
+    NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
+
+    // Start scan
+    startScanResult = Network_Interface_Start_Scan(netIndex);
+
+    switch (startScanResult)
     {
-        int netIndex;
 
-        NANOCLR_CHECK_HRESULT(GetNetInterfaceIndex(stack, &netIndex));
-
-        // Start scan
-        if (Network_Interface_Start_Scan(netIndex) == false)
-        {
+        case StartScanOutcome_WrongInterfaceType:
+        case StartScanOutcome_Esp32WifiNotInit:
+        case StartScanOutcome_Esp32WifiNotStarted:
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
-        }
+            break;
+
+        case StartScanOutcome_Esp32WifiState:
+            NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
+            break;
+
+        case StartScanOutcome_Esp32WifiTimeout:
+            NANOCLR_SET_AND_LEAVE(CLR_E_TIMEOUT);
+            break;
+
+        case StartScanOutcome_FailedToGetConfiguration:
+        default:
+            NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            break;
     }
+
     NANOCLR_NOCLEANUP();
 }
 

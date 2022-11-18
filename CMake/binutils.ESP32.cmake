@@ -5,6 +5,57 @@
 
 include(binutils.common)
 
+# process ESP32 Ethernet options
+macro(nf_process_esp32_ethernet_options)
+
+    # need to process this?
+    if(ESP32_ETHERNET_SUPPORT)
+
+        if(NOT ESP32_ETHERNET_INTERFACE)
+            # default to LAN8720
+            set(ESP32_ETHERNET_INTERFACE "LAN8720" CACHE INTERNAL "Defaulting LAN8720")
+
+            message(STATUS "\n\n*** No Ethernet interface defined. Defaulting to LAN8720. ***\n\n")
+        endif()
+
+        # list of supported PHYs
+        set(ESP32_SUPPORTED_PHY "LAN8720" "IP101" "RTL8201" "DP83848" "KSZ8041" CACHE INTERNAL "supported ESP32 PHYs")
+        # list of supported ETH SPI PHYs
+        # ENJ28J60 currently not supported, driver in IDF examples (TODO)
+        set(ESP32_SUPPORTED_ETH_SPI "W5500" "DM9051" "ENJ28J60" CACHE INTERNAL "supported ESP32 ETH SPIs")
+
+        list(FIND ESP32_SUPPORTED_PHY ${ESP32_ETHERNET_INTERFACE} ESP32_PHY_INDEX)
+
+        if(ESP32_PHY_INDEX EQUAL -1)
+
+            # can't find this under supported PHYs
+        
+            # try with SPIs
+            list(FIND ESP32_SUPPORTED_ETH_SPI ${ESP32_ETHERNET_INTERFACE} ESP32_ETH_SPI_INDEX)
+            
+            if(ESP32_ETH_SPI_INDEX EQUAL -1)
+                # can't find it under SPIs either
+                message(FATAL_ERROR "\n\nSomething wrong happening: can't find support for Ethernet interface ${ESP32_ETHERNET_INTERFACE}!\n\n")
+            else()
+                # store SPI option
+                set(ESP32_ETHERNET_SPI_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+                set(ESP32_ETHERNET_INTERNAL_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+                # set define with SPI module
+                set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_SPI_MODULE_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet SPI module option")
+            endif()
+
+        else()
+            # store PHY option
+            set(ESP32_ETHERNET_INTERNAL_OPTION TRUE CACHE INTERNAL "Set ESP32_ETHERNET_INTERNAL option")
+            set(ESP32_ETHERNET_SPI_OPTION FALSE CACHE INTERNAL "Set ESP32_ETHERNET_SPI option")
+            # set define with PHY name
+            set(ESP32_ETHERNET_DEFINES -DESP32_ETHERNET_PHY_${ESP32_ETHERNET_INTERFACE} CACHE INTERNAL "define for Ethernet PHY interface option")
+        endif()
+
+    endif()
+
+endmacro()
+
 # find a set of files on a list of possible locations
 macro(nf_find_esp32_files_at_location files locations)
 
@@ -51,6 +102,54 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
+# fixes the ESP32_C3 rom linker script for rom_temp_to_power symbol
+# this is required if the CPU it's a revision <= 2 
+macro(nf_fix_esp32c3_rom_file)
+
+    if((${TARGET_SERIES_SHORT} STREQUAL "esp32c3"))
+        # build is for esp32c3
+
+        if(${ESP32_REVISION} LESS_EQUAL 2)
+            # need to UNcomment the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+        
+            string(REPLACE
+                    "/* rom_temp_to_power = 0x40001ab4; */"
+                    "rom_temp_to_power = 0x40001ab4;"
+                    ESP32_C3_ROM_LD_NEW_CONTENT
+                    "${ESP32_C3_ROM_LD_CONTENT}")
+        
+            file(WRITE 
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+        else()
+            # need to COMMENT the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+
+            string(FIND "${ESP32_C3_ROM_LD_CONTENT}" "/* rom_temp_to_power = 0x40001ab4; */" ROM_TEMP_SYMBOL_INDEX)
+        
+            if(ROM_TEMP_SYMBOL_INDEX EQUAL -1)
+             
+                string(REPLACE
+                        "rom_temp_to_power = 0x40001ab4;"
+                        "/* rom_temp_to_power = 0x40001ab4; */"
+                        ESP32_C3_ROM_LD_NEW_CONTENT
+                        "${ESP32_C3_ROM_LD_CONTENT}")
+            
+                file(WRITE 
+                    ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                    "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+            endif()
+
+        endif()
+
+    endif()
+    
+endmacro()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
@@ -83,6 +182,13 @@ function(nf_set_esp32_target_series)
 
     # store the series name for later use
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
+
+    # set the CPU type
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2")
+        set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
+    else()
+        set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
+    endif()
 
 endfunction()
 
@@ -122,6 +228,7 @@ macro(nf_add_platform_dependencies target)
             ${CMAKE_CURRENT_SOURCE_DIR}/${target}
             ${CMAKE_CURRENT_SOURCE_DIR}/Include
             ${CMAKE_CURRENT_SOURCE_DIR}/Network
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -130,6 +237,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_wireprotocol(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -141,6 +249,7 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_debugger(
             EXTRA_INCLUDES
                 ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES})
 
@@ -151,6 +260,7 @@ macro(nf_add_platform_dependencies target)
     nf_add_lib_native_assemblies(
         EXTRA_INCLUDES
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}/targets/${RTOS}
             ${ESP32_IDF_INCLUDE_DIRS}
             ${TARGET_ESP32_IDF_INCLUDES})
     
@@ -161,11 +271,14 @@ macro(nf_add_platform_dependencies target)
         nf_add_lib_network(
             BUILD_TARGET
                 ${target}
+            EXTRA_COMPILE_DEFINITIONS
+                ${ESP32_ETHERNET_DEFINES}
             EXTRA_SOURCES 
                 ${TARGET_ESP32_IDF_NETWORK_SOURCES}
             EXTRA_INCLUDES 
                 ${ESP32_IDF_INCLUDE_DIRS}
                 ${TARGET_ESP32_IDF_INCLUDES}
+                ${CMAKE_BINARY_DIR}/targets/${RTOS}
                 ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/include
         )
 
@@ -198,6 +311,7 @@ macro(nf_add_platform_include_directories target)
     target_include_directories(${target}.elf PUBLIC
 
         ${TARGET_ESP32_IDF_COMMON_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}/targets/${RTOS}
         ${ESP32_IDF_INCLUDE_DIRS}
         ${NF_NativeAssemblies_INCLUDE_DIRS}
         ${NF_CoreCLR_INCLUDE_DIRS}
@@ -222,7 +336,7 @@ macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
@@ -236,7 +350,7 @@ macro(nf_add_platform_sources target)
            
         # add header with target platform definitions
         configure_file(${CMAKE_SOURCE_DIR}/CMake/ESP32_target_os.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_os.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/target_os.h @ONLY)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
                        ${CMAKE_CURRENT_BINARY_DIR}/nanoCLR/target_board.h @ONLY)
@@ -353,63 +467,47 @@ macro(nf_setup_partition_tables_generator)
     # create partition tables for other memory sizes
     set(ESP32_PARTITION_TABLE_UTILITY ${IDF_PATH_CMAKED}/components/partition_table/gen_esp32part.py )
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
-        
-        # partition tables for ESP32
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
-            --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
+    # create command line for partition table generator
+    set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
             --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
+            COMMENT "Generate partition table for 4MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
+            COMMAND ${gen_partition_table} 
+            --flash-size 8MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
+            COMMENT "Generate partition table for 8MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 16MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_16mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
+            COMMENT "Generate partition table for 16MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" )
+        # 2MB partition table for ESP32
+       
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table}  
             --flash-size 2MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
             ${CMAKE_BINARY_DIR}/partitions_2mb.bin
-            COMMENT "Generate Esp32 partition table for 2MB flash" )
-
-    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
-        # partition tables for ESP32-S2)
-
-                
-        # partition tables for ESP32
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
-            --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${ESP32_PARTITION_TABLE_UTILITY} 
-            --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
-
+            COMMENT "Generate partition table for 2MB flash" )
     endif()
 
 endmacro()
@@ -419,29 +517,20 @@ macro(nf_add_idf_as_library)
 
     include(${IDF_PATH_CMAKED}/tools/cmake/idf.cmake)
 
-    # if running on Azure Pipeline, tweak the reported version so it doesn't show '-dirty'
-    # because it is not!
-    set(RUNNING_ON_AZURE ($ENV{Agent_HomeDirectory} AND $ENV{Build_BuildNumber}))
+    # "fix" the reported version so it doesn't show '-dirty' 
+    # this is because we could be deleting some files and tweaking others in the IDF
+    get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER)
+    string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
+    set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
+    set(IDF_VER_FIXED ${MY_IDF_VER_FIXED} CACHE INTERNAL "IDF version as CMake var")
 
-    if(RUNNING_ON_AZURE)
-        get_property(MY_IDF_VER TARGET __idf_build_target PROPERTY IDF_VER )
+    # for COMPILE DEFINITIONS it's a bit more work
+    get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
 
-        string(REPLACE "-dirty" "" MY_IDF_VER_FIXED "${MY_IDF_VER}")
- 
-        set_property(TARGET __idf_build_target PROPERTY IDF_VER ${MY_IDF_VER_FIXED})
-
-        # for COMPILE DEFINITIONS it's a bit more work
-        get_property(IDF_COMPILE_DEFINITIONS TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS )
-
-        string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
-
-        set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
-
-        message(STATUS "Fixing IDF version. It is now: ${MY_IDF_VER_FIXED}")
-    endif()
-
-    target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
+    string(REPLACE "-dirty" "" IDF_COMPILE_DEFINITIONS_FIXED "${IDF_COMPILE_DEFINITIONS}")
+    set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
+    
+    message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)
@@ -466,6 +555,11 @@ macro(nf_add_idf_as_library)
 
     message(STATUS "\n-- SDK CONFIG is: '${SDKCONFIG_DEFAULTS_FILE}'.")
 
+    # Save original contents to be restored later
+    file(READ
+    "${SDKCONFIG_DEFAULTS_FILE}"
+    SDKCONFIG_ORIGINAL_CONTENTS)
+
     # set list with the IDF components to add
     # need to match the list below with the respective libraries
     set(IDF_COMPONENTS_TO_ADD
@@ -484,7 +578,7 @@ macro(nf_add_idf_as_library)
         idf::esptool_py
         idf::spiffs
         idf::fatfs
-    )
+  )
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -494,40 +588,6 @@ macro(nf_add_idf_as_library)
     if(ESP32_ETHERNET_SUPPORT)
         list(APPEND IDF_COMPONENTS_TO_ADD esp_eth)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
-
-        # check for ETH_RMII_CLK_OUT_GPIO in the build options
-        if(ETH_RMII_CLK_OUT_GPIO)
-
-            message(STATUS "\nETH_RMII_CLK_OUT_GPIO specified. Updating SDK CONFIG to enable CLK output on GPIO${ETH_RMII_CLK_OUT_GPIO}.\n")
-            
-            # need to read the supplied SDK CONFIG file and replace the appropriate options            
-            file(READ
-                "${SDKCONFIG_DEFAULTS_FILE}"
-                SDKCONFIG_DEFAULT_CONTENTS)
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                "CONFIG_ETH_RMII_CLK_OUTPUT=y"
-                SDKCONFIG_DEFAULT_NEW_CONTENTS
-                "${SDKCONFIG_DEFAULT_CONTENTS}")
-
-            string(REPLACE
-                "#CONFIG_ETH_RMII_CLK_OUT_GPIO=n"
-                "CONFIG_ETH_RMII_CLK_OUT_GPIO=${ETH_RMII_CLK_OUT_GPIO}"
-                SDKCONFIG_DEFAULT_FINAL_CONTENTS
-                "${SDKCONFIG_DEFAULT_NEW_CONTENTS}")
-
-            # need to temporarilly allow changes in source files
-            set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
-
-            file(WRITE 
-                ${SDKCONFIG_DEFAULTS_FILE} 
-                ${SDKCONFIG_DEFAULT_FINAL_CONTENTS})
-
-            set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-            
-        endif()
-
     endif()
 
     # handle specifics for ESP32S2 series
@@ -634,10 +694,28 @@ macro(nf_add_idf_as_library)
             ${SDKCONFIG_DEFAULTS_FILE}
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
+        PROJECT_DIR ${CMAKE_SOURCE_DIR}
     )
 
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+    # add IDF app_main
+    add_executable(
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
+    )
+
+    #Restore original sdkconfig back to defaults
+    set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+    file(WRITE 
+        ${SDKCONFIG_DEFAULTS_FILE} 
+        ${SDKCONFIG_ORIGINAL_CONTENTS})
+
+    set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+
     if(USE_NETWORKING_OPTION)
-        
+
         FetchContent_GetProperties(esp32_idf)
 
         # get list of source files for lwIP
@@ -738,10 +816,15 @@ macro(nf_add_idf_as_library)
         SDKCONFIG_DEFAULT_CONTENTS)
 
     # find out if there is support for PSRAM
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" CONFIG_ESP32_SPIRAM_SUPPORT_POS)
+    set(SPIRAM_SUPPORT_PRESENT -1)
+    if(TARGET_SERIES_SHORT STREQUAL "esp32" OR TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    endif()
 
     # set variable
-    if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
+    if(${SPIRAM_SUPPORT_PRESENT} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
         message(STATUS "Support for PSRAM included")
     else()
@@ -749,7 +832,7 @@ macro(nf_add_idf_as_library)
         message(STATUS "Support for PSRAM **IS NOT** included")
     endif()
 
-    # find out revision info
+    # find out revision info (ESP32)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_0=y" CONFIG_ESP32_REV_MIN_0_POS)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_3=y" CONFIG_ESP32_REV_MIN_3_POS)
 
@@ -761,6 +844,29 @@ macro(nf_add_idf_as_library)
         set(REVISION_INFO ", chip rev. 3")
         message(STATUS "Building for chip revision 3")
     endif()
+
+    # find out revision info (ESP32-C3)
+    unset(ESP32_REVISION)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_2=y" CONFIG_ESP32C3_REV_MIN_2_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_3=y" CONFIG_ESP32C3_REV_MIN_3_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_4=y" CONFIG_ESP32C3_REV_MIN_4_POS)
+
+    # set variable
+    if(${CONFIG_ESP32C3_REV_MIN_2_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 2")
+        message(STATUS "Building for chip revision >= 2")
+        set(ESP32_REVISION "2" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32C3_REV_MIN_3_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 3")
+        message(STATUS "Building for chip revision >= 3")
+        set(ESP32_REVISION "3" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32C3_REV_MIN_4_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. 4")
+        message(STATUS "Building for chip revision 4")
+        set(ESP32_REVISION "4" CACHE STRING "ESP32 revision")
+    endif()
+
+    nf_fix_esp32c3_rom_file()
 
     # find out if there is support for BLE
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)

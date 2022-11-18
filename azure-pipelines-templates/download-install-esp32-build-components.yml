@@ -7,8 +7,8 @@ steps:
   - task: Cache@2
     displayName: Cache ESP32 tools
     inputs:
-      key: 'esp32_tools | 4_4_1'
-      restoreKeys: 4_4_1
+      key: 'esp32_tools | 4_4_2'
+      restoreKeys: 4_4_2
       path: $(UserProfile)\.espressif\tools
       cacheHitVar: ESP32_TOOLS_CACHE_RESTORED
 
@@ -28,6 +28,16 @@ steps:
       versionSpec: '3.7'
       addToPath: true
 
+  - task: PowerShell@2
+    displayName: Fix install.ps1
+    inputs:
+      targetType: 'inline'
+      workingDirectory: $(Agent.BuildDirectory)\s\esp-idf
+      script: |
+        $filecontent = Get-Content('install.ps1')
+        attrib $file -r
+        $filecontent -replace '--features=' , ' ' | Out-File 'install.ps1' -Encoding utf8
+          
   # run IDF installers
   - task: PowerShell@2
     displayName: Install IDF (step 1)
@@ -63,8 +73,8 @@ steps:
         # need to access the PATH collection, which seems to always be the last on in the collection
         $varsCount = $envars_raw.Count
         # go through the output and grab what has to be appended to the PATH
-        # need to remove the entry for IDF CMake because it's using an older version of CMake, OK to remove after they update it to >2.23.0
-        $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '').Replace('C:\Users\VssAdministrator\.espressif\tools\cmake\3.20.3\bin;', '')
+        # need to remove the entry for IDF CMake because it's using an older version of CMake, OK to remove after they update it to >3.24.0
+        $newPath = $envars_raw[$varsCount - 1].ToString().Replace('PATH=', '').Replace(';%PATH%', '').Replace('C:\Users\VssAdministrator\.espressif\tools\cmake\3.23.1\bin;', '')
 
         # append to path
         Write-Host "##vso[task.prependpath]$newPath"

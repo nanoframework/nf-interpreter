@@ -9,6 +9,29 @@ include(binutils.ESP32)
 # Set target series in lower case
 nf_set_esp32_target_series()
 
+# checking unsupported features
+if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" AND ${API_nanoFramework.Hardware.Esp32.Rmt})
+    message(FATAL_ERROR "Currently RMT is not supported for ESP32-C3 builds")
+endif()
+
+# option to reserve RAM for IDF allocator
+option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
+
+if(NOT ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION)
+    unset(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION CACHE)
+    set(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION")
+endif()
+message(STATUS "Reserved RAM for allocation by IDF: ${ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION}k")
+
+# option to reserve SPI RAM for IDF allocator
+option(ESP32_SPIRAM_FOR_IDF_ALLOCATION "Reserved SPI RAM for IDF allocation (in kBytes)")
+
+if(NOT ESP32_SPIRAM_FOR_IDF_ALLOCATION)
+    unset(ESP32_SPIRAM_FOR_IDF_ALLOCATION CACHE)
+    set(ESP32_SPIRAM_FOR_IDF_ALLOCATION "0" CACHE STRING "Setting default value for ESP32_SPIRAM_FOR_IDF_ALLOCATION")
+endif()
+message(STATUS "Reserved SPI RAM for allocation by IDF: ${ESP32_SPIRAM_FOR_IDF_ALLOCATION}k")
+
 # Define PLATFORM base path
 set(BASE_PATH_FOR_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -22,8 +45,10 @@ if(ESP32_IDF_PATH)
     endif()
 endif()
 
-# WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-set(ESP32_IDF_TAG "4.4.1" CACHE INTERNAL "ESP32 IDF tag")
+# WHEN CHANGING THIS MAKE SURE TO UPDATE:
+# 1. the dev containers
+# 2. ref in AZDO pipeline yaml in Community Targets repo
+set(ESP32_IDF_TAG "4.4.3" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo
@@ -79,6 +104,11 @@ if(NF_FEATURE_HAS_SDCARD)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E remove ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h
     )
+else()
+    # if not using FatFS need to check if IDF ffconfig.h exists
+    if(NOT(IS_ABSOLUTE ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h))
+        message(FATAL_ERROR "'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\rIf this was deleted on a previous build using SDCard, just revert the change and restore the file.")
+    endif()
 endif()
 
 # target folder was added in main CMakeList

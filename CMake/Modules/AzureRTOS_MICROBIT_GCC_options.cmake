@@ -29,8 +29,10 @@ macro(nf_set_compile_options)
     # include any extra options coming from any extra args?
     target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO__EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -ffunction-sections -fshort-wchar -falign-functions=16 -fdata-sections -fno-builtin -fno-common -fomit-frame-pointer -mlong-calls -fdollars-in-identifiers -fno-exceptions -fno-unroll-loops -frounding-math -fsignaling-nans -ffloat-store -fno-math-errno -ftree-vectorize -fcheck-new )
 
-    # this series has FPU 
-    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE) 
+    # enable:
+    # - FPU 
+    # - user TX file
+    target_compile_definitions(${NFSCO_TARGET} PUBLIC -DPLATFORM_ARM -DCORTEX_USE_FPU=TRUE -DTX_INCLUDE_USER_DEFINE_FILE ) 
 
 endmacro()
 
@@ -46,13 +48,13 @@ macro(nf_set_link_options)
         message(FATAL_ERROR "Need to set TARGET argument when calling nf_set_link_options()")
     endif()
 
-    # request specs from newlib nano
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs")
-
     # set optimization linker flags for RELEASE and MinSizeRel
     if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -flto -fuse-linker-plugin -Os")
+        set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " -Os -flto ")
     endif()
+
+    # request specs from newlib nano
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --specs=nano.specs --specs=nosys.specs")
 
     # include libraries in build
     nf_include_libraries_in_build(${NFSLO_TARGET})

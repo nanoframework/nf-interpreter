@@ -307,6 +307,13 @@ void WP_Message_Process()
                     _receiveExpiryTicks = HAL_Time_CurrentSysTicks() + c_HeaderTimeout;
                 }
 
+                if (len == 0 && *_pos == 0)
+                {
+                    // this is probably just hanging and waiting for a connection, so we're better off and give
+                    // breading space to the RTOS
+                    return;
+                }
+
                 break;
 
             case ReceiveState_ReadingHeader:

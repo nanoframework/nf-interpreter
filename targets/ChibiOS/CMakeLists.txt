@@ -168,7 +168,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
     if(FATFS_VERSION_EMPTY)
         # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
         # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-        set(FATFS_VERSION_TAG "R0.14")
+        set(FATFS_VERSION_TAG "R0.14b")
     else()
         # set version 
         set(FATFS_VERSION_TAG ${FATFS_VERSION})
@@ -223,7 +223,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.0")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.28.1")
 
     # set options for mbed TLS
     option(ENABLE_TESTING "no testing when building mbed TLS." OFF)

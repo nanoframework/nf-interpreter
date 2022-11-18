@@ -45,17 +45,23 @@ enum Esp32_MapDeviceType
     DEV_TYPE_SERIAL,
     DEV_TYPE_LED_PWM,
     DEV_TYPE_ADC,
-    DEV_TYPE_DAC,
     DEV_TYPE_I2S,
+    DEV_TYPE_DAC,
     DEV_TYPE_MAX,
 };
 
 extern int8_t Esp32_SPI_DevicePinMap[MAX_SPI_DEVICES][Esp32SpiPin_Max];
 extern int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2];
+extern int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5];
 extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
 extern int8_t Esp32_LED_DevicePinMap[16];
-extern int8_t Esp32_ADC_DevicePinMap[20];
 extern int8_t Esp32_DAC_DevicePinMap[2];
+
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+extern int8_t Esp32_ADC_DevicePinMap[6];
+#else
+extern int8_t Esp32_ADC_DevicePinMap[20];
+#endif
 
 void Esp32_DecodeAlternateFunction(
     uint32_t alternateFunction,
