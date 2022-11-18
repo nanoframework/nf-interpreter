@@ -15,7 +15,7 @@ env:
 on:
   push:
     paths:
-      - '${{ env.GCR_SOURCE_FILE }}'
+      - '**/sources/Dockerfile.TEST'
 
 jobs:
   build:
