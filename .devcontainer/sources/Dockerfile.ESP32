@@ -63,17 +63,18 @@ RUN ln -fs /usr/bin/python3 /usr/bin/python \
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
+ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH: \
-    $IDF_PATH/components/esptool_py/esptool: \
-    $IDF_PATH/components/espcoredump: \ 
-    $IDF_PATH/components/partition_table/: \
-    $IDF_PATH/tools/: \
-    $IDF_PATH/components/app_update: \
-    /root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin: \
-    /root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s2-elf/bin: \
-    /root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch5-8.4.0/riscv32-esp-elf/bin
+ENV PATH=$PATH:\
+    $IDF_PATH/components/esptool_py/esptool:\
+    $IDF_PATH/components/espcoredump:\ 
+    $IDF_PATH/components/partition_table/:\
+    $IDF_PATH/tools/:\
+    $IDF_PATH/components/app_update:\
+    /root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
+    /root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
+    /root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \
