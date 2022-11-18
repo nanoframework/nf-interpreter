@@ -9,13 +9,13 @@ name: Build Dev Container for Tests
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-test
   GCR_LOCAL_IMAGE: .devcontainer/Dockerfile.TEST
-  GCR_SOURCE_FILE: .devcontainer/sources/Dockerfile.TEST
+#  GCR_SOURCE_FILE: '.devcontainer/sources/Dockerfile.TEST'
   GCR_RELEASEABLE: false
 
 on:
   push:
     paths:
-      - '${{ env.GCR_SOURCE_FILE }}'
+      - '.devcontainer/sources/Dockerfile.TEST'
 
 jobs:
   build:
