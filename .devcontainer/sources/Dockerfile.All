@@ -49,8 +49,7 @@ RUN apt-get update \
     python3 \
     python3-pip \
     nodejs \
-    libffi-dev \
-    cmake
+    libffi-dev
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \

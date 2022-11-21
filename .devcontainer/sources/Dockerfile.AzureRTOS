@@ -38,8 +38,7 @@ RUN apt-get update \
     clang-format \
     curl \
     ninja-build \
-    srecord \
-    cmake
+    srecord
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \

@@ -43,8 +43,7 @@ RUN apt-get update \
     curl \
     ninja-build \
     srecord \
-    nodejs \
-    cmake
+    nodejs
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
