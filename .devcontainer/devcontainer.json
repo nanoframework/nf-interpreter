@@ -7,7 +7,7 @@
 	// - Dockerfile.ESP32 = for ESP32 targets
 	// - Dockerfile.TI = for TI targets
 	// If you prefer, you can use the source files and adjust them they are located, with the same names in ./sources. This will alow you to customize them and add anything you may need on top.
-	"dockerFile": "Dockerfile.ESP32",
+	"dockerFile": "Dockerfile.ALL",
 	"context": ".",
 	"mounts": [
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
@@ -26,7 +26,6 @@
 		"cmake.configureSettings": {
 			"CMAKE_MAKE_PROGRAM":"/usr/bin/ninja"
 		},
-		"cmake.cmakePath": "/usr/bin/cmake",
 		"cmake.configureOnOpen": false
 	},
 	// Add the IDs of extensions you want installed when the container is created.
