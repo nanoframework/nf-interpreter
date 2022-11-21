@@ -129,7 +129,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
         UsbStream_PAL.RxBytesReceived = 0;
 
         // start read operation with async API
-        // requesting handling of "End-of-transfer"
         reqStatus = sl_usbd_vendor_read_bulk_async(
             sl_usbd_vendor_winusb_number,
             (void *)data,
@@ -194,6 +193,8 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
+    uint32_t xfer_len;
+    bool isLongRunning = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -236,8 +237,14 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     hbTimeout.SetInteger((CLR_INT64)pThis[FIELD___writeTimeout].NumericByRef().s4 * TIME_CONVERSION__TO_MILLISECONDS);
     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeoutTicks));
 
+    // check if it's worth to use async API
+    if (count > 64)
+    {
+        isLongRunning = true;
+    }
+
     // this is a long running operation...
-    if (stack.m_customState == 1)
+    if (isLongRunning && stack.m_customState == 1)
     {
         // ... and hasn't started yet
 
@@ -252,7 +259,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
             count,
             UsbAsyncWriteCompleted,
             &UsbStream_PAL,
-            true);
+            false);
 
         if (reqStatus == SL_STATUS_INVALID_STATE)
         {
@@ -265,8 +272,20 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
             NANOCLR_SET_AND_LEAVE(CLR_E_FILE_IO);
         }
     }
+    else
+    {
+        // start write operation with async API
+        // requesting handling of "End-of-transfer"
+        reqStatus = sl_usbd_vendor_write_bulk_sync(
+            sl_usbd_vendor_winusb_number,
+            (void *)data,
+            count,
+            *timeoutTicks,
+            false,
+            &xfer_len);
+    }
 
-    while (eventResult)
+    while (isLongRunning && eventResult)
     {
         // non-blocking wait allowing other threads to run while we wait for the USB operation to complete
         NANOCLR_CHECK_HRESULT(
