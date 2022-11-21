@@ -4,9 +4,18 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     bzip2 \
-    unzip
+    unzip \
+    wget 
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc
+
+ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+      -q -O /tmp/cmake-install.sh \
+      && chmod u+x /tmp/cmake-install.sh \
+      && mkdir /tmp/dc-extracted/cmake \
+      && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+      && rm /tmp/cmake-install.sh
 
 FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
@@ -31,8 +40,7 @@ RUN apt-get update \
     python3 \
     python3-pip \
     nodejs \
-    libffi-dev \
-    cmake
+    libffi-dev
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc
@@ -47,6 +55,11 @@ RUN git clone --branch v4.4.3 https://github.com/espressif/esp-idf --depth 1 --r
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
     && pip3 install pyserial
+
+# copy from our other container
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf

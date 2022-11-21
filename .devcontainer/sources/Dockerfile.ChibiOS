@@ -4,7 +4,8 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     xz-utils \
-    unzip
+    unzip \
+    wget 
 
 ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
@@ -12,6 +13,14 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
+
+ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+      -q -O /tmp/cmake-install.sh \
+      && chmod u+x /tmp/cmake-install.sh \
+      && mkdir /tmp/dc-extracted/cmake \
+      && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+      && rm /tmp/cmake-install.sh
 
 FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
@@ -33,8 +42,7 @@ RUN apt-get update \
     clang-format \
     curl \
     ninja-build \
-    srecord \
-    cmake
+    srecord
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
@@ -59,7 +67,9 @@ ENV PATH=$ARM_GCC_PATH/bin:${PATH}
 
 # Copy from our other container
 COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
-# COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
 
 # Putting hex2dfu in the container
 ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
