@@ -179,8 +179,8 @@ namespace nanoFramework.nanoCLR.CLI
         {
             int portIndex = Utilities.GetPortIndex(port);
             
-            // start with one way ahead the most likely ones
-            int newPortIndex = 50;
+            // start with the one right after the first one
+            int newPortIndex = portIndex + 1;
 
             // get all port names currently in use
             var usedPorts = System.IO.Ports.SerialPort.GetPortNames();
@@ -189,15 +189,22 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 int lastUsedPortIndex = Utilities.GetPortIndex(usedPorts.Last());
 
-                // grab the next free one after the last
-                lastUsedPortIndex++;
-
-                newPortIndex = lastUsedPortIndex;
-
-                // sanity check
-                if (newPortIndex == portIndex)
+                if (newPortIndex > lastUsedPortIndex)
                 {
-                    newPortIndex++;
+                    return $"COM{newPortIndex}";
+                }
+                else
+                {
+                    // grab the next free one after the last
+                    lastUsedPortIndex++;
+
+                    newPortIndex = lastUsedPortIndex;
+
+                    // sanity check
+                    if (newPortIndex == portIndex)
+                    {
+                        newPortIndex++;
+                    }
                 }
             }
 
