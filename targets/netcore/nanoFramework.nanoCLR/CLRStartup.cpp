@@ -219,37 +219,37 @@ struct Settings
         // else data in RAM
         NANOCLR_NOCLEANUP();
     }
-
-    HRESULT LoadKnownAssemblies(char *start, char *end)
-    {
-        //--//
-        NANOCLR_HEADER();
-        char *assStart = start;
-        char *assEnd = end;
-        const CLR_RECORD_ASSEMBLY *header;
-
-        NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP(&assStart, &assEnd));
-#if !defined(BUILD_RTM)
-        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
-#endif
-
-        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)assEnd - (unsigned int)assStart, 0);
-
-        header = (const CLR_RECORD_ASSEMBLY *)assStart;
-
-        while ((char *)header + sizeof(CLR_RECORD_ASSEMBLY) < assEnd && header->GoodAssembly())
-        {
-            CLR_RT_Assembly *assm;
-
-            // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
-            NANOCLR_CHECK_HRESULT(LoadAssembly(header, assm));
-
-            header = (const CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
-        }
-
-        NANOCLR_NOCLEANUP();
-    }
-
+//
+//    HRESULT LoadKnownAssemblies(char *start, char *end)
+//    {
+//        //--//
+//        NANOCLR_HEADER();
+//        char *assStart = start;
+//        char *assEnd = end;
+//        const CLR_RECORD_ASSEMBLY *header;
+//
+//        NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP(&assStart, &assEnd));
+//#if !defined(BUILD_RTM)
+//        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
+//#endif
+//
+//        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)assEnd - (unsigned int)assStart, 0);
+//
+//        header = (const CLR_RECORD_ASSEMBLY *)assStart;
+//
+//        while ((char *)header + sizeof(CLR_RECORD_ASSEMBLY) < assEnd && header->GoodAssembly())
+//        {
+//            CLR_RT_Assembly *assm;
+//
+//            // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
+//            NANOCLR_CHECK_HRESULT(LoadAssembly(header, assm));
+//
+//            header = (const CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
+//        }
+//
+//        NANOCLR_NOCLEANUP();
+//    }
+//
     HRESULT ContiguousBlockAssemblies(BlockStorageStream stream, bool isXIP)
     {
         NANOCLR_HEADER();
