@@ -818,8 +818,11 @@ void CLR_DBG_Debugger::AccessMemory(
                                 return;
                             }
 
-                            // adjust buffer pointer to match access address
-                            bufPtr = (unsigned char *)accessAddress;
+                            if (isMemoryMapped)
+                            {
+                                // adjust buffer pointer to match access address
+                                bufPtr = (unsigned char *)accessAddress;
+                            }
 
                             // compute CRC32 of the memory segment
                             *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
