@@ -53,6 +53,7 @@
     <ClCompile Include="GarbageCollector_Compaction.cpp" />
     <ClCompile Include="GarbageCollector_ComputeReachabilityGraph.cpp" />
     <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="nanoSupport_CRC32.c" />
     <ClCompile Include="Streams.cpp" />
     <ClCompile Include="StringTable.cpp" />
     <ClCompile Include="Thread.cpp" />
