@@ -7,19 +7,34 @@ using CommandLine;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    [Verb("nanoclr", HelpText = "Operations with nanoCLR.")]
+    [Verb(
+        "nanoclr", 
+        HelpText = "Operations with nanoCLR.")]
     public class CLRCommandLineOptions
     {
-        [Option("getversion", Required = false, HelpText = "Get nanoCLR version running on the virtual device")]
+        [Option(
+            "getversion", 
+            Required = false, 
+            HelpText = "Get nanoCLR version running on the virtual device")]
         public bool GetCLRVersion { get; set; }
 
-        [Option("update", Required = false, Default = "", HelpText = "Checks for newer stable versions of the CLR and updates it, if there is one. A specific version can be specified. To check preview versions add the --preview option.")]
+        [Option(
+            "update",
+            Required = false, 
+            Default = "", 
+            HelpText = "Checks for newer stable versions of the CLR and updates it, if there is one. A specific version can be specified. To check preview versions add the --preview option.")]
         public bool UpdateCLR { get; set; }
 
-        [Option("preview", Required = false, HelpText = "Checks for preview versions of the nanoCLR.")]
+        [Option(
+            "preview",
+            Required = false,
+            HelpText = "Checks for preview versions of the nanoCLR.")]
         public bool CheckPreviewVersions { get; set; }
 
-        [Option("version", Required = false, HelpText = "Specify the version of nanoCRL to install.")]
+        [Option(
+            "version", 
+            Required = false, 
+            HelpText = "Specify the version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
 
         /// <summary>
