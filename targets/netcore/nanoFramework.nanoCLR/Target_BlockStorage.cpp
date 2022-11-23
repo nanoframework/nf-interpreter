@@ -21,7 +21,7 @@ void BlockStorage_AddDevices()
         (BlockStorageDevice *)&Device_BlockStorage,
         &TransientFlash_BlockStorageInterface,
         &Device_BlockStorageConfig,
-        false);
+        true);
 }
 
 /////////////////////////////////////////////////////

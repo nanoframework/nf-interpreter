@@ -154,6 +154,8 @@ void __cdecl nanoHAL_Initialize(void)
     BlockStorageList_Initialize();
     BlockStorage_AddDevices();
 
+    BlockStorageList_InitializeDevices();
+
     Events_Initialize();
 }
 
@@ -171,6 +173,8 @@ void __cdecl nanoHAL_Uninitialize(void)
             return;
         }
     }
+
+        BlockStorageList_UnInitializeDevices();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
