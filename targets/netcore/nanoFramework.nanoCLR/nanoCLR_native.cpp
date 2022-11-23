@@ -116,7 +116,10 @@ void nanoCLR_SetWireTransmitCallback(WireTransmitCallback transmitCallback)
 
 void nanoCLR_WireProcess()
 {
-    WP_Message_Process();
+    while (true)
+    {
+        WP_Message_Process();
+    }
 }
 
 void nanoCLR_WireOpen()
