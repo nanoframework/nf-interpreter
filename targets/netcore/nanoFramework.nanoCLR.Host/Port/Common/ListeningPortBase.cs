@@ -23,6 +23,7 @@ namespace nanoFramework.nanoCLR.Host.Port.Common
 
         public void Process()
         {
+            // empty on purpose, nothing to process here
         }
 
         protected abstract void OpenListener();

@@ -47,8 +47,11 @@
 
 DebugPrintCallback gDebugPrintCallback = NULL;
 
-WireTransmitCallback gWireTransmitCallback = NULL;
-WireReceiveCallback gWireReceiveCallback = NULL;
+WireTransmitCallback WireProtocolTransmitCallback = NULL;
+WireReceiveCallback WireProtocolReceiveCallback = NULL;
+
+// flag requesting stopping of WP processing
+bool _wireProtocolStopProcess;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -104,31 +107,35 @@ void nanoCLR_SetDebugPrintCallback(DebugPrintCallback debugPrintCallback)
     gDebugPrintCallback = debugPrintCallback;
 }
 
-void nanoCLR_SetWireReceiveCallback(WireReceiveCallback receiveCallback)
+void nanoCLR_SetWireProtocolReceiveCallback(WireReceiveCallback receiveCallback)
 {
-    gWireReceiveCallback = receiveCallback;
+    WireProtocolReceiveCallback = receiveCallback;
 }
 
-void nanoCLR_SetWireTransmitCallback(WireTransmitCallback transmitCallback)
+void nanoCLR_SetWireProtocolTransmitCallback(WireTransmitCallback transmitCallback)
 {
-    gWireTransmitCallback = transmitCallback;
+    WireProtocolTransmitCallback = transmitCallback;
 }
 
-void nanoCLR_WireProcess()
+void nanoCLR_WireProtocolProcess()
 {
-    while (true)
+    while (!_wireProtocolStopProcess)
     {
         WP_Message_Process();
     }
 }
 
-void nanoCLR_WireOpen()
+void nanoCLR_WireProtocolOpen()
 {
     WP_Message_PrepareReception();
+
+    _wireProtocolStopProcess = false;
 }
 
-void nanoCLR_WireClose()
+void nanoCLR_WireProtocolClose()
 {
+    // request to stop
+    _wireProtocolStopProcess = true;
 }
 
 char *nanoCLR_GetVersion()

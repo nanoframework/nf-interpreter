@@ -13,9 +13,9 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     if (*size)
     {
         auto readed = 0;
-        if (gWireReceiveCallback)
+        if (WireProtocolReceiveCallback)
         {
-            readed = gWireReceiveCallback(*ptr, *size);
+            readed = WireProtocolReceiveCallback(*ptr, *size);
         }
         *ptr += readed;
         *size -= readed;
@@ -31,9 +31,9 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         std::memcpy(&data[sizeof(message->m_header)], message->m_payload, message->m_header.m_size);
     }
 
-    if (gWireTransmitCallback)
+    if (WireProtocolTransmitCallback)
     {
-        gWireTransmitCallback(&data.front(), data.size());
+        WireProtocolTransmitCallback(&data.front(), data.size());
     }
 
     return data.size();

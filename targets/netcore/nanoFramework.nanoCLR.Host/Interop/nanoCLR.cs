@@ -53,21 +53,21 @@ namespace nanoFramework.nanoCLR.Host.Interop
             [MarshalAs(UnmanagedType.FunctionPtr)] DebugPrintDelegate debugPrintCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_WireOpen();
+        internal static extern void nanoCLR_WireProtocolOpen();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_WireClose();
+        internal static extern void nanoCLR_WireProtocolClose();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_SetWireReceiveCallback(
+        internal static extern void nanoCLR_SetWireProtocolReceiveCallback(
             [MarshalAs(UnmanagedType.FunctionPtr)] WireReceiveDelegate receiveCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_SetWireTransmitCallback(
+        internal static extern void nanoCLR_SetWireProtocolTransmitCallback(
             [MarshalAs(UnmanagedType.FunctionPtr)] WireTransmitDelegate transmitCallback);
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void nanoCLR_WireProcess();
+        internal static extern void nanoCLR_WireProtocolProcess();
 
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.LPStr)]
