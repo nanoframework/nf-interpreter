@@ -15,7 +15,7 @@ namespace nanoFramework.nanoCLR.CLI
 {
     public class VirtualDeviceManager
     {
-        private const string LicenseResourceName = "nanoFramework.nanoCLR.CLI.License.vspt.vsptlic";
+        private const string _licenseResourceName = "nanoFramework.nanoCLR.CLI.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
         // verbs and options for virtual device
@@ -183,7 +183,7 @@ namespace nanoFramework.nanoCLR.CLI
         {
             var assembly = typeof(VirtualDeviceManager).GetTypeInfo().Assembly;
 
-            Stream resource = assembly.GetManifestResourceStream(LicenseResourceName);
+            Stream resource = assembly.GetManifestResourceStream(_licenseResourceName);
             MemoryStream memoryStream = new MemoryStream();
 
             resource.CopyTo(memoryStream);
