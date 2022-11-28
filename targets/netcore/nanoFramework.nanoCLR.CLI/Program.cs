@@ -37,16 +37,16 @@ namespace nanoFramework.nanoCLR.CLI
                 typeof(AssemblyInformationalVersionAttribute))
             as AssemblyInformationalVersionAttribute;
 
-            _headerInfo = $".NET nanoFramework CLR CLI v{_informationalVersionAttribute.InformationalVersion}";
+            _headerInfo = $".NET nanoFramework nanoCLR CLI v{_informationalVersionAttribute.InformationalVersion}";
 
-            _copyrightInfo = new CopyrightInfo(true, $".NET Foundation and nanoFramework project contributors", 2021);
+            _copyrightInfo = new CopyrightInfo(true, $".NET Foundation and Contributors", 2021);
 
             // need this to be able to use ProcessStart at the location where the .NET Core CLI tool is running from
             string codeBase = Assembly.GetExecutingAssembly().Location;
             var uri = new UriBuilder(codeBase);
             var fullPath = Uri.UnescapeDataString(uri.Path);
             ExecutingPath = Path.GetDirectoryName(fullPath);
-            
+
             // check for empty argument collection
             if (!args.Any())
             {
@@ -168,7 +168,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                 if (!string.IsNullOrEmpty(exitCodeDisplayName.Name))
                 {
-                    Console.Write($": { exitCodeDisplayName.Name }");
+                    Console.Write($": {exitCodeDisplayName.Name}");
                 }
 
                 if (string.IsNullOrEmpty(extraMessage))
@@ -177,7 +177,7 @@ namespace nanoFramework.nanoCLR.CLI
                 }
                 else
                 {
-                    Console.WriteLine($" ({ extraMessage })");
+                    Console.WriteLine($" ({extraMessage})");
                 }
             }
             else
@@ -196,7 +196,7 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 scope();
             }
-            catch(CLIException e)
+            catch (CLIException e)
             {
                 _exitCode = e.ExecutionError;
                 _extraMessage = e.ExecutionErrorMessage;
