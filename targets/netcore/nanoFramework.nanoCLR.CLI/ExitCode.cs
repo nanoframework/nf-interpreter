@@ -76,5 +76,11 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         [Display(Name = "The specified COM port is already in use.")]
         E9004 = 9004,
+
+        /// <summary>
+        /// Error updating nanoCLR library.
+        /// </summary>
+        [Display(Name = "Error updating nanoCLR library.")]
+        E9005 = 9005,
     }
 }
