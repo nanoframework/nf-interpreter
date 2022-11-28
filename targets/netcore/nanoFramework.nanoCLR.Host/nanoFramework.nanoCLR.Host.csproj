@@ -8,11 +8,12 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<RestoreLockedMode>true</RestoreLockedMode>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="6.0.0" />
-    <PackageReference Include="HexDump" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
