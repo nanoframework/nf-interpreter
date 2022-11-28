@@ -425,4 +425,16 @@ __nfweak bool BlockStorageDevice_FindNextUsageBlock(
     return false;
 }
 
+bool BlockStorageList_InitializeDevices()
+{
+    // TODO FIXME
+    return true;
+}
+
+bool BlockStorageList_UnInitializeDevices()
+{
+    // TODO FIXME
+    return true;
+}
+
 /////////////////////////////////////////////////////
