@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public class CLRCommandLineProcessor
+    public static class CLRCommandLineProcessor
     {
         private const string _cloudSmithApiUrl = "https://api.cloudsmith.io/v1/packages/net-nanoframework/";
 

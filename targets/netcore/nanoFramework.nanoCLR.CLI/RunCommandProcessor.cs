@@ -13,7 +13,7 @@ using nanoFramework.nanoCLR.Host.Port.TcpIp;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public class RunCommandProcessor
+    public static class RunCommandProcessor
     {
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(

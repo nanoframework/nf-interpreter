@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using nanoFramework.nanoCLR.CLI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
