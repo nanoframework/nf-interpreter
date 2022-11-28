@@ -218,10 +218,7 @@ jobs:
               Write-host "Building nanoCLR target"
           }
           
-          if( 
-              (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.CLI')}).Count -gt 0) -Or
-              (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.Host')}).Count -gt 0)
-            )
+          if(($files.where{$_.Contains('targets/netcore')}).Count -gt 0)
           {
               # files at nanoCLR CLI or Host folders
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
@@ -691,12 +688,13 @@ jobs:
     displayName: Install .NET SDK
     inputs:
       packageType: sdk
-      version: 5.0.300
+      version: 6.x
 
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
     inputs:
       command: restore
+      restoreArguments: '--locked-mode'
       verbosityRestore: minimal
       projects: targets\netcore\nanoCLR.sln
       feedsToUse: select
@@ -711,7 +709,7 @@ jobs:
       configuration: 'Release'
 
   - task: VSBuild@1
-    displayName: Build .NET Core target
+    displayName: Build WIN32 DLL target
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
       platform: 'x86'
@@ -720,7 +718,11 @@ jobs:
 
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     inputs:
       command: custom
       custom: tool
@@ -878,7 +880,7 @@ jobs:
     displayName: Install .NET SDK
     inputs:
       packageType: sdk
-      version: 5.0.300
+      version: 6.x
 
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
@@ -889,21 +891,13 @@ jobs:
       feedsToUse: select
       includeNuGetOrg: true
 
-  - task: VSBuild@1
-    displayName: Build .NET Core target
-    inputs:
-      solution: 'targets\netcore\nanoCLR.sln'
-      platform: 'x86'
-      msbuildArgs: '/p:PublicRelease=true'
-      configuration: 'Release'
-
-  - task: DotNetCoreCLI@2
-    displayName: Pack nanoCLR CLI dotnet tool 
-    inputs:
-      command: pack
-      verbosityPack: minimal
-      configuration: 'Release'
-      packagesToPack: targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj
+  - script: dotnet build -c 'Release' /p:platform='x86' /p:PublicRelease=true --no-restore /t:build,pack
+    displayName: Build and pack .NET tool
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['UPDATE_DEPENDENTS'], 'false')
+      )
 
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
