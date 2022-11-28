@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "nanoCLR.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "run --serialport COM100",
+      "nativeDebugging": true
+    }
+  }
+}
