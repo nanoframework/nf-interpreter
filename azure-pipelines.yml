@@ -699,7 +699,7 @@ jobs:
       includeNuGetOrg: true
 
   - task: VSBuild@1
-    displayName: Build WIN32 target
+    displayName: Build WIN32 EXE target
     inputs:
       solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
@@ -772,7 +772,7 @@ jobs:
 
   - task: CopyFiles@2
     condition: succeeded()
-    displayName: Collecting managed helpers deployable artifacts
+    displayName: Collecting NuGet packages
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
@@ -783,7 +783,7 @@ jobs:
 
   - task: CopyFiles@2
     condition: succeeded()
-    displayName: Collecting nanoCLR to deployable artifacts
+    displayName: Adding nanoCLR to deployable artifacts
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
@@ -806,9 +806,13 @@ jobs:
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign packages
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     
-  # publish artifacts (only possible if this is not a PR originated on a fork)
+  # publish artifacts
   - task: PublishBuildArtifacts@1
     condition: succeeded()
     displayName: Publish deployables artifacts
@@ -819,7 +823,11 @@ jobs:
 
   # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
@@ -829,9 +837,13 @@ jobs:
       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
-  # push NuGet class lib package to NuGet (always happens except on PR builds)
+  # push NuGet packages to NuGet (always happens except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     continueOnError: true
     displayName: Push NuGet packages to NuGet
     inputs:
@@ -887,17 +899,22 @@ jobs:
       feedsToUse: select
       includeNuGetOrg: true
 
-  - script: dotnet build -c 'Release' /p:platform='x86' /p:PublicRelease=true --no-restore /t:build,pack
-    displayName: Build and pack .NET tool
-    condition: >-
-      and(
-        succeeded(),
-        eq(variables['UPDATE_DEPENDENTS'], 'false')
-      )
+  - task: VSBuild@1
+    displayName: Build .NET tool
+    condition: succeeded()
+    inputs:
+      solution: 'targets\netcore\nanoCLR.sln'
+      platform: 'x86'
+      msbuildArgs: '/p:PublicRelease=true'
+      configuration: 'Release'
 
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     inputs:
       command: custom
       custom: tool
@@ -916,17 +933,21 @@ jobs:
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign nanoCLR assemblies
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
 
-  - task: CopyFiles@1
+  - task: MSBuild@1
     condition: succeeded()
-    displayName: Collecting managed helpers deployable artifacts
+    displayName: Pack nanoCLR CLI
     inputs:
-      sourceFolder: $(Build.SourcesDirectory)
-      Contents: |
-        **\nanoFramework.nanoCLR.CLI*.nupkg
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      flattenFolders: true
+      solution: 'targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj'
+      platform: 'x86'
+      msbuildArguments: '/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) '
+      configuration: 'Release'
+      maximumCpuCount: true
 
   - pwsh: |
       .\SignClient "Sign" `
@@ -941,9 +962,13 @@ jobs:
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign packages
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     
-  # publish artifacts (only possible if this is not a PR originated on a fork)
+  # publish artifacts
   - task: PublishBuildArtifacts@1
     condition: succeeded()
     displayName: Publish deployables artifacts
@@ -954,7 +979,11 @@ jobs:
 
   # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
@@ -964,9 +993,13 @@ jobs:
       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
-  # push NuGet class lib package to NuGet (always happens except on PR builds)
+  # push NuGet packages to NuGet (always happens except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     continueOnError: true
     displayName: Push NuGet packages to NuGet
     inputs:
