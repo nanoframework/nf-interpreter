@@ -79,7 +79,7 @@ namespace nanoFramework.nanoCLR.CLI
                 nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
-                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, VirtualDeviceCommandLineOptions>(args);
+                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, CLRCommandLineOptions, VirtualDeviceCommandLineOptions>(args);
 
                 Console.ForegroundColor = ConsoleColor.White;
 
