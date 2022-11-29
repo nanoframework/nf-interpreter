@@ -150,7 +150,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(NBGV_VersionHeight);VERSION_STRING="$(NBGV_AssemblyInformationalVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
