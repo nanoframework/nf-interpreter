@@ -48,7 +48,7 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 Debug.WriteLine($"Exception when performing initialization: {ex}.");
 #else
-            catch()
+            catch
             {
 #endif
                 IsFunctional = false;
