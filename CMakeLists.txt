@@ -37,6 +37,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(binutils.common)
 include(binutils.ESP32)
 
+nf_check_path_limits()
+
 ######################################################
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
@@ -854,12 +856,6 @@ elseif(RTOS_ESP32_CHECK)
             message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
-
-    # need to add this here to keep IDF build system happy
-    add_executable(
-        ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
-    )
 
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)
