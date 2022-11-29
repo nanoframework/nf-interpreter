@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace nanoFramework.nanoCLR.Host.Port.Serial
 {
-    public static class SerialPortExtensions
+    internal static class SerialPortExtensions
     {
         public static byte[] ReadAllBytes(this System.IO.Ports.SerialPort port)
         {

@@ -5,7 +5,7 @@
 
 namespace nanoFramework.nanoCLR.Host.Port.Serial
 {
-    public class SerialPort : IPort
+    internal class SerialPort : IPort
     {
         private const int MaxBaud = 921600;
 

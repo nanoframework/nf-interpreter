@@ -7,7 +7,7 @@ using System;
 
 namespace nanoFramework.nanoCLR.Host.Port
 {
-    public class TraceDataPort : IPort
+    internal class TraceDataPort : IPort
     {
         private readonly IPort _target;
 

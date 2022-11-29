@@ -3,13 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System.IO;
-using System.IO.Pipes;
 using nanoFramework.nanoCLR.Host.Port.Common;
+using System.IO.Pipes;
 
 namespace nanoFramework.nanoCLR.Host.Port.NamedPipe
 {
-    public class NamedPipeServerPort : ListeningPortBase
+    internal class NamedPipeServerPort : ListeningPortBase
     {
         private const int FixedBufferSize = 1024;
         private const int MaxThreads = 32;

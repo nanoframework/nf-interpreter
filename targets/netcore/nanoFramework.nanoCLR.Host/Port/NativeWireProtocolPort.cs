@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace nanoFramework.nanoCLR.Host.Port
 {
-    public class NativeWireProtocolPort : IPort
+    internal class NativeWireProtocolPort : IPort
     {
         private readonly object _syncRoot = new object();
         private readonly List<byte> _receiveBuffer = new List<byte>();
@@ -34,7 +34,7 @@ namespace nanoFramework.nanoCLR.Host.Port
             {
                 var data = _transmitBuffer.ToArray();
                 _transmitBuffer.Clear();
-               
+
                 return data;
             }
         }
@@ -44,7 +44,7 @@ namespace nanoFramework.nanoCLR.Host.Port
             lock (_syncRoot)
             {
                 _receiveBuffer.AddRange(data);
-                
+
                 Monitor.PulseAll(_syncRoot);
             }
         }
@@ -59,9 +59,9 @@ namespace nanoFramework.nanoCLR.Host.Port
             Interop.nanoCLR.nanoCLR_SetWireProtocolReceiveCallback(_wireReceiveCallback);
             Interop.nanoCLR.nanoCLR_SetWireProtocolTransmitCallback(_wireTransmitCallback);
             Interop.nanoCLR.nanoCLR_WireProtocolOpen();
-            
+
             Status = PortStatus.Opened;
-           
+
             _processingThread = new Thread(ProcessMessages);
             _processingThread.Start();
         }
@@ -69,7 +69,7 @@ namespace nanoFramework.nanoCLR.Host.Port
         public void Close()
         {
             Status = PortStatus.Closed;
-            
+
             Interop.nanoCLR.nanoCLR_WireProtocolClose();
             Interop.nanoCLR.nanoCLR_SetWireProtocolReceiveCallback(null);
             Interop.nanoCLR.nanoCLR_SetWireProtocolTransmitCallback(null);
@@ -89,16 +89,16 @@ namespace nanoFramework.nanoCLR.Host.Port
         {
             lock (_syncRoot)
             {
-                if(_receiveBuffer.Count == 0)
+                if (_receiveBuffer.Count == 0)
                 {
                     Monitor.Wait(_syncRoot);
                 }
 
                 var size = _receiveBuffer.Count < length ? _receiveBuffer.Count : length;
-                
+
                 _receiveBuffer.CopyTo(0, data, 0, size);
                 _receiveBuffer.RemoveRange(0, size);
-                
+
                 return size;
             }
         }

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace nanoFramework.nanoCLR.Host.Port
 {
-    public class Channel : IChannel
+    internal class Channel : IChannel
     {
         private bool _connected = false;
         private readonly Thread _listeningThread;

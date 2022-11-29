@@ -7,7 +7,7 @@ using System;
 
 namespace nanoFramework.nanoCLR.Host
 {
-    public static class ThreadExtensions
+    internal static class ThreadExtensions
     {
         public static T Sync<T>(this object syncRoot, Func<T> func)
         {

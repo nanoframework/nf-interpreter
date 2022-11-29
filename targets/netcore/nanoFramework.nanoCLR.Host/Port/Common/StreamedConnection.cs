@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace nanoFramework.nanoCLR.Host.Port.Common
 {
-    public class StreamedConnection : IPort
+    internal class StreamedConnection : IPort
     {
         private readonly Stream _stream;
         private readonly Func<int> _bytesAvailable;

@@ -5,7 +5,7 @@
 
 namespace nanoFramework.nanoCLR.Host.Port
 {
-    public interface IChannel
+    internal interface IChannel
     {
         IPort PortA { get; }
         IPort PortB { get; }

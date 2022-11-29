@@ -8,7 +8,7 @@ using System.Text;
 
 namespace HexDump
 {
-    public static class HexDump
+    internal static class HexDump
     {
         [Pure]
         public static string Format(byte[] bytes, int columnWidth = 8, int columnCount = 2, bool includeOffset = true, bool includeAscii = true)

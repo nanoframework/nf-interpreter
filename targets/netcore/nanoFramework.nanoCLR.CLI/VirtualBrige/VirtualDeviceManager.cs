@@ -6,6 +6,7 @@
 using hhdvspkit;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +28,7 @@ namespace nanoFramework.nanoCLR.CLI
         /// If Virtual Serial Port Tools are installed and functional this property is <see langword="true"/>, otherwise <see langword="false"/>.
         /// </summary>
         public bool IsFunctional { get; private set; }
-        
+
         internal SerialPortLibrary _serialPortLibrary = null;
 
         public VirtualDeviceManager()
@@ -42,8 +43,14 @@ namespace nanoFramework.nanoCLR.CLI
                 InstallLicense();
                 IsFunctional = true;
             }
-            catch (Exception e)
+#if DEBUG
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Exception when performing initialization: {ex}.");
+#else
+            catch()
+            {
+#endif
                 IsFunctional = false;
                 return false;
             }
@@ -66,7 +73,7 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 if (port.bridgePort > 0 && bridges.All(b => b.PortA.port != port.bridgePort))
                 {
-                    bridges.Add(new VirtualBridge {PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort)});
+                    bridges.Add(new VirtualBridge { PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort) });
                 }
             }
 
@@ -81,9 +88,9 @@ namespace nanoFramework.nanoCLR.CLI
             var bridges = GetAvailableVirtualBridges();
 
             // try to find this port index on any of the available virtual bridges
-            foreach(var b in bridges)
+            foreach (var b in bridges)
             {
-                if(b.PortAIndex == portIndex || b.PortBIndex == portIndex)
+                if (b.PortAIndex == portIndex || b.PortBIndex == portIndex)
                 {
                     // done here
                     return b;
@@ -108,7 +115,7 @@ namespace nanoFramework.nanoCLR.CLI
             }
             catch (Exception e)
             {
-                throw new Exception($@"Cannot create Virtual Bridge. {e.Message}", e);
+                throw new InvalidOperationException($@"Cannot create Virtual Bridge. {e.Message}", e);
             }
         }
 
@@ -132,7 +139,7 @@ namespace nanoFramework.nanoCLR.CLI
             }
             catch (Exception e)
             {
-                throw new Exception($@"Cannot Delete Port Pair. {e.Message}", e);
+                throw new InvalidOperationException($@"Cannot Delete Port Pair. {e.Message}", e);
             }
         }
 
@@ -176,7 +183,7 @@ namespace nanoFramework.nanoCLR.CLI
                 return null;
             }
 
-            return new VirtualBridge {PortA = portA, PortB = portB};
+            return new VirtualBridge { PortA = portA, PortB = portB };
         }
 
         private void InstallLicense()
