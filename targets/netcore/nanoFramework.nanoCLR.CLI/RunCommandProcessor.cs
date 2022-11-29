@@ -70,11 +70,6 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.LoadAssemblies(options.Assemblies);
             }
 
-            //if (options.AssembliesSet != null)
-            //{
-            //    hostBuilder.LoadAssembliesSet(options.AssembliesSet);
-            //}
-
             if (options.TryResolve)
             {
                 hostBuilder.TryResolve();

@@ -219,37 +219,7 @@ struct Settings
         // else data in RAM
         NANOCLR_NOCLEANUP();
     }
-//
-//    HRESULT LoadKnownAssemblies(char *start, char *end)
-//    {
-//        //--//
-//        NANOCLR_HEADER();
-//        char *assStart = start;
-//        char *assEnd = end;
-//        const CLR_RECORD_ASSEMBLY *header;
-//
-//        NANOCLR_CHECK_HRESULT(CheckKnownAssembliesForNonXIP(&assStart, &assEnd));
-//#if !defined(BUILD_RTM)
-//        CLR_Debug::Printf(" Loading start at %x, end %x\r\n", (unsigned int)assStart, (unsigned int)assEnd);
-//#endif
-//
-//        g_buildCRC = SUPPORT_ComputeCRC(assStart, (unsigned int)assEnd - (unsigned int)assStart, 0);
-//
-//        header = (const CLR_RECORD_ASSEMBLY *)assStart;
-//
-//        while ((char *)header + sizeof(CLR_RECORD_ASSEMBLY) < assEnd && header->GoodAssembly())
-//        {
-//            CLR_RT_Assembly *assm;
-//
-//            // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
-//            NANOCLR_CHECK_HRESULT(LoadAssembly(header, assm));
-//
-//            header = (const CLR_RECORD_ASSEMBLY *)ROUNDTOMULTIPLE((size_t)header + header->TotalSize(), CLR_UINT32);
-//        }
-//
-//        NANOCLR_NOCLEANUP();
-//    }
-//
+
     HRESULT ContiguousBlockAssemblies(BlockStorageStream stream, bool isXIP)
     {
         NANOCLR_HEADER();
@@ -307,7 +277,11 @@ struct Settings
             if (!header->GoodAssembly())
             {
                 if (!isXIP)
+                {
+
                     CLR_RT_Memory::Release(assembliesBuffer);
+                }
+
                 break;
             }
 
@@ -318,7 +292,10 @@ struct Settings
             if (FAILED(LoadAssembly(header, assm)))
             {
                 if (!isXIP)
+                {
                     CLR_RT_Memory::Release(assembliesBuffer);
+                }
+
                 break;
             }
             assm->m_flags |= CLR_RT_Assembly::Deployed;
@@ -552,13 +529,15 @@ struct Settings
         NANOCLR_FOREACH_ASSEMBLY_END();
 
         if (fError)
+        {
             NANOCLR_SET_AND_LEAVE(CLR_E_ENTRY_NOT_FOUND);
+        }
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.ResolveAll());
 
         NANOCLR_NOCLEANUP();
     }
-#endif //#if defined(_WIN32)
+#endif // #if defined(_WIN32)
 };
 
 static Settings s_ClrSettings;
@@ -636,7 +615,7 @@ void ClrStartup(CLR_SETTINGS params)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands::c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if (params.EnterDebuggerLoopAfterExit)
             {
@@ -645,7 +624,6 @@ void ClrStartup(CLR_SETTINGS params)
         }
 
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call
-
         if (CLR_EE_DBG_IS(RebootPending))
         {
             if (CLR_EE_REBOOT_IS(ClrOnly))
@@ -656,15 +634,16 @@ void ClrStartup(CLR_SETTINGS params)
 
                 s_ClrSettings.Cleanup();
 
-                // nanoHAL_Uninitialize();
+                nanoHAL_Uninitialize();
 
                 // re-init the hal for the reboot (initially it is called in bootentry)
-                // nanoHAL_Initialize();
+                nanoHAL_Initialize();
             }
             else
             {
                 CPU_Reset();
             }
         }
+
     } while (softReboot);
 }

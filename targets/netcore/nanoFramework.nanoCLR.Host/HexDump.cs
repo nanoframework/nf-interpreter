@@ -14,10 +14,14 @@ namespace HexDump
         public static string Format(byte[] bytes, int columnWidth = 8, int columnCount = 2, bool includeOffset = true, bool includeAscii = true)
         {
             if (bytes == null)
+            {
                 throw new ArgumentNullException(nameof(bytes));
+            }
 
             if (bytes.Length == 0)
+            {
                 return string.Empty;
+            }
 
             var str = new StringBuilder();
 
@@ -43,12 +47,17 @@ namespace HexDump
                 {
                     // space between columns
                     if (columnIndex != 0)
+                    {
                         str.Append("  ");
+                    }
 
                     for (var j = 0; j < columnWidth; j++)
                     {
                         if (j != 0)
+                        {
                             str.Append(' ');
+                        }
+
                         str.Append(i < bytes.Length
                             ? bytes[i].ToString("X2")
                             : "  ");
@@ -66,7 +75,9 @@ namespace HexDump
                     {
                         // space between columns
                         if (columnIndex != 0)
+                        {
                             str.Append(' ');
+                        }
 
                         for (var j = 0; j < columnWidth; j++)
                         {
