@@ -715,7 +715,7 @@ jobs:
       configuration: 'Release'
 
   - task: VSBuild@1
-    displayName: Build WIN32 DLL target
+    displayName: Build WIN DLL target
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
       platform: 'Any CPU'

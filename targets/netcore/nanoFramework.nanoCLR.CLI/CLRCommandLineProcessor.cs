@@ -55,7 +55,7 @@ namespace nanoFramework.nanoCLR.CLI
                 cloudsmithClient.DefaultRequestHeaders.Add("Accept", "*/*");
 
                 // get latest version available for download
-                HttpResponseMessage response = await cloudsmithClient.GetAsync($"nanoframework-images/?query=name:^WIN32_DLL_nanoCLR version:^latest$");
+                HttpResponseMessage response = await cloudsmithClient.GetAsync($"nanoframework-images/?query=name:^WIN_DLL_nanoCLR version:^latest$");
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (responseBody == "[]")
