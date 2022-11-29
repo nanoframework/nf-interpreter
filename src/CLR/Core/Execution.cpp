@@ -530,10 +530,12 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
     NANOCLR_HEADER();
 
     std::list<std::wstring> args;
+    CLR_RT_HeapBlock_Array *array;
+    CLR_UINT32 iArg;
 
     wchar_t *szArgNext = NULL;
     wchar_t *szArg = szCommandLineArgs;
-    wchar_t *sep = L" ";
+    const wchar_t *sep = L" ";
     wchar_t *context = NULL;
 
     szArg = wcstok_s(szArg, sep, &context);
@@ -549,8 +551,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String));
 
-    CLR_RT_HeapBlock_Array *array = argsBlk.Array();
-    CLR_UINT32 iArg = 0;
+    array = argsBlk.Array();
+    iArg = 0;
 
     for (std::list<std::wstring>::iterator it = args.begin(); it != args.end(); it++, iArg++)
     {

@@ -352,6 +352,10 @@ extern "C"
 #define CT_ASSERT(e)                   CT_ASSERT_UNIQUE_NAME(e, nanoclr)
 #endif
 
+// developer note: if "size of something" needs to be output at compile time use this
+//char checker(int);
+//char checkSizeOfWhathever[sizeof(CLR_RT_HeapBlock)] = {checker(&checkSizeOfWhathever)};
+
 #ifdef __cplusplus
 extern "C"
 {

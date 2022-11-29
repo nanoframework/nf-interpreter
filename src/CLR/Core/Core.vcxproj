@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -165,6 +165,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,10 +174,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;WIN32;NANOCLR_REFLECTION=TRUE;WIN32;_DEBUG;_LIB;VERSION_MAJOR=0;VERSION_MINOR=0;VERSION_BUILD=0;VERSION_REVISION=0;OEMSYSTEMINFOSTRING="WIN_32 PLAYGROUND APP";TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,6 +195,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -200,11 +207,14 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;WIN32;NANOCLR_REFLECTION=TRUE;WIN32;NDEBUG;_LIB;VERSION_MAJOR=$(NBGV_VersionMajor);VERSION_MINOR=$(NBGV_VersionMinor);VERSION_BUILD=$(NBGV_BuildNumber);VERSION_REVISION=$(TARGET_BUILD_COUNTER);TARGETNAMESTRING="CLR_WIN32";PLATFORMNAMESTRING="WIN32";NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\Include;..\CorLib;..\..\HAL\Include;..\..\PAL\Include;..\..\nanoFramework.System.Collections</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

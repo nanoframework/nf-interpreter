@@ -2453,19 +2453,46 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 // The use of offsetof below throwns an "invalid offset warning" because CLR_RT_StackFrame is not POD type
 // C+17 is the first standard that allow this, so until we are using it we have to disable it to keep GCC happy
 
+#ifdef _MSC_VER
+
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
+
+#else
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
 
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_owningThread) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_evalStack))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_evalStack) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_arguments))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_arguments) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_locals))
-CT_ASSERT(offsetof(CLR_RT_StackFrame, m_locals) + sizeof(CLR_UINT32) == offsetof(CLR_RT_StackFrame, m_IP))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_owningThread) + sizeof(CLR_RT_Thread *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_evalStack) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_arguments) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals))
+CT_ASSERT(
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_locals) + sizeof(CLR_RT_HeapBlock *) ==
+    offsetof(CLR_RT_StackFrame, CLR_RT_StackFrame::m_IP))
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
+
+#endif // _MSC_VER
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -3857,11 +3884,17 @@ extern CLR_UINT32 g_buildCRC;
 //
 // CT_ASSERT macro generates a compiler error in case the size of any structure changes.
 //
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 20)
+#else
 CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 12)
+#endif // _WIN64
+
 CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
-#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 4
+#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
 #else
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
@@ -3870,7 +3903,12 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
 #elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
-CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
 
 #else
 
