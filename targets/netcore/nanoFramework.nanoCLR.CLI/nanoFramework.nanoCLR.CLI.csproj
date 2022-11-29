@@ -26,7 +26,7 @@
     <PackageProjectUrl>https://github.com/nanoframework/nf-interpreter</PackageProjectUrl>
     <Description>.NET nanoFramework CLR as a .NET tool. Allows runing nanoCLR as a virtual device.</Description>
     <!-- disable NuGet warning for DLLs outside the lib folder and for SemVer 2 package reference -->
-    <NoWarn>$(NoWarn);NU5100;NU5105</NoWarn>
+    <NoWarn>$(NoWarn);NU5100;NU5105;NU5118</NoWarn>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageIcon>images\nf-logo.png</PackageIcon>
     <PackageTags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, .net</PackageTags>
@@ -35,6 +35,11 @@
 
   <!-- NuGet package files -->
   <ItemGroup>
+    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll">
+      <Pack>True</Pack>
+      <PackagePath>tools\net6.0\any</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\..\..\assets\nf-logo.png">
       <Pack>True</Pack>
       <PackagePath>images</PackagePath>
