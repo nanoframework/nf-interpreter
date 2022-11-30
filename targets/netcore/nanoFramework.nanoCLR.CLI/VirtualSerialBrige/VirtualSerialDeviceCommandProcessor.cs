@@ -49,9 +49,11 @@ namespace nanoFramework.nanoCLR.CLI
                 return (int)ExitCode.OK;
             }
 
-            if (options.DeleteVirtualSerialDevice != null)
+            if (options.RemoveVirtualSerialDevice != null)
             {
-                DeleteVirtualSerialDevice(virtualComManager, options.DeleteVirtualSerialDevice);
+                RemoveVirtualSerialDevice(
+                    virtualComManager,
+                    options.RemoveVirtualSerialDevice);
             }
 
             return 0;
@@ -87,13 +89,13 @@ namespace nanoFramework.nanoCLR.CLI
         }
 
         [SupportedOSPlatform("windows")]
-        public static void DeleteVirtualSerialDevice(
+        public static void RemoveVirtualSerialDevice(
             VirtualSerialDeviceManager virtualComManager,
             string port)
         {
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine($"Deleting Virtual Serial Device: {port}");
+                Console.WriteLine($"Removing Virtual Serial Port: {port}");
             }
 
             var bridge = virtualComManager.GetVirtualBridgeContainingPort(port);
@@ -103,7 +105,7 @@ namespace nanoFramework.nanoCLR.CLI
                 throw new CLIException(ExitCode.E1003);
             }
 
-            Utilities.ExecuteElevated(() => VirtualSerialDeviceManager.DeleteVirtualBridge(bridge), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.DeleteOption} {bridge}");
+            Utilities.ExecuteElevated(() => VirtualSerialDeviceManager.RemoveVirtualBridge(bridge), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.RemoveOption} {bridge}");
 
             bridge = virtualComManager.GetVirtualBridgeContainingPort(port);
 

@@ -22,7 +22,7 @@ namespace nanoFramework.nanoCLR.CLI
         // verbs and options for virtual serial device
         internal const string VirtualSerialDeviceVerb = "virtualserial";
         internal const string CreateOption = "create";
-        internal const string DeleteOption = "delete";
+        internal const string RemoveOption = "remove";
 
         /// <summary>
         /// If Virtual Serial Port Tools are installed and functional this property is <see langword="true"/>, otherwise <see langword="false"/>.
@@ -126,7 +126,7 @@ namespace nanoFramework.nanoCLR.CLI
             return CreateVirtualBridge(comA, comB);
         }
 
-        public static void DeleteVirtualBridge(VirtualSerialBridge bridge)
+        public static void RemoveVirtualBridge(VirtualSerialBridge bridge)
         {
             //Not working due to interop issues between 0x86/0x64 code. Error: 0xE0000235. Vendor issue?
             try
@@ -152,7 +152,7 @@ namespace nanoFramework.nanoCLR.CLI
                 throw new ArgumentException($"Virtual COM Pair {bridgeName.ToUpper()} not found.");
             }
 
-            DeleteVirtualBridge(pair);
+            RemoveVirtualBridge(pair);
         }
 
         public static (int comA, int comB) ParseVirtualBridge(string bridgeName)

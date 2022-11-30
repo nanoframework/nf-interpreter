@@ -27,11 +27,11 @@ namespace nanoFramework.nanoCLR.CLI
         public string CreateVirtualSerialDevice { get; set; }
 
         [Option(
-            'd',
-            VirtualSerialDeviceManager.DeleteOption,
+            'r',
+            VirtualSerialDeviceManager.RemoveOption,
             Required = false,
-            HelpText = "Delete Virtual Serial Device")]
-        public string DeleteVirtualSerialDevice { get; set; }
+            HelpText = "Remove Virtual Serial Device")]
+        public string RemoveVirtualSerialDevice { get; set; }
 
         [Option(
             "install",
