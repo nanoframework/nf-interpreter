@@ -82,5 +82,11 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         [Display(Name = "Error updating nanoCLR library.")]
         E9005 = 9005,
+
+        /// <summary>
+        /// Error updating nanoCLR library.
+        /// </summary>
+        [Display(Name = "Error installing Virtual Serial Port Tools.")]
+        E9006 = 9006,
     }
 }

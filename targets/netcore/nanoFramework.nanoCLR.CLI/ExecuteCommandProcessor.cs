@@ -88,7 +88,7 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.DebugTcpIpPort != null)
             {
-                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpHost ?? TcpIpListeningPort.Localhost,  options.DebugTcpIpPort.Value, options.DebugBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
+                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpHost ?? TcpIpListeningPort.Localhost, options.DebugTcpIpPort.Value, options.DebugBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
             }
 
             if (options.DebugNamedPipe != null)
@@ -100,7 +100,7 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 hostBuilder.UsePortTrace();
             }
-            
+
             if (options.MonitorParentPid != null)
             {
                 try
@@ -114,13 +114,13 @@ namespace nanoFramework.nanoCLR.CLI
                     Console.WriteLine($"Failed to find parent process with pid: {options.MonitorParentPid} message: {ex.Message}");
                 }
             }
-            
+
             var host = hostBuilder.Build();
-            
-            Console.CancelKeyPress += (_, _) => host.Shutdown(); 
-            
+
+            Console.CancelKeyPress += (_, _) => host.Shutdown();
+
             host.Run();
-            
+
             return 0;
         }
 

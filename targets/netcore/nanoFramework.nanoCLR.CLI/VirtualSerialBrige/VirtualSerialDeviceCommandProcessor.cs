@@ -3,10 +3,16 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -18,6 +24,11 @@ namespace nanoFramework.nanoCLR.CLI
             VirtualSerialDeviceManager virtualComManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
+
+            if (options.InstallVirtualSerialPortTools)
+            {
+                return (int)InstallVirtualSerialPortTools().Result;
+            }
 
             if (!CheckIfFunctional(virtualComManager))
             {
@@ -63,8 +74,9 @@ namespace nanoFramework.nanoCLR.CLI
 
                 Console.WriteLine("*** Virtual Serial Port Tools are not installed ***");
 
-                Console.WriteLine("To run nanoCLR with virtual COM port Virtual Serial Port Tools from HHD Software needs to be installed.");
-                Console.WriteLine("Please donwload and install from https://www.hhdsoftware.com/virtual-serial-port-tools/extra-info.");
+                Console.WriteLine("To run nanoCLR with a virtual COM port need to install Virtual Serial Port Tools from HHD Software.");
+                Console.WriteLine("Please run 'nanoclr virtualserial --install'.");
+                Console.WriteLine("As an alternative download and install from https://www.hhdsoftware.com/virtual-serial-port-tools/extra-info.");
 
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -95,7 +107,7 @@ namespace nanoFramework.nanoCLR.CLI
 
             bridge = virtualComManager.GetVirtualBridgeContainingPort(port);
 
-            if(bridge != null)
+            if (bridge != null)
             {
                 throw new CLIException(ExitCode.E1002);
             }
@@ -119,7 +131,7 @@ namespace nanoFramework.nanoCLR.CLI
         [SupportedOSPlatform("windows")]
         public static VirtualSerialBridge CreateVirtualBridge(
             VirtualSerialDeviceManager virtualComManager,
-            string portA, 
+            string portA,
             string portB = null)
         {
             string bridgeName;
@@ -145,12 +157,12 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             // need to run this with elevated permission
-            ExecuteElevated(() => virtualComManager.CreateVirtualBridge(bridgeName), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.CreateOption} {portA} {portB}");
+            Utilities.ExecuteElevated(() => virtualComManager.CreateVirtualBridge(bridgeName), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.CreateOption} {portA} {portB}");
 
             // find virtual brige
             VirtualSerialBridge bridge = virtualComManager.GetVirtualBridgeByName(bridgeName);
 
-            if(bridge == null)
+            if (bridge == null)
             {
                 throw new CLIException(ExitCode.E1001);
             }
@@ -175,14 +187,14 @@ namespace nanoFramework.nanoCLR.CLI
         private static string GetNextFreeSerialPort(string port)
         {
             int portIndex = Utilities.GetPortIndex(port);
-            
+
             // start with the one right after the first one
             int newPortIndex = portIndex + 1;
 
             // get all port names currently in use
             var usedPorts = System.IO.Ports.SerialPort.GetPortNames();
 
-            if(usedPorts.Any())
+            if (usedPorts.Any())
             {
                 int lastUsedPortIndex = Utilities.GetPortIndex(usedPorts.Last());
 
@@ -226,6 +238,61 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("No virtual serial port pairs found.");
                 Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+
+        private static async Task<ExitCode> InstallVirtualSerialPortTools()
+        {
+            string hhdsoftwareUrl = "https://www.hhdsoftware.com";
+            string installerName = "virtual-serial-port-tools-redist.exe";
+            HttpClient httpClient = new HttpClient();
+            var installerLocation = Path.Combine(Path.GetTempPath(), installerName);
+
+            // check if this is running on Windows Platform
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.WriteLine($"Can't install Virtual Serial Port Tools in platform other than Windows.");
+
+                return ExitCode.E9006;
+            }
+
+            try
+            {
+                httpClient.BaseAddress = new Uri(hhdsoftwareUrl);
+                httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
+
+                Console.Write($"Downloading Virtual Serial Port Tools...");
+
+                // get latest version available for download
+                HttpResponseMessage response = await httpClient.GetAsync($"/download/{installerName}");
+                response.EnsureSuccessStatusCode();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("OK");
+                Console.ForegroundColor = ConsoleColor.White;
+
+                var installerContent = await response.Content.ReadAsStreamAsync();
+                var installerFile = File.OpenWrite(installerLocation);
+
+                installerContent.Seek(0, SeekOrigin.Begin);
+                installerContent.CopyTo(installerFile);
+
+                installerContent.Dispose();
+                installerFile.Dispose();
+
+                Utilities.ExecuteElevated(null, "-silent", installerLocation);
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Virtual Serial Port Tools installed.");
+                Console.ForegroundColor = ConsoleColor.White;
+
+                return ExitCode.OK;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error installing Virtual Serial Port Tools: {ex}");
+
+                return ExitCode.E9006;
             }
         }
     }

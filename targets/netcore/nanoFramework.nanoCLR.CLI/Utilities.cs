@@ -35,13 +35,14 @@ namespace nanoFramework.nanoCLR.CLI
         [SupportedOSPlatform("windows")]
         public static void ExecuteElevated(
             Action action,
-            string arguments)
+            string arguments,
+            string executable = null)
         {
             // check if the process is running with elevated permissions
             bool isAdministrator = new WindowsPrincipal(WindowsIdentity.GetCurrent())
                 .IsInRole(WindowsBuiltInRole.Administrator);
 
-            if (isAdministrator)
+            if (isAdministrator && action is not null)
             {
                 action();
             }
@@ -62,20 +63,24 @@ namespace nanoFramework.nanoCLR.CLI
                     Console.ForegroundColor = ConsoleColor.White;
                 }
 
-                RunAsAdministrator(arguments);
+                RunAsAdministrator(
+                    arguments,
+                    executable);
             }
         }
 
-        public static void RunAsAdministrator(string arguments)
+        public static void RunAsAdministrator(
+            string arguments,
+            string executable = null)
         {
-            var fileName = Process.GetCurrentProcess().MainModule.FileName;
+            var fileName = executable ?? Environment.ProcessPath;
 
             // this ProcessStartInfo is required to run the process with elevated permissions
             // can't use other options, can't route output, can't show window
             var info = new ProcessStartInfo(fileName, arguments)
             {
                 UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
+                WindowStyle = ProcessWindowStyle.Minimized,
                 Verb = "runas"
             };
 
@@ -87,20 +92,20 @@ namespace nanoFramework.nanoCLR.CLI
 
             process.Start();
 
-            if (process.WaitForExit(20000))
+            if (process.WaitForExit(60_000))
             {
                 // check exit code
                 var exitCode = process.ExitCode;
 
                 if (exitCode != 0)
                 {
-                    throw new CLIException(ExitCode.E9002, $"Exit code was:{exitCode}");
+                    throw new CLIException(ExitCode.E9002, $"Error running elevated process. Exit code was:{exitCode}.");
                 }
             }
             else
             {
                 // timeout occurred, report 
-                throw new CLIException(ExitCode.E9003);
+                throw new CLIException(ExitCode.E9003, "Running elevated process failed to execute in alloted time.");
             }
         }
     }

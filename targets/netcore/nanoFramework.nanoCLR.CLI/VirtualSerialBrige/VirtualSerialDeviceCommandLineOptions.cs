@@ -8,30 +8,37 @@ using CommandLine;
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
-        VirtualSerialDeviceManager.VirtualSerialDeviceVerb, 
+        VirtualSerialDeviceManager.VirtualSerialDeviceVerb,
         HelpText = "Manage Virtual Devices.")]
     public class VirtualSerialDeviceCommandLineOptions
     {
         [Option(
-            'l', 
-            "list", 
-            Required = false, 
+            'l',
+            "list",
+            Required = false,
             HelpText = "List existing Virtual Bridges")]
         public bool List { get; set; }
 
         [Option(
             'c',
-            VirtualSerialDeviceManager.CreateOption, 
+            VirtualSerialDeviceManager.CreateOption,
             Required = false,
             HelpText = "Create Virtual Serial Device")]
         public string CreateVirtualSerialDevice { get; set; }
 
         [Option(
-            'd', 
-            VirtualSerialDeviceManager.DeleteOption, 
-            Required = false, 
+            'd',
+            VirtualSerialDeviceManager.DeleteOption,
+            Required = false,
             HelpText = "Delete Virtual Serial Device")]
         public string DeleteVirtualSerialDevice { get; set; }
+
+        [Option(
+            "install",
+            Required = false,
+            Default = false,
+            HelpText = "Install Virtual Serial Port Tools")]
+        public bool InstallVirtualSerialPortTools { get; set; }
 
         /// <summary>
         /// Allowed values:
