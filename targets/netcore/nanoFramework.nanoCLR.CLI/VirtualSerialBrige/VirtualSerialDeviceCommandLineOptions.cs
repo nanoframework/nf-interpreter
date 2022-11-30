@@ -8,9 +8,9 @@ using CommandLine;
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
-        VirtualDeviceManager.VirtualDeviceVerb, 
+        VirtualSerialDeviceManager.VirtualSerialDeviceVerb, 
         HelpText = "Manage Virtual Devices.")]
-    public class VirtualDeviceCommandLineOptions
+    public class VirtualSerialDeviceCommandLineOptions
     {
         [Option(
             'l', 
@@ -21,14 +21,14 @@ namespace nanoFramework.nanoCLR.CLI
 
         [Option(
             'c',
-            VirtualDeviceManager.CreateOption, 
+            VirtualSerialDeviceManager.CreateOption, 
             Required = false,
             HelpText = "Create Virtual Serial Device")]
         public string CreateVirtualSerialDevice { get; set; }
 
         [Option(
             'd', 
-            VirtualDeviceManager.DeleteOption, 
+            VirtualSerialDeviceManager.DeleteOption, 
             Required = false, 
             HelpText = "Delete Virtual Serial Device")]
         public string DeleteVirtualSerialDevice { get; set; }

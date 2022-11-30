@@ -11,27 +11,27 @@ namespace nanoFramework.nanoCLR.CLI
     /// <summary>
     /// Object representing a Virtual Bridge.
     /// </summary>
-    public class VirtualBridge
+    public class VirtualSerialBridge
     {
-        public VirtualBridge()
+        public VirtualSerialBridge()
         {
         }
 
-        internal VirtualBridge(VirtualDeviceManager virtualComManager, string bridgeName)
+        internal VirtualSerialBridge(VirtualSerialDeviceManager virtualComManager, string bridgeName)
         {
-            var (comA, comB) = VirtualDeviceManager.ParseVirtualBridge(bridgeName);
+            var (comA, comB) = VirtualSerialDeviceManager.ParseVirtualBridge(bridgeName);
 
             PortA = virtualComManager.GetVirtualPortDevice(comA);
             PortB = virtualComManager.GetVirtualPortDevice(comB);
         }
 
         /// <summary>
-        /// Bridge Device for first port of the <see cref="VirtualBridge"/>.
+        /// Bridge Device for first port of the <see cref="VirtualSerialBridge"/>.
         /// </summary>
         public IBridgePortDevice PortA { get; set; }
 
         /// <summary>
-        /// Bridge Device for second port of the <see cref="VirtualBridge"/>.
+        /// Bridge Device for second port of the <see cref="VirtualSerialBridge"/>.
         /// </summary>
         public IBridgePortDevice PortB { get; set; }
 
@@ -46,7 +46,7 @@ namespace nanoFramework.nanoCLR.CLI
         public uint PortBIndex => PortB.bridgePort;
 
         /// <summary>
-        /// Index for the other port of the <see cref="VirtualBridge"/>.
+        /// Index for the other port of the <see cref="VirtualSerialBridge"/>.
         /// </summary>
         /// <returns></returns>
         public uint GetOtherPort(IBridgePortDevice port)
@@ -71,7 +71,7 @@ namespace nanoFramework.nanoCLR.CLI
         }
 
         /// <summary>
-        /// Index for the other port of the <see cref="VirtualBridge"/>.
+        /// Index for the other port of the <see cref="VirtualSerialBridge"/>.
         /// </summary>
         /// <returns></returns>
         public uint GetOtherPort(string port)

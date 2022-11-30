@@ -14,13 +14,13 @@ using System.Text.RegularExpressions;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public class VirtualDeviceManager
+    public class VirtualSerialDeviceManager
     {
         private const string _licenseResourceName = "nanoFramework.nanoCLR.CLI.License.vspt.vsptlic";
         private static Regex s_PairRegex = new(@"COM(\d+):COM(\d+)", RegexOptions.IgnoreCase);
 
-        // verbs and options for virtual device
-        internal const string VirtualDeviceVerb = "virtualdevice";
+        // verbs and options for virtual serial device
+        internal const string VirtualSerialDeviceVerb = "virtualserial";
         internal const string CreateOption = "create";
         internal const string DeleteOption = "delete";
 
@@ -31,7 +31,7 @@ namespace nanoFramework.nanoCLR.CLI
 
         internal SerialPortLibrary _serialPortLibrary = null;
 
-        public VirtualDeviceManager()
+        public VirtualSerialDeviceManager()
         {
         }
 
@@ -63,24 +63,24 @@ namespace nanoFramework.nanoCLR.CLI
 
         internal IBridgePortDevice GetVirtualPortDevice(int port) => GetVirtualPortDevices().FirstOrDefault(p => p.port == port);
 
-        public IEnumerable<VirtualBridge> GetAvailableVirtualBridges()
+        public IEnumerable<VirtualSerialBridge> GetAvailableVirtualBridges()
         {
             IBridgePortDevice[] bridgePorts = GetVirtualPortDevices();
 
-            var bridges = new List<VirtualBridge>();
+            var bridges = new List<VirtualSerialBridge>();
 
             foreach (var port in bridgePorts)
             {
                 if (port.bridgePort > 0 && bridges.All(b => b.PortA.port != port.bridgePort))
                 {
-                    bridges.Add(new VirtualBridge { PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort) });
+                    bridges.Add(new VirtualSerialBridge { PortA = port, PortB = bridgePorts.First(p => p.port == port.bridgePort) });
                 }
             }
 
             return bridges;
         }
 
-        internal VirtualBridge GetVirtualBridgeContainingPort(string port)
+        internal VirtualSerialBridge GetVirtualBridgeContainingPort(string port)
         {
             int portIndex = Utilities.GetPortIndex(port);
 
@@ -101,7 +101,7 @@ namespace nanoFramework.nanoCLR.CLI
             return null;
         }
 
-        public VirtualBridge CreateVirtualBridge(int comA, int comB)
+        public VirtualSerialBridge CreateVirtualBridge(int comA, int comB)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace nanoFramework.nanoCLR.CLI
                 portA.bridgePort = portB.port;
                 portB.bridgePort = portA.port;
 
-                return new VirtualBridge { PortA = portA, PortB = portB };
+                return new VirtualSerialBridge { PortA = portA, PortB = portB };
             }
             catch (Exception e)
             {
@@ -119,14 +119,14 @@ namespace nanoFramework.nanoCLR.CLI
             }
         }
 
-        public VirtualBridge CreateVirtualBridge(string bridgeName)
+        public VirtualSerialBridge CreateVirtualBridge(string bridgeName)
         {
             var (comA, comB) = ParseVirtualBridge(bridgeName);
 
             return CreateVirtualBridge(comA, comB);
         }
 
-        public static void DeleteVirtualBridge(VirtualBridge bridge)
+        public static void DeleteVirtualBridge(VirtualSerialBridge bridge)
         {
             //Not working due to interop issues between 0x86/0x64 code. Error: 0xE0000235. Vendor issue?
             try
@@ -145,7 +145,7 @@ namespace nanoFramework.nanoCLR.CLI
 
         public void DeleteVirtualBridge(string bridgeName)
         {
-            VirtualBridge pair = GetVirtualBridgeByName(bridgeName);
+            VirtualSerialBridge pair = GetVirtualBridgeByName(bridgeName);
 
             if (pair == null)
             {
@@ -171,7 +171,7 @@ namespace nanoFramework.nanoCLR.CLI
             return (comA, comB);
         }
 
-        public VirtualBridge GetVirtualBridgeByName(string bridgeName)
+        public VirtualSerialBridge GetVirtualBridgeByName(string bridgeName)
         {
             var (comA, comB) = ParseVirtualBridge(bridgeName);
 
@@ -183,12 +183,12 @@ namespace nanoFramework.nanoCLR.CLI
                 return null;
             }
 
-            return new VirtualBridge { PortA = portA, PortB = portB };
+            return new VirtualSerialBridge { PortA = portA, PortB = portB };
         }
 
         private void InstallLicense()
         {
-            var assembly = typeof(VirtualDeviceManager).GetTypeInfo().Assembly;
+            var assembly = typeof(VirtualSerialDeviceManager).GetTypeInfo().Assembly;
 
             Stream resource = assembly.GetManifestResourceStream(_licenseResourceName);
             MemoryStream memoryStream = new MemoryStream();

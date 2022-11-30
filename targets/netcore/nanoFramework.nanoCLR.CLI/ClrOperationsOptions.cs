@@ -10,7 +10,7 @@ namespace nanoFramework.nanoCLR.CLI
     [Verb(
         "nanoclr", 
         HelpText = "Operations with nanoCLR.")]
-    public class CLRCommandLineOptions
+    public class ClrOperationsOptions
     {
         [Option(
             "getversion", 
@@ -21,19 +21,20 @@ namespace nanoFramework.nanoCLR.CLI
         [Option(
             "update",
             Required = false, 
-            Default = "", 
-            HelpText = "Checks for newer stable versions of the CLR and updates it, if there is one. A specific version can be specified. To check preview versions add the --preview option.")]
+            Default = false, 
+            HelpText = "Checks for stable versions of nanoCLR and updates it, if there is one. A specific version can be specified. To check preview versions add the --preview option.")]
         public bool UpdateCLR { get; set; }
 
         [Option(
             "preview",
             Required = false,
-            HelpText = "Checks for preview versions of the nanoCLR.")]
+            HelpText = "Include preview versions when checking for nanoCLR updates.")]
         public bool CheckPreviewVersions { get; set; }
 
         [Option(
             "version", 
-            Required = false, 
+            Required = false,
+            Default = null,
             HelpText = "Specify the version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
 

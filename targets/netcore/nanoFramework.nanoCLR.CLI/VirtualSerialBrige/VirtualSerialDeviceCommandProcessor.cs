@@ -12,12 +12,12 @@ using System.Security.Principal;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public static class VirtualDeviceCommandProcessor
+    public static class VirtualSerialDeviceCommandProcessor
     {
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
-            VirtualDeviceCommandLineOptions options,
-            VirtualDeviceManager virtualComManager)
+            VirtualSerialDeviceCommandLineOptions options,
+            VirtualSerialDeviceManager virtualComManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
@@ -49,7 +49,7 @@ namespace nanoFramework.nanoCLR.CLI
         }
 
         internal static bool CheckIfPortIsValid(
-            VirtualDeviceManager virtualBridgeManager,
+            VirtualSerialDeviceManager virtualBridgeManager,
             string port)
         {
             int portIndex = Utilities.GetPortIndex(port);
@@ -57,7 +57,7 @@ namespace nanoFramework.nanoCLR.CLI
             return virtualBridgeManager.GetVirtualPortDevice(portIndex) != null;
         }
 
-        public static bool CheckIfFunctional(VirtualDeviceManager virtualComManager)
+        public static bool CheckIfFunctional(VirtualSerialDeviceManager virtualComManager)
         {
             if (!virtualComManager.IsFunctional)
             {
@@ -78,7 +78,7 @@ namespace nanoFramework.nanoCLR.CLI
 
         [SupportedOSPlatform("windows")]
         public static void DeleteVirtualSerialDevice(
-            VirtualDeviceManager virtualComManager,
+            VirtualSerialDeviceManager virtualComManager,
             string port)
         {
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
@@ -93,7 +93,7 @@ namespace nanoFramework.nanoCLR.CLI
                 throw new CLIException(ExitCode.E1003);
             }
 
-            ExecuteElevated(() => VirtualDeviceManager.DeleteVirtualBridge(bridge), $"{VirtualDeviceManager.VirtualDeviceVerb} --{VirtualDeviceManager.DeleteOption} {bridge}");
+            ExecuteElevated(() => VirtualSerialDeviceManager.DeleteVirtualBridge(bridge), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.DeleteOption} {bridge}");
 
             bridge = virtualComManager.GetVirtualBridgeContainingPort(port);
 
@@ -112,15 +112,15 @@ namespace nanoFramework.nanoCLR.CLI
         }
 
         /// <summary>
-        /// Creates a <see cref="VirtualBridge"/> for the specified COM port.
+        /// Creates a <see cref="VirtualSerialBridge"/> for the specified COM port.
         /// </summary>
         /// <param name="virtualComManager"></param>
-        /// <param name="portA">Port A for <see cref="VirtualBridge"/>.</param>
-        /// <param name="portB">Port A for <see cref="VirtualBridge"/>. If null a second COM port will be choosen randomly and used to create the <see cref="VirtualBridge"/>.</param>
+        /// <param name="portA">Port A for <see cref="VirtualSerialBridge"/>.</param>
+        /// <param name="portB">Port A for <see cref="VirtualSerialBridge"/>. If null a second COM port will be choosen randomly and used to create the <see cref="VirtualSerialBridge"/>.</param>
         /// <returns></returns>
         [SupportedOSPlatform("windows")]
-        public static VirtualBridge CreateVirtualBridge(
-            VirtualDeviceManager virtualComManager,
+        public static VirtualSerialBridge CreateVirtualBridge(
+            VirtualSerialDeviceManager virtualComManager,
             string portA, 
             string portB = null)
         {
@@ -147,10 +147,10 @@ namespace nanoFramework.nanoCLR.CLI
             }
 
             // need to run this with elevated permission
-            ExecuteElevated(() => virtualComManager.CreateVirtualBridge(bridgeName), $"{VirtualDeviceManager.VirtualDeviceVerb} --{VirtualDeviceManager.CreateOption} {portA} {portB}");
+            ExecuteElevated(() => virtualComManager.CreateVirtualBridge(bridgeName), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.CreateOption} {portA} {portB}");
 
             // find virtual brige
-            VirtualBridge bridge = virtualComManager.GetVirtualBridgeByName(bridgeName);
+            VirtualSerialBridge bridge = virtualComManager.GetVirtualBridgeByName(bridgeName);
 
             if(bridge == null)
             {
@@ -210,15 +210,24 @@ namespace nanoFramework.nanoCLR.CLI
             return $"COM{newPortIndex}";
         }
 
-        public static void ListVirtualBridges(VirtualDeviceManager virtualComManager)
+        public static void ListVirtualBridges(VirtualSerialDeviceManager virtualComManager)
         {
-            IEnumerable<VirtualBridge> bridges = virtualComManager.GetAvailableVirtualBridges();
+            IEnumerable<VirtualSerialBridge> bridges = virtualComManager.GetAvailableVirtualBridges();
 
-            Console.WriteLine("Existing virtual port pairs:");
-
-            foreach (var comBridge in bridges)
+            if (bridges.Any())
             {
-                Console.WriteLine(comBridge);
+                Console.WriteLine("Existing virtual serial port pairs:");
+
+                foreach (var comBridge in bridges)
+                {
+                    Console.WriteLine(comBridge);
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("No virtual serial port pairs found.");
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 

@@ -9,9 +9,9 @@ using CommandLine;
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
-        "run", 
+        "execute", 
         HelpText = "Run nanoCLR assembly.")]
-    public class RunCommandLineOptions
+    public class ExecuteCommandLineOptions
     {
         [Option(
             'l',
@@ -20,16 +20,15 @@ namespace nanoFramework.nanoCLR.CLI
             HelpText = "Loads list of assemblies formatted for nanoCLR")]
         public IEnumerable<string> Assemblies { get; set; }
 
-        //[Option('b', "loadDatabase", Required = false, HelpText = "Loads a set of assemblies")]
-        //public string AssembliesSet { get; set; }
-
-        [Option('s', 
+        [Option(
+            's', 
             "serialport", 
             Required = false, 
             HelpText = "Serial COM port to setup for debug connection")]
         public string DebugSerialPort { get; set; }
 
-        [Option('p', 
+        [Option(
+            'p', 
             "networkport", 
             Required = false, 
             HelpText = "Set TCP/IP port for incoming debug connection")]
@@ -58,7 +57,7 @@ namespace nanoFramework.nanoCLR.CLI
 
         [Option(
             't', 
-            "traceWire",
+            "tracewire",
             Required = false, 
             HelpText = "Trace wire data packets")]
         public bool TraceWire { get; set; }
@@ -69,12 +68,6 @@ namespace nanoFramework.nanoCLR.CLI
             Required = false,
             HelpText = "Tries to resolve cross-assembly references")]
         public bool TryResolve { get; set; }
-
-        [Option(
-            "clrversion",
-            Required = false, 
-            HelpText = "Get nanoCLR version running on the virtual device")]
-        public bool CLRVersion { get; set; }
 
         [Option(
             'm', 

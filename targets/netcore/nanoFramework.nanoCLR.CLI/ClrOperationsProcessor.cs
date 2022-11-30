@@ -15,12 +15,13 @@ using System.Threading.Tasks;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public static class CLRCommandLineProcessor
+    public static class ClrOperationsProcessor
     {
         private const string _cloudSmithApiUrl = "https://api.cloudsmith.io/v1/packages/net-nanoframework/";
+        private static HttpClient _httpClient = new HttpClient();
 
         public static int ProcessVerb(
-            CLRCommandLineOptions options,
+            ClrOperationsOptions options,
             nanoCLRHostBuilder hostBuilder)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
@@ -50,12 +51,11 @@ namespace nanoFramework.nanoCLR.CLI
 
                 string nanoClrDllLocation = Path.Combine(Assembly.GetExecutingAssembly().Location, "nanoFramework.nanoClr.dll");
 
-                using var cloudsmithClient = new HttpClient();
-                cloudsmithClient.BaseAddress = new Uri(_cloudSmithApiUrl);
-                cloudsmithClient.DefaultRequestHeaders.Add("Accept", "*/*");
+                _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
+                _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
 
                 // get latest version available for download
-                HttpResponseMessage response = await cloudsmithClient.GetAsync($"nanoframework-images/?query=name:^WIN_DLL_nanoCLR version:^latest$");
+                HttpResponseMessage response = await _httpClient.GetAsync($"nanoframework-images/?query=name:^WIN_DLL_nanoCLR version:^latest$");
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (responseBody == "[]")
@@ -78,7 +78,7 @@ namespace nanoFramework.nanoCLR.CLI
                     if (latestFwVersion > version
                         || Version.Parse(targetVersion) > Version.Parse(currentVersion))
                     {
-                        response = await cloudsmithClient.GetAsync(packageInfo.ElementAt(0).DownloadUrl);
+                        response = await _httpClient.GetAsync(packageInfo.ElementAt(0).DownloadUrl);
                         response.EnsureSuccessStatusCode();
 
                         await using var ms = await response.Content.ReadAsStreamAsync();

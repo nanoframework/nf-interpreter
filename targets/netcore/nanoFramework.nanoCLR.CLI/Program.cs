@@ -55,7 +55,7 @@ namespace nanoFramework.nanoCLR.CLI
                 // because of short-comings in CommandLine parsing 
                 // need to customize the output to provide a consistent output
                 var parser = new Parser(config => config.HelpWriter = null);
-                var result = parser.ParseArguments<RunCommandLineOptions, VirtualDeviceCommandLineOptions>(new[] { "", "" });
+                var result = parser.ParseArguments<ExecuteCommandLineOptions, VirtualSerialDeviceCommandLineOptions, VirtualSerialDeviceCommandLineOptions>(new[] { "", "" });
 
                 var helpText = new HelpText(
                     new HeadingInfo(_headerInfo),
@@ -73,13 +73,13 @@ namespace nanoFramework.nanoCLR.CLI
 
             LogErrors(() =>
             {
-                VirtualDeviceManager virtualBridgeManager = new();
-                virtualBridgeManager.Initialize();
+                VirtualSerialDeviceManager virtualSerialBridgeManager = new();
+                virtualSerialBridgeManager.Initialize();
 
                 nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
-                var parsedArguments = Parser.Default.ParseArguments<RunCommandLineOptions, CLRCommandLineOptions, VirtualDeviceCommandLineOptions>(args);
+                var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -87,26 +87,20 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.WriteLine(_copyrightInfo);
                 Console.WriteLine();
 
-                // perform version check
-                //CheckVersion();
-                Console.WriteLine();
-
-                Console.ForegroundColor = ConsoleColor.White;
-
                 parsedArguments.MapResult(
-                        (RunCommandLineOptions opts) =>
-                            RunCommandProcessor.ProcessVerb(
+                        (ExecuteCommandLineOptions opts) =>
+                            ExecuteCommandProcessor.ProcessVerb(
                                 opts,
                                 hostBuilder,
-                                virtualBridgeManager),
-                        (CLRCommandLineOptions opts) =>
-                            CLRCommandLineProcessor.ProcessVerb(
+                                virtualSerialBridgeManager),
+                        (ClrOperationsOptions opts) =>
+                            ClrOperationsProcessor.ProcessVerb(
                                 opts,
                                 hostBuilder),
-                        (VirtualDeviceCommandLineOptions opts) =>
-                            VirtualDeviceCommandProcessor.ProcessVerb(
+                        (VirtualSerialDeviceCommandLineOptions opts) =>
+                            VirtualSerialDeviceCommandProcessor.ProcessVerb(
                                 opts,
-                                virtualBridgeManager),
+                                virtualSerialBridgeManager),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
             });
 

@@ -13,13 +13,13 @@ using nanoFramework.nanoCLR.Host.Port.TcpIp;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    internal static class RunCommandProcessor
+    internal static class ExecuteCommandProcessor
     {
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
-            RunCommandLineOptions options,
+            ExecuteCommandLineOptions options,
             nanoCLRHostBuilder hostBuilder,
-            VirtualDeviceManager virtualBridgeManager)
+            VirtualSerialDeviceManager virtualBridgeManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
@@ -31,12 +31,12 @@ namespace nanoFramework.nanoCLR.CLI
                 Utilities.ValidateComPortName(options.DebugSerialPort);
 
                 // check if Virtual Serial Port Tools are available 
-                if (VirtualDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
+                if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
                 {
-                    VirtualBridge bridge;
+                    VirtualSerialBridge bridge;
 
                     // check if the requested port it's a valid Virtual Device
-                    if (VirtualDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.DebugSerialPort))
+                    if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.DebugSerialPort))
                     {
                         // get the virtual bridge that contains the request port
                         bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.DebugSerialPort);
@@ -44,7 +44,7 @@ namespace nanoFramework.nanoCLR.CLI
                     else
                     {
                         // no Virtual Device for that index, create a new virtual bridge
-                        bridge = VirtualDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.DebugSerialPort);
+                        bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.DebugSerialPort);
                     }
 
                     if (bridge == null)
