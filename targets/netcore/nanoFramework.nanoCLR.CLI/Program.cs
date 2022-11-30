@@ -39,7 +39,7 @@ namespace nanoFramework.nanoCLR.CLI
 
             _headerInfo = $".NET nanoFramework nanoCLR CLI v{_informationalVersionAttribute.InformationalVersion}";
 
-            _copyrightInfo = new CopyrightInfo(true, $".NET Foundation and Contributors", 2021);
+            _copyrightInfo = new CopyrightInfo(true, ".NET Foundation and nanoFramework project contributors", 2021);
 
             // need this to be able to use ProcessStart at the location where the .NET Core CLI tool is running from
             string codeBase = Assembly.GetExecutingAssembly().Location;
@@ -82,10 +82,6 @@ namespace nanoFramework.nanoCLR.CLI
                 var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
                 Console.ForegroundColor = ConsoleColor.White;
-
-                Console.WriteLine(_headerInfo);
-                Console.WriteLine(_copyrightInfo);
-                Console.WriteLine();
 
                 parsedArguments.MapResult(
                         (ExecuteCommandLineOptions opts) =>
