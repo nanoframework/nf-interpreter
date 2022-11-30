@@ -111,7 +111,7 @@ namespace nanoFramework.nanoCLR.CLI
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to find parent process with pid: {options.MonitorParentPid} message: {ex.Message}");
+                    Console.WriteLine($"Failed to find parent process with ID: {options.MonitorParentPid} message: {ex.Message}");
                 }
             }
 

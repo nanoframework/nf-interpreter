@@ -115,7 +115,7 @@ namespace nanoFramework.nanoCLR.CLI
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
                 Console.WriteLine("");
-                Console.WriteLine($"Virtual Bridge succesfully deleted");
+                Console.WriteLine($"Virtual Bridge successfully deleted");
                 Console.WriteLine("");
             }
 
@@ -126,7 +126,7 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         /// <param name="virtualComManager"></param>
         /// <param name="portA">Port A for <see cref="VirtualSerialBridge"/>.</param>
-        /// <param name="portB">Port A for <see cref="VirtualSerialBridge"/>. If null a second COM port will be choosen randomly and used to create the <see cref="VirtualSerialBridge"/>.</param>
+        /// <param name="portB">Port A for <see cref="VirtualSerialBridge"/>. If null a second COM port will be chosen randomly and used to create the <see cref="VirtualSerialBridge"/>.</param>
         /// <returns></returns>
         [SupportedOSPlatform("windows")]
         public static VirtualSerialBridge CreateVirtualBridge(
@@ -159,7 +159,7 @@ namespace nanoFramework.nanoCLR.CLI
             // need to run this with elevated permission
             Utilities.ExecuteElevated(() => virtualComManager.CreateVirtualBridge(bridgeName), $"{VirtualSerialDeviceManager.VirtualSerialDeviceVerb} --{VirtualSerialDeviceManager.CreateOption} {portA} {portB}");
 
-            // find virtual brige
+            // find virtual bridge
             VirtualSerialBridge bridge = virtualComManager.GetVirtualBridgeByName(bridgeName);
 
             if (bridge == null)
@@ -170,7 +170,7 @@ namespace nanoFramework.nanoCLR.CLI
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
                 Console.WriteLine("");
-                Console.WriteLine($"Virtual Bridge created succesfully");
+                Console.WriteLine($"Virtual Bridge created successfully");
                 Console.WriteLine("");
             }
 
