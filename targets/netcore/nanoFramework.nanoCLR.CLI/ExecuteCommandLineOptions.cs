@@ -9,71 +9,74 @@ using CommandLine;
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
-        "execute", 
+        "run",
         HelpText = "Run nanoCLR assembly.")]
     public class ExecuteCommandLineOptions
     {
         [Option(
-            'l',
-            "load", 
-            Required = false, 
-            HelpText = "Loads list of assemblies formatted for nanoCLR")]
-        public IEnumerable<string> Assemblies { get; set; }
+            'a',
+            "assemblies",
+            Required = false,
+            HelpText = "List of PE assemblies to load in nanoCLR.")]
+        public IEnumerable<string> AssembliesToLoad { get; set; }
 
         [Option(
-            's', 
-            "serialport", 
-            Required = false, 
-            HelpText = "Serial COM port to setup for debug connection")]
-        public string DebugSerialPort { get; set; }
+            's',
+            "serialport",
+            Required = false,
+            HelpText = "Virtual serial port exposing the nanoCLR instance.")]
+        public string ExposedSerialPort { get; set; }
 
         [Option(
-            'p', 
-            "networkport", 
-            Required = false, 
-            HelpText = "Set TCP/IP port for incoming debug connection")]
-        public int? DebugTcpIpPort { get; set; }
-        
+            'p',
+            "networkport",
+            Required = false,
+            Hidden = true,
+            HelpText = "Set TCP/IP port exposing the nanoCLR instance.")]
+        public int? ExposedTcpIpPort { get; set; }
+
         [Option(
-            'h', 
-            "host", 
-            Required = false, 
-            HelpText = "Set TCP/IP host address for incoming debug connection")]
-        public string DebugTcpIpHost { get; set; }
-        
+            'h',
+            "host",
+            Required = false,
+            Hidden = true,
+            HelpText = "Set TCP/IP host address exposing the nanoCLR instance.")]
+        public string ExposedTcpIpHost { get; set; }
+
         [Option(
-            'b', 
-            "broadcast", 
-            Required = false, 
-            HelpText = "Set UDP broadcast port for device discovery")]
-        public int? DebugBroadcastPort { get; set; }
-        
+            'b',
+            "broadcast",
+            Required = false,
+            Hidden = true,
+            HelpText = "Set UDP broadcast port for device discovery.")]
+        public int? ExposedBroadcastPort { get; set; }
+
         [Option(
             'n',
-            "namedpipe", 
-            Required = false, 
-            HelpText = "Set Pipe Name for incoming debug connection")]
-        public string DebugNamedPipe { get; set; }
+            "namedpipe",
+            Required = false,
+            HelpText = "Set Pipe Name exposing the nanoCLR instance.")]
+        public string ExposedNamedPipe { get; set; }
 
         [Option(
-            't', 
-            "tracewire",
-            Required = false, 
-            HelpText = "Trace wire data packets")]
-        public bool TraceWire { get; set; }
+            "tracewireprotocol",
+            Required = false,
+            Hidden = true,
+            HelpText = "Trace wire protocol packets.")]
+        public bool TraceWireProtocol { get; set; }
 
         [Option(
             'r',
-            "resolve", 
+            "resolve",
             Required = false,
-            HelpText = "Tries to resolve cross-assembly references")]
+            HelpText = "Tries to resolve cross-assembly references.")]
         public bool TryResolve { get; set; }
 
         [Option(
-            'm', 
-            "monitorparentpid", 
-            Required = false, 
-            HelpText = "Parent process id to monitor - exit if the parent exits")]
+            'm',
+            "monitorparentpid",
+            Required = false,
+            HelpText = "Parent process id to monitor - exit if the parent exits.")]
         public int? MonitorParentPid { get; set; }
 
         /// <summary>

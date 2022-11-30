@@ -23,12 +23,12 @@ namespace nanoFramework.nanoCLR.CLI
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
-            if (options.DebugSerialPort != null)
+            if (options.ExposedSerialPort != null)
             {
                 // a serial port was requested 
 
                 // validate serial port
-                Utilities.ValidateComPortName(options.DebugSerialPort);
+                Utilities.ValidateComPortName(options.ExposedSerialPort);
 
                 // check if Virtual Serial Port Tools are available 
                 if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
@@ -36,15 +36,15 @@ namespace nanoFramework.nanoCLR.CLI
                     VirtualSerialBridge bridge;
 
                     // check if the requested port it's a valid Virtual Device
-                    if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.DebugSerialPort))
+                    if (VirtualSerialDeviceCommandProcessor.CheckIfPortIsValid(virtualBridgeManager, options.ExposedSerialPort))
                     {
                         // get the virtual bridge that contains the request port
-                        bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.DebugSerialPort);
+                        bridge = virtualBridgeManager.GetVirtualBridgeContainingPort(options.ExposedSerialPort);
                     }
                     else
                     {
                         // no Virtual Device for that index, create a new virtual bridge
-                        bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.DebugSerialPort);
+                        bridge = VirtualSerialDeviceCommandProcessor.CreateVirtualBridge(virtualBridgeManager, options.ExposedSerialPort);
                     }
 
                     if (bridge == null)
@@ -53,11 +53,11 @@ namespace nanoFramework.nanoCLR.CLI
                     }
 
                     // need to set debugger serial port to the _other_ port so it shows at the expected end
-                    options.DebugSerialPort = $"COM{bridge.GetOtherPort(options.DebugSerialPort)}";
+                    options.ExposedSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
 
                     hostBuilder.WaitForDebugger = true;
                     hostBuilder.EnterDebuggerLoopAfterExit = true;
-                    hostBuilder.UseSerialPortWireProtocol(options.DebugSerialPort);
+                    hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
                 }
                 else
                 {
@@ -65,9 +65,9 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
-            if (options.Assemblies.Any())
+            if (options.AssembliesToLoad.Any())
             {
-                hostBuilder.LoadAssemblies(options.Assemblies);
+                hostBuilder.LoadAssemblies(options.AssembliesToLoad);
             }
 
             if (options.TryResolve)
@@ -75,28 +75,28 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.TryResolve();
             }
 
-            if (options.DebugSerialPort != null || options.DebugTcpIpPort != null || options.DebugNamedPipe != null)
+            if (options.ExposedSerialPort != null || options.ExposedTcpIpPort != null || options.ExposedNamedPipe != null)
             {
                 hostBuilder.WaitForDebugger = true;
                 hostBuilder.EnterDebuggerLoopAfterExit = true;
             }
 
-            if (options.DebugSerialPort != null)
+            if (options.ExposedSerialPort != null)
             {
-                hostBuilder.UseSerialPortWireProtocol(options.DebugSerialPort);
+                hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
             }
 
-            if (options.DebugTcpIpPort != null)
+            if (options.ExposedTcpIpPort != null)
             {
-                hostBuilder.UseTcpIpPortWireProtocol(options.DebugTcpIpHost ?? TcpIpListeningPort.Localhost, options.DebugTcpIpPort.Value, options.DebugBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
+                hostBuilder.UseTcpIpPortWireProtocol(options.ExposedTcpIpHost ?? TcpIpListeningPort.Localhost, options.ExposedTcpIpPort.Value, options.ExposedBroadcastPort ?? NetworkWireBroadcastService.DebugBroadcastPort);
             }
 
-            if (options.DebugNamedPipe != null)
+            if (options.ExposedNamedPipe != null)
             {
-                hostBuilder.UseNamedPipeWireProtocol(options.DebugNamedPipe);
+                hostBuilder.UseNamedPipeWireProtocol(options.ExposedNamedPipe);
             }
 
-            if (options.TraceWire)
+            if (options.TraceWireProtocol)
             {
                 hostBuilder.UsePortTrace();
             }
