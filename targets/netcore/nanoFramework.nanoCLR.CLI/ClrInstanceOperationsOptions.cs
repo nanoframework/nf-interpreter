@@ -8,20 +8,20 @@ using CommandLine;
 namespace nanoFramework.nanoCLR.CLI
 {
     [Verb(
-        "nanoclr", 
-        HelpText = "Operations with nanoCLR.")]
-    public class ClrOperationsOptions
+        "instance",
+        HelpText = "Operations with the current nanoCLR instance.")]
+    public class ClrInstanceOperationsOptions
     {
         [Option(
-            "getversion", 
-            Required = false, 
-            HelpText = "Get nanoCLR version running on the virtual device")]
+            "getversion",
+            Required = false,
+            HelpText = "Gets the version of the current nanoCLR instance.")]
         public bool GetCLRVersion { get; set; }
 
         [Option(
             "update",
-            Required = false, 
-            Default = false, 
+            Required = false,
+            Default = false,
             HelpText = "Checks for stable versions of nanoCLR and updates it, if there is one. A specific version can be specified. To check preview versions add the --preview option.")]
         public bool UpdateCLR { get; set; }
 
@@ -32,10 +32,10 @@ namespace nanoFramework.nanoCLR.CLI
         public bool CheckPreviewVersions { get; set; }
 
         [Option(
-            "version", 
+            "clrversion",
             Required = false,
             Default = null,
-            HelpText = "Specify the version of nanoCRL to install.")]
+            HelpText = "Specify a version of nanoCRL to install.")]
         public string TargetVersion { get; set; }
 
         /// <summary>

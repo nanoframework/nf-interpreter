@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 
 namespace nanoFramework.nanoCLR.CLI
 {
-    public static class ClrOperationsProcessor
+    public static class ClrInstanceOperationsProcessor
     {
         private const string _cloudSmithApiUrl = "https://api.cloudsmith.io/v1/packages/net-nanoframework/";
         private static HttpClient _httpClient = new HttpClient();
 
         public static int ProcessVerb(
-            ClrOperationsOptions options,
+            ClrInstanceOperationsOptions options,
             nanoCLRHostBuilder hostBuilder)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);

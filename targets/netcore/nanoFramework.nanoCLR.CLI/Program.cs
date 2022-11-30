@@ -79,7 +79,7 @@ namespace nanoFramework.nanoCLR.CLI
                 nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
 
-                var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
+                var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrInstanceOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -89,8 +89,8 @@ namespace nanoFramework.nanoCLR.CLI
                                 opts,
                                 hostBuilder,
                                 virtualSerialBridgeManager),
-                        (ClrOperationsOptions opts) =>
-                            ClrOperationsProcessor.ProcessVerb(
+                        (ClrInstanceOperationsOptions opts) =>
+                            ClrInstanceOperationsProcessor.ProcessVerb(
                                 opts,
                                 hostBuilder),
                         (VirtualSerialDeviceCommandLineOptions opts) =>
