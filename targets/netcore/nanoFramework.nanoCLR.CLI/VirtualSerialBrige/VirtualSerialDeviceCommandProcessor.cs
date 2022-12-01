@@ -97,6 +97,10 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 Console.WriteLine($"Removing Virtual Serial Port: {port}");
             }
+            else
+            {
+                Console.Write($"Removing Virtual Serial Port: {port}");
+            }
 
             if (!Utilities.ValidateSerialPortName(port))
             {
@@ -119,13 +123,18 @@ namespace nanoFramework.nanoCLR.CLI
                 throw new CLIException(ExitCode.E1002);
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
+
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine("");
-                Console.WriteLine($"Virtual Bridge successfully deleted");
-                Console.WriteLine("");
+                Console.WriteLine("Virtual Bridge successfully deleted");
+            }
+            else
+            {
+                Console.WriteLine("OK");
             }
 
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         /// <summary>
@@ -173,7 +182,11 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine($"Creating a new Virtual Bridge: {bridgeName}");
+                Console.WriteLine($"Creating a new Virtual Bridge {bridgeName}...");
+            }
+            else
+            {
+                Console.Write($"Creating a new Virtual Bridge {bridgeName}");
             }
 
             // need to run this with elevated permission
@@ -187,12 +200,18 @@ namespace nanoFramework.nanoCLR.CLI
                 throw new CLIException(ExitCode.E1001);
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
+
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine("");
                 Console.WriteLine($"Virtual Bridge created successfully");
-                Console.WriteLine("");
             }
+            else
+            {
+                Console.WriteLine("OK");
+            }
+
+            Console.ForegroundColor = ConsoleColor.White;
 
             return bridge;
         }
