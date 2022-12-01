@@ -3,13 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using nanoFramework.nanoCLR.Host;
+using nanoFramework.nanoCLR.Host.Port.TcpIp;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
-using System.Text.RegularExpressions;
-using nanoFramework.nanoCLR.Host;
-using nanoFramework.nanoCLR.Host.Port.TcpIp;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -28,7 +27,10 @@ namespace nanoFramework.nanoCLR.CLI
                 // a serial port was requested 
 
                 // validate serial port
-                Utilities.ValidateComPortName(options.ExposedSerialPort);
+                if (!Utilities.ValidateSerialPortName(options.ExposedSerialPort))
+                {
+                    throw new CLIException(ExitCode.E9001);
+                }
 
                 // check if Virtual Serial Port Tools are available 
                 if (VirtualSerialDeviceCommandProcessor.CheckIfFunctional(virtualBridgeManager))
