@@ -12,31 +12,44 @@ namespace nanoFramework.nanoCLR.CLI
         HelpText = "Manage Virtual Devices.")]
     public class VirtualSerialDeviceCommandLineOptions
     {
+        internal const string _emptySerialPortName = "{0BF50126-7D07-4B09-B2B3-8C1B9482A6B1}";
+        private const string _createSetName = "addset";
+        private const string _removeSetName = "removeset";
+        private const string _listSetName = "listset";
+        private const string _installSetName = "installset";
+
         [Option(
-            'l',
             "list",
             Required = false,
+            SetName = _listSetName,
             HelpText = "List existing Virtual Bridges")]
         public bool List { get; set; }
 
         [Option(
-            'c',
             VirtualSerialDeviceManager.CreateOption,
             Required = false,
+            SetName = _createSetName,
             HelpText = "Create Virtual Serial Device")]
-        public string CreateVirtualSerialDevice { get; set; }
+        public bool CreateVirtualSerialDevice { get; set; }
 
         [Option(
-            'r',
             VirtualSerialDeviceManager.RemoveOption,
             Required = false,
+            SetName = _removeSetName,
             HelpText = "Remove Virtual Serial Device")]
-        public string RemoveVirtualSerialDevice { get; set; }
+        public bool RemoveVirtualSerialDevice { get; set; }
+
+        [Value(
+            0,
+            Hidden = true,
+            Default = null)]
+        public string PortName { get; set; }
 
         [Option(
             "install",
             Required = false,
             Default = false,
+            SetName = _installSetName,
             HelpText = "Install Virtual Serial Port Tools")]
         public bool InstallVirtualSerialPortTools { get; set; }
 

@@ -13,23 +13,23 @@ namespace nanoFramework.nanoCLR.CLI
 {
     internal static class Utilities
     {
-        public static bool ValidateComPortName(string portName)
-        {
-            // validate format
-            Regex comPortRegex = new(@"COM(\d+)", RegexOptions.IgnoreCase);
-            Match match = comPortRegex.Match(portName);
-
-            if (!match.Success)
-            {
-                throw new CLIException(ExitCode.E9001);
-            }
-
-            return true;
-        }
-
         public static int GetPortIndex(string portName)
         {
-            return int.Parse(portName.Replace("COM", ""));
+            if (int.TryParse(portName?.Replace("COM", ""), out int comIndex))
+            {
+                return comIndex;
+            }
+            else
+            {
+                // null or invalid port name
+                // 'impossible' COM port 
+                return -1;
+            }
+        }
+
+        public static bool ValidateSerialPortName(string portName)
+        {
+            return Regex.Match(portName, "(?:^COM[1-9]{1}[0-9]{0,2}$)").Success;
         }
 
         [SupportedOSPlatform("windows")]

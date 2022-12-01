@@ -3,13 +3,11 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
@@ -42,18 +40,20 @@ namespace nanoFramework.nanoCLR.CLI
                 return (int)ExitCode.OK;
             }
 
-            if (options.CreateVirtualSerialDevice != null)
+            if (options.CreateVirtualSerialDevice)
             {
-                CreateVirtualBridge(virtualComManager, options.CreateVirtualSerialDevice);
+                _ = CreateVirtualBridge(
+                    virtualComManager,
+                    options.PortName);
 
                 return (int)ExitCode.OK;
             }
 
-            if (options.RemoveVirtualSerialDevice != null)
+            if (options.RemoveVirtualSerialDevice)
             {
                 RemoveVirtualSerialDevice(
                     virtualComManager,
-                    options.RemoveVirtualSerialDevice);
+                    options.PortName);
             }
 
             return 0;
@@ -96,6 +96,11 @@ namespace nanoFramework.nanoCLR.CLI
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
                 Console.WriteLine($"Removing Virtual Serial Port: {port}");
+            }
+
+            if (!Utilities.ValidateSerialPortName(port))
+            {
+                throw new CLIException(ExitCode.E9001);
             }
 
             var bridge = virtualComManager.GetVirtualBridgeContainingPort(port);
@@ -142,9 +147,22 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 // only 1st COM port was specified
                 // check if this COM port is not in use
-                if (!CheckFreeSerialPort(portA))
+                if (portA is null)
                 {
-                    throw new CLIException(ExitCode.E9004);
+                    // get free COM port
+                    portA = GetNextFreeSerialPort(portA);
+                }
+                else
+                {
+                    if (!Utilities.ValidateSerialPortName(portA))
+                    {
+                        throw new CLIException(ExitCode.E9001);
+                    }
+
+                    if (!CheckFreeSerialPort(portA))
+                    {
+                        throw new CLIException(ExitCode.E9004);
+                    }
                 }
 
                 // get next free COM port
@@ -191,7 +209,8 @@ namespace nanoFramework.nanoCLR.CLI
             int portIndex = Utilities.GetPortIndex(port);
 
             // start with the one right after the first one
-            int newPortIndex = portIndex + 1;
+            // for invalid index, start with a 'high' COM port index
+            int newPortIndex = portIndex == -1 ? 30 : portIndex + 1;
 
             // get all port names currently in use
             var usedPorts = System.IO.Ports.SerialPort.GetPortNames();
