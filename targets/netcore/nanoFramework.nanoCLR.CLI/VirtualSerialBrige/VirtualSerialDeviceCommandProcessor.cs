@@ -95,11 +95,11 @@ namespace nanoFramework.nanoCLR.CLI
         {
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine($"Removing Virtual Serial Port: {port}");
+                Console.WriteLine($"Removing Virtual Serial Port {port}");
             }
             else
             {
-                Console.Write($"Removing Virtual Serial Port: {port}");
+                Console.Write($"Removing Virtual Serial Port {port}...");
             }
 
             if (!Utilities.ValidateSerialPortName(port))
@@ -182,11 +182,11 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (Program.VerbosityLevel >= VerbosityLevel.Normal)
             {
-                Console.WriteLine($"Creating a new Virtual Bridge {bridgeName}...");
+                Console.WriteLine($"Creating a new Virtual Bridge {bridgeName}");
             }
             else
             {
-                Console.Write($"Creating a new Virtual Bridge {bridgeName}");
+                Console.Write($"Creating a new Virtual Bridge {bridgeName}...");
             }
 
             // need to run this with elevated permission
