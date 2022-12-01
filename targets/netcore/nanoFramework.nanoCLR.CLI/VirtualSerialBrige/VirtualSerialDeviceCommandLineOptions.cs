@@ -12,7 +12,6 @@ namespace nanoFramework.nanoCLR.CLI
         HelpText = "Manage Virtual Devices.")]
     public class VirtualSerialDeviceCommandLineOptions
     {
-        internal const string _emptySerialPortName = "{0BF50126-7D07-4B09-B2B3-8C1B9482A6B1}";
         private const string _createSetName = "addset";
         private const string _removeSetName = "removeset";
         private const string _listSetName = "listset";
