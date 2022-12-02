@@ -88,9 +88,13 @@ namespace nanoFramework.nanoCLR.CLI
                         ms.CopyTo(fs);
 
                         fs.Flush();
-                    }
 
-                    Console.WriteLine($"Updated to: v{packageInfo.ElementAt(0).Version}");
+                        Console.WriteLine($"Updated to: v{packageInfo.ElementAt(0).Version}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Already at v{packageInfo.ElementAt(0).Version}");
+                    }
 
                     return ExitCode.OK;
                 }
