@@ -4,7 +4,8 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Platforms>AnyCPU;x86</Platforms>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="$(Configuration) == 'Release'">AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="$(Configuration) == 'Debug'">x86</PlatformTarget>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<RestoreLockedMode>true</RestoreLockedMode>

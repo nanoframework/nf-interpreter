@@ -3,9 +3,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>AnyCPU;x86</Platforms>
 	  <RuntimeIdentifiers>any</RuntimeIdentifiers>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="$(Configuration) == 'Release'">AnyCPU</PlatformTarget>
+    <PlatformTarget Condition="$(Configuration) == 'Debug'">x86</PlatformTarget>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<RestoreLockedMode>true</RestoreLockedMode>
