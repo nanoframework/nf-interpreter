@@ -34,7 +34,8 @@ const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[] = {
     &g_CLR_AssemblyNative_nanoFramework_Networking_Sntp,
     &g_CLR_AssemblyNative_System_Net,
     &g_CLR_AssemblyNative_System_IO_Ports,
-    &g_CLR_AssemblyNative_System_Device_Gpio
+    &g_CLR_AssemblyNative_System_Device_Gpio,
+    NULL
 };
 
 const uint16_t g_CLR_InteropAssembliesCount = ARRAYSIZE(g_CLR_InteropAssembliesNativeData);
