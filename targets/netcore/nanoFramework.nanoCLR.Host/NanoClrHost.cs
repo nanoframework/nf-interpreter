@@ -3,9 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using nanoFramework.nanoCLR.Host.Port;
 using System;
 using System.Collections.Generic;
-using nanoFramework.nanoCLR.Host.Port;
 
 namespace nanoFramework.nanoCLR.Host
 {

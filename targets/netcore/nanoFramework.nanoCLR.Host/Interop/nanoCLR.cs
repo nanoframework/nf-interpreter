@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -18,10 +19,10 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal delegate void DebugPrintDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
 
         internal delegate int WireTransmitDelegate(
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [In] byte[] data, int length);
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In] byte[] data, int length);
 
         internal delegate int WireReceiveDelegate(
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [Out] byte[] data, int length);
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][Out] byte[] data, int length);
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // The following declaration have the functions names exposed in the C++ DLL
@@ -72,5 +73,22 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport(NativeLibraryName, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.LPStr)]
         internal static extern string nanoCLR_GetVersion();
+
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+
+        public static void UnloadNanoClrImageDll(string path)
+        {
+            foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
+            {
+                if (mod.FileName.Equals(path, StringComparison.OrdinalIgnoreCase))
+                {
+                    FreeLibrary(mod.BaseAddress);
+
+                    // done here!
+                    break;
+                }
+            }
+        }
     }
 }

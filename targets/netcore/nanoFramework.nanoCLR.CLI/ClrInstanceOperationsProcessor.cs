@@ -28,7 +28,10 @@ namespace nanoFramework.nanoCLR.CLI
 
             if (options.UpdateCLR)
             {
-                return (int)UpdateNanoCLRAsync(options.TargetVersion, hostBuilder.GetCLRVersion()).Result;
+                return (int)UpdateNanoCLRAsync(
+                    options.TargetVersion,
+                    hostBuilder.GetCLRVersion(),
+                    hostBuilder).Result;
             }
             else if (options.GetCLRVersion)
             {
@@ -42,14 +45,17 @@ namespace nanoFramework.nanoCLR.CLI
 
         private static async Task<ExitCode> UpdateNanoCLRAsync(
             string targetVersion,
-            string currentVersion)
+            string currentVersion,
+            nanoCLRHostBuilder hostBuilder)
         {
             try
             {
                 // compose current version
+                // need to get rid of git hub has, in case it has one
+                currentVersion = currentVersion.Substring(0, currentVersion.IndexOf("+") < 0 ? currentVersion.Length : currentVersion.IndexOf("+"));
                 Version version = Version.Parse(currentVersion);
 
-                string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoClr.dll");
+                string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoCLR.dll");
 
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
@@ -81,6 +87,9 @@ namespace nanoFramework.nanoCLR.CLI
                     {
                         response = await _httpClient.GetAsync(packageInfo.ElementAt(0).DownloadUrl);
                         response.EnsureSuccessStatusCode();
+
+                        // need to unload the DLL before updating it
+                        hostBuilder.UnloadNanoClrDll();
 
                         await using var ms = await response.Content.ReadAsStreamAsync();
                         await using var fs = File.OpenWrite(nanoClrDllLocation);

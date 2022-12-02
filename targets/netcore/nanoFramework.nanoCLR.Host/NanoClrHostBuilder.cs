@@ -3,14 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using nanoFramework.nanoCLR.Host.Port;
 using nanoFramework.nanoCLR.Host.Port.NamedPipe;
 using nanoFramework.nanoCLR.Host.Port.Serial;
 using nanoFramework.nanoCLR.Host.Port.TcpIp;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -105,12 +106,19 @@ namespace nanoFramework.nanoCLR.Host
 
             s_nanoClrHost.nanoCLRSettings = new nanoCLRSettings
             {
-                MaxContextSwitches = (ushort) MaxContextSwitches,
+                MaxContextSwitches = (ushort)MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,
                 EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit
             };
 
             return s_nanoClrHost;
+        }
+
+        public void UnloadNanoClrDll()
+        {
+            string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoCLR.dll");
+
+            Interop.nanoCLR.UnloadNanoClrImageDll(nanoClrDllLocation);
         }
     }
 }
