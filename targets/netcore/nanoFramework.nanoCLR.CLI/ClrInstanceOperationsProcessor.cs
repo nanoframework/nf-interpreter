@@ -49,7 +49,7 @@ namespace nanoFramework.nanoCLR.CLI
                 // compose current version
                 Version version = Version.Parse(currentVersion);
 
-                string nanoClrDllLocation = Path.Combine(Assembly.GetExecutingAssembly().Location, "nanoFramework.nanoClr.dll");
+                string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoClr.dll");
 
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
