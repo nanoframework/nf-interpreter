@@ -3,6 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+    <Platforms>AnyCPU</Platforms>
+    <RuntimeIdentifiers>any</RuntimeIdentifiers>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<RestoreLockedMode>true</RestoreLockedMode>

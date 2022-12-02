@@ -718,7 +718,7 @@ jobs:
     displayName: Build WIN DLL target
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
-      platform: 'x86'
+      platform: 'Any CPU'
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
@@ -912,7 +912,7 @@ jobs:
     condition: succeeded()
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
-      platform: 'x86'
+      platform: 'Any CPU'
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
