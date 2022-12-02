@@ -886,7 +886,6 @@ jobs:
 
   variables:
     DOTNET_NOLOGO: true
-    ForceUpload: true
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
