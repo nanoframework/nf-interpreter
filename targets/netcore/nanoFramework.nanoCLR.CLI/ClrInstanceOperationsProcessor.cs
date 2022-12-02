@@ -76,7 +76,8 @@ namespace nanoFramework.nanoCLR.CLI
                     Version latestFwVersion = Version.Parse(packageInfo.ElementAt(0).Version);
 
                     if (latestFwVersion > version
-                        || Version.Parse(targetVersion) > Version.Parse(currentVersion))
+                        || (!string.IsNullOrEmpty(targetVersion)
+                            && (Version.Parse(targetVersion) > Version.Parse(currentVersion))))
                     {
                         response = await _httpClient.GetAsync(packageInfo.ElementAt(0).DownloadUrl);
                         response.EnsureSuccessStatusCode();
