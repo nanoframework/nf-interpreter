@@ -90,7 +90,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                         fs.Flush();
 
-                        Console.WriteLine($"Updated to: v{packageInfo.ElementAt(0).Version}");
+                        Console.WriteLine($"Updated to v{packageInfo.ElementAt(0).Version}");
                     }
                     else
                     {
