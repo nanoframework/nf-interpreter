@@ -88,6 +88,11 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     // initialize nanoHAL
     nanoHAL_Initialize();
 
+    // take care of block storage here as we are RAM based
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
+    BlockStorageList_InitializeDevices();
+
     CLR_SETTINGS clrSettings;
     ZeroMemory(&clrSettings, sizeof(clrSettings));
 
