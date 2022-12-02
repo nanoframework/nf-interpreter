@@ -28,7 +28,7 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageIcon>images\nf-logo.png</PackageIcon>
     <PackageTags>nanoFramework, nano Framework, NETNF, NETMF, Micro Framework, .net</PackageTags>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>docs\README.md</PackageReadmeFile>
     <PackageIconUrl />
   </PropertyGroup>
 
@@ -49,7 +49,7 @@
     </None>
     <None Include="README.md">
       <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
+      <PackagePath>docs</PackagePath>
     </None>
   </ItemGroup>
 
