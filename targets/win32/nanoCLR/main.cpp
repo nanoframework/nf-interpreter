@@ -68,7 +68,7 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 /////////////////////////////////////////////////////////////////////////////
 //
 
-int _tmain(int argc, _TCHAR *argv[])
+int _tmain(int argc, wchar_t *argv[])
 {
     wprintf(L"\n.NET nanoFramework nanoCLR WIN32 v");
     std::cout << VERSION_STRING;
