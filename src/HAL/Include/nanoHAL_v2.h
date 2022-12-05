@@ -7,7 +7,7 @@
 #ifndef NANOHAL_V2_H
 #define NANOHAL_V2_H
 
-#if !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
 
 // need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
 #include <stdlib.h>
@@ -30,7 +30,7 @@
 #include "nanoHAL_Boot.h"
 #include <nanoVersion.h>
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #include <crtdbg.h>
 #endif
 
@@ -275,7 +275,7 @@ extern "C"
 #define HAL_COMPLETION_IDLE_VALUE 0x0000FFFFFFFFFFFFull
 
 // provide platform dependent delay to CLR code
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define OS_DELAY(milliSecs) ;
 #else
 #define OS_DELAY(milliSecs) PLATFORM_DELAY(milliSecs)
@@ -353,8 +353,8 @@ extern "C"
 #endif
 
 // developer note: if "size of something" needs to be output at compile time use this
-//char checker(int);
-//char checkSizeOfWhathever[sizeof(CLR_RT_HeapBlock)] = {checker(&checkSizeOfWhathever)};
+// char checker(int);
+// char checkSizeOfWhathever[sizeof(CLR_RT_HeapBlock)] = {checker(&checkSizeOfWhathever)};
 
 #ifdef __cplusplus
 extern "C"

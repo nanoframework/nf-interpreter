@@ -6,7 +6,7 @@
 #include "stdafx.h"
 #include "nanoCLR_native.h"
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #endif
 
@@ -17,7 +17,7 @@ struct Settings
     CLR_SETTINGS m_clrOptions;
     CLR_RT_ParseOptions::BufferMap m_assemblies;
     bool m_fInitialized;
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     ConfigureRuntimeCallback m_configureRuntimeCallback;
     bool m_configured;
 #endif
@@ -58,7 +58,7 @@ struct Settings
 #if !defined(BUILD_RTM)
         if (params.WaitForDebugger)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             CLR_EE_DBG_SET(Enabled);
             CLR_EE_DBG_SET(Quiet);
 #endif
@@ -127,7 +127,7 @@ struct Settings
         // clear flag (in case EE wasn't restarted)
         CLR_EE_DBG_CLR(StateResolutionFailed);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (!m_configured && m_configureRuntimeCallback)
         {
             NANOCLR_CHECK_HRESULT(m_configureRuntimeCallback());
@@ -351,13 +351,13 @@ struct Settings
     Settings()
     {
         m_fInitialized = false;
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         m_configureRuntimeCallback = NULL;
         m_configured = false;
 #endif
     }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     ~Settings()
     {
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
@@ -537,14 +537,14 @@ struct Settings
 
         NANOCLR_NOCLEANUP();
     }
-#endif // #if defined(_WIN32)
+#endif // #if defined(VIRTUAL_DEVICE)
 };
 
 static Settings s_ClrSettings;
 
 //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT nanoCLR_LoadAssembly(const wchar_t *name, const CLR_UINT8 *data, size_t size)
 {
     return s_ClrSettings.LoadAssembly(name, data, size);

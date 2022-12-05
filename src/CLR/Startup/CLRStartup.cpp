@@ -25,7 +25,7 @@ void ClrReboot()
 }
 
 // the CLR Startup code on Windows version is different
-#ifndef WIN32
+#ifndef VIRTUAL_DEVICE
 
 struct Settings
 {
@@ -468,4 +468,4 @@ void ClrStartup(CLR_SETTINGS params)
     CPU_Reset();
 }
 
-#endif // WIN32
+#endif // VIRTUAL_DEVICE

@@ -111,7 +111,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\Include;..\..\CLR\Include;..\..\CorLib;..\..\CLR\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -126,7 +126,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;_DEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\Include;..\..\CLR\Include;..\..\CorLib;..\..\CLR\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -143,7 +143,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;NDEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\Include;..\..\CLR\Include;..\..\CorLib;..\..\CLR\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -162,7 +162,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;NDEBUG;_LIB;NANOCLR_SYSTEM_COLLECTIONS=TRUE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\Include;..\..\CLR\Include;..\..\CorLib;..\..\CLR\CorLib;..\..\HAL\Include;..\..\PAL\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>

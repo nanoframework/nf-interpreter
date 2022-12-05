@@ -660,7 +660,7 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
-# WIN32 
+# WIN32 executable 
 - job: Build_WIN32_nanoCLR
   condition: >-
     and(

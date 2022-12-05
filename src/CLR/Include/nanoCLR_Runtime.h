@@ -24,7 +24,7 @@ extern const CLR_RADIAN c_CLR_radians[];
 
 //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #include <set>
 #include <map>
@@ -572,7 +572,7 @@ extern int s_CLR_RT_fTrace_GC_Depth;
 extern int s_CLR_RT_fTrace_SimulateSpeed;
 extern int s_CLR_RT_fTrace_AssemblyOverhead;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 extern int s_CLR_RT_fTrace_ARM_Execution;
 
 extern int s_CLR_RT_fTrace_RedirectLinesPerFile;
@@ -939,7 +939,7 @@ struct CLR_RT_UnicodeHelper
 
     bool MoveBackwardInUTF8(const char *utf8StringStart, int iMaxChars);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static void ConvertToUTF8(const std::wstring &src, std::string &dst);
     static void ConvertFromUTF8(const std::string &src, std::wstring &dst);
 #endif
@@ -1190,12 +1190,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 #endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int m_maxOpcodes;
     int *m_stackDepth;
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     std::string *m_strPath;
 #endif
 
@@ -1205,7 +1205,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     bool IsSameAssembly(const CLR_RT_Assembly &assm) const;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
     static void InitString(std::map<std::string, CLR_OFFSET> &map);
     static HRESULT CreateInstance(const CLR_RECORD_ASSEMBLY *data, CLR_RT_Assembly *&assm, const wchar_t *szName);
@@ -1353,7 +1353,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static FILE *s_output;
     static FILE *s_toclose;
 
@@ -1395,7 +1395,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #endif
   private:
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     void Dump_Token(CLR_UINT32 tk);
     void Dump_FieldOwner(CLR_UINT32 idx);
     void Dump_MethodOwner(CLR_UINT32 idx);
@@ -1637,7 +1637,7 @@ struct CLR_RT_DataTypeLookup
     CLR_RT_TypeDef_Index *m_cls;
     CLR_RT_HeapBlockRelocate m_relocate;
 
-#if defined(_WIN32) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#if defined(VIRTUAL_DEVICE) || defined(NANOCLR_TRACE_MEMORY_STATS)
     const char *m_name;
 #endif
 };
@@ -1846,7 +1846,7 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static CLR_DataType MapElementTypeToDataType(CLR_UINT32 et);
     static CLR_UINT32 MapDataTypeToElementType(CLR_DataType dt);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     void Dump(const wchar_t *szFileName, bool fNoByteCode);
 #endif
 
@@ -2644,7 +2644,7 @@ struct CLR_RT_GarbageCollector
 
     bool m_fOutOfStackSpaceForGC;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     CLR_UINT32 m_events;
 #endif
 
@@ -3247,7 +3247,7 @@ struct CLR_RT_EventCache
 
         //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         void DumpTree();
         bool ConsistencyCheck();
         bool ConsistencyCheck(LookupEntry *node, int &depth);
@@ -3508,7 +3508,7 @@ struct CLR_RT_ExecutionEngine
     size_t m_breakpointsActiveNum;
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     bool m_fPerformGarbageCollection; // Should the EE do a GC every context switch
     bool m_fPerformHeapCompaction;    // Should the EE do a Compaction following every GC
 #endif
@@ -3857,7 +3857,7 @@ struct CLR_RT_ExecutionEngine
 
     CLR_UINT32 WaitSystemEvents(CLR_UINT32 powerLevel, CLR_UINT32 events, CLR_INT64 timeExpire);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     HRESULT CreateEntryPointArgs(CLR_RT_HeapBlock &args, wchar_t *szCommandLineArgs);
 #endif
 

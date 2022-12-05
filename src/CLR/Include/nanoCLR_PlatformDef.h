@@ -62,7 +62,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // WINDOWS
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #define NANOCLR_GC_VERBOSE
 #define NANOCLR_TRACE_MEMORY_STATS
@@ -113,7 +113,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TRACE DEPENDENCIES
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define NANOCLR_OPCODE_NAMES
 #define NANOCLR_OPCODE_PARSER
 #define NANOCLR_OPCODE_STACKCHANGES
@@ -143,7 +143,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // LANGUAGE
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define PROHIBIT_ALL_CONSTRUCTORS(cls)                                                                                 \
   private:                                                                                                             \
     cls();                                                                                                             \

@@ -7,7 +7,7 @@
 #ifndef DRIVERS_SOCKETS_DECL_H
 #define DRIVERS_SOCKETS_DECL_H
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define GLOBAL_LOCK_SOCKETS(x)
 #endif
 //--//

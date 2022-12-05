@@ -17,7 +17,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define NANOCLR_TRACE_DEFAULT(win, arm) (win)
 #else
 #define NANOCLR_TRACE_DEFAULT(win, arm) (arm)
@@ -47,7 +47,7 @@ int s_CLR_RT_fTrace_MemoryStats = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_C
 int s_CLR_RT_fTrace_GC = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None, c_CLR_RT_Trace_None);
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 int s_CLR_RT_fTrace_SimulateSpeed = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_None);
 #endif
 
@@ -55,11 +55,11 @@ int s_CLR_RT_fTrace_SimulateSpeed = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c
 int s_CLR_RT_fTrace_AssemblyOverhead = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_Info, c_CLR_RT_Trace_Info);
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 int s_CLR_RT_fTrace_StopOnFAILED = NANOCLR_TRACE_DEFAULT(c_CLR_RT_Trace_None, c_CLR_RT_Trace_None);
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 int s_CLR_RT_fTrace_ARM_Execution = 0;
 
 int s_CLR_RT_fTrace_RedirectLinesPerFile;
@@ -1387,7 +1387,7 @@ bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
     return SUPPORT_ComputeCRC(&this[1], this->TotalSize() - sizeof(*this), 0) == this->assemblyCRC;
 }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 void CLR_RECORD_ASSEMBLY::ComputeCRC()
 {
@@ -1776,7 +1776,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     NANOCLR_NOCLEANUP();
 }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT CLR_RT_Assembly::CreateInstance(
     const CLR_RECORD_ASSEMBLY *header,
     CLR_RT_Assembly *&assm,
@@ -1857,7 +1857,7 @@ void CLR_RT_Assembly::DestroyInstance()
         g_CLR_RT_TypeSystem.m_assemblies[m_idx - 1] = NULL;
     }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
     if (this->m_strPath != NULL)
     {
         delete this->m_strPath;
@@ -1896,7 +1896,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->scope);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown scope: %08x\r\n", src->scope);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown scope: %08x\r\n", src->scope);
@@ -1910,7 +1910,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf("Resolve: unknown type: %s\r\n", szName);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s\r\n", szName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
@@ -1933,7 +1933,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf("Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
@@ -1962,7 +1962,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->container);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Field: unknown scope: %08x\r\n", src->container);
 #else
             NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Field: unknown scope: %08x\r\n", src->container);
@@ -1977,7 +1977,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             CLR_Debug::Printf("Resolve: unknown field: %s\r\n", szName);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown field: %s\r\n", szName);
 #else
             NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown field: %s\r\n", szName);
@@ -2005,7 +2005,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
             CLR_Debug::Printf("Resolve Field: unknown scope: %08x\r\n", src->container);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve Field: unknown scope: %08x\r\n", src->container);
 #else
             NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve Field: unknown scope: %08x\r\n", src->container);
@@ -2041,7 +2041,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 name);
 #endif
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown method: %s\r\n", name);
 #else
             NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown method: %s\r\n", name);
@@ -2999,7 +2999,7 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
         {
             CLR_PMETADATA ptr = GetResourceData(m_header->patchEntryOffset);
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
             CLR_Debug::Printf("Simulating jump into patch code...\r\n");
 #else
             ((void (*)())ptr)();
