@@ -507,7 +507,7 @@ Exit:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 void CLR_RT_UnicodeHelper::ConvertToUTF8(const std::wstring &src, std::string &dst)
 {

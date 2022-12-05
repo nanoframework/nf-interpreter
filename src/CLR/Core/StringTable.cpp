@@ -32,7 +32,7 @@ const char *CLR_RT_Assembly::GetString(CLR_STRING i)
     return &(((const char *)GetTable(TBL_Strings))[i]);
 }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 void CLR_RT_Assembly::InitString(std::map<std::string, CLR_OFFSET> &map)
 {

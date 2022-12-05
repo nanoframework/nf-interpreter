@@ -10,7 +10,7 @@
 
 #include <math.h>
 
-#ifdef WIN32
+#ifdef VIRTUAL_DEVICE
 #include <float.h>
 
 #define __isnand    _isnan

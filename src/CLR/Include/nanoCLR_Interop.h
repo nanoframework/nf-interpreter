@@ -13,7 +13,7 @@
 
 extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const char *szFile, int line);
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #define NANOCLR_LEAVE()                                                                                                \
     {                                                                                                                  \

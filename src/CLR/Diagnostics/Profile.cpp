@@ -85,7 +85,7 @@ volatile CLR_UINT64 CLR_PROF_Handler::s_time_adjusted;
 static CLR_UINT64 GetPerformanceCounter()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     return 0; // UNDONE: FIXME: return HAL_Windows_GetPerformanceTicks();
 #else
     static CLR_UINT32 rollover = 0;

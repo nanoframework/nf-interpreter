@@ -80,7 +80,7 @@ int hal_strncpy_s(char *strDst, size_t sizeInBytes, const char *strSrc, size_t c
 size_t hal_strlen_s(const char *str);
 int hal_strncmp_s(const char *str1, const char *str2, size_t num);
 
-#elif defined(_WIN32)
+#elif defined(VIRTUAL_DEVICE)
 
 int hal_vprintf(const char *format, va_list arg);
 int hal_vfprintf(COM_HANDLE stream, const char *format, va_list arg);

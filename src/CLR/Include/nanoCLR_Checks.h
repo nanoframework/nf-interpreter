@@ -44,7 +44,7 @@ struct CLR_RT_DUMP
     static void POST_PROCESS_EXCEPTION(CLR_RT_HeapBlock &ref) DECL_POSTFIX;
 
     static const char *GETERRORMESSAGE(HRESULT hrError);
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     static const char *GETERRORDETAIL();
 #endif
 };
