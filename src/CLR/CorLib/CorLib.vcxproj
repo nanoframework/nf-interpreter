@@ -151,10 +151,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;VIRTUAL_DEVICE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,10 +164,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;VIRTUAL_DEVICE;SUPPORT_ANY_BASE_CONVERSION;VIRTUAL_DEVICE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -183,10 +179,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;VIRTUAL_DEVICE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -202,10 +196,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NANOCLR_REFLECTION=TRUE;SUPPORT_ANY_BASE_CONVERSION;VIRTUAL_DEVICE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\..\targets\win32\Include;..\..\CLR\Helpers\nanoprintf;..\Include;..\..\HAL\Include;..\..\PAL\Include;..\..\CLR\Helpers\Base64</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

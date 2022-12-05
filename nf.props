@@ -14,6 +14,13 @@
     <IntDir Condition="'$(__IntDir)'==''">$(BuildDir)obj\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
 
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>VIRTUAL_DEVICE;SUPPORT_ANY_BASE_CONVERSION;NANOCLR_REFLECTION=TRUE;NANOCLR_SYSTEM_COLLECTIONS=TRUE;</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
   <ItemGroup />
 </Project>
