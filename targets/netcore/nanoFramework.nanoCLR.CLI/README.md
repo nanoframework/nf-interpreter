@@ -44,7 +44,7 @@ nanoclr --help
 ## Virtual Serial Ports
 
 This verb allows managing the virtual serial port exposing the virtual device.
-The virtual serial port it's only available in Windows machines. It's made available with the sponsorship of [HHD Software](https://www.hhdsoftware.com/) which as kindly sponsored a free license for running their tool.
+The virtual serial port it's only available in Windows machines. It's made available with the sponsorship of [HHD Software](https://www.hhdsoftware.com/) which has kindly sponsored a free license for running their tool.
 
 ### List Virtual Serial ports
 
@@ -135,4 +135,12 @@ Checks for stable versions of nanoCLR and updates it, if there is one. A version
 
 ```console
 nanoclr instance --update [--preview] [--clrversion 1.22.333.4444]
+```
+
+## Uninstall .NET **nanoFramework** nanoCLR
+
+To uninstall the .NET **nanoFramework** nanoCLR tool use the following .NET Core CLI command:
+
+```console
+dotnet tool uninstall -g nanoclr
 ```
