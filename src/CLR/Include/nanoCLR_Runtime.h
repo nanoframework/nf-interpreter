@@ -24,7 +24,7 @@ extern const CLR_RADIAN c_CLR_radians[];
 
 //--//
 
-#if defined(VIRTUAL_DEVICE)
+#if defined(_WIN32)
 
 #include <set>
 #include <map>
