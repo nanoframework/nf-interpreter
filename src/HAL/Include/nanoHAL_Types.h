@@ -10,7 +10,7 @@
 
 #include <stddef.h>
 
-#if defined (__GNUC__)
+#if defined(__GNUC__)
 #define __int64 long long
 #undef NULL
 #endif
@@ -21,16 +21,16 @@
 
 #define NULL 0
 
-#endif //defined(__arm) || defined(__GNUC__)
+#endif // defined(__arm) || defined(__GNUC__)
 
-#define ARRAYSIZE_CONST_EXPR(x) (sizeof(x)/sizeof(x[0]))
+#define ARRAYSIZE_CONST_EXPR(x) (sizeof(x) / sizeof(x[0]))
 #if (!defined(_WIN32) && !defined(WIN32))
 #define ARRAYSIZE(x) ARRAYSIZE_CONST_EXPR(x)
 #endif
-#define MAXSTRLEN(x) (ARRAYSIZE(x)-1)
-#define ROUNDTOMULTIPLE(x,y)           ((x + sizeof(y) - 1) & ~(sizeof(y)-1)) // Only works with powers of 2.
-#define CONVERTFROMSIZETOELEMENTS(x,y) ((x + sizeof(y) - 1) /   sizeof(y))
-#define CONVERTFROMSIZETOHEAPBLOCKS(x) CONVERTFROMSIZETOELEMENTS(x,CLR_RT_HeapBlock)
+#define MAXSTRLEN(x)                    (ARRAYSIZE(x) - 1)
+#define ROUNDTOMULTIPLE(x, y)           ((x + sizeof(y) - 1) & ~(sizeof(y) - 1)) // Only works with powers of 2.
+#define CONVERTFROMSIZETOELEMENTS(x, y) ((x + sizeof(y) - 1) / sizeof(y))
+#define CONVERTFROMSIZETOHEAPBLOCKS(x)  CONVERTFROMSIZETOELEMENTS(x, CLR_RT_HeapBlock)
 
 //--//
 
@@ -51,4 +51,3 @@ typedef struct SYSTEMTIME
 #endif // !(defined(_WIN32) || defined(WIN32))
 
 #endif // HAL_TYPES_H
-
