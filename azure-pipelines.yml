@@ -688,6 +688,14 @@ jobs:
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
+  - task: PowerShell@2
+    displayName: Store package version
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
+        Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
   - task: UseDotNet@2
