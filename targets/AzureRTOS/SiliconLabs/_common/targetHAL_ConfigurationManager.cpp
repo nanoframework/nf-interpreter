@@ -6,8 +6,7 @@
 #include <nanoHAL.h>
 #include <nanoHAL_v2.h>
 #include <nanoWeak.h>
-// #include <Target_BlockStorage_STM32FlashDriver.h>
-// #include <network_options.h>
+//#include <network_options.h>
 
 #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
 #include <wifi.h>
@@ -19,9 +18,9 @@ uint32_t GetExistingConfigSize()
 {
     uint32_t currentConfigSize = 0;
 
-    // currentConfigSize =
-    //     g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
-    // currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
+    currentConfigSize =
+        g_TargetConfiguration.NetworkInterfaceConfigs->Count * sizeof(HAL_Configuration_NetworkInterface);
+    currentConfigSize += g_TargetConfiguration.Wireless80211Configs->Count * sizeof(HAL_Configuration_Wireless80211);
 
     return currentConfigSize;
 }
@@ -35,10 +34,10 @@ __nfweak void ConfigurationManager_Initialize()
     memset(&stream, 0, sizeof(BlockStorageStream));
     BlockStorageStream_Initialize(&stream, BlockUsage_CONFIG);
 
-    BlockStorageDevice* device = BlockStorageList_GetFirstDevice();
-    DeviceBlockInfo * deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
-    
-    if(deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
+    BlockStorageDevice *device = BlockStorageList_GetFirstDevice();
+    DeviceBlockInfo *deviceBlockInfo = BlockStorageDevice_GetDeviceInfo(device);
+
+    if (deviceBlockInfo->Regions[stream.RegionIndex].Attributes & BlockRegionAttribute_ProgramWidthIs64bits)
     {
         programWidth = 64 / 8;
     }
@@ -91,39 +90,41 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             platform_free(networkConfig);
         }
 
-//         // find wireless 80211 network configuration blocks
-//         HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs =
-//             (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
-//                 (uint32_t)&__nanoConfig_start__,
-//                 (uint32_t)&__nanoConfig_end__);
+        // find wireless 80211 network configuration blocks
+        HAL_CONFIGURATION_NETWORK_WIRELESS80211 *networkWirelessConfigs =
+            (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
+                (uint32_t)&__nanoConfig_start__,
+                (uint32_t)&__nanoConfig_end__);
 
-// #if (TARGET_HAS_WIFI_SUPPORT == 1)
-//         if (networkWirelessConfigs->Count == 0)
-//         {
-//             // there is no network config block available, get a default
-//             HAL_Configuration_Wireless80211 *wirelessConfig =
-//                 (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
+#if defined(TARGET_HAS_WIFI_SUPPORT) && (TARGET_HAS_WIFI_SUPPORT == 1)
 
-//             InitialiseWirelessDefaultConfig(wirelessConfig, 0);
+        if (networkWirelessConfigs->Count == 0)
+        {
+            // there is no network config block available, get a default
+            HAL_Configuration_Wireless80211 *wirelessConfig =
+                (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
 
-//             // config block created, store it
-//             ConfigurationManager_StoreConfigurationBlock(
-//                 wirelessConfig,
-//                 DeviceConfigurationOption_Wireless80211Network,
-//                 0,
-//                 sizeof(HAL_Configuration_Wireless80211),
-//                 0,
-//                 false);
+            InitialiseWirelessDefaultConfig(wirelessConfig, 0);
 
-//             // have to enumerate again to pick it up
-//             networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
-//                 ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
-//                     (uint32_t)&__nanoConfig_start__,
-//                     (uint32_t)&__nanoConfig_end__);
+            // config block created, store it
+            ConfigurationManager_StoreConfigurationBlock(
+                wirelessConfig,
+                DeviceConfigurationOption_Wireless80211Network,
+                0,
+                sizeof(HAL_Configuration_Wireless80211),
+                0,
+                false);
 
-//             platform_free(wirelessConfig);
-//         }
-// #endif
+            // have to enumerate again to pick it up
+            networkWirelessConfigs = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
+                ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(
+                    (uint32_t)&__nanoConfig_start__,
+                    (uint32_t)&__nanoConfig_end__);
+
+            platform_free(wirelessConfig);
+        }
+
+#endif
 
         // find X509 certificate blocks
         HAL_CONFIGURATION_X509_CERTIFICATE *certificateStore =
@@ -142,9 +143,10 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
         // the malloc size for each struct is computed separately
         uint32_t sizeOfNetworkInterfaceConfigs =
             offsetof(HAL_CONFIGURATION_NETWORK, Configs) + networkConfigs->Count * sizeof(networkConfigs->Configs[0]);
-        // uint32_t sizeOfWireless80211Configs =
-        //     offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
-        //     networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
+        uint32_t sizeOfWireless80211Configs =
+            offsetof(HAL_CONFIGURATION_NETWORK_WIRELESS80211, Configs) +
+            networkWirelessConfigs->Count * sizeof(networkWirelessConfigs->Configs[0]);
+        uint32_t sizeOfWirelessAPConfigs = offsetof(HAL_CONFIGURATION_NETWORK_WIRELESSAP, Configs);
         uint32_t sizeOfX509CertificateStore = offsetof(HAL_CONFIGURATION_X509_CERTIFICATE, Certificates) +
                                               certificateStore->Count * sizeof(certificateStore->Certificates[0]);
         uint32_t sizeOfX509DeviceCertificate = offsetof(HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE, Certificates) +
@@ -152,8 +154,10 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
 
         g_TargetConfiguration.NetworkInterfaceConfigs =
             (HAL_CONFIGURATION_NETWORK *)platform_malloc(sizeOfNetworkInterfaceConfigs);
-        // g_TargetConfiguration.Wireless80211Configs =
-        //     (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
+        g_TargetConfiguration.Wireless80211Configs =
+            (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)platform_malloc(sizeOfWireless80211Configs);
+        g_TargetConfiguration.WirelessAPConfigs =
+            (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)platform_malloc(sizeOfWirelessAPConfigs);
         g_TargetConfiguration.CertificateStore =
             (HAL_CONFIGURATION_X509_CERTIFICATE *)platform_malloc(sizeOfX509CertificateStore);
         g_TargetConfiguration.DeviceCertificates =
@@ -164,10 +168,15 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
             (HAL_CONFIGURATION_NETWORK *)g_TargetConfiguration.NetworkInterfaceConfigs,
             networkConfigs,
             sizeOfNetworkInterfaceConfigs);
+        memcpy(
+            (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)g_TargetConfiguration.Wireless80211Configs,
+            networkWirelessConfigs,
+            sizeOfWireless80211Configs);
         // memcpy(
-        //     (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)g_TargetConfiguration.Wireless80211Configs,
-        //     networkWirelessConfigs,
-        //     sizeOfWireless80211Configs);
+        //     (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)g_TargetConfiguration.WirelessAPConfigs,
+        //     networkWirelessApConfigs,
+        //     sizeOfWirelessAPConfigs);
+        g_TargetConfiguration.WirelessAPConfigs->Count = 0;
         memcpy(
             (HAL_CONFIGURATION_X509_CERTIFICATE *)g_TargetConfiguration.CertificateStore,
             certificateStore,
@@ -179,7 +188,7 @@ __nfweak void ConfigurationManager_EnumerateConfigurationBlocks()
 
         // now free the memory of the original structs
         platform_free(networkConfigs);
-        // platform_free(networkWirelessConfigs);
+        platform_free(networkWirelessConfigs);
         platform_free(certificateStore);
         platform_free(deviceCertificates);
     }
@@ -323,50 +332,51 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     else if (configuration == DeviceConfigurationOption_Wireless80211Network)
     {
 
-// #if (TARGET_HAS_WIFI_SUPPORT == 1)
+        // #if (TARGET_HAS_WIFI_SUPPORT == 1)
 
-//         if (g_TargetConfiguration.Wireless80211Configs == NULL ||
-//             (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
-//         {
-//             // there is no wireless 80211 config block, so we are storing the default one
-//             // THIS IS THE SECOND CONFIG BLOCK THAT'S AUTO-CREATED
-//             // OK to continue
-//             // set storage address contiguous to the network config block
-//             storageAddress = (uint32_t)&__nanoConfig_start__ + sizeof(HAL_Configuration_NetworkInterface);
+        //         if (g_TargetConfiguration.Wireless80211Configs == NULL ||
+        //             (g_TargetConfiguration.Wireless80211Configs->Count == 0 && configurationIndex == 0))
+        //         {
+        //             // there is no wireless 80211 config block, so we are storing the default one
+        //             // THIS IS THE SECOND CONFIG BLOCK THAT'S AUTO-CREATED
+        //             // OK to continue
+        //             // set storage address contiguous to the network config block
+        //             storageAddress = (uint32_t)&__nanoConfig_start__ + sizeof(HAL_Configuration_NetworkInterface);
 
-//             // check programming width
-//             if(programWidth > 0)
-//             {
-//                 // round address to the next valid programming width
-//                 storageAddress += programWidth - storageAddress % programWidth;
-//             }
-//         }
-//         else
-//         {
-//             // the requested config block is beyond the available count
-//             if ((configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
-//             {
-//                 return FALSE;
-//             }
+        //             // check programming width
+        //             if(programWidth > 0)
+        //             {
+        //                 // round address to the next valid programming width
+        //                 storageAddress += programWidth - storageAddress % programWidth;
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // the requested config block is beyond the available count
+        //             if ((configurationIndex + 1) > g_TargetConfiguration.Wireless80211Configs->Count)
+        //             {
+        //                 return FALSE;
+        //             }
 
-//             // set storage address from block address, plus the requested offset
-//             storageAddress =
-//                 (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] + offset;
-//         }
+        //             // set storage address from block address, plus the requested offset
+        //             storageAddress =
+        //                 (ByteAddress)g_TargetConfiguration.Wireless80211Configs->Configs[configurationIndex] +
+        //                 offset;
+        //         }
 
-//         // set block size, in case it's not already set
-//         blockSize = sizeof(HAL_Configuration_Wireless80211);
+        //         // set block size, in case it's not already set
+        //         blockSize = sizeof(HAL_Configuration_Wireless80211);
 
-//         // make sure the config block marker is set
-//         memcpy(
-//             configurationBlock,
-//             c_MARKER_CONFIGURATION_WIRELESS80211_V1,
-//             sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
+        //         // make sure the config block marker is set
+        //         memcpy(
+        //             configurationBlock,
+        //             c_MARKER_CONFIGURATION_WIRELESS80211_V1,
+        //             sizeof(c_MARKER_CONFIGURATION_WIRELESS80211_V1));
 
-// #else
-//         // no support for WIFI in this STM32 build
-//         return FALSE;
-// #endif
+        // #else
+        //         // no support for WIFI in this STM32 build
+        //         return FALSE;
+        // #endif
     }
     else if (configuration == DeviceConfigurationOption_X509CaRootBundle)
     {
@@ -714,38 +724,38 @@ __nfweak bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface 
 {
     (void)configurationIndex;
 
-// #if (TARGET_HAS_WIFI_SUPPORT == 1)
+    // #if (TARGET_HAS_WIFI_SUPPORT == 1)
 
-//     memset(config, 0, sizeof(HAL_Configuration_NetworkInterface));
+    //     memset(config, 0, sizeof(HAL_Configuration_NetworkInterface));
 
-//     // make sure the config block marker is set
-//     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
+    //     // make sure the config block marker is set
+    //     memcpy(config->Marker, c_MARKER_CONFIGURATION_NETWORK_V1, sizeof(c_MARKER_CONFIGURATION_NETWORK_V1));
 
-//     // currently only Wireless station is supported
-//     config->InterfaceType = NetworkInterfaceType_Wireless80211;
-//     config->StartupAddressMode = AddressMode_DHCP;
-//     config->AutomaticDNS = 1;
-//     config->SpecificConfigId = 0;
+    //     // currently only Wireless station is supported
+    //     config->InterfaceType = NetworkInterfaceType_Wireless80211;
+    //     config->StartupAddressMode = AddressMode_DHCP;
+    //     config->AutomaticDNS = 1;
+    //     config->SpecificConfigId = 0;
 
-//     // fill in MAX with 0xFF to allow it updating it later
-//     memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
+    //     // fill in MAX with 0xFF to allow it updating it later
+    //     memset(config->MacAddress, 0xFF, sizeof(config->MacAddress));
 
-// // get default MAC
-// #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
-//     // OK to ignore the return value, no harm done if it fails
-//     WIFI_GetMAC_Address(config->MacAddress);
-// #endif
+    // // get default MAC
+    // #if defined(WIFI_DRIVER_ISM43362) && defined(I_AM_NANOCLR)
+    //     // OK to ignore the return value, no harm done if it fails
+    //     WIFI_GetMAC_Address(config->MacAddress);
+    // #endif
 
-//     return TRUE;
+    //     return TRUE;
 
-// #else
+    // #else
 
     (void)config;
 
     // can't create a "default" network config because we are lacking definition of a MAC address
 
     return FALSE;
-// #endif
+    // #endif
 }
 
 int32_t ConfigurationManager_FindNetworkConfigurationMatchingWirelessConfigurationFromId(uint32_t configurationId)
