@@ -56,6 +56,10 @@ extern char *UsbSerialNumber[];
 // <i> Default: USBD_LANG_ID_ENGLISH_US
 #define SL_USBD_DEVICE_LANGUAGE_ID            SL_USBD_LANG_ID_ENGLISH_US
 
+#define USBD_CFG_HS_EN      0
+#define USBD_CFG_EP_ISOC_EN 0
+#define USBD_CFG_OPTIMIZE_SPD 0
+
 // </h>
 
 // <<< end of configuration section >>>
