@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
 
 struct BackTrackExecution
 {
@@ -1004,7 +1004,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         }
 #endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(_WIN32)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
         if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
         {
             CLR_PROF_HANDLER_SUSPEND_TIME();

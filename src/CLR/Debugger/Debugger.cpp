@@ -818,8 +818,11 @@ void CLR_DBG_Debugger::AccessMemory(
                                 return;
                             }
 
-                            // adjust buffer pointer to match access address
-                            bufPtr = (unsigned char *)accessAddress;
+                            if (isMemoryMapped)
+                            {
+                                // adjust buffer pointer to match access address
+                                bufPtr = (unsigned char *)accessAddress;
+                            }
 
                             // compute CRC32 of the memory segment
                             *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
@@ -889,7 +892,7 @@ void CLR_DBG_Debugger::AccessMemory(
         //--// RAM write
         ByteAddress sectAddr = location;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
         bool proceed = false;
         void *temp;
@@ -3428,7 +3431,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
     {
         if (assm)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             // append path
             if (assm->m_strPath != NULL)
             {

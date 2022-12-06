@@ -13,7 +13,7 @@
 // set min possible number of sockets
 #define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT 1
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define NANOCLR_STOP() ::DebugBreak()
 #pragma warning(error : 4706) // error C4706: assignment within conditional expression
 #endif
