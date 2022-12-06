@@ -186,6 +186,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     CLR_RT_HeapBlock_Array *dataBuffer;
     CLR_RT_HeapBlock hbTimeout;
     int64_t *timeoutTicks;
+    int16_t timeoutMiliseconds = 0;
     bool eventResult = true;
 
     uint8_t *data;
@@ -193,7 +194,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     uint32_t count = 0;
     uint32_t offset = 0;
     sl_status_t reqStatus;
-    uint32_t xfer_len;
+    uint32_t xfer_len = 0;
     bool isLongRunning = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -274,13 +275,19 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
     }
     else
     {
+        if (*timeoutTicks != TIMEOUT_INFINITE)
+        {
+            // convert from ticks to milliseconds
+            timeoutMiliseconds = (int16_t)pThis[FIELD___writeTimeout].NumericByRef().s4;
+        }
+
         // start write operation with async API
         // requesting handling of "End-of-transfer"
         reqStatus = sl_usbd_vendor_write_bulk_sync(
             sl_usbd_vendor_winusb_number,
             (void *)data,
             count,
-            *timeoutTicks,
+            timeoutMiliseconds,
             false,
             &xfer_len);
     }
