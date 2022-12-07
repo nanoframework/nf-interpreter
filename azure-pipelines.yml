@@ -723,6 +723,7 @@ jobs:
     inputs:
       solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
+      maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
@@ -731,6 +732,7 @@ jobs:
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
       platform: 'Any CPU'
+      maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
@@ -925,6 +927,7 @@ jobs:
     inputs:
       solution: 'targets\netcore\nanoCLR.sln'
       platform: 'Any CPU'
+      maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
 
