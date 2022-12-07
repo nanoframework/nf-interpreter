@@ -13,7 +13,7 @@
 // from nanoHAL_Time.h
 #define TIME_CONVERSION__TO_SYSTICKS 10000
 
-static uint16_t _lastOutboundMessage = 65535;
+static uint16_t _lastOutboundMessage = 0;
 static uint64_t _receiveExpiryTicks;
 static uint8_t _rxState;
 static uint8_t *_pos;
