@@ -698,8 +698,7 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host "$("##vso[task.setvariable variable=TARGET_BUILD_COUNTER]")$version"
-        Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$version"
+        Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
