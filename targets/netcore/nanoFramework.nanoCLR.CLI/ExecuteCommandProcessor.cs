@@ -22,6 +22,9 @@ namespace nanoFramework.nanoCLR.CLI
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
+            // flag to signal that the intenal serial port has already been configured
+            bool internalSerialPortConfig = false;
+
             if (options.ExposedSerialPort != null)
             {
                 // a serial port was requested 
@@ -55,11 +58,14 @@ namespace nanoFramework.nanoCLR.CLI
                     }
 
                     // need to set debugger serial port to the _other_ port so it shows at the expected end
-                    options.ExposedSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
+                    var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
 
                     hostBuilder.WaitForDebugger = true;
                     hostBuilder.EnterDebuggerLoopAfterExit = true;
-                    hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
+                    hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
+
+                    // set flag
+                    internalSerialPortConfig = true;
                 }
                 else
                 {
@@ -83,7 +89,8 @@ namespace nanoFramework.nanoCLR.CLI
                 hostBuilder.EnterDebuggerLoopAfterExit = true;
             }
 
-            if (options.ExposedSerialPort != null)
+            if (!internalSerialPortConfig
+                && options.ExposedSerialPort != null)
             {
                 hostBuilder.UseSerialPortWireProtocol(options.ExposedSerialPort);
             }
@@ -121,7 +128,19 @@ namespace nanoFramework.nanoCLR.CLI
 
             Console.CancelKeyPress += (_, _) => host.Shutdown();
 
-            host.Run();
+            try
+            {
+                host.Run();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // can't open port, most likely because there's already another instance running
+                throw new CLIException(ExitCode.E9007, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new CLIException(ExitCode.E9008, ex.Message);
+            }
 
             return 0;
         }
@@ -129,7 +148,9 @@ namespace nanoFramework.nanoCLR.CLI
         private static void ParentProcess_Exited(object sender, EventArgs e)
         {
             Console.WriteLine("Exiting due to parent process ending");
-            Environment.Exit(0);        // force exit of this process since the parent has exited/died
+
+            // force exit of this process since the parent has exited/died
+            Environment.Exit(0);
         }
     }
 }
