@@ -88,5 +88,17 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         [Display(Name = "Error installing Virtual Serial Port Tools.")]
         E9006 = 9006,
+
+        /// <summary>
+        /// Can't start a new instance.
+        /// </summary>
+        [Display(Name = "Can't start a new virtual device with these settings. Most likely there is already another instance running.")]
+        E9007 = 9007,
+
+        /// <summary>
+        /// Unknown error when starting the virtual device instance.
+        /// </summary>
+        [Display(Name = "Unknown error when starting the virtual device instance.")]
+        E9008 = 9008,
     }
 }
