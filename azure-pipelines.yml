@@ -217,7 +217,11 @@ jobs:
               Write-host "Building nanoCLR target"
           }
           
-          if(($files.where{$_.Contains('targets/netcore')}).Count -gt 0)
+          if( 
+            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.CLI')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.Host')}).Count -gt 0)
+            )
           {
               # files at nanoCLR CLI or Host folders
               echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
