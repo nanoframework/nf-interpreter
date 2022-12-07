@@ -686,7 +686,6 @@ jobs:
 
   variables:
     DOTNET_NOLOGO: true
-    TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('WIN32_1_8_0__versioncounter', 400)]
 
@@ -806,13 +805,23 @@ jobs:
 
   - task: CopyFiles@2
     condition: succeeded()
-    displayName: Adding nanoCLR to deployable artifacts
+    displayName: Adding nanoCLR WIN32 to deployable artifacts
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.nanoCLR.exe
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
+      flattenFolders: true
+      ignoreMakeDirErrors: true
+
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Adding nanoCLR DLL to deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
         **\nanoFramework.nanoCLR.dll
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
       flattenFolders: true
       ignoreMakeDirErrors: true
 
@@ -824,8 +833,8 @@ jobs:
       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --user "$(SignClientUser)" `
       --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.Win32 NuGet" `
-      --description "nanoFramework.nanoCLR.Win32 NuGet" `
+      --name "nanoFramework.nanoCLR NuGets" `
+      --description "nanoFramework.nanoCLR NuGets" `
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign packages
     continueOnError: true
