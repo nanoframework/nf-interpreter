@@ -1393,6 +1393,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
     {
         // update conditions
         g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
+
+#ifdef VIRTTUAL_DEVICE
+        // fire event with update on debugger activity
+        ::Events_Set(SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY);
+#endif // VIRTTUAL_DEVICE
     }
 
     return true;
