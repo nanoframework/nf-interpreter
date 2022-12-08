@@ -70,6 +70,20 @@ namespace nanoFramework.nanoCLR.CLI
 
                 return (int)ExitCode.OK;
             }
+            else
+            {
+                if (_verbosityLevel > VerbosityLevel.Quiet)
+                {
+                    // show CLI header
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    Console.WriteLine(_headerInfo);
+                    Console.WriteLine(_copyrightInfo);
+                    Console.WriteLine();
+
+                    Console.WriteLine();
+                }
+            }
 
             LogErrors(() =>
             {
