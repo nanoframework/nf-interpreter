@@ -637,7 +637,8 @@ void ClrStartup(CLR_SETTINGS params)
             }
             else
             {
-                CPU_Reset();
+                // equivalent to CPU_Reset();
+                break;
             }
         }
 
