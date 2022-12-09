@@ -75,6 +75,7 @@ set(gecko_sdk_srcs
     em_csen.c
     em_emu.c
     em_ldma.c
+    em_gpcrc.c
     em_gpio.c
     em_i2c.c
     # em_lcd.c
