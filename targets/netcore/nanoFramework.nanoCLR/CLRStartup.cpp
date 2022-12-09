@@ -58,10 +58,6 @@ struct Settings
 #if !defined(BUILD_RTM)
         if (params.WaitForDebugger)
         {
-#if defined(VIRTUAL_DEVICE)
-            CLR_EE_DBG_SET(Enabled);
-            CLR_EE_DBG_SET(Quiet);
-#endif
             CLR_EE_DBG_SET(Stopped);
         }
 #endif
@@ -641,7 +637,8 @@ void ClrStartup(CLR_SETTINGS params)
             }
             else
             {
-                CPU_Reset();
+                // equivalent to CPU_Reset();
+                break;
             }
         }
 

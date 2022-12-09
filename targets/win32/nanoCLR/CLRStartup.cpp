@@ -53,9 +53,7 @@ struct Settings : CLR_RT_ParseOptions
 #if !defined(BUILD_RTM)
         if (params.WaitForDebugger)
         {
-#if defined(VIRTUAL_DEVICE)
             CLR_EE_DBG_SET(Enabled);
-#endif
             CLR_EE_DBG_SET(Stopped);
         }
 #endif
