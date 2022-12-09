@@ -367,7 +367,7 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
     m_lastHcUsed = NULL;
 
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (m_fPerformHeapCompaction)
         CLR_EE_SET(Compaction_Pending);
 #endif
@@ -506,7 +506,7 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
     while (CLR_EE_DBG_IS(Stopped) && !CLR_EE_DBG_IS(RebootPending) && !CLR_EE_DBG_IS(ExitPending))
     {
         // TODO: Generalize this as a standard HAL API
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_SHUTTING_DOWN);
@@ -516,24 +516,26 @@ HRESULT CLR_RT_ExecutionEngine::WaitForDebugger()
         DebuggerLoop();
     }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
     NANOCLR_NOCLEANUP();
 #else
     NANOCLR_NOCLEANUP_NOLABEL();
 #endif
 }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, wchar_t *szCommandLineArgs)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     std::list<std::wstring> args;
+    CLR_RT_HeapBlock_Array *array;
+    CLR_UINT32 iArg;
 
     wchar_t *szArgNext = NULL;
     wchar_t *szArg = szCommandLineArgs;
-    wchar_t *sep = L" ";
+    const wchar_t *sep = L" ";
     wchar_t *context = NULL;
 
     szArg = wcstok_s(szArg, sep, &context);
@@ -549,8 +551,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String));
 
-    CLR_RT_HeapBlock_Array *array = argsBlk.Array();
-    CLR_UINT32 iArg = 0;
+    array = argsBlk.Array();
+    iArg = 0;
 
     for (std::list<std::wstring>::iterator it = args.begin(); it != args.end(); it++, iArg++)
     {
@@ -577,7 +579,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
     if (NANOCLR_INDEX_IS_INVALID(g_CLR_RT_TypeSystem.m_entryPoint))
     {
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
         CLR_Debug::Printf("Cannot find any entrypoint!\r\n");
 #endif
         NANOCLR_SET_AND_LEAVE(CLR_E_ENTRYPOINT_NOT_FOUND);
@@ -605,7 +607,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
             // Main entrypoint takes an optional String[] parameter.
             // Set the arg to NULL, if that's the case.
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
             if (entryPointArgs != NULL)
             {
                 NANOCLR_CHECK_HRESULT(CreateEntryPointArgs(stack->m_arguments[0], entryPointArgs));
@@ -660,7 +662,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
         }
         else if (hr2 == CLR_S_QUANTUM_EXPIRED)
         {
-#if !defined(BUILD_RTM) || defined(_WIN32)
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
             if (m_fPerformGarbageCollection)
             {
 #if defined(NANOCLR_GC_VERBOSE)
@@ -697,7 +699,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     g_CLR_PRF_Profiler.Stream_Flush();
 #endif
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 #if defined(NANOCLR_PROFILE_NEW)
     if (CLR_EE_PRF_IS(Enabled))
     {
@@ -1111,7 +1113,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
     while (maxContextSwitch-- > 0)
     {
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (HAL_Windows_IsShutdownPending())
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_THREADS);

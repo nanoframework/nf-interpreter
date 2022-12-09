@@ -93,7 +93,11 @@ extern CLR_HW_Hardware g_CLR_HW_Hardware;
 // keep under control the size of the HalInterruptRecord, since we will use externally
 // defined arrays to handle those data structures in the interrupt dispatching
 
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 32)
+#else
 CT_ASSERT(sizeof(CLR_HW_Hardware::HalInterruptRecord) == 24)
+#endif // _WIN64
 
 ////////////////////////////////////////////////////////////////////////////////////////
 

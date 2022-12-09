@@ -28,6 +28,8 @@
 #include <tx_api.h>
 #include <nanoCLR_Headers.h>
 
+extern void InitGpCrc(void);
+
 // implemented as weak function to allow overriding at platform level
 __nfweak void sl_platform_init(void)
 {
@@ -41,6 +43,7 @@ __nfweak void sl_platform_init(void)
     sl_device_init_emu();
     sl_board_init();
     sl_power_manager_init();
+    InitGpCrc();
 }
 
 // implemented as weak function to allow overriding at platform level
