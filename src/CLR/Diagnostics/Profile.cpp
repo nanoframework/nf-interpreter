@@ -9,14 +9,14 @@
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
 
-void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
+void *CLR_PROF_CounterCallChain::Prepare(CLR_PROF_Handler *handler)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    if(m_owningHandler)
+    if (m_owningHandler)
     {
         CLR_UINT64 t = handler->GetFrozenTime() - m_owningHandler->m_time_start;
 
-        Complete( t, m_owningHandler );
+        Complete(t, m_owningHandler);
 
         handler->m_target_Mode = CLR_PROF_Handler::c_Mode_Ignore;
 
@@ -32,19 +32,19 @@ void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
     }
 }
 
-void CLR_PROF_CounterCallChain::Complete( CLR_UINT64& t, CLR_PROF_Handler* handler )
+void CLR_PROF_CounterCallChain::Complete(CLR_UINT64 &t, CLR_PROF_Handler *handler)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    if(m_owningHandler)
+    if (m_owningHandler)
     {
-        m_time_exclusive              += t;
+        m_time_exclusive += t;
 
         m_owningHandler->m_target = NULL;
-        m_owningHandler           = NULL;
+        m_owningHandler = NULL;
     }
 }
 
-void CLR_PROF_CounterCallChain::Enter( CLR_RT_StackFrame* stack )
+void CLR_PROF_CounterCallChain::Enter(CLR_RT_StackFrame *stack)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     CLR_PROF_Handler::SuspendTime();
@@ -69,14 +69,13 @@ void CLR_PROF_CounterCallChain::Leave()
 
 #if defined(NANOCLR_PROFILE_HANDLER)
 
-         bool              CLR_PROF_Handler::s_initialized;
-         CLR_PROF_Handler* CLR_PROF_Handler::s_current;
-volatile CLR_UINT64        CLR_PROF_Handler::s_time_overhead;
-volatile CLR_UINT64        CLR_PROF_Handler::s_time_freeze;
-volatile CLR_UINT64        CLR_PROF_Handler::s_time_adjusted;
+bool CLR_PROF_Handler::s_initialized;
+CLR_PROF_Handler *CLR_PROF_Handler::s_current;
+volatile CLR_UINT64 CLR_PROF_Handler::s_time_overhead;
+volatile CLR_UINT64 CLR_PROF_Handler::s_time_freeze;
+volatile CLR_UINT64 CLR_PROF_Handler::s_time_adjusted;
 
 //--//
-
 
 // TODO: roll this entire function into the HAL so that
 // hardware with a HighRes counter can be used, this
@@ -86,15 +85,16 @@ volatile CLR_UINT64        CLR_PROF_Handler::s_time_adjusted;
 static CLR_UINT64 GetPerformanceCounter()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     return 0; // UNDONE: FIXME: return HAL_Windows_GetPerformanceTicks();
 #else
-    static CLR_UINT32 rollover  = 0;
+    static CLR_UINT32 rollover = 0;
     static CLR_UINT32 lastValue = 0;
 
     CLR_UINT32 value = ::PAL_PerformanceCounter();
 
-    if(lastValue > value) rollover++;
+    if (lastValue > value)
+        rollover++;
 
     lastValue = value;
 
@@ -111,16 +111,16 @@ void CLR_PROF_Handler::Constructor()
 
     m_target_Mode = c_Mode_Ignore;
 
-    Init( NULL );
+    Init(NULL);
 }
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-void CLR_PROF_Handler::Constructor( CLR_PROF_CounterCallChain& target )
+void CLR_PROF_Handler::Constructor(CLR_PROF_CounterCallChain &target)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     SuspendTime();
 
-    Init( target.Prepare( this ) );
+    Init(target.Prepare(this));
 }
 #endif
 
@@ -131,23 +131,25 @@ void CLR_PROF_Handler::Destructor()
 
     CLR_UINT64 t = GetFrozenTime() - m_time_start;
 
-    if(m_target_Mode == c_Mode_Ignore)
+    if (m_target_Mode == c_Mode_Ignore)
     {
         s_time_adjusted += t;
     }
     else
     {
-        if(m_containing)
+        if (m_containing)
         {
             m_containing->m_time_correction += t;
         }
 
-        if(m_target)
+        if (m_target)
         {
-            switch(m_target_Mode)
+            switch (m_target_Mode)
             {
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-            case c_Mode_CallChain: ((CLR_PROF_CounterCallChain*)m_target)->Complete( t, this ); break;
+                case c_Mode_CallChain:
+                    ((CLR_PROF_CounterCallChain *)m_target)->Complete(t, this);
+                    break;
 #endif
             }
         }
@@ -158,33 +160,33 @@ void CLR_PROF_Handler::Destructor()
     ResumeTime();
 }
 
-
-void CLR_PROF_Handler::Init( void* target )
+void CLR_PROF_Handler::Init(void *target)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    m_target     = target;
-    m_containing = s_current; s_current = this;
+    m_target = target;
+    m_containing = s_current;
+    s_current = this;
 
-    if(m_target)
+    if (m_target)
     {
-        if(m_containing && m_containing->m_target == NULL)
+        if (m_containing && m_containing->m_target == NULL)
         {
             m_target = NULL;
         }
     }
 
-    if(m_target == NULL)
+    if (m_target == NULL)
     {
         m_target_Mode = c_Mode_Ignore;
     }
 
     m_time_correction = 0;
-    m_time_start      = ResumeTime();
+    m_time_start = ResumeTime();
 }
 
-static void TestCalibrate( CLR_PROF_CounterCallChain& cnt )
+static void TestCalibrate(CLR_PROF_CounterCallChain &cnt)
 {
-    CLR_PROF_Handler c( cnt );
+    CLR_PROF_Handler c(cnt);
 }
 
 void CLR_PROF_Handler::Calibrate()
@@ -196,30 +198,32 @@ void CLR_PROF_Handler::Calibrate()
     const int c_training = 1024;
 #endif
 
-    if(s_initialized) return;
+    if (s_initialized)
+        return;
 
-    s_current       = NULL;
+    s_current = NULL;
     s_time_overhead = 0;
-    s_time_freeze   = 0;
+    s_time_freeze = 0;
     s_time_adjusted = 0;
 
 #if defined(PLATFORM_ARM) || defined(PLATFORM_ESP32)
     ::PAL_PerformanceCounter_Initialize();
 #endif
 
-    int              i;
+    int i;
     CLR_PROF_CounterCallChain tmp;
 
-    for(i=0; i<c_training; i++)
+    for (i = 0; i < c_training; i++)
     {
         NANOCLR_CLEAR(tmp);
-        TestCalibrate( tmp );
+        TestCalibrate(tmp);
 
         CLR_INT64 diff = tmp.m_time_exclusive;
 
-        if(diff == 0) break;
+        if (diff == 0)
+            break;
 
-        if(diff > 100 && i > c_training/2)
+        if (diff > 100 && i > c_training / 2)
         {
             i--;
             continue;
@@ -255,14 +259,13 @@ CLR_UINT64 CLR_PROF_Handler::ResumeTime()
     return res;
 }
 
-CLR_UINT64 CLR_PROF_Handler::ResumeTime( CLR_INT64 t )
+CLR_UINT64 CLR_PROF_Handler::ResumeTime(CLR_INT64 t)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     s_time_adjusted += t;
 
     return ResumeTime();
 }
-#endif //defined(NANOCLR_PROFILE_HANDLER)
+#endif // defined(NANOCLR_PROFILE_HANDLER)
 
 //--//
-

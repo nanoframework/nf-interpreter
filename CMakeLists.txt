@@ -37,6 +37,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(binutils.common)
 include(binutils.ESP32)
 
+nf_check_path_limits()
+
 ######################################################
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
@@ -557,6 +559,13 @@ else()
 endif()
 
 
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+endif()
+
+
 if(API_System.Device.Pwm)
     set(HAL_USE_PWM_OPTION TRUE CACHE INTERNAL "HAL PWM for System.Device.Pwm")
 else()
@@ -674,7 +683,7 @@ if(USE_NETWORKING_OPTION)
     # which is required for network
 
     if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
-        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that in your CMakePresets or in the build command line.")
     endif()
 
 else()
@@ -847,12 +856,6 @@ elseif(RTOS_ESP32_CHECK)
             message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
-
-    # need to add this here to keep IDF build system happy
-    add_executable(
-        ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
-    )
 
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)

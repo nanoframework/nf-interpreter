@@ -7,7 +7,7 @@
 #ifndef DRIVERS_SOCKETS_DECL_H
 #define DRIVERS_SOCKETS_DECL_H
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 #define GLOBAL_LOCK_SOCKETS(x)
 #endif
 //--//
@@ -522,7 +522,7 @@ bool Network_Interface_Close(int index);
 int Network_Interface_Disconnect(int index);
 int Network_Interface_Start_Connect(int index, const char *ssid, const char *passphase, int options);
 int Network_Interface_Connect_Result(int configIndex);
-bool Network_Interface_Start_Scan(int index);
+int Network_Interface_Start_Scan(int index);
 
 // Wireless AP methods
 void Network_Interface_Add_Station(uint16_t index, uint8_t *macAddress);

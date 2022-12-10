@@ -4,14 +4,18 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     bzip2 \
-    unzip
+    unzip \
+    wget 
 
-RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc /tmp/dc-extracted/cmake
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.23/cmake-3.23.0-linux-x86_64.sh
-RUN curl -o /tmp/dc-downloads/cmake.sh $CMAKE_SCRIPT \
-    && chmod +x /tmp/dc-downloads/cmake.sh \
-    && bash /tmp/dc-downloads/cmake.sh --skip-license --prefix=/tmp/dc-extracted/cmake
+ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+RUN wget $CMAKE_SCRIPT \
+      -q -O /tmp/cmake-install.sh \
+      && chmod u+x /tmp/cmake-install.sh \
+      && mkdir /tmp/dc-extracted/cmake \
+      && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+      && rm /tmp/cmake-install.sh
 
 FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
 
@@ -46,22 +50,32 @@ RUN git clone --branch mbedtls-2.28.1 https://github.com/ARMmbed/mbedtls.git --d
     && git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.2 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
-
-# Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc /usr/local/bin/gcc 
-COPY --from=downloader /tmp/dc-extracted/cmake /usr
-# COPY ./scripts/git-pull-repos.sh /usr/local/git-pull-repos.sh
+RUN git clone --branch v4.4.3 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
     && pip3 install pyserial
 
+# copy from our other container
+COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
+
+ENV PATH=/usr/bin/cmake/bin:${PATH}
+
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
+ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
 RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
-ENV PATH=$PATH:$IDF_PATH/components/esptool_py/esptool:$IDF_PATH/components/espcoredump:$IDF_PATH/components/partition_table/:$IDF_PATH/tools/:$IDF_PATH/components/app_update:/root/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin:/root/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32s2-elf/bin:/root/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch3-8.4.0/riscv32-esp-elf/bin
+
+ENV PATH=$PATH:\
+$IDF_PATH/components/esptool_py/esptool:\
+$IDF_PATH/components/espcoredump:\ 
+$IDF_PATH/components/partition_table/:\
+$IDF_PATH/tools/:\
+$IDF_PATH/components/app_update:\
+/root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
+/root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
+/root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files
 RUN apt-get autoremove -y \

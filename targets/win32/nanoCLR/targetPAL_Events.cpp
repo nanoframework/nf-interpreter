@@ -99,7 +99,14 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
 {
     std::unique_lock<std::mutex> scopeLock(EventsMutex);
 
+    if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
+    {
+        // there is a reboot or program exit condition pending, no need to wait for anything
+        return 0;
+    }
+
     bool timeout = false;
+
     // check current condition before waiting as Condition var doesn't do that
     if ((wakeupSystemEvents & SystemEvents) == 0)
     {
@@ -107,6 +114,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
             return (wakeupSystemEvents & SystemEvents) != 0;
         });
     }
+
     return timeout ? 0 : SystemEvents & wakeupSystemEvents;
 }
 

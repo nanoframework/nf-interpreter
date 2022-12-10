@@ -64,10 +64,17 @@
 //
 // This is used in memory move operations.
 //
+#ifdef _WIN64
+struct CLR_RT_HeapBlock_Raw
+{
+    CLR_UINT32 data[5];
+};
+#else
 struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[3];
 };
+#endif // _WIN64
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push

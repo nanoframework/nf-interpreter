@@ -97,7 +97,7 @@ bool Network_Interface_Close(int index)
     return false;
 }
 
-bool Network_Interface_Start_Scan(int index)
+int Network_Interface_Start_Scan(int index)
 {
     HAL_Configuration_NetworkInterface networkConfiguration;
 
@@ -107,18 +107,17 @@ bool Network_Interface_Start_Scan(int index)
             DeviceConfigurationOption_Network,
             index))
     {
-        // failed to load configuration
-        // FIXME output error?
-        return SOCK_SOCKET_ERROR;
+        // failed to get configuration
+        return StartScanOutcome_FailedToGetConfiguration;
     }
 
     // can only do this is this is STA
-    if (networkConfiguration.InterfaceType == NetworkInterfaceType_Wireless80211)
+    if (networkConfiguration.InterfaceType != NetworkInterfaceType_Wireless80211)
     {
-        return (NF_ESP32_Wireless_Scan() == 0);
+        return StartScanOutcome_WrongInterfaceType;
     }
 
-    return false;
+    return NF_ESP32_Wireless_Scan();
 }
 
 bool GetWirelessConfig(int index, HAL_Configuration_Wireless80211 **wirelessConfig)

@@ -135,6 +135,9 @@
     <ClCompile Include="..\Helpers\nanoprintf\nanoprintf.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="nanoSupport_CRC32.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">

@@ -15,7 +15,13 @@ typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cConnectionSettings I2cCo
 typedef Library_sys_dev_i2c_native_System_Device_I2c_I2cTransferResult I2cTransferResult;
 typedef Library_corlib_native_System_SpanByte SpanByte;
 
-static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {0, 0};
+static char Esp_I2C_Initialised_Flag[I2C_NUM_MAX] = {
+    0
+#if I2C_NUM_MAX > 1
+    ,
+    0
+#endif
+};
 
 void Esp32_I2c_UnitializeAll()
 {
@@ -70,7 +76,11 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
         // subtract 1 to get ESP32 bus number
         i2c_port_t bus = (i2c_port_t)(pConfig[I2cConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        if (bus != I2C_NUM_0 && bus != I2C_NUM_1)
+        if (bus != I2C_NUM_0
+#if I2C_NUM_MAX > 1
+            && bus != I2C_NUM_1
+#endif
+        )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
