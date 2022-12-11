@@ -277,7 +277,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
 {
     NANOCLR_HEADER();
 
-    uint32_t handle;
+    uint32_t handle = -1;
     SPI_DEVICE_CONFIGURATION spiConfig;
     CLR_RT_HeapBlock *config = NULL;
 
