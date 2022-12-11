@@ -289,6 +289,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     config = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
 
     spiConfig.BusMode = SpiBusMode_master;
+    spiConfig.DataIs16bits = false;
 
     // internally SPI bus ID is zero based, so better take care of that here
     spiConfig.Spi_Bus = config[SpiConnectionSettings::FIELD___busId].NumericByRef().s4 - 1;
