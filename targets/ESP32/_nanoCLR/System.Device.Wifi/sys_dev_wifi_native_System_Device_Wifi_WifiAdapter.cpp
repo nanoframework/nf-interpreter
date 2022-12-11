@@ -195,7 +195,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::NativeScanAs
         case StartScanOutcome_Success:
             NANOCLR_SET_AND_LEAVE(S_OK);
             break;
-            
+
         case StartScanOutcome_WrongInterfaceType:
         case StartScanOutcome_Esp32WifiNotInit:
         case StartScanOutcome_Esp32WifiNotStarted:
