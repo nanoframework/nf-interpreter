@@ -32,7 +32,7 @@ __RAM_segment_used_end__ = 0;
 
 MEMORY
 {
-  flash0      (rx) : org = 0x00000000, len = 76k        /* space reserved for nanoBooter */
+  flash0      (rx) : org = 0x00000000, len = 48k        /* space reserved for nanoBooter */
   deployment  (rx) : org = 0x00013000, len = 0          /* space reserved for application deployment */
   config      (rw) : org = 0x001FF000, len = 4k         /* space reserved for configuration block */
   RAM         (rwx): org = 0x20000000, len = 512k - 48  /* RAM */
