@@ -1545,11 +1545,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 }
 }
 
-{
-    ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF)
-    {
-        dst->m_data = CLR_EmptyIndex;
-    }
+{ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF){dst->m_data = CLR_EmptyIndex;
+}
 }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

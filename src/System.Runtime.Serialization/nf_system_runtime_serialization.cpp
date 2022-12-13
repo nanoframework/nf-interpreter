@@ -23,5 +23,4 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Runtime_Serializatio
     { 100, 0, 0, 0 }
 };
 
-
 // clang-format on
