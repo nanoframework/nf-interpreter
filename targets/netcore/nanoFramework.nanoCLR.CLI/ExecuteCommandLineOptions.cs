@@ -79,6 +79,20 @@ namespace nanoFramework.nanoCLR.CLI
             HelpText = "Parent process id to monitor - exit if the parent exits.")]
         public int? MonitorParentPid { get; set; }
 
+        [Option(
+            "waitfordebugger",
+            Required = false,
+            Default = false,
+            HelpText = "Option to wait for a debugger connection after nanoCLR is started.")]
+        public bool WaitForDebugger { get; set; }
+
+        [Option(
+            "loopafterexit",
+            Required = false,
+            Default = true,
+            HelpText = "Option to remain in loop waiting for a debugger connection after the program exits.")]
+        public bool EnterDebuggerLoopAfterExit { get; set; }
+
         /// <summary>
         /// Allowed values:
         /// q[uiet]

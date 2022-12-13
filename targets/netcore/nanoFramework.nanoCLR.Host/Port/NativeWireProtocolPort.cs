@@ -68,11 +68,14 @@ namespace nanoFramework.nanoCLR.Host.Port
 
         public void Close()
         {
-            Status = PortStatus.Closed;
+            lock (_syncRoot)
+            {
+                Status = PortStatus.Closed;
 
-            Interop.nanoCLR.nanoCLR_WireProtocolClose();
-            Interop.nanoCLR.nanoCLR_SetWireProtocolReceiveCallback(null);
-            Interop.nanoCLR.nanoCLR_SetWireProtocolTransmitCallback(null);
+                Interop.nanoCLR.nanoCLR_WireProtocolClose();
+                Interop.nanoCLR.nanoCLR_SetWireProtocolReceiveCallback(null);
+                Interop.nanoCLR.nanoCLR_SetWireProtocolTransmitCallback(null);
+            }
         }
 
         private int WireProtocolTransmitCallback(byte[] data, int length)
@@ -85,13 +88,17 @@ namespace nanoFramework.nanoCLR.Host.Port
             }
         }
 
+
         private int WireProtocolReceiveCallback(byte[] data, int length)
         {
             lock (_syncRoot)
             {
-                if (_receiveBuffer.Count == 0)
+                if (_receiveBuffer.Count == 0
+                    || Status == PortStatus.Closed)
                 {
-                    Monitor.Wait(_syncRoot);
+                    Thread.Yield();
+
+                    return 0;
                 }
 
                 var size = _receiveBuffer.Count < length ? _receiveBuffer.Count : length;
@@ -108,6 +115,7 @@ namespace nanoFramework.nanoCLR.Host.Port
             while (Status == PortStatus.Opened)
             {
                 Interop.nanoCLR.nanoCLR_WireProtocolProcess();
+                Thread.Yield();
             }
         }
     }
