@@ -1046,10 +1046,10 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
             {
                 CLR_RT_HeapBlock_String *str = CLR_RT_HeapBlock_String::CreateInstance(*m_value, len);
                 CHECK_ALLOCATION(str);
-                char *dst = (char *)str->StringText();
+                char *dst1 = (char *)str->StringText();
 
-                NANOCLR_CHECK_HRESULT(m_bf->ReadArray((CLR_UINT8 *)dst, len));
-                dst[len] = 0;
+                NANOCLR_CHECK_HRESULT(m_bf->ReadArray((CLR_UINT8 *)dst1, len));
+                dst1[len] = 0;
             }
 
             res = c_Action_None;
