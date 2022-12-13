@@ -131,7 +131,7 @@ HRESULT CLR_RT_HeapBlock_WeakReference::GetTarget(CLR_RT_HeapBlock &targetRefere
                     CLR_RT_ProtectFromGC gcInput(input);
                     CLR_RT_ProtectFromGC gcOutput(output);
 
-                    if (FAILED(CLR_RT_BinaryFormatter::Deserialize(output, input, NULL, NULL, 0)))
+                    if (FAILED(CLR_RT_BinaryFormatter::Deserialize(output, input, NULL, 0)))
                     {
                         output.SetObjectReference(NULL);
                     }

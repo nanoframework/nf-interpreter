@@ -27,6 +27,7 @@ option(API_System.Device.I2s                    "option for System.Device.I2s AP
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
+option(API_System.Runtime.Serialization         "option for System.Runtime.Serialization API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
@@ -333,6 +334,12 @@ endif()
 if(API_System.Device.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Spi")
+endif()
+
+# System.Runtime.Serialization
+if(API_System.Runtime.Serialization)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Runtime.Serialization")
 endif()
 
 # System.Device.Wifi

@@ -1545,8 +1545,11 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 }
 }
 
-{ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF){dst->m_data = CLR_EmptyIndex;
-}
+{
+    ITERATE_THROUGH_RECORDS(this, i, MethodDef, METHODDEF)
+    {
+        dst->m_data = CLR_EmptyIndex;
+    }
 }
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -2514,7 +2517,7 @@ HRESULT CLR_RT_AppDomain::MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock 
             CLR_RT_BinaryFormatter::Serialize(blk, src, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal));
 
         (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(appDomainDst);
-        hr = CLR_RT_BinaryFormatter::Deserialize(dst, blk, NULL, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal);
+        hr = CLR_RT_BinaryFormatter::Deserialize(dst, blk, NULL, CLR_RT_BinaryFormatter::c_Flags_Marshal);
 
         CLR_EE_DBG_RESTORE(NoCompaction, fNoCompaction);
     }

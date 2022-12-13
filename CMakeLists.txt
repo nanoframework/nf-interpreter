@@ -446,15 +446,30 @@ option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
 # handles inclusion of System.Reflection API
 #############################################
 
-# set default option for SNTP to ON
+# set default option for Reflection API to ON
 option(NF_FEATURE_SUPPORT_REFLECTION "option to add support for System.Reflection API" ON)
+# set default option for Serialization API to ON
+option(NF_FEATURE_BINARY_SERIALIZATION "option to add support for binary serialization" ON)
 
 if(NF_FEATURE_SUPPORT_REFLECTION)
     set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
     message(STATUS "Support for System.Reflection API enabled")
+    
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        set(API_System.Runtime.Serialization TRUE CACHE INTERNAL "enable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization enabled")
+    else()
+        set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization **IS NOT** enabled")
+    endif()
+
 else()
     set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
     message(STATUS "Support for System.Reflection API **IS NOT** enabled")
+
+    # disable binary serialization if Reflection is disabled
+    set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+    message(STATUS "Support for binary serialization **IS NOT** enabled")
 endif()
 
 #################################################################
