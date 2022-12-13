@@ -84,6 +84,18 @@ bool SSL_ParseCertificate(const char *certificate, size_t certLength, X509CertDa
     return ssl_parse_certificate_internal((void *)certificate, certLength, (void *)certData);
 }
 
+bool SSL_GetPublicKeyRaw(const char *certificate, size_t certLength, X509RawData *rawData)
+{
+    if (!s_InitDone)
+    {
+        s_InitDone = ssl_initialize_internal();
+    }
+
+    NATIVE_PROFILE_PAL_COM();
+
+    return ssl_get_public_key_raw_internal((void *)certificate, certLength, (void *)rawData);
+}
+
 int SSL_DecodePrivateKey(const unsigned char *key, size_t keyLength, const unsigned char *pwd, size_t pwdLength)
 {
     if (!s_InitDone)

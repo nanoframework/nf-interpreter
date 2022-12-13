@@ -31,6 +31,14 @@ bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x50
     (void)x509;
 }
 
+bool ssl_get_public_key_raw_internal(void *buf, size_t size, void *pwd, void *x509)
+{
+    (void)buf;
+    (void)size;
+    (void)pwd;
+    (void)x509;
+}
+
 int ssl_decode_private_key_internal(
     const unsigned char *key,
     size_t keyLength,
