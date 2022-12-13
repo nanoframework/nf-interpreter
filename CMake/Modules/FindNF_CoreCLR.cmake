@@ -135,7 +135,6 @@ set(NF_CoreCLR_SRCS
     
     # Core stubs
     RPC_stub.cpp
-    BinaryFormatter_stub.cpp
 
     # CLR stubs
     Debugger_stub.cpp
@@ -181,6 +180,18 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeMethodInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_RuntimeType.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Type.cpp)
+
+    # should we include binary serialization support?
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter.cpp)    
+    else()
+        # binary serialization stubs because we're not supporting reflection
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stubs.cpp)    
+    endif()
+
+else()
+    # binary serialization stubs because we're not supporting reflection
+    list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stubs.cpp)    
 endif()
 
 # include Collection support files depending on build option

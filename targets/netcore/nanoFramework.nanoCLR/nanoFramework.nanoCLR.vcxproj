@@ -251,12 +251,6 @@
     <ProjectReference Include="..\..\..\src\CLR\Core\Serialization\Serialization.vcxproj">
       <Project>{16bf6131-a3b8-4b97-b867-e45669fb48bd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\src\CLR\Core\Serialization\Serialization_stub.vcxproj">
-      <Project>{c337041d-344d-49fe-ad99-b137e7fd0188}</Project>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>false</Private>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\CLR\CorLib\CorLib.vcxproj">
       <Project>{58e950cc-2ff6-423c-b006-a70a19272f20}</Project>
     </ProjectReference>
@@ -319,6 +313,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\System.IO.Ports\System.IO.Ports.vcxproj">
       <Project>{46556afc-c248-4082-abe6-9b07f4e57579}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\System.Runtime.Serialization\System.Runtime.Serialization.vcxproj">
+      <Project>{c9264d0a-ac25-46b0-bd08-4a3252427f19}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Windows.Storage\Windows.Storage.vcxproj">
       <Project>{3cae286f-0ef8-45e4-8111-afa0aa9282b4}</Project>
