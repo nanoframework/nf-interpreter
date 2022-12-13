@@ -93,7 +93,8 @@
             ],
             "cacheVariables": {
                 "TARGET_BOARD": "${presetName}",
-                "NF_INTEROP_ASSEMBLIES": null
+                "NF_INTEROP_ASSEMBLIES": null,
+                "NF_FEATURE_BINARY_SERIALIZATION": "OFF"
             }
         },
         {
