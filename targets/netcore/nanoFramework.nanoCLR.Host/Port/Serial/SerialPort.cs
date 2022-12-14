@@ -18,7 +18,7 @@ namespace nanoFramework.nanoCLR.Host.Port.Serial
             _serialPort = new System.IO.Ports.SerialPort(name, baudRate);
         }
 
-        public int BytesAvailable => _serialPort.BytesToRead;
+        public int BytesAvailable => (_serialPort != null && _serialPort.IsOpen ? _serialPort.BytesToRead : 0);
 
         public byte[] ReceiveData() => _serialPort.ReadAllBytes();
 

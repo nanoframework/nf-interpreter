@@ -186,12 +186,12 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
         list(APPEND NF_CoreCLR_SRCS BinaryFormatter.cpp)    
     else()
         # binary serialization stubs because we're not supporting reflection
-        list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stubs.cpp)    
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)    
     endif()
 
 else()
     # binary serialization stubs because we're not supporting reflection
-    list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stubs.cpp)    
+    list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)    
 endif()
 
 # include Collection support files depending on build option
