@@ -6,8 +6,8 @@
     <Platforms>AnyCPU</Platforms>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>..\..\..\build\bin\$(Configuration)</OutputPath>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<RestoreLockedMode>true</RestoreLockedMode>
+		<RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+		<RestoreLockedMode>false</RestoreLockedMode>
   </PropertyGroup>
 
   <ItemGroup>

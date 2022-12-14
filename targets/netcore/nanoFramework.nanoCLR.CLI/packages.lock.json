@@ -78,7 +78,7 @@
         }
       }
     },
-    "net6.0/any": {
+    "net6.0/win-x64": {
       "System.Security.Principal.Windows": {
         "type": "Direct",
         "requested": "[5.0.0, )",
