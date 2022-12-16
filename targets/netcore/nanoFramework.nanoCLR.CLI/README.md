@@ -116,6 +116,11 @@ This option tries to resolve cross-assembly references between the loaded assemb
 nanoclr run --resolve (--assemblies ...)
 ```
 
+### Options to control debugger connection
+
+There are two options that control how the nanoCLR execution interacts with a debugger. If it's intended that after a program terminates and exits the execution a debugger will be connecting, the option `--loopafterexit` should be included.
+In case it's expected that imediatly after nanoCLR is started,a debugger is to connect to it, the option `--waitfordebugger` should be included.
+
 ## Maintenance operations with the nanoCLR
 
 The nanoCLR it's, in fact, a wrapper to the nanoCLR instance that is distributed as DLL so it can be easily updated.

@@ -60,8 +60,6 @@ namespace nanoFramework.nanoCLR.CLI
                     // need to set debugger serial port to the _other_ port so it shows at the expected end
                     var internalSerialPort = $"COM{bridge.GetOtherPort(options.ExposedSerialPort)}";
 
-                    hostBuilder.WaitForDebugger = true;
-                    hostBuilder.EnterDebuggerLoopAfterExit = true;
                     hostBuilder.UseSerialPortWireProtocol(internalSerialPort);
 
                     // set flag
@@ -81,12 +79,6 @@ namespace nanoFramework.nanoCLR.CLI
             if (options.TryResolve)
             {
                 hostBuilder.TryResolve();
-            }
-
-            if (options.ExposedSerialPort != null || options.ExposedTcpIpPort != null || options.ExposedNamedPipe != null)
-            {
-                hostBuilder.WaitForDebugger = true;
-                hostBuilder.EnterDebuggerLoopAfterExit = true;
             }
 
             if (!internalSerialPortConfig
@@ -109,6 +101,10 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 hostBuilder.UsePortTrace();
             }
+
+            hostBuilder.WaitForDebugger = options.WaitForDebugger;
+            hostBuilder.EnterDebuggerLoopAfterExit = options.EnterDebuggerLoopAfterExit;
+
 
             if (options.MonitorParentPid != null)
             {

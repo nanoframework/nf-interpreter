@@ -4,6 +4,7 @@
   "assemblyVersion": {
     "precision": "minor"
   },
+  "buildNumberOffset": 60,
   "nuGetPackageVersion": {
     "semVer": 2.0
   },
