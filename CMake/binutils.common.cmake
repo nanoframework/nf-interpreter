@@ -298,7 +298,9 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
         ${file2} -Binary -offset 0x${offset}
         -o ${outputfilename} -Binary
 
-        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX} 
+        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX}
+
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${outputfilename}
 
         COMMENT "exporting hex files to one binary file" 
     )

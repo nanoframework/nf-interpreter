@@ -229,6 +229,7 @@ jobs:
   steps:
   - checkout: self
     fetchDepth: 1
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
   - template: azure-pipelines-templates/download-install-llvm.yml
   - template: azure-pipelines-templates/check-code-style.yml
