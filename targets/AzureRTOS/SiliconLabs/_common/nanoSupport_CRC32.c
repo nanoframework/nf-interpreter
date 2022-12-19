@@ -20,11 +20,16 @@ uint32_t SUPPORT_ComputeCRC(const void *rgBlock, const uint32_t nLength, const u
         return crc;
     }
 
-    // set intial value
-    GPCRC_InitValueSet(GPCRC, crc);
+    if(crc == 0)
+    {
+        // this is NOT continuing a previous CRC calculation
 
-    // Prepare GPCRC_DATA for inputs
-    GPCRC_Start(GPCRC);
+        // set intial value
+        GPCRC_InitValueSet(GPCRC, crc);
+
+        // Prepare GPCRC_DATA for inputs
+        GPCRC_Start(GPCRC);
+    }
 
     for (uint32_t i = 0; i < nLength; i++)
     {
