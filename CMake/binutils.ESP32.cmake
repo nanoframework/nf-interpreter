@@ -703,6 +703,7 @@ macro(nf_add_idf_as_library)
     add_executable(
         ${NANOCLR_PROJECT_NAME}.elf
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/project_elf_src_${TARGET_SERIES_SHORT}.c
     )
 
     #Restore original sdkconfig back to defaults
@@ -875,6 +876,24 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_BT_ENABLED_POS} GREATER -1)
         set(BLE_INFO ", support for BLE")
     endif()    
+
+    ############################################################
+    # output component size summary for the nanoCLR executable #
+    # more on this here: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/performance/size.html#size-summary-idf-py-size
+    
+    # set the map file with the components
+    set(nanoCLRMapfile "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map")
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf "-Wl,--cref" "-Wl,--Map=\"${nanoCLRMapfile}\"")
+
+    # setup the call to the python script to generate the size summary
+    set(ESP32_IDF_SIZE_UTILITY ${IDF_PATH_CMAKED}/tools/idf_size.py)
+    set(output_idf_size "python" "${ESP32_IDF_SIZE_UTILITY}")
+
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${output_idf_size}
+        --archives --target ${TARGET_SERIES_SHORT} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
+        COMMENT "Ouptut IDF size summary")
 
 endmacro()
 
