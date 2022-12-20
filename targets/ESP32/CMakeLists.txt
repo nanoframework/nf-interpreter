@@ -117,8 +117,10 @@ if(NF_FEATURE_HAS_SDCARD)
     )
 else()
     # if not using FatFS need to check if IDF ffconfig.h exists
-    if(NOT(IS_ABSOLUTE ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h))
-        message(FATAL_ERROR "'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\rIf this was deleted on a previous build using SDCard, just revert the change and restore the file.")
+    if(EXISTS ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
+        # all good, ffconf.h still there
+    else()
+        message(FATAL_ERROR "\r\n*******************************************************************\r\n'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\r\nIf this was deleted on a previous build using SDCard, just revert the change and restore the file.\r\n*******************************************************************\r\n")
     endif()
 endif()
 
