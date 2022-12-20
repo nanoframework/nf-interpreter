@@ -20,7 +20,11 @@ foreach(SRC_FILE ${RPI_PICO_SKD_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${RPI_PICO_SKD_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${RPI_PICO_SKD_SRC_FILE}")
+    endif()
+
     list(APPEND RPI_PICO_SKD_SOURCES ${RPI_PICO_SKD_SRC_FILE})
 endforeach()
 

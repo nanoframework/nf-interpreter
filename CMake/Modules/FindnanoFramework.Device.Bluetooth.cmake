@@ -56,7 +56,11 @@ foreach(SRC_FILE ${nanoFramework.Device.Bluetooth_SRCS})
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Device.Bluetooth_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Device.Bluetooth_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Device.Bluetooth_SOURCES ${nanoFramework.Device.Bluetooth_SRC_FILE})
 endforeach()
 
