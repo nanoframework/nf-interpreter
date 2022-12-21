@@ -173,14 +173,13 @@ struct Library_corlib_native_System_Object
 
 struct Library_corlib_native_System_Int64
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
 
 struct Library_corlib_native_System_Int32
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -188,7 +187,6 @@ struct Library_corlib_native_System_Int32
 
 struct Library_corlib_native_System_Char
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -416,6 +414,7 @@ struct Library_corlib_native_System_Collections_ArrayList
 {
     static const int FIELD___items = 1;
     static const int FIELD___size = 2;
+    static const int FIELD___syncRoot = 3;
 
     NANOCLR_NATIVE_DECLARE(get_Item___OBJECT__I4);
     NANOCLR_NATIVE_DECLARE(set_Item___VOID__I4__OBJECT);
@@ -435,15 +434,6 @@ struct Library_corlib_native_System_ComponentModel_EditorBrowsableState
 
     //--//
 };
-
-struct Library_corlib_native_System_Int64
-{
-
-    static const int FIELD__m_value = 1;
-
-    //--//
-};
-
 struct Library_corlib_native_System_Double
 {
 
@@ -571,7 +561,6 @@ struct Library_corlib_native_System_Diagnostics_DebuggerBrowsableAttribute
 
 struct Library_corlib_native_System_UInt16
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -627,7 +616,6 @@ struct Library_corlib_native_System_Globalization_DateTimeFormat
 
 struct Library_corlib_native_System_UInt32
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -635,7 +623,6 @@ struct Library_corlib_native_System_UInt32
 
 struct Library_corlib_native_System_Int16
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -894,7 +881,6 @@ struct Library_corlib_native_System_SByte
 
 struct Library_corlib_native_System_Single
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
@@ -1040,7 +1026,6 @@ struct Library_corlib_native_System_Threading_WaitHandle
 
 struct Library_corlib_native_System_UInt64
 {
-
     static const int FIELD__m_value = 1;
 
     //--//
