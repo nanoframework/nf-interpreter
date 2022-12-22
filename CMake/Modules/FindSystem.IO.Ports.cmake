@@ -35,7 +35,11 @@ foreach(SRC_FILE ${System.IO.Ports_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.IO.Ports_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.IO.Ports_SRC_FILE}")
+    endif()
+
     list(APPEND System.IO.Ports_SOURCES ${System.IO.Ports_SRC_FILE})
 endforeach()
 

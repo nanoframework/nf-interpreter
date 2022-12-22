@@ -85,9 +85,12 @@ list(APPEND CMAKE_MODULE_PATH ${esp32_idf_SOURCE_DIR}/CMake)
 # parse IDF path to allow proper comparison with environment variable
 string(REPLACE "\\" "/" IDF_SOURCE_DIR_PATH "$ENV{IDF_PATH}")
 
+# need to lowercase both paths to compare them
+string(TOLOWER "${IDF_SOURCE_DIR_PATH}" IDF_SOURCE_DIR_PATH_LOWER )
+string(TOLOWER "${esp32_idf_SOURCE_DIR}" esp32_idf_SOURCE_DIR_LOWER )
+
 # check IDF_PATH environment variable
-if(NOT "${IDF_SOURCE_DIR_PATH}" STREQUAL "${esp32_idf_SOURCE_DIR}")
-    
+if(NOT "${IDF_SOURCE_DIR_PATH_LOWER}" STREQUAL "${esp32_idf_SOURCE_DIR_LOWER}")
     # variable is set and it's different from the current location
     # can't continue
 
@@ -96,7 +99,15 @@ if(NOT "${IDF_SOURCE_DIR_PATH}" STREQUAL "${esp32_idf_SOURCE_DIR}")
 else()
     message(STATUS "\n-- IDF_PATH is '${IDF_SOURCE_DIR_PATH}'\r")
 
+    # on Windows need to make sure the path has the same case as the actual path
+    if(CMAKE_HOST_WIN32)
+        if(NOT "${IDF_SOURCE_DIR_PATH}" STREQUAL "${esp32_idf_SOURCE_DIR}")
+            message(FATAL_ERROR "ESP32_IDF_PATH var is '${esp32_idf_SOURCE_DIR}'. It's using a different case than the actual path. Please fix this.")
+        endif()
+    endif()
+
     set(IDF_PATH_CMAKED ${IDF_SOURCE_DIR_PATH} CACHE INTERNAL "CMake formated IDF path")
+
 endif()
 
 # if using FatFS need to remove IDF ffconfig.h so it can pick ours
@@ -106,8 +117,10 @@ if(NF_FEATURE_HAS_SDCARD)
     )
 else()
     # if not using FatFS need to check if IDF ffconfig.h exists
-    if(NOT(IS_ABSOLUTE ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h))
-        message(FATAL_ERROR "'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\rIf this was deleted on a previous build using SDCard, just revert the change and restore the file.")
+    if(EXISTS ${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h)
+        # all good, ffconf.h still there
+    else()
+        message(FATAL_ERROR "\r\n*******************************************************************\r\n'${esp32_idf_SOURCE_DIR}/components/fatfs/src/ffconf.h' file is missing from IDF\r\nIf this was deleted on a previous build using SDCard, just revert the change and restore the file.\r\n*******************************************************************\r\n")
     endif()
 endif()
 

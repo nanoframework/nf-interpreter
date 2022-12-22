@@ -31,7 +31,9 @@ if(NF_WP_TRACE_ALL)
     math(EXPR WP_TRACE_MASK "16 + 8 + 4 + 2 + 1")
 endif()
 
-message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'") # debug helper
+if (BUILD_VERBOSE)
+    message(STATUS "Wire Protocol TRACE_MASK is '${WP_TRACE_MASK}'")
+endif()
 
 # set include directories for Wire Protocol
 list(APPEND WireProtocol_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)

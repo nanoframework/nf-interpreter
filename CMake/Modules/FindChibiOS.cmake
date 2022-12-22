@@ -31,7 +31,9 @@ include(CHIBIOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
 include(CHIBIOS_${TARGET_SERIES}_GCC_options)
 
-# message("ChibiOS board series is ${TARGET_SERIES}") # debug helper
+if (BUILD_VERBOSE)
+    message("ChibiOS board series is ${TARGET_SERIES}")
+endif()
 
 # set include directories for ChibiOS
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os) 
