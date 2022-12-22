@@ -39,7 +39,7 @@ struct Library_corlib_native_System_Boolean
     static const int FIELD_STATIC__FalseString = 0;
     static const int FIELD_STATIC__TrueString = 1;
 
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -173,21 +173,21 @@ struct Library_corlib_native_System_Object
 
 struct Library_corlib_native_System_Int64
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
 
 struct Library_corlib_native_System_Int32
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
 
 struct Library_corlib_native_System_Char
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -404,7 +404,8 @@ struct Library_corlib_native_System_BitConverter
 
 struct Library_corlib_native_System_Byte
 {
-    static const int FIELD___value = 1;
+
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -426,9 +427,17 @@ struct Library_corlib_native_System_Collections_ArrayList
     //--//
 };
 
+struct Library_corlib_native_System_ComponentModel_EditorBrowsableState
+{
+
+    static const int FIELD__value__ = 1;
+
+    //--//
+};
 struct Library_corlib_native_System_Double
 {
-    static const int FIELD___value = 1;
+
+    static const int FIELD__m_value = 1;
 
     NANOCLR_NATIVE_DECLARE(CompareTo___STATIC__I4__R8__R8);
     NANOCLR_NATIVE_DECLARE(IsInfinity___STATIC__BOOLEAN__R8);
@@ -552,7 +561,7 @@ struct Library_corlib_native_System_Diagnostics_DebuggerBrowsableAttribute
 
 struct Library_corlib_native_System_UInt16
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -607,14 +616,14 @@ struct Library_corlib_native_System_Globalization_DateTimeFormat
 
 struct Library_corlib_native_System_UInt32
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
 
 struct Library_corlib_native_System_Int16
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -865,14 +874,14 @@ struct Library_corlib_native_System_RuntimeType
 struct Library_corlib_native_System_SByte
 {
 
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
 
 struct Library_corlib_native_System_Single
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
@@ -1017,7 +1026,7 @@ struct Library_corlib_native_System_Threading_WaitHandle
 
 struct Library_corlib_native_System_UInt64
 {
-    static const int FIELD___value = 1;
+    static const int FIELD__m_value = 1;
 
     //--//
 };
