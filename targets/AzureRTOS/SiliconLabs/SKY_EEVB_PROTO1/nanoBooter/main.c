@@ -145,6 +145,9 @@ int main(void)
     // configure LED READY for output
     GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
 
+    // configure
+    GPIO_PinModeSet(gpioPortE, 8, gpioModeInput, 0);
+
     // init boot clipboard
     InitBootClipboard();
 
@@ -152,25 +155,25 @@ int main(void)
     // the board to remain in nanoBooter and not launching nanoCLR
 
     // check if there is a request to remain on nanoBooter
-    // if (!IsToRemainInBooter())
-    // {
-    //     // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
-    //     //if (GPIO_PinInGet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN) != 0)
-    //     {
-    // check for valid CLR image
-    // we are checking for a valid image at the deployment address, which is pointing to the CLR address
-    if (CheckValidCLRImage((uint32_t)&__deployment_start__))
+    if (!IsToRemainInBooter())
     {
-        // there seems to be a valid CLR image
+        // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
+        if (GPIO_PinInGet(gpioPortE, 8) != 0)
+        {
+            // check for valid CLR image
+            // we are checking for a valid image at the deployment address, which is pointing to the CLR address
+            if (CheckValidCLRImage((uint32_t)&__deployment_start__))
+            {
+                // there seems to be a valid CLR image
 
-        // need to change HF clock to internal RCO so the CLR can boot smoothly
-        CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+                // need to change HF clock to internal RCO so the CLR can boot smoothly
+                CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
 
-        // launch nanoCLR
-        LaunchCLR((uint32_t)&__deployment_start__);
+                // launch nanoCLR
+                LaunchCLR((uint32_t)&__deployment_start__);
+            }
+        }
     }
-    //     }
-    // }
 
     // Enter the ThreadX kernel. Task(s) created in tx_application_define() will start running
     sl_system_kernel_start();
