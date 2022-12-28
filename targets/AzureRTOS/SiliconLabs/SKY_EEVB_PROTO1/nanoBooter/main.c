@@ -65,11 +65,6 @@ void tx_application_define(void *first_unused_memory)
     // Create a byte memory pool from which to allocate the thread stacks.
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
-    // #if (HAL_NF_USE_STM32_CRC == TRUE)
-    //     // startup crc
-    //     crcStart(NULL);
-    // #endif
-
     // initialize block storage list and devices
     // in CLR this is called in nanoHAL_Initialize()
     // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
@@ -149,11 +144,7 @@ int main(void)
 
     // configure LED READY for output
     GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
-    // while (1)
-    // {
-    //     __NOP();
-    // } 
-    /* Hang here forever... */
+
     // init boot clipboard
     InitBootClipboard();
 
@@ -166,18 +157,18 @@ int main(void)
     //     // if the BTN0 is pressed, skip the check for a valid CLR image and remain in booter
     //     //if (GPIO_PinInGet(BSP_GPIO_PB0_PORT, BSP_GPIO_PB0_PIN) != 0)
     //     {
-            // check for valid CLR image
-            // we are checking for a valid image at the deployment address, which is pointing to the CLR address
-            if (CheckValidCLRImage((uint32_t)&__deployment_start__))
-            {
-                // there seems to be a valid CLR image
+    // check for valid CLR image
+    // we are checking for a valid image at the deployment address, which is pointing to the CLR address
+    if (CheckValidCLRImage((uint32_t)&__deployment_start__))
+    {
+        // there seems to be a valid CLR image
 
-                // need to change HF clock to internal RCO so the CLR can boot smoothly
-                CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+        // need to change HF clock to internal RCO so the CLR can boot smoothly
+        CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
 
-                // launch nanoCLR
-                LaunchCLR((uint32_t)&__deployment_start__);
-            }
+        // launch nanoCLR
+        LaunchCLR((uint32_t)&__deployment_start__);
+    }
     //     }
     // }
 

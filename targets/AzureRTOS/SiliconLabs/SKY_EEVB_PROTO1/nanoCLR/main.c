@@ -59,26 +59,22 @@ TX_THREAD clrStartupThread;
 uint32_t clrStartupThreadStack[CLR_THREAD_STACK_SIZE / sizeof(uint32_t)];
 extern void ClrStartupThread_entry(uint32_t parameter);
 
-extern sl_status_t sl_usbd_vendor_read_bulk_sync(uint8_t  class_nbr,
-                                          void     *p_buf,
-                                          uint32_t buf_len,
-                                          uint16_t timeout,
-                                          uint32_t *p_xfer_len);
-extern sl_status_t sl_usbd_vendor_is_enabled(uint8_t  class_nbr,
-                                      bool     *p_enabled);
+extern sl_status_t sl_usbd_vendor_read_bulk_sync(
+    uint8_t class_nbr,
+    void *p_buf,
+    uint32_t buf_len,
+    uint16_t timeout,
+    uint32_t *p_xfer_len);
+extern sl_status_t sl_usbd_vendor_is_enabled(uint8_t class_nbr, bool *p_enabled);
 
 void BlinkThread_entry(uint32_t parameter)
 {
     (void)parameter;
-// uint8_t buffer[10];
-// uint32_t p_xfer_len;
-// sl_status_t reqStatus;
-// bool conn;
 
     while (1)
     {
         GPIO_PinOutToggle(gpioPortE, 9);
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1500));                             
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1500));
     }
 }
 
@@ -92,11 +88,6 @@ void tx_application_define(void *first_unused_memory)
 
     // start watchdog
     // Watchdog_Init();
-
-    // #if (HAL_NF_USE_STM32_CRC == TRUE)
-    //     // startup crc
-    //     crcStart(NULL);
-    // #endif
 
 #if (TRACE_TO_STDIO == TRUE)
     StdioPort_Init();
