@@ -144,10 +144,10 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
             spiDeviceConfig->ByteTime = (1.0 / spiDeviceConfig->Clock_RateHz) * 1000 * 8;
             spiDeviceConfig->BusConfiguration =
                 (SpiBusConfiguration)config[SpiBaseConfiguration::FIELD___busConfiguration].NumericByRef().s4;
-            spiDeviceConfig->MD16bits =
+            spiDeviceConfig->DataIs16bits =
                 config[SpiBaseConfiguration::FIELD___databitLength].NumericByRef().s4 == 16 ? true : false;
             // store this here too
-            palSpi->BufferIs16bits = spiDeviceConfig->MD16bits;
+            palSpi->BufferIs16bits = spiDeviceConfig->DataIs16bits;
 
             CPU_SPI_Initialize_Extended(busIndex, *spiDeviceConfig, true);
 
