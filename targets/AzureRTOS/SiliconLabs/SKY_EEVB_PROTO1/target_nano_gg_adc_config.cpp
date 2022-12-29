@@ -5,31 +5,42 @@
 
 #include <nano_gg_adc_native_target.h>
 
-// PA15: ADC0 APORT2X Channel 15
-// PE15: ADC0 APORT4X Channel 15
-// PE14: ADC0 APORT4Y Channel 14
-// PE13: ADC0 APORT4X Channel 13
-// PE12: ADC0 APORT4Y Channel 12
-// PE11: ADC0 APORT4X Channel 11
+// PA6 (Gecko APORT1X CH6) ADC IMON0 Channel
+// PA7 (Gecko APORT2X CH7) ADC IMON1 Channel
+// PA8 (Gecko APORT1X CH8) ADC IMON2 Channel
+// PA9 (Gecko APORT2X CH9) ADC IMON3 Channel
+// PA10 (Gecko APORT1X CH10) ADC IMON4 Channel
+// PA11 (Gecko APORT2X CH11) ADC IMON5 Channel
+// PA12 (Gecko APORT1X CH12) ADC IMON6 Channel
+// PA13 (Gecko APORT2X CH13) ADC IMON7 Channel
+// PA14 (Gecko APORT1X CH14) ADC IMON8 Channel
+// PA15 (Gecko APORT2X CH15) 16 analog channel ADC mux (see docs)
+// PE6 (Gecko APORT3X CH6) ADC Cal Channel
 
 const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 
-    // MCU_ADC1
+    // IMON0
+    {0, adcPosSelAPORT1XCH6},
+    //
+    {0, adcPosSelAPORT2XCH7},
+    //
+    {0, adcPosSelAPORT1XCH8},
+    //
+    {0, adcPosSelAPORT2XCH9},
+    //
+    {0, adcPosSelAPORT1XCH10},
+    //
+    {0, adcPosSelAPORT2XCH11},
+    //
+    {0, adcPosSelAPORT1XCH12},
+    //
+    {0, adcPosSelAPORT2XCH13},
+    //
+    {0, adcPosSelAPORT1XCH14},
+    //
     {0, adcPosSelAPORT2XCH15},
-    // MCU_ADC2
-    {0, adcPosSelAPORT4XCH15},
-    // MCU_ADC3
-    {0, adcPosSelAPORT4YCH14},
-    // MCU_ADC4
-    {0, adcPosSelAPORT4XCH13},
-    // MCU_ADC5
-    {0, adcPosSelAPORT4YCH12},
-    // MCU_ADC6
-    {0, adcPosSelAPORT4XCH11},
-
-    // these are the internal sources
-    {0, adcPosSelTEMP},
-    {0, adcPosSelAVDD},    
+    //
+    {0, adcPosSelAPORT3XCH6},
 };
 
 const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
