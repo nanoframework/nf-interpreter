@@ -52,7 +52,7 @@ void BlinkThread_entry(uint32_t parameter)
 
     while (1)
     {
-        GPIO_PinOutToggle(gpioPortE, 9);
+        GPIO_PinOutToggle(gpioPortB, 12);
         tx_thread_sleep(TX_TICKS_PER_MILLISEC(500));
     }
 }
@@ -143,7 +143,7 @@ int main(void)
     sl_system_init();
 
     // configure LED READY for output
-    GPIO_PinModeSet(gpioPortE, 9, gpioModePushPull, 0);
+    GPIO_PinModeSet(gpioPortB, 12, gpioModePushPull, 0);
 
     // configure
     GPIO_PinModeSet(gpioPortE, 8, gpioModeInput, 0);
