@@ -232,7 +232,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     CLR_UINT32 clsData = cls.m_data;
     CLR_UINT32 mdVirtualData = mdVirtual.m_data;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     bool fVerify = false;
 
     {
@@ -264,7 +264,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 
         if (cls.Type() == owner)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             if (fVerify != true)
             {
                 CLR_Debug::Printf(
@@ -282,7 +282,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         }
     }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     if (fVerify != false)
     {
         CLR_Debug::Printf(

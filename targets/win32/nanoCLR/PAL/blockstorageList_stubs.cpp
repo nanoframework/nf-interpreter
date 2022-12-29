@@ -16,6 +16,11 @@ static BlockStorageDevice *s_primaryDevice = NULL;
 // void BlockStorageList::Initialize()
 //{
 //}
+void BlockStorageList_Initialize()
+{
+
+}
+
 //
 // bool BlockStorageList::InitializeDevices()
 //{

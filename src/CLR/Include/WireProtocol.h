@@ -13,7 +13,7 @@
 #include <nanoSupport.h>
 #include "nanoVersion.h"
 
-#if !defined(_WIN32)
+#ifndef VIRTUAL_DEVICE
 #include <target_common.h>
 #endif
 

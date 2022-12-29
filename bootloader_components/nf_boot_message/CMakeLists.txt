@@ -8,4 +8,7 @@ idf_component_register(
     INCLUDE_DIRS ${CMAKE_BINARY_DIR}/../targets/ESP32
 )
 
-target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=bootloader_print_banner")
+target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--whole-archive"
+                     $<TARGET_FILE:${COMPONENT_LIB}>
+                    "-Wl,--no-whole-archive"
+                    "-Wl,--wrap=bootloader_print_banner")

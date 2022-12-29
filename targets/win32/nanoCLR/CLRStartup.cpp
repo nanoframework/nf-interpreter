@@ -5,7 +5,7 @@
 //
 #include "stdafx.h"
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
 #endif
 
@@ -53,9 +53,7 @@ struct Settings : CLR_RT_ParseOptions
 #if !defined(BUILD_RTM)
         if (params.WaitForDebugger)
         {
-#if defined(_WIN32)
             CLR_EE_DBG_SET(Enabled);
-#endif
             CLR_EE_DBG_SET(Stopped);
         }
 #endif
@@ -361,12 +359,12 @@ struct Settings : CLR_RT_ParseOptions
     Settings()
     {
         m_fInitialized = false;
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         BuildOptions();
 #endif
     }
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     ~Settings()
     {
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
@@ -564,14 +562,14 @@ struct Settings : CLR_RT_ParseOptions
 
         NANOCLR_NOCLEANUP();
     }
-#endif //#if defined(_WIN32)
+#endif //#if defined(VIRTUAL_DEVICE)
 };
 
 static Settings s_ClrSettings;
 
 //--//
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT ClrLoadPE(const wchar_t *szPeFilePath)
 {
     CLR_RT_StringVector vec;
