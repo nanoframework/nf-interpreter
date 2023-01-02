@@ -21,7 +21,7 @@
 #define HALCONF_H
 
 #define _CHIBIOS_HAL_CONF_
-#define _CHIBIOS_HAL_CONF_VER_8_0_
+#define _CHIBIOS_HAL_CONF_VER_8_4_
 
 #include <target_platform.h>
 #include "mcuconf.h"
