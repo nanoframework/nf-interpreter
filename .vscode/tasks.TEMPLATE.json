@@ -77,9 +77,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Flash Nordic targets",
+      "label": "Flash Nordic Targets",
       "type": "shell",
-      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/flash_NRF9160_DK.jlink",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device ${input:nordicseries} -si swd -CommandFile ${workspaceRoot}/.jlink/flash_nordic_generic.jlink",
       "windows": {
         "options": {
           "shell": {
@@ -152,6 +152,15 @@
       "type": "promptString",
       "default": "${workspaceFolder}/build/nanoCLR.elf",
       "description": "Path to ELF file. Default is the current build executable."
+    },
+    {
+      "id": "nordicseries",
+      "type": "pickString",
+      "description": "Nordic series",
+      "options": [
+        "nRF9160_xxAA",
+        "nRF52840_xxAA"
+      ]
     }
   ]
 }
