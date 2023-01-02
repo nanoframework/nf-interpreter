@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.2
+      ref: refs/tags/v4.4.3
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -64,7 +64,15 @@ jobs:
       {
           # build for other reasons: build depending on target tag
           echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true"
-          "**build for other reasons**" | Write-Host  
+
+          if ($env:System_PullRequest_PullRequestId -ne $null)
+          {
+            "**This is a PR build**" | Write-Host
+          }
+          else
+          {
+            "**build for other reasons**" | Write-Host
+          }
       }
 
     name: BuildOptions
@@ -221,6 +229,7 @@ jobs:
   steps:
   - checkout: self
     fetchDepth: 1
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
   - template: azure-pipelines-templates/download-install-llvm.yml
   - template: azure-pipelines-templates/check-code-style.yml
@@ -252,14 +261,12 @@ jobs:
         TargetBoard: ORGPAL_PALTHREE
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: true
         NeedsSRECORD: false
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: true
 
@@ -268,6 +275,7 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -407,6 +415,14 @@ jobs:
         TargetName: M5Core2
         PackageName: M5Core2
 
+      ESP32_C3_REV3:
+        TargetBoard: ESP32_C3
+        TargetSeries: 'esp32c3'
+        BuildOptions: 
+        IDF_Target: esp32c3
+        TargetName: ESP32_C3_REV3
+        PackageName: ESP32_C3_REV3
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
@@ -430,7 +446,7 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -439,6 +455,7 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml

@@ -37,6 +37,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(binutils.common)
 include(binutils.ESP32)
 
+nf_check_path_limits()
+
 ######################################################
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
@@ -446,15 +448,30 @@ option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
 # handles inclusion of System.Reflection API
 #############################################
 
-# set default option for SNTP to ON
+# set default option for Reflection API to ON
 option(NF_FEATURE_SUPPORT_REFLECTION "option to add support for System.Reflection API" ON)
+# set default option for Serialization API to ON
+option(NF_FEATURE_BINARY_SERIALIZATION "option to add support for binary serialization" ON)
 
 if(NF_FEATURE_SUPPORT_REFLECTION)
     set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
     message(STATUS "Support for System.Reflection API enabled")
+    
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        set(API_System.Runtime.Serialization TRUE CACHE INTERNAL "enable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization enabled")
+    else()
+        set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization **IS NOT** enabled")
+    endif()
+
 else()
     set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
     message(STATUS "Support for System.Reflection API **IS NOT** enabled")
+
+    # disable binary serialization if Reflection is disabled
+    set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+    message(STATUS "Support for binary serialization **IS NOT** enabled")
 endif()
 
 #################################################################
@@ -556,6 +573,13 @@ if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for System.Device.I2c")
+endif()
+
+
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
 endif()
 
 
@@ -676,7 +700,7 @@ if(USE_NETWORKING_OPTION)
     # which is required for network
 
     if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
-        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that in your CMakePresets or in the build command line.")
     endif()
 
 else()
@@ -846,15 +870,9 @@ elseif(RTOS_ESP32_CHECK)
 
         else()
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
-
-    # need to add this here to keep IDF build system happy
-    add_executable(
-        ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
-    )
 
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)

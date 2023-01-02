@@ -237,7 +237,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     //
     if (extraBlocks < 0)
     {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (caller->m_evalStackPos > caller->m_evalStackEnd)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_STACK_OVERFLOW);
@@ -251,7 +251,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 
         caller->m_evalStackPos = stack->m_arguments;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
         if (stack->m_arguments < caller->m_evalStack)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_STACK_UNDERFLOW);

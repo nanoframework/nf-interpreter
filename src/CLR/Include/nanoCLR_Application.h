@@ -24,7 +24,7 @@ typedef struct CLR_SETTINGS
     // when building is set for RTM this configuration is ignored
     bool EnterDebuggerLoopAfterExit;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
     CLR_RT_StringVector StartArgs;
 #endif
 
