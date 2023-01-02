@@ -122,6 +122,10 @@ endmacro()
 # build system takes care of all the linking and other complexities
 macro(nf_setup_target_build)
 
+    if(CMAKE_BUILD_TYPE MATCHES Debug OR CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+        set(OVERLAY_CONFIG ${CMAKE_SOURCE_DIR}/targets/Nordic/_common/overlay-debugging.conf CACHE STRING "Zephyr overlay config file for debug")
+    endif()
+
     # points Zephyr to nanoCLR lib module
     list(APPEND ZEPHYR_EXTRA_MODULES ${CMAKE_SOURCE_DIR}/targets/Nordic/_nanoCLR_module)
 
