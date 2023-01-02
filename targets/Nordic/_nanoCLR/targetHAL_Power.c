@@ -8,7 +8,7 @@
 
 #include <hal/nrf_power.h>
 
-int sys_reboot(int);
+#include <sys/reboot.h>
 
 inline void CPU_Reset()
 {
