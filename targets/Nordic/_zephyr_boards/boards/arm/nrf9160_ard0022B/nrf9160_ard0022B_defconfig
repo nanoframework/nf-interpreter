@@ -1,0 +1,38 @@
+# Copyright (c) .NET Foundation and Contributors
+# Portions Copyright (c) Ericsson AB 2020, all rights reserved
+# See LICENSE file in the project root for full license information.
+
+CONFIG_SOC_SERIES_NRF91X=y
+CONFIG_SOC_NRF9160_SICA=y
+CONFIG_BOARD_NRF9160_ARD0022B=y
+
+# Enable MPU
+CONFIG_ARM_MPU=y
+
+# Needed for v2.0
+CONFIG_PINCTRL=y
+
+# Enable TrustZone-M
+CONFIG_ARM_TRUSTZONE_M=y
+
+# Enable GPIO
+CONFIG_GPIO=y
+
+CONFIG_SERIAL=n
+# Enable console
+CONFIG_CONSOLE=n
+CONFIG_UART_CONSOLE=n
+#(db) end of change.
+
+
+# Enable I2C
+CONFIG_I2C=y
+
+# Enable power management IC ADP536x
+CONFIG_ADP536X=y
+
+# Disable entropy driver, as it's not yet implemented for nRF9160
+CONFIG_ENTROPY_NRF5_RNG=n
+
+# Enlarge the secure boot partition. Needed for v1.5 support
+CONFIG_PM_PARTITION_SIZE_SPM=0x10000

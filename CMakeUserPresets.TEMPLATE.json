@@ -20,7 +20,8 @@
                 "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
                 "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
-                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>"
+                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
+                "NRF_CONNECT_SDK_SOURCE_FOLDER": "<path-to-local-NORDIC-NRF-Connect-SDK-mind-the-forward-slash>"
             }
         },
         {
@@ -44,7 +45,8 @@
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
                 "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
                 "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
-                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo"
+                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo",
+                "NRF_CONNECT_SDK_SOURCE_FOLDER": "/sources/ncs"
             }
         },
         {
@@ -714,35 +716,35 @@
             }
         },
         {
-            "name": "Nordic_Ardesco",
+            "name": "ARDESCO",
             "inherits": [
                 "user-prefs",
-                "Nordic_Ardesco_preset"
+                "ARDESCO_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "Ardesco",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
         {
-            "name": "Nordic_9160DK",
+            "name": "NRF9160_DK",
             "inherits": [
                 "user-prefs",
-                "Nordic_9160DK_preset"
+                "NRF9160_DK_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "9160_DK",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
         {
-            "name": "Nordic_52840DK",
+            "name": "NRF52840_DK",
             "inherits": [
                 "user-prefs",
-                "Nordic_52840DK_preset"
+                "NRF52840_DK_preset"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "52840_DK",
+                "TARGET_BOARD": "${presetName}",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -1022,19 +1024,19 @@
             "configurePreset": "WEACT_F411CE"
         },
         {
-            "name": "Nordic_Ardesco",
-            "displayName": "Nordic_Ardesco",
-            "configurePreset": "Nordic_Ardesco"
+            "name": "ARDESCO",
+            "displayName": "ARDESCO",
+            "configurePreset": "ARDESCO"
         },
         {
-            "name": "Nordic_9160DK",
-            "displayName": "Nordic_9160DK",
-            "configurePreset": "Nordic_9160DK"
+            "name": "NRF9160_DK",
+            "displayName": "NRF9160_DK",
+            "configurePreset": "NRF9160_DK"
         },
         {
-            "name": "Nordic_52840DK",
-            "displayName": "Nordic_52840DK",
-            "configurePreset": "Nordic_52840DK"
+            "name": "NRF52840_DK",
+            "displayName": "NRF52840_DK",
+            "configurePreset": "NRF52840_DK"
         },
         {
             "name": "TI_CC1352P1_LAUNCHXL",

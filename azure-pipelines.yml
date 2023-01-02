@@ -143,6 +143,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+          echo "##vso[task.setvariable variable=BUILD_NORDIC;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
@@ -203,6 +204,14 @@ jobs:
               echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
 
               Write-host "Building Azure RTOS targets"
+          }
+          
+          if( ($files.where{$_.Contains('targets/Nordic')}).Count -gt 0)
+          {
+              # files at AzureRTOS folder
+              echo "##vso[task.setvariable variable=BUILD_NORDIC;isOutput=true]true"
+
+              Write-host "Building Nordic targets"
           }
 
           if( 
@@ -311,6 +320,7 @@ jobs:
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NORDIC'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
       )
     )
@@ -660,6 +670,59 @@ jobs:
   - template: azure-pipelines-templates/download-hexdfu.yml
   - template: azure-pipelines-templates/download-srecord.yml
   - template: azure-pipelines-templates/build-azurertos-targets.yml
+  - template: azure-pipelines-templates/pack-publish-artifacts.yml
+  - template: azure-pipelines-templates/publish-cloudsmith.yml
+  - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
+
+#################
+# Nordic (Zephyr) RTOS
+- job: Build_Nordic_targets
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+      or(
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NORDIC'], true)
+      )
+    )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'windows-latest'
+
+  strategy:
+    matrix:
+      NRF9160_DK:
+        TargetBoard: NRF9160_DK
+        TargetSeries: 'nrf9160'
+        BuildOptions: 
+      NRF52840_DK:
+        TargetBoard: NRF52840_DK
+        TargetSeries: 'nrf52840'
+        BuildOptions: 
+      ARDESCO:
+        TargetBoard: ARDESCO
+        TargetSeries: 'nrf9160'
+        BuildOptions: 
+
+  variables:
+    # creates a counter and assigns it to the revision variable
+    REVISION: $[counter('NORDIC_1_8_0_versioncounter', 0)]
+    HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    TargetPlatform: 'nordic'
+    PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+    NRF_CONNECT_SDK_SOURCE_FOLDER: '$(Agent.TempDirectory)/ncs'
+
+  steps:
+  - template: azure-pipelines-templates/build-preparations.yml
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+  - template: azure-pipelines-templates/download-install-ninja.yml
+  - template: azure-pipelines-templates/download-install-ncs-zephyr-toolchain.yml
+  - template: azure-pipelines-templates/build-nordic-targets.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
   - template: azure-pipelines-templates/publish-cloudsmith.yml
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
@@ -1054,6 +1117,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_Azure_RTOS_targets
+  - Build_Nordic_targets
   # skip build if this is a PR, submitted by nfbot and the commit message contains [version update]
   condition: >-
     and(
@@ -1062,6 +1126,7 @@ jobs:
       succeeded('Build_NXP_targets'),
       succeeded('Build_TI_SimpleLink_targets'),
       succeeded('Build_Azure_RTOS_targets'),
+      succeeded('Build_Nordic_targets'),
       not( eq(variables['Build.Reason'], 'PullRequest')
     ),
     or(
@@ -1157,6 +1222,7 @@ jobs:
   - Build_NXP_targets
   - Build_TI_SimpleLink_targets
   - Build_Azure_RTOS_targets
+  - Build_Nordic_targets
   - Build_WIN32_nanoCLR
   - Build_nanoCLR_CLI
   - Generate_change_log
@@ -1170,6 +1236,7 @@ jobs:
         failed('Build_NXP_targets'),
         failed('Build_TI_SimpleLink_targets'),
         failed('Build_Azure_RTOS_targets'),
+        failed('Build_Nordic_targets'),
         failed('Build_WIN32_nanoCLR'),
         failed('Build_nanoCLR_CLI'),
         failed('Generate_change_log')

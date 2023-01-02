@@ -16,20 +16,20 @@ static const struct flash_parameters *flash_params;
 bool ZephyrFlashDriver_InitializeDevice(void *context)
 {
     (void)context;
-//#if (NCS_VERSION_MAJOR < 2)
+    //#if (NCS_VERSION_MAJOR < 2)
     flash_device = device_get_binding(FLASH_DRIVER_NAME);
     if (flash_device)
     {
         flash_params = flash_get_parameters(flash_device);
         return true;
     }
-// #else
-//     flash_device = DEVICE_DT_GET(FLASH_DRIVER);
-// 	if (device_is_ready(flash_device)) {
-// 		printk("Flash device not ready\n");
-// 		return true;
-// 	}
-// #endif
+    // #else
+    //     flash_device = DEVICE_DT_GET(FLASH_DRIVER);
+    // 	if (device_is_ready(flash_device)) {
+    // 		printk("Flash device not ready\n");
+    // 		return true;
+    // 	}
+    // #endif
     printk("***** Failed to open Flash driver. *****\n");
     return false;
 }
@@ -59,13 +59,16 @@ bool ZephyrFlashDriver_Read(void *context, ByteAddress startAddress, unsigned in
         printk("ERROR flash_device not initialized\n");
         return false;
     }
+
     // Zephyr read call
     int rc = flash_read(flash_device, startAddress, buffer, numBytes);
+
     if (rc)
     {
         printk("ZephyrFlashDriver_Read error %d addr %x len %d\n", rc, startAddress, numBytes);
         return false;
     }
+
     return true;
 }
 
@@ -84,9 +87,14 @@ bool ZephyrFlashDriver_Write(
         printk("ERROR flash_device not initialized\n");
         return false;
     }
+
     int rc = flash_write(flash_device, startAddress, buffer, numBytes);
+
     if (rc)
+    {
         return false;
+    }
+
     return true;
 }
 
@@ -107,10 +115,16 @@ bool ZephyrFlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
     while (fErased && (length > 0))
     {
         if (length < CHK_ERASE_BUF_SIZE)
+        {
             len = length;
+        }
         else
+        {
             len = CHK_ERASE_BUF_SIZE;
+        }
+
         rc = flash_read(flash_device, blockAddress, buf, len);
+
         if (rc)
         {
             printk("ZephyrFlashDriver_IsBlockErased, Error reading flash at %x len %d\n", blockAddress, len);
@@ -126,6 +140,7 @@ bool ZephyrFlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
                     break;
                 }
             }
+
             if (fErased)
             {
                 blockAddress += len;
@@ -133,6 +148,7 @@ bool ZephyrFlashDriver_IsBlockErased(void *context, ByteAddress blockAddress, un
             }
         }
     }
+
     return fErased;
 }
 
@@ -150,17 +166,21 @@ bool ZephyrFlashDriver_EraseBlock(void *context, ByteAddress address)
 
     // get info on the page
     rc = flash_get_page_info_by_offs(flash_device, address, &info);
+
     if (rc)
     {
         printk("ZephyrFlashDriver_EraseBlock. flash_get_page_info_by_offs error %d\n", rc);
         return false;
     }
+
     // erase that page.
     rc = flash_erase(flash_device, info.start_offset, info.size);
+
     if (rc)
     {
         printk("ZephyrFlashDriver_EraseBlock flash_erase error %d\n", rc);
         return false;
     }
+
     return true;
 }

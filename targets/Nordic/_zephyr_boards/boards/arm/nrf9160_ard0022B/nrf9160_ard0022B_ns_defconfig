@@ -1,0 +1,67 @@
+# Copyright (c) .NET Foundation and Contributors
+# Portions Copyright (c) Ericsson AB 2020, all rights reserved
+# See LICENSE file in the project root for full license information.
+
+CONFIG_SOC_SERIES_NRF91X=y
+CONFIG_SOC_NRF9160_SICA=y
+CONFIG_BOARD_NRF9160_ARD0022B_NS=y
+
+# Enable MPU
+CONFIG_ARM_MPU=y
+
+# Needed for v1.6
+CONFIG_FPU=y
+
+# Needed for v2.0
+CONFIG_PINCTRL=y
+
+# v2.0 MAGPIO config now done in a library
+CONFIG_MODEM_ANTENNA=y
+CONFIG_MODEM_ANTENNA_AT_MAGPIO="AT\%XMAGPIO=1,1,1,9,1,698,728,3,729,757,5,758,820,6,815,862,2,859,895,0,896,980,1,1559,1916,3,1917,2100,6,2101,2200"
+CONFIG_MODEM_ANTENNA_AT_COEX0="AT\%XCOEX0=1,1,1570,1580"
+
+# Enable TrustZone-M
+CONFIG_ARM_TRUSTZONE_M=y
+
+# This Board implies building Non-Secure firmware
+CONFIG_TRUSTED_EXECUTION_NONSECURE=y
+
+# Enable GPIO
+CONFIG_GPIO=y
+
+# Enable UARTE
+CONFIG_SERIAL=y
+
+# Enable console
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+
+# Enable I2C
+CONFIG_I2C=y
+
+# Enable SPI
+CONFIG_SPI=y
+#CONFIG_SPI_3=y
+
+# Disable default power management driver for IC ADP536x
+CONFIG_ADP536X=n
+
+# Disable entropy driver, as it's not yet implemented for nRF9160
+CONFIG_ENTROPY_NRF5_RNG=n
+
+# Select default sensors here. These can be
+# overridden in the prj file for an individual application.
+CONFIG_SENSOR=y
+CONFIG_BME680=y
+
+CONFIG_ADXL362=y
+CONFIG_ADXL362_TRIGGER_GLOBAL_THREAD=y
+CONFIG_ADXL362_INTERRUPT_MODE=1
+CONFIG_ADXL362_ABS_REF_MODE=1
+
+CONFIG_ADXL372=y
+CONFIG_ADXL372_TRIGGER_GLOBAL_THREAD=y
+CONFIG_ADXL372_SPI=y
+CONFIG_ADXL372_MEASUREMENT_MODE=y
+
+CONFIG_BH1749=n

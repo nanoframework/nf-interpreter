@@ -8,9 +8,7 @@
 #include <nanoCLR_Types.h>
 #include <nanoCLR_Runtime.h>
 
-//
 // Overrides the debug out functionality. Use zephyr's printk
-//
 uint32_t GenericPort_Write(int portNum, const char *data, size_t size)
 {
     // (db) Note below is from ESP32 build. keeping b/c maybe true.

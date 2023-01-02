@@ -1,0 +1,18 @@
+//
+// Copyright (c) .NET Foundation and Contributors
+// Portions Copyright (c) 2019 Nordic Semiconductor ASA
+// Portions Copyright (c) Ericsson AB 2020, all rights reserved
+// See LICENSE file in the project root for full license information.
+//
+
+/dts-v1/;
+#include <nordic/nrf9160_sica.dtsi>
+#include "nrf9160_ard0022B_common.dts"
+
+/ {
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+	};
+};

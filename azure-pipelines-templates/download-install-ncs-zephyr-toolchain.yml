@@ -1,0 +1,163 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+parameters:
+  - name: ncsVersion
+    type: string
+    default: '2.0.0'
+  - name: zephyrSdkVersion
+    type: string
+    default: '0.15.1'
+
+steps:
+
+  # Use Python Version 3.10 and add it to path
+  - task: UsePythonVersion@0
+    displayName: Set Python to v3.10
+    inputs:
+      versionSpec: '3.10'
+      addToPath: true
+
+  - task: Cache@2
+    displayName: Cache latest NCS
+    inputs:
+      key: 'ncs-2_0_0 | ncsUpdateKey'
+      restoreKeys: ncsUpdateKey
+      path: $(Agent.TempDirectory)\ncs
+      cacheHitVar: NCS_CACHE_RESTORED
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.NCS_CACHE_RESTORED, 'true')
+      )
+    displayName: Install pre-requisites for NCS
+    inputs:
+        targetType: 'inline'
+        script: |
+          choco feature enable -n allowGlobalConfirmation
+          choco install gperf dtc-msys2
+          pip3 install west
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.NCS_CACHE_RESTORED, 'true')
+      )
+    displayName: Downloading NCS
+    inputs:
+        targetType: 'inline'
+        script: |
+          md $(Agent.TempDirectory)\ncs
+          cd $(Agent.TempDirectory)\ncs
+          west init -m https://github.com/nrfconnect/sdk-nrf --mr v${{ parameters.ncsVersion }}
+          west update --narrow -o=--depth=1
+          west zephyr-export
+
+  # # cache pip packages
+  # - task: Cache@2
+  #   displayName: Cache pip packages
+  #   condition: succeeded()
+  #   inputs:
+  #     key: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
+  #     restoreKeys: python | "$(Agent.OS)" | $(Agent.TempDirectory)/ncs/zephyr/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/nrf/scripts/requirements.txt | $(Agent.TempDirectory)/ncs/bootloader/mcuboot/scripts/requirements.txt
+  #     path: $(PIP_CACHE_DIR)
+  #     cacheHitVar: PIP_PACKAGES_RESTORED
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.PIP_PACKAGES_RESTORED, 'true')
+      )
+    displayName: Install more pre-requisites
+    inputs:
+        targetType: 'inline'
+        workingDirectory: $(Agent.TempDirectory)\ncs
+        script: |
+          pip3 install -r zephyr/scripts/requirements.txt
+          pip3 install -r nrf/scripts/requirements.txt
+          pip3 install -r bootloader/mcuboot/scripts/requirements.txt
+
+  - task: Cache@2
+    displayName: Cache Zephyr SDK and toolchain
+    condition: succeeded()
+    inputs:
+      key: 'zephyr-0_15_1 | zephyrUpdateKey'
+      restoreKeys: zephyrUpdateKey
+      path: $(Agent.TempDirectory)\zephyr-sdk-${{ parameters.zephyrSdkVersion }}
+      cacheHitVar: ZEPHYR_SDK_CACHE_RESTORED
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
+    displayName: Install Zephyr SDK and toolchain
+    inputs:
+        workingDirectory: $(Agent.TempDirectory)
+        targetType: 'inline'
+        script: |
+          # download and extract Zephyr SDK
+          $sdkFileName = "zephyr-sdk-${{ parameters.zephyrSdkVersion }}_windows-x86_64_minimal.zip"
+          Invoke-WebRequest -Uri "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ parameters.zephyrSdkVersion }}/$sdkFileName" -OutFile $sdkFileName
+
+  - task: ExtractFiles@1
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
+    displayName: Extract Zephyr SDK
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}_windows-x86_64_minimal.zip' 
+      destinationFolder: '$(Agent.TempDirectory)'
+      cleanDestinationFolder: false 
+
+  - task: PowerShell@2
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
+    displayName: Download Zephyr toolchain
+    inputs:
+        workingDirectory: $(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}
+        targetType: 'inline'
+        script: |
+          # download toolchain
+          $toolchainUrl = "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${{ parameters.zephyrSdkVersion }}"
+          $toolchainFilename = "toolchain_windows-x86_64_arm-zephyr-eabi.zip"
+          Invoke-WebRequest -Uri "$toolchainUrl/$toolchainFilename" -OutFile $toolchainFilename
+
+  - task: ExtractFiles@1
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables.ZEPHYR_SDK_CACHE_RESTORED, 'true')
+      )
+    displayName: Extract Zephyr toolchain
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}/toolchain_windows-x86_64_arm-zephyr-eabi.zip' 
+      destinationFolder: '$(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}'
+      cleanDestinationFolder: false
+
+  - task: CMake@1
+    displayName: Register Zephry toolchain with CMake
+    condition: succeeded()
+    inputs:
+      cmakeArgs: '-P cmake\zephyr_sdk_export.cmake'
+      workingDirectory: $(Agent.TempDirectory)/zephyr-sdk-${{ parameters.zephyrSdkVersion }}
+
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\zephyr-${{ parameters.zephyrSdkVersion }}\arm-zephyr-eabi\bin"
+    displayName: Add Zephyr GCC to PATH
+    condition: succeeded()
+
+  - script: |
+      echo "##vso[task.prependpath]c:\windows\System32"
+      echo "##vso[task.prependpath]c:\windows\SysWoW64"
+    displayName: Tweak PATH to reach cmd
+    condition: succeeded()
