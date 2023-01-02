@@ -8,12 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.IO
 
 
 # set include directories
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.IO.Ports_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.IO.Ports_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.IO.Ports_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.IO.Ports_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.IO.Ports_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.IO.Ports_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.IO.Ports)
+list(APPEND System.IO.Ports_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.IO.Ports)
 
 # source files
 set(System.IO.Ports_SRCS
@@ -31,7 +31,7 @@ foreach(SRC_FILE ${System.IO.Ports_SRCS})
         PATHS
             ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/System.IO.Ports
+            ${CMAKE_SOURCE_DIR}/src/System.IO.Ports
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
