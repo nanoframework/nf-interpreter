@@ -7,7 +7,7 @@ include(FetchContent)
 FetchContent_GetProperties(mbedtls)
 FetchContent_GetProperties(esp32_idf)
 
-# because of issues when passing the config file as a string when using ExternalProject_Add with mbedTLS
+# because of issues when passing the config file as a string when using ExternalProject_Add with MbedTLS
 # we are replicating their CMakeList here. Actually this is more a simplified version...
 
 # List of the required include paths
@@ -21,8 +21,8 @@ list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR})
 list(APPEND mbedTLS_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
 
 
-option(USE_PKCS11_HELPER_LIBRARY "Build mbed TLS with the pkcs11-helper library." OFF)
-option(ENABLE_ZLIB_SUPPORT "Build mbed TLS with zlib library." OFF)
+option(USE_PKCS11_HELPER_LIBRARY "Build Mbed TLS with the pkcs11-helper library." OFF)
+option(ENABLE_ZLIB_SUPPORT "Build Mbed TLS with zlib library." OFF)
 
 if(ENABLE_ZLIB_SUPPORT)
     find_package(ZLIB)
@@ -123,10 +123,6 @@ if(RTOS_ESP32_CHECK)
     list(APPEND mbedTLS_SOURCES ${esp32_idf_SOURCE_DIR}/components/mbedtls/mbedtls/library/bignum.c)
 endif()
 
-# unset this warning as error required for this source file
-SET_SOURCE_FILES_PROPERTIES( ${mbedtls_SOURCE_DIR}/library/hmac_drbg.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
-SET_SOURCE_FILES_PROPERTIES( ${mbedtls_SOURCE_DIR}/library/x509_crt.c PROPERTIES COMPILE_FLAGS -Wno-maybe-uninitialized)
-
 set(src_x509
     certs.c
     pkcs11.c
@@ -190,7 +186,7 @@ foreach(SRC_FILE ${src_tls})
 
 endforeach()
 
-# some sources need to be added from mbedTLS repo or ESP32 depending on build
+# some sources need to be added from MbedTLS repo or ESP32 depending on build
 # check port files specific to ESP32 IDF here 'components/mbedtls/CMakeLists.txt'
 if(RTOS_ESP32_CHECK)
 
@@ -277,4 +273,4 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(mbedTLS DEFAULT_MSG mbedTLS_INCLUDE_DIRS mbedTLS_SOURCES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MbedTLS DEFAULT_MSG mbedTLS_INCLUDE_DIRS mbedTLS_SOURCES)

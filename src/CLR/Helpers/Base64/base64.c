@@ -5,8 +5,8 @@
 //
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-// we are using the function declarations matching the mbedTLS ones BUT with weak attribute //
-// if the image includes the mbedTLS, these will be replaced by the strong ones from there  //
+// we are using the function declarations matching the MbedTLS ones BUT with weak attribute //
+// if the image includes the MbedTLS, these will be replaced by the strong ones from there  //
 // thus there will be no duplicate code                                                     //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,7 +18,7 @@
 
 #include "base64.h"
 
-// from mbedTLS common.h
+// from MbedTLS common.h
 #define MBEDTLS_BYTE_0( x ) ( (uint8_t) (   ( x )         & 0xff ) )
 #define MBEDTLS_BYTE_1( x ) ( (uint8_t) ( ( ( x ) >> 8  ) & 0xff ) )
 #define MBEDTLS_BYTE_2( x ) ( (uint8_t) ( ( ( x ) >> 16 ) & 0xff ) )

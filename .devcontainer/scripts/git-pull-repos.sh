@@ -15,7 +15,7 @@ git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEA
 cd /sources/ChibiOs-Contrib
 git pull origin nanoframework
 cd /sources/mbedtls
-git pull origin mbedtls-2.28.1
+git pull origin mbedtls-2.28.2
 cd /sources/fatfs
 git pull origin R0.14b
 cd /sources/FreeRTOS
