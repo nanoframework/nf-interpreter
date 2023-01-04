@@ -127,7 +127,7 @@ endif()
 # target folder was added in main CMakeList
 
 # force this to ON
-set(NF_SECURITY_MBEDTLS ON CACHE INTERNAL "mbedTLS must be ON for IDF build")
+set(NF_SECURITY_MBEDTLS ON CACHE INTERNAL "MbedTLS must be ON for IDF build")
 
 # add platform dirs
 add_subdirectory(_common)
