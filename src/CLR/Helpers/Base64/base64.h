@@ -44,4 +44,4 @@ extern "C"
 }
 #endif
 
-#endif //BASE64_H
+#endif // BASE64_H
