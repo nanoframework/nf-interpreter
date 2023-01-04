@@ -33,7 +33,7 @@ int sslRecv(
     return 0;
 }
 
-// mbedTLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
+// MbedTLS requires a function with this signature, so we are wrapping the call to our debug_printf here 
 void nf_debug( 
     void *ctx, 
     int level, 

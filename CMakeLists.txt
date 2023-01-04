@@ -431,8 +431,8 @@ endif()
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
 
-# (default is OFF so mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider" ON)
+# (default is OFF so Mbed TLS is NOT used)
+option(NF_SECURITY_MBEDTLS "option to use Mbed TLS as the network security provider" ON)
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
@@ -674,7 +674,7 @@ if(USE_NETWORKING_OPTION)
     endif()
 
     if(NF_SECURITY_MBEDTLS)
-        message(STATUS "Support for networking enabled with security from mbedTLS")
+        message(STATUS "Support for networking enabled with security from MbedTLS")
     elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
         # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")

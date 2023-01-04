@@ -5,8 +5,8 @@
 //
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-// we are using the function declarations matching the mbedTLS ones BUT with weak attribute //
-// if the image includes the mbedTLS, these will be replaced by the strong ones from there  //
+// we are using the function declarations matching the MbedTLS ones BUT with weak attribute //
+// if the image includes the MbedTLS, these will be replaced by the strong ones from there  //
 // thus there will be no duplicate code                                                     //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
