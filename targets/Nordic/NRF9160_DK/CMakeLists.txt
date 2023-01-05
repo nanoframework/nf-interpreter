@@ -11,4 +11,6 @@ endif()
 # invoke the Zephyr build
 nf_setup_target_build()
 
-target_sources(app PRIVATE main.c )
+target_sources(app PRIVATE main.c)
+
+nf_copy_zephyr_build_artifacts()

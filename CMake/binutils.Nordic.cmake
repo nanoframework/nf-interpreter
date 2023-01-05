@@ -203,21 +203,22 @@ macro(nf_setup_target_build)
 
     nf_clear_output_files_nanoclr()
 
-    nf_copy_build_artifacts()
-
 endmacro()
 
-# copy build artifacts to build output folder
-macro(nf_copy_build_artifacts)
+# copy Zephyr build artifacts to build output folder
+macro(nf_copy_zephyr_build_artifacts)
 
-    get_property(HEX_FILES_TO_MERGE GLOBAL PROPERTY HEX_FILES_TO_MERGE)
-
-    if(NOT HEX_FILES_TO_MERGE)
+    # need to adjust these depending on the artifacts produced by Zephyr build
+    # some targets produce merged.hex, others zephyr.hex
+    if(${TARGET_BOARD} STREQUAL "NRF9160_DK"  
+        OR ${TARGET_BOARD} STREQUAL "ARDESCO")
+        # use merged.hex
+        set(HEX_NAME "merged")
+    elseif(${TARGET_BOARD} STREQUAL "NRF52840_DK")
         # there is no merged.hex being generated, stick with zephyr.hex
         set(HEX_NAME "zephyr")
     else()
-        # use merged.hex
-        set(HEX_NAME "merged")
+        message(FATAL_ERROR "Unknown target board ${TARGET_BOARD}!")
     endif()
 
     add_custom_command(
@@ -225,8 +226,8 @@ macro(nf_copy_build_artifacts)
             ${CMAKE_BINARY_DIR}/nanoCLR.hex
 
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/${HEX_NAME}.hex
-        ${CMAKE_BINARY_DIR}/nanoCLR.hex
+            ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/${HEX_NAME}.hex
+            ${CMAKE_BINARY_DIR}/nanoCLR.hex
 
         DEPENDS
             ${CMAKE_BINARY_DIR}/targets/Nordic/${TARGET_BOARD}/zephyr/${HEX_NAME}.hex
@@ -243,7 +244,7 @@ macro(nf_copy_build_artifacts)
 
     add_dependencies(
         copy_build_artifacts
-        ${logical_target_for_zephyr_elf})
+        app)
 
 endmacro()
 
