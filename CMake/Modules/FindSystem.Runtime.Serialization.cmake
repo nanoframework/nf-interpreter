@@ -8,12 +8,12 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Ru
 
 
 # set include directories
-list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Runtime.Serialization)
+list(APPEND System.Runtime.Serialization_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Runtime.Serialization)
 
 # source files
 set(System.Runtime.Serialization_SRCS
@@ -32,7 +32,7 @@ foreach(SRC_FILE ${System.Runtime.Serialization_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/System.Runtime.Serialization
+            ${CMAKE_SOURCE_DIR}/src/System.Runtime.Serialization
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

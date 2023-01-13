@@ -12,7 +12,7 @@
 #include <mbedtls_config.h>
 #include <time.h>
 
-// need to declare this as external to be picked up by mbed TLS platform_time
+// need to declare this as external to be picked up by Mbed TLS platform_time
 #ifdef __cplusplus
 extern "C"
 {
@@ -36,7 +36,7 @@ extern "C"
 // need to define this as the alternative to standard time function
 #define MBEDTLS_PLATFORM_TIME_MACRO nf_get_unix_epoch
 
-/* mbed TLS feature support */
+/* Mbed TLS feature support */
 #define MBEDTLS_CIPHER_MODE_CBC
 #define MBEDTLS_CIPHER_MODE_CFB
 #define MBEDTLS_CIPHER_MODE_CTR
@@ -102,7 +102,7 @@ extern "C"
 #define MBEDTLS_X509_RSASSA_PSS_SUPPORT
 #define MBEDTLS_CMAC_C
 
-/* mbed TLS modules */
+/* Mbed TLS modules */
 #define MBEDTLS_AESNI_C
 #define MBEDTLS_AES_C
 #define MBEDTLS_ASN1_PARSE_C
@@ -175,7 +175,7 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////
 // This define depends on the platform having a hardware random generator.
-// Requires that a function mbedtls_hardware_poll() exits as explained in mbed TLS documentation.
+// Requires that a function mbedtls_hardware_poll() exits as explained in Mbed TLS documentation.
 // Because it's target dependent, the define PLATFORM_HAS_RNG belongs in the target_common header
 #if (PLATFORM_HAS_RNG == TRUE)
 #define MBEDTLS_ENTROPY_HARDWARE_ALT

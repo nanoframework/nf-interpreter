@@ -7,10 +7,10 @@
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Device.Bluetooth)
 
 # set include directories
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 
 # set include directories for Esp32 IDF
@@ -52,7 +52,7 @@ foreach(SRC_FILE ${nanoFramework.Device.Bluetooth_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Device.Bluetooth
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.Device.Bluetooth
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

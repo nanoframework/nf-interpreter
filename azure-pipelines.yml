@@ -855,13 +855,17 @@ jobs:
       ArtifactName: deployables
       ArtifactType: Container
 
-  # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
     condition: >-
       and(
         succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
@@ -871,13 +875,17 @@ jobs:
       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
-  # push NuGet packages to NuGet (always happens except on PR builds)
+  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
     condition: >-
       and(
         succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to NuGet
     inputs:
@@ -1013,13 +1021,17 @@ jobs:
       ArtifactName: deployables
       ArtifactType: Container
 
-  # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
     condition: >-
       and(
         succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
@@ -1029,13 +1041,17 @@ jobs:
       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
-  # push NuGet packages to NuGet (always happens except on PR builds)
+  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
     condition: >-
       and(
         succeeded(),
-        eq(variables['System.PullRequest.PullRequestId'], '')
-      )
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to NuGet
     inputs:

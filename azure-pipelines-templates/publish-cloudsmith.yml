@@ -52,7 +52,7 @@ steps:
         eq(variables['System.PullRequest.PullRequestId'], ''),
         or(
           eq(variables['ForceUpload'], true),
-          startsWith(variables['Build.SourceBranchName'], 'main')
+          startsWith(variables['Build.SourceBranchName'], 'develop')
         )
       )
     displayName: Zip binary files (preview)

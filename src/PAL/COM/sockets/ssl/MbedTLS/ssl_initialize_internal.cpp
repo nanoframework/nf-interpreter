@@ -5,7 +5,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <ssl.h> 
+#include <ssl.h>
 #include "mbedtls.h"
 
 bool ssl_initialize_internal()

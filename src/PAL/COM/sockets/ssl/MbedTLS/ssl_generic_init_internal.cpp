@@ -50,7 +50,7 @@ bool ssl_generic_init_internal(
     if (sslContexIndex == -1)
         return FALSE;
 
-    // create and init mbedTLS nanoFramework context
+    // create and init MbedTLS nanoFramework context
     // this needs to be freed in ssl_exit_context_internal
     context = (mbedTLS_NFContext *)platform_malloc(sizeof(mbedTLS_NFContext));
     if (context == NULL)
@@ -282,7 +282,7 @@ bool ssl_generic_init_internal(
     mbedtls_ssl_conf_ca_chain(context->conf, context->x509_crt, NULL);
 
     // set certificate verification
-    // the current options provided by mbed TLS are only verify or don't verify
+    // the current options provided by Mbed TLS are only verify or don't verify
     if ((SslVerification)sslVerify == SslVerification_CertificateRequired)
     {
         authMode = MBEDTLS_SSL_VERIFY_REQUIRED;

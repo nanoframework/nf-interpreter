@@ -580,10 +580,10 @@ macro(nf_setup_target_build_common)
 
     if(USE_SECURITY_MBEDTLS_OPTION AND NOT RTOS_ESP32_CHECK)
 
-        # mbedTLS requires setting a compiler definition in order to pass a config file
-        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h\"")
+        # MbedTLS requires setting a compiler definition in order to pass a config file
+        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\"")
         
-        # need to add extra include directories for mbedTLS
+        # need to add extra include directories for MbedTLS
         target_include_directories(
             mbedcrypto PUBLIC
             ${CMAKE_SOURCE_DIR}/src/CLR/Include
@@ -591,7 +591,7 @@ macro(nf_setup_target_build_common)
             ${CMAKE_SOURCE_DIR}/src/PAL
             ${CMAKE_SOURCE_DIR}/src/PAL/Include
             ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
-            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
             ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
             ${TARGET_BASE_LOCATION}/nanoCLR
