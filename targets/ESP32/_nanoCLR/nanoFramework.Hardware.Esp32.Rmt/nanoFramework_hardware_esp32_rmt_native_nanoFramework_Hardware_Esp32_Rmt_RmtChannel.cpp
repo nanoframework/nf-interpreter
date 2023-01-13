@@ -9,7 +9,7 @@ std::map<rmt_channel_t, std::vector<rmt_item32_t>>
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::registredChannels;
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
-    NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN( CLR_RT_StackFrame &stack )
+    NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -23,7 +23,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     {
         rmt_mode = RMT_MODE_RX;
     }
-    else 
+    else
     {
         rmt_mode = RMT_MODE_TX;
     }
@@ -50,8 +50,15 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     FAULT_ON_NULL(pThis);
 
     // get a reference to the configs in the managed code instance
-    channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::FIELD___settings].Dereference();
-    channel = channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    channel_settings =
+        pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+                  FIELD___settings]
+            .Dereference();
+    channel = channel_settings
+                  [Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::
+                       FIELD___channel]
+                      .NumericByRef()
+                      .s4;
 
     if (!CheckChannel(channel))
     {
@@ -76,15 +83,28 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         FAULT_ON_NULL(pThis);
 
         // get a reference to the configs in the managed code instance
-        channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::FIELD___settings].Dereference();
-        channel = channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+        channel_settings =
+            pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
+                      FIELD___settings]
+                .Dereference();
+        channel =
+            channel_settings
+                [Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::
+                     FIELD___channel]
+                    .NumericByRef()
+                    .s4;
 
         if (!CheckChannel(channel))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
         }
 
-        rmt_mem_num = (uint8_t)channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
+        rmt_mem_num =
+            (uint8_t)channel_settings
+                [Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::
+                     FIELD___numberOfMemoryBlocks]
+                    .NumericByRef()
+                    .u1;
         auto err = rmt_set_mem_block_num((rmt_channel_t)channel, rmt_mem_num);
         if (err != ESP_OK)
         {
