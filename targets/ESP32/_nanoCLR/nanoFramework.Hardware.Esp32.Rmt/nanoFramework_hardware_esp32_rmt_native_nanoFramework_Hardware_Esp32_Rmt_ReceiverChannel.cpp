@@ -5,31 +5,62 @@
 
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
-HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    NativeRxInit___I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::NativeRxInit___I4( CLR_RT_StackFrame &stack )
 {
     NANOCLR_HEADER();
-
-    gpio_num_t gpio_number;
-    CLR_INT32 channel;
-    CLR_INT32 bufferSizeRmtItems;
-    CLR_INT32 clockDiv = 80; // Default
-    gpio_number = (gpio_num_t)stack.Arg1().NumericByRef().s1;
-    bufferSizeRmtItems = (CLR_INT32)stack.Arg2().NumericByRef().s4;
-
-    channel = RmtChannel::FindNextChannel();
-    if (channel < 0)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+        int32_t channel;
+        int32_t pin_number;
+        int32_t ring_buff_size;
+
+        // get a pointer to the managed object instance and check that it's not NULL
+        CLR_RT_HeapBlock *pThis = stack.This();
+        FAULT_ON_NULL(pThis);
+
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+
+        channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+        pin_number = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___pinNumber].NumericByRef().s4;
+
+        if (channel < 0)
+        {
+            channel = RmtChannel::FindNextChannel();
+            if (channel < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
+            }
+        }
+
+        rmt_config_t rmt_rx_config = RMT_DEFAULT_CONFIG_RX((gpio_num_t)pin_number, (rmt_channel_t)channel);
+        rmt_rx_config.clk_div = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
+        rmt_rx_config.mem_block_num = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
+        rmt_rx_config.rx_config.idle_threshold = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings::FIELD___idleThreshold].NumericByRef().u2;
+        rmt_rx_config.rx_config.filter_en = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings::FIELD___enableFilter].NumericByRef().u1 != 0;
+        rmt_rx_config.rx_config.filter_ticks_thresh = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings::FIELD___filterThreshold].NumericByRef().u1;
+        auto err = rmt_config(&rmt_rx_config);
+        if (err != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
+        }
+
+        ring_buff_size = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___bufferSize].NumericByRef().s4;
+        ring_buff_size *= sizeof(rmt_item32_t);
+
+        err = rmt_driver_install((rmt_channel_t)channel, ring_buff_size, 0);
+        if (err != ESP_OK)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
+        }
+
+        RmtChannel::registredChannels.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple((rmt_channel_t)channel),
+            std::forward_as_tuple());
+
+        stack.SetResult_I4((CLR_INT32)channel);
     }
-
-    if (InitRxChannel((rmt_channel_t)channel, gpio_number, bufferSizeRmtItems, clockDiv) != ESP_OK)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_DRIVER_NOT_REGISTERED);
-    }
-
-    stack.SetResult_I4(channel);
-
     NANOCLR_NOCLEANUP();
 }
 
@@ -38,15 +69,18 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_INT32 channel;
         bool clearBuffer;
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        clearBuffer = stack.Arg1().NumericByRefConst().u1 != 0;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
-        channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        clearBuffer = stack.Arg1().NumericByRefConst().u1 != 0;
 
         if (clearBuffer)
         {
@@ -81,12 +115,15 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_INT32 channel;
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         auto err = rmt_rx_stop((rmt_channel_t)channel);
         if (err != ESP_OK)
@@ -102,6 +139,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_INT32 channel;
         esp_err_t err;
         RingbufHandle_t ringbufHandle;
@@ -109,7 +147,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         err = rmt_get_ringbuf_handle((rmt_channel_t)channel, &ringbufHandle);
         if (err != ESP_OK)
@@ -190,8 +230,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_INT32 channel;
-        // CLR_RT_HeapBlock *pRetVal = NULL;
         esp_err_t err;
         RingbufHandle_t ringbufHandle;
         CLR_INT32 waitMs;
@@ -200,7 +240,9 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         err = rmt_get_ringbuf_handle((rmt_channel_t)channel, &ringbufHandle);
         if (err != ESP_OK)
@@ -209,7 +251,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         }
 
         // Timespan in 100ns ticks
-        CLR_INT64 *timespan = Library_corlib_native_System_TimeSpan::GetValuePtr(pThis[FIELD___receiveTimeout]);
+        CLR_INT64 *timespan = Library_corlib_native_System_TimeSpan::GetValuePtr(receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannelSettings::FIELD___receiveTimeout]);
         // Convert to milli-secs for wait
         waitMs = (CLR_INT32)(*timespan / TIME_CONVERSION__TO_MILLISECONDS);
 
@@ -258,13 +300,16 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
         bool enableFilter = stack.Arg1().NumericByRefConst().u1 != 0;
         uint8_t threshold = stack.Arg2().NumericByRefConst().u1;
 
-        CLR_INT32 channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        CLR_INT32 channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         esp_err_t err = rmt_set_rx_filter((rmt_channel_t)channel, enableFilter, threshold);
         if (err != ESP_OK)
@@ -280,12 +325,16 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
+
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
         uint16_t threshold = stack.Arg1().NumericByRefConst().u2;
 
-        CLR_INT32 channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        CLR_INT32 channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         esp_err_t err = rmt_set_rx_idle_thresh((rmt_channel_t)channel, threshold);
         if (err != ESP_OK)
@@ -301,10 +350,13 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 {
     NANOCLR_HEADER();
     {
+        CLR_RT_HeapBlock *receiver_channel_settings = NULL;
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
 
-        CLR_INT32 channel = pThis[RmtChannel::FIELD___channel].NumericByRef().s4;
+        // get a reference to the configs in the managed code instance
+        receiver_channel_settings = pThis[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::FIELD___receiverChannelSettings].Dereference();
+        CLR_INT32 channel = receiver_channel_settings[Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
         if (RmtChannel::registredChannels.find((rmt_channel_t)channel) == RmtChannel::registredChannels.end())
         {
@@ -319,36 +371,4 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         RmtChannel::registredChannels.erase((rmt_channel_t)channel);
     }
     NANOCLR_NOCLEANUP();
-}
-
-esp_err_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
-    InitRxChannel(rmt_channel_t channel, gpio_num_t gpio, int32_t bufferSizeRmtItems, int32_t clockDiv)
-{
-    rmt_config_t rmt_rxconfig{};
-
-    rmt_rxconfig.rmt_mode = RMT_MODE_RX; // Channel mode
-    rmt_rxconfig.channel = channel;      // Channel
-    rmt_rxconfig.clk_div = clockDiv;     // Channel counter divider
-                                         // 80,000,000 / 80 = 1,000,000 or 1us tick
-    rmt_rxconfig.gpio_num = gpio;        // GPIO number
-    rmt_rxconfig.mem_block_num = 1;      // number of memory blocks
-
-    rmt_rxconfig.rx_config.filter_en = false; // No filter or theshold
-    rmt_rxconfig.rx_config.filter_ticks_thresh = 0;
-    rmt_rxconfig.rx_config.idle_threshold = 0;
-    auto err = rmt_config(&rmt_rxconfig);
-    if (err != ESP_OK)
-        return err;
-
-    int32_t ringBufferSize = bufferSizeRmtItems * sizeof(rmt_item32_t);
-    err = rmt_driver_install(channel, ringBufferSize, 0);
-    if (err != ESP_OK)
-        return err;
-
-    RmtChannel::registredChannels.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(channel),
-        std::forward_as_tuple());
-
-    return ESP_OK;
 }
