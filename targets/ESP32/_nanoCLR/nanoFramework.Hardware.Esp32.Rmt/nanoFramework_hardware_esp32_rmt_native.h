@@ -110,13 +110,13 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
 struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitChannelSettings
 {
-    static const int FIELD__enableCarrierWave = 7;
-    static const int FIELD__carrierLevel = 8;
-    static const int FIELD__carrierWaveFrequency = 9;
-    static const int FIELD__carrierWaveDutyPercentage = 10;
-    static const int FIELD__enableLooping = 11;
-    static const int FIELD__enableIdleLevelOutput = 12;
-    static const int FIELD__idleLevel = 13;
+    static const int FIELD___enableCarrierWave = 7;
+    static const int FIELD___carrierLevel = 8;
+    static const int FIELD___carrierWaveFrequency = 9;
+    static const int FIELD___carrierWaveDutyPercentage = 10;
+    static const int FIELD___enableLooping = 11;
+    static const int FIELD___enableIdleLevelOutput = 12;
+    static const int FIELD___idleLevel = 13;
 
     //--//
 };
