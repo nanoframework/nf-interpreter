@@ -476,6 +476,9 @@ void Device_ble_dispose()
     BLE_DEBUG_PRINTF("delete mutexs\n");
     vEventGroupDelete(ble_event_waitgroup);
     vSemaphoreDelete(ble_event_data.mutex);
+    
+    //vSemaphoreDelete does not null the pointer, we help to clean up
+    ble_event_data.mutex = NULL;
 
     ble_initialized = false;
 
