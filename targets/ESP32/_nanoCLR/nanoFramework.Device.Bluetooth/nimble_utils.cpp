@@ -211,8 +211,8 @@ bool LockEventMutex()
 {
     if (ble_event_data.mutex == NULL)
     {
-       BLE_DEBUG_PRINTF("LockEventMutex is NULL\n" );
-       return false;
+        BLE_DEBUG_PRINTF("LockEventMutex is NULL\n");
+        return false;
     }
     return xSemaphoreTake(ble_event_data.mutex, (TickType_t)(1000 / portTICK_PERIOD_MS));
 }
