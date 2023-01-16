@@ -106,3 +106,4 @@ TouchPointDevice TouchDevice::GetPoint()
 }
 
 #endif // stmpe811qtr_H
+
