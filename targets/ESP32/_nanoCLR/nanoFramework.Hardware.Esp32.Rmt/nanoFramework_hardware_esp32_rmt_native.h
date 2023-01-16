@@ -17,9 +17,7 @@
 #include <rmt.h>
 
 // Reduce line lengths
-#define ManagedRmtCommand Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtCommand
-#define RmtChannel        Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel
-#define CHANNEL(channel)  static_cast<rmt_channel_t>(channel)
+#define CHANNEL(channel) static_cast<rmt_channel_t>(channel)
 
 typedef enum __nfpack ChannelMode
 {

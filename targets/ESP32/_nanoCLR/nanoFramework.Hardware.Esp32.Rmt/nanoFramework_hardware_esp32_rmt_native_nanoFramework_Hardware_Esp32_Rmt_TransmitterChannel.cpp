@@ -8,6 +8,8 @@
 
 #define DEFAULT_DIVIDER 4
 
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel RmtChannel;
+
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
     NativeTxInit___I4(CLR_RT_StackFrame &stack)
 {
