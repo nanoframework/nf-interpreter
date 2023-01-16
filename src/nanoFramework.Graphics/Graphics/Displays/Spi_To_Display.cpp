@@ -23,7 +23,6 @@ CLR_INT16 lcdReset;
 CLR_INT16 lcdDC;
 CLR_INT16 lcdBacklight;
 
-// CLR_UINT32 spiDeviceHandle = 0;
 uint32_t spiDeviceHandle = 0;
 CLR_INT16 outputBufferSize;
 CLR_UINT8 spiBuffer[SPI_MAX_TRANSFER_SIZE];

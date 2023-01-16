@@ -8,10 +8,9 @@
 #ifndef SPI_TO_TOUCHPANEL_H
 #define SPI_TO_TOUCHPANEL_H
 
-#include "nanoCLR_Types.h"
+#include <nanoCLR_Types.h>
 #include <nanoPAL.h>
 #include <target_platform.h>
-//#include <esp32_idf.h>
 
 #include "TouchInterface.h"
 
