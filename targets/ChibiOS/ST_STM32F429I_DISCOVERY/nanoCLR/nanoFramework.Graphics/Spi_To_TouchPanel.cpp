@@ -3,16 +3,13 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#define UNUSED(x) (void)x
-
 #ifndef SPI_TO_TOUCHPANEL_H
 #define SPI_TO_TOUCHPANEL_H
 
 #include <nanoCLR_Types.h>
 #include <nanoPAL.h>
 #include <target_platform.h>
-
-#include "TouchInterface.h"
+#include <TouchInterface.h>
 
 bool TouchInterface::Initialize()
 {
@@ -27,9 +24,9 @@ CLR_UINT8 *TouchInterface::Write_Read(
     CLR_UINT16 numberValuesExpected)
 {
 
-    UNUSED(valuesToSend);
-    UNUSED(numberOfValuesToSend);
-    UNUSED(numberValuesExpected);
+    (void)valuesToSend;
+    (void)numberOfValuesToSend;
+    (void)numberValuesExpected;
 
     return 0;
 }

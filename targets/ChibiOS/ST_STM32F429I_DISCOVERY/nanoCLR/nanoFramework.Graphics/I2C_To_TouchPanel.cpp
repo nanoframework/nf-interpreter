@@ -6,16 +6,10 @@
 #ifndef I2C_TO_TOUCHPANEL_H
 #define I2C_TO_TOUCHPANEL_H
 
-#include "nanoCLR_Types.h"
+#include <nanoCLR_Types.h>
 #include <nanoPAL.h>
 #include <target_platform.h>
-#include "TouchInterface.h"
-#include "hal_i2c.h"
-#include "CPU_GPIO_decl.h"
-#include "Core_Cm7.h"
-#include "STM32f769xx.h"
-
-#define UNUSED(x) (void)x
+#include <TouchInterface.h>
 
 // This code module is written for a STM32F429I DISCOVERY board with display 240x320 TFT and touch screen
 // The touch screen driver IC is a STMPE811QTR
@@ -42,9 +36,9 @@ CLR_UINT8 *TouchInterface::Write_Read(
     CLR_UINT16 numberValuesExpected)
 {
     // TO BE DEVELOPED
-    UNUSED(valuesToSend);
-    UNUSED(numberOfValuesToSend);
-    UNUSED(numberValuesExpected);
+    (void)valuesToSend;
+    (void)numberOfValuesToSend;
+    (void)numberValuesExpected;
 
     // CLR_UINT8* receivedValues = NULL;
     // msg_t result = i2cMasterTransmitTimeout(&touchDriver, I2C_Address, valuesToSend, numberOfValuesToSend,
@@ -52,4 +46,5 @@ CLR_UINT8 *TouchInterface::Write_Read(
 
     return 0U;
 }
+
 #endif // I2C_TO_TOUCHPANEL_H

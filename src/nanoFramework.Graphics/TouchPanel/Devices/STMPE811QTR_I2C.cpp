@@ -50,6 +50,8 @@ bool TouchDevice::Initialize()
 
 bool TouchDevice::Enable(GPIO_INTERRUPT_SERVICE_ROUTINE touchIsrProc)
 {
+    (void)touchIsrProc;
+
     /*
         // Connect the Interrupt Service routine to the interrupt pin
         // G3# - PI13  ( GPIOI_LCD_INT )
