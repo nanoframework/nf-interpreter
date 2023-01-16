@@ -268,7 +268,7 @@
                 "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
                 "GRAPHICS_DISPLAY": "Otm8009a_DSI_Video_Mode.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "DSI_To_Display_Video_Mode.cpp",
-                "TOUCHPANEL_DEVICE": "STMPE811QTR_I2C.cpp",
+                "TOUCHPANEL_DEVICE": "ft6x06_I2C.cpp",
                 "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp"
             }
         },
