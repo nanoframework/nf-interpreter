@@ -7,8 +7,10 @@
 #include "nanoFramework_hardware_esp32_rmt_native.h"
 
 typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel RmtChannel;
-typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings RmtChannelSettings;
-typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitChannelSettings TransmitterChannelSettings;
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
+    RmtChannelSettings;
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitChannelSettings
+    TransmitterChannelSettings;
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
     NativeTxInit___I4(CLR_RT_StackFrame &stack)
@@ -38,22 +40,36 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         }
 
         rmt_config_t rmt_tx_config = RMT_DEFAULT_CONFIG_TX((gpio_num_t)pin_number, (rmt_channel_t)channel);
-        rmt_tx_config.clk_div = transmitter_channel_settings[RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
-        rmt_tx_config.mem_block_num = transmitter_channel_settings[RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
-        rmt_tx_config.tx_config.carrier_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
-        rmt_tx_config.tx_config.carrier_freq_hz = transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
+        rmt_tx_config.clk_div =
+            transmitter_channel_settings[RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
+        rmt_tx_config.mem_block_num =
+            transmitter_channel_settings[RmtChannelSettings::FIELD___numberOfMemoryBlocks].NumericByRef().u1;
+        rmt_tx_config.tx_config.carrier_en =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
+        rmt_tx_config.tx_config.carrier_freq_hz =
+            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
 
-        bool carrier_level = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
+        bool carrier_level =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
         rmt_tx_config.tx_config.carrier_level = carrier_level ? RMT_CARRIER_LEVEL_HIGH : RMT_CARRIER_LEVEL_LOW;
 
-        rmt_tx_config.tx_config.carrier_duty_percent = transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage].NumericByRef().u1;
-        rmt_tx_config.tx_config.loop_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
-        rmt_tx_config.tx_config.idle_output_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput].NumericByRef().u1;
+        rmt_tx_config.tx_config.carrier_duty_percent =
+            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage]
+                .NumericByRef()
+                .u1;
+        rmt_tx_config.tx_config.loop_en =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
+        rmt_tx_config.tx_config.idle_output_en =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput]
+                .NumericByRef()
+                .u1;
 
-        bool idle_level = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
+        bool idle_level =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
         rmt_tx_config.tx_config.idle_level = idle_level ? RMT_IDLE_LEVEL_HIGH : RMT_IDLE_LEVEL_LOW;
 
-        bool invert_signal = (bool)transmitter_channel_settings[RmtChannelSettings::FIELD___signalInverterEnabled].NumericByRef().u1;
+        bool invert_signal =
+            (bool)transmitter_channel_settings[RmtChannelSettings::FIELD___signalInverterEnabled].NumericByRef().u1;
         if (invert_signal)
         {
             rmt_tx_config.flags = RMT_CHANNEL_FLAGS_INVERT_SIG;
@@ -124,7 +140,8 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         // get a reference to the configs in the managed code instance
         transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
         channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        enabled = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
+        enabled =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
 
         if (!RmtChannel::CheckChannel(channel))
         {
@@ -158,10 +175,16 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         // get a reference to the configs in the managed code instance
         transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
         channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        carrier_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
-        carrier_freq_hz = transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
-        carrier_duty_percent = transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage].NumericByRef().u1;
-        carrier_level = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
+        carrier_en =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
+        carrier_freq_hz =
+            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
+        carrier_duty_percent =
+            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage]
+                .NumericByRef()
+                .u1;
+        carrier_level =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
 
         if (!RmtChannel::CheckChannel(channel))
         {
@@ -204,8 +227,11 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         // get a reference to the configs in the managed code instance
         transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
         channel = (rmt_channel_t)transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        idle_out_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput].NumericByRef().u1;
-        idle_level = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
+        idle_out_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput]
+                          .NumericByRef()
+                          .u1;
+        idle_level =
+            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
 
         if (!RmtChannel::CheckChannel(channel))
         {
