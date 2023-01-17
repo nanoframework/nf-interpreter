@@ -23,7 +23,7 @@ CLR_INT16 lcdReset;
 CLR_INT16 lcdDC;
 CLR_INT16 lcdBacklight;
 
-CLR_UINT32 spiDeviceHandle = 0;
+uint32_t spiDeviceHandle = 0;
 CLR_INT16 outputBufferSize;
 CLR_UINT8 spiBuffer[SPI_MAX_TRANSFER_SIZE];
 CLR_UINT8 spiBuffer2[SPI_MAX_TRANSFER_SIZE];
@@ -60,7 +60,6 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     bufferWritten = 0;
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
-    ASSERT(hr == ESP_OK);
     if (hr == S_OK)
     {
         // TODO Reserve Pins
@@ -179,6 +178,7 @@ void DisplayInterface::DisplayBacklight(bool on) // true = on
 // Dummy callback to enable async spi writes
 void spi_callback(int busIndex)
 {
+    (void)busIndex;
 }
 
 void DisplayInterface::SendBytes(CLR_UINT8 *data, CLR_UINT32 length)
