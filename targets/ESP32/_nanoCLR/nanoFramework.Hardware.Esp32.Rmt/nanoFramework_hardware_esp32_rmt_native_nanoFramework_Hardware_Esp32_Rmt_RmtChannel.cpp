@@ -8,7 +8,8 @@
 std::map<rmt_channel_t, std::vector<rmt_item32_t>>
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::registredChannels;
 
-typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings RmtChannelSettings;
+typedef Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannelSettings
+    RmtChannelSettings;
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::
     NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN(CLR_RT_StackFrame &stack)
