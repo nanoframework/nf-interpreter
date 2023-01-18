@@ -10,10 +10,19 @@
 
 #define HAL_Time_CurrentSysTicks chVTGetSystemTimeX
 
-inline __attribute__((always_inline)) uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
+#ifdef __cplusplus
+extern "C"
 {
-    // convert to microseconds from CMSIS SysTicks
-    return sysTicks * CH_CFG_ST_FREQUENCY * 10;
+#endif
+
+    inline __attribute__((always_inline)) uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
+    {
+        // convert to microseconds from CMSIS SysTicks
+        return sysTicks * CH_CFG_ST_FREQUENCY * 10;
+    }
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif // TARGET_HAL_TIME_H

@@ -53,7 +53,7 @@ extern "C"
 
     // this function, because it is called VERY VERY often, is implemented as inlined on each platform
     // in the targetHAL_Time.h file
-    // inline __attribute__((always_inline)) uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks);
+    uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks);
 
     /// <summary>
     /// System time and date for DateTime managed class.
