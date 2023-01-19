@@ -129,31 +129,31 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeTxSetLoopingMode___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    int32_t channel;
+    bool enabled;
+    esp_err_t err;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get a reference to the configs in the managed code instance
+    transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
+    channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    enabled = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
+
+    if (!RmtChannel::CheckChannel(channel))
     {
-        CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
-        int32_t channel;
-        bool enabled;
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // get a reference to the configs in the managed code instance
-        transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
-        channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        enabled =
-            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
-
-        if (!RmtChannel::CheckChannel(channel))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        auto err = rmt_set_tx_loop_mode((rmt_channel_t)channel, enabled);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    err = rmt_set_tx_loop_mode((rmt_channel_t)channel, enabled);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -161,53 +161,54 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeTxSetCarrierMode___VOID(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    int32_t channel;
+    bool carrier_en;
+    uint32_t carrier_freq_hz;
+    uint8_t carrier_duty_percent;
+    bool carrier_level;
+    esp_err_t err;
+
+    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get a reference to the configs in the managed code instance
+    transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
+    channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    carrier_en =
+        (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
+    carrier_freq_hz =
+        transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
+    carrier_duty_percent =
+        transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage]
+            .NumericByRef()
+            .u1;
+    carrier_level = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
+
+    if (!RmtChannel::CheckChannel(channel))
     {
-        CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
-        int32_t channel;
-        bool carrier_en;
-        uint32_t carrier_freq_hz;
-        uint8_t carrier_duty_percent;
-        bool carrier_level;
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // get a reference to the configs in the managed code instance
-        transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
-        channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        carrier_en =
-            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableCarrierWave].NumericByRef().u1;
-        carrier_freq_hz =
-            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
-        carrier_duty_percent =
-            transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierWaveDutyPercentage]
-                .NumericByRef()
-                .u1;
-        carrier_level =
-            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___carrierLevel].NumericByRef().u1;
-
-        if (!RmtChannel::CheckChannel(channel))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        uint32_t rmt_source_clk_hz, duty_div, duty_h, duty_l;
-        rmt_source_clk_hz = APB_CLK_FREQ; // only APB bus clock is supported
-        duty_div = rmt_source_clk_hz / carrier_freq_hz;
-        duty_h = duty_div * carrier_duty_percent / 100;
-        duty_l = duty_div - duty_h;
-
-        auto err = rmt_set_tx_carrier(
-            (rmt_channel_t)channel,
-            carrier_en,
-            duty_h,
-            duty_l,
-            carrier_level ? RMT_CARRIER_LEVEL_HIGH : RMT_CARRIER_LEVEL_LOW);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    uint32_t rmt_source_clk_hz, duty_div, duty_h, duty_l;
+    rmt_source_clk_hz = APB_CLK_FREQ; // only APB bus clock is supported
+    duty_div = rmt_source_clk_hz / carrier_freq_hz;
+    duty_h = duty_div * carrier_duty_percent / 100;
+    duty_l = duty_div - duty_h;
+
+    err = rmt_set_tx_carrier(
+        (rmt_channel_t)channel,
+        carrier_en,
+        duty_h,
+        duty_l,
+        carrier_level ? RMT_CARRIER_LEVEL_HIGH : RMT_CARRIER_LEVEL_LOW);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -215,35 +216,37 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     NativeTxSetIdleLevel___VOID__BOOLEAN(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    rmt_channel_t channel;
+    bool idle_out_en;
+    bool idle_level;
+    esp_err_t err;
+
+    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get a reference to the configs in the managed code instance
+    transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
+    channel = (rmt_channel_t)transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    idle_out_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput]
+                        .NumericByRef()
+                        .u1;
+    idle_level =
+        (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
+
+    if (!RmtChannel::CheckChannel(channel))
     {
-        CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
-        rmt_channel_t channel;
-        bool idle_out_en;
-        bool idle_level;
-
-        CLR_RT_HeapBlock *pThis = stack.This();
-        FAULT_ON_NULL(pThis);
-
-        // get a reference to the configs in the managed code instance
-        transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
-        channel = (rmt_channel_t)transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
-        idle_out_en = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput]
-                          .NumericByRef()
-                          .u1;
-        idle_level =
-            (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___idleLevel].NumericByRef().u1;
-
-        if (!RmtChannel::CheckChannel(channel))
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
-        }
-
-        auto err = rmt_set_idle_level(channel, idle_out_en, idle_level ? RMT_IDLE_LEVEL_HIGH : RMT_IDLE_LEVEL_LOW);
-        if (err != ESP_OK)
-        {
-            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-        }
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
+
+    err = rmt_set_idle_level(channel, idle_out_en, idle_level ? RMT_IDLE_LEVEL_HIGH : RMT_IDLE_LEVEL_LOW);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -303,7 +306,6 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
     // get a reference to the configs in the managed code instance
     transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
-
     channel = (int32_t)transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
 
     if (!RmtChannel::CheckChannel(channel))
