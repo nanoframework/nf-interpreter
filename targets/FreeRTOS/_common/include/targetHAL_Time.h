@@ -20,12 +20,12 @@ extern "C"
     // Converts FreeRTOS Tickcount to .NET ticks (100 nanoseconds)
     inline __attribute__((always_inline)) uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks)
     {
-        return sysTicks * configTICK_RATE_HZ * 10;
+        return sysTicks * configTICK_RATE_HZ * 1000;
     }
 
     inline __attribute__((always_inline)) uint64_t HAL_Time_SysTicksToTime_C(uint64_t sysTicks)
     {
-        return sysTicks * configTICK_RATE_HZ * 10;
+        return sysTicks * configTICK_RATE_HZ * 1000;
     }
 
 #ifdef __cplusplus
