@@ -92,6 +92,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
+        CLR_RT_HeapBlock *connectionSettings;
         FAULT_ON_NULL(pThis);
 
         // get device handle saved on open
@@ -179,7 +180,11 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeTransfer(
             bool fullDuplex = (bool)stack.Arg3().NumericByRef().u1;
 
             // Set up read/write settings for SPI_Write_Read call
-            rws = {fullDuplex, 0, data16Bits, 0};
+            // Gets the CS and active state
+            connectionSettings = pThis[Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::FIELD___connectionSettings].Dereference();
+            int32_t chipSelect = connectionSettings[Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings::FIELD___csLine].NumericByRef().s4;
+            bool chipSelectActiveState = (bool)connectionSettings[Library_sys_dev_spi_native_System_Device_Spi_SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().u1;
+            rws = {fullDuplex, 0, data16Bits, 0, chipSelect, chipSelectActiveState};            
 
             // Check to see if we should run async so as not to hold up other tasks
             isLongRunningOperation = System_Device_IsLongRunningOperation(

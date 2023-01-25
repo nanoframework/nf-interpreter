@@ -98,12 +98,13 @@ __nfweak void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &mi
 //
 //  return true = handle valid
 static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
-{
+{    
     int type = handle >> 16 & 0x00ff;
     deviceIndex = handle & 0x00ff;
 
     spiBus = GetBusFromHandle(handle);
 
+    CLR_Debug::Printf("handle: %i spibus %i deviceindex %i\r\n", handle, deviceIndex, spiBus);
     // Validate type, bus, deviceIndex
     if (type != CPU_DEVICE_TYPE_SPI || spiBus >= NUM_SPI_BUSES || deviceIndex >= NUM_SPI_BUSES)
     {

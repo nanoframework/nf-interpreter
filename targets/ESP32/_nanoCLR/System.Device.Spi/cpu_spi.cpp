@@ -46,6 +46,8 @@
 #include <nanoHAL.h>
 #include <Esp32_DeviceMapping.h>
 
+#include <sys_dev_spi_native_target.h>
+
 // Max frequency over GPIO mux pins, full duplex
 #define MAX_CLOCK_FREQUENCY_GPIO_FULL 26000000
 // Max frequency over GPIO mux pins, half duplex
@@ -73,6 +75,11 @@ struct NF_PAL_SPI
     unsigned char *originalReadData;
     unsigned char *readDataBuffer;
     unsigned char *writeDataBuffer;
+
+    // -1 = Chip Select is not handled | >0 Chip Select is to be controlled with this GPIO
+    int32_t CurrentChipSelect;
+    int32_t NumberSpiDeviceInUse;
+    uint32_t Handle;
 };
 
 NF_PAL_SPI nf_pal_spi[2];
@@ -90,6 +97,12 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 // return true of successful, false if error
 bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
+    // Do we already initialized the SPI bus?
+    if (nf_pal_spi[busIndex].NumberSpiDeviceInUse > 0)
+    {
+        return true;
+    }
+
     GPIO_PIN clockPin, misoPin, mosiPin;
 
     // Get pins used by SPI bus
@@ -161,7 +174,8 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     nf_pal_spi[busIndex].BusIndex = busIndex;
     nf_pal_spi[busIndex].status = SPI_OP_STATUS::SPI_OP_READY;
-
+    nf_pal_spi[busIndex].NumberSpiDeviceInUse++;
+    
     haveAsyncTrans[busIndex] = false;
 
     return true;
@@ -170,23 +184,27 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 // Uninitialise the bus
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex));
-#else
-    esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + HSPI_HOST));
-#endif
+    nf_pal_spi[busIndex].NumberSpiDeviceInUse--;
 
-    if (ret != ESP_OK)
+    if(nf_pal_spi[busIndex].NumberSpiDeviceInUse == 0)
     {
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex, ret);
+        esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex));
 #else
-        ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + HSPI_HOST, ret);
+        esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + HSPI_HOST));
 #endif
 
-        return false;
-    }
+        if (ret != ESP_OK)
+        {
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+            ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex, ret);
+#else
+            ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + HSPI_HOST, ret);
+#endif
 
+            return false;
+        }
+    }
     return true;
 }
 
@@ -195,6 +213,7 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
 {
     NF_PAL_SPI *pnf_pal_spi = (NF_PAL_SPI *)trans->user;
 
+    CLR_Debug::Printf("CS callback: %i\r\n", pnf_pal_spi->CurrentChipSelect);
     if (pnf_pal_spi != &nf_pal_spi[0] && pnf_pal_spi != &nf_pal_spi[1])
         return;
 
@@ -216,6 +235,13 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
             heap_caps_free(pnf_pal_spi->readDataBuffer);
         }
     }
+    
+    // if CS is to be controlled by the driver, set the GPIO
+    if (pnf_pal_spi->CurrentChipSelect >= 0)
+    {
+        // de-assert pin based on CS active level
+        CPU_GPIO_TogglePinState(pnf_pal_spi->CurrentChipSelect);
+    }
 
     // fire callback for SPI transaction complete
     // only if callback set
@@ -231,7 +257,6 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
 // Convert from SPI_DEVICE_CONFIGURATION to spi_device_interface_config_t used for ESP33
 spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig)
 {
-    int csPin = spiDeviceConfig.DeviceChipSelect;
     uint8_t spiMode = spiDeviceConfig.Spi_Mode;
     int32_t clockHz = spiDeviceConfig.Clock_RateHz;
 
@@ -245,12 +270,6 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         (spiDeviceConfig.DataOrder16 == DataBitOrder_LSB) ? (SPI_DEVICE_TXBIT_LSBFIRST | SPI_DEVICE_RXBIT_LSBFIRST) : 0;
 
     flags |= SPI_DEVICE_NO_DUMMY;
-
-    // Positive Chip Select for Active
-    if (spiDeviceConfig.ChipSelectActive)
-    {
-        flags |= SPI_DEVICE_POSITIVE_CS;
-    }
 
     // check for half duplex
     if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_HalfDuplex)
@@ -269,7 +288,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         0,               // cs_ena_posttrans
         clockHz,         // Clock speed in Hz
         0,               // Input_delay_ns
-        csPin,           // Chip select
+        -1,               // Chip select, we will use manual chip select
         flags,           // SPI_DEVICE flags
         1,               // Queue size
         0,               // Callback before
@@ -288,31 +307,54 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
     // First available bus on ESP32 is HSPI_HOST(1), so add one
     spi_device_interface_config_t dev_config = GetConfig(spiDeviceConfig);
 
+    // If the CS is low, then initial value is high and vice versa
+    int initialPinValue = 0;
+    if (spiDeviceConfig.ChipSelectActive == 0)
+    {
+        initialPinValue = 1;
+    }
+
+    // Sets the CS pin as output
+    if (spiDeviceConfig.DeviceChipSelect >= 0)
+    {
+        // pinmode output
+        CPU_GPIO_EnableOutputPin(spiDeviceConfig.DeviceChipSelect, (GpioPinValue)initialPinValue, PinMode_Output);
+    }
+
     // check supported bus configuration: all valid except simplex
     if (spiDeviceConfig.BusConfiguration == SpiBusConfiguration_Simplex)
     {
         return CLR_E_NOT_SUPPORTED;
     }
 
-    // Add device to bus
-    spi_device_handle_t deviceHandle;
+    // We only have 1 device, so let's generate the handle
+    if (nf_pal_spi[spiDeviceConfig.Spi_Bus].NumberSpiDeviceInUse == 1)
+    {
+        // Add device to bus
+        spi_device_handle_t deviceHandle;
 
-    // First available bus on ESP32 is HSPI_HOST(1)
+        // First available bus on ESP32 is HSPI_HOST(1)
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
-    esp_err_t ret = spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus), &dev_config, &deviceHandle);
+        esp_err_t ret = spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus), &dev_config, &deviceHandle);
 #else
-    esp_err_t ret =
-        spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus + HSPI_HOST), &dev_config, &deviceHandle);
+        esp_err_t ret =
+            spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus + HSPI_HOST), &dev_config, &deviceHandle);
 #endif
 
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Unable to init SPI device, esp_err %d", ret);
 
-        return S_FALSE;
+            return S_FALSE;
+        }
+
+        handle = (uint32_t)deviceHandle;
+        nf_pal_spi[spiDeviceConfig.Spi_Bus].Handle = (uint32_t)deviceHandle;
     }
-
-    handle = (uint32_t)deviceHandle;
+    else
+    {
+        handle = nf_pal_spi[spiDeviceConfig.Spi_Bus].Handle;
+    }
 
     return S_OK;
 }
@@ -428,7 +470,9 @@ HRESULT CPU_SPI_nWrite_nRead(
         pnf_pal_spi->fullDuplex = wrc.fullDuplex;
         pnf_pal_spi->readOffset = wrc.readOffset; // dummy bytes between write & read on half duplex
         pnf_pal_spi->callback = wrc.callback;
+        pnf_pal_spi->CurrentChipSelect = wrc.DeviceChipSelect;
 
+        CLR_Debug::Printf("deviceHandle %i\r\n", deviceHandle);
         // Wait for any previously queued async transfer
         CPU_SPI_Wait_Busy(deviceHandle, sdev);
 
@@ -447,6 +491,14 @@ HRESULT CPU_SPI_nWrite_nRead(
         pTrans->user = (void *)pnf_pal_spi;
         pTrans->tx_buffer = writeData;
         pTrans->rx_buffer = readDataBuffer;
+        
+        CLR_Debug::Printf("CS read/write %d\r\n", wrc.DeviceChipSelect);
+        // if CS is to be controlled by the driver, set the GPIO
+        if (wrc.DeviceChipSelect >= 0)
+        {
+            // assert pin based on CS active level
+            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+        }
 
         // Start asynchronous SPI transaction
         if (async)

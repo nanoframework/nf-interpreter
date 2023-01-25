@@ -614,7 +614,7 @@ err_t enc28j60_lwip_xmit(struct netif *pNetIF, struct pbuf *pPBuf)
     }
 
     // CPU_SPI_nWrite8_nRead8(spiHandle, false, pTx, length+2, 0, 0, 0 );
-    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0};
+    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0, ENC28J60_CS, ENC28J60_CS_ACTIVE};
     nanoSPI_Write_Read(spiHandle, wrc, pTx, length + 2, 0, 0);
 
     // FIXME
@@ -1079,7 +1079,7 @@ void enc28j60_lwip_write_spi(uint32_t spiHandle, uint8_t opcode, uint8_t address
     commandWithData[1] = byteData;
 
     // CPU_SPI_nWrite8_nRead8 (spiHandle, false, commandWithData, 2, 0, 0, 0);
-    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0};
+    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0, ENC28J60_CS, ENC28J60_CS_ACTIVE};
     nanoSPI_Write_Read(spiHandle, wrc, commandWithData, 2, 0, 0);
 }
 
@@ -1149,7 +1149,7 @@ void enc28j60_lwip_soft_reset(uint32_t spiHandle)
     /* Combine the command and the data */
     byteData = (ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_OPCODE << 5) | ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_ARGUMENT;
 
-    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0};
+    SPI_WRITE_READ_SETTINGS wrc{false, 0, false, 0, ENC28J60_CS, ENC28J60_CS_ACTIVE};
     nanoSPI_Write_Read(spiHandle, wrc, (uint8_t *)&byteData, 1, 0, 0);
 
     // Errata : After reset wait for 100 ms
@@ -1195,7 +1195,7 @@ void enc28j60_lwip_read_spi(
     /* Write the command and read*/
     //    CPU_SPI_nWrite8_nRead8 (spiHandle, false, &opcodeArg, 1, byteData, numBytes+offset, offset+1);
     // Note uses offset on read data
-    SPI_WRITE_READ_SETTINGS wrc{false, offset, false, 0};
+    SPI_WRITE_READ_SETTINGS wrc{false, offset, false, 0, ENC28J60_CS, ENC28J60_CS_ACTIVE};
     nanoSPI_Write_Read(spiHandle, wrc, &opcodeArg, 1, byteData, numBytes);
 }
 
