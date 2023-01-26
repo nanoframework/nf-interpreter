@@ -20,4 +20,7 @@ typedef struct
 extern const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[];
 extern const int AdcChannelCount;
 
+extern NF_PAL_ADC_PORT_PIN_CHANNEL *RuntimeAdcPortPinConfig;
+extern uint8_t RuntimeAdcChannelCount;
+
 #endif // SYS_DEV_ADC_NATIVE_TARGET_H

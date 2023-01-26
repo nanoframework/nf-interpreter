@@ -10,6 +10,8 @@ set(BASE_PATH_FOR_THIS_MODULE "${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFram
 
 # set include directories
 list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS "${BASE_PATH_FOR_THIS_MODULE}")
+list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.Device.Adc)
+list(APPEND nanoFramework.Hardware.Stm32_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Adc)
 
 
 # source files
@@ -17,6 +19,7 @@ set(nanoFramework.Hardware.Stm32_SRCS
 
     nf_hardware_stm32_native.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory.cpp
+    nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC.cpp
     nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities.cpp
