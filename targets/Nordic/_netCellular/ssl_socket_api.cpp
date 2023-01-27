@@ -28,7 +28,7 @@
 //--//
 
 // TODO
-//bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x509)
+// bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x509)
 bool ssl_parse_certificate_internal(void *buf, size_t size, void *x509)
 {
     (void)buf;
@@ -62,7 +62,7 @@ int ssl_accept_internal(int socket, int contextHandle)
     return 0;
 }
 
-//bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int certLength, const char *certPassword)
+// bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int certLength, const char *certPassword)
 bool ssl_add_cert_auth_internal(int contextHandle, const char *certificate, int certLength)
 {
     (void)contextHandle;
@@ -155,7 +155,7 @@ bool ssl_generic_init_internal(
             goto error;
     }
     // default to no security
-    //context->sec_tag = SSL_TAG_NO_SEC;
+    // context->sec_tag = SSL_TAG_NO_SEC;
     context->sec_tag = TLS_SEC_TAG;
 
     // CA root certs are taken from Simple Link trusted root-certificate catalog, so nothing to do here
@@ -278,15 +278,15 @@ bool ssl_exit_context_internal(int contextHandle)
 int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
 {
     int rc;
-    //int cache;
+    // int cache;
     nrf91ssl_Context *context;
 
-    //TODO:: expect we need to move this
-	struct addrinfo *res;
-	struct addrinfo hints = {
-		.ai_family = AF_INET,
-		.ai_socktype = SOCK_STREAM,
-	};
+    // TODO:: expect we need to move this
+    struct addrinfo *res;
+    struct addrinfo hints = {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    };
 
     NATIVE_PROFILE_PAL_NETWORK();
 
@@ -308,19 +308,19 @@ int ssl_connect_internal(int sd, const char *szTargetHost, int contextHandle)
     // set socket in network context
     context->SocketFd = sd;
 
-    // TODO:: get this info from the getaddrinfo call 
-	rc = getaddrinfo(szTargetHost, NULL, &hints, &res);
-	if (rc) {
-		printk("getaddrinfo() failed, err %d\n", errno);
-		return -1;
-	}
+    // TODO:: get this info from the getaddrinfo call
+    rc = getaddrinfo(szTargetHost, NULL, &hints, &res);
+    if (rc)
+    {
+        printk("getaddrinfo() failed, err %d\n", errno);
+        return -1;
+    }
 
-    //TODO::
-	((struct sockaddr_in *)res->ai_addr)->sin_port = htons(443);
-
+    // TODO::
+    ((struct sockaddr_in *)res->ai_addr)->sin_port = htons(443);
 
     context->peer_verify = 2;
-printk ("calling setsockopt verify %d\n", context->peer_verify);
+    printk("calling setsockopt verify %d\n", context->peer_verify);
     rc = setsockopt(sd, SOL_TLS, TLS_PEER_VERIFY, &context->peer_verify, sizeof(uint32_t));
     if (rc)
     {
@@ -328,11 +328,11 @@ printk ("calling setsockopt verify %d\n", context->peer_verify);
         return rc;
     }
 
-//    sec_tag_t sec_tag_list[1] = {context->sec_tag};
-//    rc = setsockopt(sd, SOL_TLS, TLS_SEC_TAG_LIST, sec_tag_list, sizeof(sec_tag_list));
-   	const sec_tag_t tls_sec_tag[] = {
-		TLS_SEC_TAG,
-	};
+    //    sec_tag_t sec_tag_list[1] = {context->sec_tag};
+    //    rc = setsockopt(sd, SOL_TLS, TLS_SEC_TAG_LIST, sec_tag_list, sizeof(sec_tag_list));
+    const sec_tag_t tls_sec_tag[] = {
+        TLS_SEC_TAG,
+    };
     rc = setsockopt(sd, SOL_TLS, TLS_SEC_TAG_LIST, tls_sec_tag, sizeof(tls_sec_tag));
     if (rc)
     {
@@ -358,7 +358,7 @@ printk ("calling setsockopt verify %d\n", context->peer_verify);
 
     if (szTargetHost != NULL && szTargetHost[0] != 0)
     {
-        printk ("target host  %d >%s<\n", hal_strlen_s(szTargetHost), szTargetHost);
+        printk("target host  %d >%s<\n", hal_strlen_s(szTargetHost), szTargetHost);
         rc = setsockopt(sd, SOL_TLS, TLS_HOSTNAME, szTargetHost, hal_strlen_s(szTargetHost));
         if (rc)
         {
@@ -366,10 +366,10 @@ printk ("calling setsockopt verify %d\n", context->peer_verify);
             return rc;
         }
     }
-    printk ("server >%s<\n", szTargetHost);
+    printk("server >%s<\n", szTargetHost);
 
-    rc = connect (sd, res->ai_addr, sizeof(struct sockaddr_in));
-    printk ("connect ret %d  %d\n", rc, errno);
+    rc = connect(sd, res->ai_addr, sizeof(struct sockaddr_in));
+    printk("connect ret %d  %d\n", rc, errno);
     freeaddrinfo(res);
 
     return 0;
@@ -378,7 +378,7 @@ printk ("calling setsockopt verify %d\n", context->peer_verify);
 int ssl_available_internal(int sd)
 {
     NATIVE_PROFILE_PAL_NETWORK();
-    return GetAvailBytes (sd);
+    return GetAvailBytes(sd);
 }
 
 int ssl_write_internal(int sd, const char *data, size_t req_len)

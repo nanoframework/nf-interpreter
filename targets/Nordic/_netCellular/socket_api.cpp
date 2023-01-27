@@ -117,7 +117,7 @@ int SOCK_getpeername(SOCK_SOCKET socket, struct SOCK_sockaddr *name, int *namele
     NATIVE_PROFILE_PAL_COM();
     int rc;
 #ifdef PERRADDR_WORKAROUND
-    //printk("getpeername workaround\n");
+    // printk("getpeername workaround\n");
     rc = g_Sockets_nrf9160_Driver.GetSocketAddrData(socket, name, namelen);
     if (rc)
         printk("###  GetSocketAddrData ret %d\n", rc);
@@ -469,11 +469,11 @@ bool Sockets_nrf9160_Driver::Initialize()
     NATIVE_PROFILE_PAL_COM();
     SOCKET_CHECK_ENTER();
 
-printk ("Sockets_nrf9160_Driver::Initialize++ %d\n", s_initialized);
+    printk("Sockets_nrf9160_Driver::Initialize++ %d\n", s_initialized);
     if (!s_initialized)
     {
 
-printk ("Sockets_nrf9160_Driver::Initialize  1\n");
+        printk("Sockets_nrf9160_Driver::Initialize  1\n");
 
         g_Sockets_nrf9160_Driver.m_fShuttingDown = FALSE;
         g_Sockets_nrf9160_Driver.m_cntSockets = 0;
@@ -485,7 +485,7 @@ printk ("Sockets_nrf9160_Driver::Initialize  1\n");
             g_Sockets_nrf9160_Driver.m_socketHandles[i].m_sslData = NULL;
         }
         k_sem_init(&g_Sockets_nrf9160_Driver.sem_sockmon, 0, 1);
-printk ("Sockets_nrf9160_Driver::Initialize  2\n");
+        printk("Sockets_nrf9160_Driver::Initialize  2\n");
         k_thread_create(
             &sock_thread_data,
             sock_thread_stack,
@@ -626,7 +626,7 @@ void Sockets_nrf9160_Driver::SockMonitorThread(void *arg1, void *arg2, void *arg
     struct pollfd fd[SOCKETS_MAX_COUNT];
     int r, w, e, c, b;
 
-    printk ("**** SockMonitorThread++\n");
+    printk("**** SockMonitorThread++\n");
 
     NATIVE_PROFILE_PAL_COM();
     while (true)
@@ -669,19 +669,19 @@ void Sockets_nrf9160_Driver::SockMonitorThread(void *arg1, void *arg2, void *arg
         // If no socks have flags, just wait.
         if (sock_cnt == 0)
         {
-            printk ("**** SockMonitorThread  zero socket wait\n");
+            printk("**** SockMonitorThread  zero socket wait\n");
             k_sem_reset(&g_Sockets_nrf9160_Driver.sem_sockmon);
 
             // Wait for a new socket
             k_sem_take(&g_Sockets_nrf9160_Driver.sem_sockmon, K_FOREVER);
-            printk ("**** SockMonitorThread  triggered\n");
+            printk("**** SockMonitorThread  triggered\n");
             continue;
         }
 
         // Now monitor the open sockets.
-        printk ("**** SockMonitorThread  poll cnt:%d  %d %d %d\n", g_Sockets_nrf9160_Driver.m_cntSockets, r, w, e);
+        printk("**** SockMonitorThread  poll cnt:%d  %d %d %d\n", g_Sockets_nrf9160_Driver.m_cntSockets, r, w, e);
         rc = poll(fd, g_Sockets_nrf9160_Driver.m_cntSockets, 1000);
-        printk ("**** SockMonitorThread  poll return %d %x   ", rc, fd[0].revents);
+        printk("**** SockMonitorThread  poll return %d %x   ", rc, fd[0].revents);
         if (rc < 0)
         {
             printk("poll error %d  %d\n", rc, errno);
@@ -709,8 +709,7 @@ void Sockets_nrf9160_Driver::SockMonitorThread(void *arg1, void *arg2, void *arg
             if (fd[i].revents & POLLNVAL)
                 b++;
         }
-        printk("cnt %d r %d w %d err %d close %d Inv %d\n", 
-               g_Sockets_nrf9160_Driver.m_cntSockets, r, w, e, c, b);
+        printk("cnt %d r %d w %d err %d close %d Inv %d\n", g_Sockets_nrf9160_Driver.m_cntSockets, r, w, e, c, b);
         // signal the nf stack.
         Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
 

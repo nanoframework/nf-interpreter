@@ -15,7 +15,6 @@
 
 extern char connect_state;
 
-
 static int last_sock_error = 0;
 
 bool HAL_SOCK_Initialize()
@@ -102,7 +101,7 @@ int HAL_SOCK_connect(SOCK_SOCKET socket, const struct SOCK_sockaddr *address, in
     net_saddr_2z(address, &addr);
 
     printk("connect: xlate: sock %d  fam: %d  len %d\n", socket, addr.sa_family, addressLen);
-    //printk("connect: old errno %d\n", errno);
+    // printk("connect: old errno %d\n", errno);
     int rc = connect(socket, &addr, addressLen);
     if (rc != 0)
     {
@@ -267,11 +266,16 @@ void rep_sockaddr_to_zsockaddr(const struct SOCK_addrinfo *a, struct zsock_addri
     else
         z->ai_addr = 0;
 }
-char *ipaddr2str (uint32_t addr)
+char *ipaddr2str(uint32_t addr)
 {
     static char sz[48];
-    sprintf (sz, "%d.%d.%d.%d", (addr && 0xff000000) >> 24,   (addr && 0xff0000) >> 16,
-    (addr && 0xff00) >> 8, (addr && 0xff));
+    sprintf(
+        sz,
+        "%d.%d.%d.%d",
+        (addr && 0xff000000) >> 24,
+        (addr && 0xff0000) >> 16,
+        (addr && 0xff00) >> 8,
+        (addr && 0xff));
     return sz;
 }
 int HAL_SOCK_getaddrinfo(
@@ -298,18 +302,18 @@ int HAL_SOCK_getaddrinfo(
         {
             for (int q = 0; q < 16; q++)
             {
-                printk ("%x ", *(servname + q));
+                printk("%x ", *(servname + q));
             }
-            printk ("\n");
+            printk("\n");
         }
         else
-            printk ("servname unreadable %p\n", servname);
+            printk("servname unreadable %p\n", servname);
     }
     else
-        printk ("servname zero\n");
+        printk("servname zero\n");
 
-    //printk ("server >%s<\n", servname);
-    //printk("addr internal_res %x\n", (uint32_t)internal_res);
+    // printk ("server >%s<\n", servname);
+    // printk("addr internal_res %x\n", (uint32_t)internal_res);
 
     // Fetch the zsock version
     rc = getaddrinfo(nodename, servname, &ai, &internal_res->z_res);
@@ -359,7 +363,7 @@ int HAL_SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
             printk("SOCK_FIONREAD ");
             // Fake this ioctl by peeking at socket and seeing how
             // much data returned. This is non-optimal but should work.
-            rc = GetAvailBytes (socket);
+            rc = GetAvailBytes(socket);
             *data = rc;
             break;
         default:
@@ -371,12 +375,12 @@ int HAL_SOCK_ioctl(SOCK_SOCKET socket, int cmd, int *data)
     }
     return rc;
 }
-//static char tmpbuf[256];
+// static char tmpbuf[256];
 static char tmpbuf[1520];
-int GetAvailBytes (SOCK_SOCKET socket)
+int GetAvailBytes(SOCK_SOCKET socket)
 {
     int rc;
-    printk ("GetAvailBytes soc %d available:", socket);
+    printk("GetAvailBytes soc %d available:", socket);
     rc = recv(socket, tmpbuf, sizeof(tmpbuf), MSG_DONTWAIT | MSG_PEEK);
     if (rc >= 0)
     {
@@ -694,7 +698,7 @@ int HAL_SOCK_select(
     MARSHAL_FDSET_TO_SOCK_FDSET(readfds, pR);
     MARSHAL_FDSET_TO_SOCK_FDSET(writefds, pW);
     MARSHAL_FDSET_TO_SOCK_FDSET(except, pE);
-    printk ("HAL_SOCK_select-- ret %d\n", ret);
+    printk("HAL_SOCK_select-- ret %d\n", ret);
     return ret;
 }
 int translate_opt_net_to_z(int *level, int *netopt)
@@ -929,7 +933,7 @@ void *HAL_SOCK_GlobalLockContext()
 }
 int signal_nf_stack(void)
 {
-    printk ("Signal NF Stack++\n");
+    printk("Signal NF Stack++\n");
     Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
     return 0;
 }

@@ -195,7 +195,7 @@ char *DateTimeToString(const uint64_t &time)
 
 const char *HAL_Time_CurrentDateTimeToString()
 {
-    //printk("HAL_Time_CurrentDateTimeToString++\n");
+    // printk("HAL_Time_CurrentDateTimeToString++\n");
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
