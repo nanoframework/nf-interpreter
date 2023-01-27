@@ -316,7 +316,7 @@ HRESULT Library_sys_dev_spi_native_System_Device_Spi_SpiDevice::NativeOpenDevice
     }
 
     // load CS active state from config (which is always PinValue.Low or PinValue.High
-    spiConfig.ChipSelectActive =
+    spiConfig.ChipSelectActiveState =
         (bool)config[SpiConnectionSettings::FIELD___chipSelectLineActiveState].NumericByRef().s4;
 
     spiConfig.Spi_Mode = (SpiMode)config[SpiConnectionSettings::FIELD___spiMode].NumericByRef().s4;

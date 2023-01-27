@@ -68,7 +68,7 @@ struct SPI_DEVICE_CONFIGURATION
     // GPIO pin used for device Chip select, if -1 it means the ChipSelect is handled manually
     int32_t DeviceChipSelect;
     // False = LOW active,      True = HIGH active
-    bool ChipSelectActive;
+    bool ChipSelectActiveState;
     // SPI mode 0 -> 3
     SpiMode Spi_Mode;
     // SPI bus Configuration (full-duplex is default)
@@ -96,7 +96,7 @@ struct SPI_WRITE_READ_SETTINGS
     // GPIO pin used for device Chip select, if -1 it means the ChipSelect is handled manually
     int32_t DeviceChipSelect;
     // False = LOW active,      True = HIGH active
-    bool ChipSelectActive;
+    bool ChipSelectActiveState;
 };
 
 #define CPU_SPI_ERROR_PARAM   -1

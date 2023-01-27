@@ -491,7 +491,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         if (wrc.DeviceChipSelect >= 0)
         {
             // assert pin based on CS active level
-            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
         }
 
         if (sync)
@@ -566,7 +566,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.DeviceChipSelect >= 0)
             {
                 // de-assert pin based on CS active level
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
             }
         }
         else
@@ -579,7 +579,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.DeviceChipSelect >= 0)
             {
                 // assert pin based on CS active level
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
             }
 
             // this is a Async operation

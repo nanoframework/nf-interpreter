@@ -474,12 +474,12 @@ HRESULT CPU_SPI_nWrite_nRead(
         // just to satisfy the driver ceremony, no actual implementation for STM32
         spiSelect(palSpi->Driver);
 
-        palSpi->ChipSelect = wrc.ChipSelectActive;
+        palSpi->ChipSelect = wrc.DeviceChipSelect;
         // if CS is to be controlled by the driver, set the GPIO
-        if (wrc.ChipSelectActive >= 0)
+        if (wrc.DeviceChipSelect >= 0)
         {
             // assert pin based on CS active level
-            CPU_GPIO_SetPinState(wrc.ChipSelectActive, (GpioPinValue)wrc.ChipSelectActive);
+            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
         }
 
         if (sync)
@@ -554,7 +554,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.DeviceChipSelect >= 0)
             {
                 // de-assert pin based on CS active level
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
             }
         }
         else
@@ -567,7 +567,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (wrc.DeviceChipSelect >= 0)
             {
                 // assert pin based on CS active level
-                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+                CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
             }
 
             // this is a Async operation

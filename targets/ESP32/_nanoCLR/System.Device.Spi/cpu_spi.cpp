@@ -325,7 +325,7 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
 
     // If the CS is low, then initial value is high and vice versa
     int initialPinValue = 0;
-    if (spiDeviceConfig.ChipSelectActive == 0)
+    if (spiDeviceConfig.ChipSelectActiveState == 0)
     {
         initialPinValue = 1;
     }
@@ -511,7 +511,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         if (wrc.DeviceChipSelect >= 0)
         {
             // assert pin based on CS active level
-            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActive);
+            CPU_GPIO_SetPinState(wrc.DeviceChipSelect, (GpioPinValue)wrc.ChipSelectActiveState);
         }
 
         // Start asynchronous SPI transaction
