@@ -24,6 +24,8 @@ CLR_INT16 lcdDC;
 CLR_INT16 lcdBacklight;
 
 uint32_t spiDeviceHandle = 0;
+int spiChipSelect = 0;
+bool spiChipSelectActive = false;
 CLR_INT16 outputBufferSize;
 CLR_UINT8 spiBuffer[SPI_MAX_TRANSFER_SIZE];
 CLR_UINT8 spiBuffer2[SPI_MAX_TRANSFER_SIZE];
@@ -47,11 +49,14 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     g_DisplayInterfaceConfig = config;
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
     spiConfig.Spi_Bus = config.Spi.spiBus;
-    spiConfig.DeviceChipSelect = config.Spi.chipSelect;
+    spiConfig.DeviceChipSelect = config.Spi.chipSelect;    
     spiConfig.ChipSelectActive = false;
     spiConfig.Spi_Mode = SpiMode::SpiMode_Mode0;
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
     spiConfig.BusConfiguration = SpiBusConfiguration_FullDuplex;
+    // Store for internal usage
+    spiChipSelect = config.Spi.chipSelect;
+    spiChipSelectActive = false;
 
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // SPI clock speed.
 
@@ -197,8 +202,8 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     wrc.callback = sendAsync ? spi_callback : 0;
     wrc.fullDuplex = false;
     wrc.readOffset = 0;
-    wrc.DeviceChipSelect = spiConfig.DeviceChipSelect;
-    wrc.ActiveState = spiConfig.ActiveState;
+    wrc.DeviceChipSelect = spiChipSelect;
+    wrc.ActiveState = spiChipSelectActive;
     
     nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, NULL, 0);
 
