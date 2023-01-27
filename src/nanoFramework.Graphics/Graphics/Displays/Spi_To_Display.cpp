@@ -49,7 +49,7 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     g_DisplayInterfaceConfig = config;
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
     spiConfig.Spi_Bus = config.Spi.spiBus;
-    spiConfig.DeviceChipSelect = config.Spi.chipSelect;    
+    spiConfig.DeviceChipSelect = config.Spi.chipSelect;
     spiConfig.ChipSelectActive = false;
     spiConfig.Spi_Mode = SpiMode::SpiMode_Mode0;
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
@@ -204,7 +204,7 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     wrc.readOffset = 0;
     wrc.DeviceChipSelect = spiChipSelect;
     wrc.ActiveState = spiChipSelectActive;
-    
+
     nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, NULL, 0);
 
     return;
