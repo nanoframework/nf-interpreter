@@ -378,3 +378,4 @@ sdkconfig
 
 # CMake user presets
 CMakeUserPresets.json
+g.cmd
