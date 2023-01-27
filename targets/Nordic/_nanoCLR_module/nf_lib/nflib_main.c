@@ -41,7 +41,7 @@ int start_nf(const char *wire_uart_name)
 
     //	g_heapsize = (0x8000-32) * 2; //64k - overhead
     g_heapsize = (0x8800 - 32); // 48k - overhead
-    //g_heapsize = (0x8000 - 32); // 32k - overhead
+    // g_heapsize = (0x8000 - 32); // 32k - overhead
     g_heapbase = k_malloc(g_heapsize);
 
     if (g_heapbase != 0)
