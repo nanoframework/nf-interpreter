@@ -925,9 +925,7 @@ void enc28j60_lwip_destroy_device()
         spiHandle,
         ENC28J60_SPI_BIT_FIELD_CLEAR_OPCODE,
         ENC28J60_EIE,
-        (uint8_t)(
-            (1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) |
-            (1 << ENC28J60_EIE_TXERIE_BIT)));
+        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) | (1 << ENC28J60_EIE_TXERIE_BIT)));
 }
 
 /*
@@ -1142,9 +1140,7 @@ void enc28j60_lwip_soft_reset(uint32_t spiHandle)
         spiHandle,
         ENC28J60_SPI_BIT_FIELD_CLEAR_OPCODE,
         ENC28J60_EIE,
-        (uint8_t)(
-            (1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) |
-            (1 << ENC28J60_EIE_TXERIE_BIT)));
+        (uint8_t)((1 << ENC28J60_EIE_INTIE_BIT) | (1 << ENC28J60_EIE_PKTIE_BIT) | (1 << ENC28J60_EIE_TXIE_BIT) | (1 << ENC28J60_EIE_TXERIE_BIT)));
 
     /* Combine the command and the data */
     byteData = (ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_OPCODE << 5) | ENC28J60_SPI_SYSTEM_COMMAND_SOFT_RESET_ARGUMENT;

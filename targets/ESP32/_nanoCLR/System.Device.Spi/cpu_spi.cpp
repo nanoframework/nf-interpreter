@@ -90,13 +90,13 @@ bool haveAsyncTrans[2];
 bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
 {
     // Find the bus
-    int spiBus = -1;    
+    int spiBus = -1;
     if (nf_pal_spi[0].Handle == deviceHandle)
     {
         spiBus = 0;
     }
     else if (nf_pal_spi[1].Handle == deviceHandle)
-        {
+    {
         spiBus = 1;
     }
 
@@ -108,10 +108,10 @@ bool CPU_SPI_Remove_Device(uint32_t deviceHandle)
     // We remove only if it's the last device
     nf_pal_spi[spiBus].NumberSpiDeviceInUse--;
     if (nf_pal_spi[spiBus].NumberSpiDeviceInUse == 0)
-    {        
+    {
         return spi_bus_remove_device((spi_device_handle_t)deviceHandle) != ESP_OK;
     }
-    
+
     return true;
 }
 
@@ -197,7 +197,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     nf_pal_spi[busIndex].BusIndex = busIndex;
     nf_pal_spi[busIndex].status = SPI_OP_STATUS::SPI_OP_READY;
-    
+
     haveAsyncTrans[busIndex] = false;
 
     return true;
@@ -251,7 +251,7 @@ static void IRAM_ATTR spi_trans_ready(spi_transaction_t *trans)
             heap_caps_free(pnf_pal_spi->readDataBuffer);
         }
     }
-    
+
     // if CS is to be controlled by the driver, set the GPIO
     if (pnf_pal_spi->CurrentChipSelect >= 0)
     {
@@ -304,7 +304,7 @@ spi_device_interface_config_t GetConfig(const SPI_DEVICE_CONFIGURATION &spiDevic
         0,               // cs_ena_posttrans
         clockHz,         // Clock speed in Hz
         0,               // Input_delay_ns
-        -1,               // Chip select, we will use manual chip select
+        -1,              // Chip select, we will use manual chip select
         flags,           // SPI_DEVICE flags
         1,               // Queue size
         0,               // Callback before
@@ -506,7 +506,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         pTrans->user = (void *)pnf_pal_spi;
         pTrans->tx_buffer = writeData;
         pTrans->rx_buffer = readDataBuffer;
-        
+
         // if CS is to be controlled by the driver, set the GPIO
         if (wrc.DeviceChipSelect >= 0)
         {
