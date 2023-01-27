@@ -8,7 +8,7 @@
 
 struct nrf91ssl_Context
 {
-    //SlNetSockSecAttrib_t* SecurityAttributes;
+    // SlNetSockSecAttrib_t* SecurityAttributes;
     uint32_t securityMethod;
     uint32_t peer_verify;
     int sec_tag;
@@ -17,4 +17,4 @@ struct nrf91ssl_Context
     bool IsServer;
 };
 
-#endif //SSL_NRF9160_H
+#endif // SSL_NRF9160_H

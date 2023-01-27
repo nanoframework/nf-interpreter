@@ -7,7 +7,8 @@
 // Include basic operating system dependencies
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #if defined(CONFIG_NET_SOCKETS_SOCKOPT_TLS)
@@ -26,26 +27,24 @@ extern "C" {
 #define DEFAULT_TIMEOUT -1
 
 // Connect State values
-#define CONN_STATE_DISCONNECTED   0
-#define CONN_STATE_CONN_HOME      1
-#define CONN_STATE_CONN_ROAM      2
+#define CONN_STATE_DISCONNECTED 0
+#define CONN_STATE_CONN_HOME    1
+#define CONN_STATE_CONN_ROAM    2
 
-// Initialize the LTE library
-int nrf9160_lte_init(uint16_t timeout);
+    // Initialize the LTE library
+    int nrf9160_lte_init(uint16_t timeout);
 
-// Connect to the network.
-int nrf9160_lte_connect(uint16_t timeout);
+    // Connect to the network.
+    int nrf9160_lte_connect(uint16_t timeout);
 
-// Disconnect to the network.
-int nrf9160_lte_offline(void);
+    // Disconnect to the network.
+    int nrf9160_lte_offline(void);
 
-// Turn off the modem.
-int nrf9160_lte_power_off(void);
-
+    // Turn off the modem.
+    int nrf9160_lte_power_off(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* NRF9610_LTE_H__ */
-

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <modem/modem_info.h>
+// #include <modem/modem_info.h>
 #include <nrf_modem_at.h>
 
 #include <modem/nrf_modem_lib.h>
@@ -19,8 +19,8 @@
 
 #include <nrf9160_lte.h>
 
-//#include <nanoHAL_v2.h>
-//#include <nanoPAL_Events.h>
+// #include <nanoHAL_v2.h>
+// #include <nanoPAL_Events.h>
 
 int signal_nf_stack(void);
 
@@ -50,7 +50,7 @@ int cert_provision(void);
 
 int handle_new_connection(int);
 
-//static struct modem_param_info modem_param;
+// static struct modem_param_info modem_param;
 
 bool fconnected = false;
 char szIMEI[IMxI_LEN];
@@ -124,7 +124,7 @@ void lte_evt_handler(const struct lte_lc_evt *const evt)
                         connect_state = CONN_STATE_CONN_HOME;
                         // TODO:: Notify of connect.
                         k_work_schedule(&connect_work, K_NO_WAIT);
-                        //handle_new_connection (0);
+                        // handle_new_connection (0);
                     }
                     break;
                 case LTE_LC_NW_REG_SEARCHING:
@@ -221,7 +221,7 @@ static void connect_work_fn(struct k_work *work)
 
     // Get the IP addresses
     rc = get_ip_info(&ip4_addr, &ip4_dns1_addr, &ip4_dns2_addr);
-    //printk ("get_ip_info returned %x %x %x\n", ip4_addr, ip4_dns1_addr, ip4_dns2_addr);
+    // printk ("get_ip_info returned %x %x %x\n", ip4_addr, ip4_dns1_addr, ip4_dns2_addr);
 
 #ifdef CONFIG_DATE_TIME
     date_time_update_async(date_time_event_handler);
@@ -258,12 +258,12 @@ static void connect_work_fn(struct k_work *work)
 //     return rc;
 // }
 
-int comma_parse (char *buf, int inlen, int find_comma, char *outbuf, int outlen)
+int comma_parse(char *buf, int inlen, int find_comma, char *outbuf, int outlen)
 {
     int i, j, k = 0, rc = 0;
     int comma_cnt = 0;
 
-//    printk ("comma_parse++ %d >%s<\n", find_comma, buf);
+    //    printk ("comma_parse++ %d >%s<\n", find_comma, buf);
 
     for (i = 0; (i < inlen) && (rc == 0); i++)
     {
@@ -282,7 +282,7 @@ int comma_parse (char *buf, int inlen, int find_comma, char *outbuf, int outlen)
             // We expect the string to have a starting quote.
             if (buf[i + 1] != '\"')
             {
-                //printk("i %d char %c\n", i, buf[i + 1]);
+                // printk("i %d char %c\n", i, buf[i + 1]);
                 rc = -2;
             }
             // Find closing quote
@@ -298,7 +298,7 @@ int comma_parse (char *buf, int inlen, int find_comma, char *outbuf, int outlen)
                 if (buf[j] == '\"')
                 {
                     outbuf[k] = '\0'; // zero terminate
-                    rc = k;  // Copy length
+                    rc = k;           // Copy length
                     break;
                 }
                 else
@@ -338,14 +338,14 @@ int get_ip_info(uint32_t *ip_addr, uint32_t *dns1, uint32_t *dns2)
     *dns2 = 0;
 
     // First, convert IP address.
-    memset (buf, 0, sizeof (buf));
+    memset(buf, 0, sizeof(buf));
     // Use specific cmd to get the IP addresses
     rc = query_modem("AT+CGPADDR=0", buf, sizeof(buf));
-    //printk ("query_modem ret %d >%s<\n", rc, buf);
+    // printk ("query_modem ret %d >%s<\n", rc, buf);
     if (rc == 0)
     {
-        //printk ("IP addr: %s\n", buf);
-        rc = comma_parse (buf, strlen (buf), 1, outbuf, sizeof (outbuf));
+        // printk ("IP addr: %s\n", buf);
+        rc = comma_parse(buf, strlen(buf), 1, outbuf, sizeof(outbuf));
         if (rc > 0)
         {
             rc = inet_pton(AF_INET, outbuf, &sa.sin_addr);
@@ -358,15 +358,15 @@ int get_ip_info(uint32_t *ip_addr, uint32_t *dns1, uint32_t *dns2)
     }
     else
     {
-        printk ("Failed to get ip address from modem. %d\n", rc);
+        printk("Failed to get ip address from modem. %d\n", rc);
     }
     // Now use cmd to get the DNS addresses
     rc = query_modem("AT+CGCONTRDP=0", buf, sizeof(buf));
     if (rc == 0)
     {
-        //printk ("modem string: %s\n", buf);
-        // DNS 1
-        rc = comma_parse (buf, strlen (buf), 5, outbuf, sizeof (outbuf));
+        // printk ("modem string: %s\n", buf);
+        //  DNS 1
+        rc = comma_parse(buf, strlen(buf), 5, outbuf, sizeof(outbuf));
         if (rc > 0)
         {
             rc = inet_pton(AF_INET, outbuf, &sa.sin_addr);
@@ -374,7 +374,7 @@ int get_ip_info(uint32_t *ip_addr, uint32_t *dns1, uint32_t *dns2)
                 *dns1 = sa.sin_addr.s_addr;
         }
         // DNS 2
-        rc = comma_parse (buf, strlen (buf), 6, outbuf, sizeof (outbuf));
+        rc = comma_parse(buf, strlen(buf), 6, outbuf, sizeof(outbuf));
         if (rc > 0)
         {
             rc = inet_pton(AF_INET, outbuf, &sa.sin_addr);

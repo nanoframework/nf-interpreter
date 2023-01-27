@@ -268,7 +268,7 @@ __nfweak bool ConfigurationManager_GetConfigurationBlock(
     return TRUE;
 }
 
-void DumpBuf (uint8_t *buf, int size)
+void DumpBuf(uint8_t *buf, int size)
 {
     int i;
     int cnt = 0;
@@ -276,12 +276,12 @@ void DumpBuf (uint8_t *buf, int size)
     char sz1[32];
     while (cnt < size)
     {
-        sz[0]='\0';
-        sz1[0]='\0';
+        sz[0] = '\0';
+        sz1[0] = '\0';
         for (i = 0; (i < 16) && (cnt < size); i++)
         {
-            sprintf (&sz[hal_strlen_s(sz)], "%02x ", buf[cnt]);
-            if ((buf[cnt] >=' ') && (buf[cnt] < 0x7e))
+            sprintf(&sz[hal_strlen_s(sz)], "%02x ", buf[cnt]);
+            if ((buf[cnt] >= ' ') && (buf[cnt] < 0x7e))
             {
                 sz1[i] = buf[cnt];
             }
@@ -291,7 +291,7 @@ void DumpBuf (uint8_t *buf, int size)
             }
             cnt++;
         }
-        printk ("%s    %s\n", sz, sz1);
+        printk("%s    %s\n", sz, sz1);
     }
 }
 
@@ -311,7 +311,12 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
     // ByteAddress storageAddress = 0;
     // bool requiresEnumeration = FALSE;
     bool success = FALSE;
-    printk("ConfigurationManager_StoreConfigurationBlock++  idx: %d ptr %p blksiz: %d off %d\n", configurationIndex, configurationBlock, blockSize, offset);
+    printk(
+        "ConfigurationManager_StoreConfigurationBlock++  idx: %d ptr %p blksiz: %d off %d\n",
+        configurationIndex,
+        configurationBlock,
+        blockSize,
+        offset);
 
     if (g_TargetConfiguration.NetworkInterfaceConfigs->Count == 0 ||
         (configurationIndex + 1) > g_TargetConfiguration.NetworkInterfaceConfigs->Count)
@@ -328,58 +333,62 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
         return false;
     }
 
-    printk ("################################ >>>\n");
+    printk("################################ >>>\n");
     HAL_CONFIGURATION_NETWORK *pnet;
     HAL_CONFIGURATION_NETWORK_WIRELESS80211 *p802;
     // HAL_CONFIGURATION_NETWORK_WIRELESSAP *pAP;
     HAL_CONFIGURATION_X509_CERTIFICATE *pCACert;
     HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *pDevCert;
     uint32_t start, end;
-    start = (uint32_t)configurationBlock+offset;
-    end = start+blockSize;
+    start = (uint32_t)configurationBlock + offset;
+    end = start + blockSize;
     {
         pnet = (HAL_CONFIGURATION_NETWORK *)ConfigurationManager_FindNetworkConfigurationBlocks(start, end);
         if (pnet && (pnet->Count > 0))
-            printk ("NetworkConfiguration at %p  cnt %d\n", pnet, pnet->Count);
-        platform_free (pnet);
+            printk("NetworkConfiguration at %p  cnt %d\n", pnet, pnet->Count);
+        platform_free(pnet);
 
-        p802 = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(start, end);
+        p802 = (HAL_CONFIGURATION_NETWORK_WIRELESS80211 *)
+            ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(start, end);
         if (p802 && (p802->Count > 0))
-            printk ("NetworkWireless80211Configuration at %p cnt %d\n", p802, p802->Count);
-        platform_free (p802);
+            printk("NetworkWireless80211Configuration at %p cnt %d\n", p802, p802->Count);
+        platform_free(p802);
 
-        // pAP = (HAL_CONFIGURATION_NETWORK_WIRELESSAP *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(start, end);
-        // if (pAP && (pAP->Count > 0))
+        // pAP = (HAL_CONFIGURATION_NETWORK_WIRELESSAP
+        // *)ConfigurationManager_FindNetworkWireless80211ConfigurationBlocks(start, end); if (pAP && (pAP->Count > 0))
         //     printk ("NetworkWirelessAPConfiguration at %p cnt %d\n", pAP, pAP->Count);
         // platform_free (pAP);
 
-        pCACert = (HAL_CONFIGURATION_X509_CERTIFICATE *)ConfigurationManager_FindX509CertificateConfigurationBlocks(start, end);
+        pCACert = (HAL_CONFIGURATION_X509_CERTIFICATE *)ConfigurationManager_FindX509CertificateConfigurationBlocks(
+            start,
+            end);
         if (pCACert && (pCACert->Count > 0))
         {
-            printk ("X509CertificateConfiguration at %p ", pCACert);
-            printk ("cnt %d  ", pCACert->Count);
+            printk("X509CertificateConfiguration at %p ", pCACert);
+            printk("cnt %d  ", pCACert->Count);
             if ((pCACert->Count > 0) && (pCACert->Certificates))
             {
-                printk ("size %d\n", pCACert->Certificates[0]->CertificateSize);
-                DumpBuf (pCACert->Certificates[0]->Certificate, pCACert->Certificates[0]->CertificateSize);
+                printk("size %d\n", pCACert->Certificates[0]->CertificateSize);
+                DumpBuf(pCACert->Certificates[0]->Certificate, pCACert->Certificates[0]->CertificateSize);
             }
-            printk ("\n");
+            printk("\n");
         }
-        platform_free (pCACert);
-        pDevCert = (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(start, end);
+        platform_free(pCACert);
+        pDevCert = (HAL_CONFIGURATION_X509_DEVICE_CERTIFICATE *)
+            ConfigurationManager_FindX509DeviceCertificatesConfigurationBlocks(start, end);
         if (pDevCert && (pDevCert->Count > 0))
         {
-            printk ("DeviceCertificatesConfiguration at %p ", pDevCert);
-            printk ("cnt %d  ", pDevCert->Count);
+            printk("DeviceCertificatesConfiguration at %p ", pDevCert);
+            printk("cnt %d  ", pDevCert->Count);
             if ((pDevCert->Count > 0) && (pDevCert->Certificates))
             {
-                printk ("size %d", pDevCert->Certificates[0]->CertificateSize);
+                printk("size %d", pDevCert->Certificates[0]->CertificateSize);
             }
-            printk ("\n");
+            printk("\n");
         }
-        platform_free (pDevCert);
+        platform_free(pDevCert);
     }
-    printk ("################################ <<<\n");
+    printk("################################ <<<\n");
     switch (configuration)
     {
         case DeviceConfigurationOption_Network:
@@ -388,7 +397,6 @@ __nfweak bool ConfigurationManager_StoreConfigurationBlock(
             HAL_Configuration_NetworkInterface *newcfg = (HAL_Configuration_NetworkInterface *)configurationBlock;
             dumpNetInfo(newcfg, nrf9160_lte);
             printk("Store configuration \"DeviceConfigurationOption_Network\" not supported at this time.");
-
 
             printk("ConfigurationManager_StoreConfigurationBlock-- 3\n");
             success = TRUE;
