@@ -44,20 +44,6 @@ endif()
 # source files for nanoFramework Networking
 set(NF_Network_SRCS "")
 
-set(NF_Network_SRCS
-
-#     #pal Socket
-     sockets_lwip.cpp
-
-#     #Lwip 
-#     lwIP_Sockets.cpp
-#     lwIP_Sockets_functions.cpp 
-
-#     # platform specific
-#     Target_Network.cpp
-#     targetHAL_Network.cpp
-)
-
 # need a conditional include because of ESP32 building network as a library 
 if(NOT USE_SECURITY_MBEDTLS_OPTION)
     list(APPEND NF_Network_SRCS ssl_stubs.cpp)
@@ -67,25 +53,12 @@ endif()
 set(NF_Network_Security_SRCS
 
     ssl.cpp
-    ssl_accept_internal.cpp
-    ssl_add_cert_auth_internal.cpp
-    ssl_close_socket_internal.cpp
-    ssl_connect_internal.cpp
-    ssl_decode_private_key_internal.cpp
-    ssl_exit_context_internal.cpp
-    ssl_generic.cpp
-    ssl_generic_init_internal.cpp
-    ssl_initialize_internal.cpp
-    ssl_parse_certificate_internal.cpp
-    ssl_available_internal.cpp
-    ssl_read_internal.cpp
-    ssl_uninitialize_internal.cpp
-    ssl_write_internal.cpp
+    ssl_socket_api.cpp
 )
 
-if(NF_FEATURE_DEBUGGER)
-    list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
-endif()
+#if(NF_FEATURE_DEBUGGER)
+#   list(APPEND NF_Network_SRCS Sockets_debugger.cpp)
+#endif()
 
 # add Enc28j60source files in two steps
 if(USE_ENC28J60_DRIVER_OPTION)
@@ -112,7 +85,7 @@ foreach(SRC_FILE ${NF_Network_SRCS})
             ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
             ${CMAKE_SOURCE_DIR}/src/PAL/Lwip
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_common
-            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_Network
+            ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_netCellular
 
             ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}
  
@@ -140,6 +113,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
             PATHS 
 
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
+                ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_netCellular
                 ${NF_Security_Search_Path}
     
             CMAKE_FIND_ROOT_PATH_BOTH
@@ -187,9 +161,7 @@ endmacro()
 # add platform dirs
 add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_include nordic__include)
 add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_common nordic__common)
-#add_subdirectory(${TARGET_RTOS_ROOT}/_nanoBooter ${TARGET_RTOS_BINDIR}/_nanoBooter)
 add_subdirectory($ENV{PLATFORM_NORDIC_ROOT}/_nanoCLR nordic__nanoCLR)
-
 
 # (binutils.zephyr.cmake) Calls FindPackage for platform specific needs. Nop right now.
 nf_add_platform_packages(TARGET ${NANOCLR_PROJECT_NAME})
@@ -228,13 +200,10 @@ endif()
 
 if(USE_NETWORKING_OPTION)
     nordic_add_network()
-    #zephyr_include_directories(${ZEPHYR_CURRENT_LIBRARY} PUBLIC
     z_include_directories(${ZEPHYR_CURRENT_LIBRARY} PUBLIC
         ${NF_Network_INCLUDE_DIRS}
-#        "C:/_dev/ardesco/v1.8.0/modules/lib/matter/third_party/lwip/repo/lwip/src/include"
     )
 endif()
-
 
 # zephyr-centric adding source files
 zephyr_library_sources(
@@ -259,19 +228,12 @@ if(NF_FEATURE_DEBUGGER)
         )
 endif()
 
-if(0)
-if(USE_NETWORKING_OPTION)
-    zephyr_library_sources(${NF_Network_SOURCES})
-endif()
-else()
 if(USE_NETWORKING_OPTION)
     zephyr_library_sources(
         ${NORDIC_Network_SOURCES}
-        ${TARGET_BASE_LOCATION}/../_network/nrf9160_lte.c
-        #${TARGET_BASE_LOCATION}/../_network/sockets_Nordic.cpp
-        ${TARGET_BASE_LOCATION}/../_network/Nordic_Sockets_functions.cpp
-        ${TARGET_BASE_LOCATION}/../_network/targetHAL_ConfigurationManager.cpp
-
+        ${TARGET_BASE_LOCATION}/../_netCellular/nrf9160_lte.c
+        ${TARGET_BASE_LOCATION}/../_netCellular/socket_api.cpp
+        ${TARGET_BASE_LOCATION}/../_netCellular/Nordic_Sockets_functions.cpp
+        ${TARGET_BASE_LOCATION}/../_netCellular/targetHAL_ConfigurationManager.cpp
     )
-endif()
 endif()

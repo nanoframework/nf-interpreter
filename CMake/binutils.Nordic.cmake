@@ -153,7 +153,7 @@ macro(nf_setup_target_build)
 
     zephyr_compile_definitions(PROJECT_NAME=nanoCLR)
 
-    zephyr_compile_definitions(APP_VERSION=${BUILD_VERSION})
+    #zephyr_compile_definitions(APP_VERSION=${BUILD_VERSION})
 
     #######################################################
     # the following are nanoCLR common compile definitions

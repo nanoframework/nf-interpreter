@@ -96,7 +96,7 @@ else()
         endif()
 
         if (NOT "v${NRF_CONNECT_SDK_FOUND_VERSION}" STREQUAL ${NRF_CONNECT_SDK_VERSION})
-            message(FATAL_ERROR "\n\nFound nRF Connect SDK ${NRF_CONNECT_SDK_FOUND_VERSION}.\nExpecting ${NRF_CONNECT_SDK_VERSION}.\n\n") 
+           message(WARNING "\n\nFound nRF Connect SDK ${NRF_CONNECT_SDK_FOUND_VERSION}.\nExpecting ${NRF_CONNECT_SDK_VERSION}.\n\n") 
         endif()
 
         # save path for later

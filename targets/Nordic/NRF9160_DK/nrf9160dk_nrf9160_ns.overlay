@@ -5,8 +5,10 @@
 //
 
 // Enable uart1
-// compatible = "nordic,nrf-uarte";
+// It appears that only 115200 works when piping through the 52840
 // current-speed = <921600>;
 &uart1 {
+	compatible = "nordic,nrf-uarte";
+	current-speed = <115200>;
 	status = "okay";
 };
