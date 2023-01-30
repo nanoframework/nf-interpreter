@@ -62,7 +62,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
 #if SOC_RMT_SUPPORT_TX_LOOP_COUNT
 
-        rmt_tx_config.tx_config.loop_count = 
+        rmt_tx_config.tx_config.loop_count =
             transmitter_channel_settings[TransmitterChannelSettings::FIELD___loopCount].NumericByRef().u4;
 
 #endif
@@ -166,7 +166,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
-    NativeTxSetLoopCount___VOID__I4( CLR_RT_StackFrame &stack )
+    NativeTxSetLoopCount___VOID__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
