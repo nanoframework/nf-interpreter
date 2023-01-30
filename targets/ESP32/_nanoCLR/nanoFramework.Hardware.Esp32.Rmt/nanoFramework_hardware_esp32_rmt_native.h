@@ -56,6 +56,10 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     //--//
 
+    static rmt_config_t GetNewRmtRxConfig(
+        gpio_num_t pin,
+        rmt_channel_t channel);
+
     static HRESULT CreateRmtArrayOnStack(
         CLR_RT_StackFrame &stack,
         CLR_INT32 numItems,
@@ -74,6 +78,10 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     static const int FIELD___enableFilter = 8;
     static const int FIELD___filterThreshold = 9;
     static const int FIELD___receiveTimeout = 10;
+    static const int FIELD___enableDemodulation = 11;
+    static const int FIELD___carrierWaveFrequency = 12;
+    static const int FIELD___carrierWaveDutyPercentage = 13;
+    static const int FIELD___carrierLevel = 14;
 
     //--//
 };
@@ -113,8 +121,9 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     static const int FIELD___carrierWaveFrequency = 9;
     static const int FIELD___carrierWaveDutyPercentage = 10;
     static const int FIELD___enableLooping = 11;
-    static const int FIELD___enableIdleLevelOutput = 12;
-    static const int FIELD___idleLevel = 13;
+    static const int FIELD___loopCount = 12;
+    static const int FIELD___enableIdleLevelOutput = 13;
+    static const int FIELD___idleLevel = 14;
 
     //--//
 };
@@ -127,12 +136,17 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
     NANOCLR_NATIVE_DECLARE(NativeTxInit___I4);
     NANOCLR_NATIVE_DECLARE(NativeTxGetIsChannelIdle___BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTxSetLoopingMode___VOID__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeTxSetLoopCount___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeTxSetCarrierMode___VOID);
     NANOCLR_NATIVE_DECLARE(NativeTxSetIdleLevel___VOID__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTxWriteItems___U4__SZARRAY_U1__BOOLEAN);
     NANOCLR_NATIVE_DECLARE(NativeTxDispose___VOID);
 
     //--//
+
+    static rmt_config_t GetNewRmtTxConfig(
+        gpio_num_t pin,
+        rmt_channel_t channel);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt;

@@ -39,7 +39,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             }
         }
 
-        rmt_config_t rmt_tx_config = RMT_DEFAULT_CONFIG_TX((gpio_num_t)pin_number, (rmt_channel_t)channel);
+        rmt_config_t rmt_tx_config = GetNewRmtTxConfig((gpio_num_t)pin_number, (rmt_channel_t)channel);
         rmt_tx_config.clk_div =
             transmitter_channel_settings[RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
         rmt_tx_config.mem_block_num =
@@ -59,6 +59,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
                 .u1;
         rmt_tx_config.tx_config.loop_en =
             (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u1;
+
+#if SOC_RMT_SUPPORT_TX_LOOP_COUNT
+
+        rmt_tx_config.tx_config.loop_count = 
+            transmitter_channel_settings[TransmitterChannelSettings::FIELD___loopCount].NumericByRef().u4;
+
+#endif
+
         rmt_tx_config.tx_config.idle_output_en =
             (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableIdleLevelOutput]
                 .NumericByRef()
@@ -153,6 +161,46 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
+    NativeTxSetLoopCount___VOID__I4( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+#if SOC_RMT_SUPPORT_TX_LOOP_COUNT
+
+    CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
+    int32_t channel;
+    uint32_t count;
+    esp_err_t err;
+
+    CLR_RT_HeapBlock *pThis = stack.This();
+    FAULT_ON_NULL(pThis);
+
+    // get a reference to the configs in the managed code instance
+    transmitter_channel_settings = pThis[FIELD___transmitterChannelSettings].Dereference();
+    channel = transmitter_channel_settings[RmtChannelSettings::FIELD___channel].NumericByRef().s4;
+    count = (bool)transmitter_channel_settings[TransmitterChannelSettings::FIELD___enableLooping].NumericByRef().u4;
+
+    if (!RmtChannel::CheckChannel(channel))
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
+    }
+
+    err = rmt_set_tx_loop_count((rmt_channel_t)channel, count);
+    if (err != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+#else
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+#endif
 
     NANOCLR_NOCLEANUP();
 }
@@ -318,4 +366,33 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     RmtChannel::registredChannels.erase(CHANNEL(channel));
 
     NANOCLR_NOCLEANUP();
+}
+
+rmt_config_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::
+    GetNewRmtTxConfig(gpio_num_t pin, rmt_channel_t channel)
+{
+    rmt_config_t config = rmt_config_t();
+
+    config.rmt_mode = RMT_MODE_TX;
+    config.channel = channel;
+    config.gpio_num = pin;
+    config.clk_div = 80;
+    config.mem_block_num = 1;
+    config.flags = 0;
+
+    config.tx_config = rmt_tx_config_t();
+    config.tx_config.carrier_freq_hz = 38000;
+    config.tx_config.carrier_level = RMT_CARRIER_LEVEL_HIGH;
+    config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
+    config.tx_config.carrier_duty_percent = 33;
+    config.tx_config.carrier_en = false;
+    config.tx_config.loop_en = false;
+
+#if SOC_RMT_SUPPORT_TX_LOOP_COUNT
+    config.tx_config.loop_count = 1;
+#endif
+
+    config.tx_config.idle_output_en = true;
+
+    return config;
 }

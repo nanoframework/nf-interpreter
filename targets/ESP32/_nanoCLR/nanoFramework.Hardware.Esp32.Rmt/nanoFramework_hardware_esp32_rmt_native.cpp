@@ -77,6 +77,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::NativeSetGpioPin___VOID__I4__U1__I4__BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::NativeSetClockDivider___VOID__U1,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_RmtChannel::NativeSetNumberOfMemoryBlocks___VOID__U1,
@@ -116,9 +124,14 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxInit___I4,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxGetIsChannelIdle___BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxSetLoopingMode___VOID__BOOLEAN,
+    Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxSetLoopCount___VOID__I4,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxSetCarrierMode___VOID,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxSetIdleLevel___VOID__BOOLEAN,
     Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_TransmitterChannel::NativeTxWriteItems___U4__SZARRAY_U1__BOOLEAN,
@@ -128,7 +141,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt =
 {
     "nanoFramework.Hardware.Esp32.Rmt",
-    0x5ECF7DE5,
+    0x608C5658,
     method_lookup,
     { 100, 0, 4, 0 }
 };

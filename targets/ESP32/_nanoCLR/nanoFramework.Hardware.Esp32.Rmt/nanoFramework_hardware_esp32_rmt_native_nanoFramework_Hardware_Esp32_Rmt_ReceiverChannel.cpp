@@ -47,7 +47,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     }
 
     {
-        rmt_config_t rmt_rx_config = RMT_DEFAULT_CONFIG_RX((gpio_num_t)pin_number, (rmt_channel_t)channel);
+        rmt_config_t rmt_rx_config = GetNewRmtRxConfig((gpio_num_t)pin_number, (rmt_channel_t)channel);
 
         rmt_rx_config.clk_div = receiver_channel_settings[RmtChannelSettings::FIELD___clockDivider].NumericByRef().u1;
         rmt_rx_config.mem_block_num =
@@ -58,6 +58,20 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
             receiver_channel_settings[ReceiverChannelSettings::FIELD___enableFilter].NumericByRef().u1 != 0;
         rmt_rx_config.rx_config.filter_ticks_thresh =
             receiver_channel_settings[ReceiverChannelSettings::FIELD___filterThreshold].NumericByRef().u1;
+
+#if SOC_RMT_SUPPORT_RX_DEMODULATION
+
+        config.rx_config.rm_carrier = 
+            receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1 != 0;
+        config.rx_config.carrier_freq_hz = 
+            receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
+        config.rx_config.carrier_duty_percent = 
+            receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1;
+        config.rx_config.carrier_level = 
+            (bool)transmitter_channel_settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1
+                ? RMT_CARRIER_LEVEL_HIGH : RMT_CARRIER_LEVEL_LOW;
+
+#endif
 
         err = rmt_config(&rmt_rx_config);
         if (err != ESP_OK)
@@ -418,4 +432,31 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     RmtChannel::registredChannels.erase((rmt_channel_t)channel);
 
     NANOCLR_NOCLEANUP();
+}
+
+rmt_config_t Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Esp32_Rmt_ReceiverChannel::
+    GetNewRmtRxConfig(gpio_num_t pin, rmt_channel_t channel)
+{
+    rmt_config_t config = rmt_config_t();
+
+    config.rmt_mode = RMT_MODE_RX;
+    config.channel = channel;
+    config.gpio_num = pin;
+    config.clk_div = 80;
+    config.mem_block_num = 1;
+    config.flags = 0;
+
+    config.rx_config = rmt_rx_config_t();
+    config.rx_config.idle_threshold = 12000;
+    config.rx_config.filter_ticks_thresh = 100;
+    config.rx_config.filter_en = true;
+
+#if SOC_RMT_SUPPORT_RX_DEMODULATION
+    config.rx_config.rm_carrier = true;
+    config.rx_config.carrier_freq_hz = 38000;
+    config.rx_config.carrier_duty_percent = 33;
+    config.rx_config.carrier_level = RMT_CARRIER_LEVEL_HIGH;
+#endif
+
+    return config;
 }
