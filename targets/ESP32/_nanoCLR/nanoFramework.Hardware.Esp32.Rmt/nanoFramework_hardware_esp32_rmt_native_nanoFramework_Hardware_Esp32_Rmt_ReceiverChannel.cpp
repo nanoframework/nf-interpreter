@@ -61,14 +61,14 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
 
 #if SOC_RMT_SUPPORT_RX_DEMODULATION
 
-        config.rx_config.rm_carrier =
+        rmt_rx_config.rx_config.rm_carrier =
             receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1 != 0;
-        config.rx_config.carrier_freq_hz =
+        rmt_rx_config.rx_config.carrier_freq_hz =
             receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
-        config.rx_config.carrier_duty_percent =
+        rmt_rx_config.rx_config.carrier_duty_percent =
             receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1;
-        config.rx_config.carrier_level =
-            (bool)transmitter_channel_settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1
+        rmt_rx_config.rx_config.carrier_level =
+            (bool)receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1
                 ? RMT_CARRIER_LEVEL_HIGH
                 : RMT_CARRIER_LEVEL_LOW;
 
