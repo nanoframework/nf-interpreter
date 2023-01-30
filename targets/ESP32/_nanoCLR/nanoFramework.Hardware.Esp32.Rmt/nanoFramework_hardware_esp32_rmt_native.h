@@ -56,9 +56,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     //--//
 
-    static rmt_config_t GetNewRmtRxConfig(
-        gpio_num_t pin,
-        rmt_channel_t channel);
+    static rmt_config_t GetNewRmtRxConfig(gpio_num_t pin, rmt_channel_t channel);
 
     static HRESULT CreateRmtArrayOnStack(
         CLR_RT_StackFrame &stack,
@@ -144,9 +142,7 @@ struct Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_Es
 
     //--//
 
-    static rmt_config_t GetNewRmtTxConfig(
-        gpio_num_t pin,
-        rmt_channel_t channel);
+    static rmt_config_t GetNewRmtTxConfig(gpio_num_t pin, rmt_channel_t channel);
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32_Rmt;
