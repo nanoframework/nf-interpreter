@@ -22,9 +22,9 @@
 #include <nrf_socket.h>
 
 #define NATIVE_PROFILE_PAL_NETWORK()
-//#define NATIVE_PROFILE_PAL_NETWORK() printk("%s++\n", __func__);
+// #define NATIVE_PROFILE_PAL_NETWORK() printk("%s++\n", __func__);
 
-int GetAvailBytes (SOCK_SOCKET socket);
+int GetAvailBytes(SOCK_SOCKET socket);
 int GetAvailBytes(SOCK_SOCKET socket);
 extern "C" int signal_nf_stack(void);
 
