@@ -1,0 +1,52 @@
+name: Build SKY_EEVB_PROTO1
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_EEVB_PROTO1:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: 'skyworks-evb'
+
+    - uses: lukka/get-cmake@latest
+
+    - name: Install arm-none-eabi-gcc
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: 'latest'
+
+    - name: Tweak GCC path
+      run: |
+        $currentPath = "$env:ARM_NONE_EABI_GCC_PATH"
+        if($currentPath.EndsWith("bin"))
+        {
+          $fixedPath = $currentPath.Replace("\bin", "")
+          
+          echo "ARM_NONE_EABI_GCC_PATH=$fixedPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
+
+    - name: Rename CMake presets
+      run: |
+        $file = "CMakeUserPresets.json"
+        Rename-Item -Path "CMakeUserPresets.SKY_EEVB_PROTO1.json" -NewName $file
+
+    - run: nbgv cloud -a -c
+
+    - uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'SKY_EEVB_PROTO1'
+        configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel']"
+        buildPreset: 'SKY_EEVB_PROTO1'
+        buildPresetAdditionalArgs: "['--config MinSizeRel']"
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: 'SKY_EEVB_PROTO1-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        path: |
+          ${{ github.workspace }}/build/*.bin
+          ${{ github.workspace }}/build/*.hex
