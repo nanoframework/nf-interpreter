@@ -137,7 +137,7 @@ if(USE_NETWORKING_OPTION)
 
     list(APPEND NANOCLR_PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/_LwIP)
 
-    # append mbed TLS entropy generator, if hardware has it
+    # append Mbed TLS entropy generator, if hardware has it
     # if(NF_SECURITY_MBEDTLS AND USE_RNG)
     #     list(APPEND NANOCLR_PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_entropy_hardware_pool.c")
     # endif()

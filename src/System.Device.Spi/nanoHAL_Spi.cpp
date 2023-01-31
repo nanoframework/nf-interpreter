@@ -18,7 +18,9 @@
 // Create a handle built from device type, SPI bus number and device index
 #define CreateSpiHandle(spiBusIndex, deviceIndex) ((CPU_DEVICE_TYPE_SPI << 16) + (spiBusIndex << 8) + deviceIndex)
 
-#define GetBusFromHandle(handle) ((handle >> 8) & 0x00ff);
+#define GetBusFromHandle(handle)    ((handle >> 8) & 0x00ff);
+#define GetTypeFromHandle(handle)   ((handle >> 16) & 0x00ff);
+#define GetDeviceFromHandle(handle) ((handle)&0x00ff);
 
 // Saved config for each available SPI bus
 nanoSPI_BusConfig spiconfig[NUM_SPI_BUSES];
@@ -80,6 +82,7 @@ __nfweak uint32_t CPU_SPI_PortsCount()
         }
         map >>= 1;
     }
+
     return count;
 }
 
@@ -99,9 +102,8 @@ __nfweak void CPU_SPI_GetPins(uint32_t spi_bus, GPIO_PIN &clockPin, GPIO_PIN &mi
 //  return true = handle valid
 static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
 {
-    int type = handle >> 16 & 0x00ff;
-    deviceIndex = handle & 0x00ff;
-
+    int type = GetTypeFromHandle(handle);
+    deviceIndex = GetDeviceFromHandle(handle);
     spiBus = GetBusFromHandle(handle);
 
     // Validate type, bus, deviceIndex
@@ -123,6 +125,7 @@ static int FindFreeDeviceSlotSpi(int spiBus, int32_t cs)
         {
             return deviceIndex;
         }
+
         // Check device chip select not already in use
         if (spiconfig[spiBus].deviceConfig[deviceIndex].DeviceChipSelect == cs)
         {
@@ -146,6 +149,7 @@ bool nanoSPI_Initialize()
         spiconfig[spiBus].devicesInUse = 0;
         memset(&spiconfig[spiBus].deviceHandles, 0, sizeof(spiconfig[spiBus].deviceHandles));
     }
+
     return true;
 }
 
@@ -354,8 +358,8 @@ HRESULT nanoSPI_OpenDeviceEx(
 
     // Add next Device - Copy device config, save handle, increment number devices on bus
     nanoSPI_BusConfig *pBusConfig = &spiconfig[spiDeviceConfig.Spi_Bus];
-    pBusConfig->deviceConfig[spiDeviceConfig.Spi_Bus] = spiDeviceConfig;
-    pBusConfig->deviceHandles[spiDeviceConfig.Spi_Bus] = deviceHandle;
+    pBusConfig->deviceConfig[deviceIndex] = spiDeviceConfig;
+    pBusConfig->deviceHandles[deviceIndex] = deviceHandle;
 
     pBusConfig->devicesInUse++;
 
@@ -447,7 +451,9 @@ HRESULT nanoSPI_Write_Read(
     int deviceIndex;
 
     if (!getDevice(handle, spiBus, deviceIndex))
+    {
         return CLR_E_INVALID_PARAMETER;
+    }
 
     return CPU_SPI_nWrite_nRead(
         spiconfig[spiBus].deviceHandles[deviceIndex],

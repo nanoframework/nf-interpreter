@@ -187,7 +187,7 @@ if(RTOS_AZURERTOS_CHECK)
 
                 # ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
-                # ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+                # ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
                 
                 ${NX_THREAD_LOCATION}
                 ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common
@@ -258,7 +258,7 @@ if(RTOS_AZURERTOS_CHECK)
     #             PATHS 
 
     #                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
-    #                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+    #                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
         
     #             CMAKE_FIND_ROOT_PATH_BOTH
     #         )
@@ -323,7 +323,7 @@ else()
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
     if(USE_SECURITY_MBEDTLS_OPTION)
-        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS)
+        list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS)
         list(APPEND NF_Network_INCLUDE_DIRS ${mbedtls_SOURCE_DIR}/include)
     endif()
 
@@ -405,7 +405,7 @@ else()
 
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
                 ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl
-                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
                 ${CMAKE_SOURCE_DIR}/src/PAL/Lwip
                 ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_common
                 ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_Network
@@ -425,7 +425,7 @@ else()
 
     if(USE_SECURITY_MBEDTLS_OPTION)
 
-        set(NF_Security_Search_Path "${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS")
+        set(NF_Security_Search_Path "${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS")
 
         # 2nd pass: security files if option is selected 
         foreach(SRC_FILE ${NF_Network_Security_SRCS})

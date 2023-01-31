@@ -58,16 +58,8 @@ function(nf_check_radio_frequency)
         message(FATAL_ERROR "Radio frequncy NOT defined. Please set build option 'RADIO_FREQUENCY'. Valid values are 868 and 915.")
     endif()
 
-    find_file(
-        SYS-CONFIG-FILE 
-        *_${RADIO_FREQUENCY}.syscfg
-        
-        PATHS 
-            ${TARGET_BASE_LOCATION}
-        )
-
-    # check if file was found
-    if(SYS-CONFIG-FILE-NOTFOUND)
+    # check if file exists
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET_BOARD}_${RADIO_FREQUENCY}.syscfg")
         message(FATAL_ERROR "Couldn't find a sysconfig file for radio frequency ${RADIO_FREQUENCY}. Valid values are 868 and 915.")
     endif()
 
@@ -251,6 +243,8 @@ macro(nf_add_platform_sysconfig_steps ti_device ti_device_family)
         # compose sys config file name 
         set(SYS_CONFIG_FILENAME ${TARGET_BOARD}_${RADIO_FREQUENCY}.syscfg)
     endif()
+
+    message(STATUS "Using sysconfig file: ${CMAKE_CURRENT_SOURCE_DIR}/${SYS_CONFIG_FILENAME}.")
 
     # copy Sys Config file to build directory
     add_custom_command(

@@ -10,6 +10,31 @@
 #include <nanoCLR_Runtime.h>
 #include <hal.h>
 
+typedef enum __nfpack GpioConfiguration_IOMode
+{
+    GpioConfiguration_IOMode_Input = 0,
+    GpioConfiguration_IOMode_Output = 1,
+    GpioConfiguration_IOMode_AlternateFunction = 2,
+    GpioConfiguration_IOMode_Analog = 4,
+    GpioConfiguration_IOMode_OutputPushPull = 1,
+    GpioConfiguration_IOMode_OutputOpenDrain = 17,
+} GpioConfiguration_IOMode;
+
+typedef enum __nfpack GpioConfiguration_PullUpDownActivation
+{
+    GpioConfiguration_PullUpDownActivation_None = 0,
+    GpioConfiguration_PullUpDownActivation_PullUp = 1,
+    GpioConfiguration_PullUpDownActivation_PullDown = 2,
+} GpioConfiguration_PullUpDownActivation;
+
+typedef enum __nfpack GpioConfiguration_Speed
+{
+    GpioConfiguration_Speed_Low = 0,
+    GpioConfiguration_Speed_Medium = 1,
+    GpioConfiguration_Speed_High = 2,
+    GpioConfiguration_Speed_VeryHigh = 3,
+} GpioConfiguration_Speed;
+
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemory
 {
     static const int FIELD_STATIC___size = 0;
@@ -25,6 +50,25 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_BackupMemor
     static const int BACKUP_SIZE = RTC_BKP_NUMBER * sizeof(RTC_BKP0R_Msk);
 };
 
+struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Configuration
+{
+    NANOCLR_NATIVE_DECLARE(ConfigurePin___STATIC__VOID__I4__nanoFrameworkHardwareStm32GpioConfiguration);
+    NANOCLR_NATIVE_DECLARE(AddAdcChannel___STATIC__U4__U4__U4__U4);
+    NANOCLR_NATIVE_DECLARE(RemoveAdcChannel___STATIC__VOID__U4);
+
+    //--//
+};
+
+struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_GpioConfiguration
+{
+    static const int FIELD___mode = 1;
+    static const int FIELD___pullUpDown = 2;
+    static const int FIELD___speed = 3;
+    static const int FIELD___alternateFunction = 4;
+
+    //--//
+};
+
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power
 {
     NANOCLR_NATIVE_DECLARE(get_WakeupReason___STATIC__nanoFrameworkHardwareStm32PowerWakeupReasonType);
@@ -33,7 +77,6 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Power
     NANOCLR_NATIVE_DECLARE(NativeEnterStandbyMode___STATIC__VOID);
 
     //--//
-
 };
 
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC
@@ -42,7 +85,6 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC
     NANOCLR_NATIVE_DECLARE(Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1);
 
     //--//
-
 };
 
 struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities
@@ -56,7 +98,6 @@ struct Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_Utilities
     NANOCLR_NATIVE_DECLARE(NativeGetDeviceRevisionId___STATIC__U4);
 
     //--//
-
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Stm32;

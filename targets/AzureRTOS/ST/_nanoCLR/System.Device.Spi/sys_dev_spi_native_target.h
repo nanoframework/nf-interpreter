@@ -75,7 +75,7 @@ struct NF_PAL_SPI
                 GPIO_PORT(spiDeviceConfig.DeviceChipSelect),                                                           \
                 spiDeviceConfig.DeviceChipSelect % 16,                                                                 \
                 (PAL_STM32_OSPEED_HIGHEST | PAL_MODE_OUTPUT_PUSHPULL));                                                \
-            if (spiDeviceConfig.ChipSelectActive)                                                                      \
+            if (spiDeviceConfig.ChipSelectActiveState)                                                                 \
             {                                                                                                          \
                 palSetPad(GPIO_PORT(spiDeviceConfig.DeviceChipSelect), spiDeviceConfig.DeviceChipSelect % 16);         \
             }                                                                                                          \

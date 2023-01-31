@@ -209,7 +209,7 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
 endif()
 
-# if mbed TLS is enabled add it to the build
+# if Mbed TLS is enabled add it to the build
 if(USE_SECURITY_MBEDTLS_OPTION)
 
     # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
@@ -223,14 +223,14 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.1")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.28.2")
 
-    # set options for mbed TLS
-    option(ENABLE_TESTING "no testing when building mbed TLS." OFF)
+    # set options for Mbed TLS
+    option(ENABLE_TESTING "no testing when building Mbed TLS." OFF)
 
     if(NO_MBEDTLS_SOURCE)
-        # no mbed TLS source specified, download it from it's repo
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
+        # no Mbed TLS source specified, download it from it's repo
+        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
 
         FetchContent_Declare(
             mbedtls
@@ -239,9 +239,9 @@ if(USE_SECURITY_MBEDTLS_OPTION)
         )
 
     else()
-        # mbedTLS source was specified
+        # MbedTLS source was specified
 
-        message(STATUS "mbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
+        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
             
         FetchContent_Declare(
             mbedtls
