@@ -284,7 +284,7 @@ macro(nf_add_platform_dependencies target)
 
         add_dependencies(${target}.elf nano::NF_Network)
 
-        # security provider is mbedTLS
+        # security provider is MbedTLS
         if(USE_SECURITY_MBEDTLS_OPTION)
             add_dependencies(NF_Network mbedtls)
         endif()

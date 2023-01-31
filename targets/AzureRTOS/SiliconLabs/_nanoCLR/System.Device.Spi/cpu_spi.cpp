@@ -311,7 +311,7 @@ HRESULT CPU_SPI_nWrite_nRead(
         if (palSpi->ChipSelect >= 0)
         {
             // assert pin based on CS active level
-            CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+            CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActiveState);
         }
 
         if (sync)
@@ -398,7 +398,7 @@ HRESULT CPU_SPI_nWrite_nRead(
             if (palSpi->ChipSelect >= 0)
             {
                 // assert pin based on CS active level
-                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActive);
+                CPU_GPIO_SetPinState(palSpi->ChipSelect, (GpioPinValue)sdev.ChipSelectActiveState);
             }
 
             // this is a Async operation
@@ -582,7 +582,7 @@ jump_to_init:
         if (busConfiguration.DeviceChipSelect >= 0)
         {
             GetIoLine(busConfiguration.DeviceChipSelect, &port, &portPin);
-            GPIO_PinModeSet(port, portPin, gpioModePushPull, busConfiguration.ChipSelectActive ? 0 : 1);
+            GPIO_PinModeSet(port, portPin, gpioModePushPull, busConfiguration.ChipSelectActiveState ? 0 : 1);
         }
     }
     else

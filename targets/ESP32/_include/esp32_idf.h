@@ -6,8 +6,8 @@
 #ifndef ESP32_IDF_H
 #define ESP32_IDF_H
 
-#include <string.h>
-#include <stdlib.h>
+#include <nanoCLR_Headers.h>
+
 #include <sys/time.h>
 #include <time.h>
 
@@ -81,6 +81,6 @@
 #endif
 
 // Uncomment to support Ethernet
-//#define ESP32_ETHERNET_SUPPORT
+// #define ESP32_ETHERNET_SUPPORT
 
 #endif // ESP32_IDF_H

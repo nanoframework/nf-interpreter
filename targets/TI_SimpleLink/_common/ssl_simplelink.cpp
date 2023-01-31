@@ -121,7 +121,7 @@ bool ssl_generic_init_internal(
     }
 
     // create security attribute
-    // this is the equivalent of SSL context in mbedTLS
+    // this is the equivalent of SSL context in MbedTLS
     // it needs to be freed in ssl_exit_context_internal
     context->SecurityAttributes = SlNetSock_secAttribCreate();
     if (context->SecurityAttributes == NULL)

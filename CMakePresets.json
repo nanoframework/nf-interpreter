@@ -220,7 +220,13 @@
                 "API_nanoFramework.Device.Can": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
-                "API_nanoFramework.System.Text": "ON"
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+                "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "STMPE811QTR_I2C.cpp",
+                "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp"
             }
         },
         {
@@ -503,7 +509,8 @@
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
                 "TARGET_SERIAL_BAUDRATE": "115200",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "15",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -790,7 +797,8 @@
             "hidden": true,
             "cacheVariables": {
                 "SDK_CONFIG_FILE": "sdkconfig.default_pico",
-                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "10",
+                "ESP32_SPIRAM_FOR_IDF_ALLOCATION": "0",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "15",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "TARGET_SERIAL_BAUDRATE": "115200",
@@ -839,6 +847,7 @@
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "OFF",
+                "API_System.IO.FileSystem": "ON",
                 "ESP32_ETHERNET_SUPPORT": "OFF",
                 "ESP32_CONFIG_PIN_PHY_POWER": "",
                 "ESP32_CONFIG_PHY_CLOCK_MODE": "",
@@ -858,6 +867,7 @@
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
+                "API_System.IO.FileSystem": "ON",
                 "API_nanoFramework.Graphics": "ON",
                 "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
                 "TOUCHPANEL_DEVICE": "XPT2046.cpp",
