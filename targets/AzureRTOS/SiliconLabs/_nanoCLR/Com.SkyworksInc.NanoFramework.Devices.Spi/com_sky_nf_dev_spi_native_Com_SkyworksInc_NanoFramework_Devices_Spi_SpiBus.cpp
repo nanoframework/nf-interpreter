@@ -128,7 +128,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
             config = stack.Arg5().Dereference();
 
             // CS is always active low
-            spiDeviceConfig->ChipSelectActive = false;
+            spiDeviceConfig->ChipSelectActiveState = false;
             // CS is controled by the Gecko SDK driver
             spiDeviceConfig->DeviceChipSelect = -1;
             // always bus master
@@ -209,7 +209,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
         fullDuplex = true;
 
         // Set up read/write settings for SPI_Write_Read call
-        rws = {fullDuplex, 0, palSpi->BufferIs16bits, 0};
+        rws = {fullDuplex, 0, palSpi->BufferIs16bits, 0, palSpi->ChipSelect, false};
 
         // Check to see if we should run async so as not to hold up other tasks
         isLongRunningOperation = System_Device_IsLongRunningOperation(
