@@ -106,8 +106,8 @@ static bool getDevice(uint32_t handle, uint8_t &spiBus, int &deviceIndex)
     deviceIndex = GetDeviceFromHandle(handle);
     spiBus = GetBusFromHandle(handle);
 
-    // Validate type, bus, deviceIndex
-    if (type != CPU_DEVICE_TYPE_SPI || spiBus >= NUM_SPI_BUSES || deviceIndex >= NUM_SPI_BUSES)
+    // Validate type, bus, no need to check the device index as we're managing this manually
+    if (type != CPU_DEVICE_TYPE_SPI || spiBus >= NUM_SPI_BUSES)
     {
         return false;
     }
