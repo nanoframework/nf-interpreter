@@ -19,8 +19,8 @@ if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     # series is NOT supported by STM 
     message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
 else()
-    # series is supported by STM
-    set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
+    # series is supported by ST
+    set(TARGET_VENDOR "ST" CACHE INTERNAL "target vendor is ST")
 endif()
 
 # store the package name for later use
