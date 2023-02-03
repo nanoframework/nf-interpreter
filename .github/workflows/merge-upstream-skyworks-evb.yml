@@ -1,0 +1,36 @@
+name: Merge from upstream into skyworks-evb
+on: 
+  # schedule:
+  #   # scheduled for 00:00 every day
+  #   - cron: '0 0 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  merge-from-upstream-repo:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: skyworks-evb
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge from upstream repo
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          target_sync_branch: skyworks-evb
+          upstream_sync_branch: main
+          upstream_sync_repo: Skyworks-Timing-Software/nf-interpreter
+
+      - name: New commits found
+        if: steps.sync.outputs.has_new_commits == 'true'
+        run: echo "New commits were found to sync."
+      
+      - name: No new commits
+        if: steps.sync.outputs.has_new_commits == 'false'
+        run: echo "There were no new commits."
+        
+      - name: Show value of 'has_new_commits'
+        run: echo ${{ steps.sync.outputs.has_new_commits }}
