@@ -553,6 +553,14 @@ else()
 endif()
 
 
+if(API_nanoFramework.GiantGecko.Adc)
+    # check if the standard ADC lib is already enabled
+    if(API_System.Device.Adc)
+        message(FATAL_ERROR "\n\nERROR:Can't enable simultaneously System.Device.Adc and GiantGecko.Adc APIs")
+    endif()
+endif()
+
+
 if(API_System.Device.Dac)
     set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 else()

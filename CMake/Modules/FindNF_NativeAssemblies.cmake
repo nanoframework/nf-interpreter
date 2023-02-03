@@ -450,7 +450,7 @@ macro(nf_add_lib_native_assemblies)
     if(RTOS_ESP32_CHECK)
         # this is the only one different
 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
 
         nf_set_compile_definitions(
             TARGET ${LIB_NAME} 
@@ -462,7 +462,7 @@ macro(nf_add_lib_native_assemblies)
         nf_set_link_options(TARGET ${LIB_NAME})
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALNA_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

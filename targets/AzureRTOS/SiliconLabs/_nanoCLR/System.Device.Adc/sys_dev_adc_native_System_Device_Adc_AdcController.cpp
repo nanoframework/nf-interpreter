@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <sys_dev_adc_native_target.h>
+#include "sys_dev_adc_native_target.h"
 
 #define ADC_FREQ 16000000
 

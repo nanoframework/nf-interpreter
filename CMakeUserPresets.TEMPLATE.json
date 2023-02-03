@@ -152,6 +152,8 @@
                     "value": "${presetName}"
                 },
                 "HAL_WP_USE_SERIAL": "ON",
+                "API_System.Device.Adc": "OFF",                
+                "API_nanoFramework.GiantGecko.Adc": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         },
@@ -169,37 +171,14 @@
                 },
                 "TARGET_SERIAL_BAUDRATE": "115200",
                 "GECKO_FEATURE_USBD_HID": "OFF",
-                "HAL_WP_USE_SERIAL": "OFF",
-                "HAL_WP_USE_USB_CDC": "ON",
-                "API_System.Device.Adc": "OFF",
-                "API_nanoFramework.GiantGecko.Adc": "ON",
-                "API_System.Device.UsbStream": "OFF",
-                "NF_INTEROP_ASSEMBLIES": null
-            }
-        },
-        {
-            "name": "SKY_EEVB_PROTO1",
-            "inherits": [
-                "user-local-tools",
-                "user-prefs",
-                "SL_STK3701A_preset"
-            ],
-            "cacheVariables": {
-                "TARGET_BOARD": {
-                    "type": "STRING",
-                    "value": "${presetName}"
-                },
-                "TARGET_SERIAL_BAUDRATE": "115200",
-                "GECKO_FEATURE_USBD_HID": "OFF",
                 "GECKO_FEATURE_USBD_WINUSB": "OFF",
                 "HAL_WP_USE_SERIAL": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.Device.Adc": "OFF",
                 "API_nanoFramework.GiantGecko.Adc": "ON",
-                "API_nanoFramework.Device.OneWire": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
-        },    
+        },  
         {
             "name": "ESP32_PSRAM_REV0",
             "inherits": [
@@ -823,11 +802,6 @@
             "name": "SL_STK3701A_REVB",
             "displayName": "SL_STK3701A_REVB",
             "configurePreset": "SL_STK3701A_REVB"
-        },
-        {
-            "name": "SKY_EEVB_PROTO1",
-            "displayName": "SKY_EEVB_PROTO1",
-            "configurePreset": "SKY_EEVB_PROTO1"
         },
         {
             "name": "ESP32_PSRAM_REV0",

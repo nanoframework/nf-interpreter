@@ -264,6 +264,7 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/nano_sl_usbd_class_vendor.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
     SET_SOURCE_FILES_PROPERTIES(${CMAKE_SOURCE_DIR}/targets/AzureRTOS/SiliconLabs/_common/sl_usbd_init.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    set_source_files_properties(${gecko_sdk_SOURCE_DIR}/platform/service/iostream/src/sl_iostream_uart.c PROPERTIES COMPILE_OPTIONS "-Wno-maybe-uninitialized")
 
     list(REMOVE_DUPLICATES Gecko_SDK_INCLUDE_DIRS)
 

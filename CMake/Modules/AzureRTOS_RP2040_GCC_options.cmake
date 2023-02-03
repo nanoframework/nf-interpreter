@@ -58,7 +58,7 @@ macro(nf_set_link_options)
     nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO_EXTRA_LINK_FLAGS} ")
       
     # set optimization flags
     nf_set_optimization_options(${NFSLO_TARGET})

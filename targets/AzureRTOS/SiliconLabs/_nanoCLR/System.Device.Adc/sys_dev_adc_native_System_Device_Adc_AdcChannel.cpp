@@ -4,7 +4,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <sys_dev_adc_native_target.h>
+#include "sys_dev_adc_native_target.h"
 
 HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue___I4(CLR_RT_StackFrame &stack)
 {
