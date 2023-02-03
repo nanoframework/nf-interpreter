@@ -19,6 +19,10 @@
                 "API_System.Device.Adc": "OFF",
                 "API_nanoFramework.GiantGecko.Adc": "ON",
                 "API_nanoFramework.Device.OneWire": "ON",
+                "API_System.Device.Spi": "OFF",
+                "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "ON",
+                "API_System.Device.I2c": "OFF",
+                "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
         }
