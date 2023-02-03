@@ -12,7 +12,6 @@
 
 #include <em_device.h>
 #include <em_gpio.h>
-#include <nf_gecko_spi_driver.h>
 #include "nf_gecko_spi_driver.h"
 
 // set missing defines
