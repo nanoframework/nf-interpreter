@@ -137,7 +137,7 @@ void CLR_HW_Hardware::ProcessActivity()
     if ((events & SYSTEM_EVENT_HW_INTERRUPT)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         || (!CLR_EE_DBG_IS(Stopped) && !g_CLR_HW_Hardware.m_interruptData.m_applicationQueue.IsEmpty())
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     )
     {
         ProcessInterrupts();
