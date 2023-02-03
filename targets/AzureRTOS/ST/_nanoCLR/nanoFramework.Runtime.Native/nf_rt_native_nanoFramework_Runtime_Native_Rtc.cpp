@@ -33,6 +33,8 @@ HRESULT Library_nf_rt_native_nanoFramework_Runtime_Native_Rtc::
         ((((uint32_t)stack.Arg4().NumericByRef().u1 * 3600) + ((uint32_t)stack.Arg5().NumericByRef().u1 * 60) +
           (uint32_t)stack.Arg6().NumericByRef().u1) *
          1000);
+    // no DST support, but still need to set this
+    newTime.dstflag = 0;
 
     // set RTC time
     rtcSetTime(&RTCD1, &newTime);
