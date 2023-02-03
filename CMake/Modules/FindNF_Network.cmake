@@ -15,8 +15,9 @@ if(RTOS_AZURERTOS_CHECK)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS/${TARGET_BOARD})
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
-
+    
     # source files for nanoFramework Networking
     set(NF_Network_SRCS
 

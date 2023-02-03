@@ -646,6 +646,13 @@ jobs:
       #   NeedsDFU: true
       #   NeedsSRECORD: false
 
+      SL_STK3701A:
+        TargetBoard: SL_STK3701A
+        BuildOptions:
+        GccArm_Version: 
+        NeedsDFU: false
+        NeedsSRECORD: false
+
   variables:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('AZURERTOS_1_8_0_versioncounter', 0)]

@@ -9,10 +9,10 @@ include(binutils.common)
 function(nf_set_optimization_options target) 
 
     target_compile_options(${target} PRIVATE
-        $<$<CONFIG:Debug>:-Og -femit-class-debug-always -g3 -ggdb>
-        $<$<CONFIG:Release>:-O3>
-        $<$<CONFIG:MinSizeRel>:-Os>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3 -ggdb>
+        $<$<CONFIG:Debug>:-Og -ggdb>
+        $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
+        $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
+        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3-ggdb>
     )
 
 endfunction()
@@ -26,11 +26,6 @@ endfunction()
 
 # sets network connectivity options according to the NetX driver choosen in build options WIFI_DRIVER and ETHERNET_DRIVER
 macro(nf_set_network_connectivity_options)
-
-    # sanity check
-    if(NOT DEFINED ETHERNET_DRIVER AND NOT DEFINED WIFI_DRIVER)
-        message(FATAL_ERROR "\n\nSorry but you must define either ETHERNET_DRIVER or WIFI_DRIVER build option...\n\n")
-    endif()
 
     ############################
     if(DEFINED WIFI_DRIVER)
@@ -138,7 +133,11 @@ macro(nf_add_platform_packages)
     if(STM32_CUBE_PACKAGE_REQUIRED)
         find_package(${TARGET_STM32_CUBE_PACKAGE}_CubePackage REQUIRED QUIET)
     endif()
-    
+
+    if(SILABS_GECKO_SDK_REQUIRED)
+        find_package(Gecko_SDK REQUIRED QUIET)
+    endif()
+ 
     # packages specific for nanoBooter
     if(NFAPP_TARGET STREQUAL ${NANOBOOTER_PROJECT_NAME})
         # no packages for booter
@@ -158,7 +157,8 @@ macro(nf_add_platform_packages)
             # need to add ThreadX extension in order to use BSD
             if("${TARGET_SERIES}" STREQUAL "STM32F7xx")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m7/gnu/inc/tx_port.h)
-            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx")
+            elseif("${TARGET_SERIES}" STREQUAL "STM32L4xx"
+                    OR "${TARGET_SERIES}" STREQUAL "EFM32GG11")
                 set(TX_PORT_FILE ${azure_rtos_SOURCE_DIR}/ports/cortex_m4/gnu/inc/tx_port.h)
             else()
                 message(FATAL_ERROR "Support for NetX Duo is not implemented for ${TARGET_SERIES}.")
@@ -200,6 +200,7 @@ macro(nf_add_platform_dependencies target)
                 ${NF_Network_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES}
         )
@@ -218,6 +219,7 @@ macro(nf_add_platform_dependencies target)
                 ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${AZRTOS_INCLUDES}
         )
@@ -231,6 +233,7 @@ macro(nf_add_platform_dependencies target)
                     ${TARGET_AZURERTOS_COMMON_INCLUDE_DIRS}
                     ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                     ${CHIBIOS_HAL_INCLUDE_DIRS}
+                    ${Gecko_SDK_INCLUDE_DIRS}
                     ${azure_rtos_SOURCE_DIR}/common/inc
                     ${AZRTOS_INCLUDES}
             )
@@ -245,6 +248,7 @@ macro(nf_add_platform_dependencies target)
                 ${ChibiOSnfOverlay_INCLUDE_DIRS}
                 ${CHIBIOS_CONTRIB_INCLUDE_DIRS}
                 ${CHIBIOS_HAL_INCLUDE_DIRS}
+                ${Gecko_SDK_INCLUDE_DIRS}
                 ${azure_rtos_SOURCE_DIR}/common/inc
                 ${NETXDUO_INCLUDES}
                 ${TARGET_BASE_LOCATION}
@@ -324,11 +328,17 @@ macro(nf_add_platform_include_directories target)
         )
     endif()
     
+    if(SILABS_GECKO_SDK_REQUIRED)
+        target_include_directories(${target}.elf PUBLIC
+            ${Gecko_SDK_INCLUDE_DIRS}
+        )
+    endif()
+  
     # includes specific to nanoBooter
     if(${target} STREQUAL ${NANOBOOTER_PROJECT_NAME})
 
         target_include_directories(${target}.elf PUBLIC
-            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}  
+            ${TARGET_AZURERTOS_NANOBOOTER_INCLUDE_DIRS}
         )
 
     endif()
@@ -350,7 +360,7 @@ macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_common.h @ONLY)
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
@@ -378,7 +388,7 @@ macro(nf_add_platform_sources target)
 
         # add header file for board definition
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoBooter/target_board.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoBooter/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
             
@@ -395,16 +405,24 @@ macro(nf_add_platform_sources target)
     if(${target} STREQUAL ${NANOCLR_PROJECT_NAME})
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/nanoCLR/target_board.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
+                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR/target_board.h @ONLY)
 
         target_sources(${target}.elf PUBLIC
             ${TARGET_AZURERTOS_NANOCLR_SOURCES}
         )
 
-        if(AZURERTOS_NETXDUO_REQUIRED)         
+        if(USE_NETWORKING_OPTION)         
             target_link_libraries(${target}.elf
                 nano::NF_Network
                 azrtos::netxduo
+            )
+        endif()
+
+        if(USBX_FEATURE_HID_OPTION)
+            target_link_libraries(${target}.elf
+                azrtos::netxduo
+                azrtos::filex
+                azrtos::usbx
             )
         endif()
 
@@ -423,6 +441,26 @@ macro(nf_add_platform_sources target)
 
         target_link_libraries(${target}.elf
             nano::stm32${TARGET_SERIES_SHORT_LOWER}_hal_driver_${target}
+        )
+
+    endif()
+
+    if(SILABS_GECKO_SDK_REQUIRED)
+        
+        nf_add_gecko_sdk(
+            BUILD_TARGET
+                ${target}
+            EXTRA_INCLUDES
+                ${AZRTOS_INCLUDES}
+                ${NF_CoreCLR_INCLUDE_DIRS}
+        )
+                        
+        add_dependencies(${target}.elf nano::gecko_sdk_${target})
+
+        target_link_libraries(${target}.elf
+            -Wl,-whole-archive
+            nano::gecko_sdk_${target}
+            -Wl,-no-whole-archive
         )
 
     endif()

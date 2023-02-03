@@ -108,17 +108,17 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_common_dependencies target)
 
+    configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/target_platform.h @ONLY)
+
     # dependencies specific to nanoBooter
     if("${target}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
 
     endif()
-    
+
     # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-    
-        configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_platform.h @ONLY)
-
+        
     endif()
 
 endmacro()

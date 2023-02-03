@@ -6,7 +6,8 @@
 #include <targetHAL.h>
 #include <WireProtocol_Message.h>
 
-__attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
+// defined as weak so it can be replaced with platform specific one
+__nfweak __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
 {
     (void)parameter;
 
@@ -20,7 +21,7 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
         WP_Message_Process();
 
         // pass control to the OS
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(10));
     }
 
     // this function never returns

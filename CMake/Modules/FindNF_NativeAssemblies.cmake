@@ -31,6 +31,7 @@ option(API_System.Runtime.Serialization         "option for System.Runtime.Seria
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
+option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
@@ -43,6 +44,10 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
 option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
+
+# Silabs Giant Gecko only
+option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
+option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko")
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -239,6 +244,18 @@ if(API_nanoFramework.Hardware.TI)
     PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
 endif()
 
+# nanoFramework.Hardware.TI
+if(API_nanoFramework.GiantGecko.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
+endif()
+
+# nanoFramework.Hardware.GiantGecko
+if(API_Hardware.GiantGecko)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
+endif()
+
 # nanoFramework.Runtime.Events
 if(API_nanoFramework.Runtime.Events)
     ##### API name here (doted name)
@@ -329,6 +346,12 @@ endif()
 if(API_System.Device.Wifi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Wifi")
+endif()
+
+# System.Device.UsbStream
+if(API_System.Device.UsbStream)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
 # Windows.Storage
