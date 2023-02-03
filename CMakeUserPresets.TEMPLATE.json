@@ -152,6 +152,7 @@
                     "value": "${presetName}"
                 },
                 "HAL_WP_USE_SERIAL": "ON",
+                "API_System.Device.Adc": "OFF",                
                 "API_nanoFramework.GiantGecko.Adc": "ON",
                 "NF_INTEROP_ASSEMBLIES": null
             }
