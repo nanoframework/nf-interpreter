@@ -566,12 +566,15 @@ jobs:
     matrix:
 
       SL_STK3701A_REVB:
-        TargetBoard: SL_STK3701A_REVB
+        TargetBoard: SL_STK3701A
         TargetSeries: 'efm32gg11'
+        TargetName: ''
         BuildOptions:
         GccArm_Version: 
         NeedsDFU: false
         NeedsSRECORD: false
+        TargetName: SL_STK3701A_REVB
+        PackageName: SL_STK3701A_REVB
 
   variables:
     # creates a counter and assigns it to the revision variable
