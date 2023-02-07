@@ -150,15 +150,6 @@ void nanoHAL_Uninitialize()
     EasyLink_abort();
 #endif
 
-    // disable UART pins and ADC
-    PIN_Config BoardGpioInitTable[] = {
-        12 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        13 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        24 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        PIN_TERMINATE};
-
-    PIN_init(BoardGpioInitTable);
-
     Events_Uninitialize();
 
     HAL_CONTINUATION::Uninitialize();
