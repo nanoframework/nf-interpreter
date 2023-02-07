@@ -568,7 +568,6 @@ jobs:
       SL_STK3701A_REVB:
         TargetBoard: SL_STK3701A
         TargetSeries: 'efm32gg11'
-        TargetName: ''
         BuildOptions:
         GccArm_Version: 
         NeedsDFU: false
