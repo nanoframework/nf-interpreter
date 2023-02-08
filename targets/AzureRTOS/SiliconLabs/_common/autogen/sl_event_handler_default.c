@@ -31,6 +31,8 @@
 extern void InitGpCrc(void);
 
 // implemented as weak function to allow overriding at platform level
+// DEVELOPER NOTE: when implementing this function, make sure to call ALL the functions there
+// except for the ones that aren't required for your target
 __nfweak void sl_platform_init(void)
 {
     CHIP_Init();
