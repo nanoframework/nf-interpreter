@@ -70,6 +70,10 @@
 #include <esp_rom_crc.h>
 #include <esp_rom_caps.h>
 
+// Touch pad
+#include <touch_sensor.h>
+#include <touch_pad.h>
+
 // includes specific for TinyUSB and CDC
 #if CONFIG_USB_CDC_ENABLED
 #include <tinyusb.h>

@@ -215,9 +215,15 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #if SOC_PM_SUPPORT_EXT_WAKEUP
 
     touch_pad_t touch_pad = esp_sleep_get_touchpad_wakeup_status();
-
+    int retValue = (int)touch_pad;
+    // We have to remap this enum.
+    if (touch_pad == TOUCH_PAD_MAX)
+    {
+            retValue = -1;
+    }
+    
     // Return value to the managed application
-    stack.SetResult_I4((int)touch_pad);
+    stack.SetResult_I4(retValue);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 
