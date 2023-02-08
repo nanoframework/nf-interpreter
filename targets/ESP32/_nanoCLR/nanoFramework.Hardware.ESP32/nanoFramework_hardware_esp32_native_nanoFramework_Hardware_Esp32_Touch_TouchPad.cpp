@@ -544,19 +544,19 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
-    touch_fsm_mode_t newMeasurementMode = (touch_fsm_mode_t)stack.Arg0().NumericByRef().s4;
+    measurementMode = (touch_fsm_mode_t)stack.Arg0().NumericByRef().s4;
 
-    if(newMeasurementMode != measurementMode)
+    // TODO: once we'll use IDF 5.0 or a version where the FSM start is present
+    // This section will have to be adjusted.
+
+    // Do we need to stop the task?
+    if(measurementMode == TOUCH_FSM_MODE_SW)
     {
-        // Do we need to stop the task?
-        if(measurementMode == TOUCH_FSM_MODE_SW)
-        {
-            isTimeModeOn = false;
-        }
-
-        measurementMode = newMeasurementMode;
+        isTimeModeOn = false;
     }
 
+    // As the ESP32 in this current version of IDF does not have a task to start the measurement,
+    // we do it in a task and don't change the mode.
     if (measurementMode == TOUCH_FSM_MODE_TIMER)
     {
         if (!isTimeModeOn)
