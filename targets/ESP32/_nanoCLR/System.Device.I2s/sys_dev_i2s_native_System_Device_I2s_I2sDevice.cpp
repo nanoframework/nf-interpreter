@@ -51,6 +51,10 @@ void Esp32_I2s_UnitializeAll()
         if (Esp_I2S_Initialised_Flag[c])
         {
             // Delete bus driver
+            
+            //TODO call only for ADC mode? Process result?
+            i2s_adc_disable((i2s_port_t)c);
+            
             i2s_driver_uninstall((i2s_port_t)c);
             Esp_I2S_Initialised_Flag[c] = 0;
         }
@@ -59,6 +63,11 @@ void Esp32_I2s_UnitializeAll()
 
 i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits)
 {
+    if (mode & I2S_MODE_ADC_BUILT_IN)
+    {
+        return bits;
+    }
+
     if (mode == (I2S_MODE_MASTER | I2S_MODE_TX))
     {
         return bits;
@@ -207,6 +216,79 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
+        
+        //Configure ADC Mode
+        if (mode & I2S_MODE_ADC_BUILT_IN)
+        {
+            //TODO - make attenuation configurable?  
+            adc_atten_t atten = ADC_ATTEN_DB_11;
+
+            // TODO Re-use logic in ADC?
+            int channelNumber = -1;
+
+            //Find out ADC Channel for pin confiured as I2S_DATAIN
+            for (unsigned int i = 0; i< sizeof(Esp32_ADC_DevicePinMap) / sizeof(int8_t);i++)
+            {
+                if (Esp32_ADC_DevicePinMap[i] == pin_config.data_in_num)
+                {
+                    channelNumber = i;
+                    break;
+                }
+            }
+            if (channelNumber < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
+
+
+            int adcUnit = channelNumber <= 9 ? 1 : 2;
+            switch (adcUnit)
+            {
+                case 1:
+                    // Normal channel 0-7 ?
+                    if (channelNumber <= 7)
+                    {
+                        //TODO - Make ADC Resolution configurable?
+                        //adc1_config_width(width_bit);
+
+                        if (adc1_config_channel_atten((adc1_channel_t)channelNumber, atten) != ESP_OK)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+                        }
+
+                        if(i2s_set_adc_mode(ADC_UNIT_1, (adc1_channel_t)channelNumber) != ESP_OK)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    // Adjust for ADC2
+                    channelNumber -= 10;
+
+                    //TODO - Make ADC Resolution configurable?
+                    //adc2_config_width(width_bit);
+                    
+                    if (adc2_config_channel_atten((adc2_channel_t)channelNumber, atten) != ESP_OK)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+                    }
+
+                    if(i2s_set_adc_mode(ADC_UNIT_2, (adc1_channel_t)channelNumber) != ESP_OK)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                    }
+
+                    break;
+            }
+
+            if(i2s_adc_enable(bus) != ESP_OK)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            }
+        }
+
         // Ensure driver gets unitialized during soft reboot
         HAL_AddSoftRebootHandler(Esp32_I2s_UnitializeAll);
 
@@ -314,7 +396,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::Read___VOID__Sys
                         size_t num_bytes_requested_from_dma = MIN(sizeof(transform_buffer), num_bytes_needed_from_dma);
                         size_t num_bytes_received_from_dma = 0;
 
-                        esp_err_t ret = i2s_read(
+                            esp_err_t ret = i2s_read(
                             bus,
                             transform_buffer,
                             num_bytes_requested_from_dma,
@@ -494,8 +576,11 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
         {
+            //TODO call only for ADC mode? Process result?
+            i2s_adc_disable(bus);
+            
             i2s_driver_uninstall(bus);
-
+            
             Esp_I2S_Initialised_Flag[bus] = 0;
         }
     }
