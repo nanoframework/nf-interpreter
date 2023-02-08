@@ -82,14 +82,14 @@ void MakeSureTouchIsInitialized()
         // is not properly working on ESP32 and we will manage a read loop
         // in a task.
         touch_pad_set_fsm_mode(TOUCH_FSM_MODE_SW);
-        
+
         // Make sure all pins are not reserved
         memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
 
         HAL_AddSoftRebootHandler(HAL_AddSoftRebootHandler);
 
         touch_pad_intr_enable();
-        touch_pad_isr_register(IsrCallBack, NULL);    
+        touch_pad_isr_register(IsrCallBack, NULL);
     }
 }
 
@@ -172,10 +172,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 uint16_t TouchPadRead(touch_pad_t padNumber)
 {
     uint16_t touchValue;
-    
+
     // Start a manual measurement if software mode
     touch_pad_sw_start();
-    
+
     while (!touch_pad_meas_is_done())
     {
         ;
@@ -191,7 +191,7 @@ uint16_t TouchPadRead(touch_pad_t padNumber)
         touch_pad_read(padNumber, &touchValue);
     }
 
-        // Do we have to reset the event
+    // Do we have to reset the event
     if (touchValue > thresholds[padNumber] && touchValues[padNumber])
     {
         PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
@@ -336,7 +336,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeCalibrate___I4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
+    NativeCalibrate___I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -474,8 +475,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
-    touch_trigger_mode_t triggerMode = (touch_trigger_mode_t)stack.Arg0().NumericByRef().s4;    
-    
+    touch_trigger_mode_t triggerMode = (touch_trigger_mode_t)stack.Arg0().NumericByRef().s4;
+
     if (touch_pad_set_trigger_mode(triggerMode) != ESP_OK)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
@@ -544,7 +545,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     // This section will have to be adjusted.
 
     // Do we need to stop the task?
-    if(measurementMode == TOUCH_FSM_MODE_SW)
+    if (measurementMode == TOUCH_FSM_MODE_SW)
     {
         isTimeModeOn = false;
     }
