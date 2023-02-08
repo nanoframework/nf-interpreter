@@ -34,10 +34,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 ########################################################
 
+nf_check_path_limits()
+
 include(binutils.common)
 include(binutils.ESP32)
 
-nf_check_path_limits()
 
 ######################################################
 # set build type to release if not specified otherwise

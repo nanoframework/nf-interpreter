@@ -22,7 +22,7 @@ jobs:
         with:
           target_sync_branch: skyworks-evb
           upstream_sync_branch: main
-          upstream_sync_repo: nanoframework/nf-interpreter
+          upstream_sync_repo: Skyworks-Timing-Software/nf-interpreter
 
       - name: New commits found
         if: steps.sync.outputs.has_new_commits == 'true'
