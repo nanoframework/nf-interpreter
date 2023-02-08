@@ -219,9 +219,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     // We have to remap this enum.
     if (touch_pad == TOUCH_PAD_MAX)
     {
-            retValue = -1;
+        retValue = -1;
     }
-    
+
     // Return value to the managed application
     stack.SetResult_I4(retValue);
 
