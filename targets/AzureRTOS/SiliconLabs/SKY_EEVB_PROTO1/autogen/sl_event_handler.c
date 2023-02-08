@@ -28,18 +28,21 @@
 #include <tx_api.h>
 #include <nanoCLR_Headers.h>
 
+extern void InitGpCrc(void);
+
 void sl_platform_init(void)
 {
     CHIP_Init();
     sl_device_init_nvic();
     sl_board_preinit();
     sl_device_init_dcdc();
-    //sl_device_init_hfxo();
+    // sl_device_init_hfxo();
     sl_device_init_hfrco();
-    //sl_device_init_lfxo();
+    // sl_device_init_lfxo();
     sl_device_init_lfrco();
     sl_device_init_clocks();
     sl_device_init_emu();
     sl_board_init();
     sl_power_manager_init();
+    InitGpCrc();
 }
