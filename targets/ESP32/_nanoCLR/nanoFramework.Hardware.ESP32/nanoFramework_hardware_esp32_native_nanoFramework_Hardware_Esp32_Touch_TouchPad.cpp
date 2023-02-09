@@ -8,6 +8,8 @@
 #include <nanoCLR_Hardware.h>
 #include <targetPAL.h>
 
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+
 static int numberInitialzed = 0;
 static bool isTouchInitialized = false;
 static bool isTouchPadUsed[TOUCH_PAD_MAX];
@@ -93,9 +95,13 @@ void MakeSureTouchIsInitialized()
     }
 }
 
+#endif
+
 HRESULT GetAndCheckTouchPadNumber(CLR_RT_StackFrame &stack, touch_pad_t *padNumber)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // Get the stack
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -112,6 +118,10 @@ HRESULT GetAndCheckTouchPadNumber(CLR_RT_StackFrame &stack, touch_pad_t *padNumb
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -119,6 +129,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     NANOCLR_CHECK_HRESULT(GetAndCheckTouchPadNumber(stack, &padNumber));
@@ -145,6 +157,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     numberInitialzed++;
     isTouchPadUsed[padNumber] = true;
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -152,6 +168,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     if (numberInitialzed == 1)
     {
@@ -166,8 +184,14 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     numberInitialzed--;
     isTouchPadUsed[padNumber] = false;
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
 uint16_t TouchPadRead(touch_pad_t padNumber)
 {
@@ -221,10 +245,14 @@ static void ReadTask(void *pvParameter)
     }
 }
 
+#endif
+
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeRead___I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     uint16_t touchValue;
@@ -242,6 +270,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     stack.SetResult_I4(touchValue);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -249,6 +281,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetThreshold___U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     NANOCLR_CHECK_HRESULT(GetAndCheckTouchPadNumber(stack, &padNumber));
@@ -263,6 +297,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     thresholds[padNumber] = threshold;
     stack.SetResult_U2(threshold);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -270,6 +308,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeSetThreshold___VOID__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     uint16_t threshold;
@@ -286,6 +326,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     // Make sure we store it for later usage
     thresholds[padNumber] = threshold;
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -293,6 +337,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetTouchSpeed___VOID__BYREF_I4__BYREF_I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     touch_cnt_slope_t slope;
@@ -312,6 +358,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     bhOpt.SetInteger(opt);
     NANOCLR_CHECK_HRESULT(bhOpt.StoreToReference(stack.Arg2(), 0));
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -319,6 +369,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeSetChargeSpeed___VOID__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     touch_cnt_slope_t slope;
@@ -333,6 +385,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -340,6 +396,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeCalibrate___I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
     int count;
@@ -358,6 +416,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     // And we return the average
     stack.SetResult_I4((int)average);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -365,6 +427,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetGpioNumberFromTouchNumber___STATIC__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     int padNumber = (int)(stack.Arg0().NumericByRef().u4);
     int gpioNumber = -1;
@@ -446,6 +510,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     stack.SetResult_I4(gpioNumber);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -453,6 +521,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetTriggerMode___STATIC__nanoFrameworkHardwareEsp32TouchTouchTriggerMode(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -465,6 +535,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     stack.SetResult_I4(triggerMode);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -472,6 +546,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeSetTriggerMode___STATIC__VOID__nanoFrameworkHardwareEsp32TouchTouchTriggerMode(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -482,6 +558,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -489,6 +569,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetTriggerSource___STATIC__nanoFrameworkHardwareEsp32TouchWakeUpSource(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -500,6 +582,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     stack.SetResult_I4(triggerSource);
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -507,6 +593,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeSetTriggerSource___STATIC__VOID__nanoFrameworkHardwareEsp32TouchWakeUpSource(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -516,6 +604,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -524,18 +616,28 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
 
     stack.SetResult_I4(measurementMode);
 
     NANOCLR_NOCLEANUP_NOLABEL();
+
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    NANOCLR_NOCLEANUP();
+#endif
+
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
     NativeSetMeasurementMode___STATIC__VOID__nanoFrameworkHardwareEsp32TouchMeasurementMode(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -563,6 +665,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
+
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    NANOCLR_NOCLEANUP();
+#endif
+
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
@@ -570,6 +678,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -582,6 +692,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -590,6 +704,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_high_volt_t refh;
     touch_low_volt_t refl;
@@ -611,6 +727,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     bhAtten.SetInteger(atten);
     NANOCLR_CHECK_HRESULT(bhAtten.StoreToReference(stack.Arg2(), 0));
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -618,6 +738,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeStartFilter___STATIC__VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // Static function, argument 0 is the first argument
     uint32_t period = (uint32_t)stack.Arg0().NumericByRef().u4;
@@ -628,7 +750,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     }
 
     isFilterOn = true;
-    NANOCLR_NOCLEANUP();
+    
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
+NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
@@ -636,15 +763,25 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+
     touch_pad_filter_stop();
     isFilterOn = false;
     NANOCLR_NOCLEANUP_NOLABEL();
+
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+    NANOCLR_NOCLEANUP();
+#endif
+
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
     NativeSetMeasurementTime___STATIC__VOID__U2__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // Static function, argument 0 is the first argument
     uint16_t sleep = (uint32_t)stack.Arg0().NumericByRef().u2;
@@ -655,6 +792,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
+
     NANOCLR_NOCLEANUP();
 }
 
@@ -662,6 +803,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NativeGetMeasurementTime___STATIC__VOID__BYREF_U2__BYREF_U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // Static function, argument 0 is the first argument
     uint16_t sleep;
@@ -679,6 +822,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_CHECK_HRESULT(bhSleep.StoreToReference(stack.Arg0(), 0));
     bhMeas.SetInteger(meas);
     NANOCLR_CHECK_HRESULT(bhMeas.StoreToReference(stack.Arg1(), 0));
+
+#else
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#endif
 
     NANOCLR_NOCLEANUP();
 }
