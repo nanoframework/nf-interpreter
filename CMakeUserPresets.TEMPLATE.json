@@ -140,6 +140,46 @@
             }
         },
         {
+            "name": "SL_STK3701A",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "SL_STK3701A_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "${presetName}"
+                },
+                "HAL_WP_USE_SERIAL": "ON",
+                "API_System.Device.Adc": "OFF",                
+                "API_nanoFramework.GiantGecko.Adc": "ON",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "inherits": [
+                "user-local-tools",
+                "user-prefs",
+                "SL_STK3701A_preset"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": {
+                    "type": "STRING",
+                    "value": "SL_STK3701A"
+                },
+                "TARGET_SERIAL_BAUDRATE": "115200",
+                "GECKO_FEATURE_USBD_HID": "OFF",
+                "GECKO_FEATURE_USBD_WINUSB": "OFF",
+                "HAL_WP_USE_SERIAL": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "API_System.Device.Adc": "OFF",
+                "API_nanoFramework.GiantGecko.Adc": "ON",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        },  
+        {
             "name": "ESP32_PSRAM_REV0",
             "inherits": [
                 "user-local-tools",
@@ -752,6 +792,16 @@
             "name": "ST_B_L475E_IOT01A",
             "displayName": "ST_B_L475E_IOT01A",
             "configurePreset": "ST_B_L475E_IOT01A"
+        },
+        {
+            "name": "SL_STK3701A",
+            "displayName": "SL_STK3701A",
+            "configurePreset": "SL_STK3701A"
+        },
+        {
+            "name": "SL_STK3701A_REVB",
+            "displayName": "SL_STK3701A_REVB",
+            "configurePreset": "SL_STK3701A_REVB"
         },
         {
             "name": "ESP32_PSRAM_REV0",

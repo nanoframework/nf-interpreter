@@ -192,7 +192,7 @@ macro(nf_add_stm32_cube)
             ${NFSTMPKG_EXTRA_INCLUDES}
     )
 
-    nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NFSTMPKG_BUILD_TARGET})
+    nf_set_compile_options(TARGET ${LIB_NAME})
     nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFSTMPKG_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFSTMPKG_BUILD_TARGET})
     nf_set_link_options(TARGET ${LIB_NAME})
 
