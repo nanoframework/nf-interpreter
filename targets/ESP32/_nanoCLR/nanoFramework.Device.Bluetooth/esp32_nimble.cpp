@@ -474,10 +474,17 @@ void Device_ble_dispose()
     }
 
     BLE_DEBUG_PRINTF("delete mutexs\n");
-    vEventGroupDelete(ble_event_waitgroup);
-    vSemaphoreDelete(ble_event_data.mutex);
 
-    // vSemaphoreDelete does not null the pointer, we help to clean up
+    if (ble_event_waitgroup)
+    {
+        vEventGroupDelete(ble_event_waitgroup);
+    }
+    if (ble_event_data.mutex)
+    {
+        vSemaphoreDelete(ble_event_data.mutex);
+    }
+
+    ble_event_waitgroup = NULL;
     ble_event_data.mutex = NULL;
 
     ble_initialized = false;
@@ -509,6 +516,12 @@ bool DeviceBleInit()
 
     ble_event_waitgroup = xEventGroupCreate();
     ble_event_data.mutex = xSemaphoreCreateMutex();
+
+    if (!ble_event_waitgroup  || !ble_event_data.mutex)
+    {
+        BLE_DEBUG_PRINTF("Ble Event Wait Group or mutex is null\n");
+        return false;
+    }
 
     nimble_port_init();
 
