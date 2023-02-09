@@ -70,9 +70,11 @@
 #include <esp_rom_crc.h>
 #include <esp_rom_caps.h>
 
-// Touch pad
+// Touch pad supported only on those platforms
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 #include <touch_sensor.h>
 #include <touch_pad.h>
+#endif
 
 // includes specific for TinyUSB and CDC
 #if CONFIG_USB_CDC_ENABLED
