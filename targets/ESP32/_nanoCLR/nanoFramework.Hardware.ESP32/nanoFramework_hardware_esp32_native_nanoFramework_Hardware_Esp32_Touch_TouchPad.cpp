@@ -629,7 +629,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     NANOCLR_NOCLEANUP();
 #endif
-
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
@@ -670,7 +669,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     NANOCLR_NOCLEANUP();
 #endif
-
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
@@ -750,12 +748,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     }
 
     isFilterOn = true;
-    
+
 #else
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 #endif
 
-NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
@@ -773,7 +771,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     NANOCLR_NOCLEANUP();
 #endif
-
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
