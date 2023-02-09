@@ -7,13 +7,17 @@
 #define HALCONF_NF_H
 
 // enables STM32 Flash driver
-#if !defined(HAL_NF_USE_STM32_FLASH) 
-#define HAL_NF_USE_STM32_FLASH         TRUE
+#if !defined(HAL_NF_USE_STM32_FLASH)
+#define HAL_NF_USE_STM32_FLASH TRUE
 #endif
 
 //  Enables the FSMC subsystem.
 #if !defined(HAL_NF_USE_FSMC)
-#define HAL_NF_USE_FSMC                TRUE
+#define HAL_NF_USE_FSMC TRUE
+#endif
+
+#if !defined(HAL_LTDC_MODULE_ENABLED)
+#define HAL_LTDC_MODULE_ENABLED TRUE
 #endif
 
 #endif // HALCONF_NF_H

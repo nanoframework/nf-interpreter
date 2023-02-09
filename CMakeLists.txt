@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -553,6 +553,14 @@ else()
 endif()
 
 
+if(API_nanoFramework.GiantGecko.Adc)
+    # check if the standard ADC lib is already enabled
+    if(API_System.Device.Adc)
+        message(FATAL_ERROR "\n\nERROR:Can't enable simultaneously System.Device.Adc and GiantGecko.Adc APIs")
+    endif()
+endif()
+
+
 if(API_System.Device.Dac)
     set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 else()
@@ -604,8 +612,10 @@ endif()
 
 if(API_nanoFramework.Device.OneWire)
     set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################

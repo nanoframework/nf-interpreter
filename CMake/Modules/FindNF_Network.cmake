@@ -15,8 +15,9 @@ if(RTOS_AZURERTOS_CHECK)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/NetX)
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/AzureRTOS/_common/include)
+    list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS/${TARGET_BOARD})
     list(APPEND NF_Network_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/AzureRTOS)
-
+    
     # source files for nanoFramework Networking
     set(NF_Network_SRCS
 
@@ -521,7 +522,7 @@ macro(nf_add_lib_network)
         )
 
     else()
-        nf_set_compile_options(TARGET ${LIB_NAME} EXTRA_COMPILE_OPTIONS ${NFALN_EXTRA_COMPILE_OPTIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
+        nf_set_compile_options(TARGET ${LIB_NAME} EXTRA_COMPILE_OPTIONS ${NFALN_EXTRA_COMPILE_OPTIONS})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALN_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NFALN_BUILD_TARGET})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()
