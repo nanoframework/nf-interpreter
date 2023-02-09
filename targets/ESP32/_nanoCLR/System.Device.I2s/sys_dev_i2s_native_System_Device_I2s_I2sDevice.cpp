@@ -51,9 +51,11 @@ void Esp32_I2s_UnitializeAll()
         if (Esp_I2S_Initialised_Flag[c])
         {
             // Delete bus driver
-            
+
+#if SOC_I2S_SUPPORTS_ADC_DAC            
             //TODO call only for ADC mode? Process result?
             i2s_adc_disable((i2s_port_t)c);
+#endif            
             
             i2s_driver_uninstall((i2s_port_t)c);
             Esp_I2S_Initialised_Flag[c] = 0;
@@ -63,11 +65,12 @@ void Esp32_I2s_UnitializeAll()
 
 i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits)
 {
+#if SOC_I2S_SUPPORTS_ADC_DAC    
     if (mode & I2S_MODE_ADC_BUILT_IN)
     {
         return bits;
     }
-
+#endif
     if (mode == (I2S_MODE_MASTER | I2S_MODE_TX))
     {
         return bits;
@@ -216,7 +219,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        
+#if SOC_I2S_SUPPORTS_ADC_DAC       
         //Configure ADC Mode
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
@@ -288,6 +291,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
             }
         }
+#endif
 
         // Ensure driver gets unitialized during soft reboot
         HAL_AddSoftRebootHandler(Esp32_I2s_UnitializeAll);
@@ -576,9 +580,12 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
         {
+
+#if SOC_I2S_SUPPORTS_ADC_DAC            
             //TODO call only for ADC mode? Process result?
             i2s_adc_disable(bus);
-            
+#endif
+
             i2s_driver_uninstall(bus);
             
             Esp_I2S_Initialised_Flag[bus] = 0;
