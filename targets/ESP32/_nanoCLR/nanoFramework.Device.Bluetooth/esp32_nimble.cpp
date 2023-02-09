@@ -517,7 +517,7 @@ bool DeviceBleInit()
     ble_event_waitgroup = xEventGroupCreate();
     ble_event_data.mutex = xSemaphoreCreateMutex();
 
-    if (!ble_event_waitgroup  || !ble_event_data.mutex)
+    if (!ble_event_waitgroup || !ble_event_data.mutex)
     {
         BLE_DEBUG_PRINTF("Ble Event Wait Group or mutex is null\n");
         return false;
