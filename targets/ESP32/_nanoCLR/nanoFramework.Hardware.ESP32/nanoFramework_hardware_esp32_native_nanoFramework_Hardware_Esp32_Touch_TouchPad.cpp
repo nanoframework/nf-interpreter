@@ -921,7 +921,7 @@ void MakeSureTouchIsInitialized()
 
         // Make sure all pins are not reserved
         memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
-            // Clear the pin values
+        // Clear the pin values
         memset(touchValues, 0, sizeof(touchValues));
         memset(thresholds, 0, sizeof(thresholds));
         memset(lastTouchValues, 0, sizeof(lastTouchValues));
@@ -1012,7 +1012,7 @@ void ReadTask(void *pvParameter)
         }
 
         // Wait the measurement time, 20 milliseconds
-        // So we are aligning on the nano Thread        
+        // So we are aligning on the nano Thread
         vTaskDelay(20 / portTICK_PERIOD_MS);
     }
 }
