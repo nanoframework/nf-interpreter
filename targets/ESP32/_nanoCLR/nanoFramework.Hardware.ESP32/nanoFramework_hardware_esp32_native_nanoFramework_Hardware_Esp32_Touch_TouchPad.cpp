@@ -35,7 +35,7 @@ static void IsrCallBack(void *arg)
 #endif
     for (int i = 0; i < TOUCH_PAD_MAX; i++)
     {
-        val = (padIntr >> i) & 0x01;
+        val = (padIntr >> i) & 0x01;        
         // Check if we have a change and raise an even if yes
         if (val != touchValues[i])
         {
@@ -51,7 +51,13 @@ Resources need to be cleaned and the driver uninstalled in case of a soft reboot
 */
 void HAL_AddSoftRebootHandler()
 {
-    // top the task
+    // stop the task
+    if (xHandle != NULL)
+    {
+        vTaskDelete(xHandle);
+    }
+
+    xHandle = NULL;
     isTimeModeOn = false;
 
     // Clean the isr registration
@@ -103,8 +109,10 @@ void MakeSureTouchIsInitialized()
 
         HAL_AddSoftRebootHandler(HAL_AddSoftRebootHandler);
 #if defined(CONFIG_IDF_TARGET_ESP32)
-        touch_pad_intr_enable();
-        touch_pad_isr_register(IsrCallBack, NULL);
+        // The ISR is not really working properly, leaving this code in case new functions
+        // and features will be added in the future.
+        // touch_pad_intr_enable();
+        // touch_pad_isr_register(IsrCallBack, NULL);
 #else
         touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
         touch_pad_isr_register(IsrCallBack, NULL, TOUCH_PAD_INTR_MASK_ALL);
@@ -224,10 +232,11 @@ uint32_t TouchPadRead(touch_pad_t padNumber)
     // Start a manual measurement if software mode
     touch_pad_sw_start();
 
+    // This doesn't seems necessary, leaving here in case it will be for some reasons
     // while (!touch_pad_meas_is_done())
-    {
-        ;
-    }
+    // {
+    //    ;
+    // }
 
     // If we are filtering, the function to call to read the data is different
     if (isFilterOn)
@@ -247,11 +256,18 @@ uint32_t TouchPadRead(touch_pad_t padNumber)
 #endif
     }
 
-    // Do we have to reset the event
+    // Do we have an event?
     if (touchValue > thresholds[padNumber] && touchValues[padNumber])
     {
+        // Pressed
         PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
         touchValues[padNumber] = false;
+    }
+    else if (touchValue < thresholds[padNumber] && !touchValues[padNumber])
+    {
+        // Released
+        PostManagedEvent(EVENT_TOUCH, 0, padNumber, 1);
+        touchValues[padNumber] = true;
     }
 
     lastTouchValues[padNumber] = touchValue;
@@ -704,6 +720,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         {
             vTaskDelete(xHandle);
         }
+
+        // Waiting a bit to make sure the task is properly deleted
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        xHandle = NULL;
     }
 
     // As the ESP32 in this current version of IDF does not have a task to start the measurement,
@@ -882,7 +902,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
                 .NumericByRef()
                 .s4;
 
-    err = touch_pad_filter_set_config(filterConfig);
+    err = touch_pad_filter_set_config(&filterConfig);
     if (err != ESP_OK)
     {
         if (err == ESP_ERR_INVALID_ARG)
