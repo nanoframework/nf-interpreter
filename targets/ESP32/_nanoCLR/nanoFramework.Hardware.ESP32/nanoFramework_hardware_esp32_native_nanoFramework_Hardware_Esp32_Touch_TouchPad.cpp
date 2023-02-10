@@ -907,7 +907,8 @@ void HAL_AddSoftRebootHandler()
 This function ensure that the driver is installed for static functions.
 It does initialize as well the pins table and register for the soft reboot call back.
 */
-void MakeSureTouchIsInitialized()
+void Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
+    MakeSureTouchIsInitialized()
 {
     if (!isTouchInitialized)
     {
@@ -943,7 +944,8 @@ void MakeSureTouchIsInitialized()
 This function reads the sensor value. It does return the last read if running in timer mode.
 Otherwise returns the value read directly on the sensors.
 */
-uint32_t TouchPadRead(touch_pad_t padNumber)
+uint32_t Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::TouchPadRead(
+    touch_pad_t padNumber)
 {
 #if defined(CONFIG_IDF_TARGET_ESP32)
     uint16_t touchValue;
@@ -999,7 +1001,8 @@ uint32_t TouchPadRead(touch_pad_t padNumber)
 /*
 This task is run when the timer mode is used.
 */
-void ReadTask(void *pvParameter)
+void Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::ReadTask(
+    void *pvParameter)
 {
     while (isTimeModeOn)
     {

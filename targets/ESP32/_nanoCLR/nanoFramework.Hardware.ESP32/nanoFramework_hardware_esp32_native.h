@@ -12,11 +12,38 @@
 #include <nanoCLR_Checks.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack EspNativeError
+{
+    EspNativeError_OK = 0,
+    EspNativeError_FAIL = -1,
+    EspNativeError_NO_MEM = 257,
+    EspNativeError_INVALID_ARG = 258,
+    EspNativeError_INVALID_STATE = 259,
+    EspNativeError_INVALID_SIZE = 260,
+    EspNativeError_NOT_FOUND = 261,
+    EspNativeError_NOT_SUPPORTED = 262,
+    EspNativeError_TIMEOUT = 263,
+    EspNativeError_INVALID_RESPONSE = 264,
+    EspNativeError_INVALID_CRC = 265,
+    EspNativeError_INVALID_VERSION = 266,
+    EspNativeError_INVALID_MAC = 267,
+    EspNativeError_WIFI_BASE = 12288,
+} EspNativeError;
 
 typedef enum __nfpack HighResTimerEventType
 {
     HighResTimerEventType_TimerExpired = 101,
 } HighResTimerEventType;
+
+typedef enum __nfpack Logging_LogLevel
+{
+    Logging_LogLevel_LOG_LEVEL_NONE = 0,
+    Logging_LogLevel_LOG_LEVEL_ERROR = 1,
+    Logging_LogLevel_LOG_LEVEL_WARN = 2,
+    Logging_LogLevel_LOG_LEVEL_INFO = 3,
+    Logging_LogLevel_LOG_LEVEL_DEBUG = 4,
+    Logging_LogLevel_LOG_LEVEL_VERBOSE = 5,
+} Logging_LogLevel;
 
 typedef enum __nfpack NativeMemory_MemoryType
 {
@@ -260,8 +287,10 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep
 {
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTimer___STATIC__nanoFrameworkHardwareEsp32EspNativeError__U8);
-    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByPin___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
-    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
+    NANOCLR_NATIVE_DECLARE(
+        NativeEnableWakeupByPin___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
+    NANOCLR_NATIVE_DECLARE(
+        NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartDeepSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
