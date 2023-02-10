@@ -35,7 +35,7 @@ static void IsrCallBack(void *arg)
 #endif
     for (int i = 0; i < TOUCH_PAD_MAX; i++)
     {
-        val = (padIntr >> i) & 0x01;        
+        val = (padIntr >> i) & 0x01;
         // Check if we have a change and raise an even if yes
         if (val != touchValues[i])
         {
