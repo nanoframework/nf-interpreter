@@ -25,6 +25,180 @@ typedef enum __nfpack NativeMemory_MemoryType
     NativeMemory_MemoryType_SpiRam = 2,
 } NativeMemory_MemoryType;
 
+typedef enum __nfpack Sleep_TouchPad
+{
+    Sleep_TouchPad_None = -1,
+    Sleep_TouchPad_Num0 = 0,
+    Sleep_TouchPad_Num1 = 1,
+    Sleep_TouchPad_Num2 = 2,
+    Sleep_TouchPad_Num3 = 3,
+    Sleep_TouchPad_Num4 = 4,
+    Sleep_TouchPad_Num5 = 5,
+    Sleep_TouchPad_Num6 = 6,
+    Sleep_TouchPad_Num7 = 7,
+    Sleep_TouchPad_Num8 = 8,
+    Sleep_TouchPad_Num9 = 9,
+    Sleep_TouchPad_Num10 = 10,
+    Sleep_TouchPad_Num11 = 11,
+    Sleep_TouchPad_Num12 = 12,
+    Sleep_TouchPad_Num13 = 13,
+    Sleep_TouchPad_Num14 = 14,
+} Sleep_TouchPad;
+
+typedef enum __nfpack Sleep_WakeupCause
+{
+    Sleep_WakeupCause_Undefined = 0,
+    Sleep_WakeupCause_Ext0 = 2,
+    Sleep_WakeupCause_Ext1 = 3,
+    Sleep_WakeupCause_Timer = 4,
+    Sleep_WakeupCause_TouchPad = 5,
+    Sleep_WakeupCause_Ulp = 6,
+    Sleep_WakeupCause_Gpio = 7,
+    Sleep_WakeupCause_Uart = 8,
+} Sleep_WakeupCause;
+
+typedef enum __nfpack Sleep_WakeupGpioPin
+{
+    Sleep_WakeupGpioPin_None = 0,
+    Sleep_WakeupGpioPin_Pin0 = 1,
+    Sleep_WakeupGpioPin_Pin2 = 4,
+    Sleep_WakeupGpioPin_Pin4 = 16,
+    Sleep_WakeupGpioPin_Pin12 = 4096,
+    Sleep_WakeupGpioPin_Pin13 = 8192,
+    Sleep_WakeupGpioPin_Pin14 = 16384,
+    Sleep_WakeupGpioPin_Pin15 = 32768,
+    Sleep_WakeupGpioPin_Pin25 = 33554432,
+    Sleep_WakeupGpioPin_Pin26 = 67108864,
+    Sleep_WakeupGpioPin_Pin27 = 134217728,
+    Sleep_WakeupGpioPin_Pin32 = 4294967296,
+    Sleep_WakeupGpioPin_Pin33 = 8589934592,
+    Sleep_WakeupGpioPin_Pin34 = 17179869184,
+    Sleep_WakeupGpioPin_Pin35 = 34359738368,
+    Sleep_WakeupGpioPin_Pin36 = 68719476736,
+    Sleep_WakeupGpioPin_Pin37 = 137438953472,
+    Sleep_WakeupGpioPin_Pin38 = 274877906944,
+    Sleep_WakeupGpioPin_Pin39 = 549755813888,
+} Sleep_WakeupGpioPin;
+
+typedef enum __nfpack Sleep_WakeupMode
+{
+    Sleep_WakeupMode_AllLow = 0,
+    Sleep_WakeupMode_AnyHigh = 1,
+} Sleep_WakeupMode;
+
+typedef enum __nfpack FilterSettingDebounce
+{
+    FilterSettingDebounce_NoDebounce = 0,
+    FilterSettingDebounce_One = 1,
+    FilterSettingDebounce_Two = 2,
+    FilterSettingDebounce_Three = 3,
+    FilterSettingDebounce_Four = 4,
+    FilterSettingDebounce_Five = 5,
+    FilterSettingDebounce_Six = 6,
+    FilterSettingDebounce_Seven = 7,
+} FilterSettingDebounce;
+
+typedef enum __nfpack FilterSettingMode
+{
+    FilterSettingMode_Iir4 = 0,
+    FilterSettingMode_Iir8 = 1,
+    FilterSettingMode_Iir16 = 2,
+    FilterSettingMode_Iir32 = 3,
+    FilterSettingMode_Iir64 = 4,
+    FilterSettingMode_Iir128 = 5,
+    FilterSettingMode_Iir256 = 6,
+    FilterSettingMode_IirJitter = 7,
+} FilterSettingMode;
+
+typedef enum __nfpack FilterSettingNoiseThreshold
+{
+    FilterSettingNoiseThreshold_Low = 0,
+    FilterSettingNoiseThreshold_Mediumlow = 1,
+    FilterSettingNoiseThreshold_MediumHigh = 2,
+    FilterSettingNoiseThreshold_High = 3,
+} FilterSettingNoiseThreshold;
+
+typedef enum __nfpack FilterSettingSmoothMode
+{
+    FilterSettingSmoothMode_Off = 0,
+    FilterSettingSmoothMode_Iir2 = 1,
+    FilterSettingSmoothMode_Iir4 = 2,
+    FilterSettingSmoothMode_Iir8 = 3,
+} FilterSettingSmoothMode;
+
+typedef enum __nfpack IFilterSetting_FilterType
+{
+    IFilterSetting_FilterType_Esp32 = 0,
+    IFilterSetting_FilterType_S2_S3 = 1,
+} IFilterSetting_FilterType;
+
+typedef enum __nfpack MeasurementMode
+{
+    MeasurementMode_Timer = 0,
+    MeasurementMode_Software = 1,
+} MeasurementMode;
+
+typedef enum __nfpack TouchChargeSpeed_ChargeSpeed
+{
+    TouchChargeSpeed_ChargeSpeed_Zero = 0,
+    TouchChargeSpeed_ChargeSpeed_Slowest = 1,
+    TouchChargeSpeed_ChargeSpeed_Speed2 = 2,
+    TouchChargeSpeed_ChargeSpeed_Speed3 = 3,
+    TouchChargeSpeed_ChargeSpeed_Speed4 = 4,
+    TouchChargeSpeed_ChargeSpeed_Speed5 = 5,
+    TouchChargeSpeed_ChargeSpeed_Speed6 = 6,
+    TouchChargeSpeed_ChargeSpeed_Fastest = 7,
+} TouchChargeSpeed_ChargeSpeed;
+
+typedef enum __nfpack TouchChargeSpeed_InitialCharge
+{
+    TouchChargeSpeed_InitialCharge_Low = 0,
+    TouchChargeSpeed_InitialCharge_High = 1,
+} TouchChargeSpeed_InitialCharge;
+
+typedef enum __nfpack TouchHighVoltage
+{
+    TouchHighVoltage_Volt2V4 = 0,
+    TouchHighVoltage_Volt2V5 = 1,
+    TouchHighVoltage_Volt2V6 = 2,
+    TouchHighVoltage_Volt2V7 = 3,
+} TouchHighVoltage;
+
+typedef enum __nfpack TouchHighVoltageAttenuation
+{
+    TouchHighVoltageAttenuation_Volt1V5 = 0,
+    TouchHighVoltageAttenuation_Volt1V0 = 1,
+    TouchHighVoltageAttenuation_Volt0V5 = 2,
+    TouchHighVoltageAttenuation_Volt0V0 = 3,
+} TouchHighVoltageAttenuation;
+
+typedef enum __nfpack TouchLowVoltage
+{
+    TouchLowVoltage_Volt0V5 = 0,
+    TouchLowVoltage_Volt0V6 = 1,
+    TouchLowVoltage_Volt0V7 = 2,
+    TouchLowVoltage_Volt0V8 = 3,
+} TouchLowVoltage;
+
+typedef enum __nfpack TouchTriggerMode
+{
+    TouchTriggerMode_BellowThreshold = 0,
+    TouchTriggerMode_AboveThreshold = 1,
+} TouchTriggerMode;
+
+typedef enum __nfpack WakeUpSource
+{
+    WakeUpSource_BothSet1AndSet2 = 0,
+    WakeUpSource_OnlySet1 = 1,
+} WakeUpSource;
+
+typedef enum __nfpack ValueTypes
+{
+    ValueTypes_Index = 0,
+    ValueTypes_DeviceIndex = 256,
+    ValueTypes_DeviceType = 65536,
+} ValueTypes;
+
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration
 {
     NANOCLR_NATIVE_DECLARE(NativeSetPinFunction___STATIC__VOID__I4__I4);
@@ -88,21 +262,15 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTimer___STATIC__nanoFrameworkHardwareEsp32EspNativeError__U8);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByPin___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__I4);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
-    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError__I4__I4);
+    NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartDeepSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeGetWakeupCause___STATIC__nanoFrameworkHardwareEsp32SleepWakeupCause);
     NANOCLR_NATIVE_DECLARE(NativeGetWakeupGpioPin___STATIC__nanoFrameworkHardwareEsp32SleepWakeupGpioPin);
-    NANOCLR_NATIVE_DECLARE(NativeGetWakeupTouchpad___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(NativeGetWakeupTouchpad___STATIC__nanoFrameworkHardwareEsp32SleepTouchPad);
 
     //--//
 };
-
-typedef enum __nfpack IFilterSetting_FilterType
-{
-    IFilterSetting_FilterType_Esp32 = 0,
-    IFilterSetting_FilterType_S2_S3 = 1,
-} IFilterSetting_FilterType;
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32FilterSetting
 {
@@ -111,6 +279,14 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
     //--//
 };
+
+// struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_MeasurementTime
+// {
+//     static const int FIELD__<SleepCycles> k__BackingField = 1;
+//     static const int FIELD__<MeasurementCycles> k__BackingField = 2;
+
+//     //--//
+// };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting
 {
@@ -123,6 +299,22 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
     //--//
 };
+
+// struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchChargeSpeed
+// {
+//     static const int FIELD__<Speed> k__BackingField = 1;
+//     static const int FIELD__<Charge> k__BackingField = 2;
+
+//     //--//
+// };
+
+// struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPadEventArgs
+// {
+//     static const int FIELD__<PadNumber> k__BackingField = 3;
+//     static const int FIELD__<Touched> k__BackingField = 4;
+
+//     //--//
+// };
 
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad
 {
@@ -163,16 +355,27 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeGetMeasurementTime___STATIC__VOID__BYREF_U2__BYREF_U2);
 
     //--//
+
+    static uint32_t TouchPadRead(touch_pad_t padNumber);
+    static void ReadTask(void *pvParameter);
+    static void MakeSureTouchIsInitialized();
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPadEvent
+{
+    static const int FIELD__TouchPadNumber = 3;
+    static const int FIELD__Touched = 4;
+
+    //--//
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPadEventHandler
+{
+    static const int FIELD___pinMap = 1;
+
+    //--//
 };
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32;
-
-// Internally used functions
-
-uint32_t TouchPadRead(touch_pad_t padNumber);
-void ReadTask(void *pvParameter);
-void MakeSureTouchIsInitialized();
-void HAL_AddSoftRebootHandler();
-void IsrCallBack(void *arg);
 
 #endif // NANOFRAMEWORK_HARDWARE_ESP32_NATIVE_H
