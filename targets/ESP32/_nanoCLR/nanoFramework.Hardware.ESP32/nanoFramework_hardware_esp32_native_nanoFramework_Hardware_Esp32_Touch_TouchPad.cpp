@@ -882,7 +882,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
                 .NumericByRef()
                 .s4;
 
-    err = touch_pad_filter_start(filterConfig) if (err != ESP_OK)
+    err = touch_pad_filter_set_config(filterConfig);
+     if (err != ESP_OK)
     {
         if (err == ESP_ERR_INVALID_ARG)
         {
@@ -892,6 +893,11 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
+    }
+
+    if (touch_pad_filter_enable() != ESP_OK)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
 
     isFilterOn = true;
