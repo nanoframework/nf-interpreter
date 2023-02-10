@@ -864,7 +864,7 @@ void IsrCallBack(void *arg)
 /*
 Resources need to be cleaned and the driver uninstalled in case of a soft reboot.
 */
-void HAL_AddSoftRebootHandler()
+void TouchPad_Uninitialize()
 {
     // stop the task
     if (handleReadTask != NULL)
@@ -927,7 +927,7 @@ void Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_To
         memset(thresholds, 0, sizeof(thresholds));
         memset(lastTouchValues, 0, sizeof(lastTouchValues));
 
-        HAL_AddSoftRebootHandler(HAL_AddSoftRebootHandler);
+        HAL_AddSoftRebootHandler(TouchPad_Uninitialize);
 #if defined(CONFIG_IDF_TARGET_ESP32)
         // The ISR is not really working properly, leaving this code in case new functions
         // and features will be added in the future.
