@@ -100,6 +100,20 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     //--//
 };
 
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32PeriodSetting
+{
+    static const int FIELD___period = 1;
+
+    //--//
+};
+
+struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3PeriodSetting
+{
+    static const int FIELD___periodeSettingMode = 1;
+
+    //--//
+};
+
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad
 {
     static const int FIELD_STATIC___touchHighVoltage = 1;
@@ -116,9 +130,9 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
     NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
     NANOCLR_NATIVE_DECLARE(NativeDeinit___VOID);
-    NANOCLR_NATIVE_DECLARE(NativeRead___I4);
-    NANOCLR_NATIVE_DECLARE(NativeGetThreshold___U2);
-    NANOCLR_NATIVE_DECLARE(NativeSetThreshold___VOID__U2);
+    NANOCLR_NATIVE_DECLARE(NativeRead___U4);
+    NANOCLR_NATIVE_DECLARE(NativeGetThreshold___U4);
+    NANOCLR_NATIVE_DECLARE(NativeSetThreshold___VOID__U4);
     NANOCLR_NATIVE_DECLARE(NativeGetTouchSpeed___VOID__BYREF_I4__BYREF_I4);
     NANOCLR_NATIVE_DECLARE(NativeSetChargeSpeed___VOID__I4__I4);
     NANOCLR_NATIVE_DECLARE(NativeCalibrate___I4__I4);
@@ -129,11 +143,9 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(NativeSetTriggerSource___STATIC__VOID__nanoFrameworkHardwareEsp32TouchWakeUpSource);
     NANOCLR_NATIVE_DECLARE(NativeGetMeasurementMode___STATIC__nanoFrameworkHardwareEsp32TouchMeasurementMode);
     NANOCLR_NATIVE_DECLARE(NativeSetMeasurementMode___STATIC__VOID__nanoFrameworkHardwareEsp32TouchMeasurementMode);
-    NANOCLR_NATIVE_DECLARE(
-        NativeSetVoltage___STATIC__VOID__nanoFrameworkHardwareEsp32TouchTouchHighVoltage__nanoFrameworkHardwareEsp32TouchTouchLowVoltage__nanoFrameworkHardwareEsp32TouchTouchHighVoltageAttenuation);
-    NANOCLR_NATIVE_DECLARE(
-        NativeGetVoltage___STATIC__VOID__BYREF_nanoFrameworkHardwareEsp32TouchTouchHighVoltage__BYREF_nanoFrameworkHardwareEsp32TouchTouchLowVoltage__BYREF_nanoFrameworkHardwareEsp32TouchTouchHighVoltageAttenuation);
-    NANOCLR_NATIVE_DECLARE(NativeStartFilter___STATIC__VOID__U4);
+    NANOCLR_NATIVE_DECLARE(NativeSetVoltage___STATIC__VOID__nanoFrameworkHardwareEsp32TouchTouchHighVoltage__nanoFrameworkHardwareEsp32TouchTouchLowVoltage__nanoFrameworkHardwareEsp32TouchTouchHighVoltageAttenuation);
+    NANOCLR_NATIVE_DECLARE(NativeGetVoltage___STATIC__VOID__BYREF_nanoFrameworkHardwareEsp32TouchTouchHighVoltage__BYREF_nanoFrameworkHardwareEsp32TouchTouchLowVoltage__BYREF_nanoFrameworkHardwareEsp32TouchTouchHighVoltageAttenuation);
+    NANOCLR_NATIVE_DECLARE(NativeStartFilter___STATIC__VOID__nanoFrameworkHardwareEsp32TouchIPeriodSetting);
     NANOCLR_NATIVE_DECLARE(NativeStopFilter___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(NativeSetMeasurementTime___STATIC__VOID__U2__U2);
     NANOCLR_NATIVE_DECLARE(NativeGetMeasurementTime___STATIC__VOID__BYREF_U2__BYREF_U2);
