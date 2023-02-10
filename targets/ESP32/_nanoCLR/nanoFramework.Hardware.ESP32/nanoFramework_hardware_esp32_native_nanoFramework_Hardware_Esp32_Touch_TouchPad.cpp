@@ -648,18 +648,34 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+    CLR_RT_TypeDef_Index esp32FilteringTypeDef;
+    CLR_RT_TypeDef_Index s2s3FilteringTypeDef;
+
+    CLR_RT_TypeDescriptor esp32FilteringType;
+    CLR_RT_TypeDescriptor s2s3FilteringType;
+    CLR_RT_TypeDescriptor typeParamType;
+
+    CLR_RT_HeapBlock *bhPeriodeSetting;
+
+    // init types to compare with bhPeriodeSetting parameter
+    g_CLR_RT_TypeSystem.FindTypeDef("Esp32FilterSetting", "nanoFramework.Hardware.Esp32.Touch", esp32FilteringTypeDef);
+    esp32FilteringType.InitializeFromType(esp32FilteringTypeDef);
+    g_CLR_RT_TypeSystem.FindTypeDef("S2S3FilterSetting", "nanoFramework.Hardware.Esp32.Touch", s2s3FilteringTypeDef);
+    s2s3FilteringType.InitializeFromType(s2s3FilteringTypeDef);
 
     // Static function, argument 0 is the first argument
-    CLR_RT_HeapBlock *bhPeriodeSetting;
+    bhPeriodeSetting = stack.Arg0().Dereference();
+
+    // get type descriptor for parameter
+    NANOCLR_CHECK_HRESULT(typeParamType.InitializeFromObject(*bhPeriodeSetting));
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
+
     uint32_t period;
-    int type;
     esp_err_t err;
 
-    bhPeriodeSetting = stack.Arg0().Dereference();
-    // sanity check for the type of arguments
-    type = (int)bhPeriodeSetting[Esp32FilterSetting::FIELD___type].NumericByRef().u4;
-    if (type != (int)IFilterSetting_FilterType_Esp32)
+    // sanity check for parameter type
+    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, esp32FilteringType, false))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -682,15 +698,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     isFilterOn = true;
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    CLR_RT_HeapBlock *bhPeriodeSetting;
     touch_filter_config_t filterConfig;
     int type;
     esp_err_t err;
 
-    bhPeriodeSetting = stack.Arg0().Dereference();
-    // sanity check for the type of arguments
-    type = (int)bhPeriodeSetting[S2S3FilterSetting::FIELD___type].NumericByRef().u4;
-    if (type != (int)IFilterSetting_FilterType_S2_S3)
+    // sanity check for parameter type
+    if (!CLR_RT_ExecutionEngine::IsInstanceOf(typeParamType, s2s3FilteringType, false))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
