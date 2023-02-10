@@ -789,8 +789,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // Static function, argument 0 is the first argument
-    uint16_t sleep = (uint32_t)stack.Arg0().NumericByRef().u2;
-    uint16_t meas = (uint32_t)stack.Arg1().NumericByRef().u2;
+    uint16_t sleep = (uint16_t)stack.Arg0().NumericByRef().u2;
+    uint16_t meas = (uint16_t)stack.Arg1().NumericByRef().u2;
 
     if (touch_pad_set_meas_time(sleep, meas) != ESP_OK)
     {
