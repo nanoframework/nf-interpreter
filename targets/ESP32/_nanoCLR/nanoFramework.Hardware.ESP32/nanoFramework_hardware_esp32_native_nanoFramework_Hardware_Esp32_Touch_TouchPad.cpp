@@ -835,7 +835,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
     CLR_RT_HeapBlock *bhPeriodeSetting;
-    touch_filter_config filterConfig;
+    touch_filter_config_t filterConfig;
     int type;
     esp_err_t err;
 
