@@ -14,6 +14,7 @@ static int numberInitialzed = 0;
 static bool isTouchInitialized = false;
 static bool isTouchPadUsed[TOUCH_PAD_MAX];
 static bool isFilterOn = false;
+static TaskHandle_t xHandle = NULL;
 static bool touchValues[TOUCH_PAD_MAX];
 static uint32_t thresholds[TOUCH_PAD_MAX];
 static bool isTimeModeOn = false;
@@ -223,7 +224,7 @@ uint32_t TouchPadRead(touch_pad_t padNumber)
     // Start a manual measurement if software mode
     touch_pad_sw_start();
 
-    while (!touch_pad_meas_is_done())
+    //while (!touch_pad_meas_is_done())
     {
         ;
     }
@@ -286,7 +287,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     touch_pad_t padNumber;
-    uint16_t touchValue;
+    uint32_t touchValue;
     NANOCLR_CHECK_HRESULT(GetAndCheckTouchPadNumber(stack, &padNumber));
 
     // If we already have the background task running
@@ -697,6 +698,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     if (measurementMode == TOUCH_FSM_MODE_SW)
     {
         isTimeModeOn = false;
+                // If we just switch mode, we have to wait for the task to exit
+        // So killing it
+        if( xHandle != NULL )
+        {
+            vTaskDelete( xHandle );
+        }
     }
 
     // As the ESP32 in this current version of IDF does not have a task to start the measurement,
@@ -707,7 +714,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         {
             isTimeModeOn = true;
             // Start a task to show what pads have been touched
-            xTaskCreate(&ReadTask, "ReadTask", 4096, NULL, 5, NULL);
+            xTaskCreate(&ReadTask, "ReadTask", 4096, NULL, 5, &xHandle);
         }
     }
 
@@ -875,7 +882,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
                 .NumericByRef()
                 .s4;
 
-    CLR_Debug::Printf("Period %i\r\n", filterConfig.mode);
     err = touch_pad_filter_start(filterConfig) if (err != ESP_OK)
     {
         if (err == ESP_ERR_INVALID_ARG)
