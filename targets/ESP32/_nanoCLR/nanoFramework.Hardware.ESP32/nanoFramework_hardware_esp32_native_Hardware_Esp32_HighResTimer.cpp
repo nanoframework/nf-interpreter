@@ -10,15 +10,6 @@
 
 esp_timer_handle_t hrtimers[MAX_HRTIMERS] = {};
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH nanoFramework.Hardware.Esp32.HighResTimerEventType (in managed code) !!! //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-enum HighResTimerEventType
-{
-    TimerExpired = 101
-};
-
 static int FindNextTimerIndex()
 {
     for (int index = 0; index < MAX_HRTIMERS; index++)
@@ -33,7 +24,7 @@ static int FindNextTimerIndex()
 static void HRtimer_callback(void *arg)
 {
     esp_timer_handle_t timer_handle = hrtimers[(int)arg];
-    PostManagedEvent(EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType::TimerExpired, 0, (uint32_t)timer_handle);
+    PostManagedEvent(EVENT_HIGH_RESOLUTION_TIMER, HighResTimerEventType_TimerExpired, 0, (uint32_t)timer_handle);
 }
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_HighResTimer::
