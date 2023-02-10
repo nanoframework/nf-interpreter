@@ -224,7 +224,7 @@ uint32_t TouchPadRead(touch_pad_t padNumber)
     // Start a manual measurement if software mode
     touch_pad_sw_start();
 
-    //while (!touch_pad_meas_is_done())
+    // while (!touch_pad_meas_is_done())
     {
         ;
     }
@@ -698,11 +698,11 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     if (measurementMode == TOUCH_FSM_MODE_SW)
     {
         isTimeModeOn = false;
-                // If we just switch mode, we have to wait for the task to exit
+        // If we just switch mode, we have to wait for the task to exit
         // So killing it
-        if( xHandle != NULL )
+        if (xHandle != NULL)
         {
-            vTaskDelete( xHandle );
+            vTaskDelete(xHandle);
         }
     }
 
