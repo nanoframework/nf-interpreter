@@ -169,4 +169,12 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32;
 
+// Internally used functions
+
+uint32_t TouchPadRead(touch_pad_t padNumber);
+void ReadTask(void *pvParameter);
+void MakeSureTouchIsInitialized();
+void HAL_AddSoftRebootHandler();
+void IsrCallBack(void *arg);
+
 #endif // NANOFRAMEWORK_HARDWARE_ESP32_NATIVE_H
