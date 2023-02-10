@@ -101,7 +101,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #endif
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
+    NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -119,13 +120,13 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     pad2 = stack.Arg0().NumericByRef().s4;
 
     // Check that the configuration is correct
-    if ((pad1 < 0) && (pad2 <0))
+    if ((pad1 < 0) && (pad2 < 0))
     {
         // We can't have both pads negative
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
     else if ((pad1 >= TOUCH_PAD_MAX) || (pad2 >= TOUCH_PAD_MAX))
-        {
+    {
         // We can't have any pad more than the maximum pad number
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -163,7 +164,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #else
 #endif
-    
+
     err = esp_sleep_enable_touchpad_wakeup();
     esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
@@ -299,18 +300,21 @@ static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount)
     double avg = 0;
     const int minReading = 300;
     uint16_t val;
-    for (int i = 0; i < calibrationCount; i++) 
-    {        
+    for (int i = 0; i < calibrationCount; i++)
+    {
         touch_pad_read(pad, &val);
         avg = (avg * i + val) / (i + 1);
     }
-     
-    if (avg < minReading) {
+
+    if (avg < minReading)
+    {
         touch_pad_config(pad, 0);
-                return false;
-    } else {
+        return false;
+    }
+    else
+    {
         // TODO: adjust sensitivity, 2/3 seems to work as well.
-        int threshold = avg * 2 / 3;    
+        int threshold = avg * 2 / 3;
         touch_pad_config(pad, threshold);
     }
 
