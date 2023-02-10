@@ -107,7 +107,7 @@ void MakeSureTouchIsInitialized()
 #else
         touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
         touch_pad_isr_register(IsrCallBack, NULL, TOUCH_PAD_INTR_MASK_ALL);
-#endif        
+#endif
     }
 }
 
@@ -163,7 +163,6 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
-
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
     if (touch_pad_config(padNumber, 0) != ESP_OK)
@@ -279,7 +278,8 @@ static void ReadTask(void *pvParameter)
 
 #endif
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeRead___U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeRead___U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -308,7 +308,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeGetThreshold___U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
+    NativeGetThreshold___U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -338,12 +339,13 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeSetThreshold___VOID__U4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
+    NativeSetThreshold___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    
+
     touch_pad_t padNumber;
     NANOCLR_CHECK_HRESULT(GetAndCheckTouchPadNumber(stack, &padNumber));
 
@@ -564,7 +566,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 ||
+                                     // defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -589,7 +592,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 ||
+                                     // defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -611,7 +615,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 ||
+                                     // defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -636,7 +641,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 {
     NANOCLR_HEADER();
 
-#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32) // Not implemented in this IDF version on the S2/S3 ||
+                                     // defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
     // For static functions, we need to make sure that we have the touch pad initialized
     MakeSureTouchIsInitialized();
@@ -774,7 +780,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::NativeStartFilter___STATIC__VOID__nanoFrameworkHardwareEsp32TouchIPeriodSetting( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
+    NativeStartFilter___STATIC__VOID__nanoFrameworkHardwareEsp32TouchIPeriodSetting(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -782,7 +789,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     // Static function, argument 0 is the first argument
     // For ESP32, only 1 call to do
-    uint32_t period = (uint32_t)stack.Arg0()[Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32PeriodSetting::FIELD___period].NumericByRef().u4;
+    uint32_t period =
+        (uint32_t)stack
+            .Arg0()[Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32PeriodSetting::
+                        FIELD___period]
+            .NumericByRef()
+            .u4;
 
     if (touch_pad_filter_start(period) != ESP_OK)
     {
