@@ -23,6 +23,15 @@ static touch_fsm_mode_t measurementMode;
 
 #endif
 
+typedef Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad TouchPad;
+typedef Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32FilterSetting
+    Esp32FilterSetting;
+
+#if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+typedef Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting
+    S2S3FilterSetting;
+#endif
+
 HRESULT GetAndCheckTouchPadNumber(CLR_RT_StackFrame &stack, touch_pad_t *padNumber)
 {
     NANOCLR_HEADER();
@@ -32,11 +41,7 @@ HRESULT GetAndCheckTouchPadNumber(CLR_RT_StackFrame &stack, touch_pad_t *padNumb
     // Get the stack
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
-    *padNumber =
-        (touch_pad_t)(pThis[Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
-                                FIELD___touchPadNumber]
-                          .NumericByRef()
-                          .s4);
+    *padNumber = (touch_pad_t)(pThis[TouchPad::FIELD___touchPadNumber].NumericByRef().s4);
 
     // Let's make sure it's a proper pin
     if ((*padNumber < 0) || (*padNumber >= TOUCH_PAD_MAX))
@@ -653,21 +658,13 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     bhPeriodeSetting = stack.Arg0().Dereference();
     // sanity check for the type of arguments
-    type = (int)bhPeriodeSetting
-               [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32FilterSetting::
-                    FIELD___type]
-                   .NumericByRef()
-                   .u4;
+    type = (int)bhPeriodeSetting[Esp32FilterSetting::FIELD___type].NumericByRef().u4;
     if (type != (int)IFilterSetting_FilterType_Esp32)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    period = (uint32_t)bhPeriodeSetting
-                 [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_Esp32FilterSetting::
-                      FIELD___period]
-                     .NumericByRef()
-                     .u4;
+    period = (uint32_t)bhPeriodeSetting[Esp32FilterSetting::FIELD___period].NumericByRef().u4;
 
     err = touch_pad_filter_start(period);
     if (err != ESP_OK)
@@ -692,46 +689,21 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     bhPeriodeSetting = stack.Arg0().Dereference();
     // sanity check for the type of arguments
-    type = (int)bhPeriodeSetting
-               [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                    FIELD___type]
-                   .NumericByRef()
-                   .u4;
+    type = (int)bhPeriodeSetting[S2S3FilterSetting::FIELD___type].NumericByRef().u4;
     if (type != (int)IFilterSetting_FilterType_S2_S3)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     filterConfig.mode =
-        (touch_filter_mode_t)bhPeriodeSetting
-            [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                 FIELD___periodeSettingMode]
-                .NumericByRef()
-                .s4;
+        (touch_filter_mode_t)bhPeriodeSetting[S2S3FilterSetting::FIELD___periodeSettingMode].NumericByRef().s4;
     filterConfig.debounce_cnt =
-        (uint32_t)bhPeriodeSetting
-            [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                 FIELD___filterSettingDebounce]
-                .NumericByRef()
-                .s4;
+        (uint32_t)bhPeriodeSetting[S2S3FilterSetting::FIELD___filterSettingDebounce].NumericByRef().s4;
     filterConfig.noise_thr =
-        (uint32_t)bhPeriodeSetting
-            [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                 FIELD___filterSettingNoiseThreshold]
-                .NumericByRef()
-                .s4;
-    filterConfig.jitter_step =
-        (uint32_t)bhPeriodeSetting
-            [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                 FIELD___jitterSize]
-                .NumericByRef()
-                .u1;
+        (uint32_t)bhPeriodeSetting[S2S3FilterSetting::FIELD___filterSettingNoiseThreshold].NumericByRef().s4;
+    filterConfig.jitter_step = (uint32_t)bhPeriodeSetting[S2S3FilterSetting::FIELD___jitterSize].NumericByRef().u1;
     filterConfig.smh_lvl =
-        (touch_smooth_mode_t)bhPeriodeSetting
-            [Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_S2S3FilterSetting::
-                 FIELD___filterSettingSmoothMode]
-                .NumericByRef()
-                .s4;
+        (touch_smooth_mode_t)bhPeriodeSetting[S2S3FilterSetting::FIELD___filterSettingSmoothMode].NumericByRef().s4;
 
     err = touch_pad_filter_set_config(&filterConfig);
     if (err != ESP_OK)
