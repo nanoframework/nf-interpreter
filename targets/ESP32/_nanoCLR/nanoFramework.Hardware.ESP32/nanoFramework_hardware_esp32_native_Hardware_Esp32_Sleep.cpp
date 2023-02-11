@@ -112,7 +112,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     int pad1;
     int coefficient;
 
-#if defined(CONFIG_IDF_TARGET_ESP32)    
+#if defined(CONFIG_IDF_TARGET_ESP32)
     int pad2;
     // Setup the sleep mode
     touch_pad_init();
@@ -185,13 +185,13 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     touch_pad_denoise_set_config(&denoise);
     touch_pad_denoise_enable();
-    
+
     /* Filter setting */
     filter_info = {
         .mode = TOUCH_PAD_FILTER_IIR_16,
-        .debounce_cnt = 1,      // 1 time count.
-        .noise_thr = 0,         // 50%
-        .jitter_step = 4,       // use for jitter mode.
+        .debounce_cnt = 1, // 1 time count.
+        .noise_thr = 0,    // 50%
+        .jitter_step = 4,  // use for jitter mode.
         .smh_lvl = TOUCH_PAD_SMOOTH_IIR_2,
     };
 
