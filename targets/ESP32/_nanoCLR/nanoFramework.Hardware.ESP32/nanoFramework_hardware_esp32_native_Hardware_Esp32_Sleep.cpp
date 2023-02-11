@@ -11,7 +11,7 @@
 #include "nanoFramework_hardware_esp32_native.h"
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount);
+static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount, int coefficient);
 #endif
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -101,12 +101,14 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #endif
 }
 
-HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError__I4__I4( CLR_RT_StackFrame &stack )
+HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
+    NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError__I4__I4__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
 #if SOC_PM_SUPPORT_EXT_WAKEUP
     esp_err_t err;
+    int coefficient;
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
     int pad1;
@@ -116,7 +118,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
 
     pad1 = stack.Arg0().NumericByRef().s4;
-    pad2 = stack.Arg0().NumericByRef().s4;
+    pad2 = stack.Arg1().NumericByRef().s4;
+    coefficient = stack.Arg2().NumericByRef().u1;
 
     // Check that the configuration is correct
     if ((pad1 < 0) && (pad2 < 0))
@@ -146,7 +149,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     // Set pad 1 and calibrate it
     touch_pad_config((touch_pad_t)pad1, 0);
-    if (!CalibrateTouchPad((touch_pad_t)pad1, 20))
+    if (!CalibrateTouchPad((touch_pad_t)pad1, 20, coefficient))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -155,7 +158,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     {
         // Set pad 2 and calibrate it if it's a valid one
         touch_pad_config((touch_pad_t)pad2, 0);
-        if (!CalibrateTouchPad((touch_pad_t)pad2, 20))
+        if (!CalibrateTouchPad((touch_pad_t)pad2, 20, coefficient))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
@@ -294,7 +297,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 }
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount)
+static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount, int coefficient)
 {
     double avg = 0;
     const int minReading = 300;
@@ -312,8 +315,7 @@ static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount)
     }
     else
     {
-        // TODO: adjust sensitivity, 2/3 seems to work as well.
-        int threshold = avg * 2 / 3;
+        int threshold = avg * coefficient / 100;
         touch_pad_config(pad, threshold);
     }
 
