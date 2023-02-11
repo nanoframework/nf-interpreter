@@ -646,7 +646,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad::
     NativeStartFilter___STATIC__VOID__nanoFrameworkHardwareEsp32TouchIFilterSetting(CLR_RT_StackFrame &stack)
 {
-    NANOCLR_HEADER();    
+    NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor typeParamType;
     CLR_RT_HeapBlock *bhPeriodeSetting;
@@ -693,7 +693,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
     touch_filter_config_t filterConfig;
     esp_err_t err;
-    CLR_RT_TypeDef_Index s2s3FilteringTypeDef;    
+    CLR_RT_TypeDef_Index s2s3FilteringTypeDef;
     CLR_RT_TypeDescriptor s2s3FilteringType;
 
     // init types to compare with bhPeriodeSetting parameter
