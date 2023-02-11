@@ -3,7 +3,7 @@
 /zips/
 
 # ignore build folder
-/build/
+/build**/
 /out/
 /build/.gitkeep
 

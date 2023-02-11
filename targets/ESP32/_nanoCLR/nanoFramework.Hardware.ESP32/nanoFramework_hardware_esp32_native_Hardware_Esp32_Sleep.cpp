@@ -109,10 +109,10 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #if SOC_PM_SUPPORT_EXT_WAKEUP
     esp_err_t err;
+    int pad1;
     int coefficient;
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    int pad1;
+#if defined(CONFIG_IDF_TARGET_ESP32)    
     int pad2;
     // Setup the sleep mode
     touch_pad_init();
@@ -166,6 +166,55 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     }
 
 #else
+    touch_pad_denoise_t denoise;
+    touch_filter_config_t filter_info;
+
+    touch_pad_init();
+    pad1 = stack.Arg0().NumericByRef().s4;
+    if (pad1 <= 0)
+    {
+        // We can't have both pads negative
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
+    denoise = {
+        /* The bits to be cancelled are determined according to the noise level. */
+        .grade = TOUCH_PAD_DENOISE_BIT4,
+        .cap_level = TOUCH_PAD_DENOISE_CAP_L4,
+    };
+
+    touch_pad_denoise_set_config(&denoise);
+    touch_pad_denoise_enable();
+    
+    /* Filter setting */
+    filter_info = {
+        .mode = TOUCH_PAD_FILTER_IIR_16,
+        .debounce_cnt = 1,      // 1 time count.
+        .noise_thr = 0,         // 50%
+        .jitter_step = 4,       // use for jitter mode.
+        .smh_lvl = TOUCH_PAD_SMOOTH_IIR_2,
+    };
+
+    touch_pad_filter_set_config(&filter_info);
+    touch_pad_filter_enable();
+
+    /* Set sleep touch pad. */
+    touch_pad_sleep_channel_enable((touch_pad_t)pad1, true);
+    touch_pad_sleep_channel_enable_proximity((touch_pad_t)pad1, false);
+    /* Reducing the operating frequency can effectively reduce power consumption. */
+    touch_pad_sleep_channel_set_work_time(1000, TOUCH_PAD_MEASURE_CYCLE_DEFAULT);
+    /* Enable touch sensor clock. Work mode is "timer trigger". */
+    touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
+    touch_pad_fsm_start();
+    // Wait for some measurement
+    vTaskDelay(100 / portTICK_RATE_MS);
+
+    uint32_t touch_value, wake_threshold;
+    touch_pad_sleep_channel_read_smooth((touch_pad_t)pad1, &touch_value);
+    coefficient = stack.Arg2().NumericByRef().u1;
+    // wakeup when touch sensor crosses % of background level
+    wake_threshold = touch_value * (100 - coefficient) / 100;
+    touch_pad_sleep_set_threshold((touch_pad_t)pad1, wake_threshold);
 #endif
 
     err = esp_sleep_enable_touchpad_wakeup();
