@@ -133,16 +133,12 @@ void UnlinkInputState(gpio_input_state *pState)
 
     // Remove interrupt associated with pin
     // it's OK to do always this, no matter if interrupts are enabled or not
-    GPIO_disableInt(pState->pinConfigIndex);
-
-    // disable pin
-    GPIO_setConfig(pState->pinConfigIndex, GPIO_CFG_NO_DIR);
 
     // clear pin config array
     gpioPinConfigs[pState->pinConfigIndex] = GPIO_CFG_NO_DIR;
 
-    // remove callback
-    gpioCallbackFunctions[pState->pinConfigIndex] = NULL;
+    // reset pin
+    GPIO_resetConfig(pState->pinConfigIndex);
 
     // unlink from list
     pState->Unlink();
@@ -270,11 +266,11 @@ bool CPU_GPIO_Uninitialize()
             continue;
         }
 
-        // set config
-        GPIO_setConfig(index, GPIO_CFG_NO_DIR);
-
         // store config
         gpioPinConfigs[index] = GPIO_CFG_NO_DIR;
+
+        // reset pin
+        GPIO_resetConfig(index);
     }
 
     return true;
@@ -342,20 +338,15 @@ bool CPU_GPIO_EnableInputPin(
         return false;
     }
 
-    // check if pin is already in use
-    if (CPU_GPIO_PinIsBusy(pinNumber))
-    {
-        return false;
-    }
-
     pState = AllocateGpioInputState(pinNumber);
 
     // store index of this GPIO
     pState->pinConfigIndex = pinNumber;
 
     // set default input config for GPIO pin
-    gpioPinConfigs[pState->pinConfigIndex] |=
-        GPIO_CFG_INPUT_INTERNAL | GPIO_CFG_IN_INT_NONE | GPIO_CFG_PULL_NONE_INTERNAL;
+    gpioPinConfigs[pState->pinConfigIndex] = GPIO_CFG_INPUT | GPIO_CFG_IN_INT_NONE;
+
+    GPIO_setConfig(pState->pinConfigIndex, gpioPinConfigs[pState->pinConfigIndex]);
 
     if (!CPU_GPIO_SetDriveMode(pState->pinConfigIndex, driveMode))
     {
@@ -366,16 +357,11 @@ bool CPU_GPIO_EnableInputPin(
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
     if (pinISR != NULL && (pState->isrPtr == NULL))
     {
-        // get current config
-        GPIO_PinConfig currentPinConfig;
-        GPIO_getConfig(pState->pinConfigIndex, &currentPinConfig);
-
-        // set interrupt on both edges
-        GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_BOTH_EDGES);
         // set callback
         GPIO_setCallback(pState->pinConfigIndex, GpioEventCallback);
-        // enable INT
-        GPIO_enableInt(pState->pinConfigIndex);
+
+        // set interrupt on both edges and enable interrupt
+        GPIO_setInterruptConfig(pState->pinConfigIndex, GPIO_CFG_IN_INT_BOTH_EDGES | GPIO_CFG_INT_ENABLE);
 
         // store parameters & configs
         pState->isrPtr = pinISR;
@@ -430,16 +416,10 @@ bool CPU_GPIO_EnableInputPin(
         // there is no managed handler setup anymore
         // remove INT handler
 
-        // get current config
-        GPIO_PinConfig currentPinConfig;
-        GPIO_getConfig(pState->pinConfigIndex, &currentPinConfig);
-
         // disable interrupt
         GPIO_disableInt(pState->pinConfigIndex);
         // remove callback
         GPIO_setCallback(pState->pinConfigIndex, NULL);
-        // remove interrupt config
-        GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_NONE);
 
         // clear parameters & configs
         pState->isrPtr = NULL;
@@ -477,6 +457,8 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Pin
     // set the GPIO pin as output
     gpioPinConfigs[pinNumber] = GPIO_CFG_OUT_STD;
 
+    GPIO_setConfig(pinNumber, gpioPinConfigs[pinNumber]);
+
     if (CPU_GPIO_SetDriveMode(pinNumber, driveMode) == false)
     {
         return false;
@@ -490,12 +472,6 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Pin
 void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alternateFunction)
 {
     GLOBAL_LOCK();
-
-    // check if pin is already in use
-    if (CPU_GPIO_PinIsBusy(pinNumber))
-    {
-        return;
-    }
 
     DeleteGpioInputState(pinNumber);
 
