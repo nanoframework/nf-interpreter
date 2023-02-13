@@ -443,13 +443,13 @@ jobs:
         TargetName: FEATHER_S2
         PackageName: FEATHER_S2
 
-      ESP32_C3_REV2:
+      ESP32_C3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
         BuildOptions: 
         IDF_Target: esp32c3
-        TargetName: ESP32_C3_REV2
-        PackageName: ESP32_C3_REV2
+        TargetName: ESP32_C3
+        PackageName: ESP32_C3
 
   variables:
     DOTNET_NOLOGO: true
