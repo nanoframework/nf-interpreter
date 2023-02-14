@@ -453,13 +453,13 @@ jobs:
         TargetName: FEATHER_S2
         PackageName: FEATHER_S2
 
-      ESP32_C3_REV2:
+      ESP32_C3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
         BuildOptions: 
         IDF_Target: esp32c3
-        TargetName: ESP32_C3_REV2
-        PackageName: ESP32_C3_REV2
+        TargetName: ESP32_C3
+        PackageName: ESP32_C3
 
   variables:
     DOTNET_NOLOGO: true
@@ -655,6 +655,14 @@ jobs:
       #   GccArm_Version: 
       #   NeedsDFU: true
       #   NeedsSRECORD: false
+
+      SL_STK3701A:
+        TargetBoard: SL_STK3701A
+        TargetSeries: 'efm32gg11'
+        BuildOptions:
+        GccArm_Version: 
+        NeedsDFU: false
+        NeedsSRECORD: false
 
   variables:
     # creates a counter and assigns it to the revision variable

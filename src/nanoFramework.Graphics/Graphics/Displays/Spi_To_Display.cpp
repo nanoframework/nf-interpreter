@@ -23,7 +23,9 @@ CLR_INT16 lcdReset;
 CLR_INT16 lcdDC;
 CLR_INT16 lcdBacklight;
 
-CLR_UINT32 spiDeviceHandle = 0;
+uint32_t spiDeviceHandle = 0;
+int spiChipSelect = 0;
+bool spiChipSelectActiveState = false;
 CLR_INT16 outputBufferSize;
 CLR_UINT8 spiBuffer[SPI_MAX_TRANSFER_SIZE];
 CLR_UINT8 spiBuffer2[SPI_MAX_TRANSFER_SIZE];
@@ -48,10 +50,13 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     spiConfig.BusMode = SpiBusMode::SpiBusMode_master;
     spiConfig.Spi_Bus = config.Spi.spiBus;
     spiConfig.DeviceChipSelect = config.Spi.chipSelect;
-    spiConfig.ChipSelectActive = false;
+    spiConfig.ChipSelectActiveState = false;
     spiConfig.Spi_Mode = SpiMode::SpiMode_Mode0;
     spiConfig.DataOrder16 = DataBitOrder::DataBitOrder_MSB;
     spiConfig.BusConfiguration = SpiBusConfiguration_FullDuplex;
+    // Store for internal usage
+    spiChipSelect = config.Spi.chipSelect;
+    spiChipSelectActiveState = false;
 
     spiConfig.Clock_RateHz = 40 * 1000 * 1000; // SPI clock speed.
 
@@ -60,7 +65,6 @@ void DisplayInterface::Initialize(DisplayInterfaceConfig &config)
     bufferWritten = 0;
 
     HRESULT hr = nanoSPI_OpenDevice(spiConfig, spiDeviceHandle);
-    ASSERT(hr == ESP_OK);
     if (hr == S_OK)
     {
         // TODO Reserve Pins
@@ -179,6 +183,7 @@ void DisplayInterface::DisplayBacklight(bool on) // true = on
 // Dummy callback to enable async spi writes
 void spi_callback(int busIndex)
 {
+    (void)busIndex;
 }
 
 void DisplayInterface::SendBytes(CLR_UINT8 *data, CLR_UINT32 length)
@@ -197,6 +202,8 @@ void InternalSendBytes(CLR_UINT8 *data, CLR_UINT32 length, bool sendAsync)
     wrc.callback = sendAsync ? spi_callback : 0;
     wrc.fullDuplex = false;
     wrc.readOffset = 0;
+    wrc.DeviceChipSelect = spiChipSelect;
+    wrc.ChipSelectActiveState = spiChipSelectActiveState;
 
     nanoSPI_Write_Read(spiDeviceHandle, wrc, data, length, NULL, 0);
 

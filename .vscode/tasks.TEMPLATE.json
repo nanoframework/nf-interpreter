@@ -77,6 +77,22 @@
       "problemMatcher": []
     },
     {
+      "label": "Erase flash Silabs GG11",
+      "type": "shell",
+      "command": "${env:JLINK_PATH}/Jlink.exe -device default -si swd -CommandFile ${workspaceRoot}/.jlink/erase_gg11.jlink",
+      "windows": {
+        "options": {
+          "shell": {
+            "executable": "cmd.exe",
+            "args": [
+              "/c"
+            ]
+          }
+        }
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Flash Nordic Targets",
       "type": "shell",
       "command": "${env:JLINK_PATH}/Jlink.exe -device ${input:nordicseries} -si swd -CommandFile ${workspaceRoot}/.jlink/flash_nordic_generic.jlink",
