@@ -1,0 +1,18 @@
+{
+    "version": 4,
+    "include": [
+        "base.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "nordic-preset",
+            "description": "Preset for Nordic devices",
+            "hidden": true,
+            "inherits": "general-preset",
+            "cacheVariables": {
+                "RTOS": "Nordic",
+                "NF_INTEROP_ASSEMBLIES": null
+            }
+        }
+    ]
+}

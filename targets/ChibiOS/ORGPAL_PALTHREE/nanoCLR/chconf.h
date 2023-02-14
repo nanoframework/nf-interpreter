@@ -53,7 +53,7 @@
  * @note    Allowed values are 16, 32 or 64 bits.
  */
 #if !defined(CH_CFG_ST_RESOLUTION)
-#define CH_CFG_ST_RESOLUTION 32
+#define CH_CFG_ST_RESOLUTION 64
 #endif
 
 /**
@@ -70,7 +70,7 @@
  * @note    Allowed values are 16, 32 or 64 bits.
  */
 #if !defined(CH_CFG_INTERVALS_SIZE)
-#define CH_CFG_INTERVALS_SIZE 32
+#define CH_CFG_INTERVALS_SIZE 64
 #endif
 
 /**
