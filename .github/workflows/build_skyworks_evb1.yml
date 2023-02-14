@@ -55,7 +55,7 @@ jobs:
         buildPreset: 'SKY_EEVB_PROTO1'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: 'SKY_EEVB_PROTO1-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
