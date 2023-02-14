@@ -577,7 +577,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     //           NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     //       }
     //   }
-    //endif
+    // endif
 
     // Do we need to stop the task?
     if (measurementMode == TOUCH_FSM_MODE_SW)
