@@ -14,6 +14,9 @@
         "targets/ChibiOS/ST_STM32F769I_DISCOVERY/CMakePresets.json",
         "targets/ESP32/CMakePresets.json",
         "targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK/CMakePresets.json",
+        "targets/Nordic/ARDESCO/CMakePresets.json",
+        "targets/Nordic/NRF9160_DK/CMakePresets.json",
+        "targets/Nordic/NRF52840_DK/CMakePresets.json",
         "targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL/CMakePresets.json",
         "targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL/CMakePresets.json"
     ]
