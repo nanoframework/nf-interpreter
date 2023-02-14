@@ -25,13 +25,21 @@ CCFG.ccfgTemplate.$name = "ti_devices_CCFGTemplate0";
 ADC1.$name            = "ADC_0";
 ADC1.samplingDuration = "170 us";
 
+UART21.$name            = "UART0";
+UART21.$hardware        = system.deviceData.board.components.XDS110UART;
+UART21.rxRingBufferSize = 256;
+
 easylink.EasyLink_Phy_50kbps2gfsk                                  = true;
 easylink.EasyLink_Phy_5kbpsSlLr                                    = true;
 easylink.EasyLink_Phy_200kbps2gfsk                                 = true;
 easylink.enableAddrFilter                                          = false;
+easylink.radioConfigEasylinkPhyCustom.carrierFrequency             = 868.0000;
 easylink.radioConfigEasylinkPhyCustom.codeExportConfig.$name       = "ti_devices_radioconfig_code_export_param0";
+easylink.radioConfigEasylinkPhy50kbps2gfsk.carrierFrequency        = 868.0000;
 easylink.radioConfigEasylinkPhy50kbps2gfsk.codeExportConfig.$name  = "ti_devices_radioconfig_code_export_param1";
+easylink.radioConfigEasylinkPhy5kbpssllr.carrierFrequency          = 868.0000;
 easylink.radioConfigEasylinkPhy5kbpssllr.codeExportConfig.$name    = "ti_devices_radioconfig_code_export_param2";
+easylink.radioConfigEasylinkPhy200kbps2gfsk.carrierFrequency       = 868.0000;
 easylink.radioConfigEasylinkPhy200kbps2gfsk.codeExportConfig.$name = "ti_devices_radioconfig_code_export_param3";
 
 /**
