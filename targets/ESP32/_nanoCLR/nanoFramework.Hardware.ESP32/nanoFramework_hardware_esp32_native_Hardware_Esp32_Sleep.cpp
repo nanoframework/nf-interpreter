@@ -11,7 +11,7 @@
 #include "nanoFramework_hardware_esp32_native.h"
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount, int coefficient);
+static bool CalibrateEspTouchPad(touch_pad_t pad, int calibrationCount, int coefficient);
 #endif
 
 HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Sleep::
@@ -150,7 +150,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     // Set pad 1 and calibrate it
     touch_pad_config((touch_pad_t)pad1, 0);
-    if (!CalibrateTouchPad((touch_pad_t)pad1, 20, coefficient))
+    if (!CalibrateEspTouchPad((touch_pad_t)pad1, 20, coefficient))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
     }
@@ -159,7 +159,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     {
         // Set pad 2 and calibrate it if it's a valid one
         touch_pad_config((touch_pad_t)pad2, 0);
-        if (!CalibrateTouchPad((touch_pad_t)pad2, 20, coefficient))
+        if (!CalibrateEspTouchPad((touch_pad_t)pad2, 20, coefficient))
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
         }
@@ -167,7 +167,9 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
 #else
     touch_pad_denoise_t denoise;
-    touch_filter_config_t filter_info;
+    touch_filter_config_t filterInfo;
+    uint32_t touchValue;
+    uint32_t wakeThreshold;
 
     touch_pad_init();
     pad1 = stack.Arg0().NumericByRef().s4;
@@ -177,48 +179,44 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
+    touch_pad_config((touch_pad_t)pad1);
+    // Denoise setting at TouchSensor 0.
     denoise = {
-        /* The bits to be cancelled are determined according to the noise level. */
+        // The bits to be cancelled are determined according to the noise level.
         .grade = TOUCH_PAD_DENOISE_BIT4,
         .cap_level = TOUCH_PAD_DENOISE_CAP_L4,
     };
-
     touch_pad_denoise_set_config(&denoise);
     touch_pad_denoise_enable();
 
-    /* Filter setting */
-    filter_info = {
+    // Filter setting
+    filterInfo = {
         .mode = TOUCH_PAD_FILTER_IIR_16,
         .debounce_cnt = 1, // 1 time count.
         .noise_thr = 0,    // 50%
         .jitter_step = 4,  // use for jitter mode.
         .smh_lvl = TOUCH_PAD_SMOOTH_IIR_2,
     };
-
-    touch_pad_filter_set_config(&filter_info);
+    touch_pad_filter_set_config(&filterInfo);
     touch_pad_filter_enable();
 
-    /* Set sleep touch pad. */
+    // Set sleep touch pad. No proximity
     touch_pad_sleep_channel_enable((touch_pad_t)pad1, true);
     touch_pad_sleep_channel_enable_proximity((touch_pad_t)pad1, false);
-    /* Reducing the operating frequency can effectively reduce power consumption. */
+    // Reducing the operating frequency can effectively reduce power consumption.
     touch_pad_sleep_channel_set_work_time(1000, TOUCH_PAD_MEASURE_CYCLE_DEFAULT);
-    /* Enable touch sensor clock. Work mode is "timer trigger". */
+    // Enable touch sensor clock. Work mode is "timer trigger".
     touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
     touch_pad_fsm_start();
-    // Wait for some measurement
+    // Giving time for measurements
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    uint32_t touchValue;
-    uint32_t wakeThreshold;
-    touch_pad_sleep_channel_read_smooth((touch_pad_t)pad1, &touchValue);
     coefficient = stack.Arg2().NumericByRef().u1;
-    
+
+    touch_pad_sleep_channel_read_smooth((touch_pad_t)pad1, &touchValue);
     // wakeup when touch sensor crosses % of background level
-    wakeThreshold = touchValue * (100 - coefficient) / 100;
+    wakeThreshold = touchValue * (100 - coefficient) / 100.0;
     touch_pad_sleep_set_threshold((touch_pad_t)pad1, wakeThreshold);
-    CLR_Debug::Printf("Touch value: %i wakeThr: %i\r\n", touchValue, wakeThreshold);
-        vTaskDelay(5000 / portTICK_RATE_MS);
 #endif
 
     err = esp_sleep_enable_touchpad_wakeup();
@@ -351,7 +349,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 }
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-static bool CalibrateTouchPad(touch_pad_t pad, int calibrationCount, int coefficient)
+static bool CalibrateEspTouchPad(touch_pad_t pad, int calibrationCount, int coefficient)
 {
     double avg = 0;
     const int minReading = 300;
