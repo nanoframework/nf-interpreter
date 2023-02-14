@@ -213,12 +213,12 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
     uint32_t wakeThreshold;
     touch_pad_sleep_channel_read_smooth((touch_pad_t)pad1, &touchValue);
     coefficient = stack.Arg2().NumericByRef().u1;
-    
+
     // wakeup when touch sensor crosses % of background level
     wakeThreshold = touchValue * (100 - coefficient) / 100;
     touch_pad_sleep_set_threshold((touch_pad_t)pad1, wakeThreshold);
     CLR_Debug::Printf("Touch value: %i wakeThr: %i\r\n", touchValue, wakeThreshold);
-        vTaskDelay(5000 / portTICK_RATE_MS);
+    vTaskDelay(5000 / portTICK_RATE_MS);
 #endif
 
     err = esp_sleep_enable_touchpad_wakeup();
