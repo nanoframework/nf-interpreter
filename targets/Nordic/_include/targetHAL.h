@@ -29,8 +29,8 @@ extern "C"
 // Definitions for Sockets/Network
 #define GLOBAL_LOCK_SOCKETS(x)
 
-// get number of sockets from lwIP options
-#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT MEMP_NUM_NETCONN
+// get number of sockets from zephyr config process
+#define PLATFORM_DEPENDENT__SOCKETS_MAX_COUNT CONFIG_NET_MAX_CONN
 
 #define LPCSTR const char *
 

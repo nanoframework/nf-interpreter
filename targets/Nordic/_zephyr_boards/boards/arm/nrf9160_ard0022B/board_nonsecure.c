@@ -58,12 +58,7 @@ static int ard_ns_grove_ctrl_init(const struct device *dev)
 {
     int ret;
 
-    // While this file is typically board specific, keeping this file
-    // consistent between the Combi and Combi Dev simplifies support.
-
-#if defined CONFIG_BOARD_NRF9160_ARD0022BNS
     ret = gpio_pin_configure(dev, BOARD_NS_GROVE_SELECT_PIN, GPIO_OUTPUT | GPIO_ACTIVE_HIGH);
-
     if (ret)
     {
         LOG_ERR("Error configuring pin %d!", BOARD_NS_GROVE_SELECT_PIN);
@@ -71,23 +66,10 @@ static int ard_ns_grove_ctrl_init(const struct device *dev)
 
     bool sel_digital = BOARD_NS_SEL_GROVEDIGITAL;
     ret = gpio_pin_set_raw(dev, BOARD_NS_GROVE_SELECT_PIN, sel_digital);
-
     if (ret)
     {
         LOG_ERR("Error setting pin %d!", BOARD_NS_GROVE_SELECT_PIN);
     }
-
-#else
-
-    ret = gpio_pin_configure(dev, BOARD_NS_GROVE_SELECT_PIN, GPIO_DISCONNECTED);
-
-    if (ret)
-    {
-        LOG_ERR("Error configuring pin %d!", BOARD_NS_GROVE_SELECT_PIN);
-    }
-
-#endif
-
     return ret;
 }
 
@@ -96,9 +78,7 @@ static int ard_ns_board_init(const struct device *dev)
 {
     int err;
     const struct device *gpio_out_dev;
-
     gpio_out_dev = device_get_binding(GPIO_DRIVER_NAME);
-
     if (!gpio_out_dev)
     {
         LOG_ERR("Cannot find %s!", GPIO_DRIVER_NAME);
@@ -106,19 +86,15 @@ static int ard_ns_board_init(const struct device *dev)
     }
 
     err = ard_ns_sim_ctrl_init(gpio_out_dev);
-
     if (err)
     {
         LOG_ERR("ard_ns_sim_ctrl_init failed with error: %d", err);
-        // return err;
     }
 
     err = ard_ns_grove_ctrl_init(gpio_out_dev);
-
     if (err)
     {
         LOG_ERR("ard_ns_grove_ctrl_init failed with error: %d", err);
-        // return err;
     }
 
     return 0;

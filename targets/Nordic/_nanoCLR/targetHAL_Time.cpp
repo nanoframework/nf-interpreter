@@ -9,46 +9,64 @@
 #include <nanoHAL_Time.h>
 #include <target_platform.h>
 #include <zephyr.h>
+#include <date_time.h>
+
+/*
+ * Amazingly, the 'new lib' doesn't convert longlong vals using %lld
+ * So, I need this routine.
+ */
+// char *my_longlong2str(uint64_t *num_ptr)
+// {
+//     static char longnum[64];
+//     uint64_t num = *num_ptr;
+//     memset(longnum, sizeof(longnum), 0);
+//     char *p = &longnum[sizeof(longnum) - 2];
+//     do
+//     {
+//         *p-- = num % 10 + '0';
+//         num = num / 10;
+//     } while (num != 0);
+//     p++;
+//     return p;
+// }
+// char *my_time_to_str(uint64_t *time_val, char *sz, int len)
+// {
+//     struct tm st_tim;
+//     time_t corrected = *time_val / 1000;
+
+//     sz[0] = '\0';
+//     if (corrected < 100000)
+//         return sz;
+
+//     const struct tm *p = gmtime_r(&corrected, &st_tim);
+//     if (p != 0)
+//     {
+//         sprintf(
+//             sz,
+//             "%d/%d/%d  %2d:%02d:%02d",
+//             p->tm_mon + 1,
+//             p->tm_mday,
+//             p->tm_year + 1900,
+//             p->tm_hour,
+//             p->tm_min,
+//             p->tm_sec);
+//     }
+//     return sz;
+// }
 
 // Returns the current date time from the system tick or from the RTC if it's available (this depends on the respective
 // configuration option)
 uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 {
+    // printk ("HAL_Time_CurrentDateTime++ %d\n", datePartOnly);
 #if (HAL_USE_RTC == TRUE)
+    uint64_t epoc; // epoch time, seconds since 1/1/1970
+    date_time_now((int64_t *)&epoc);
 
-    // use RTC to get date time
-    SYSTEMTIME st;
-    RTCDateTime _dateTime;
-
-    rtcGetTime(&RTCD1, &_dateTime);
-
-    st.wDay = (unsigned short)_dateTime.day;
-    st.wMonth = (unsigned short)_dateTime.month;
-    st.wYear = (unsigned short)(_dateTime.year + 1980); // ChibiOS is counting years since 1980
-    st.wDayOfWeek = (unsigned short)_dateTime.dayofweek;
-
-    // zero 'time' fields if date part only is required
-    if (datePartOnly)
-    {
-        st.wMilliseconds = 0;
-        st.wSecond = 0;
-        st.wMinute = 0;
-        st.wHour = 0;
-    }
-    else
-    {
-        // full date&time required, fill in 'time' fields too
-
-        st.wMilliseconds = (unsigned short)(_dateTime.millisecond % 1000);
-        _dateTime.millisecond /= 1000;
-        st.wSecond = (unsigned short)(_dateTime.millisecond % 60);
-        _dateTime.millisecond /= 60;
-        st.wMinute = (unsigned short)(_dateTime.millisecond % 60);
-        _dateTime.millisecond /= 60;
-        st.wHour = (unsigned short)(_dateTime.millisecond % 24);
-    }
-
-    return HAL_Time_ConvertFromSystemTime(&st);
+    // msec between 1/1/1601 and 1/1/1970 = 11644473600000
+    uint64_t nf_epoc = epoc + (11644473600000);
+    nf_epoc = nf_epoc * 10000; // Convert to 100nS
+    return nf_epoc;
 
 #else
 
@@ -75,24 +93,24 @@ uint64_t HAL_Time_CurrentDateTime(bool datePartOnly)
 void HAL_Time_SetUtcTime(uint64_t utcTime)
 {
     SYSTEMTIME systemTime;
+    printk("HAL_Time_SetUtcTime++  NEED TO TEST\n");
 
     HAL_Time_ToSystemTime(utcTime, &systemTime);
 
 #if (HAL_USE_RTC == TRUE)
+    struct tm st;
+    st.tm_hour = systemTime.wHour;
+    st.tm_sec = systemTime.wSecond; // seconds after the minute - [0, 60] including leap second
+    st.tm_min = systemTime.wMinute; // minutes after the hour - [0, 59]
+    st.tm_hour = systemTime.wHour;  // hours since midnight - [0, 23]
+    st.tm_mday = systemTime.wDay;   // day of the month - [1, 31]
+    st.tm_mon = systemTime.wMonth;  // months since January - [0, 11]
+    st.tm_year = systemTime.wYear;  // years since 1900
+    st.tm_wday = 0;                 // Unused.
+    st.tm_yday = 0;                 // Unused.
+    st.tm_isdst = 0;
 
-    // set RTC
-    RTCDateTime newTime;
-
-    newTime.year = systemTime.wYear - 1980; // ChibiOS time base is 1980-01-01
-    newTime.month = systemTime.wMonth;
-    newTime.day = systemTime.wDay;
-    newTime.dayofweek = systemTime.wDayOfWeek;
-    newTime.millisecond =
-        ((((uint32_t)systemTime.wHour * 3600) + ((uint32_t)systemTime.wMinute * 60) + (uint32_t)systemTime.wSecond) *
-         1000);
-
-    // set RTC time
-    rtcSetTime(&RTCD1, &newTime);
+    date_time_set(&st);
 
 #else
 
@@ -147,6 +165,7 @@ bool HAL_Time_TimeSpanToStringEx(const int64_t &ticks, char *&buf, size_t &len)
 bool DateTimeToString(const uint64_t &time, char *&buf, size_t &len)
 {
     SYSTEMTIME st;
+    printk("DateTimeToString++\n");
 
     HAL_Time_ToSystemTime(time, &st);
 
@@ -176,6 +195,7 @@ char *DateTimeToString(const uint64_t &time)
 
 const char *HAL_Time_CurrentDateTimeToString()
 {
+    // printk("HAL_Time_CurrentDateTimeToString++\n");
     return DateTimeToString(HAL_Time_CurrentDateTime(false));
 }
 
