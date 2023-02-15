@@ -12,6 +12,12 @@
 #include <nanoCLR_Checks.h>
 #include <corlib_native.h>
 
+
+typedef enum __nfpack HighResTimerEventType
+{
+    HighResTimerEventType_TimerExpired = 101,
+} HighResTimerEventType;
+
 typedef enum __nfpack NativeMemory_MemoryType
 {
     NativeMemory_MemoryType_All = 0,
