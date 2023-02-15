@@ -154,8 +154,10 @@ void __cdecl nanoHAL_Initialize(void)
     Events_Initialize();
 }
 
-void __cdecl nanoHAL_Uninitialize(void)
+void __cdecl nanoHAL_Uninitialize(bool isPoweringDown)
 {
+    (void)isPoweringDown;
+
     int i;
 
     // UNDONE: FIXME: CPU_GPIO_Uninitialize();
