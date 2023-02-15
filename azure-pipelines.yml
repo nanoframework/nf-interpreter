@@ -465,6 +465,8 @@ jobs:
     fetchDepth: 1
 
   - template: azure-pipelines-templates/build-preparations.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/nb-gitversioning.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
