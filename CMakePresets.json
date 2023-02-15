@@ -15,6 +15,7 @@
         "targets/ESP32/CMakePresets.json",
         "targets/FreeRTOS/NXP/NXP_MIMXRT1060_EVK/CMakePresets.json",
         "targets/TI_SimpleLink/TI_CC1352R1_LAUNCHXL/CMakePresets.json",
-        "targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL/CMakePresets.json"
+        "targets/TI_SimpleLink/TI_CC3220SF_LAUNCHXL/CMakePresets.json",
+        "targets-community/CMakePresets.json"
     ]
 }
