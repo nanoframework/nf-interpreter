@@ -24,3 +24,12 @@ steps:
     inputs:
       targetType: 'inline'
       script: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+
+  - task: PowerShell@2
+    displayName: Add dummy cmake presets
+    condition: ne(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')
+    inputs:
+      workingDirectory: $(Build.SourcesDirectory)\targets-community
+      targetType: 'inline'
+      script: |
+        New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n"version": 4,`n"include`": []`n}"
