@@ -44,7 +44,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // wdgStop(&WDGD1);
 
             // gracefully shutdown everything
-            nanoHAL_Uninitialize_C();
+            nanoHAL_Uninitialize_C(true);
 
             __disable_irq();
 

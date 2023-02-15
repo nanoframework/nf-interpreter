@@ -201,7 +201,7 @@ extern "C"
 #endif
 
     void nanoHAL_Initialize_C();
-    void nanoHAL_Uninitialize_C();
+    void nanoHAL_Uninitialize_C(bool isPoweringDown);
     void HeapLocation_C(unsigned char **baseAddress, unsigned int *sizeInBytes);
 
     // Call to the external memory configuration and initialization function
@@ -220,6 +220,10 @@ extern "C"
     void CPU_Reset();
     void CPU_Sleep(SLEEP_LEVEL_type level, uint64_t wakeEvents);
     void CPU_SetPowerMode(PowerLevel_type powerLevel);
+    // platform specific handler for power mode changes (may be empty)
+    void CPU_SetPowerModePlatform(PowerLevel_type powerLevel);
+    // target specific handler for power mode changes (may be empty)
+    void CPU_SetPowerModeTarget(PowerLevel_type powerLevel);
 
 #ifdef __cplusplus
 }
