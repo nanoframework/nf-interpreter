@@ -352,7 +352,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
     NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2311,7 +2311,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     // If we are a thread spawned by the debugger to perform evaluations,
     // return the thread object that correspond to thread that has focus in debugger.
     th = th->m_realThread;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     // Find an existing managed thread, if it exists
     // making sure to only return the managed object association with the current appdomain
@@ -3093,7 +3093,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
 bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
@@ -3158,7 +3158,7 @@ bool CLR_DBG_Debugger::Profiling_FlushStream(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_PROFILE_NEW)
+#endif // #if defined(NANOCLR_PROFILE_NEW)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
@@ -3637,7 +3637,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 //--//
 
@@ -3805,4 +3805,4 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
     }
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
