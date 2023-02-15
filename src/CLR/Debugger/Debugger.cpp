@@ -456,6 +456,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     BlockStorageDevice *storageDevices = NULL;
+    BlockStorageDevice *device = NULL;
     DeviceBlockInfo *devicesBlockInfos = NULL;
     Flash_BlockRegionInfo *pData = NULL;
     bool success = false;
@@ -499,7 +500,8 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
             }
 
             // sanity check
-            if (&storageDevices[i] == NULL)
+            device = &storageDevices[i];
+            if (device == NULL)
             {
                 // failed
                 goto cmd_executed;
