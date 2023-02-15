@@ -32,4 +32,4 @@ steps:
       workingDirectory: $(Build.SourcesDirectory)\targets-community
       targetType: 'inline'
       script: |
-        New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n\"version\": 4,`n\"include\": []`n}"
+        New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n""version"": 4,`n""include"": []`n}"
