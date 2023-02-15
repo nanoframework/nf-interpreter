@@ -138,7 +138,10 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
     nanoSPI_Uninitialize();
 #endif
 
-    CPU_GPIO_Uninitialize();
+    if (!isPoweringDown)
+    {
+        CPU_GPIO_Uninitialize();
+    }
 
 #if (HAL_USE_I2C_OPTION == TRUE)
     I2C_close(I2C1_PAL.i2c);
