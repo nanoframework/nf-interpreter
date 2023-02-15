@@ -1,6 +1,11 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
+
 steps:
 
   - task: PowerShell@2
@@ -29,7 +34,7 @@ steps:
     displayName: Add dummy cmake presets
     condition: ne(variables['Build.Repository.Name'], 'nanoframework/nf-Community-Targets')
     inputs:
-      workingDirectory: $(Build.SourcesDirectory)\targets-community
+      workingDirectory: ${{ parameters.repoDirectory }}\targets-community
       targetType: 'inline'
       script: |
         New-Item -Path . -Name "CMakePresets.json" -ItemType "file" -Value "{`n""version"": 4,`n""include"": []`n}"
