@@ -800,7 +800,7 @@ template <typename T> class HAL_RingBuffer
 // hal cleanup for CLR reboot
 
 void nanoHAL_Initialize();
-void nanoHAL_Uninitialize();
+void nanoHAL_Uninitialize(bool isPoweringDown);
 
 typedef void (*ON_SOFT_REBOOT_HANDLER)(void);
 

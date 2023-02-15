@@ -444,7 +444,7 @@ void ClrStartup(CLR_SETTINGS params)
 
                 s_ClrSettings.Cleanup();
 
-                nanoHAL_Uninitialize();
+                nanoHAL_Uninitialize(false);
 
                 // re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();

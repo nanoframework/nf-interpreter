@@ -29,7 +29,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     {
         case PowerLevel__Off:
             // gracefully shutdown everything
-            nanoHAL_Uninitialize_C();
+            nanoHAL_Uninitialize_C(true);
 
             esp_deep_sleep_start();
 
