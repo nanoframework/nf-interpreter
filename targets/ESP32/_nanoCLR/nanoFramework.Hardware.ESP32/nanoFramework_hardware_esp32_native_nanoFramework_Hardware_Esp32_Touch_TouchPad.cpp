@@ -22,6 +22,212 @@ static uint32_t lastTouchValues[TOUCH_PAD_MAX];
 static touch_fsm_mode_t measurementMode;
 static touch_trigger_mode_t triggerMode;
 
+/*
+ *
+ * Shared functions between ESP32 and ESP32S2 and for all the functions.
+ *
+ */
+
+/*
+Function used for all the interruption in the touch pad.
+*/
+static void IsrCallBack(void *arg)
+{
+    bool val;
+    uint32_t padIntr = touch_pad_get_status();
+#if defined(CONFIG_IDF_TARGET_ESP32)
+    touch_pad_intr_clear();
+#else
+    touch_pad_intr_clear(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+#endif
+    for (int i = 0; i < TOUCH_PAD_MAX; i++)
+    {
+        val = (padIntr >> i) & 0x01;
+        // Check if we have a change and raise an even if yes
+        if (val != isTouched[i])
+        {
+            PostManagedEvent(EVENT_TOUCH, 0, i, val);
+        }
+
+        isTouched[i] = val;
+    }
+}
+
+/*
+Resources need to be cleaned and the driver uninstalled in case of a soft reboot.
+*/
+static void TouchPad_Uninitialize()
+{
+    // stop the task
+    if (handleReadTask != NULL)
+    {
+        vTaskDelete(handleReadTask);
+    }
+
+    handleReadTask = NULL;
+    isTimeModeOn = false;
+
+    // Clean the isr registration
+#if defined(CONFIG_IDF_TARGET_ESP32)
+    touch_pad_intr_disable();
+#else
+    touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
+#endif
+    touch_pad_isr_deregister(IsrCallBack, NULL);
+    // Clean filter and uninstall the driver
+#if defined(CONFIG_IDF_TARGET_ESP32)
+    touch_pad_filter_stop();
+    touch_pad_filter_delete();
+#else
+    touch_pad_filter_disable();
+#endif
+
+    // Deinitialize and clean the touch pad driver
+    touch_pad_deinit();
+
+    isFilterOn = false;
+    isTouchInitialized = false;
+    // Make sure all pins are not reserved
+    memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
+    // Clear the pin values
+    memset(isTouched, 0, sizeof(isTouched));
+    memset(thresholds, 0, sizeof(thresholds));
+    memset(lastTouchValues, 0, sizeof(lastTouchValues));
+}
+
+/*
+This function ensure that the driver is installed for static functions.
+It does initialize as well the pins table and register for the soft reboot call back.
+*/
+static void MakeSureTouchIsInitialized()
+{
+    if (!isTouchInitialized)
+    {
+        isTouchInitialized = true;
+        touch_pad_init();
+
+        // We setup software trigger mode because the FSM one
+        // is not properly working on ESP32 and we will manage a read loop
+        // in a task.
+        touch_pad_set_fsm_mode(TOUCH_FSM_MODE_SW);
+
+        // Make sure all pins are not reserved
+        memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
+        // Clear the pin values
+        memset(isTouched, 0, sizeof(isTouched));
+        memset(thresholds, 0, sizeof(thresholds));
+        memset(lastTouchValues, 0, sizeof(lastTouchValues));
+
+        HAL_AddSoftRebootHandler(TouchPad_Uninitialize);
+
+        // The ISR is not really working properly, leaving this code in case new functions
+#if defined(CONFIG_IDF_TARGET_ESP32)
+        // and features will be added in the future.
+        // touch_pad_intr_enable();
+        // touch_pad_isr_register(IsrCallBack, NULL);
+#else
+        // touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
+        // TOUCH_PAD_INTR_MASK_TIMEOUT); touch_pad_isr_register(IsrCallBack, NULL, TOUCH_PAD_INTR_MASK_ALL);
+#endif
+    }
+}
+
+/*
+This function reads the sensor value. It does return the last read if running in timer mode.
+Otherwise returns the value read directly on the sensors.
+*/
+static uint32_t TouchPadRead(touch_pad_t padNumber)
+{
+#if defined(CONFIG_IDF_TARGET_ESP32)
+    uint16_t touchValue;
+#else
+    uint32_t touchValue;
+#endif
+    // Start a manual measurement if software mode
+    touch_pad_sw_start();
+
+    // We're waiting to get the data ready
+    while (!touch_pad_meas_is_done())
+    {
+        vTaskDelay(1);
+    }
+
+    // If we are filtering, the function to call to read the data is different
+    if (isFilterOn)
+    {
+#if defined(CONFIG_IDF_TARGET_ESP32)
+        touch_pad_read_filtered(padNumber, &touchValue);
+#else
+        touch_pad_filter_read_smooth(padNumber, &touchValue);
+#endif
+    }
+    else
+    {
+#if defined(CONFIG_IDF_TARGET_ESP32)
+        touch_pad_read(padNumber, &touchValue);
+#else
+        touch_pad_read_raw_data(padNumber, &touchValue);
+#endif
+    }
+
+    // Do we have an event?
+    if (triggerMode == TOUCH_TRIGGER_ABOVE)
+    {
+        if (touchValue < thresholds[padNumber] && isTouched[padNumber])
+        {
+            // Released
+            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
+            isTouched[padNumber] = false;
+        }
+        else if (touchValue > thresholds[padNumber] && !isTouched[padNumber])
+        {
+            // Touched
+            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 1);
+            isTouched[padNumber] = true;
+        }
+    }
+    else
+    {
+        if (touchValue > thresholds[padNumber] && !isTouched[padNumber])
+        {
+            // Touched
+            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 1);
+            isTouched[padNumber] = true;
+        }
+        else if (touchValue < thresholds[padNumber] && isTouched[padNumber])
+        {
+            // Released
+            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
+            isTouched[padNumber] = false;
+        }
+    }
+
+    lastTouchValues[padNumber] = touchValue;
+
+    return touchValue;
+}
+
+/*
+This task is run when the timer mode is used.
+*/
+static void ReadTask(void *pvParameter)
+{
+    while (isTimeModeOn)
+    {
+        for (int i = 0; i < TOUCH_PAD_MAX; i++)
+        {
+            if (isTouchPadUsed[i])
+            {
+                TouchPadRead((touch_pad_t)i);
+            }
+        }
+
+        // Wait the measurement time, 20 milliseconds
+        // So we are aligning on the nano Thread
+        vTaskDelay(20 / portTICK_PERIOD_MS);
+    }
+}
+
 #endif
 
 typedef Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad TouchPad;
@@ -941,212 +1147,3 @@ HRESULT Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32
 
     NANOCLR_NOCLEANUP();
 }
-
-/*
- *
- * Shared functions between ESP32 and ESP32S2 and for all the functions.
- *
- */
-
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-/*
-Function used for all the interruption in the touch pad.
-*/
-void IsrCallBack(void *arg)
-{
-    bool val;
-    uint32_t padIntr = touch_pad_get_status();
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    touch_pad_intr_clear();
-#else
-    touch_pad_intr_clear(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
-#endif
-    for (int i = 0; i < TOUCH_PAD_MAX; i++)
-    {
-        val = (padIntr >> i) & 0x01;
-        // Check if we have a change and raise an even if yes
-        if (val != isTouched[i])
-        {
-            PostManagedEvent(EVENT_TOUCH, 0, i, val);
-        }
-
-        isTouched[i] = val;
-    }
-}
-
-/*
-Resources need to be cleaned and the driver uninstalled in case of a soft reboot.
-*/
-void TouchPad_Uninitialize()
-{
-    // stop the task
-    if (handleReadTask != NULL)
-    {
-        vTaskDelete(handleReadTask);
-    }
-
-    handleReadTask = NULL;
-    isTimeModeOn = false;
-
-    // Clean the isr registration
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    touch_pad_intr_disable();
-#else
-    touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE | TOUCH_PAD_INTR_MASK_TIMEOUT);
-#endif
-    touch_pad_isr_deregister(IsrCallBack, NULL);
-    // Clean filter and uninstall the driver
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    touch_pad_filter_stop();
-    touch_pad_filter_delete();
-#else
-    touch_pad_filter_disable();
-#endif
-
-    // Deinitialize and clean the touch pad driver
-    touch_pad_deinit();
-
-    isFilterOn = false;
-    isTouchInitialized = false;
-    // Make sure all pins are not reserved
-    memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
-    // Clear the pin values
-    memset(isTouched, 0, sizeof(isTouched));
-    memset(thresholds, 0, sizeof(thresholds));
-    memset(lastTouchValues, 0, sizeof(lastTouchValues));
-}
-
-/*
-This function ensure that the driver is installed for static functions.
-It does initialize as well the pins table and register for the soft reboot call back.
-*/
-void MakeSureTouchIsInitialized()
-{
-    if (!isTouchInitialized)
-    {
-        isTouchInitialized = true;
-        touch_pad_init();
-
-        // We setup software trigger mode because the FSM one
-        // is not properly working on ESP32 and we will manage a read loop
-        // in a task.
-        touch_pad_set_fsm_mode(TOUCH_FSM_MODE_SW);
-
-        // Make sure all pins are not reserved
-        memset(isTouchPadUsed, 0, sizeof(isTouchPadUsed));
-        // Clear the pin values
-        memset(isTouched, 0, sizeof(isTouched));
-        memset(thresholds, 0, sizeof(thresholds));
-        memset(lastTouchValues, 0, sizeof(lastTouchValues));
-
-        HAL_AddSoftRebootHandler(TouchPad_Uninitialize);
-
-        // The ISR is not really working properly, leaving this code in case new functions
-#if defined(CONFIG_IDF_TARGET_ESP32)
-        // and features will be added in the future.
-        // touch_pad_intr_enable();
-        // touch_pad_isr_register(IsrCallBack, NULL);
-#else
-        // touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE |
-        // TOUCH_PAD_INTR_MASK_TIMEOUT); touch_pad_isr_register(IsrCallBack, NULL, TOUCH_PAD_INTR_MASK_ALL);
-#endif
-    }
-}
-
-/*
-This function reads the sensor value. It does return the last read if running in timer mode.
-Otherwise returns the value read directly on the sensors.
-*/
-uint32_t TouchPadRead(touch_pad_t padNumber)
-{
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    uint16_t touchValue;
-#else
-    uint32_t touchValue;
-#endif
-    // Start a manual measurement if software mode
-    touch_pad_sw_start();
-
-    // We're waiting to get the data ready
-    while (!touch_pad_meas_is_done())
-    {
-        vTaskDelay(1);
-    }
-
-    // If we are filtering, the function to call to read the data is different
-    if (isFilterOn)
-    {
-#if defined(CONFIG_IDF_TARGET_ESP32)
-        touch_pad_read_filtered(padNumber, &touchValue);
-#else
-        touch_pad_filter_read_smooth(padNumber, &touchValue);
-#endif
-    }
-    else
-    {
-#if defined(CONFIG_IDF_TARGET_ESP32)
-        touch_pad_read(padNumber, &touchValue);
-#else
-        touch_pad_read_raw_data(padNumber, &touchValue);
-#endif
-    }
-
-    // Do we have an event?
-    if (triggerMode == TOUCH_TRIGGER_ABOVE)
-    {
-        if (touchValue < thresholds[padNumber] && isTouched[padNumber])
-        {
-            // Released
-            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
-            isTouched[padNumber] = false;
-        }
-        else if (touchValue > thresholds[padNumber] && !isTouched[padNumber])
-        {
-            // Touched
-            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 1);
-            isTouched[padNumber] = true;
-        }
-    }
-    else
-    {
-        if (touchValue > thresholds[padNumber] && !isTouched[padNumber])
-        {
-            // Touched
-            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 1);
-            isTouched[padNumber] = true;
-        }
-        else if (touchValue < thresholds[padNumber] && isTouched[padNumber])
-        {
-            // Released
-            PostManagedEvent(EVENT_TOUCH, 0, padNumber, 0);
-            isTouched[padNumber] = false;
-        }
-    }
-
-    lastTouchValues[padNumber] = touchValue;
-
-    return touchValue;
-}
-
-/*
-This task is run when the timer mode is used.
-*/
-void ReadTask(void *pvParameter)
-{
-    while (isTimeModeOn)
-    {
-        for (int i = 0; i < TOUCH_PAD_MAX; i++)
-        {
-            if (isTouchPadUsed[i])
-            {
-                TouchPadRead((touch_pad_t)i);
-            }
-        }
-
-        // Wait the measurement time, 20 milliseconds
-        // So we are aligning on the nano Thread
-        vTaskDelay(20 / portTICK_PERIOD_MS);
-    }
-}
-
-#endif
