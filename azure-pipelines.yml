@@ -45,7 +45,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.3
+      ref: refs/tags/v4.4.4
       
 jobs:
 
@@ -414,13 +414,13 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
-      ESP32_BLE_REV0:
-        TargetBoard: ESP32
-        TargetSeries: 'esp32'
-        BuildOptions: 
-        IDF_Target: esp32
-        TargetName: ESP32
-        PackageName: ESP32_BLE_REV0
+      # ESP32_BLE_REV0:
+      #   TargetBoard: ESP32
+      #   TargetSeries: 'esp32'
+      #   BuildOptions: 
+      #   IDF_Target: esp32
+      #   TargetName: ESP32
+      #   PackageName: ESP32_BLE_REV0
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
@@ -465,6 +465,8 @@ jobs:
     fetchDepth: 1
 
   - template: azure-pipelines-templates/build-preparations.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/nb-gitversioning.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'

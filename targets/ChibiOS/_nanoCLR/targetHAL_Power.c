@@ -69,7 +69,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
 #endif
 
             // gracefully shutdown everything
-            nanoHAL_Uninitialize_C();
+            nanoHAL_Uninitialize_C(true);
 
             chSysDisable();
 
