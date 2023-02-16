@@ -36,8 +36,7 @@
                 "API_nanoFramework.System.Collections": "OFF",
                 "API_nanoFramework.System.Text": "ON",
                 "API_nanoFramework.TI.EasyLink": "ON",
-                "API_nanoFramework.Hardware.TI": "ON",
-                "RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"
+                "API_nanoFramework.Hardware.TI": "ON"
             }
         }
     ],

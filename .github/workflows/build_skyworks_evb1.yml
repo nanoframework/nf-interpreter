@@ -18,7 +18,7 @@ jobs:
     - name: Install arm-none-eabi-gcc
       uses: carlosperate/arm-none-eabi-gcc-action@v1
       with:
-        release: '11.3.Rel1'
+        release: '12.2.Rel1'
 
     - name: Tweak GCC path
       run: |
@@ -55,7 +55,7 @@ jobs:
         buildPreset: 'SKY_EEVB_PROTO1'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: 'SKY_EEVB_PROTO1-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
