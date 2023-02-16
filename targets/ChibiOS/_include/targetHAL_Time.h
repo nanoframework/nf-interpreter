@@ -8,7 +8,7 @@
 
 #include <cmsis_os.h>
 
-#define HAL_Time_CurrentSysTicks chVTGetSystemTimeX
+#define HAL_Time_CurrentSysTicks chVTGetTimeStamp
 
 #ifdef __cplusplus
 extern "C"
