@@ -249,18 +249,15 @@ HRESULT Library_nf_device_can_native_nanoFramework_Device_Can_CanController::
             *id = canFrame.EID;
         }
 
-        // get data if any
-        if (canFrame.data8)
-        {
-            CLR_RT_HeapBlock &dataArrayField = canMessage[ManagedCanMessage::FIELD___message];
-            // create an array of <bytes>
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8));
+        // grab data and copy over to managed array
+        CLR_RT_HeapBlock &dataArrayField = canMessage[ManagedCanMessage::FIELD___message];
+        // create an array of <bytes>
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(dataArrayField, 8, g_CLR_RT_WellKnownTypes.m_UInt8));
 
-            // get a pointer to the first object in the array
-            CLR_UINT8 *dataBuffer = (CLR_UINT8 *)(dataArrayField.DereferenceArray()->GetFirstElement());
-            memcpy(dataBuffer, &canFrame.data8[0], 8);
-        }
+        // get a pointer to the first object in the array
+        CLR_UINT8 *dataBuffer = (CLR_UINT8 *)(dataArrayField.DereferenceArray()->GetFirstElement());
+        memcpy(dataBuffer, &canFrame.data8[0], 8);
     }
     else
     {

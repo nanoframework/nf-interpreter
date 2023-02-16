@@ -21,9 +21,6 @@
                 "dev": true,
                 "uninitialized": false,
                 "unusedCli": false
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "MinSizeRel"
             }
         }
     ]
