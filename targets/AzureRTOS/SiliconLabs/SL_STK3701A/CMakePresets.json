@@ -49,8 +49,6 @@
         {
             "name": "SL_STK3701A_REVB",
             "inherits": [
-                "user-tools-repos",
-                "user-prefs",
                 "SL_STK3701A"
             ],
             "cacheVariables": {
