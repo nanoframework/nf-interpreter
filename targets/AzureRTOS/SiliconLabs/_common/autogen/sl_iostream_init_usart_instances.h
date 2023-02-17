@@ -33,9 +33,11 @@ void sl_iostream_usart_init_instances(void);
 
 #if HAL_WP_USE_SERIAL == TRUE
 sl_power_manager_on_isr_exit_t sl_iostream_usart_vcom_sleep_on_isr_exit(void);
+bool sl_iostream_usart_vcom_is_ok_to_sleep(void);
 #endif
 #if HAL_USE_ONEWIRE == TRUE
 sl_power_manager_on_isr_exit_t sl_iostream_usart_onewire_sleep_on_isr_exit(void);
+bool sl_iostream_usart_onewire_is_ok_to_sleep(void);
 #endif
 
 #endif
