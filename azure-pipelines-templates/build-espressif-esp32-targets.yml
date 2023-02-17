@@ -32,7 +32,7 @@ steps:
   # because of permission issues (the python script isn't allowed to write on the output folder)
   # we need to perform these steps by calling directly the python scripts
 
-  # 16MB partition table it's generated for ESP32 and ESP32_S2 only
+  # 16MB partition table it's generated for ESP32 and ESP32_C3 only
   - task: PythonScript@0
     condition: >-
       and(
