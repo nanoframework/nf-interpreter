@@ -414,13 +414,13 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
-      # ESP32_BLE_REV0:
-      #   TargetBoard: ESP32
-      #   TargetSeries: 'esp32'
-      #   BuildOptions: 
-      #   IDF_Target: esp32
-      #   TargetName: ESP32
-      #   PackageName: ESP32_BLE_REV0
+      ESP32_BLE_REV0:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32
+        PackageName: ESP32_BLE_REV0
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
