@@ -763,6 +763,7 @@ struct CLR_RT_HeapBlock
     {
         return (CLR_DataType)m_id.type.dataType;
     }
+
     CLR_UINT8 DataFlags() const
     {
         return m_id.type.flags;
@@ -1002,12 +1003,17 @@ struct CLR_RT_HeapBlock
     {
         CLR_RT_HeapBlock *obj;
 
+        // If already a ref type, dereference it
+        if (dst.DataType() == DATATYPE_BYREF)
+        {
+            obj = dst.Dereference();
+        }
         //
         // ValueTypes are implemented as pointers to objects,
         // so getting a reference to a ValueType has to be treated like getting a reference to object, not to its
         // holder!
         //
-        if (dst.IsAValueType())
+        else if (dst.IsAValueType())
         {
             obj = dst.Dereference();
         }
@@ -1242,8 +1248,10 @@ struct CLR_RT_HeapBlock
 
         this->m_data = value.m_data;
 
-        if (this->DataType() > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
-            this->m_id = value.m_id;
+        if (DataType() > DATATYPE_LAST_PRIMITIVE_TO_PRESERVE)
+        {
+            this->m_id = value.m_id; // FIX: handle generic type
+        }
     }
 
     void AssignPreserveTypeCheckPinned(const CLR_RT_HeapBlock &value)

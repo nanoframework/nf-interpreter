@@ -1799,7 +1799,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         while (true)
         {
             dt = CLR_UncompressElementType(sig);
-
+            if (dt ==
+                DATATYPE_VOID) // there should never have been a local variable of type void, unless it's generic type
+            {
+                dt = DATATYPE_OBJECT;
+            }
             switch (dt)
             {
                 case DATATYPE_TYPE_PINNED:

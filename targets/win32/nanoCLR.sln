@@ -76,6 +76,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.Device.Gpio", "..\..
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System.Runtime.Serialization", "..\..\src\System.Runtime.Serialization\System.Runtime.Serialization.vcxproj", "{C9264D0A-AC25-46B0-BD08-4A3252427F19}"
 EndProject
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "nanoFramework.System.Threading", "..\..\..\..\nanoframework\lib-nanoFramework.System.Threading\nanoFramework.System.Threading\nanoFramework.System.Threading.nfproj", "{A8146E83-014A-4570-A2F9-8B8BE68CFD7B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
