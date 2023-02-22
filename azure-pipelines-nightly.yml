@@ -421,7 +421,6 @@ jobs:
         TargetName: M5StickCPlus
         PackageName: M5StickCPlus
         CMakePreset: M5StickCPlus
-        CMakePreset: M5StickCPlus
 
       M5Core:
         TargetBoard: ESP32
