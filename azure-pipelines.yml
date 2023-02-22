@@ -357,12 +357,15 @@ jobs:
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: false
+        CMakePreset: ST_STM32F429I_DISCOVERY
+
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: true
+        CMakePreset: ST_STM32F769I_DISCOVERY
 
   variables:
     DOTNET_NOLOGO: true
@@ -414,6 +417,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
+        CMakePreset: ESP32_PSRAM_REV0
+
       ESP32_BLE_REV0:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -421,6 +426,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_BLE_REV0
+        CMakePreset: ESP32_BLE_REV0
+
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
@@ -428,6 +435,8 @@ jobs:
          IDF_Target: esp32
          TargetName: ESP_WROVER_KIT
          PackageName: ESP_WROVER_KIT
+         CMakePreset: ESP_WROVER_KIT
+
       ESP32_LILYGO:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -435,6 +444,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32_LILYGO
         PackageName: ESP32_LILYGO
+        CMakePreset: ESP32_LILYGO
+
       FEATHER_S2:
         TargetBoard: ESP32_S2
         TargetSeries: 'esp32_s2'
@@ -442,6 +453,7 @@ jobs:
         IDF_Target: esp32s2
         TargetName: FEATHER_S2
         PackageName: FEATHER_S2
+        CMakePreset: FEATHER_S2
 
       ESP32_C3:
         TargetBoard: ESP32_C3
@@ -450,6 +462,7 @@ jobs:
         IDF_Target: esp32c3
         TargetName: ESP32_C3
         PackageName: ESP32_C3
+        CMakePreset: ESP32_C3
 
   variables:
     DOTNET_NOLOGO: true
@@ -522,6 +535,7 @@ jobs:
         BuildOptions: 
         GccArm_Version: 
         NeedsSRECORD: true
+        CMakePreset: NXP_MIMXRT1060_EVK
 
   variables:
     DOTNET_NOLOGO: true
@@ -592,6 +606,7 @@ jobs:
         BuildOptions: >-
           -DRADIO_FREQUENCY=915
         GccArm_Version:
+        CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
     DOTNET_NOLOGO: true
@@ -639,6 +654,7 @@ jobs:
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
+        CMakePreset: ST_B_L475E_IOT01A
 
       # ORGPAL_PALTHREE:
       #   TargetBoard: ORGPAL_PALTHREE
@@ -647,6 +663,7 @@ jobs:
       #   GccArm_Version: 
       #   NeedsDFU: true
       #   NeedsSRECORD: false
+      #   CMakePreset: ORGPAL_PALTHREE
 
       SL_STK3701A:
         TargetBoard: SL_STK3701A
@@ -655,6 +672,7 @@ jobs:
         GccArm_Version: 
         NeedsDFU: false
         NeedsSRECORD: false
+        CMakePreset: SL_STK3701A
 
   variables:
     # creates a counter and assigns it to the revision variable
