@@ -520,7 +520,7 @@ jobs:
     matrix:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
-        PackageName: TI_CC1352R1_LAUNCHXL_915
+        PackageName: TI_CC1352R1_LAUNCHXL_868
         TargetSeries: 'CC13X2'
         BuildOptions: >-
           -DRADIO_FREQUENCY=868
