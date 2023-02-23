@@ -275,12 +275,15 @@ jobs:
         BuildOptions: 
         NeedsDFU: true
         NeedsSRECORD: false
+        CMakePreset: ORGPAL_PALTHREE
+
       ST_NUCLEO64_F091RC:
         TargetBoard: ST_NUCLEO64_F091RC
         TargetSeries: 'stm32f0xx'
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: true
+        CMakePreset: ST_NUCLEO64_F091RC
 
   variables:
     DOTNET_NOLOGO: true
@@ -334,6 +337,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_REV0
+        CMakePreset: ESP32_REV0
 
       ESP32_PSRAM_REV3:
         TargetBoard: ESP32
@@ -342,6 +346,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV3
+        CMakePreset: ESP32_PSRAM_REV3
 
       ESP32_PSRAM_XTAL26_REV0:
         TargetBoard: ESP32
@@ -350,6 +355,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_XTAL26_REV0
+        CMakePreset: ESP32_PSRAM_XTAL26_REV0
 
       ESP32_REV3:
         TargetBoard: ESP32
@@ -358,6 +364,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_REV3
+        CMakePreset: ESP32_REV3
 
       ESP32_PICO:
         TargetBoard: ESP32
@@ -366,6 +373,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32_PICO
         PackageName: ESP32_PICO
+        CMakePreset: ESP32_PICO
 
       KALUGA_1:
         TargetBoard: ESP32_S2
@@ -374,6 +382,7 @@ jobs:
         IDF_Target: esp32s2
         TargetName: KALUGA_1
         PackageName: KALUGA_1
+        CMakePreset: KALUGA_1
 
       ESP32_BLE_REV3:
         TargetBoard: ESP32
@@ -382,6 +391,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_BLE_REV3
+        CMakePreset: ESP32_BLE_REV3
 
       ESP32_OLIMEX:
         TargetBoard: ESP32
@@ -390,6 +400,7 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32_OLIMEX
         PackageName: ESP32_OLIMEX
+        CMakePreset: ESP32_OLIMEX
 
       M5StickC:
         TargetBoard: ESP32
@@ -399,6 +410,7 @@ jobs:
         IDF_Target: esp32
         TargetName: M5StickC
         PackageName: M5StickC
+        CMakePreset: M5StickC
 
       M5StickCPlus:
         TargetBoard: ESP32
@@ -408,6 +420,7 @@ jobs:
         IDF_Target: esp32
         TargetName: M5StickCPlus
         PackageName: M5StickCPlus
+        CMakePreset: M5StickCPlus
 
       M5Core:
         TargetBoard: ESP32
@@ -417,6 +430,7 @@ jobs:
         IDF_Target: esp32
         TargetName: M5Core
         PackageName: M5Core
+        CMakePreset: M5Core
 
       M5Core2:
         TargetBoard: ESP32
@@ -426,6 +440,7 @@ jobs:
         IDF_Target: esp32
         TargetName: M5Core2
         PackageName: M5Core2
+        CMakePreset: M5Core2
 
       ESP32_C3_REV3:
         TargetBoard: ESP32_C3
@@ -434,6 +449,7 @@ jobs:
         IDF_Target: esp32c3
         TargetName: ESP32_C3_REV3
         PackageName: ESP32_C3_REV3
+        CMakePreset: ESP32_C3_REV3
 
   variables:
     DOTNET_NOLOGO: true
@@ -505,25 +521,11 @@ jobs:
       TI_CC1352R1_LAUNCHXL_868:
         TargetBoard: TI_CC1352R1_LAUNCHXL
         PackageName: TI_CC1352R1_LAUNCHXL_868
-        TargetSeries: 'cc13xx_26xx'
+        TargetSeries: 'CC13X2'
         BuildOptions: >-
-          -DTARGET_SERIES=CC13X2
-          -DRTOS=TI_SimpleLink
           -DRADIO_FREQUENCY=868
-          -DSUPPORT_ANY_BASE_CONVERSION=OFF
-          -DNF_FEATURE_DEBUGGER=ON
-          -DNF_FEATURE_RTC=ON
-          -DNF_FEATURE_WATCHDOG=OFF
-          -DAPI_System.Device.Gpio=ON
-          -DAPI_System.Device.Spi=OFF
-          -DAPI_System.Device.I2c=OFF
-          -DAPI_System.Device.Pwm=OFF
-          -DAPI_System.IO.Ports=OFF
-          -DAPI_System.Device.Adc=ON
-          -DAPI_nanoFramework.TI.EasyLink=ON
-          -DAPI_nanoFramework.Hardware.TI=ON
-          -DAPI_nanoFramework.System.Text=ON
         GccArm_Version:
+        CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
     DOTNET_NOLOGO: true
@@ -568,7 +570,7 @@ jobs:
     matrix:
 
       SL_STK3701A_REVB:
-        TargetBoard: SL_STK3701A
+        TargetBoard: SL_STK3701A_REVB
         TargetSeries: 'efm32gg11'
         BuildOptions:
         GccArm_Version: 
@@ -576,6 +578,7 @@ jobs:
         NeedsSRECORD: false
         TargetName: SL_STK3701A_REVB
         PackageName: SL_STK3701A_REVB
+        CMakePreset: SL_STK3701A_REVB
 
   variables:
     # creates a counter and assigns it to the revision variable
