@@ -19,14 +19,14 @@ steps:
     condition: succeeded()
     displayName: Setup build with CMake
     inputs:
-      cmakeArgs: ' --preset $(PackageName) -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetName) $(BuildOptions)'
+      cmakeArgs: '--preset $(CMakePreset) -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)'
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Build with CMake
     condition: succeeded()
     inputs:
-      cmakeArgs: '--build  --preset $(PackageName) --target all --config MinSizeRel '
+      cmakeArgs: '--build --preset $(CMakePreset) --target all --config MinSizeRel'
       workingDirectory:  ${{ parameters.repoDirectory }}
 
   # because of permission issues (the python script isn't allowed to write on the output folder)
