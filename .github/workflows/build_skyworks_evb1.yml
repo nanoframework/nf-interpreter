@@ -12,6 +12,7 @@ jobs:
       with:
         fetch-depth: 0
         ref: 'skyworks-evb'
+        submodules: true
 
     - uses: lukka/get-cmake@latest
 
