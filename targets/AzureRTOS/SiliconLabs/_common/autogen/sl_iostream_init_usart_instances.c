@@ -152,6 +152,7 @@ sl_status_t sl_iostream_usart_init_vcom(void)
 #if HAL_USE_ONEWIRE == TRUE
 
 sl_status_t sl_iostream_usart_init_onewire(void);
+static sl_iostream_uart_t sl_iostream_onewire;
 sl_iostream_t *sl_iostream_onewire_handle = &sl_iostream_onewire.stream;
 sl_iostream_uart_t *sl_iostream_uart_onewire_handle = &sl_iostream_onewire;
 static sl_iostream_usart_context_t context_onewire;
@@ -239,8 +240,6 @@ sl_status_t sl_iostream_usart_init_onewire(void)
 
 void sl_iostream_usart_init_instances(void)
 {
-    sl_status_t status;
-
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(_SILICON_LABS_32B_SERIES_2)
     // Enable power manager notifications
     sl_power_manager_subscribe_em_transition_event(&events_handle, &events_info);
@@ -248,7 +247,7 @@ void sl_iostream_usart_init_instances(void)
 
 // Instantiate usart instance(s)
 #if HAL_WP_USE_SERIAL == TRUE
-    status = sl_iostream_usart_init_vcom();
+    sl_status_t status = sl_iostream_usart_init_vcom();
     EFM_ASSERT(status == SL_STATUS_OK);
 #endif
 }
