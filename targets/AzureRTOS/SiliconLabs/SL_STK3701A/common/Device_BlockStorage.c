@@ -15,7 +15,7 @@ const BlockRange BlockRange1[] = {
     // 0000C000 nanoCLR
     {BlockRange_BLOCKTYPE_CODE, 12, 158},
 
-    // 000EF000 deployment
+    // 0009F000 deployment
     {BlockRange_BLOCKTYPE_DEPLOYMENT, 159, 509},
 
     ///////////////////////////////////////////////////////////////////////////////////////

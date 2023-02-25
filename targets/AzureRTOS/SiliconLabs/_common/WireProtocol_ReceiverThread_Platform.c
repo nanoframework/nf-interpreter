@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <target_platform.h>
 #include <targetHAL.h>
 #include <WireProtocol_Message.h>
 
@@ -30,10 +31,13 @@
 __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
 {
     (void)parameter;
+
+#if HAL_WP_USE_USB_CDC == TRUE
     sl_status_t status = SL_STATUS_OK;
     bool conn = false;
 
     const uint32_t xDelay = TX_TICKS_PER_MILLISEC(TASK_DELAY_MS);
+#endif
 
     tx_thread_sleep(50);
 
@@ -42,6 +46,8 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
     // loop until thread receives a request to terminate
     while (1)
     {
+
+#if HAL_WP_USE_USB_CDC == TRUE
         // Wait until device is in configured state
         status = sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
         _ASSERTE(status == SL_STATUS_OK);
@@ -55,6 +61,7 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
             status = sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
             _ASSERTE(status == SL_STATUS_OK);
         }
+#endif
 
         WP_Message_Process();
 

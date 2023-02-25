@@ -43,6 +43,17 @@ nf_check_path_limits()
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
+else()
+
+    # validate valid build types
+    set(SUPPORTED_CMAKE_BUILD_TYPES "Debug" "Release" "MinSizeRel" "RelWithDebInfo" CACHE INTERNAL "supported CMake build types")
+
+    list(FIND SUPPORTED_CMAKE_BUILD_TYPES ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_INDEX)
+    if(CMAKE_BUILD_TYPE_INDEX EQUAL -1)
+        # build type is NOT supported 
+        message(FATAL_ERROR "\n\nSorry but the CMAKE_BUILD_TYPE set: '${CMAKE_BUILD_TYPE}' is not supported!\nPlease double check the CMAKE_BUILD_TYPE build configuration.\n\n")
+    endif()
+    
 endif()
 ######################################################
 

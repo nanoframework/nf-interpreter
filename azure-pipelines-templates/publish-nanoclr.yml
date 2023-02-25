@@ -22,14 +22,16 @@ steps:
       script: |
           $repoName = $env:Build_Repository_Name
           $branchName = $env:Build_SourceBranchName
+          $forceUpload = $env:ForceUpload
 
           Write-Host "repo name is: $repoName"
           Write-Host "branch name is: $branchName"
 
-          if( $env:Build_SourceBranchName -match "^develop*" -or 
-              $env:Build_SourceBranchName -match "^release*" )
+          if( $env:Build_SourceBranchName -match "develop" -or 
+              $env:Build_SourceBranchName -match "^release*" -or
+              $forceUpload -eq "true")
           {
-            # this a dev or release branch, publish to Cloudsmith dev repo
+            # this a dev, release branch or force upload, publish to Cloudsmith dev repo
             Write-Host "$("##vso[task.setvariable variable=CLOUDSMITH_REPO]")nanoframework-images-dev"
             # set version
             Write-Host "$("##vso[task.setvariable variable=PACKAGE_VERSION]")$(NBGV_NuGetPackageVersion)"
