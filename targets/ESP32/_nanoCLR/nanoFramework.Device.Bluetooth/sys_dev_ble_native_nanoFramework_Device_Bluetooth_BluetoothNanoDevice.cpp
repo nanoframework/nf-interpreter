@@ -34,8 +34,8 @@ void SetDeviceName(const char *deviceName)
     UpdateNameInContext();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice::
-    NativeInitilise___STATIC__VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice::NativeInitilise___STATIC__VOID(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -89,7 +89,11 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoD
 
             if (!result)
             {
-                BLE_DEBUG_PRINTF("run mode %d/%d device name %s\n", ble_operatingMode, last_operatingMode, bleDeviceName);
+                BLE_DEBUG_PRINTF(
+                    "run mode %d/%d device name %s\n",
+                    ble_operatingMode,
+                    last_operatingMode,
+                    bleDeviceName);
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
             }
         }

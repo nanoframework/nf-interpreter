@@ -267,7 +267,7 @@ bool StartBleStack(char *devicename)
 
 bool StopBleStack()
 {
-    // Not running 
+    // Not running
     if (!ble_hs_is_enabled())
     {
         return false;
@@ -282,18 +282,18 @@ DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode)
 {
     DevicePairingResultStatus pairingStatus = DevicePairingResultStatus_Paired;
 
-    //ble_error_codes
-    switch(errorCode)
+    // ble_error_codes
+    switch (errorCode)
     {
         case 0:
             pairingStatus = DevicePairingResultStatus_Paired;
             break;
 
-        case  BLE_ERR_HW_FAIL:
+        case BLE_ERR_HW_FAIL:
             pairingStatus = DevicePairingResultStatus_HardwareFailure;
             break;
 
-        case (BLE_HS_ERR_HCI_BASE + BLE_ERR_NO_PAIRING):     // Pairing not allowed
+        case (BLE_HS_ERR_HCI_BASE + BLE_ERR_NO_PAIRING): // Pairing not allowed
             pairingStatus = DevicePairingResultStatus_NotPaired;
             break;
 

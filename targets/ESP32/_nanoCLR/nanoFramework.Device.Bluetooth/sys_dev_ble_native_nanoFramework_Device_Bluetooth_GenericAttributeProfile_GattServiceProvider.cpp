@@ -617,7 +617,7 @@ void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 #endif
 
 HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeStartAdvertising___BOOLEAN__SystemCollectionsArrayList( CLR_RT_StackFrame &stack )
+    NativeStartAdvertising___BOOLEAN__SystemCollectionsArrayList(CLR_RT_StackFrame &stack)
 {
     bool result = true;
 
@@ -641,7 +641,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         // Pick up passed ArrayList of Services and get service count
         pArrayServiceProviders = (CLR_RT_HeapBlock_ArrayList *)stack.Arg1().Dereference();
         FAULT_ON_NULL_ARG(pArrayServiceProviders);
-        bleContext.serviceCount = pArrayServiceProviders->GetSize(); 
+        bleContext.serviceCount = pArrayServiceProviders->GetSize();
 
         // Allocate contexts for all service definitions
         size_t bleContextSize = sizeof(ble_context) * bleContext.serviceCount;
@@ -683,7 +683,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         BLE_DEBUG_PRINTF("Gatt Services built\n");
 
 #ifdef NANO_BLE_DEBUG
-        //PrintSvrDefs(bleContext.gatt_service_def);
+        // PrintSvrDefs(bleContext.gatt_service_def);
 #endif
 
         // Set Service definitions in nimble
