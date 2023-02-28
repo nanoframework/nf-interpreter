@@ -47,7 +47,7 @@
 
 #define CLR_RT_HEAPBLOCK_RELOCATE(ptr)                                                                                 \
     {                                                                                                                  \
-        CLR_DataType dt = ptr->DataType();                                                                             \
+        NanoCLRDataType dt = ptr->DataType();                                                                          \
                                                                                                                        \
         if (dt > DATATYPE_LAST_NONPOINTER && dt < DATATYPE_FIRST_INVALID)                                              \
         {                                                                                                              \
@@ -64,17 +64,10 @@
 //
 // This is used in memory move operations.
 //
-#ifdef _WIN64
-struct CLR_RT_HeapBlock_Raw
-{
-    CLR_UINT32 data[5];
-};
-#else
 struct CLR_RT_HeapBlock_Raw
 {
     CLR_UINT32 data[3];
 };
-#endif // _WIN64
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -142,13 +135,14 @@ struct CLR_RT_HeapBlock
     union CLR_RT_HeapBlock_Id {
         struct Type
         {
-            CLR_UINT8 dataType; // CLR_DataType
+            CLR_UINT8 dataType; // NanoCLRDataType
             CLR_UINT8 flags;    // HB_*
             CLR_UINT16 size;
         } type;
 
         CLR_UINT32 raw;
     } m_id;
+
 
     union CLR_RT_HeapBlock_AtomicData {
         struct NodeLink
@@ -750,6 +744,16 @@ struct CLR_RT_HeapBlock
             CLR_RT_RelocationHandler m_relocate;
         } binaryBlob;
 
+        //--//
+
+        struct GenericInstance
+        {
+            CLR_RT_TypeSpec_Index genericType;
+            CLR_RT_HeapBlock_GenericInstance *ptr;
+        } genericInstance;
+
+        //--//
+
     } m_data;
 
   public:
@@ -759,9 +763,9 @@ struct CLR_RT_HeapBlock
 
     //--//
 
-    CLR_DataType DataType() const
+    NanoCLRDataType DataType() const
     {
-        return (CLR_DataType)m_id.type.dataType;
+        return (NanoCLRDataType)m_id.type.dataType;
     }
 
     CLR_UINT8 DataFlags() const
@@ -1026,7 +1030,7 @@ struct CLR_RT_HeapBlock
         m_data.objectReference.ptr = obj;
     }
 
-    bool IsAReferenceOfThisType(CLR_DataType dataType) const
+    bool IsAReferenceOfThisType(NanoCLRDataType dataType) const
     {
         if (DataType() == DATATYPE_OBJECT)
         {
@@ -1148,6 +1152,21 @@ struct CLR_RT_HeapBlock
     {
         return m_data.reflection;
     }
+
+    //--//
+
+    void SetGenericType(const CLR_RT_TypeSpec_Index& genericType)
+    {
+        m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
+        m_data.genericInstance.genericType.m_data = genericType.m_data;
+    }
+
+    const CLR_RT_TypeSpec_Index& ObjectGenericType() const
+    {
+        return m_data.genericInstance.genericType;
+    }
+
+    HRESULT SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& genericType);
 
     //--//
 
@@ -1274,7 +1293,7 @@ struct CLR_RT_HeapBlock
     // Since it is rare case, the code is not inlined to save code size.
     void AssignAndPinReferencedObject(const CLR_RT_HeapBlock &value);
 
-    HRESULT Convert(CLR_DataType et, bool fOverflow, bool fUnsigned)
+    HRESULT Convert(NanoCLRDataType et, bool fOverflow, bool fUnsigned)
     {
         //
         // For V1, we don't throw on overflow.
@@ -1327,7 +1346,7 @@ struct CLR_RT_HeapBlock
 
     static CLR_INT32 Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned);
 
-    HRESULT Convert_Internal(CLR_DataType et);
+    HRESULT Convert_Internal(NanoCLRDataType et);
     HRESULT NumericAdd(const CLR_RT_HeapBlock &right);
     HRESULT NumericSub(const CLR_RT_HeapBlock &right);
     HRESULT NumericMul(const CLR_RT_HeapBlock &right);
@@ -2340,6 +2359,15 @@ struct CLR_RT_HeapBlock_WeakReference : public CLR_RT_HeapBlock_Node // OBJECT H
     HRESULT GetTarget(CLR_RT_HeapBlock &targetReference);
 
     void InsertInPriorityOrder();
+
+    void Relocate();
+};
+
+//--//
+
+struct CLR_RT_HeapBlock_GenericInstance : public CLR_RT_HeapBlock_Node // OBJECT HEAP - DO RELOCATION -
+{
+    static HRESULT CreateInstance(CLR_RT_HeapBlock& reference, const CLR_RT_TypeSpec_Index& tsIndex);
 
     void Relocate();
 };

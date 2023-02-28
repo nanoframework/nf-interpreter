@@ -198,7 +198,7 @@ CLR_INT64 *Library_corlib_native_System_TimeSpan::GetValuePtr(CLR_RT_HeapBlock &
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock *obj = &ref;
-    CLR_DataType dt = obj->DataType();
+    NanoCLRDataType dt = obj->DataType();
 
     if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {

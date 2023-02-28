@@ -287,7 +287,7 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
     m_data.reflection.m_kind =
-        (inst.m_target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
+        (inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
     m_data.reflection.m_levels = 0;
     m_data.reflection.m_data.m_method = md;
 
@@ -308,6 +308,24 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
 
     m_data.objectHeader.cls = cls;
     m_data.objectHeader.lock = NULL;
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& genericType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance instance;
+
+    if (instance.InitializeFromIndex(genericType) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+    }
+
+    m_data.genericInstance.genericType = genericType;
+    m_data.genericInstance.ptr = NULL;
 
     NANOCLR_NOCLEANUP();
 }
@@ -385,7 +403,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    NanoCLRDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -463,7 +481,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
                     NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
                 }
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+                if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
                 {
                     obj = &objT[1];
                 }
@@ -491,7 +509,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock *obj;
-    CLR_DataType dt = ref.DataType();
+    NanoCLRDataType dt = ref.DataType();
 
     if (dt == DATATYPE_ARRAY_BYREF)
     {
@@ -527,7 +545,7 @@ HRESULT CLR_RT_HeapBlock::StoreToReference(CLR_RT_HeapBlock &ref, int size)
 
 #if defined(_DEBUG)
                 {
-                    CLR_DataType dtElem = (CLR_DataType)array->m_typeOfElement;
+                    NanoCLRDataType dtElem = (NanoCLRDataType)array->m_typeOfElement;
                     CLR_RT_HeapBlock blk;
                     blk.Assign(*this);
 
@@ -797,7 +815,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
 
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock *obj = this;
-    CLR_DataType dt = obj->DataType();
+    NanoCLRDataType dt = obj->DataType();
 
     //
     // System.DateTime and System.TimeSpan are real value types, so sometimes they are passed by reference.
@@ -821,7 +839,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     }
 
     {
-        CLR_DataType dataType = (CLR_DataType)cls.m_target->dataType;
+        NanoCLRDataType dataType = (NanoCLRDataType)cls.m_target->DataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -893,7 +911,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     if (this->DataType() != DATATYPE_OBJECT)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Finds the object that keeps the boxed type.
@@ -903,7 +921,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     // Validates that src keeps something boxed and the boxed value is VALUE type.
     if (src->IsBoxed() == false || src->DataType() != DATATYPE_VALUETYPE)
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
     // Validates the type of data kept by object corresponds to type in cls.
@@ -913,7 +931,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         // The typedef indexes are different, but src and cls may have identical basic data type.
         // Need to check it. If identical - the unboxing is allowed.
         // This "if" compares underlying type in object and cls. Should be equal in order to continue.
-        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->dataType)))
+        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->DataType)))
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
@@ -935,7 +953,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
         }
     }
 
-    if (cls.m_target->dataType == DATATYPE_VALUETYPE)
+    if (cls.m_target->DataType == DATATYPE_VALUETYPE)
     {
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *this));
 
@@ -945,7 +963,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     {
         this->Assign(src[1]);
 
-        this->ChangeDataType(cls.m_target->dataType);
+        this->ChangeDataType(cls.m_target->DataType);
     }
 
     NANOCLR_NOCLEANUP();
@@ -970,7 +988,7 @@ CLR_RT_HeapBlock *CLR_RT_HeapBlock::FixBoxingReference()
             if (!inst.InitializeFromIndex(src->ObjectCls()))
                 return NULL;
 
-            if (inst.m_target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+            if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
             {
                 return &src[1];
             }
@@ -1131,7 +1149,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             // DATATYPE_I8
             // DATATYPE_U8
             // DATATYPE_R8
-            if (fRecurse && cls.m_target->dataType <= DATATYPE_R8)
+            if (fRecurse && cls.m_target->DataType <= DATATYPE_R8)
             {
                 // pass the 1st field which is the one holding the actual value
                 crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
@@ -1235,8 +1253,8 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
         return true;
     }
 
-    CLR_DataType leftDataType = pArgLeft.DataType();
-    CLR_DataType rightDataType = pArgRight.DataType();
+    NanoCLRDataType leftDataType = pArgLeft.DataType();
+    NanoCLRDataType rightDataType = pArgRight.DataType();
 
     if (leftDataType == rightDataType)
     {
@@ -1357,7 +1375,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 {
                 }
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                if (inst.m_target->DataType != DATATYPE_VALUETYPE)
                 {
                     // boxed primitive or enum type
                     obj = &rightObj[1];
@@ -1525,8 +1543,8 @@ static inline int CompareValues_Pointers(const CLR_RT_HeapBlock *left, const CLR
 CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const CLR_RT_HeapBlock &right, bool fSigned)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType leftDataType = left.DataType();
-    CLR_DataType rightDataType = right.DataType();
+    NanoCLRDataType leftDataType = left.DataType();
+    NanoCLRDataType rightDataType = right.DataType();
 
     if (leftDataType == rightDataType)
     {

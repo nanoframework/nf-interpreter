@@ -190,7 +190,7 @@ void CLR_RT_EventCache::VirtualMethodTable::Callback_Reassign(
 void CLR_RT_EventCache::VirtualMethodTable::Initialize()
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32 idx;
+    CLR_UINT32 index;
 
     m_entries = (Link *)&g_scratchVirtualMethodTableLink[0];
     m_entriesMRU = (Link *)&g_scratchVirtualMethodTableLinkMRU[0];
@@ -199,24 +199,24 @@ void CLR_RT_EventCache::VirtualMethodTable::Initialize()
     //
     // Link all the entries to themselves => no elements in the lists.
     //
-    for (idx = 0; idx < LinkArraySize(); idx++)
+    for (index = 0; index < LinkArraySize(); index++)
     {
-        Link &lnk = m_entries[idx];
+        Link &lnk = m_entries[index];
 
-        lnk.m_next = idx;
-        lnk.m_prev = idx;
+        lnk.m_next = index;
+        lnk.m_prev = index;
     }
 
     //
     // Link all the entries to the following one => all the elements are in the MRU list.
     //
     _ASSERTE(LinkMRUArraySize() < 0xFFFF);
-    for (idx = 0; idx < LinkMRUArraySize(); idx++)
+    for (index = 0; index < LinkMRUArraySize(); index++)
     {
-        Link &lnk = m_entriesMRU[idx];
+        Link &lnk = m_entriesMRU[index];
 
-        lnk.m_next = idx == LinkMRUArraySize() - 1 ? 0 : idx + 1;
-        lnk.m_prev = idx == 0 ? (CLR_UINT16)LinkMRUArraySize() - 1 : idx - 1;
+        lnk.m_next = index == LinkMRUArraySize() - 1 ? 0 : index + 1;
+        lnk.m_prev = index == 0 ? (CLR_UINT16)LinkMRUArraySize() - 1 : index - 1;
     }
 }
 
@@ -227,8 +227,8 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
 {
     NATIVE_PROFILE_CLR_CORE();
     Payload::Key key;
-    CLR_UINT32 idx;
-    CLR_UINT32 idxHead;
+    CLR_UINT32 index;
+    CLR_UINT32 indexHead;
     CLR_UINT32 clsData = cls.m_data;
     CLR_UINT32 mdVirtualData = mdVirtual.m_data;
 
@@ -247,7 +247,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         //
         if (clsData == instCLS.m_data)
         {
-            if ((instMD.m_target->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
+            if ((instMD.m_target->Flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
             {
                 md = mdVirtual;
 
@@ -260,7 +260,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     if (cls.Assembly() == mdVirtual.Assembly())
     {
         CLR_RT_Assembly *assm = g_CLR_RT_TypeSystem.m_assemblies[mdVirtual.Assembly() - 1];
-        CLR_IDX owner = assm->m_pCrossReference_MethodDef[mdVirtual.Method()].GetOwner();
+        CLR_INDEX owner = assm->m_pCrossReference_MethodDef[mdVirtual.Method()].GetOwner();
 
         if (cls.Type() == owner)
         {
@@ -296,13 +296,14 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     key.m_mdVirtual.m_data = mdVirtualData;
     key.m_cls.m_data = clsData;
 
-    idxHead = (SUPPORT_ComputeCRC(&key, sizeof(key), 0) % (LinkArraySize() - PayloadArraySize())) + PayloadArraySize();
+    indexHead =
+        (SUPPORT_ComputeCRC(&key, sizeof(key), 0) % (LinkArraySize() - PayloadArraySize())) + PayloadArraySize();
 
-    for (idx = m_entries[idxHead].m_next;; idx = m_entries[idx].m_next)
+    for (index = m_entries[indexHead].m_next;; index = m_entries[index].m_next)
     {
-        if (idx != idxHead)
+        if (index != indexHead)
         {
-            Payload &res = m_payloads[idx];
+            Payload &res = m_payloads[index];
 
             if (res.m_key.m_mdVirtual.m_data != mdVirtualData)
                 continue;
@@ -318,9 +319,9 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
             if (g_CLR_RT_TypeSystem.FindVirtualMethodDef(cls, mdVirtual, md) == false)
                 return false;
 
-            idx = GetNewEntry();
+            index = GetNewEntry();
 
-            Payload &res = m_payloads[idx];
+            Payload &res = m_payloads[index];
 
             res.m_md = md;
             res.m_key = key;
@@ -329,20 +330,20 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         }
     }
 
-    MoveEntryToTop(m_entries, idxHead, idx);
-    MoveEntryToTop(m_entriesMRU, LinkMRUArraySize() - 1, idx);
+    MoveEntryToTop(m_entries, indexHead, index);
+    MoveEntryToTop(m_entriesMRU, LinkMRUArraySize() - 1, index);
 
     return true;
 }
 
-void CLR_RT_EventCache::VirtualMethodTable::MoveEntryToTop(Link *entries, CLR_UINT32 slot, CLR_UINT32 idx)
+void CLR_RT_EventCache::VirtualMethodTable::MoveEntryToTop(Link *entries, CLR_UINT32 slot, CLR_UINT32 index)
 {
     NATIVE_PROFILE_CLR_CORE();
     Link &list = entries[slot];
 
-    if (list.m_next != idx)
+    if (list.m_next != index)
     {
-        Link &node = entries[idx];
+        Link &node = entries[index];
         CLR_UINT32 next;
         CLR_UINT32 prev;
 
@@ -363,8 +364,8 @@ void CLR_RT_EventCache::VirtualMethodTable::MoveEntryToTop(Link *entries, CLR_UI
         node.m_next = next;
         node.m_prev = slot;
 
-        list.m_next = idx;
-        entries[next].m_prev = idx;
+        list.m_next = index;
+        entries[next].m_prev = index;
     }
 }
 

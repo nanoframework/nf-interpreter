@@ -17,6 +17,9 @@
 
 //--//
 
+extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+extern uint16_t g_CLR_InteropAssembliesCount;
+
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
 BlockStorageDevice *CLR_DBG_Debugger::m_deploymentStorageDevice = NULL;
@@ -300,7 +303,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
                     dst.m_IP = (CLR_UINT32)(call->m_inlineFrame->m_frame.m_IP - call->m_inlineFrame->m_frame.m_IPStart);
 #if defined(NANOCLR_APPDOMAINS)
                     dst.m_appDomainID = call->m_appDomain->m_id;
-                    dst.m_flags = call->m_flags;
+                    dst.Flags = call->m_flags;
 #endif
                 }
 #endif
@@ -319,7 +322,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
 
 #if defined(NANOCLR_APPDOMAINS)
                 dst.m_appDomainID = call->m_appDomain->m_id;
-                dst.m_flags = call->m_flags;
+                dst.Flags = call->m_flags;
 #endif
             }
 
@@ -1772,10 +1775,14 @@ static bool FillValues(
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     if (!ptr)
+    {
         return true;
+    }
 
     if (!array || num == 0)
+    {
         return false;
+    }
 
     CLR_DBG_Commands::Debugging_Value *dst = array++;
     num--;
@@ -1856,6 +1863,10 @@ static bool FillValues(
             dst->m_td = ptr->ObjectCls();
             break;
 
+        case DATATYPE_GENERICINST:
+            dst->m_ts = ptr->ObjectGenericType();
+            break;
+
         case DATATYPE_SZARRAY:
         {
             CLR_RT_HeapBlock_Array *ptr2 = (CLR_RT_HeapBlock_Array *)ptr;
@@ -1912,6 +1923,10 @@ static bool FillValues(
         case DATATYPE_TRANSPARENT_PROXY:
         case DATATYPE_APPDOMAIN_ASSEMBLY:
 #endif
+
+            break;
+        default:
+            return false;
 
             break;
     }
@@ -2000,12 +2015,12 @@ bool CLR_DBG_Debugger::Debugging_Execution_BreakpointStatus(WP_Message *msg)
 
 //--//
 
-CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_IDX idxAssm)
+CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_INDEX indexAssm)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        if (pASSM->m_idx == idxAssm)
+        if (pASSM->m_index == indexAssm)
             return pASSM;
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
@@ -2110,16 +2125,16 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     {
         CLR_RT_StackFrame *stack = th->CurrentFrame();
         const CLR_RECORD_METHODDEF *target = stack->m_call.m_target;
-        CLR_UINT8 numArgs = target->numArgs;
+        CLR_UINT8 numArgs = target->ArgumentsCount;
 
         if (numArgs)
         {
             CLR_RT_SignatureParser parser;
-            parser.Initialize_MethodSignature(stack->m_call.m_assm, target);
+            parser.Initialize_MethodSignature(&stack->m_call);
             CLR_RT_SignatureParser::Element res;
             CLR_RT_HeapBlock *args = stack->m_arguments;
 
-            if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+            if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
             {
                 args->SetObjectReference(NULL);
 
@@ -2142,7 +2157,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
                 {
                     NANOCLR_CHECK_HRESULT(parser2.Advance(res));
 
-                    if (res.m_fByRef)
+                    if (res.IsByRef)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2389,7 +2404,9 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     }
 
     // try to get value
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL);
+
 
     return true;
 }
@@ -2409,7 +2426,8 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
     }
 
     // try to get value
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
 
     return true;
 }
@@ -2463,8 +2481,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_inlineFrame->m_frame.m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_inlineFrame->m_frame.m_IP - call->m_inlineFrame->m_frame.m_IPStart);
-            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.m_target->numArgs;
-            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.m_target->numLocals;
+            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount;
+            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.m_target->LocalsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack);
         }
         else
@@ -2472,8 +2490,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_IP - call->m_IPstart);
-            cmdReply.m_numOfArguments = call->m_call.m_target->numArgs;
-            cmdReply.m_numOfLocals = call->m_call.m_target->numLocals;
+            cmdReply.m_numOfArguments = call->m_call.m_target->ArgumentsCount;
+            cmdReply.m_numOfLocals = call->m_call.m_target->LocalsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)call->TopValuePosition();
         }
 
@@ -2529,19 +2547,19 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     if (FAILED(desc.InitializeFromObject(*blk)))
         return false;
 
-    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.m_target->dataType];
+    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.m_target->DataType];
 
     return (dtl.m_flags & c_MaskForPrimitive) == c_MaskForPrimitive;
 }
 
-static bool SetBlockHelper(CLR_RT_HeapBlock *blk, CLR_DataType dt, CLR_UINT8 *builtinValue)
+static bool SetBlockHelper(CLR_RT_HeapBlock *blk, NanoCLRDataType dt, CLR_UINT8 *builtinValue)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     bool fCanAssign = false;
 
     if (blk)
     {
-        CLR_DataType dtDst;
+        NanoCLRDataType dtDst;
         CLR_RT_HeapBlock src;
 
         dtDst = blk->DataType();
@@ -2586,7 +2604,7 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, CLR_DataType dt, CLR_UINT8 *bu
     return fCanAssign;
 }
 
-static CLR_RT_HeapBlock *GetScratchPad_Helper(int idx)
+static CLR_RT_HeapBlock *GetScratchPad_Helper(int index)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_HeapBlock_Array *array = g_CLR_RT_ExecutionEngine.m_scratchPadArray;
@@ -2595,9 +2613,9 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int idx)
 
     tmp.SetObjectReference(array);
 
-    if (SUCCEEDED(ref.InitializeArrayReference(tmp, idx)))
+    if (SUCCEEDED(ref.InitializeArrayReference(tmp, index)))
     {
-        return (CLR_RT_HeapBlock *)array->GetElement(idx);
+        return (CLR_RT_HeapBlock *)array->GetElement(index);
     }
 
     return NULL;
@@ -2669,20 +2687,20 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
 #ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
-                num = isInline ? md.m_target->numArgs : md.m_target->numArgs;
+                num = isInline ? md.m_target->ArgumentsCount : md.m_target->ArgumentsCount;
 #else
                 array = call->m_arguments;
-                num = call->m_call.m_target->numArgs;
+                num = call->m_call.m_target->ArgumentsCount;
 #endif
                 break;
 
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
 #ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
-                num = isInline ? md.m_target->numLocals : md.m_target->numLocals;
+                num = isInline ? md.m_target->LocalsCount : md.m_target->LocalsCount;
 #else
                 array = call->m_locals;
-                num = call->m_call.m_target->numLocals;
+                num = call->m_call.m_target->LocalsCount;
 #endif
                 break;
 
@@ -2718,14 +2736,16 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             CLR_RT_SignatureParser parser;
             CLR_RT_SignatureParser::Element res;
             CLR_RT_TypeDescriptor desc;
+            CLR_RT_TypeDef_Index targetClass;
+            NanoCLRDataType targetDataType;
 
             if (cmd->m_kind == CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument)
             {
-                parser.Initialize_MethodSignature(md.m_assm, md.m_target);
+                parser.Initialize_MethodSignature(&md);
 
                 iElement++; // Skip the return value, always at the head of the signature.
 
-                if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+                if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
                 {
                     if (iElement == 0)
                     {
@@ -2746,33 +2766,83 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 parser.Advance(res);
             } while (iElement--);
 
+            // handle generic parameters
+            if (res.DataType == DATATYPE_VAR)
+            {
+                // Generic parameter in a generic TypeDef
+                CLR_RT_Assembly *assembly = md.m_assm;
+
+                CLR_RT_GenericParam_Index gpIndex;
+                assembly->FindGenericParamAtTypeDef(md, res.GenericParamPosition, gpIndex);
+
+                CLR_RT_GenericParam_CrossReference gp =
+                    assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                targetClass = gp.Class;
+                targetDataType = gp.DataType;
+
+                // isGenericInstance = true;
+            }
+            else if (res.DataType == DATATYPE_MVAR)
+            {
+                // Generic parameter in a generic method definition
+                CLR_RT_Assembly *assembly = md.m_assm;
+
+                CLR_RT_GenericParam_Index gpIndex;
+                assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
+
+                CLR_RT_GenericParam_CrossReference gp =
+                    assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                targetClass = gp.Class;
+                targetDataType = gp.DataType;
+
+                // isGenericInstance = true;
+            }
+            else
+            {
+                // all the rest get it from parser element
+                targetClass = res.Class;
+                targetDataType = res.DataType;
+            }
+
             //
             // Arguments to a methods come from the eval stack and we don't fix up the eval stack for each call.
             // So some arguments have the wrong datatype, since an eval stack push always promotes to 32 bits.
             //
             if (c_CLR_RT_DataTypeLookup[blk->DataType()].m_sizeInBytes == sizeof(CLR_INT32) &&
-                c_CLR_RT_DataTypeLookup[res.m_dt].m_sizeInBytes < sizeof(CLR_INT32))
+                c_CLR_RT_DataTypeLookup[targetDataType].m_sizeInBytes < sizeof(CLR_INT32))
             {
                 tmp.Assign(*blk);
-                tmp.ChangeDataType(res.m_dt);
+                tmp.ChangeDataType(targetDataType);
 
                 reference = blk;
                 blk = &tmp;
             }
 
-            //
-            // Check for enum.
-            //
-            desc.InitializeFromType(res.m_cls);
-
-            if (desc.m_handlerCls.m_target->IsEnum())
+            if (res.DataType == DATATYPE_VAR || res.DataType == DATATYPE_MVAR)
             {
-                td = desc.m_handlerCls;
-                pTD = &td;
+                tmp.Assign(*blk);
+                tmp.ChangeDataType(targetDataType);
+
+                reference = blk;
+                blk = &tmp;
+            }
+            else
+            {
+                desc.InitializeFromType(targetClass);
+
+                // Check for enum
+                if (desc.m_handlerCls.m_target->IsEnum())
+                {
+                    td = desc.m_handlerCls;
+                    pTD = &td;
+                }
             }
         }
 
-        WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+        //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+        return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
 
         return true;
     }
@@ -2806,7 +2876,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 
         while (true)
         {
-            CLR_UINT32 iFields = td.m_target->iFields_Num;
+            CLR_UINT32 iFields = td.m_target->InstanceFieldsCount;
             CLR_UINT32 totalFields = td.CrossReference().m_totalFields;
             CLR_UINT32 dFields = totalFields - iFields;
 
@@ -2822,7 +2892,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
             }
         }
 
-        cmd->m_fd.Set(td.Assembly(), td.m_target->iFields_First + offset);
+        cmd->m_fd.Set(td.Assembly(), td.m_target->FirstInstanceField + offset);
     }
 
     if (!g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
@@ -2884,7 +2954,9 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
         }
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
+
 
     return true;
 }
@@ -2934,7 +3006,9 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         }
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
+
 
     return true;
 }
@@ -2946,7 +3020,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_GetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
 
     return true;
 }
@@ -2957,7 +3032,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetScratchPad(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_GetScratchPad *cmd =
         (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_idx);
+    CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_index);
 
     WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
 
@@ -2971,7 +3046,9 @@ bool CLR_DBG_Debugger::Debugging_Value_SetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_SetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    WP_ReplyToCommand(msg, SetBlockHelper(blk, (CLR_DataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
+    //WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+
 
     return true;
 }
@@ -3030,7 +3107,9 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
         }
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+
 
     return true;
 }
@@ -3062,7 +3141,9 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
         }
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+
 
     return true;
 }
@@ -3090,7 +3171,9 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
         }
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+   //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+
 
     return true;
 }
@@ -3302,7 +3385,9 @@ bool CLR_DBG_Debugger::Debugging_Value_Assign(WP_Message *msg)
         blkDst = NULL;
     }
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL), false, NULL, 0);
+    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL), false, NULL, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL);
+
 
     return true;
 }
@@ -3318,7 +3403,7 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies(WP_Message *msg)
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        assemblies[num++].Set(pASSM->m_idx);
+        assemblies[num++].Set(pASSM->m_index);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 
@@ -3389,7 +3474,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_AppDomain(WP_Message *msg)
 
         NANOCLR_FOREACH_ASSEMBLY_IN_APPDOMAIN(appDomain)
         {
-            pAssemblyIndex->Set(pASSM->m_idx);
+            pAssemblyIndex->Set(pASSM->m_index);
             pAssemblyIndex++;
             numAssemblies++;
         }
@@ -3422,7 +3507,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply *cmdReply;
 
     CLR_DBG_Commands::Debugging_Resolve_Assembly *cmd = (CLR_DBG_Commands::Debugging_Resolve_Assembly *)msg->m_payload;
-    CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_idx.Assembly());
+    CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_index.Assembly());
 
 #ifdef TARGET_RAM_CONSTRAINED
     // try allocating memory for reply struct
@@ -3599,7 +3684,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
             cmdReply->m_td = instOwner;
 
-            CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->name));
+            CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->Name));
 
             WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Method::Reply));
 
@@ -3740,11 +3825,11 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
         return false;
 
     td = inst.m_target;
-    totMethods = td->vMethods_Num + td->iMethods_Num + td->sMethods_Num;
+    totMethods = td->VirtualMethodCount + td->InstanceMethodCount + td->StaticFieldsCount;
 
     for (int i = 0; i < totMethods; i++)
     {
-        md.Set(idx.Assembly(), td->methods_First + i);
+        md.Set(idx.Assembly(), td->FirstMethod + i);
 
         Debugging_Info_SetJMC_Method(md, fJMC);
     }

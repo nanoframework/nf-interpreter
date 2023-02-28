@@ -27,7 +27,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 
     fd = instFD.m_target;
     
-    if(fd->flags & CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
+    if(fd->Flags & CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }
@@ -100,7 +100,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if(instFD.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if(instFD.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
         obj = CLR_RT_ExecutionEngine::AccessStaticField( instFD );
                 

@@ -668,7 +668,7 @@ void SaveNativeEventToHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext,
 // Cleans up the data in the queue after interrupts were closed and no managed callbacks are expected.
 void CleanupNativeEventsFromHALQueue(CLR_RT_HeapBlock_NativeEventDispatcher *pContext);
 
-void CLR_RetrieveCurrentMethod(unsigned int &assmIdx, unsigned int &methodIdx);
+void CLR_RetrieveCurrentMethod(unsigned int &assmIndex, unsigned int &methodIndex);
 
 void CLR_SoftReboot();
 

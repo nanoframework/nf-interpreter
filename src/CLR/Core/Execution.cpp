@@ -535,7 +535,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
 
     wchar_t *szArgNext = NULL;
     wchar_t *szArg = szCommandLineArgs;
-    const wchar_t *sep = L" ";
+    wchar_t *sep = L" ";
     wchar_t *context = NULL;
 
     szArg = wcstok_s(szArg, sep, &context);
@@ -602,7 +602,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     {
         CLR_RT_StackFrame *stack = thMain->CurrentFrame();
 
-        if (stack->m_call.m_target->numArgs > 0)
+        if (stack->m_call.m_target->ArgumentsCount > 0)
         {
             // Main entrypoint takes an optional String[] parameter.
             // Set the arg to NULL, if that's the case.
@@ -765,27 +765,27 @@ void CLR_RT_ExecutionEngine::StaticConstructorTerminationCallback(void *arg)
 bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
     CLR_RT_AppDomain *appDomain,
     CLR_RT_AppDomainAssembly *appDomainAssembly,
-    const CLR_RT_MethodDef_Index &idx)
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
     _ASSERTE(m_cctorThread != NULL);
     //_ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.m_data = index.m_data;
 
     _ASSERTE(appDomainAssembly != NULL);
 
     // find next method with static constructor
-    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(idxNext))
+    if (appDomainAssembly->m_assembly->FindNextStaticConstructor(indexNext))
     {
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
-        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, idxNext, NULL)))
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, NULL)))
         {
             dlg = refDlg.DereferenceDelegate();
             dlg->m_appDomain = appDomain;
@@ -816,24 +816,24 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     if (dlg != NULL)
     {
         CLR_RT_AppDomainAssembly *appDomainAssembly;
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst;
 
-        // Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex(idx));
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
         appDomainAssembly = dlg->m_appDomain->FindAppDomainAssembly(inst.m_assm);
 
         _ASSERTE(appDomainAssembly != NULL);
         _ASSERTE(appDomainAssembly->m_assembly == inst.m_assm);
 
-        // This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
+        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
         // which will fail
-        idx.m_data++;
+        index.m_data++;
 
         // This is not the first static constructor run in this appDomain
-        if (SpawnStaticConstructorHelper(dlg->m_appDomain, appDomainAssembly, idx))
+        if (SpawnStaticConstructorHelper(dlg->m_appDomain, appDomainAssembly, index))
             return;
     }
 
@@ -847,8 +847,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
             // Find an AppDomainAssembly that does not have it's static constructor bit set...
             if ((appDomainAssembly->m_flags & CLR_RT_AppDomainAssembly::StaticConstructorsExecuted) == 0)
             {
-                CLR_RT_MethodDef_Index idx;
-                idx.Set(assembly->m_idx, 0);
+                CLR_RT_MethodDef_Index index;
+                index.Set(assembly->m_index, 0);
 
 #ifdef DEBUG
 
@@ -863,7 +863,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
                 }
 #endif
 
-                if (SpawnStaticConstructorHelper(appDomain, appDomainAssembly, idx))
+                if (SpawnStaticConstructorHelper(appDomain, appDomainAssembly, index))
                     return;
             }
         }
@@ -878,27 +878,29 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 }
 #else  // NANOCLR_APPDOMAINS
 
-bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(CLR_RT_Assembly *assembly, const CLR_RT_MethodDef_Index &idx)
+bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
+    CLR_RT_Assembly *assembly,
+    const CLR_RT_MethodDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_MethodDef_Index idxNext;
+    CLR_RT_MethodDef_Index indexNext;
 
     _ASSERTE(m_cctorThread != NULL);
     _ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    idxNext.m_data = idx.m_data;
+    indexNext.m_data = index.m_data;
 
     _ASSERTE(assembly != NULL);
 
     // find next method with static constructor
-    if (assembly->FindNextStaticConstructor(idxNext))
+    if (assembly->FindNextStaticConstructor(indexNext))
     {
         CLR_RT_HeapBlock_Delegate *dlg;
         CLR_RT_HeapBlock refDlg;
         refDlg.SetObjectReference(NULL);
         CLR_RT_ProtectFromGC gc(refDlg);
 
-        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, idxNext, NULL)))
+        if (SUCCEEDED(CLR_RT_HeapBlock_Delegate::CreateInstance(refDlg, indexNext, NULL)))
         {
             dlg = refDlg.DereferenceDelegate();
 
@@ -927,18 +929,18 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 
     if (dlg != NULL)
     {
-        CLR_RT_MethodDef_Index idx = dlg->DelegateFtn();
+        CLR_RT_MethodDef_Index index = dlg->DelegateFtn();
         CLR_RT_MethodDef_Instance inst;
 
-        // Find next static constructor for given idx
-        _ASSERTE(NANOCLR_INDEX_IS_VALID(idx));
-        _SIDE_ASSERTE(inst.InitializeFromIndex(idx));
+        // Find next static constructor for given index
+        _ASSERTE(NANOCLR_INDEX_IS_VALID(index));
+        _SIDE_ASSERTE(inst.InitializeFromIndex(index));
 
-        // This is ok if idx is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
+        // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
         // which will fail
-        idx.m_data++;
+        index.m_data++;
 
-        if (SpawnStaticConstructorHelper(inst.m_assm, idx))
+        if (SpawnStaticConstructorHelper(inst.m_assm, index))
             return;
     }
 
@@ -948,8 +950,8 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         // Find an AppDomainAssembly that does not have it's static constructor bit set...
         if ((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {
-            CLR_RT_MethodDef_Index idx;
-            idx.Set(pASSM->m_idx, 0);
+            CLR_RT_MethodDef_Index index;
+            index.Set(pASSM->m_index, 0);
             bool fDepedenciesRun = true;
 
             // Check that all dependent assemblies have had static constructors run.
@@ -963,7 +965,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
                 }
             }
 
-            if (fDepedenciesRun && SpawnStaticConstructorHelper(pASSM, idx))
+            if (fDepedenciesRun && SpawnStaticConstructorHelper(pASSM, index))
                 return;
         }
     }
@@ -1034,10 +1036,10 @@ void CLR_RT_ExecutionEngine::UpdateToLowestExecutionCounter(CLR_RT_Thread *pThre
     pThread->m_executionCounter = m_GlobalExecutionCounter - 1;
 }
 
-void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT32 &methodIdx)
+void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    assmIdx = 0;
-    methodIdx = 0;
+    assmIndex = 0;
+    methodIndex = 0;
 
     if (m_currentThread != NULL)
     {
@@ -1045,15 +1047,15 @@ void CLR_RT_ExecutionEngine::RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT
 
         if (stack)
         {
-            assmIdx = stack->m_call.Assembly();
-            methodIdx = stack->m_call.Method();
+            assmIndex = stack->m_call.Assembly();
+            methodIndex = stack->m_call.Method();
         }
     }
 }
 
-void CLR_RetrieveCurrentMethod(CLR_UINT32 &assmIdx, CLR_UINT32 &methodIdx)
+void CLR_RetrieveCurrentMethod(CLR_UINT32 &assmIndex, CLR_UINT32 &methodIndex)
 {
-    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod(assmIdx, methodIdx);
+    g_CLR_RT_ExecutionEngine.RetrieveCurrentMethod(assmIndex, methodIndex);
 }
 
 void CLR_SoftReboot()
@@ -1436,7 +1438,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
@@ -1471,8 +1473,11 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
         return NULL;
+    }
 
     _ASSERTE(dataType == DATATYPE_CLASS || dataType == DATATYPE_VALUETYPE);
 
@@ -1482,6 +1487,33 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     if (hb)
     {
         hb->SetObjectCls(cls);
+
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+        g_CLR_PRF_Profiler.TrackObjectCreation(hb);
+#endif
+    }
+
+    return hb;
+}
+
+CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
+    CLR_UINT32 flags,
+    const CLR_RT_TypeSpec_Index& genericType,
+    CLR_UINT32 length)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    if (length > CLR_RT_HeapBlock::HB_MaxSize)
+    {
+        return NULL;
+    }
+
+    flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
+    CLR_RT_HeapBlock* hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
+
+    if (hb)
+    {
+        hb->SetGenericInstanceObject(genericType);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
         g_CLR_PRF_Profiler.TrackObjectCreation(hb);
@@ -1680,7 +1712,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_FieldDef_Instance inst;
 
-    if (inst.InitializeFromIndex(fd) && inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.InitializeFromIndex(fd) && inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
 #if defined(NANOCLR_APPDOMAINS)
         {
@@ -1712,13 +1744,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
     NANOCLR_HEADER();
 
     CLR_RT_SignatureParser::Element res;
-    CLR_DataType dt;
+    NanoCLRDataType dt;
 
     NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-    dt = res.m_dt;
+    dt = res.DataType;
 
-    if (res.m_levels > 0) // Array
+    if (res.Levels > 0) // Array
     {
         dt = DATATYPE_OBJECT;
     }
@@ -1727,11 +1759,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
         if (dt == DATATYPE_VALUETYPE)
         {
             CLR_RT_TypeDef_Instance inst;
-            inst.InitializeFromIndex(res.m_cls);
+            inst.InitializeFromIndex(res.Class);
 
-            if ((inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
-                dt = (CLR_DataType)inst.m_target->dataType;
+                dt = (NanoCLRDataType)inst.m_target->DataType;
             }
             else
             {
@@ -1773,8 +1805,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(
 
 HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
     CLR_RT_HeapBlock *locals,
-    CLR_RT_Assembly *assm,
-    const CLR_RECORD_METHODDEF *md)
+    const CLR_RT_MethodDef_Instance &methodDefInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     //
@@ -1785,25 +1816,23 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
     NANOCLR_HEADER();
 
-    CLR_PMETADATA sig = assm->GetSignature(md->locals);
-    CLR_UINT32 count = md->numLocals;
+    CLR_RT_Assembly *assembly = methodDefInstance.m_assm;
+    const CLR_RECORD_METHODDEF *methodDef = methodDefInstance.m_target;
+    CLR_PMETADATA sig = assembly->GetSignature(methodDef->Locals);
+    CLR_UINT32 count = methodDef->LocalsCount;
     bool fZeroed = false;
 
     while (count)
     {
-        CLR_DataType dt = DATATYPE_VOID;
+        NanoCLRDataType dt = DATATYPE_VOID;
         CLR_RT_TypeDef_Index cls;
+        CLR_RT_TypeSpec_Index typeSpecIndex;
         CLR_UINT32 levels = 0;
-        CLR_DataType dtModifier = DATATYPE_VOID;
+        NanoCLRDataType dtModifier = DATATYPE_VOID;
 
         while (true)
         {
             dt = CLR_UncompressElementType(sig);
-            if (dt ==
-                DATATYPE_VOID) // there should never have been a local variable of type void, unless it's generic type
-            {
-                dt = DATATYPE_OBJECT;
-            }
             switch (dt)
             {
                 case DATATYPE_TYPE_PINNED:
@@ -1821,36 +1850,67 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 case DATATYPE_VALUETYPE:
                 {
                     CLR_UINT32 tk = CLR_TkFromStream(sig);
-                    CLR_UINT32 idx = CLR_DataFromTk(tk);
+                    CLR_UINT32 index = CLR_DataFromTk(tk);
 
                     switch (CLR_TypeFromTk(tk))
                     {
-                        case TBL_TypeSpec:
-                        {
-                            CLR_RT_SignatureParser sub;
-                            sub.Initialize_TypeSpec(assm, assm->GetTypeSpec(idx));
-                            CLR_RT_SignatureParser::Element res;
-
-                            NANOCLR_CHECK_HRESULT(sub.Advance(res));
-
-                            cls = res.m_cls;
-                            levels += res.m_levels;
-                        }
-                        break;
-
                         case TBL_TypeRef:
-                            cls = assm->m_pCrossReference_TypeRef[idx].m_target;
+                            cls = assembly->m_pCrossReference_TypeRef[index].Target;
                             break;
 
                         case TBL_TypeDef:
-                            cls.Set(assm->m_idx, idx);
+                            cls.Set(assembly->m_index, index);
                             break;
 
                         default:
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
-                }
+
                     goto done;
+                }
+
+                case DATATYPE_GENERICINST:
+                    // need to rewind the signature so that the ELEMENT_TYPE is present
+                    // otherwise the comparison won't be possible
+                    sig--;
+
+                    if(!assembly->FindTypeSpec(sig, typeSpecIndex))
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
+                    goto done;
+
+                case DATATYPE_VAR:
+                {
+                    CLR_INT8 genericParamPosition = *sig++;
+
+                    CLR_RT_GenericParam_Index gpIndex;
+
+                    assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParamPosition, gpIndex);
+
+                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                    cls = gp.Class;
+                    dt = gp.DataType;
+
+                    goto done;
+                }
+
+                case DATATYPE_MVAR:
+                {
+                    CLR_UINT8 genericParamPosition = *sig++;
+
+                    CLR_RT_GenericParam_Index gpIndex;
+                        
+                    assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
+
+                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+
+                    cls = gp.Class;
+                    dt = gp.DataType;
+
+                    goto done;
+                }
 
                 default:
                 {
@@ -1862,8 +1922,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     }
 
                     cls = *cls2;
-                }
+
                     goto done;
+                }
             }
         }
 
@@ -1872,7 +1933,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
         {
             locals->SetObjectReference(NULL);
 
-            // If local varialb has DATATYPE_TYPE_PINNED, we mark heap block as
+            // If local variable has DATATYPE_TYPE_PINNED, we mark heap block as
             if (dtModifier == DATATYPE_TYPE_PINNED)
             {
                 locals->Pin();
@@ -1885,9 +1946,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(cls);
 
-                if (inst.m_target->dataType != DATATYPE_VALUETYPE)
+                if (inst.m_target->DataType != DATATYPE_VALUETYPE)
                 {
-                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.m_target->dataType, CLR_RT_HeapBlock::HB_Alive, 1));
+                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.m_target->DataType, CLR_RT_HeapBlock::HB_Alive, 1));
                     locals->ClearData();
                 }
                 else
@@ -1912,6 +1973,13 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
                     NANOCLR_CHECK_HRESULT(NewObject(*locals, inst));
                 }
+            }
+            else if (dt == DATATYPE_GENERICINST)
+            {
+                // locals for generic instances are always OBJECT type
+                dt = DATATYPE_OBJECT;
+                locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dt, CLR_RT_HeapBlock::HB_Alive, 1));
+                locals->ClearData();
             }
             else
             {
@@ -1956,7 +2024,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
     reference.SetObjectReference(NULL);
 
-    CLR_DataType dt = (CLR_DataType)inst.m_target->dataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
 
     //
     // You cannot create an array this way.
@@ -1998,7 +2066,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
             case DATATYPE_CLASS:
             case DATATYPE_VALUETYPE:
             {
-                int clsFields = inst.m_target->iFields_Num;
+                int clsFields = inst.m_target->InstanceFieldsCount;
                 int totFields = inst.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
                 CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, 0, inst, totFields);
                 CHECK_ALLOCATION(obj);
@@ -2026,14 +2094,14 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                             if (instSub.SwitchToParent() == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
-                            clsFields = instSub.m_target->iFields_Num;
+                            clsFields = instSub.m_target->InstanceFieldsCount;
                             target = NULL;
                         }
 
                         if (target == NULL)
                         {
                             assm = instSub.m_assm;
-                            target = assm->GetFieldDef(instSub.m_target->iFields_First + clsFields);
+                            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
                         }
 
                         obj--;
@@ -2050,6 +2118,9 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                 }
             }
             break;
+
+            case DATATYPE_GENERICINST:
+                break;
 
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2076,17 +2147,99 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
 
 //--//
 
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& typeDef, const CLR_RT_TypeSpec_Index& genericType)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance inst;
+
+    if (inst.InitializeFromIndex(genericType) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    NANOCLR_SET_AND_LEAVE(NewGenericInstanceObject(reference, typeDef, inst));
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance& instance, CLR_RT_TypeSpec_Instance& genericInstance)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    const CLR_RECORD_FIELDDEF* target = NULL;
+    CLR_RT_Assembly* assm = NULL;
+    CLR_RT_TypeDef_Instance instSub = instance;
+
+    reference.SetObjectReference(NULL);
+
+    int clsFields = instance.m_target->InstanceFieldsCount;
+    int totFields = instance.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
+
+    CLR_RT_HeapBlock_GenericInstance* genericInst;
+
+    genericInst = (CLR_RT_HeapBlock_GenericInstance*)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
+    CHECK_ALLOCATION(genericInst);
+
+    reference.SetObjectReference(genericInst);
+
+
+    //
+    // Initialize field types, from last to first.
+    //
+    // We do the decrement BEFORE the comparison because we want to stop short of the first field, the
+    // object descriptor (already initialized).
+    //
+    genericInst += totFields;
+    while (--totFields > 0)
+    {
+        while (clsFields == 0)
+        {
+            if (instSub.SwitchToParent() == false)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+            }
+
+            clsFields = instSub.m_target->InstanceFieldsCount;
+            target = NULL;
+        }
+
+        if (target == NULL)
+        {
+            assm = instSub.m_assm;
+            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
+        }
+
+        genericInst--;
+        target--;
+        clsFields--;
+
+        NANOCLR_CHECK_HRESULT(InitializeReference(*genericInst, target, assm));
+    }
+
+    if (instance.HasFinalizer())
+    {
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Finalizer::CreateInstance(reference.Dereference(), instance));
+    }
+
+    NANOCLR_NOCLEANUP();
+}
+
+//--//
+
 HRESULT CLR_RT_ExecutionEngine::CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     const CLR_RT_HeapBlock *obj = &source;
-    CLR_DataType dt;
+    NanoCLRDataType dt;
 
     while (true)
     {
-        dt = (CLR_DataType)obj->DataType();
+        dt = (NanoCLRDataType)obj->DataType();
 
         if (dt == DATATYPE_BYREF || dt == DATATYPE_OBJECT)
         {
@@ -2248,18 +2401,18 @@ HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const cha
     NANOCLR_HEADER();
 
     CLR_RT_FieldDef_Instance inst;
-    CLR_RT_FieldDef_Index idx;
+    CLR_RT_FieldDef_Index index;
     CLR_RT_HeapBlock *res;
 
     field = NULL;
 
-    NANOCLR_CHECK_HRESULT(FindFieldDef(reference, szText, idx));
+    NANOCLR_CHECK_HRESULT(FindFieldDef(reference, szText, index));
 
-    inst.InitializeFromIndex(idx);
+    inst.InitializeFromIndex(index);
 
-    if (inst.m_target->flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
-        res = CLR_RT_ExecutionEngine::AccessStaticField(idx);
+        res = CLR_RT_ExecutionEngine::AccessStaticField(index);
         if (res == NULL)
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -2835,14 +2988,14 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             }
         }
 
-        if (inst.m_target->dataType != instTarget.m_target->dataType)
+        if (inst.m_target->DataType != instTarget.m_target->DataType)
         {
             return false;
         }
     }
 
-    CLR_UINT32 semantic = (inst.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
-    CLR_UINT32 semanticTarget = (instTarget.m_target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semantic = (inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semanticTarget = (instTarget.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
@@ -2862,7 +3015,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         // Scan the list of interfaces.
         //
-        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->interfaces != CLR_EmptyIndex)
+        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->Interfaces != CLR_EmptyIndex)
         {
             CLR_RT_SignatureParser parser;
             parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
@@ -2873,7 +3026,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
                 if (FAILED(parser.Advance(res)))
                     break;
 
-                if (res.m_cls.m_data == instTarget.m_data)
+                if (res.Class.m_data == instTarget.m_data)
                 {
                     return true;
                 }

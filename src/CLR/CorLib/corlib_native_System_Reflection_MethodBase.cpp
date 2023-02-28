@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING(CL
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.m_target->name, md.m_assm));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.m_target->Name, md.m_assm));
 
     NANOCLR_NOCLEANUP();
 }
@@ -109,7 +109,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     const CLR_RECORD_METHODDEF *mdR;
     CLR_RT_HeapBlock_Array *pArray = stack.Arg2().DereferenceArray();
     CLR_RT_HeapBlock *args = NULL;
-    int numArgs = 0;
+    int ArgumentsCount = 0;
     CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
@@ -123,18 +123,18 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
         if (pArray)
         {
             args = (CLR_RT_HeapBlock *)pArray->GetFirstElement();
-            numArgs = pArray->m_numOfElements;
+            ArgumentsCount = pArray->m_numOfElements;
         }
 
-        NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, numArgs));
+        NANOCLR_CHECK_HRESULT(stack.MakeCall(md, &obj, args, ArgumentsCount));
     }
     else
     {
-        if (mdR->retVal != DATATYPE_VOID)
+        if (mdR->RetVal != DATATYPE_VOID)
         {
-            if (mdR->retVal < DATATYPE_I4)
+            if (mdR->RetVal < DATATYPE_I4)
             {
-                stack.TopValue().ChangeDataType(mdR->retVal);
+                stack.TopValue().ChangeDataType(mdR->RetVal);
             }
 
             NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
@@ -175,7 +175,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    if ((md.m_target->flags & mask) == flag)
+    if ((md.m_target->Flags & mask) == flag)
     {
         fRes = true;
     }

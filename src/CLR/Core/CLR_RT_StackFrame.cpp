@@ -34,11 +34,11 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     assm = callInstPtr->m_assm;
     md = callInstPtr->m_target;
 
-    sizeLocals = md->numLocals;
+    sizeLocals = md->LocalsCount;
 #ifndef NANOCLR_NO_IL_INLINE
-    sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
+    sizeEvalStack = md->LengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
-    sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
+    sizeEvalStack = md->LengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
 #endif
 
     //--//
@@ -136,7 +136,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         stack->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
-        if (md->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke) // Special case for delegate calls.
+        if (md->Flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke) // Special case for delegate calls.
         {
             stack->m_nativeMethod = (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_DelegateInvoke;
 
@@ -180,20 +180,24 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 #endif
     }
 
-    if (md->numLocals)
+    if (md->LocalsCount)
     {
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals(stack->m_locals, assm, md));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals(stack->m_locals, callInst));
     }
 
     {
-        CLR_UINT32 flags = md->flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
+        CLR_UINT32 syncFlags = md->Flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
 
-        if (flags)
+        if (syncFlags)
         {
-            if (flags & md->MD_Synchronized)
+            if (syncFlags & md->MD_Synchronized)
+            {
                 stack->m_flags |= c_NeedToSynchronize;
-            if (flags & md->MD_GloballySynchronized)
+            }
+            if (syncFlags & md->MD_GloballySynchronized)
+            {
                 stack->m_flags |= c_NeedToSynchronizeGlobally;
+            }
         }
     }
 
@@ -247,7 +251,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         //
         // Everything is set up correctly, pop the operands.
         //
-        stack->m_arguments = &caller->m_evalStackPos[-md->numArgs];
+        stack->m_arguments = &caller->m_evalStackPos[-md->ArgumentsCount];
 
         caller->m_evalStackPos = stack->m_arguments;
 
@@ -279,13 +283,13 @@ bool CLR_RT_StackFrame::PushInline(
     const CLR_RECORD_METHODDEF *md = calleeInst.m_target;
 
     if ((m_inlineFrame != NULL) || // We can only support one inline at a time per stack call
-        (m_evalStackEnd - evalPos) <= (md->numArgs + md->numLocals + md->lengthEvalStack +
+        (m_evalStackEnd - evalPos) <= (md->ArgumentsCount + md->LocalsCount + md->LengthEvalStack +
                                        2) || // We must have enough space on the current stack for the inline method
         (m_nativeMethod != (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_IL) || // We only support IL inlining
-        (md->flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
+        (md->Flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
-        (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
+        (0 != (md->Flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
         (calleeInst.m_assm->m_nativeCode != NULL && (calleeInst.m_assm->m_nativeCode[calleeInst.Method()] !=
                                                      NULL)) || // Make sure the callee is not an internal method
         (md->RVA == CLR_EmptyIndex) ||                         // Make sure we have a valid IP address for the method
@@ -323,7 +327,7 @@ bool CLR_RT_StackFrame::PushInline(
     ip = ipTmp;
 
     m_arguments = pThis;
-    m_locals = &m_evalStackEnd[-md->numLocals];
+    m_locals = &m_evalStackEnd[-md->LocalsCount];
     m_call = calleeInst;
     m_evalStackEnd = m_locals;
     m_evalStack = evalPos;
@@ -331,14 +335,14 @@ bool CLR_RT_StackFrame::PushInline(
     m_IPstart = ip;
     m_IP = ip;
 
-    if (md->numLocals)
+    if (md->LocalsCount)
     {
-        g_CLR_RT_ExecutionEngine.InitializeLocals(m_locals, calleeInst.m_assm, md);
+        g_CLR_RT_ExecutionEngine.InitializeLocals(m_locals, calleeInst);
     }
 
     m_flags |= CLR_RT_StackFrame::c_MethodKind_Inlined;
 
-    if (md->retVal != DATATYPE_VOID)
+    if (md->RetVal != DATATYPE_VOID)
     {
         m_flags |= CLR_RT_StackFrame::c_InlineMethodHasReturnValue;
     }
@@ -399,7 +403,7 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
 {
     m_arguments = m_inlineFrame->m_frame.m_args;
     m_locals = m_inlineFrame->m_frame.m_locals;
-    m_evalStackEnd += m_call.m_target->numLocals;
+    m_evalStackEnd += m_call.m_target->LocalsCount;
     m_call = m_inlineFrame->m_frame.m_call;
     m_IP = m_inlineFrame->m_frame.m_IP;
     m_IPstart = m_inlineFrame->m_frame.m_IPStart;
@@ -416,7 +420,7 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     m_IPstart = frame.m_IPStart;
     m_evalStack = frame.m_evalStack;
     m_evalStackPos = frame.m_evalPos;
-    m_evalStackEnd -= m_call.m_target->numLocals;
+    m_evalStackEnd -= m_call.m_target->LocalsCount;
 }
 
 void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
@@ -474,7 +478,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
         }
         else
         {
-            int cArgs = m_call.m_target->numArgs;
+            int cArgs = m_call.m_target->ArgumentsCount;
 
             // First marshal the ref parameters
             NANOCLR_CHECK_HRESULT(
@@ -485,7 +489,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
         }
 
         // Now, push the return, if any.
-        if (m_call.m_target->retVal != DATATYPE_VOID)
+        if (m_call.m_target->RetVal != DATATYPE_VOID)
         {
             CLR_RT_HeapBlock &dst = caller->PushValueAndClear();
             CLR_RT_HeapBlock &src = this->TopValue();
@@ -529,7 +533,7 @@ HRESULT CLR_RT_StackFrame::PushAppDomainTransition(
     NANOCLR_HEADER();
 
     CLR_RT_StackFrame *frame = NULL;
-    int cArgs = callInst.m_target->numArgs;
+    int cArgs = callInst.m_target->ArgumentsCount;
     CLR_RT_HeapBlock *proxy;
 
     _ASSERTE(pThis->IsTransparentProxy());
@@ -568,15 +572,15 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     NANOCLR_HEADER();
 
     const CLR_RECORD_METHODDEF *mdR = md.m_target;
-    bool fStatic = (mdR->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
-    int numArgs = mdR->numArgs;
+    bool fStatic = (mdR->Flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
+    int ArgumentsCount = mdR->ArgumentsCount;
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
     tmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmp);
 
-    if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
+    if (mdR->Flags & CLR_RECORD_METHODDEF::MD_Constructor)
     {
         CLR_RT_TypeDef_Instance owner;
         owner.InitializeFromMethod(md);
@@ -598,17 +602,17 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     if (!fStatic)
     {
         FAULT_ON_NULL(obj);
-        numArgs--;
+        ArgumentsCount--;
         argsOffset = 1;
     }
 
-    if (numArgs != nArgs)
+    if (ArgumentsCount != nArgs)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     //
     // In case the invoked method is abstract or virtual, resolve it to the correct method implementation.
     //
-    if (mdR->flags & (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual))
+    if (mdR->Flags & (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual))
     {
         CLR_RT_TypeDef_Index cls;
         CLR_RT_MethodDef_Index mdReal;
@@ -641,7 +645,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     else
 #endif
     {
-        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(m_owningThread, md, md.m_target->numArgs));
+        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(m_owningThread, md, md.m_target->ArgumentsCount));
 
         stackSub = m_owningThread->CurrentFrame();
 
@@ -650,9 +654,9 @@ HRESULT CLR_RT_StackFrame::MakeCall(
             stackSub->m_arguments[0].Assign(*obj);
         }
 
-        if (numArgs)
+        if (ArgumentsCount)
         {
-            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(CLR_RT_HeapBlock) * numArgs);
+            memcpy(&stackSub->m_arguments[argsOffset], args, sizeof(CLR_RT_HeapBlock) * ArgumentsCount);
         }
     }
 
@@ -669,21 +673,21 @@ HRESULT CLR_RT_StackFrame::FixCall()
     NANOCLR_HEADER();
 
     const CLR_RECORD_METHODDEF *target = m_call.m_target;
-    CLR_UINT8 numArgs = target->numArgs;
+    CLR_UINT8 ArgumentsCount = target->ArgumentsCount;
 
     //
     // The copy of ValueTypes is delayed as much as possible.
     //
     // If an argument is a ValueType, now it's a good time to clone it.
     //
-    if (numArgs)
+    if (ArgumentsCount)
     {
         CLR_RT_SignatureParser parser;
-        parser.Initialize_MethodSignature(m_call.m_assm, target);
+        parser.Initialize_MethodSignature(&m_call);
         CLR_RT_SignatureParser::Element res;
         CLR_RT_HeapBlock *args = m_arguments;
 
-        if (parser.m_flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
+        if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
         {
             args++;
         }
@@ -697,14 +701,14 @@ HRESULT CLR_RT_StackFrame::FixCall()
         {
             NANOCLR_CHECK_HRESULT(parser.Advance(res));
 
-            if (res.m_levels > 0)
+            if (res.Levels > 0)
                 continue; // Array, no need to fix.
 
             if (args->DataType() == DATATYPE_OBJECT)
             {
                 CLR_RT_TypeDef_Instance inst;
-                inst.InitializeFromIndex(res.m_cls);
-                CLR_DataType dtT = (CLR_DataType)inst.m_target->dataType;
+                inst.InitializeFromIndex(res.Class);
+                NanoCLRDataType dtT = (NanoCLRDataType)inst.m_target->DataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
 
                 if (dtl.m_flags & (CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType))
@@ -717,7 +721,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                         // It's a boxed primitive/enum type.
                         args->Assign(*value);
                     }
-                    else if (args->Dereference()->ObjectCls().m_data == res.m_cls.m_data)
+                    else if (args->Dereference()->ObjectCls().m_data == res.Class.m_data)
                     {
                         if (args->Dereference()->IsBoxed())
                         {
@@ -731,7 +735,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                 }
             }
 
-            if (res.m_dt == DATATYPE_VALUETYPE && res.m_fByRef == false)
+            if (res.DataType == DATATYPE_VALUETYPE && res.IsByRef == false)
             {
                 if (args->IsAReferenceOfThisType(DATATYPE_VALUETYPE))
                 {
@@ -783,13 +787,13 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
             *ppGlobalLock = obj->Dereference();
         }
     }
-    else if (m_call.m_target->flags & CLR_RECORD_METHODDEF::MD_Static)
+    else if (m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static)
     {
-        CLR_RT_TypeDef_Index idx;
+        CLR_RT_TypeDef_Index index;
 
-        idx.Set(m_call.Assembly(), m_call.CrossReference().GetOwner());
+        index.Set(m_call.Assembly(), m_call.CrossReference().GetOwner());
 
-        refType.SetReflection(idx);
+        refType.SetReflection(index);
 
         obj = &refType;
     }
@@ -933,7 +937,7 @@ void CLR_RT_StackFrame::Pop()
                 //
                 // Push the return, if any.
                 //
-                if (m_call.m_target->retVal != DATATYPE_VOID)
+                if (m_call.m_target->RetVal != DATATYPE_VOID)
                 {
                     if (m_owningThread->m_currentException.Dereference() == NULL)
                     {
@@ -949,15 +953,15 @@ void CLR_RT_StackFrame::Pop()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     else
     {
-        int idx = m_owningThread->m_scratchPad;
+        int index = m_owningThread->m_scratchPad;
 
-        if (idx >= 0)
+        if (index >= 0)
         {
             CLR_RT_HeapBlock_Array *array = g_CLR_RT_ExecutionEngine.m_scratchPadArray;
 
-            if (array && array->m_numOfElements > (CLR_UINT32)idx)
+            if (array && array->m_numOfElements > (CLR_UINT32)index)
             {
-                CLR_RT_HeapBlock *dst = (CLR_RT_HeapBlock *)array->GetElement((CLR_UINT32)idx);
+                CLR_RT_HeapBlock *dst = (CLR_RT_HeapBlock *)array->GetElement((CLR_UINT32)index);
                 CLR_RT_HeapBlock *exception = m_owningThread->m_currentException.Dereference();
 
                 dst->SetObjectReference(NULL);
@@ -966,10 +970,10 @@ void CLR_RT_StackFrame::Pop()
                 {
                     dst->SetObjectReference(exception);
                 }
-                else if (m_call.m_target->retVal != DATATYPE_VOID)
+                else if (m_call.m_target->RetVal != DATATYPE_VOID)
                 {
                     CLR_RT_SignatureParser sig;
-                    sig.Initialize_MethodSignature(this->m_call.m_assm, this->m_call.m_target);
+                    sig.Initialize_MethodSignature(&this->m_call);
                     CLR_RT_SignatureParser::Element res;
                     CLR_RT_TypeDescriptor desc;
 
@@ -979,7 +983,7 @@ void CLR_RT_StackFrame::Pop()
 
                     // Box to the return value type
                     _SIDE_ASSERTE(SUCCEEDED(sig.Advance(res)));
-                    _SIDE_ASSERTE(SUCCEEDED(desc.InitializeFromType(res.m_cls)));
+                    _SIDE_ASSERTE(SUCCEEDED(desc.InitializeFromType(res.Class)));
 
                     if (c_CLR_RT_DataTypeLookup[this->DataType()].m_flags &
                             CLR_RT_DataTypeLookup::c_OptimizedValueType ||
@@ -1019,7 +1023,7 @@ void CLR_RT_StackFrame::Pop()
 
 //--//
 
-void CLR_RT_StackFrame::SetResult(CLR_INT32 val, CLR_DataType dataType)
+void CLR_RT_StackFrame::SetResult(CLR_INT32 val, NanoCLRDataType dataType)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock &top = PushValue();
@@ -1254,14 +1258,14 @@ void CLR_RT_StackFrame::Relocate()
 
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_args,
-            m_inlineFrame->m_frame.m_call.m_target->numArgs);
+            m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_locals,
-            m_inlineFrame->m_frame.m_call.m_target->numLocals);
+            m_inlineFrame->m_frame.m_call.m_target->LocalsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_evalStack,
             (int)(m_evalStackPos - m_inlineFrame->m_frame.m_evalStack));
-        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->numLocals);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->LocalsCount);
     }
     else
 #endif
@@ -1272,8 +1276,8 @@ void CLR_RT_StackFrame::Relocate()
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IPstart);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IP);
 
-        CLR_RT_GarbageCollector::Heap_Relocate(m_arguments, m_call.m_target->numArgs);
-        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->numLocals);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_arguments, m_call.m_target->ArgumentsCount);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->LocalsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(m_evalStack, TopValuePosition());
     }
 }
@@ -1285,7 +1289,7 @@ HRESULT CLR_RT_StackFrame::NotImplementedStub()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if (m_call.m_target->retVal != DATATYPE_VOID)
+    if (m_call.m_target->RetVal != DATATYPE_VOID)
     {
         SetResult_I4(0);
     }

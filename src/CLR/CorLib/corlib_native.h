@@ -676,16 +676,16 @@ struct Library_corlib_native_System_Number
     static bool ValidateFormatChar(char *formatChar, bool isInteger);
     static bool GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision);
     static int DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value);
-    static bool IsSignedIntegerDataType(CLR_DataType dataType);
-    static bool IsUnsignedIntegerDataType(CLR_DataType dataType);
-    static bool IsIntegerDataType(CLR_DataType dataType);
+    static bool IsSignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsUnsignedIntegerDataType(NanoCLRDataType dataType);
+    static bool IsIntegerDataType(NanoCLRDataType dataType);
     static int GetStrLen(char *buffer);
     static int GetDotIndex(char *buffer, int bufferContentLength);
     static void RoundUpNumStr(char *buffer, int *bufferContentLength);
     static int ReplaceNegativeSign(char *buffer, int bufferContentLength, char *negativeSign);
     static int ReplaceDecimalSeparator(char *buffer, int bufferContentLength, char *decimalSeparator);
     static int InsertGroupSeparators(char *buffer, int bufferContentLength, int groupSize, char *groupSep);
-    static const char *GetPrintfLengthModifier(CLR_DataType dataType);
+    static const char *GetPrintfLengthModifier(NanoCLRDataType dataType);
     static int Format_G(
         char *buffer,
         CLR_RT_HeapBlock *value,

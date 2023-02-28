@@ -27,9 +27,8 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
-    snprintf(
+    sprintf(
         buffer,
-        ARRAYSIZE(buffer),
         "%s, Version=%d.%d.%d.%d",
         assm->m_szName,
         header->version.iMajorVersion,
@@ -98,14 +97,14 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
 
             for (CLR_UINT32 i = 0; i < num; i++, pArray++)
             {
-                CLR_RT_TypeDef_Index idx;
-                idx.Set(pASSM->m_idx, i);
+                CLR_RT_TypeDef_Index index;
+                index.Set(pASSM->m_index, i);
 
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
 
                 hbObj = pArray->Dereference();
-                hbObj->SetReflection(idx);
+                hbObj->SetReflection(index);
             }
         }
     }
@@ -165,9 +164,10 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
         {
             CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
 
-            for (int idxResourceFile = 0; idxResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles]; idxResourceFile++)
+            for (int indexResourceFile = 0; indexResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles];
+                 indexResourceFile++)
             {
-                const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(idxResourceFile);
+                const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(indexResourceFile);
 
                 NANOCLR_CHECK_HRESULT(
                     CLR_RT_HeapBlock_String::CreateInstance(*pArray, pAssm->GetString(resourceFile->name)));
@@ -194,13 +194,13 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetExecutingAssembly__
         NANOCLR_SET_AND_LEAVE(S_OK);
 
     {
-        CLR_RT_Assembly_Index idx;
-        idx.Set(caller->MethodCall().m_assm->m_idx);
+        CLR_RT_Assembly_Index index;
+        index.Set(caller->MethodCall().m_assm->m_index);
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(idx);
+        hbObj->SetReflection(index);
     }
 
     NANOCLR_NOCLEANUP();
@@ -219,7 +219,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
     CLR_RT_HeapBlock *hbObj;
     CLR_RT_Assembly *assembly;
     const char *szAssembly;
-    CLR_RT_Assembly_Index idx;
+    CLR_RT_Assembly_Index index;
     bool fVersion;
     CLR_INT16 maj, min, build, rev;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
@@ -258,12 +258,12 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
 #if defined(NANOCLR_APPDOMAINS)
     NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly(assembly));
 #endif
-    idx.Set(assembly->m_idx);
+    index.Set(assembly->m_index);
 
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
 
     hbObj = top.Dereference();
-    hbObj->SetReflection(idx);
+    hbObj->SetReflection(index);
 
     NANOCLR_CLEANUP();
 
@@ -306,14 +306,6 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     {
         if (header->GoodAssembly())
         {
-            //
-            // Sorry, you'll have to reboot to load this assembly.
-            //
-            if (header->flags & CLR_RECORD_ASSEMBLY::c_Flags_NeedReboot)
-            {
-                NANOCLR_SET_AND_LEAVE(CLR_E_BUSY);
-            }
-
             NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
             assm->m_pFile = array;
@@ -324,7 +316,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.PrepareForExecution());
 
             CLR_RT_MethodDef_Index idx;
-            idx.Set(assm->m_idx, 0);
+            idx.Set(assm->m_index, 0);
 
             if (assm->FindNextStaticConstructor(idx))
             {

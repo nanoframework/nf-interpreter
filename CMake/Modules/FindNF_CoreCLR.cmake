@@ -48,6 +48,7 @@ set(NF_CoreCLR_SRCS
     CLR_RT_HeapBlock_Delegate.cpp
     CLR_RT_HeapBlock_Delegate_List.cpp
     CLR_RT_HeapBlock_Finalizer.cpp
+    CLR_RT_HeapBlock_GenericInstance.cpp
     CLR_RT_HeapBlock_Lock.cpp
     CLR_RT_HeapBlock_LockRequest.cpp
     CLR_RT_HeapBlock_Node.cpp

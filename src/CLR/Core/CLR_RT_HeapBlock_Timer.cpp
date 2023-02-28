@@ -113,10 +113,10 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer(CLR_RT_Thread *th)
         CLR_RT_StackFrame *stack = th->FirstFrame();
         if (stack->Next() != NULL)
         {
-            int numArgs = stack->m_call.m_target->numArgs;
-            if (numArgs > 0)
+            int ArgumentsCount = stack->m_call.m_target->ArgumentsCount;
+            if (ArgumentsCount > 0)
             {
-                stack->m_arguments[numArgs - 1].Assign(*state);
+                stack->m_arguments[ArgumentsCount - 1].Assign(*state);
             }
         }
 
@@ -241,7 +241,7 @@ HRESULT CLR_RT_HeapBlock_Timer::ConfigureObject(CLR_RT_StackFrame &stack, CLR_UI
 
     if (flags & CLR_RT_HeapBlock_Timer::c_ACTION_Create)
     {
-        FAULT_ON_NULL_ARG(args[0].DereferenceDelegate());
+        FAULT_ON_NULL(args[0].DereferenceDelegate());
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Timer::CreateInstance(
             0,

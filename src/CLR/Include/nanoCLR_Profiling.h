@@ -6,6 +6,8 @@
 #ifndef NANOCLR_PROFILING_H
 #define NANOCLR_PROFILING_H
 
+// clang-format off
+
 #if defined(NANOCLR_PROFILE_NEW)
 
 /*
@@ -19,9 +21,9 @@ int      = 32BIT
 long     = 64BIT
 pointer  = 32BIT
 datatype = 8BIT
-typedef-idx = 32BIT
-method-idx  = 32BIT
-    nanoCLR Method_Idx value for identifying a specific function
+typedef-index = 32BIT
+method-index  = 32BIT
+    nanoCLR Method_Index value for identifying a specific function
 
 stream-packet = sequence-id length stream-payload
     A chunk of data sent out over the WireProtocol.
@@ -53,9 +55,9 @@ memory-layout-heap-length = int
     Contains heap layout information useful for showing memory usage statistics.
 
 heapdump = heapdump-start-packet *heapdump-root-packet *heapdump-object-packet heapdump-stop-packet
-    Heapdumps always occur in this form. All roots are listed before all objects, and both roots and objects fall between
-    a pair of 'start' and 'stop' packets. Heap dumps may be split up across stream-payload boundaries, but they may not be
-    nested, and packets may not be sent in any other order.
+    Heapdumps always occur in this form. All roots are listed before all objects, and both roots and objects fall
+between a pair of 'start' and 'stop' packets. Heap dumps may be split up across stream-payload boundaries, but they may
+not be nested, and packets may not be sent in any other order.
 
 heapdump-start-header = "00000011"
 heapdump-start-packet = heapdump-start-header
@@ -65,7 +67,7 @@ heapdump-start-packet = heapdump-start-header
 heapdump-root-packet = heapdump-root-header ( heapdump-root-stack / heapdump-root-other )
 heapdump-root-header = "00000011"
 
-heapdump-root-stack = heapdump-root-stack-header method-idx
+heapdump-root-stack = heapdump-root-stack-header method-index
 heapdump-root-stack-header = "101"
 
 heapdump-root-other = heapdump-root-finalizer / heapdump-root-appdomain / heapdump-root-assembly / heapdump-root-thread
@@ -84,17 +86,18 @@ heapdump-object-type = heapdump-object-classvaluetype / heapdump-object-array / 
 
 heapdump-object-classvaluetype = heapdump-object-classvaluetype-header heapdump-object-classvaluetype-typedef
 heapdump-object-classvaluetype-header = "00010001" / "00010010"
-heapdump-object-classvaluetype-typedef = typedef-idx
+heapdump-object-classvaluetype-typedef = typedef-index
 
 heapdump-object-array = heapdump-object-array-header heapdump-object-array-datatype heapdump-object-array-levels
 heapdump-object-array-header = "00010011"
-heapdump-object-array-typedef = typedef-idx
+heapdump-object-array-typedef = typedef-index
 heapdump-object-array-levels = short
     Rank of the array
 
 heapdump-object-special-cases = heapdump-object-classvaluetype-header / heapdump-object-array-header
 heapdump-object-other = datatype
-    datatype must not be one of <heapdump-object-special-cases>; If it is, the appropriate special case should be used instead.
+    datatype must not be one of <heapdump-object-special-cases>; If it is, the appropriate special case should be used
+instead.
 
 heapdump-object-references = *heapdump-object-reference heapdump-object-end-of-references
 heapdump-object-reference = "1" pointer
@@ -106,7 +109,8 @@ heapdump-stop-packet = heapdump-stop-header heapdump-stop-blocks-used
 
 heapdump-stop-header = "00000110"
 heapdump-stop-blocks-used = int
-    Reports how many heap-blocks were used by objects, including objects that might have been filtered out from reporting.
+    Reports how many heap-blocks were used by objects, including objects that might have been filtered out from
+reporting.
 
  */
 
@@ -161,58 +165,60 @@ struct CLR_PRF_Profiler
 {
     // This is not implemented:
     // Write formatter functions to send only as many bits as needed for uint32,uint64 numbers, cast bytes, etc.
-     static HRESULT CreateInstance();
-     static HRESULT DeleteInstance();
+    static HRESULT CreateInstance();
+    static HRESULT DeleteInstance();
 
-     HRESULT Stream_Send();
-     HRESULT Stream_Flush();
+    HRESULT Stream_Send();
+    HRESULT Stream_Flush();
 
-     HRESULT Profiler_Cleanup();
-     HRESULT DumpHeap();
+    HRESULT Profiler_Cleanup();
+    HRESULT DumpHeap();
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-     HRESULT RecordContextSwitch( CLR_RT_Thread* nextThread );
-     HRESULT RecordFunctionCall( CLR_RT_Thread* th, CLR_RT_MethodDef_Index md );
-     HRESULT RecordFunctionReturn( CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof );
+    HRESULT RecordContextSwitch(CLR_RT_Thread *nextThread);
+    HRESULT RecordFunctionCall(CLR_RT_Thread *th, CLR_RT_MethodDef_Index md);
+    HRESULT RecordFunctionReturn(CLR_RT_Thread *th, CLR_PROF_CounterCallChain &prof);
 #endif
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-     void TrackObjectCreation( CLR_RT_HeapBlock* ptr );
-     void TrackObjectDeletion( CLR_RT_HeapBlock* ptr );
-     void TrackObjectRelocation();
-     void RecordGarbageCollectionBegin();
-     void RecordGarbageCollectionEnd();
-     void RecordHeapCompactionBegin();
-     void RecordHeapCompactionEnd();
+    void TrackObjectCreation(CLR_RT_HeapBlock *ptr);
+    void TrackObjectDeletion(CLR_RT_HeapBlock *ptr);
+    void TrackObjectRelocation();
+    void RecordGarbageCollectionBegin();
+    void RecordGarbageCollectionEnd();
+    void RecordHeapCompactionBegin();
+    void RecordHeapCompactionEnd();
 #endif
 
-     void SendMemoryLayout();
+    void SendMemoryLayout();
 
-private:
-     void SendTrue();
-     void SendFalse();
-     void Timestamp();
-     void PackAndWriteBits( CLR_UINT32 value );
-     void PackAndWriteBits( const CLR_RT_TypeDef_Index& typeDef );
-     void PackAndWriteBits( const CLR_RT_MethodDef_Index& methodDef );
-     CLR_RT_HeapBlock* FindReferencedObject( CLR_RT_HeapBlock* ref );
-     HRESULT DumpRoots();
-     void DumpRoot( CLR_RT_HeapBlock* root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index* source );
-     void DumpObject( CLR_RT_HeapBlock* ptr );
-     void DumpEndOfRefsList();
-     void DumpPointer( void* ref );
-     void DumpSingleReference( CLR_RT_HeapBlock* ptr );
-     void DumpListOfReferences( CLR_RT_DblLinkedList& list );
-     void DumpListOfReferences( CLR_RT_HeapBlock* firstItem, CLR_UINT16 count );
+  private:
+    void SendTrue();
+    void SendFalse();
+    void Timestamp();
+    void PackAndWriteBits(CLR_UINT32 value);
+    void PackAndWriteBits(const CLR_RT_TypeDef_Index &typeDef);
+    void PackAndWriteBits(const CLR_RT_MethodDef_Index &methodDef);
+    CLR_RT_HeapBlock *FindReferencedObject(CLR_RT_HeapBlock *ref);
+    HRESULT DumpRoots();
+    void DumpRoot(CLR_RT_HeapBlock *root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index *source);
+    void DumpObject(CLR_RT_HeapBlock *ptr);
+    void DumpEndOfRefsList();
+    void DumpPointer(void *ref);
+    void DumpSingleReference(CLR_RT_HeapBlock *ptr);
+    void DumpListOfReferences(CLR_RT_DblLinkedList &list);
+    void DumpListOfReferences(CLR_RT_HeapBlock *firstItem, CLR_UINT16 count);
 
-    CLR_RT_HeapBlock_MemoryStream*  m_stream;
-    CLR_UINT16                      m_packetSeqId;
-    CLR_UINT32                      m_lastTimestamp;
-    CLR_IDX                         m_currentAssembly;
-    int                             m_currentThreadPID;
+    CLR_RT_HeapBlock_MemoryStream *m_stream;
+    CLR_UINT16 m_packetSeqId;
+    CLR_UINT32 m_lastTimestamp;
+    CLR_INDEX m_currentAssembly;
+    int m_currentThreadPID;
 };
 
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;
+
+// clang-format on
 
 #endif //defined(NANOCLR_PROFILE_NEW)
 #endif // NANOCLR_PROFILING_H

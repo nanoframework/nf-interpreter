@@ -16,10 +16,10 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if (td.m_target->enclosingType != CLR_EmptyIndex)
+    if (td.m_target->HasValidEnclosingType())
     {
         CLR_RT_HeapBlock *hbObj;
-        td.Set(td.Assembly(), td.m_target->enclosingType);
+        td.Set(td.Assembly(), td.m_target->EnclosingType());
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = top.Dereference();
@@ -371,7 +371,7 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if ((td.m_target->flags & mask) == flag)
+    if ((td.m_target->Flags & mask) == flag)
     {
         fRes = true;
     }
@@ -424,21 +424,21 @@ HRESULT Library_corlib_native_System_Type::GetFields(
             {
                 CLR_RT_Assembly *assm = td.m_assm;
                 const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-                const CLR_RECORD_FIELDDEF *fd = td.m_assm->GetFieldDef(tdR->sFields_First);
-                int iTot = tdR->iFields_Num + tdR->sFields_Num;
+                const CLR_RECORD_FIELDDEF *fd = td.m_assm->GetFieldDef(tdR->FirstStaticField);
+                int iTot = tdR->InstanceFieldsCount + tdR->StaticFieldsCount;
                 int i;
-                CLR_RT_FieldDef_Index idx;
+                CLR_RT_FieldDef_Index index;
 
                 for (i = 0; i < iTot; i++, fd++)
                 {
-                    const char *fieldName = assm->GetString(fd->name);
+                    const char *fieldName = assm->GetString(fd->Name);
 
-                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
+                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
                     {
                         continue;
                     }
 
-                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_Static)
+                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_Static)
                     {
                         if ((bindingFlags & c_BindingFlags_Static) == 0)
                             continue;
@@ -449,7 +449,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
+                    if ((fd->Flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
                     {
                         if ((bindingFlags & c_BindingFlags_Public) == 0)
                             continue;
@@ -475,7 +475,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    idx.Set(td.Assembly(), i + tdR->sFields_First);
+                    index.Set(td.Assembly(), i + tdR->FirstStaticField);
 
                     if (!fAllMatches)
                     {
@@ -483,7 +483,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                         NANOCLR_CHECK_HRESULT(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_FieldInfo));
                         hbObj = top.Dereference();
-                        hbObj->SetReflection(idx);
+                        hbObj->SetReflection(index);
 
                         NANOCLR_SET_AND_LEAVE(S_OK);
                     }
@@ -494,7 +494,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                         NANOCLR_CHECK_HRESULT(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.m_FieldInfo));
                         hbObj = elem->Dereference();
-                        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
+                        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
                     }
 
                     iField++;
@@ -561,8 +561,8 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
         {
             CLR_RT_Assembly *assm = td.m_assm;
             const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->methods_First);
-            int iTot = tdR->sMethods_Num + tdR->iMethods_Num + tdR->vMethods_Num;
+            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->FirstMethod);
+            int iTot = tdR->StaticMethodCount + tdR->InstanceMethodCount + tdR->VirtualMethodCount;
             int i;
 
             if (staticInstanceOnly)
@@ -583,7 +583,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
             for (i = 0; i < iTot; i++, md++)
             {
-                if (md->flags & CLR_RECORD_METHODDEF::MD_Static)
+                if (md->Flags & CLR_RECORD_METHODDEF::MD_Static)
                 {
                     if ((bindingFlags & c_BindingFlags_Static) == 0)
                     {
@@ -598,7 +598,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
-                if ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
+                if ((md->Flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
                 {
                     if ((bindingFlags & c_BindingFlags_Public) == 0)
                     {
@@ -615,7 +615,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 //--//
 
-                if (md->flags & CLR_RECORD_METHODDEF::MD_Constructor)
+                if (md->Flags & CLR_RECORD_METHODDEF::MD_Constructor)
                 {
                     if ((bindingFlags & c_BindingFlags_CreateInstance) == 0)
                     {
@@ -629,7 +629,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         continue;
                     }
 
-                    if (szText != NULL && !strcmp(assm->GetString(md->name), szText) == false)
+                    if (szText != NULL && !strcmp(assm->GetString(md->Name), szText) == false)
                     {
                         continue;
                     }
@@ -654,10 +654,10 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
-                CLR_RT_MethodDef_Index idx;
-                idx.Set(td.Assembly(), i + tdR->methods_First);
+                CLR_RT_MethodDef_Index index;
+                index.Set(td.Assembly(), i + tdR->FirstMethod);
                 CLR_RT_MethodDef_Instance inst2;
-                inst2.InitializeFromIndex(idx);
+                inst2.InitializeFromIndex(index);
 
                 if (fAllMatches)
                 {
@@ -668,11 +668,11 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         NANOCLR_CHECK_HRESULT(
                             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*elem, g_CLR_RT_WellKnownTypes.m_MethodInfo));
                         hbObj = elem->Dereference();
-                        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(idx));
+                        NANOCLR_CHECK_HRESULT(hbObj->SetReflection(index));
 
                         // store token for type
                         hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
-                            idx.m_data;
+                            index.m_data;
                     }
 
                     iMethod++;
@@ -684,9 +684,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     if (NANOCLR_INDEX_IS_VALID(inst))
                     {
                         CLR_RT_SignatureParser parserLeft;
-                        parserLeft.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+                        parserLeft.Initialize_MethodSignature(&inst);
                         CLR_RT_SignatureParser parserRight;
-                        parserRight.Initialize_MethodSignature(inst2.m_assm, inst2.m_target);
+                        parserRight.Initialize_MethodSignature(&inst2);
 
                         CLR_RT_SignatureParser::Element resLeft;
                         CLR_RT_SignatureParser::Element resRight;
@@ -719,9 +719,9 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                                 NANOCLR_CHECK_HRESULT(parserRight.Advance(resRight));
 
                                 bool fRightBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, true);
+                                    CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, true);
                                 bool fLeftBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resRight, resLeft, true);
+                                    CLR_RT_TypeSystem::MatchSignatureElement(resRight, resLeft, parserLeft, parserRight, true);
 
                                 // If fLeftBetterMatchT && fRightBetterMatchT, one is assignable from the other, they
                                 // must be the same
@@ -757,7 +757,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         }
                     }
 
-                    inst.InitializeFromIndex(idx);
+                    inst.InitializeFromIndex(index);
 
                     NANOCLR_CHECK_HRESULT(
                         g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_MethodInfo));

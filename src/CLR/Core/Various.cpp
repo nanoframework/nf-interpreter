@@ -123,4 +123,3 @@ HRESULT CLR_RT_ByteArrayReader::Skip( unsigned int size )
 
     NANOCLR_NOCLEANUP();
 }
-

@@ -37,7 +37,7 @@ HRESULT Library_corlib_native_System_AppDomain::
     CLR_RT_AppDomain *appDomainSav;
     CLR_RT_AppDomain *appDomain;
     CLR_RT_Assembly *assembly;
-    CLR_RT_Assembly_Index idx;
+    CLR_RT_Assembly_Index index;
     bool fVersion;
     CLR_INT16 maj, min, build, rev;
     const char *szAssembly;
@@ -81,12 +81,12 @@ HRESULT Library_corlib_native_System_AppDomain::
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        idx.Set(assembly->m_idx);
+        index.Set(assembly->m_index);
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
 
         hbObj = top.Dereference();
-        hbObj->SetReflection(idx);
+        hbObj->SetReflection(index);
     }
 
     NANOCLR_CLEANUP();
@@ -272,14 +272,14 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
             else
             {
                 CLR_RT_HeapBlock *hbObj;
-                CLR_RT_Assembly_Index idx;
-                idx.Set(pASSM->m_idx);
+                CLR_RT_Assembly_Index index;
+                index.Set(pASSM->m_index);
 
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
                 hbObj = pArray->Dereference();
 
-                hbObj->SetReflection(idx);
+                hbObj->SetReflection(index);
 
                 pArray++;
             }
