@@ -744,6 +744,8 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         BLE_DEBUG_PRINTF("Server: Stop Advertising\n");
 
         ble_gap_adv_stop();
+
+        FreeContext(bleContext);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }

@@ -11,6 +11,11 @@ char *bleDeviceName = NULL;
 
 void UpdateNameInContext()
 {
+    if(bleContext.pDeviceName)
+    {
+        platform_free((void *)bleContext.pDeviceName);
+    }
+    
     size_t nlen = hal_strlen_s(bleDeviceName);
 
     bleContext.pDeviceName = (char *)platform_malloc(nlen + 1);
