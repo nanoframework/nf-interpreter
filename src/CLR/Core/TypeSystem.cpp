@@ -4726,6 +4726,119 @@ bool CLR_RT_TypeSystem::FindTypeDef(const char *szClass, CLR_RT_Assembly *assm, 
     return false;
 }
 
+bool CLR_RT_TypeSystem::FindTypeDef(const char *szClass, CLR_RT_Assembly *assm, CLR_RT_ReflectionDef_Index &reflex)
+{
+    (void)szClass;
+    (void)assm;
+    (void)reflex;
+
+    NATIVE_PROFILE_CLR_CORE();
+
+    char rgName[MAXTYPENAMELEN];
+    char rgNamespace[MAXTYPENAMELEN];
+    CLR_RT_TypeDef_Index res;
+
+    if (hal_strlen_s(szClass) < ARRAYSIZE(rgNamespace))
+    {
+        const char *szPtr = szClass;
+        const char *szPtr_LastDot = NULL;
+        const char *szPtr_FirstSubType = NULL;
+        char c;
+        size_t len;
+        bool arrayType = false;
+
+        while (true)
+        {
+            c = szPtr[0];
+            if (!c)
+                break;
+
+            if (c == '.')
+            {
+                szPtr_LastDot = szPtr;
+            }
+            else if (c == '+')
+            {
+                szPtr_FirstSubType = szPtr;
+                break;
+            }
+            else if (c == '[')
+            {
+                char ch = szPtr[1];
+                if (ch == ']')
+                {
+                    arrayType = true;
+                    break;
+                }
+            }
+
+            szPtr++;
+        }
+
+        if (szPtr_LastDot)
+        {
+            len = szPtr_LastDot++ - szClass;
+            hal_strncpy_s(rgNamespace, ARRAYSIZE(rgNamespace), szClass, len);
+            len = szPtr - szPtr_LastDot;
+            hal_strncpy_s(rgName, ARRAYSIZE(rgName), szPtr_LastDot, len);
+        }
+        else
+        {
+            rgNamespace[0] = 0;
+            hal_strcpy_s(rgName, ARRAYSIZE(rgName), szClass);
+        }
+
+        if (FindTypeDef(rgName, rgNamespace, assm, res))
+        {
+            //
+            // Found the containing type, let's look for the nested type.
+            //
+            if (szPtr_FirstSubType)
+            {
+                CLR_RT_TypeDef_Instance inst;
+
+                do
+                {
+                    szPtr = ++szPtr_FirstSubType;
+
+                    while (true)
+                    {
+                        c = szPtr_FirstSubType[0];
+                        if (!c)
+                            break;
+
+                        if (c == '+')
+                            break;
+
+                        szPtr_FirstSubType++;
+                    }
+
+                    len = szPtr_FirstSubType - szPtr;
+                    hal_strncpy_s(rgName, ARRAYSIZE(rgName), szPtr, len);
+
+                    inst.InitializeFromIndex(res);
+
+                    if (inst.m_assm->FindTypeDef(rgName, res.Type(), res) == false)
+                    {
+                        return false;
+                    }
+
+                } while (c == '+');
+            }
+
+            reflex.m_kind = REFLECTION_TYPE;
+            // make sure this works for multidimensional arrays.
+            reflex.m_levels = arrayType ? 1 : 0;
+            reflex.m_data.m_type = res;
+            return true;
+        }
+    }
+
+    res.Clear();
+
+    return false;
+}
+
 //--//
 
 int
