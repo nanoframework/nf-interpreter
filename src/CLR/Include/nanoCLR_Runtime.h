@@ -863,7 +863,7 @@ struct CLR_RT_ReflectionDef_Index
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_TypeDef_Instance &inst, CLR_UINT32 *levels);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_MethodDef_Instance &inst);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_FieldDef_Instance &inst);
-    static bool Convert(CLR_RT_HeapBlock& ref, CLR_RT_TypeSpec_Instance& inst);
+    static bool Convert(CLR_RT_HeapBlock &ref, CLR_RT_TypeSpec_Instance &inst);
     static bool Convert(CLR_RT_HeapBlock &ref, CLR_UINT32 &hash);
 };
 
@@ -925,7 +925,7 @@ struct CLR_RT_GenericParam_CrossReference
     /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
     ///
     CLR_UINT16 m_data;
-    
+
     /// @brief Tag for owner (TypeDef or MethodDef)
     ///
     NanoCLRTable m_TypeOrMethodDef;
@@ -944,7 +944,7 @@ struct CLR_RT_GenericParam_CrossReference
 struct CLR_RT_MethodSpec_CrossReference
 {
     CLR_RT_TypeSpec_Index GenericType;
-    
+
     CLR_RT_MethodDef_Index MethodDef;
     CLR_RT_MethodRef_Index MethodRef;
 
@@ -952,10 +952,10 @@ struct CLR_RT_MethodSpec_CrossReference
 
     CLR_UINT16 m_data;
 
-    //CLR_INDEX GetMethod() const
+    // CLR_INDEX GetMethod() const
     //{
-    //    return (CLR_INDEX)(m_data);
-    //}
+    //     return (CLR_INDEX)(m_data);
+    // }
 };
 
 struct CLR_RT_TypeSpec_CrossReference
@@ -1018,7 +1018,7 @@ struct CLR_RT_MethodDef_DebuggingInfo
     }
 };
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1200,22 +1200,22 @@ struct CLR_RT_SignatureParser
 
     //--//
 
-    void Initialize_TypeSpec(CLR_RT_Assembly* assm, CLR_PMETADATA ts);
+    void Initialize_TypeSpec(CLR_RT_Assembly *assm, CLR_PMETADATA ts);
     void Initialize_TypeSpec(CLR_RT_Assembly *assm, const CLR_RECORD_TYPESPEC *ts);
 
     void Initialize_Interfaces(CLR_RT_Assembly *assm, const CLR_RECORD_TYPEDEF *td);
     void Initialize_MethodLocals(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
-    bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly* assm, const CLR_RECORD_GENERICPARAM* gp);
+    bool Initialize_GenericParamTypeSignature(CLR_RT_Assembly *assm, const CLR_RECORD_GENERICPARAM *gp);
 
-    void Initialize_FieldDef(CLR_RT_Assembly* assm, const CLR_RECORD_FIELDDEF* fd);
+    void Initialize_FieldDef(CLR_RT_Assembly *assm, const CLR_RECORD_FIELDDEF *fd);
     void Initialize_FieldDef(CLR_RT_Assembly *assm, CLR_PMETADATA fd);
 
-    void Initialize_FieldSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
+    void Initialize_FieldSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
 
-    void Initialize_MethodSignature(CLR_RT_Assembly* assm, const CLR_RECORD_METHODDEF* md);
-    void Initialize_MethodSignature(CLR_RT_Assembly* assm, CLR_PMETADATA md);
-    void Initialize_MethodSignature(CLR_RT_MethodDef_Instance* mdInstance);
-    void Initialize_MethodSignature(CLR_RT_MethodSpec_Instance* msInstance);
+    void Initialize_MethodSignature(CLR_RT_Assembly *assm, const CLR_RECORD_METHODDEF *md);
+    void Initialize_MethodSignature(CLR_RT_Assembly *assm, CLR_PMETADATA md);
+    void Initialize_MethodSignature(CLR_RT_MethodDef_Instance *mdInstance);
+    void Initialize_MethodSignature(CLR_RT_MethodSpec_Instance *msInstance);
 
     void Initialize_Objects(CLR_RT_HeapBlock *lst, int count, bool fTypes);
 
@@ -1360,12 +1360,12 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     CLR_RT_MethodSpec_CrossReference
         *m_pCrossReference_MethodSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeSpec_CrossReference
-        * m_pCrossReference_TypeSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *m_pCrossReference_TypeSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                               // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int m_maxOpcodes;
@@ -1415,11 +1415,19 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     bool FindTypeDef(const char *name, const char *nameSpace, CLR_RT_TypeDef_Index &index);
     bool FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_TypeDef_Index &index);
     bool FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index);
+
     bool FindTypeSpec(const CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &index);
-    bool FindGenericParamAtTypeDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
-    bool FindGenericParamAtMethodDef(CLR_RT_MethodDef_Instance md, CLR_UINT32 genericParameterPosition, CLR_RT_GenericParam_Index &index);
-    bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index& index);
-    bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index& index);
+
+    bool FindGenericParamAtTypeDef(
+        CLR_RT_MethodDef_Instance md,
+        CLR_UINT32 genericParameterPosition,
+        CLR_RT_GenericParam_Index &index);
+    bool FindGenericParamAtMethodDef(
+        CLR_RT_MethodDef_Instance md,
+        CLR_UINT32 genericParameterPosition,
+        CLR_RT_GenericParam_Index &index);
+    bool FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericParam_Index &index);
+    bool FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT_MethodSpec_Index &index);
 
     bool FindFieldDef(
         const CLR_RECORD_TYPEDEF *src,
@@ -1428,11 +1436,11 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_SIG sig,
         CLR_RT_FieldDef_Index &index);
     bool FindFieldDef(
-        const CLR_RECORD_TYPESPEC* ts,
-        const char* name,
-        CLR_RT_Assembly* base,
+        const CLR_RECORD_TYPESPEC *ts,
+        const char *name,
+        CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_FieldDef_Index& index);
+        CLR_RT_FieldDef_Index &index);
     bool FindMethodDef(
         const CLR_RECORD_TYPEDEF *src,
         const char *name,
@@ -1440,11 +1448,11 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
         CLR_SIG sig,
         CLR_RT_MethodDef_Index &index);
     bool FindMethodDef(
-        const CLR_RECORD_TYPESPEC* ts,
-        const char* name,
-        CLR_RT_Assembly* base,
+        const CLR_RECORD_TYPESPEC *ts,
+        const char *name,
+        CLR_RT_Assembly *base,
         CLR_SIG sig,
-        CLR_RT_MethodDef_Index& index);
+        CLR_RT_MethodDef_Index &index);
 
     bool FindNextStaticConstructor(CLR_RT_MethodDef_Index &index);
 
@@ -2037,10 +2045,14 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
         CLR_UINT32 flags,
         CLR_UINT32 levels);
     HRESULT BuildTypeName(const CLR_RT_TypeDef_Index &cls, char *&szBuffer, size_t &size);
-    HRESULT BuildMethodName(const CLR_RT_MethodDef_Index &md, const CLR_RT_TypeSpec_Index* genericType, char *&szBuffer, size_t &size);
+    HRESULT BuildMethodName(
+        const CLR_RT_MethodDef_Index &md,
+        const CLR_RT_TypeSpec_Index *genericType,
+        char *&szBuffer,
+        size_t &size);
     HRESULT BuildFieldName(const CLR_RT_FieldDef_Index &fd, char *&szBuffer, size_t &size);
-    HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char*& szBuffer, size_t& iBuffer);
-    HRESULT BuildMethodSpecName(const CLR_RT_MethodSpec_Index& ms, char*& szBuffer, size_t& iBuffer);
+    HRESULT BuildMethodRefName(const CLR_RT_MethodRef_Index &method, char *&szBuffer, size_t &iBuffer);
+    HRESULT BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms, char *&szBuffer, size_t &iBuffer);
 
     HRESULT QueueStringToBuffer(char *&szBuffer, size_t &size, const char *szText);
 
@@ -2062,8 +2074,8 @@ struct CLR_RT_TypeSystem // EVENT HEAP - NO RELOCATION -
     static bool MatchSignatureElement(
         CLR_RT_SignatureParser::Element &resLeft,
         CLR_RT_SignatureParser::Element &resRight,
-        CLR_RT_SignatureParser& parserLeft,
-        CLR_RT_SignatureParser& parserRight,
+        CLR_RT_SignatureParser &parserLeft,
+        CLR_RT_SignatureParser &parserRight,
         bool fIsInstanceOfOK);
 
     static NanoCLRDataType MapElementTypeToDataType(CLR_UINT32 et);
@@ -2095,7 +2107,7 @@ struct CLR_RT_Assembly_Instance : public CLR_RT_Assembly_Index
 struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
 {
     CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_TYPESPEC* m_target;
+    const CLR_RECORD_TYPESPEC *m_target;
 
     CLR_INDEX TypeDefIndex;
 
@@ -2120,11 +2132,11 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     bool InitializeFromIndex(const CLR_RT_TypeDef_Index &index);
     bool InitializeFromMethod(const CLR_RT_MethodDef_Instance &md);
     bool InitializeFromField(const CLR_RT_FieldDef_Instance &fd);
-    bool InitializeFromMethod(const CLR_RT_MethodSpec_Instance& ms);
+    bool InitializeFromMethod(const CLR_RT_MethodSpec_Instance &ms);
 
     void Clear();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance* caller = NULL);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = NULL);
 
     //--//
 
@@ -2146,7 +2158,7 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
     CLR_RT_Assembly *m_assm;
     const CLR_RECORD_FIELDDEF *m_target;
 
-    const CLR_RT_TypeSpec_Index* genericType;
+    const CLR_RT_TypeSpec_Index *genericType;
 
     //--//
 
@@ -2195,7 +2207,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     {
         return m_assm->m_pDebuggingInfo_MethodDef[Method()];
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
@@ -2205,7 +2217,7 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     //--//
 
-    bool InitializeFromIndex(const CLR_RT_GenericParam_Index& index);
+    bool InitializeFromIndex(const CLR_RT_GenericParam_Index &index);
 
     void Clear();
 
@@ -2221,16 +2233,16 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
 struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 {
-    CLR_RT_Assembly* m_assm;
-    const CLR_RECORD_METHODSPEC* m_target;
+    CLR_RT_Assembly *m_assm;
+    const CLR_RECORD_METHODSPEC *m_target;
 
     //--//
 
-    bool InitializeFromIndex(const CLR_RT_MethodSpec_Index& index);
+    bool InitializeFromIndex(const CLR_RT_MethodSpec_Index &index);
 
     void Clear();
 
-    CLR_RT_MethodSpec_CrossReference& CrossReference() const
+    CLR_RT_MethodSpec_CrossReference &CrossReference() const
     {
         return m_assm->m_pCrossReference_MethodSpec[Method()];
     }
@@ -2241,7 +2253,6 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 };
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2349,7 +2360,7 @@ struct CLR_RT_TypeDescriptor
     HRESULT InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex);
     HRESULT InitializeFromTypeSpec(const CLR_RT_TypeSpec_Index &sig);
     HRESULT InitializeFromType(const CLR_RT_TypeDef_Index &cls);
-    HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index& genericType);
+    HRESULT InitializeFromGenericType(const CLR_RT_TypeSpec_Index &genericType);
     HRESULT InitializeFromFieldDefinition(const CLR_RT_FieldDef_Instance &fd);
     HRESULT InitializeFromSignatureParser(CLR_RT_SignatureParser &parser);
     HRESULT InitializeFromObject(const CLR_RT_HeapBlock &ref);
@@ -2526,7 +2537,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_UINT32 m_depth;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_CounterCallChain m_callchain;
@@ -3301,7 +3312,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                  // However, if this thread was spawned on behalf of the debugger to evaluate
                                  // a property or function call, it points to the object coresponding to the
                                  // thread that is currently selected in the debugger.
-#endif                           //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                           // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
@@ -3672,7 +3683,7 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
-//#include <nanoCLR_Messaging.h>
+// #include <nanoCLR_Messaging.h>
 
 //--//
 
@@ -3789,7 +3800,7 @@ struct CLR_RT_ExecutionEngine
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef *m_breakpoints;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef m_breakpointsActive[c_MaxBreakpointsActive];
     size_t m_breakpointsActiveNum;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     bool m_fPerformGarbageCollection; // Should the EE do a GC every context switch
@@ -3997,9 +4008,9 @@ struct CLR_RT_ExecutionEngine
         CLR_UINT32 flags,
         const CLR_RT_TypeDef_Index &cls,
         CLR_UINT32 length);
-    CLR_RT_HeapBlock* ExtractHeapBlocksForGenericInstance(
+    CLR_RT_HeapBlock *ExtractHeapBlocksForGenericInstance(
         CLR_UINT32 flags,
-        const CLR_RT_TypeSpec_Index& genericType,
+        const CLR_RT_TypeSpec_Index &genericType,
         CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBytesForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
     CLR_RT_HeapBlock *ExtractHeapBlocksForObjects(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length);
@@ -4023,8 +4034,14 @@ struct CLR_RT_ExecutionEngine
     HRESULT NewObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance &inst);
     HRESULT NewObject(CLR_RT_HeapBlock &reference, CLR_UINT32 token, CLR_RT_Assembly *assm);
 
-    HRESULT NewGenericInstanceObject(CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& typeDef, const CLR_RT_TypeSpec_Index& genericType);
-    HRESULT NewGenericInstanceObject(CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& typeDef, CLR_RT_TypeSpec_Instance& genericInstance);
+    HRESULT NewGenericInstanceObject(
+        CLR_RT_HeapBlock &reference,
+        const CLR_RT_TypeDef_Instance &typeDef,
+        const CLR_RT_TypeSpec_Index &genericType);
+    HRESULT NewGenericInstanceObject(
+        CLR_RT_HeapBlock &reference,
+        const CLR_RT_TypeDef_Instance &typeDef,
+        CLR_RT_TypeSpec_Instance &genericInstance);
 
     HRESULT CloneObject(CLR_RT_HeapBlock &reference, const CLR_RT_HeapBlock &source);
     HRESULT CopyValueType(CLR_RT_HeapBlock *destination, const CLR_RT_HeapBlock *source);
@@ -4090,7 +4107,7 @@ struct CLR_RT_ExecutionEngine
     void Breakpoint_Exception(CLR_RT_StackFrame *stack, CLR_UINT32 reason, CLR_PMETADATA ip);
     void Breakpoint_Exception_Intercepted(CLR_RT_StackFrame *stack);
     void Breakpoint_Exception_Uncaught(CLR_RT_Thread *th);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //--//
 
