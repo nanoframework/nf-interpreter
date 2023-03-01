@@ -254,12 +254,12 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         NANOCLR_CHECK_HRESULT(
             g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = paraTypeHB.Dereference();
-        hbObj->SetReflection(paramElement.m_cls);
+        hbObj->SetReflection(paramElement.Class);
 
         // deal with array types
-        if (paramElement.m_levels > 0)
+        if (paramElement.Levels > 0)
         {
-            hbObj->ReflectionData().m_levels = (CLR_UINT16)paramElement.m_levels;
+            hbObj->ReflectionData().m_levels = (CLR_UINT16)paramElement.Levels;
         }
 
         // move pointer to the next element

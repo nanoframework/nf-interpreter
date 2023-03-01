@@ -127,7 +127,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
     CLR_RT_TypeDescriptor *td;
     CLR_RT_TypeDescriptor sub;
 
-    if (m_hints.m_arraySize != 0)
+    if (m_hints._arraySize != 0)
     {
         res &= ~c_Signature_Length;
     }
@@ -145,7 +145,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
                 break;
 
             default:
-                if (m_hints.m_flags & SF_FixedType)
+                if (m_hints._options & SF_FixedType)
                 {
                     res &= ~c_Signature_Type;
                     break;
@@ -175,7 +175,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
         m_typeForced = &m_typeForced_tmp;
         *m_typeForced = *m_typeExpected;
 
-        if (m_hints.m_flags & SF_PointerNeverNull)
+        if (m_hints._options & SF_PointerNeverNull)
         {
             res &= ~c_Signature_Header;
         }
@@ -437,7 +437,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
 
         if ((mask & c_Signature_Length) != 0)
         {
-            int bitsMax = m_hints.m_bitPacked;
+            int bitsMax = m_hints._bitPacked;
 
             if (bitsMax != 0)
             {
@@ -455,7 +455,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
         }
         else
         {
-            int sizeExpected = m_hints.m_arraySize;
+            int sizeExpected = m_hints._arraySize;
 
             if (sizeExpected > 0 && sizeExpected != sizeReal)
             {
@@ -522,7 +522,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
 
         if (levelOne == TE_L1_Null)
         {
-            if (m_hints.m_flags & SF_PointerNeverNull)
+            if (m_hints._options & SF_PointerNeverNull)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
@@ -717,7 +717,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
 
         if (mask & c_Signature_Length)
         {
-            int bitsMax = m_hints.m_bitPacked;
+            int bitsMax = m_hints._bitPacked;
 
             if (bitsMax != 0)
             {
@@ -742,7 +742,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
 
             sub.InitializeFromType(m_type->m_reflex.m_data.m_type);
 
-            len = m_hints.m_arraySize;
+            len = m_hints._arraySize;
 
             if (len == (CLR_UINT32)-1)
             {
@@ -948,17 +948,17 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
         }
     }
 
-    if (m_hints.m_bitPacked)
-        bits = m_hints.m_bitPacked;
+    if (m_hints._bitPacked)
+        bits = m_hints._bitPacked;
 
-    val -= m_hints.m_rangeBias;
+    val -= m_hints._rangeBias;
 
     if (fSigned)
     {
         CLR_INT64 valS = (CLR_INT64)val;
 
-        if (m_hints.m_scale != 0)
-            valS /= (CLR_INT64)m_hints.m_scale;
+        if (m_hints._scale != 0)
+            valS /= (CLR_INT64)m_hints._scale;
 
         if (bits != 64)
         {
@@ -976,8 +976,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
     {
         CLR_UINT64 valU = (CLR_UINT64)val;
 
-        if (m_hints.m_scale != 0)
-            valU /= (CLR_UINT64)m_hints.m_scale;
+        if (m_hints._scale != 0)
+            valU /= (CLR_UINT64)m_hints._scale;
 
         if (bits != 64)
         {
@@ -1074,8 +1074,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
         NANOCLR_SET_AND_LEAVE(TrackObject(res));
     }
 
-    if (m_hints.m_bitPacked)
-        bits = m_hints.m_bitPacked;
+    if (m_hints._bitPacked)
+        bits = m_hints._bitPacked;
 
     NANOCLR_CHECK_HRESULT(m_bf->ReadBits(val, bits));
 
@@ -1091,12 +1091,12 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
             val = (val >> revBits);
     }
 
-    if (m_hints.m_scale != 0)
+    if (m_hints._scale != 0)
     {
-        val *= m_hints.m_scale;
+        val *= m_hints._scale;
     }
 
-    *dst = val + m_hints.m_rangeBias;
+    *dst = val + m_hints._rangeBias;
 
     res = c_Action_None;
     NANOCLR_SET_AND_LEAVE(S_OK);
@@ -1157,7 +1157,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance(
 
             NANOCLR_CLEAR(*hints);
 
-            hints->m_flags = (SerializationFlags)(SF_PointerNeverNull | SF_FixedType);
+            hints->_options = (SerializationFlags)(SF_PointerNeverNull | SF_FixedType);
         }
     }
     else
@@ -1269,15 +1269,15 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
                 else
                 {
                     if (!strcmp(val->m_name, "Flags"))
-                        hints.m_flags = (SerializationFlags)val->m_value.NumericByRef().u4;
+                        hints._options = (SerializationFlags)val->m_value.NumericByRef().u4;
                     else if (!strcmp(val->m_name, "ArraySize"))
-                        hints.m_arraySize = val->m_value.NumericByRef().s4;
+                        hints._arraySize = val->m_value.NumericByRef().s4;
                     else if (!strcmp(val->m_name, "BitPacked"))
-                        hints.m_bitPacked = val->m_value.NumericByRef().s4;
+                        hints._bitPacked = val->m_value.NumericByRef().s4;
                     else if (!strcmp(val->m_name, "RangeBias"))
-                        hints.m_rangeBias = val->m_value.NumericByRef().s8;
+                        hints._rangeBias = val->m_value.NumericByRef().s8;
                     else if (!strcmp(val->m_name, "Scale"))
-                        hints.m_scale = val->m_value.NumericByRef().u8;
+                        hints._scale = val->m_value.NumericByRef().u8;
                 }
             }
         }
@@ -1750,7 +1750,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
 
         SerializationHintsAttribute *hints;
 
-        if (m_value.m_hints.m_flags & (SF_FixedType | SF_PointerNeverNull))
+        if (m_value.m_hints._options & (SF_FixedType | SF_PointerNeverNull))
         {
             hints = &m_value.m_hints;
         }

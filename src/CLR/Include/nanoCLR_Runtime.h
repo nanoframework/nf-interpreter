@@ -59,7 +59,7 @@ typedef CLR_RT_AddressToSymbolMap::iterator CLR_RT_AddressToSymbolMapIter;
 #endif // #if defined(VIRTUAL_DEVICE)
 
 #if defined(_MSC_VER)
-#pragma pack(push, NANOCLR_RUNTIME_H, 4)
+#pragma pack(push, __NANOCLR_RUNTIME_H__, 4)
 #endif
 
 #if defined(VIRTUAL_DEVICE)
@@ -2708,6 +2708,11 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
         SetResult_I4(val);
     }
 
+    inline void PushValueU4(CLR_UINT32 val)
+    {
+        SetResult_U4(val);
+    }
+
     //--//
 
     CLR_RT_StackFrame *Caller()
@@ -2860,8 +2865,6 @@ struct CLR_RT_GarbageCollector
     static const int c_minimumSpaceForGC = 128;
     static const int c_minimumSpaceForCompact = 128;
     static const CLR_UINT32 c_pressureThreshold = 10;
-    static const CLR_UINT32 c_memoryThreshold = HEAP_SIZE_THRESHOLD;
-    static const CLR_UINT32 c_memoryThreshold2 = HEAP_SIZE_THRESHOLD_UPPER;
 
     static const CLR_UINT32 c_StartGraphEvent = 0x00000001;
     static const CLR_UINT32 c_StopGraphEvent = 0x00000002;
@@ -4139,16 +4142,20 @@ struct CLR_RT_ExecutionEngine
 extern CLR_RT_ExecutionEngine g_CLR_RT_ExecutionEngine;
 extern CLR_UINT32 g_buildCRC;
 
-//--//
-
 //
 // CT_ASSERT macro generates a compiler error in case the size of any structure changes.
 //
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 20)
+#else
 CT_ASSERT(sizeof(CLR_RT_HeapBlock) == 12)
+#endif // _WIN64
+
 CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
-#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 4
+#define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE sizeof(const char *)
 #else
 #define NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE 0
 #endif
@@ -4157,7 +4164,12 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
 #elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
-CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
 
 #else
 
@@ -4170,5 +4182,8 @@ CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + 4)
 #if defined(_MSC_VER)
 #pragma pack(pop, __NANOCLR_RUNTIME_H__)
 #endif
+
+extern const CLR_RT_NativeAssemblyData *g_CLR_InteropAssembliesNativeData[];
+extern const uint16_t g_CLR_InteropAssembliesCount;
 
 #endif // NANOCLR_RUNTIME_H

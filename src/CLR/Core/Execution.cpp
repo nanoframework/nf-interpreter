@@ -535,7 +535,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
 
     wchar_t *szArgNext = NULL;
     wchar_t *szArg = szCommandLineArgs;
-    wchar_t *sep = L" ";
+    const wchar_t *sep = L" ";
     wchar_t *context = NULL;
 
     szArg = wcstok_s(szArg, sep, &context);

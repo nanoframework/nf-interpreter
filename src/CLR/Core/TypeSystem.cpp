@@ -5896,18 +5896,18 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
         // get type
         NANOCLR_CHECK_HRESULT(m_parser.Advance(m_res));
 
-        CLR_RT_DataTypeLookup dtl = c_CLR_RT_DataTypeLookup[m_res.m_dt];
+        CLR_RT_DataTypeLookup dtl = c_CLR_RT_DataTypeLookup[m_res.DataType];
 
         ////////////////////////////////////////////////
         // now read the arguments from the blob
 
-        if ((m_res.m_dt == DATATYPE_OBJECT && m_res.m_levels == 1) || m_fixed_Count > 1)
+        if ((m_res.DataType == DATATYPE_OBJECT && m_res.Levels == 1) || m_fixed_Count > 1)
         {
             // this is either an array of objects or a constructor with multiple parameters
 
             uint8_t paramCount;
 
-            if (m_res.m_dt == DATATYPE_OBJECT && m_res.m_levels == 1)
+            if (m_res.DataType == DATATYPE_OBJECT && m_res.Levels == 1)
             {
                 // get element count of array (from blob)
                 NANOCLR_READ_UNALIGNED_UINT8(paramCount, m_blob);
@@ -5968,9 +5968,9 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             CLR_UINT32 size = dtl.m_sizeInBytes;
 
             CLR_RT_HeapBlock *currentParam = &m_lastValue.m_value;
-            NANOCLR_CHECK_HRESULT(ReadNumericValue(currentParam, m_res.m_dt, dtl.m_cls, size));
+            NANOCLR_CHECK_HRESULT(ReadNumericValue(currentParam, m_res.DataType, dtl.m_cls, size));
         }
-        else if (m_res.m_dt == DATATYPE_STRING)
+        else if (m_res.DataType == DATATYPE_STRING)
         {
             // single parameter of string type
             // OK to skip element type

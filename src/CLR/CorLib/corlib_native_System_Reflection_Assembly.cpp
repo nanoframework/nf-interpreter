@@ -333,7 +333,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
             }
 
             // push assembly index onto the eval stack
-            stack.PushValueU4(assm->m_idx);
+            stack.PushValueU4(assm->m_index);
         }
         else
         {
