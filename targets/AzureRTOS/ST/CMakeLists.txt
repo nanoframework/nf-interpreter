@@ -46,7 +46,7 @@ if(NO_CHIBIOS_HAL_SOURCE)
 
     FetchContent_Declare(
         chibios
-        SVN_REPOSITORY https://svn.osdn.net/svnroot/chibios/branches/${CHIBIOS_HAL_VERSION}
+        SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${CHIBIOS_HAL_VERSION}
         SVN_REVISION -rHEAD
     )
 
@@ -65,7 +65,7 @@ else()
 
         else()
             # running on *nix requires setting up a local git repo from SVN
-            # with git svn clone https://svn.osdn.net/svnroot/chibios/branches/${CHIBIOS_HAL_VERSION} -rHEAD
+            # with git svn clone http://svn.code.sf.net/p/chibios/code/branches/${CHIBIOS_HAL_VERSION} -rHEAD
             message(STATUS "ChibiOS HAL is: ${CHIBIOS_HAL_VERSION} (source from: ${CHIBIOS_HAL_SOURCE})")
 
             FetchContent_Declare(
