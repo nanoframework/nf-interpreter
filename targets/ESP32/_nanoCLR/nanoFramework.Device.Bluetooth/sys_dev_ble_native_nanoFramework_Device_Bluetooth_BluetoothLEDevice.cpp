@@ -717,6 +717,19 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
     NANOCLR_NOCLEANUP();
 }
 
+uint16_t ConvertReadWriteStatus(uint16_t status)
+{
+    switch (status)
+    {
+    case 0:
+        return BluetoothLEDevice_readWriteValueResult_success;
+    case 5:
+        return BluetoothLEDevice_readWriteValueResult_acessDenied;
+    default:
+        return BluetoothLEDevice_readWriteValueResult_failure;
+    }
+}
+
 static int ReadCharCallback(
     uint16_t conn_handle,
     const struct ble_gatt_error *error,
@@ -724,18 +737,24 @@ static int ReadCharCallback(
     void *arg)
 {
     central_context *con = (central_context *)arg;
+    uint16_t result = ConvertReadWriteStatus(error->status);
 
     if (error->status == 0)
     {
         BLE_DEBUG_PRINTF(
-            "Read complete; status=%d conn_handle=%d handle:%d\n",
+            "Read complete; status=%d conn_handle=%d handle:%d result=%d\n",
             error->status,
             conn_handle,
-            attr->handle);
+            attr->handle,
+            result);
     }
     else
     {
-        BLE_DEBUG_PRINTF("Read complete; status=%d conn_handle=%d\n", error->status, conn_handle);
+        BLE_DEBUG_PRINTF(
+            "Read complete; status=%d conn_handle=%d result=%d\n", 
+            error->status, 
+            conn_handle, 
+            result);
     }
 
     // Save ble_gatt_attr for use in NativeReadValue
@@ -750,7 +769,7 @@ static int ReadCharCallback(
         if (PostAndWaitCentralEvent(
                 BluetoothEventType_AttributeReadValueComplete,
                 conn_handle,
-                error->status,
+                result,
                 con->serviceHandle,
                 attr->handle))
         {
@@ -762,7 +781,7 @@ static int ReadCharCallback(
         PostCentralEvent(
             BluetoothEventType_AttributeReadValueComplete,
             conn_handle,
-            error->status,
+            result,
             con->serviceHandle,
             0);
     }
@@ -798,7 +817,7 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDev
             }
         }
 
-        stack.SetResult_U2(rc);
+        stack.SetResult_U2(ConvertReadWriteStatus(rc));
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -840,19 +859,20 @@ static int WriteCharWithResponseCallback(
     struct ble_gatt_attr *attr,
     void *arg)
 {
-
     central_context *con = (central_context *)arg;
+    uint16_t result = ConvertReadWriteStatus(error->status); 
 
     BLE_DEBUG_PRINTF(
-        "Write complete; status=%d conn_handle=%d attr_handle=%d\n",
+        "Write complete; status=%d conn_handle=%d attr_handle=%d result=%d\n",
         error->status,
         conn_handle,
-        attr->handle);
+        attr->handle,
+        result);
 
     PostCentralEvent(
         BluetoothEventType_AttributeWriteValueComplete,
         conn_handle,
-        error->status,
+        result,
         con->serviceHandle,
         attr->handle);
 

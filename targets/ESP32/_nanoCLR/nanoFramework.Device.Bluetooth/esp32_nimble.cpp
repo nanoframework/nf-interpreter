@@ -338,7 +338,7 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
                 // As BLE_SM_IOACT_NUMCMP action we use unique BluetoothEventType_PassKeyActions_numcmp so we can pass
                 // pin instead of action
                 if (PostAndWaitManagedGapEvent(
-                        BluetoothEventType_PassKeyActions_numcmp,
+                        BluetoothEventType_PassKeyActionsNumericComparison,
                         event->passkey.conn_handle,
                         event->passkey.params.numcmp))
                 {
