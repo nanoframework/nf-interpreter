@@ -85,7 +85,7 @@ if(NO_CHIBIOS_SOURCE_FOLDER)
 
     FetchContent_Declare(
         chibios
-        SVN_REPOSITORY https://svn.osdn.net/svnroot/chibios/branches/${RTOS_VERSION}
+        SVN_REPOSITORY http://svn.code.sf.net/p/chibios/code/branches/${RTOS_VERSION}
         SVN_REVISION -rHEAD
     )
 
