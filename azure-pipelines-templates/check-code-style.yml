@@ -14,8 +14,9 @@ steps:
         # need this to remove definition of redirect stdErr (only on Azure Pipelines image fo VS2019)
         $env:GIT_REDIRECT_STDERR = '2>&1'
 
-        # compute authorization header in format "AUTHORIZATION: Bearer <YOUR-TOKEN>"
-        $auth = "Bearer $(GitHubToken)"
+        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
+        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
 
         git config --global gc.auto 0
         git config --global user.name nfbot
