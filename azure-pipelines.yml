@@ -244,9 +244,8 @@ jobs:
 
   - powershell: |
 
-      # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-      # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+      # compute authorization header in format "AUTHORIZATION: Bearer <YOUR-TOKEN>"
+      $auth = "Bearer $(GitHubToken)"
 
       cd "$env:Agent_TempDirectory" > $null
 
@@ -1175,9 +1174,8 @@ jobs:
         git add CHANGELOG.md
         git commit -m "Update CHANGELOG" -m"***NO_CI***"
 
-        # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
-        # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+        # compute authorization header in format "AUTHORIZATION: Bearer <YOUR-TOKEN>"
+        $auth = "Bearer $(GitHubToken)"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
     condition: >-
