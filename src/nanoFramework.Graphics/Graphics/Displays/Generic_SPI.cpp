@@ -16,9 +16,9 @@ void ProcessCommand(CLR_RT_HeapBlock_Array *array)
 {
     CLR_UINT32 numberElements = array->m_numOfElements;
     CLR_UINT32 inc = 0;
-    CLR_UINT8* cmd;
-    CLR_UINT8* size;
-    while(inc < numberElements)
+    CLR_UINT8 *cmd;
+    CLR_UINT8 *size;
+    while (inc < numberElements)
     {
         cmd = array->GetElement(inc++);
         size = array->GetElement(inc++);
@@ -31,10 +31,7 @@ void ProcessCommand(CLR_RT_HeapBlock_Array *array)
         else if (*cmd == GraphicDriverCommandType::GraphicDriverCommandType_Command)
         {
             // Send the command followed by the data, size is the all up size, so reduce by 1
-            g_DisplayInterface.WriteToFrameBuffer(
-                *array->GetElement(inc),
-                array->GetElement(inc + 1),
-                *size - 1, 0);
+            g_DisplayInterface.WriteToFrameBuffer(*array->GetElement(inc), array->GetElement(inc + 1), *size - 1, 0);
             // increase the increment
             inc += *size;
         }
@@ -60,7 +57,7 @@ bool DisplayDriver::Initialize()
 void DisplayDriver::SetupDisplayAttributes()
 {
     // Define the LCD/TFT resolution
-    if(g_DisplayInterfaceConfig.GenericDriverCommands.Width == 0)
+    if (g_DisplayInterfaceConfig.GenericDriverCommands.Width == 0)
     {
         Attributes.LongerSide = g_DisplayInterfaceConfig.Screen.width;
     }
@@ -69,17 +66,18 @@ void DisplayDriver::SetupDisplayAttributes()
         Attributes.LongerSide = g_DisplayInterfaceConfig.GenericDriverCommands.Width;
     }
 
-    if(g_DisplayInterfaceConfig.GenericDriverCommands.Height == 0)
+    if (g_DisplayInterfaceConfig.GenericDriverCommands.Height == 0)
     {
-        Attributes.ShorterSide = g_DisplayInterfaceConfig.Screen.height;;
+        Attributes.ShorterSide = g_DisplayInterfaceConfig.Screen.height;
+        ;
     }
     else
     {
         Attributes.LongerSide = g_DisplayInterfaceConfig.GenericDriverCommands.Height;
     }
-    
+
     Attributes.PowerSave = PowerSaveState::NORMAL;
-    if(g_DisplayInterfaceConfig.GenericDriverCommands.BitsPerPixel == 0)
+    if (g_DisplayInterfaceConfig.GenericDriverCommands.BitsPerPixel == 0)
     {
         Attributes.BitsPerPixel = 16;
     }
@@ -88,7 +86,7 @@ void DisplayDriver::SetupDisplayAttributes()
         Attributes.BitsPerPixel = g_DisplayInterfaceConfig.GenericDriverCommands.BitsPerPixel;
     }
 
-    g_DisplayInterface.GetTransferBuffer(Attributes.TransferBuffer, Attributes.TransferBufferSize);    
+    g_DisplayInterface.GetTransferBuffer(Attributes.TransferBuffer, Attributes.TransferBufferSize);
 }
 
 bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
