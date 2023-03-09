@@ -47,4 +47,4 @@ DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode);
 DevicePairingKinds PairingActionToDevicePairingKinds(int action);
 int DevicePairingKindsToPairingAction(DevicePairingKinds kinds);
 
-#endif
+#endif // NIMBLE_UTIL_H

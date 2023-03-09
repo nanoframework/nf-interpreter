@@ -721,12 +721,12 @@ uint16_t ConvertReadWriteStatus(uint16_t status)
 {
     switch (status)
     {
-    case 0:
-        return BluetoothLEDevice_readWriteValueResult_success;
-    case 5:
-        return BluetoothLEDevice_readWriteValueResult_acessDenied;
-    default:
-        return BluetoothLEDevice_readWriteValueResult_failure;
+        case 0:
+            return BluetoothLEDevice_readWriteValueResult_success;
+        case 5:
+            return BluetoothLEDevice_readWriteValueResult_acessDenied;
+        default:
+            return BluetoothLEDevice_readWriteValueResult_failure;
     }
 }
 
@@ -750,11 +750,7 @@ static int ReadCharCallback(
     }
     else
     {
-        BLE_DEBUG_PRINTF(
-            "Read complete; status=%d conn_handle=%d result=%d\n", 
-            error->status, 
-            conn_handle, 
-            result);
+        BLE_DEBUG_PRINTF("Read complete; status=%d conn_handle=%d result=%d\n", error->status, conn_handle, result);
     }
 
     // Save ble_gatt_attr for use in NativeReadValue
@@ -778,12 +774,7 @@ static int ReadCharCallback(
     }
     else
     {
-        PostCentralEvent(
-            BluetoothEventType_AttributeReadValueComplete,
-            conn_handle,
-            result,
-            con->serviceHandle,
-            0);
+        PostCentralEvent(BluetoothEventType_AttributeReadValueComplete, conn_handle, result, con->serviceHandle, 0);
     }
 
     return 0;
@@ -860,7 +851,7 @@ static int WriteCharWithResponseCallback(
     void *arg)
 {
     central_context *con = (central_context *)arg;
-    uint16_t result = ConvertReadWriteStatus(error->status); 
+    uint16_t result = ConvertReadWriteStatus(error->status);
 
     BLE_DEBUG_PRINTF(
         "Write complete; status=%d conn_handle=%d attr_handle=%d result=%d\n",
