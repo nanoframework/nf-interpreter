@@ -12,8 +12,9 @@
 static const char *tag = "BLE";
 static uint8_t esp32_addr_type;
 
-void Esp32BleStartAdvertise(bleServicesContext *context);
+bool Esp32BleStartAdvertise(bleServicesContext *context);
 void BleCentralStartScan();
+void ble_store_config_init();
 
 uint16_t ble_event_next_id = 1;
 device_ble_event_data ble_event_data;
@@ -128,6 +129,8 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
 {
     bleServicesContext *con = (bleServicesContext *)arg;
 
+    BLE_DEBUG_PRINTF("Esp32GapEvent type %d \n", event->type);
+
     switch (event->type)
     {
         //
@@ -142,7 +145,9 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
                 ble_event_data.result = -1;
 
                 BLE_DEBUG_PRINTF(
-                    "BLE_GAP_EVENT_DISC event type:%d adr:%X rssi:%d\n",
+                    "BLE_GAP_EVENT_DISC event id:%d event:%X event type:%d adr:%X rssi:%d\n",
+                    ble_event_data.eventId,
+                    ble_event_data.gapEvent,
                     event->disc.event_type,
                     (unsigned int)event->disc.addr.val,
                     event->disc.rssi);
@@ -153,7 +158,7 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
                 if (PostAndWaitManagedGapEvent(BluetoothEventType_AdvertisementDiscovered, 0, ble_event_data.eventId))
                 {
                     // Handled
-                    BLE_DEBUG_PRINTF("disc handled");
+                    BLE_DEBUG_PRINTF("disc handled\n");
                 }
 
                 BLE_DEBUG_PRINTF("adv2 adr:%x rssi:%d\n", &event->disc.addr, event->disc.rssi);
@@ -165,7 +170,7 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
         // Discovery Scan complete
         //
         case BLE_GAP_EVENT_DISC_COMPLETE:
-            MODLOG_DFLT(INFO, "discovery complete; reason=%d\n", event->disc_complete.reason);
+            BLE_DEBUG_PRINTF("Discovery complete; reason=%d\n", event->disc_complete.reason);
 
             // Post event to managed code
             PostManagedEvent(EVENT_BLUETOOTH, BluetoothEventType_ScanningComplete, event->disc_complete.reason, 0);
@@ -174,23 +179,37 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
 
         case BLE_GAP_EVENT_CONNECT:
             // A new connection was established or a connection attempt failed
-            ESP_LOGI(
-                tag,
-                "connection %s; status=%d\n",
+            BLE_DEBUG_PRINTF(
+                "Connection %s; status=%d  handle %d\n",
                 event->connect.status == 0 ? "established" : "failed",
-                event->connect.status);
+                event->connect.status,
+                event->connect.conn_handle);
 
+            if (event->connect.status == 0)
+            {
+                PostManagedEvent(
+                    EVENT_BLUETOOTH,
+                    BluetoothEventType_ClientConnected,
+                    event->connect.conn_handle,
+                    event->connect.status);
+            }
             break;
 
         case BLE_GAP_EVENT_DISCONNECT:
-            ESP_LOGI(tag, "BLE_GAP_EVENT_DISCONNECT; reason=%d\n", event->disconnect.reason);
+            BLE_DEBUG_PRINTF("BLE_GAP_EVENT_DISCONNECT; reason=%d\n", event->disconnect.reason);
+
+            PostManagedEvent(
+                EVENT_BLUETOOTH,
+                BluetoothEventType_ClientDisconnected,
+                event->disconnect.conn.conn_handle,
+                event->disconnect.reason);
 
             // Connection terminated; resume advertising
             Esp32BleStartAdvertise(con);
             break;
 
         case BLE_GAP_EVENT_ADV_COMPLETE:
-            ESP_LOGI(tag, "BLE_GAP_EVENT_ADV_COMPLETE adv complete");
+            BLE_DEBUG_PRINTF("BLE_GAP_EVENT_ADV_COMPLETE adv complete");
             break;
 
         case BLE_GAP_EVENT_SUBSCRIBE:
@@ -200,8 +219,7 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
             // Find characteristicId from attr_handle
             uint16_t characteristicId = FindIdFromHandle(con, event->subscribe.attr_handle);
 
-            ESP_LOGI(
-                tag,
+            BLE_DEBUG_PRINTF(
                 "BLE_GAP_EVENT_SUBSCRIBE conn_handle=%d attr_handle=%d "
                 "reason=%d prevn=%d curn=%d previ=%d curi=%d arg=%d\n",
                 event->subscribe.conn_handle,
@@ -262,12 +280,135 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
         break;
 
         case BLE_GAP_EVENT_MTU:
-            ESP_LOGI(
-                tag,
-                "BLE_GAP_EVENT_MTU mtu update event; conn_handle=%d mtu=%d\n",
+            BLE_DEBUG_PRINTF(
+                "BLE_GAP_EVENT_MTU mtu update event; conn_handle=%d channel id=%d mtu=%d\n",
                 event->mtu.conn_handle,
+                event->mtu.channel_id,
                 event->mtu.value);
+
+            PostManagedEvent(
+                EVENT_BLUETOOTH,
+                BluetoothEventType_ClientSessionChanged,
+                event->mtu.conn_handle,
+                (event->mtu.value << 16) + event->mtu.channel_id);
+
             break;
+
+        case BLE_GAP_EVENT_ENC_CHANGE:
+        {
+            struct ble_gap_conn_desc desc;
+
+            int rc = ble_gap_conn_find(event->enc_change.conn_handle, &desc);
+            if (rc != 0)
+            {
+                return BLE_ATT_ERR_INVALID_HANDLE;
+            }
+
+            uint16_t securityState = 0;
+            securityState += desc.sec_state.encrypted ? 1 : 0;
+            securityState += desc.sec_state.authenticated ? 2 : 0;
+            securityState += desc.sec_state.bonded ? 4 : 0;
+
+            DevicePairingResultStatus pairingStatus = MapNimbleErrorToStatus(event->enc_change.status);
+
+            BLE_DEBUG_PRINTF(
+                "Srv BLE_GAP_EVENT_ENC_CHANGE conn_handle=%d status=%d security=%X pairingStatus = %d\n",
+                event->enc_change.conn_handle,
+                event->enc_change.status,
+                securityState,
+                pairingStatus);
+
+            PostManagedEvent(
+                EVENT_BLUETOOTH,
+                BluetoothEventType_AuthenticationComplete,
+                event->enc_change.conn_handle,
+                (securityState << 16) + pairingStatus);
+        }
+        break;
+
+        case BLE_GAP_EVENT_PASSKEY_ACTION:
+        {
+            BLE_DEBUG_PRINTF(
+                "Srv BLE_GAP_EVENT_PASSKEY_ACTION conn_handle=%d action=%d\n",
+                event->passkey.conn_handle,
+                event->passkey.params.action);
+
+            if (event->passkey.params.action == BLE_SM_IOACT_NUMCMP)
+            {
+                // As BLE_SM_IOACT_NUMCMP action we use unique BluetoothEventType_PassKeyActions_numcmp so we can pass
+                // pin instead of action
+                if (PostAndWaitManagedGapEvent(
+                        BluetoothEventType_PassKeyActionsNumericComparison,
+                        event->passkey.conn_handle,
+                        event->passkey.params.numcmp))
+                {
+                    BLE_DEBUG_PRINTF(" BluetoothEventType_PassKeyActions NUMCMP handled");
+                    return 0;
+                }
+            }
+            else
+            {
+                if (PostAndWaitManagedGapEvent(
+                        BluetoothEventType_PassKeyActions,
+                        event->passkey.conn_handle,
+                        PairingActionToDevicePairingKinds(event->passkey.params.action) << 16))
+                {
+                    BLE_DEBUG_PRINTF(" BluetoothEventType_PassKeyActions handled");
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+        break;
+
+        case BLE_GAP_EVENT_CONN_UPDATE:
+        {
+            BLE_DEBUG_PRINTF(
+                "BLE_GAP_EVENT_CONN_UPDATE conn_handle=%d status=%d\n",
+                event->conn_update.conn_handle,
+                event->conn_update.status);
+        }
+        break;
+
+        case BLE_GAP_EVENT_CONN_UPDATE_REQ:
+        {
+            // Peer updating connection params.
+            BLE_DEBUG_PRINTF("BLE_GAP_EVENT_CONN_UPDATE_REQ conn_handle=%d\n", event->conn_update_req.conn_handle);
+            BLE_DEBUG_PRINTF(
+                "BLE_GAP_EVENT_CONN_UPDATE_REQ conn_handle=%d\n",
+                "Min Interval: %d, Max Interval: %d, Timeout: %d, Latency: %d ",
+                event->conn_update_req.peer_params->itvl_min,
+                event->conn_update_req.peer_params->itvl_max,
+                event->conn_update_req.peer_params->supervision_timeout,
+                event->conn_update_req.peer_params->latency);
+            // do nothing for now
+        }
+        break;
+
+        case BLE_GAP_EVENT_REPEAT_PAIRING:
+        {
+            ble_gap_conn_desc out_desc;
+
+            BLE_DEBUG_PRINTF(
+                "BLE_GAP_EVENT_REPEAT_PAIRING conn_handle=%d cur_authenticated=%d\n",
+                event->repeat_pairing.conn_handle,
+                event->repeat_pairing.cur_authenticated);
+
+            // For now just delete old bond so we can continue with pairing
+
+            // Delete the old bond
+            int rc = ble_gap_conn_find(event->repeat_pairing.conn_handle, &out_desc);
+            if (rc != 0)
+            {
+                return BLE_GAP_REPEAT_PAIRING_IGNORE;
+            }
+
+            ble_store_util_delete_peer(&out_desc.peer_id_addr);
+
+            // Host to continue with the pairing operation.
+            return BLE_GAP_REPEAT_PAIRING_RETRY;
+        }
     }
 
     return 0;
@@ -278,7 +419,7 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
 //     o General discoverable mode
 //     o Undirected connectable mode
 //
-void Esp32BleStartAdvertise(bleServicesContext *context)
+bool Esp32BleStartAdvertise(bleServicesContext *context)
 {
     struct ble_gap_adv_params adv_params;
     struct ble_hs_adv_fields fields;
@@ -365,7 +506,7 @@ void Esp32BleStartAdvertise(bleServicesContext *context)
 
     if (rc != 0)
     {
-        return;
+        return false;
     }
 
     // Begin advertising
@@ -383,8 +524,10 @@ void Esp32BleStartAdvertise(bleServicesContext *context)
     if (rc != 0)
     {
         BLE_DEBUG_PRINTF("error enabling advertisement; rc=%d\n", rc);
-        return;
+        return false;
     }
+
+    return true;
 }
 
 static void Esp32BleOnSync(void)
@@ -421,9 +564,7 @@ static void Esp32BleOnSync(void)
     switch (ble_operatingMode)
     {
         case BluetoothNanoDevice_Mode_Server:
-            // Begin advertising
-            Esp32BleStartAdvertise(&bleContext);
-            BLE_DEBUG_PRINTF("Server advertise started\n");
+            BLE_DEBUG_PRINTF("Server mode started\n");
             break;
 
         case BluetoothNanoDevice_Mode_Client:
@@ -473,7 +614,13 @@ void Device_ble_dispose()
         BLE_DEBUG_PRINTF("nimble_port_stop failed %d\n", rc);
     }
 
-    BLE_DEBUG_PRINTF("delete mutexs\n");
+    BLE_DEBUG_PRINTF("delete event & mutexs\n");
+
+    LockEventMutex();
+
+    ble_event_data.eventId = 0; // block any further callbacks
+
+    ReleaseEventMutex();
 
     if (ble_event_waitgroup)
     {
@@ -490,6 +637,44 @@ void Device_ble_dispose()
     ble_initialized = false;
 
     BLE_DEBUG_PRINTF("Device_ble_dispose exit %d\n", ble_initialized);
+}
+
+void SetSecuritySettings(
+    DevicePairingIOCapabilities IOCaps,
+    DevicePairingProtectionLevel protectionLevel,
+    bool allowBonding,
+    bool allowOob)
+{
+    ble_hs_cfg.sm_io_cap = IOCaps;
+
+    switch (protectionLevel)
+    {
+        case DevicePairingProtectionLevel_Encryption:
+            ble_hs_cfg.sm_sc = 1;
+            break;
+
+        case DevicePairingProtectionLevel_EncryptionAndAuthentication:
+            ble_hs_cfg.sm_sc = 1;
+            ble_hs_cfg.sm_mitm = 1;
+            break;
+
+        default:
+            ble_hs_cfg.sm_sc = 0;
+            ble_hs_cfg.sm_mitm = 0;
+            break;
+    }
+
+    ble_hs_cfg.sm_bonding = allowBonding ? 1 : 0;
+
+    ble_hs_cfg.sm_oob_data_flag = allowOob ? 1 : 0;
+
+    ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
+
+    BLE_DEBUG_PRINTF(
+        "SetSecuritySettings sc=%d mitm=%d bonding %d\n",
+        ble_hs_cfg.sm_sc,
+        ble_hs_cfg.sm_mitm,
+        ble_hs_cfg.sm_bonding);
 }
 
 bool DeviceBleInit()
@@ -529,6 +714,9 @@ bool DeviceBleInit()
     ble_hs_cfg.sync_cb = Esp32BleOnSync;
     ble_hs_cfg.reset_cb = Esp32BleOnReset;
 
+    // Initialise default security/pairing settings
+    SetSecuritySettings(DevicePairingIOCapabilities_NoInputNoOutput, DevicePairingProtectionLevel_Default, true, false);
+
     ble_initialized = true;
 
     return true;
@@ -546,36 +734,6 @@ void StartBleTask(char *deviceName)
 
     // Start the BLE task
     nimble_port_freertos_init(esp32_ble_host_task);
-}
-
-int DeviceBleStart(bleServicesContext &con)
-{
-    int rc;
-    ble_gatt_svc_def *gatt_svr_svcs = con.gatt_service_def;
-
-    BLE_DEBUG_PRINTF("DeviceBleStart\n");
-
-    ble_svc_gap_init();
-    ble_svc_gatt_init();
-
-    rc = ble_gatts_count_cfg(gatt_svr_svcs);
-    if (rc != 0)
-    {
-        BLE_DEBUG_PRINTF("ble_gatts_count_cfg failed %d\n", rc);
-        return rc;
-    }
-
-    rc = ble_gatts_add_svcs(gatt_svr_svcs);
-    if (rc != 0)
-    {
-        BLE_DEBUG_PRINTF("ble_gatts_add_svcs failed %d\n", rc);
-        return rc;
-    }
-
-    // Set device name & start BLE task
-    StartBleTask(con.pDeviceName);
-
-    return 0;
 }
 
 //

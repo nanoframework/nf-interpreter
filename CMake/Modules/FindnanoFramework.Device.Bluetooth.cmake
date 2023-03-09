@@ -30,18 +30,19 @@ set(nanoFramework.Device.Bluetooth_SRCS
     
     sys_dev_ble_native.cpp
 
-    # Client
+    # Server
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher.cpp
  
-    # Central
+    # Client / Central
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice.cpp
 
     # Others
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security.cpp
     esp32_nimble.cpp
     nimble_utils.cpp
 )
