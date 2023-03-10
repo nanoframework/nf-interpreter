@@ -63,7 +63,7 @@ namespace nanoFramework.nanoCLR.CLI
 
                 Version version = Version.Parse(currentVersion);
 
-                string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoCLR.dll");
+                string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR", "nanoFramework.nanoCLR.dll");
 
                 _httpClient.BaseAddress = new Uri(_cloudSmithApiUrl);
                 _httpClient.DefaultRequestHeaders.Add("Accept", "*/*");
@@ -89,8 +89,12 @@ namespace nanoFramework.nanoCLR.CLI
                 {
                     Version latestFwVersion = Version.Parse(packageInfo.ElementAt(0).Version);
 
-                    if (latestFwVersion > version
-                        || (!string.IsNullOrEmpty(targetVersion)
+                    if (latestFwVersion < version)
+                    {
+                        Console.WriteLine($"Current version {version} lower than available version {packageInfo.ElementAt(0).Version}");
+                    }
+                    else if (latestFwVersion > version
+                            || (!string.IsNullOrEmpty(targetVersion)
                             && (Version.Parse(targetVersion) > Version.Parse(currentVersion))))
                     {
                         response = await _httpClient.GetAsync(packageInfo.ElementAt(0).DownloadUrl);
