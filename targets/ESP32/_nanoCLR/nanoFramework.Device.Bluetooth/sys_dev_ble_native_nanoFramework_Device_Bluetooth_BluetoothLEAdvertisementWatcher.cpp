@@ -5,7 +5,7 @@
 //
 
 #include "sys_dev_ble_native.h"
-//#include "ble_gap.h"
+// #include "ble_gap.h"
 
 #define BluetoothLEAdvertisement                                                                                       \
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisement
@@ -105,6 +105,12 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
         // Eventid
         CLR_INT32 eventID = stack.Arg1().NumericByRef().s4;
 
+        BLE_DEBUG_PRINTF(
+            "NativeCreateFromEvent eventid::%d ble_event:%d event:%X\n",
+            eventID,
+            ble_event_data.eventId,
+            ble_event_data.gapEvent);
+
         // Get access to Event data
         if (LockEventMutex())
         {
@@ -148,7 +154,7 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
 
                         platform_free(pname);
                     }
-                    BLE_DEBUG_PRINTF("local Name %X len %d", fields.name, fields.name_len);
+                    BLE_DEBUG_PRINTF("local Name %X len %d\n", fields.name, fields.name_len);
 
                     // == Service UUIDs ====
                     // Create Array of all UUID 16bit, UUID 32 bit & UUID 128bit as 16 byte GUID in byte buffer

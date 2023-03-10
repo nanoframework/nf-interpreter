@@ -8,7 +8,7 @@
 #define NIMBLE_UTIL_H
 
 // Uncomment to enable BLE diagnostic debug messages
-//#define NANO_BLE_DEBUG
+// #define NANO_BLE_DEBUG
 
 #if defined(NANO_BLE_DEBUG)
 #define BLE_DEBUG_PRINTF(format, ...)                                                                                  \
@@ -39,7 +39,12 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack);
 bool LockEventMutex();
 void ReleaseEventMutex();
 
-void StartStack(char *devicename);
+bool StartBleStack(char *devicename);
+bool StopBleStack();
 bool WaitForBleStackStart(int waitMs);
 
-#endif
+DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode);
+DevicePairingKinds PairingActionToDevicePairingKinds(int action);
+int DevicePairingKindsToPairingAction(DevicePairingKinds kinds);
+
+#endif // NIMBLE_UTIL_H
