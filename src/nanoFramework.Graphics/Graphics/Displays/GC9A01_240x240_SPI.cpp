@@ -240,7 +240,7 @@ void DisplayDriver::PowerSave(PowerSaveState powerState)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
@@ -248,16 +248,16 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     CLR_UINT8 orientationByte = GC9A01_MEMORY_ACCESS_CTRL::Portrait;
     switch (orientation)
     {
-        case DisplayOrientation::PORTRAIT:
+        case DisplayOrientation::DisplayOrientation_Portrait:
             orientationByte = GC9A01_MEMORY_ACCESS_CTRL::Portrait;
             break;
-        case DisplayOrientation::PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             orientationByte = GC9A01_MEMORY_ACCESS_CTRL::Portrait180;
             break;
-        case DisplayOrientation::LANDSCAPE:
+        case DisplayOrientation::DisplayOrientation_Landscape:
             orientationByte = GC9A01_MEMORY_ACCESS_CTRL::Landscape;
             break;
-        case DisplayOrientation::LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             orientationByte = GC9A01_MEMORY_ACCESS_CTRL::Portrait180;
             break;
     }
