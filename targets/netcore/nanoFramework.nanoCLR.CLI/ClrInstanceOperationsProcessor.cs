@@ -52,7 +52,15 @@ namespace nanoFramework.nanoCLR.CLI
             {
                 // compose current version
                 // need to get rid of git hub has, in case it has one
-                currentVersion = currentVersion.Substring(0, currentVersion.IndexOf("+") < 0 ? currentVersion.Length : currentVersion.IndexOf("+"));
+                if (string.IsNullOrEmpty(currentVersion))
+                {
+                    currentVersion = "0.0.0.0";
+                }
+                else
+                {
+                    currentVersion = currentVersion.Substring(0, currentVersion.IndexOf("+") < 0 ? currentVersion.Length : currentVersion.IndexOf("+"));
+                }
+
                 Version version = Version.Parse(currentVersion);
 
                 string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoCLR.dll");
