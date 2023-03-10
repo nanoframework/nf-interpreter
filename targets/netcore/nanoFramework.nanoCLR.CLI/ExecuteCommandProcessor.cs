@@ -7,6 +7,7 @@ using nanoFramework.nanoCLR.Host;
 using nanoFramework.nanoCLR.Host.Port.TcpIp;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -21,6 +22,20 @@ namespace nanoFramework.nanoCLR.CLI
             VirtualSerialDeviceManager virtualBridgeManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
+
+            string pathForNanoClrDll = string.Empty;
+
+            // are we to use a local DLL?
+            if (options.LocalInstance != null)
+            {
+                // check if path exists
+                if (!File.Exists(options.LocalInstance))
+                {
+                    throw new CLIException(ExitCode.E9009);
+                }
+
+                pathForNanoClrDll = Path.GetDirectoryName(options.LocalInstance);
+            }
 
             // flag to signal that the intenal serial port has already been configured
             bool internalSerialPortConfig = false;
@@ -105,7 +120,6 @@ namespace nanoFramework.nanoCLR.CLI
             hostBuilder.WaitForDebugger = options.WaitForDebugger;
             hostBuilder.EnterDebuggerLoopAfterExit = options.EnterDebuggerLoopAfterExit;
 
-
             if (options.MonitorParentPid != null)
             {
                 try
@@ -120,7 +134,7 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
-            var host = hostBuilder.Build();
+            var host = hostBuilder.Build(pathForNanoClrDll);
 
             Console.CancelKeyPress += (_, _) => host.Shutdown();
 

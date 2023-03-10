@@ -12,7 +12,10 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories | DllImportSearchPath.UseDllDirectoryForDependencies)]
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -92,6 +95,9 @@ namespace nanoFramework.nanoCLR.CLI
 
                 nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
                 hostBuilder.UseConsoleDebugPrint();
+
+                // need to set DLL directory to HHD interop DLL
+                SetDllDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Vendor"));
 
                 var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrInstanceOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
@@ -210,5 +216,9 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
+
     }
 }
