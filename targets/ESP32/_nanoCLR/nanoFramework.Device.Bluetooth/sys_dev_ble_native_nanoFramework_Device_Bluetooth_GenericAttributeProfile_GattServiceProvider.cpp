@@ -8,10 +8,14 @@
 
 extern bool DeviceBleInit();
 extern void Device_ble_dispose();
-extern int DeviceBleStart(bleServicesContext &context);
 extern int DeviceBleCallback(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-
-extern void Esp32BleStartAdvertise(bleServicesContext *context);
+extern void SetSecuritySettings(
+    DevicePairingIOCapabilities IOCaps,
+    DevicePairingProtectionLevel protectionLevel,
+    bool allowBonding,
+    bool allowOob);
+extern bool Esp32BleStartAdvertise(bleServicesContext *context);
+extern void UpdateNameInContext();
 
 extern const struct ble_gatt_chr_def gatt_char_device_info[];
 
@@ -94,30 +98,6 @@ static void FreeContext(bleServicesContext &srvContext)
         srvContext.bleSrvContexts = NULL;
     }
 }
-
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeInitService___BOOLEAN(CLR_RT_StackFrame &stack)
-{
-    (void)stack;
-
-    NANOCLR_HEADER();
-    {
-        InitContext(&bleContext);
-
-        stack.SetResult_Boolean(true);
-    }
-    NANOCLR_NOCLEANUP_NOLABEL();
-}
-
-/*
-ble_uuid_t *Ble_uuid16_declare(uint16_t id16)
-{
-    ble_uuid16_t *pU16 = (ble_uuid16_t *)platform_malloc(sizeof(ble_uuid16_t));
-    pU16->u.type = BLE_UUID_TYPE_16;
-    pU16->value = id16;
-    return (ble_uuid_t *)pU16;
-}
-*/
 
 // Assumes UUID is 16 bytes length
 void BuildUUID(uint8_t *pUuid, ble_uuid_any_t *pUany)
@@ -637,17 +617,19 @@ void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 #endif
 
 HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeStartAdvertising___BOOLEAN(CLR_RT_StackFrame &stack)
+    NativeStartAdvertising___BOOLEAN__SystemCollectionsArrayList(CLR_RT_StackFrame &stack)
 {
-    bool result = false;
+    bool result = true;
 
     NANOCLR_HEADER();
     {
-        CLR_RT_HeapBlock_ArrayList *pArrayServices;
-        int deviceNameLen;
-
+        CLR_RT_HeapBlock_ArrayList *pArrayServiceProviders;
         CLR_RT_HeapBlock *pThis = stack.This(); // ptr to GattServiceProvider
         FAULT_ON_NULL(pThis);
+
+        InitContext(&bleContext);
+
+        UpdateNameInContext();
 
         // Save Discoverable & Connectable flags in context
         bool isDiscoverable = pThis[GattServiceProvider::FIELD___isDiscoverable].NumericByRef().s4 != 0;
@@ -656,18 +638,10 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         bleContext.isDiscoverable = isDiscoverable;
         bleContext.isConnectable = isConnectable;
 
-        // Save Device name in context
-        CLR_RT_HeapBlock_Array *pDeviceNameField =
-            (CLR_RT_HeapBlock_Array *)pThis[GattServiceProvider::FIELD___deviceName].Array();
-        char *pDeviceName = (char *)pDeviceNameField->GetFirstElement();
-        deviceNameLen = pDeviceNameField->m_numOfElements;
-
-        bleContext.pDeviceName = (char *)platform_malloc(deviceNameLen + 1);
-        memcpy(bleContext.pDeviceName, pDeviceName, deviceNameLen);
-        bleContext.pDeviceName[deviceNameLen] = 0;
-
-        pArrayServices = (CLR_RT_HeapBlock_ArrayList *)pThis[GattServiceProvider::FIELD___services].Dereference();
-        bleContext.serviceCount = pArrayServices->GetSize();
+        // Pick up passed ArrayList of Services and get service count
+        pArrayServiceProviders = (CLR_RT_HeapBlock_ArrayList *)stack.Arg1().Dereference();
+        FAULT_ON_NULL_ARG(pArrayServiceProviders);
+        bleContext.serviceCount = pArrayServiceProviders->GetSize();
 
         // Allocate contexts for all service definitions
         size_t bleContextSize = sizeof(ble_context) * bleContext.serviceCount;
@@ -680,12 +654,17 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         memset(bleContext.bleSrvContexts, 0, bleContextSize);
 
         // Foreach Service set up the Nimble definitions
-        CLR_RT_HeapBlock *serviceItem;
+        CLR_RT_HeapBlock *serviceProviderItem;
+        CLR_RT_HeapBlock *localServiceItem;
         for (int i = 0; i < bleContext.serviceCount; i++)
         {
-            if (SUCCEEDED(pArrayServices->GetItem(i, serviceItem)))
+            // Get serviceProvider by index
+            if (SUCCEEDED(pArrayServiceProviders->GetItem(i, serviceProviderItem)))
             {
-                if (!ParseAndBuildNimbleDefinition(bleContext.bleSrvContexts[i], serviceItem))
+                // Get associatted local server object
+                localServiceItem = serviceProviderItem[GattServiceProvider::FIELD___service].Dereference();
+
+                if (!ParseAndBuildNimbleDefinition(bleContext.bleSrvContexts[i], localServiceItem))
                 {
                     NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
                 }
@@ -706,19 +685,40 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 #ifdef NANO_BLE_DEBUG
         // PrintSvrDefs(bleContext.gatt_service_def);
 #endif
-        result = DeviceBleInit();
-        if (!result)
+
+        // Set Service definitions in nimble
+        ble_svc_gap_init();
+        ble_svc_gatt_init();
+
+        int rc = ble_gatts_count_cfg(bleContext.gatt_service_def);
+        BLE_DEBUG_PRINTF("ble_gatts_count_cfg -> %d\n", rc);
+        if (rc != 0)
         {
-            NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_MEMORY);
+            BLE_DEBUG_PRINTF("ble_gatts_count_cfg failed %d\n", rc);
+            result = false;
+        }
+        else
+        {
+            rc = ble_gatts_add_svcs(bleContext.gatt_service_def);
+            BLE_DEBUG_PRINTF("ble_gatts_add_svcs -> %d\n", rc);
+            if (rc != 0)
+            {
+                BLE_DEBUG_PRINTF("ble_gatts_add_svcs failed %d\n", rc);
+                result = false;
+            }
+
+            rc = ble_gatts_start();
+            if (rc != 0)
+            {
+                BLE_DEBUG_PRINTF("ble_gatts_start failed %d\n", rc);
+                result = false;
+            }
         }
 
-        result = (DeviceBleStart(bleContext) == 0);
-
-        // Wait for stack to start
-        // Otherwise you will have problems if Stop is called straight away before stack has started
-        if (WaitForBleStackStart(5000))
+        if (result)
         {
-            BLE_DEBUG_PRINTF("Stack start signaled\n");
+            result = Esp32BleStartAdvertise(&bleContext);
+            BLE_DEBUG_PRINTF("Esp32BleStartAdvertise -> %d\n", result);
         }
 
         stack.SetResult_Boolean(result);
@@ -728,7 +728,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
 
     if (!result)
     {
-        Device_ble_dispose();
         FreeContext(bleContext);
     }
 
@@ -745,8 +744,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         BLE_DEBUG_PRINTF("Server: Stop Advertising\n");
 
         ble_gap_adv_stop();
-
-        Device_ble_dispose();
 
         FreeContext(bleContext);
     }
