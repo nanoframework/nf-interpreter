@@ -94,40 +94,40 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     switch (orientation)
     {
         case DisplayOrientation::DisplayOrientation_Portrait:
-            Attributes.Height = Attributes.LongerSide;
-            Attributes.Width = Attributes.ShorterSide;
             if (g_DisplayInterfaceConfig.GenericDriverCommands.OrientationPortrait != NULL)
             {
+                Attributes.Height = Attributes.LongerSide;
+                Attributes.Width = Attributes.ShorterSide;
                 ProcessCommand(g_DisplayInterfaceConfig.GenericDriverCommands.OrientationPortrait);
                 return true;
             }
 
             break;
         case DisplayOrientation::DisplayOrientation_Portrait180:
-            Attributes.Height = Attributes.LongerSide;
-            Attributes.Width = Attributes.ShorterSide;
             if (g_DisplayInterfaceConfig.GenericDriverCommands.OrientationPortrait180 != NULL)
             {
+                Attributes.Height = Attributes.LongerSide;
+                Attributes.Width = Attributes.ShorterSide;
                 ProcessCommand(g_DisplayInterfaceConfig.GenericDriverCommands.OrientationPortrait180);
                 return true;
             }
 
             break;
         case DisplayOrientation::DisplayOrientation_Landscape:
-            Attributes.Height = Attributes.ShorterSide;
-            Attributes.Width = Attributes.LongerSide;
             if (g_DisplayInterfaceConfig.GenericDriverCommands.OrientationLandscape != NULL)
             {
+                Attributes.Height = Attributes.ShorterSide;
+                Attributes.Width = Attributes.LongerSide;
                 ProcessCommand(g_DisplayInterfaceConfig.GenericDriverCommands.OrientationLandscape);
                 return true;
             }
 
             break;
         case DisplayOrientation::DisplayOrientation_Landscape180:
-            Attributes.Height = Attributes.ShorterSide;
-            Attributes.Width = Attributes.LongerSide;
             if (g_DisplayInterfaceConfig.GenericDriverCommands.OrientationLandscape180 != NULL)
             {
+                Attributes.Height = Attributes.ShorterSide;
+                Attributes.Width = Attributes.LongerSide;
                 ProcessCommand(g_DisplayInterfaceConfig.GenericDriverCommands.OrientationLandscape180);
                 return true;
             }
