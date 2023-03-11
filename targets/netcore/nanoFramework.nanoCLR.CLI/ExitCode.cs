@@ -100,5 +100,11 @@ namespace nanoFramework.nanoCLR.CLI
         /// </summary>
         [Display(Name = "Unknown error when starting the virtual device instance.")]
         E9008 = 9008,
+
+        /// <summary>
+        /// Specified nanoCLR DLL file does not exist.
+        /// </summary>
+        [Display(Name = " Specified nanoCLR DLL file does not exist.")]
+        E9009 = 9009,
     }
 }
