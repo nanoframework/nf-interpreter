@@ -34,7 +34,7 @@
 
   <!-- NuGet package files -->
   <ItemGroup>
-    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll">
+    <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
       <PackagePath>tools\net6.0\any</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -85,5 +85,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
+  <ItemGroup>
+    <Folder Include="NanoCLR\" />
+  </ItemGroup>
+  
 </Project>
