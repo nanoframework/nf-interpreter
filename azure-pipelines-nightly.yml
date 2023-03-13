@@ -43,17 +43,22 @@ jobs:
           # scheduled daily build: get commit date 
           $commitDate = git show -s --format=%cd --date=short
           $commitDate = [DateTime]$commitDate
+
+          "Last commit dated $commitDate" | Write-Host
+
+          $yesterdayDate = [System.DateTime]::UtcNow.AddDays(-1).Date
+          "Comparing with $yesterdayDate" | Write-Host
           
           # shceduled build is at start of day, so check if commit date was from yesterday
-          if($commitDate -eq [System.DateTime]::UtcNow.AddDays(-1).Date)
+          if($commitDate -eq $yesterdayDate)
           {
-              # last commit is from today, build images
+              # last commit was yesterday, build images
               echo "##vso[task.setvariable variable=CHECK_CHANGES;isOutput=true]true" 
               "**Commits from today. Go and check what changed.**" | Write-Host
           }
           else
           {
-            # last commit is older than today, skip build
+            # last commit is older than yesterday, skip build
             "***************************************************" | Write-Host
             "* Last commit is older than today, skipping build *" | Write-Host
             "***************************************************" | Write-Host
@@ -87,133 +92,143 @@ jobs:
       
       $buildingPr = $env:System_PullRequest_PullRequestId -ne $null
 
+      # set default values
+      echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
+      echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
+      echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
+      echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
+      echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+
       if($env:StartReleaseCandidate -like "true")
       {
           # this is a release prep so NO build
+          Write-host "Start Release candidate build, don't build"
       }
       else
       {
-          if($buildingPr)
+          # check if this build was triggered by the pipeline itself
+          if($env:Build_Reason -eq "Manual")
           {
-              # get files changed in PR, if this is a PR
-              $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
-
-              # filter removed files              
-              $files = $commit.where{$_.status -ne 'removed'}
-
-              # get file names only
-              $files = $files | % {$_.filename}
+              # this is a manual build, no need to check anything 
+              Write-host "Manual build"
           }
           else
           {
-              # scheduled build, grab repo history for the last day
-              $commitHistory = git log --name-status --since=1.day --format=
+            if($buildingPr)
+            {
+                # get files changed in PR, if this is a PR
+                $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/pulls/$env:System_PullRequest_PullRequestNumber/files" -Header @{"Authorization"="$auth"} -ContentType "application/json" -Method GET
 
-              # filter removed files              
-              $files = $commitHistory.where{$_[0] -ne 'D'}
+                # filter removed files              
+                $files = $commit.where{$_.status -ne 'removed'}
 
-              # get file names only
-              $files = $files | % {$_.SubString(2)}
-          }
+                # get file names only
+                $files = $files | % {$_.filename}
+            }
+            else
+            {
+                # scheduled build, grab repo history for the last day
+                $commitHistory = git log --name-status --since=1.day --format=
 
-          Write-host "Files changed:"
-          $files | % { Write-host $_ }
-          Write-host ""
+                # filter removed files              
+                $files = $commitHistory.where{$_[0] -ne 'D'}
 
-          # set default values
-          echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"  
-          echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
-          echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
+                # get file names only
+                $files = $files | % {$_.SubString(2)}
+            }
 
-          if(
-              (($files.where{$_.Contains('/')}).Count -eq 0) -Or
-              (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
-              (($files.where{$_.StartsWith('src')}).Count -gt 0)
-            )
-          {
-              # files at:
-              # - repo root
-              # - azure-pipelines-templates
-              # - CMake
-              # - src
+            Write-host "Files changed:"
+            $files | % { Write-host $_ }
+            Write-host ""
 
-              if($buildingPr)
-              {
-                  # ChibiOS targets are the only ones needing to be build on a global change
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
-                  Write-host "Building ChibiOS targets"
-              }
-              else
-              {
-                  echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
-                  Write-host "Building ALL targets"
-              }              
-          }
+            if(
+                (($files.where{$_.Contains('/')}).Count -eq 0) -Or
+                (($files.where{$_.StartsWith('azure-pipelines-templates')}).Count -gt 0) -Or
+                (($files.where{$_.StartsWith('CMake')}).Count -gt 0) -Or
+                (($files.where{$_.StartsWith('src')}).Count -gt 0)
+              )
+            {
+                # files at:
+                # - repo root
+                # - azure-pipelines-templates
+                # - CMake
+                # - src
 
-          if($buildingPr)
-          {
-              if( 
-                  ($files.where{$_.Contains('targets/ChibiOS/_common')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_include')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_Lwip')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nanoBooter')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
-                  ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
-                )
-              {
-                  # files at ChibiOS global folders or targets being built with this pipeline
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                if($buildingPr)
+                {
+                    # ChibiOS targets are the only ones needing to be build on a global change
+                    echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+                    Write-host "Building ChibiOS targets"
+                }
+                else
+                {
+                    echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]true"
+                    Write-host "Building ALL targets"
+                }              
+            }
 
-                  Write-host "Building ChibiOS targets"
-              }
-          }
-          else
-          {
-              if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
-              {
-                  # files at ChibiOS folder
-                  echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
+            if($buildingPr)
+            {
+                if( 
+                    ($files.where{$_.Contains('targets/ChibiOS/_common')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_include')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_Lwip')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_nanoBooter')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_nanoCLR')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_FatFS')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_nf-overlay')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/_spiffs')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/ORGPAL_PALTHREE')}).Count -gt 0 -Or
+                    ($files.where{$_.Contains('targets/ChibiOS/ST_NUCLEO64_F091RC')}).Count -gt 0
+                  )
+                {
+                    # files at ChibiOS global folders or targets being built with this pipeline
+                    echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-                  Write-host "Building ChibiOS targets"
-              }
-          }
+                    Write-host "Building ChibiOS targets"
+                }
+            }
+            else
+            {
+                if( ($files.where{$_.Contains('targets/ChibiOS')}).Count -gt 0)
+                {
+                    # files at ChibiOS folder
+                    echo "##vso[task.setvariable variable=BUILD_CHIBIOS;isOutput=true]true"
 
-          if(
-            !$buildingPr -And 
-            ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
-          {
-              # files at ESP32 folder
-              echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
+                    Write-host "Building ChibiOS targets"
+                }
+            }
 
-              Write-host "Building ESP32 targets"
-          }
+            if(
+              !$buildingPr -And 
+              ($files.where{$_.Contains('targets/ESP32')}).Count -gt 0)
+            {
+                # files at ESP32 folder
+                echo "##vso[task.setvariable variable=BUILD_ESP32;isOutput=true]true"
 
-          if(
-            !$buildingPr -And
-            ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
-          {
-              # files at TI_SimpleLink folder
-              echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
+                Write-host "Building ESP32 targets"
+            }
 
-              Write-host "Building TI SimpleLink targets"
-          }
+            if(
+              !$buildingPr -And
+              ($files.where{$_.Contains('targets/TI_SimpleLink')}).Count -gt 0)
+            {
+                # files at TI_SimpleLink folder
+                echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]true"
 
-          if( 
-            !$buildingPr -And
-            ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
-          {
-              # files at AzureRTOS folder
-              echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+                Write-host "Building TI SimpleLink targets"
+            }
 
-              Write-host "Building Azure RTOS targets"
+            if( 
+              !$buildingPr -And
+              ($files.where{$_.Contains('targets/AzureRTOS')}).Count -gt 0)
+            {
+                # files at AzureRTOS folder
+                echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]true"
+
+                Write-host "Building Azure RTOS targets"
+            }
           }
       }
 
@@ -221,48 +236,24 @@ jobs:
     displayName: Get targets to build
     condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
 
-##############################
-- job: Check_Code_Style
-  dependsOn:
-  - Check_Build_Options
-
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
-    )
-
-  pool:
-    vmImage: 'windows-latest'
-
-  steps:
-  - checkout: self
-    fetchDepth: 1
-    condition: ne(variables['System.PullRequest.PullRequestId'], '')
-
-  - template: azure-pipelines-templates/download-install-llvm.yml
-  - template: azure-pipelines-templates/check-code-style.yml
-
 ################
 # STM32
 - job: Build_STM32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_CHIBIOS'], 'true')
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_CHIBIOS__'], 'true')
+        )
       )
     )
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -309,20 +300,21 @@ jobs:
 # ESP32 targets
 - job: Build_ESP32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_ESP32'], 'true')
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_ESP32__'], 'true')
+        )
       )
-    )
+    )  
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -518,20 +510,21 @@ jobs:
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_TI'], 'true')
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_TI__'], 'true')
+        )
       )
-    )
+    )  
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -568,20 +561,21 @@ jobs:
 # Azure RTOS
 - job: Build_Azure_RTOS_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_AZURERTOS'], 'true')
+    or(
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+      contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_AZURERTOS__'], 'true')
+        )
       )
     )
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
