@@ -22,6 +22,14 @@ enum GraphicDriverCommandType : CLR_UINT8
     GraphicDriverCommandType_Command = 1,
 };
 
+enum SetWindowType : CLR_UINT8
+{
+    SetWindowType_NoWindowing = 0,
+    SetWindowType_X8bitsY1Bit = 1,
+    SetWindowType_X8bitsY8Bits = 2,
+    SetWindowType_X16bitsY16Bit = 3,
+};
+
 enum PixelFormat : CLR_UINT8
 {
     FORMAT_RGB888 = 0, // Pixel format chosen is RGB888 : 24 bpp

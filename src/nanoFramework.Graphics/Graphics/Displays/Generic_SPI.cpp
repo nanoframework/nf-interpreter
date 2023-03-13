@@ -12,6 +12,12 @@ struct DisplayDriver g_DisplayDriver;
 extern DisplayInterface g_DisplayInterface;
 extern DisplayInterfaceConfig g_DisplayInterfaceConfig;
 
+// A pointer on the Set window function to make things faster
+bool (*SetWindowPointer)(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2);
+
+/*
+Process command function to send commands or sleep.
+*/
 void ProcessCommand(CLR_RT_HeapBlock_Array *array)
 {
     CLR_UINT32 numberElements = array->m_numOfElements;
@@ -43,8 +49,87 @@ void ProcessCommand(CLR_RT_HeapBlock_Array *array)
     }
 }
 
+/*
+The next functions are the primitives depending on the driver set windowing behavior
+*/
+bool SetWindowNoWindowing(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
+{
+    // If no windowing, nothing is done here.
+    return true;
+}
+
+bool SetWindowX8bitsY1Bit(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
+{
+    // Start & End column address
+    g_DisplayInterface.SendCommand(3, g_DisplayInterfaceConfig.GenericDriverCommands.SetColumnAddress, x1, x2);
+
+    // Start & End page address  0 to 7
+    g_DisplayInterface.SendCommand(3, g_DisplayInterfaceConfig.GenericDriverCommands.SetRowAddress, (y1 / 8), (y2 / 8));
+
+    return true;
+}
+
+bool SetWindowX8bitsY8Bits(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
+{
+     // Start & End column address
+    g_DisplayInterface.SendCommand(3, g_DisplayInterfaceConfig.GenericDriverCommands.SetColumnAddress, x1, x2);
+
+    // Start & End row address
+    g_DisplayInterface.SendCommand(3, g_DisplayInterfaceConfig.GenericDriverCommands.SetRowAddress, y1, y2);
+
+    return true;
+}
+
+bool SetWindowX16bitsY16Bit(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
+{
+    CLR_UINT8 Column_Address_Set_Data[4];
+    Column_Address_Set_Data[0] = ((x1 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[1] = (x1 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
+    Column_Address_Set_Data[2] = ((x2 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
+    Column_Address_Set_Data[3] = (x2 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
+    g_DisplayInterface.SendCommand(
+        5,
+        g_DisplayInterfaceConfig.GenericDriverCommands.SetColumnAddress,
+        Column_Address_Set_Data[0],
+        Column_Address_Set_Data[1],
+        Column_Address_Set_Data[2],
+        Column_Address_Set_Data[3]);
+
+    CLR_UINT8 Page_Address_Set_Data[4];
+    Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
+    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
+    Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
+    g_DisplayInterface.SendCommand(
+        5,
+        g_DisplayInterfaceConfig.GenericDriverCommands.SetRowAddress,
+        Page_Address_Set_Data[0],
+        Page_Address_Set_Data[1],
+        Page_Address_Set_Data[2],
+        Page_Address_Set_Data[3]);
+    return true;
+}
+
 bool DisplayDriver::Initialize()
 {
+    // SetWindowPointer to the correct function
+    switch (g_DisplayInterfaceConfig.GenericDriverCommands.SetWindowType)
+    {
+        default:
+        case SetWindowType::SetWindowType_NoWindowing:
+            SetWindowPointer = &SetWindowNoWindowing;
+            break;
+        case SetWindowType::SetWindowType_X8bitsY1Bit:
+            SetWindowPointer = &SetWindowX8bitsY1Bit;
+            break;
+        case SetWindowType::SetWindowType_X8bitsY8Bits:
+            SetWindowPointer = &SetWindowX8bitsY8Bits;
+            break;
+        case SetWindowType::SetWindowType_X16bitsY16Bit:
+            SetWindowPointer = &SetWindowX16bitsY16Bit;
+            break;
+    }
+
     SetupDisplayAttributes();
 
     ProcessCommand(g_DisplayInterfaceConfig.GenericDriverCommands.InitializationSequence);
@@ -191,32 +276,7 @@ void DisplayDriver::DisplayBrightness(CLR_INT16 brightness)
 
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
 {
-    CLR_UINT8 Column_Address_Set_Data[4];
-    Column_Address_Set_Data[0] = ((x1 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
-    Column_Address_Set_Data[1] = (x1 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
-    Column_Address_Set_Data[2] = ((x2 + g_DisplayInterfaceConfig.Screen.x) >> 8) & 0xFF;
-    Column_Address_Set_Data[3] = (x2 + g_DisplayInterfaceConfig.Screen.x) & 0xFF;
-    g_DisplayInterface.SendCommand(
-        5,
-        g_DisplayInterfaceConfig.GenericDriverCommands.SetColumnAddress,
-        Column_Address_Set_Data[0],
-        Column_Address_Set_Data[1],
-        Column_Address_Set_Data[2],
-        Column_Address_Set_Data[3]);
-
-    CLR_UINT8 Page_Address_Set_Data[4];
-    Page_Address_Set_Data[0] = ((y1 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
-    Page_Address_Set_Data[1] = (y1 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    Page_Address_Set_Data[2] = ((y2 + g_DisplayInterfaceConfig.Screen.y) >> 8) & 0xFF;
-    Page_Address_Set_Data[3] = (y2 + g_DisplayInterfaceConfig.Screen.y) & 0xFF;
-    g_DisplayInterface.SendCommand(
-        5,
-        g_DisplayInterfaceConfig.GenericDriverCommands.SetRowAddress,
-        Page_Address_Set_Data[0],
-        Page_Address_Set_Data[1],
-        Page_Address_Set_Data[2],
-        Page_Address_Set_Data[3]);
-    return true;
+    return (*SetWindowPointer)(x1, y1, x2, y2);
 }
 
 void DisplayDriver::BitBlt(
