@@ -453,15 +453,15 @@ jobs:
         PackageName: ESP32_GenericDisplay_REV0
         CMakePreset: ESP32_GenericDisplay_REV0
 
-      ESP32_PSRAM_BLE_GenericGraphic_REV0:
+      ESP32_PSRAM_BLE_GenericGraphic_REV3:
         TargetBoard: ESP32
         TargetPlatform: 'esp32'
         TargetSeries: 'esp32'
         BuildOptions: 
         IDF_Target: esp32
-        TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV0
-        PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV0
-        CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV0
+        TargetName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+        PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
+        CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
 
   variables:
     DOTNET_NOLOGO: true
