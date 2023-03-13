@@ -226,48 +226,25 @@ jobs:
     displayName: Get targets to build
     condition: eq(variables['BuildOptions.CHECK_CHANGES'], 'True')
 
-##############################
-- job: Check_Code_Style
-  dependsOn:
-  - Check_Build_Options
-
-  condition: >-
-    or(
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], 'true'),
-      eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
-    )
-
-  pool:
-    vmImage: 'windows-latest'
-
-  steps:
-  - checkout: self
-    fetchDepth: 1
-    condition: ne(variables['System.PullRequest.PullRequestId'], '')
-
-  - template: azure-pipelines-templates/download-install-llvm.yml
-  - template: azure-pipelines-templates/check-code-style.yml
-
 ################
 # STM32
 - job: Build_STM32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_CHIBIOS'], 'true')
+    or(
+      eq(variables['BUILD_ALL__'], 'true'),
+      eq(variables['BUILD_CHIBIOS__'], 'true'),
+      and(
+        eq(variables['BUILD_ALL__'], 'false'),
+        eq(variables['BUILD_CHIBIOS__'], 'false'),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true),
+          contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***')
+        )
       )
     )
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -314,20 +291,22 @@ jobs:
 # ESP32 targets
 - job: Build_ESP32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_ESP32'], 'true')
-      )
+    or(
+      eq(variables['BUILD_ALL__'], 'true'),
+      eq(variables['BUILD_ESP32__'], 'true'),
+      and(
+        eq(variables['BUILD_ALL__'], 'false'),
+        eq(variables['BUILD_ESP32__'], 'false'),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true),
+          contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***')
+        )
+      )      
     )
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -523,20 +502,22 @@ jobs:
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_TI'], 'true')
-      )
-    )
+    or(
+      eq(variables['BUILD_ALL__'], 'true'),
+      eq(variables['BUILD_TI__'], 'true'),
+      and(
+        eq(variables['BUILD_ALL__'], 'false'),
+        eq(variables['BUILD_TI__'], 'false'),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true),
+          contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***')
+        )
+      )      
+    )      
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
@@ -573,20 +554,22 @@ jobs:
 # Azure RTOS
 - job: Build_Azure_RTOS_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
-        contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***'),
-        eq(variables['BUILD_ALL'], 'true'),
-        eq(variables['BUILD_AZURERTOS'], 'true')
-      )
+    or(
+      eq(variables['BUILD_ALL__'], 'true'),
+      eq(variables['BUILD_AZURERTOS__'], 'true'),
+      and(
+        eq(variables['BUILD_ALL__'], 'false'),
+        eq(variables['BUILD_AZURERTOS__'], 'false'),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true),
+          contains(dependencies.Check_Build_Options.outputs['GetCommitDetails.COMMIT_MESSAGE'], '***BUILD_ALL***')
+        )
+      )      
     )
 
   dependsOn:
   - Check_Build_Options
-  - Check_Code_Style
 
   pool:
     vmImage: 'windows-latest'
