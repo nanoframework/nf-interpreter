@@ -71,7 +71,7 @@ bool SetWindowX8bitsY1Bit(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2
 
 bool SetWindowX8bitsY8Bits(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)
 {
-     // Start & End column address
+    // Start & End column address
     g_DisplayInterface.SendCommand(3, g_DisplayInterfaceConfig.GenericDriverCommands.SetColumnAddress, x1, x2);
 
     // Start & End row address
