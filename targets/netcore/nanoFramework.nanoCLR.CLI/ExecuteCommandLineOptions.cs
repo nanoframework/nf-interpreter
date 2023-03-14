@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System.Collections.Generic;
 using CommandLine;
+using System.Collections.Generic;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -92,6 +92,14 @@ namespace nanoFramework.nanoCLR.CLI
             Default = true,
             HelpText = "Option to remain in loop waiting for a debugger connection after the program exits.")]
         public bool EnterDebuggerLoopAfterExit { get; set; }
+
+        [Option(
+            "localinstance",
+            Required = false,
+            Default = null,
+            Hidden = true,
+            HelpText = "Path to a local instance of the nanoCLR.")]
+        public string LocalInstance { get; set; }
 
         /// <summary>
         /// Allowed values:

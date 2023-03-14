@@ -4,6 +4,8 @@
 //
 
 using System;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -13,6 +15,20 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal const uint ClrOk = 0;
         internal const uint ClrErrorFail = 0xFF000000;
         private const string NativeLibraryName = "nanoFramework.nanoCLR";
+
+        internal static string DllPath { get; set; } = string.Empty;
+
+        static nanoCLR()
+        {
+            if (string.IsNullOrEmpty(DllPath))
+            {
+                // default to assembly path
+                DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
+
+                // need to set DLL directory
+                SetDllDirectory(Interop.nanoCLR.DllPath);
+            }
+        }
 
         internal delegate uint ConfigureDelegate();
 
@@ -77,11 +93,13 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool FreeLibrary(IntPtr hModule);
 
-        public static void UnloadNanoClrImageDll(string path)
+        public static void UnloadNanoClrImageDll()
         {
+            string nanoClrDllLocation = Path.Combine(DllPath, "nanoFramework.nanoCLR.dll");
+
             foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
             {
-                if (mod.FileName.Equals(path, StringComparison.OrdinalIgnoreCase))
+                if (mod.FileName.Equals(nanoClrDllLocation, StringComparison.OrdinalIgnoreCase))
                 {
                     FreeLibrary(mod.BaseAddress);
 
@@ -90,5 +108,8 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 }
             }
         }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
     }
 }
