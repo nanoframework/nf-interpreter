@@ -117,5 +117,10 @@ namespace nanoFramework.nanoCLR.Host
         {
             Interop.nanoCLR.UnloadNanoClrImageDll();
         }
+
+        public void OutputNanoClrDllInfo()
+        {
+            Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
+        }
     }
 }
