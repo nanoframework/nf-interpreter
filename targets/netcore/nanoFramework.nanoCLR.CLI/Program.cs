@@ -5,7 +5,6 @@
 
 using CommandLine;
 using CommandLine.Text;
-using nanoFramework.nanoCLR.Host;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -93,9 +92,6 @@ namespace nanoFramework.nanoCLR.CLI
                 VirtualSerialDeviceManager virtualSerialBridgeManager = new();
                 virtualSerialBridgeManager.Initialize();
 
-                nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
-                hostBuilder.UseConsoleDebugPrint();
-
                 // need to set DLL directory to HHD interop DLL
                 SetDllDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Vendor"));
 
@@ -107,12 +103,10 @@ namespace nanoFramework.nanoCLR.CLI
                         (ExecuteCommandLineOptions opts) =>
                             ExecuteCommandProcessor.ProcessVerb(
                                 opts,
-                                hostBuilder,
                                 virtualSerialBridgeManager),
                         (ClrInstanceOperationsOptions opts) =>
                             ClrInstanceOperationsProcessor.ProcessVerb(
-                                opts,
-                                hostBuilder),
+                                opts),
                         (VirtualSerialDeviceCommandLineOptions opts) =>
                             VirtualSerialDeviceCommandProcessor.ProcessVerb(
                                 opts,
