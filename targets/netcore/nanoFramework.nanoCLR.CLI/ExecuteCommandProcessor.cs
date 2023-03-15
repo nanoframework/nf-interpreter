@@ -18,12 +18,11 @@ namespace nanoFramework.nanoCLR.CLI
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
             ExecuteCommandLineOptions options,
-            nanoCLRHostBuilder hostBuilder,
             VirtualSerialDeviceManager virtualBridgeManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
 
-            string pathForNanoClrDll = string.Empty;
+            nanoCLRHostBuilder hostBuilder;
 
             // are we to use a local DLL?
             if (options.LocalInstance != null)
@@ -34,8 +33,14 @@ namespace nanoFramework.nanoCLR.CLI
                     throw new CLIException(ExitCode.E9009);
                 }
 
-                pathForNanoClrDll = Path.GetDirectoryName(options.LocalInstance);
+                hostBuilder = nanoCLRHost.CreateBuilder(Path.GetDirectoryName(options.LocalInstance));
             }
+            else
+            {
+                hostBuilder = nanoCLRHost.CreateBuilder();
+            }
+
+            hostBuilder.UseConsoleDebugPrint();
 
             // flag to signal that the intenal serial port has already been configured
             bool internalSerialPortConfig = false;
@@ -139,7 +144,7 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
-            var host = hostBuilder.Build(pathForNanoClrDll);
+            var host = hostBuilder.Build();
 
             Console.CancelKeyPress += (_, _) => host.Shutdown();
 
