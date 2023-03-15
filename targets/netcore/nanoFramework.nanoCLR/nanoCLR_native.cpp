@@ -9,6 +9,7 @@
 #include <nanoCLR_Application.h>
 #include <target_common.h>
 #include <iostream>
+#include <format>
 
 //
 // UNDONE: Feature configuration
@@ -83,7 +84,12 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
-    CLR_Debug::Printf("\r\nLoading nanoCLR v%s\r\n...", VERSION_STRING);
+    CLR_Debug::Printf(
+        "\r\nLoading nanoCLR v%d.%d.%d.%d\r\n...",
+        VERSION_MAJOR,
+        VERSION_MINOR,
+        VERSION_BUILD,
+        VERSION_REVISION);
 
     // initialize nanoHAL
     nanoHAL_Initialize();
@@ -143,9 +149,29 @@ void nanoCLR_WireProtocolClose()
     _wireProtocolStopProcess = true;
 }
 
-char *nanoCLR_GetVersion()
+const char *nanoCLR_GetVersion()
 {
-    char *pszVersion = (char *)CoTaskMemAlloc(sizeof(VERSION_STRING));
-    std::memcpy(pszVersion, VERSION_STRING, sizeof(VERSION_STRING));
-    return pszVersion;
+    char buffer[128];
+
+    char *pszVersion = nullptr;
+    pszVersion = (char *)CoTaskMemAlloc(std::size(buffer));
+
+    if (pszVersion != nullptr)
+    {
+        const auto result = std::format_to_n(
+            buffer,
+            std::size(buffer) - 1,
+            "{}.{}.{}.{}",
+            VERSION_MAJOR,
+            VERSION_MINOR,
+            VERSION_BUILD,
+            VERSION_REVISION);
+        *result.out = '\0';
+
+        const std::string_view str{buffer, result.out};
+
+        std::memcpy(pszVersion, buffer, result.size);
+
+        return pszVersion;
+    }
 }
