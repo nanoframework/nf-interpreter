@@ -27,7 +27,7 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
 
                 // need to set DLL directory
-                SetDllDirectory(Interop.nanoCLR.DllPath);
+                _ = SetDllDirectory(DllPath);
             }
         }
 

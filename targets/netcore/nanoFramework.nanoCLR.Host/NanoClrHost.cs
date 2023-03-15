@@ -36,7 +36,7 @@ namespace nanoFramework.nanoCLR.Host
             }
 
             // set path to search nanoCLR DLL
-            Interop.nanoCLR.SetDllDirectory(Interop.nanoCLR.DllPath);
+            _ = Interop.nanoCLR.SetDllDirectory(Interop.nanoCLR.DllPath);
         }
 
         public void Run()
