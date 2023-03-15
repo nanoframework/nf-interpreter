@@ -5,7 +5,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -16,18 +15,18 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal const uint ClrErrorFail = 0xFF000000;
         private const string NativeLibraryName = "nanoFramework.nanoCLR";
         private const string _nanoClrDllName = "nanoFramework.nanoCLR.dll";
+        private static string _dllPath;
 
-        internal static string DllPath { get; set; } = string.Empty;
-
-        static nanoCLR()
+        internal static string DllPath
         {
-            if (string.IsNullOrEmpty(DllPath))
-            {
-                // default to assembly path
-                DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
+            get => _dllPath;
 
-                // need to set DLL directory
-                _ = SetDllDirectory(DllPath);
+            set
+            {
+                _dllPath = value;
+
+                // set path to search nanoCLR DLL
+                _ = SetDllDirectory(_dllPath);
             }
         }
 
