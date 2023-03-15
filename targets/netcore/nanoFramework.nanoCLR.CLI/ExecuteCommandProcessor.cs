@@ -86,6 +86,11 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
+            if (Program.VerbosityLevel > VerbosityLevel.Normal)
+            {
+                hostBuilder.OutputNanoClrDllInfo();
+            }
+
             if (options.AssembliesToLoad.Any())
             {
                 hostBuilder.LoadAssemblies(options.AssembliesToLoad);

@@ -35,6 +35,11 @@ namespace nanoFramework.nanoCLR.CLI
             }
             else if (options.GetCLRVersion)
             {
+                if (Program.VerbosityLevel > VerbosityLevel.Normal)
+                {
+                    hostBuilder.OutputNanoClrDllInfo();
+                }
+
                 Console.WriteLine($"nanoCLR version: {hostBuilder.GetCLRVersion()}");
 
                 return (int)ExitCode.OK;
