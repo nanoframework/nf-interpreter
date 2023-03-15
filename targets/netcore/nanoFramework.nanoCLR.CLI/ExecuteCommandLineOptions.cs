@@ -89,7 +89,7 @@ namespace nanoFramework.nanoCLR.CLI
         [Option(
             "loopafterexit",
             Required = false,
-            Default = true,
+            Default = false,
             HelpText = "Option to remain in loop waiting for a debugger connection after the program exits.")]
         public bool EnterDebuggerLoopAfterExit { get; set; }
 
