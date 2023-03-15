@@ -53,7 +53,8 @@ struct DisplayInterfaceConfig
         CLR_RT_HeapBlock_Array *OrientationLandscape180;
         CLR_RT_HeapBlock_Array *Clear;
         CLR_UINT8 Brightness;
-        CLR_INT32 DefaultOrientation;
+        CLR_UINT8 DefaultOrientation;
+        CLR_UINT8 SetWindowType;
     } GenericDriverCommands;
 };
 
