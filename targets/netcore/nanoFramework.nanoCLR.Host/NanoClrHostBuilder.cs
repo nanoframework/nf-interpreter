@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -24,6 +25,16 @@ namespace nanoFramework.nanoCLR.Host
         public int MaxContextSwitches { get; set; } = 50;
         public bool WaitForDebugger { get; set; } = false;
         public bool EnterDebuggerLoopAfterExit { get; set; } = false;
+
+        public nanoCLRHostBuilder()
+        {
+            Interop.nanoCLR.DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
+        }
+
+        public nanoCLRHostBuilder(string dllPath)
+        {
+            Interop.nanoCLR.DllPath = dllPath;
+        }
 
         public nanoCLRHostBuilder LoadAssembly(string name, byte[] data)
         {
@@ -90,14 +101,14 @@ namespace nanoFramework.nanoCLR.Host
         public nanoCLRHostBuilder UsePortTrace() =>
             UseWireProtocolPort(new TraceDataPort(_wireProtocolPort));
 
-        public nanoCLRHost Build(string pathForNanoClrDll)
+        public nanoCLRHost Build()
         {
             if (s_nanoClrHost != null)
             {
                 throw new InvalidOperationException("Cannot build two nanoCLR runtime hosts");
             }
 
-            s_nanoClrHost = new nanoCLRHost(pathForNanoClrDll);
+            s_nanoClrHost = new nanoCLRHost();
 
             s_nanoClrHost.WireProtocolPort = _wireProtocolPort;
             s_nanoClrHost.ConfigureSteps.AddRange(_configureSteps);
@@ -116,6 +127,11 @@ namespace nanoFramework.nanoCLR.Host
         public void UnloadNanoClrDll()
         {
             Interop.nanoCLR.UnloadNanoClrImageDll();
+        }
+
+        public void OutputNanoClrDllInfo()
+        {
+            Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
         }
     }
 }
