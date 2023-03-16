@@ -722,7 +722,7 @@ bool DeviceBleInit()
     return true;
 }
 
-void StartBleTask(char *deviceName)
+void StartBleTask(char *deviceName, uint16_t appearance)
 {
     int rc;
 
@@ -730,6 +730,9 @@ void StartBleTask(char *deviceName)
 
     // Set the default device name
     rc = ble_svc_gap_device_name_set(deviceName);
+    assert(rc == 0);
+
+    rc = ble_svc_gap_device_appearance_set(appearance);
     assert(rc == 0);
 
     // Start the BLE task
