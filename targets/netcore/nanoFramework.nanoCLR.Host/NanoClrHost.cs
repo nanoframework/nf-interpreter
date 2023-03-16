@@ -6,8 +6,6 @@
 using nanoFramework.nanoCLR.Host.Port;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 
 namespace nanoFramework.nanoCLR.Host
 {
@@ -21,22 +19,9 @@ namespace nanoFramework.nanoCLR.Host
         internal nanoCLRSettings nanoCLRSettings { get; set; } = nanoCLRSettings.Default;
         internal IPort WireProtocolPort { get; set; }
 
-        internal nanoCLRHost(string pathForNanoClrDll)
+        internal nanoCLRHost()
         {
-            // set app directory, if different from executing assembly
-            if (!string.IsNullOrEmpty(pathForNanoClrDll)
-               && pathForNanoClrDll != Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
-            {
-                Interop.nanoCLR.DllPath = pathForNanoClrDll;
-            }
-            else
-            {
-                // use default path
-                Interop.nanoCLR.DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
-            }
 
-            // set path to search nanoCLR DLL
-            Interop.nanoCLR.SetDllDirectory(Interop.nanoCLR.DllPath);
         }
 
         public void Run()
@@ -81,7 +66,9 @@ namespace nanoFramework.nanoCLR.Host
             return Interop.nanoCLR.ClrOk;
         }
 
-        public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder { };
+        public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder() { };
+
+        public static nanoCLRHostBuilder CreateBuilder(string dllPath) => new nanoCLRHostBuilder(dllPath) { };
 
         public void Shutdown()
         {

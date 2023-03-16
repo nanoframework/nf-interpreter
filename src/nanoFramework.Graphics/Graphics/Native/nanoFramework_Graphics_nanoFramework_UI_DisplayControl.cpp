@@ -168,7 +168,9 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
         displayConfig.GenericDriverCommands.Brightness =
             graphicDriver[GraphicDriver::FIELD___brightness].NumericByRef().u1;
         displayConfig.GenericDriverCommands.DefaultOrientation =
-            graphicDriver[GraphicDriver::FIELD___defaultOrientation].NumericByRef().s4;
+            (CLR_UINT8)graphicDriver[GraphicDriver::FIELD___defaultOrientation].NumericByRef().s4;
+        displayConfig.GenericDriverCommands.SetWindowType =
+            (CLR_UINT8)graphicDriver[GraphicDriver::FIELD___setWindowType].NumericByRef().s4;
     }
 
     g_DisplayInterface.Initialize(displayConfig);
