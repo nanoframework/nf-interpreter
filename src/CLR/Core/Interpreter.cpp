@@ -2296,8 +2296,6 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         CLR_RT_ProtectFromGC gc(safeSource);
 
                         NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeSource));
-
-                        NANOCLR_CHECK_HRESULT(evalPos[0].LoadFromReference(safeSource));
                     }
 
                     goto Execute_LoadAndPromote;
