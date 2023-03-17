@@ -2529,7 +2529,11 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->Scope);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown scope: %08x\r\n", src->Scope);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown scope: %08x\r\n", src->Scope);
+#endif
             }
 
             const char *szName = GetString(src->Name);
@@ -2538,7 +2542,12 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s\r\n", szName);
 #endif
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s\r\n", szName);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
+#endif
             }
         }
         else
@@ -2557,7 +2566,11 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
                 CLR_Debug::Printf("Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Resolve: unknown type: %s\r\n", szName);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
+#endif
             }
         }
     }
@@ -2610,7 +2623,17 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                     src->encodedOwner);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
+                    src->encodedOwner);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
+                    src->encodedOwner);
+#endif
         }
 
         const char *fieldName = GetString(src->Name);
@@ -2623,7 +2646,11 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+#endif
             }
 
             if (!typeSpecInstance.m_assm
@@ -2633,7 +2660,12 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 CLR_Debug::Printf("Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
+#endif
+         
             }
 
             // set TypeSpec
@@ -2668,7 +2700,11 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
                 CLR_Debug::Printf("Unknown FieldRef: %s\r\n", fieldName);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Unknown FieldRef: %s\r\n", fieldName);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown FieldRef: %s\r\n", fieldName);
+#endif
             }
 
             // invalidate GenericType
@@ -2726,7 +2762,18 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                     "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
                     src->encodedOwner);
 #endif
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
+                    src->encodedOwner);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
+                    src->encodedOwner);
+#endif
         }
 
         name = GetString(src->Name);
@@ -2739,7 +2786,17 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown scope when resolving MethodRef: %08x\r\n",
+                    src->encodedOwner);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown scope when resolving MethodRef: %08x\r\n",
+                    src->encodedOwner);
+#endif
             }
 
             if (typeSpecInstance.m_assm->FindMethodDef(typeSpecInstance.m_target, name, this, src->Sig, dst->Target))
@@ -2756,7 +2813,13 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 CLR_Debug::Printf("Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL, "Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL, L"Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
+#endif
             }
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
@@ -2767,7 +2830,17 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                 CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
 #endif
 
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown scope when resolving MethodRef: %08x\r\n",
+                    src->encodedOwner);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown scope when resolving MethodRef: %08x\r\n",
+                    src->encodedOwner);
+#endif
             }
 
 #if defined(VIRTUAL_DEVICE) && defined(DEBUG_RESOLUTION)
@@ -2808,8 +2881,21 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
                     qASSM->GetString(qTD->Name),
                     name);
 #endif
-
-                NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
+#if defined(VIRTUAL_DEVICE)
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown MethodRef: %s.%s.%s\r\n",
+                    qASSM->GetString(qTD->NameSpace),
+                    qASSM->GetString(qTD->Name),
+                    name);
+#else
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown MethodRef: %s.%s.%s\r\n",
+                    qASSM->GetString(qTD->NameSpace),
+                    qASSM->GetString(qTD->Name),
+                    name);
+#endif
             }
         }
     }
