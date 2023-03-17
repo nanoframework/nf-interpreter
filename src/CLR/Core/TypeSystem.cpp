@@ -2408,7 +2408,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     NANOCLR_NOCLEANUP();
 }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
 HRESULT CLR_RT_Assembly::CreateInstance(
     const CLR_RECORD_ASSEMBLY *header,
     CLR_RT_Assembly *&assm,
@@ -2489,7 +2489,7 @@ void CLR_RT_Assembly::DestroyInstance()
         g_CLR_RT_TypeSystem.m_assemblies[m_index - 1] = NULL;
     }
 
-#if defined(WIN32)
+#if defined(VIRTUAL_DEVICE)
     if (this->m_strPath != NULL)
     {
         delete this->m_strPath;
