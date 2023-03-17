@@ -24,7 +24,7 @@ extern const CLR_RADIAN c_CLR_radians[];
 
 //--//
 
-#if defined(VIRTUAL_DEVICE)
+#if defined(_WIN32)
 
 #include <set>
 #include <map>
@@ -56,13 +56,13 @@ typedef CLR_RT_AddressToSymbolMap::iterator CLR_RT_AddressToSymbolMapIter;
 #include <map>
 #endif
 
-#endif // #if defined(VIRTUAL_DEVICE)
+#endif // _WIN32
 
 #if defined(_MSC_VER)
 #pragma pack(push, __NANOCLR_RUNTIME_H__, 4)
 #endif
 
-#if defined(VIRTUAL_DEVICE)
+#if defined(_WIN32)
 //--//
 
 #define _COM_SMRT_PTR(i)      typedef _com_ptr_t<_com_IIID<i, &__uuidof(i)>> i##Ptr
