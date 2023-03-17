@@ -1964,6 +1964,20 @@ bool CLR_RECORD_ASSEMBLY::GoodAssembly() const
     return SUPPORT_ComputeCRC(&this[1], this->TotalSize() - sizeof(*this), 0) == this->assemblyCRC;
 }
 
+#if defined(VIRTUAL_DEVICE)
+
+void CLR_RECORD_ASSEMBLY::ComputeCRC()
+{
+    NATIVE_PROFILE_CLR_CORE();
+    memcpy(marker, c_MARKER_ASSEMBLY_V2, sizeof(marker));
+
+    headerCRC = 0;
+    assemblyCRC = SUPPORT_ComputeCRC(&this[1], this->TotalSize() - sizeof(*this), 0);
+    headerCRC = SUPPORT_ComputeCRC(this, sizeof(*this), 0);
+}
+
+#endif
+
 CLR_UINT32 CLR_RECORD_ASSEMBLY::ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver)
 {
     NATIVE_PROFILE_CLR_CORE();
