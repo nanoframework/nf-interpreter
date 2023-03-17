@@ -39,7 +39,7 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack);
 bool LockEventMutex();
 void ReleaseEventMutex();
 
-bool StartBleStack(char *devicename);
+bool StartBleStack(char *devicename, uint16_t appearance);
 bool StopBleStack();
 bool WaitForBleStackStart(int waitMs);
 
