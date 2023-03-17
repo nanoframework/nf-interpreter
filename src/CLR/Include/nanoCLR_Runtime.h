@@ -3874,8 +3874,8 @@ struct CLR_RT_ExecutionEngine
     struct ExecutionConstraintCompensation
     {
         CLR_INT32 m_recursion;
-        CLR_INT32 m_start;
-        CLR_INT32 m_cumulative;
+        CLR_INT64 m_start;
+        CLR_INT64 m_cumulative;
 
         void Suspend()
         {
