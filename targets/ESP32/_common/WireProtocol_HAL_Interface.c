@@ -8,6 +8,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 #include <WireProtocol_HAL_Interface.h>
+#include "UsbSerial.h"
 
 ////////////////////////////////////////////////////////////////////
 // Baudrate for the serial port                                   //
@@ -55,7 +56,6 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 #error "NOT IMPLEMENTED (YET)"
 
 #elif CONFIG_IDF_TARGET_ESP32C3
-
 
 // WP uses UART0
 static uart_port_t ESP32_WP_UART = UART_NUM_0;
@@ -116,29 +116,7 @@ bool WP_Initialise(COM_HANDLE port)
 {
     (void)port;
 
-    ASSERT(ESP32_WP_UART <= SOC_UART_NUM);
-
-    // uninstall driver for console
-    // ESP_ERROR_CHECK(uart_driver_delete(ESP32_WP_UART));
-
-    uart_config_t uart_config = {// baudrate
-                                 .baud_rate = TARGET_SERIAL_BAUDRATE,
-                                 // baudrate
-                                 .data_bits = UART_DATA_8_BITS,
-                                 // parity mode
-                                 .parity = UART_PARITY_DISABLE,
-                                 // stop bit mode
-                                 .stop_bits = UART_STOP_BITS_1,
-                                 // hardware flow control(cts/rts)
-                                 .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
-
-    ESP_ERROR_CHECK(uart_param_config(ESP32_WP_UART, &uart_config));
-
-    ESP_ERROR_CHECK(
-        uart_set_pin(ESP32_WP_UART, ESP32_WP_TX_PIN, ESP32_WP_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
-
-    // setup UART driver with UART queue
-    ESP_ERROR_CHECK(uart_driver_install(ESP32_WP_UART, 256, 256, 0, NULL, ESP_INTR_FLAG_IRAM));
+    UsbSerialIntitialise();
 
     WP_Port_Intitialised = true;
 
@@ -173,8 +151,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
         tinyusb_cdcacm_read(TINYUSB_CDC_ACM_0, *ptr, requestedSize, &read);
 
 #else
-        // non blocking read from serial port with 100ms timeout
-        size_t read = uart_read_bytes(ESP32_WP_UART, *ptr, (uint32_t)requestedSize, pdMS_TO_TICKS(250));
+        const size_t read = UsbSerialRead(*ptr, requestedSize, pdMS_TO_TICKS(250));
 #endif
 
         *ptr += read;
@@ -212,22 +189,15 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
 #else
 
-    // TODO Check if timeout required
-    // write header to output stream
-    if (uart_write_bytes(ESP32_WP_UART, (const char *)&message->m_header, sizeof(message->m_header)) !=
+    if (UsbSerialWrite((const uint8_t *)&message->m_header, sizeof(message->m_header), pdMS_TO_TICKS(250)) !=
         sizeof(message->m_header))
-    {
         return false;
-    }
 
-    // if there is anything on the payload send it to the output stream
     if (message->m_header.m_size && message->m_payload)
     {
-        if (uart_write_bytes(ESP32_WP_UART, (const char *)message->m_payload, message->m_header.m_size) !=
-            (int)message->m_header.m_size)
-        {
+        if (UsbSerialWrite(message->m_payload, message->m_header.m_size, pdMS_TO_TICKS(250)) !=
+            message->m_header.m_size)
             return false;
-        }
     }
 
 #endif
