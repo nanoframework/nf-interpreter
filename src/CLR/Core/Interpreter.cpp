@@ -660,17 +660,25 @@ HRESULT CLR_RT_Thread::Execute()
                 stack = CurrentFrame();
                 if (stack->Prev() != NULL)
                 {
-#if defined(NANOCLR_TRACE_INSTRUCTIONS) && defined(PLATFORM_WINDOWS_EMULATOR)
+#if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
                     for (int i = 0; i < ARRAYSIZE(s_track); i++)
                     {
-                        BackTrackExecution &track = s_track[(s_trackPos + i) % ARRAYSIZE(s_track)];
+                        BackTrackExecution &track = s_track[(s_trackPos + i - 1) % ARRAYSIZE(s_track)];
 
-                        CLR_Debug::Printf(" %3d ", track.m_depth);
+                        // check if there is a valid stack information
+                        if (track.m_assm != nullptr)
+                        {
+                            CLR_Debug::Printf(" %3d ", track.m_depth);
 
-                        CLR_RT_MethodDef_Instance inst;
-                        inst.InitializeFromIndex(track.m_call);
+                            CLR_RT_MethodDef_Instance inst;
+                            inst.InitializeFromIndex(track.m_call);
 
-                        // track.m_assm->DumpOpcodeDirect( inst, track.m_IP, track.m_IPstart, track.m_pid );
+                            track.m_assm->DumpOpcodeDirect(inst, track.m_IP, track.m_IPstart, track.m_pid);
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
 
                     CLR_Debug::Printf("\r\n");
