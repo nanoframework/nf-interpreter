@@ -85,7 +85,7 @@ extern HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, c
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
     }
-#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, arg)                                                                     \
+#define NANOCLR_MSG1_SET_AND_LEAVE(expr, msg, ...)                                                                     \
     {                                                                                                                  \
         hr = (expr);                                                                                                   \
         NANOCLR_LEAVE();                                                                                               \
