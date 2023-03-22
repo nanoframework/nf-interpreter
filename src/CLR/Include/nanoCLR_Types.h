@@ -1053,6 +1053,25 @@ struct CLR_RECORD_ASSEMBLY
     static CLR_UINT32 ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver);
 };
 
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+// size of CLR_RECORDs
+// these have to match the struct used in MDP
+// when changing any of these structs need to update the constant in MDP
+#define sizeOf_CLR_RECORD_ASSEMBLYREF   10
+#define sizeOf_CLR_RECORD_TYPEREF       6
+#define sizeOf_CLR_RECORD_FIELDREF      6
+#define sizeOf_CLR_RECORD_METHODREF     6
+#define sizeOf_CLR_RECORD_TYPEDEF       27
+#define sizeOf_CLR_RECORD_FIELDDEF      8
+#define sizeOf_CLR_RECORD_METHODDEF     19
+#define sizeOf_CLR_RECORD_TYPESPEC      2
+#define sizeOf_CLR_RECORD_GENERICPARAM  10
+#define sizeOf_CLR_RECORD_METHODSPEC    6
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 // record structures are aligned to 1 byte boundary to minimize PE size
 #pragma pack(push, 1)
 
@@ -1065,6 +1084,8 @@ struct CLR_RECORD_ASSEMBLYREF
     /// @brief Assembly version
     CLR_RECORD_VERSION version;
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_ASSEMBLYREF) == sizeOf_CLR_RECORD_ASSEMBLYREF)
 
 struct CLR_RECORD_TYPEREF
 {
@@ -1080,6 +1101,8 @@ struct CLR_RECORD_TYPEREF
     ///
     CLR_INDEX Scope;
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_TYPEREF) == sizeOf_CLR_RECORD_TYPEREF)
 
 struct CLR_RECORD_FIELDREF
 {
@@ -1110,6 +1133,8 @@ struct CLR_RECORD_FIELDREF
         return c_lookup[(encodedOwner >> 15)];
     }
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_FIELDREF) == sizeOf_CLR_RECORD_FIELDREF)
 
 struct CLR_RECORD_METHODREF
 {
@@ -1148,6 +1173,8 @@ struct CLR_RECORD_METHODREF
         return encodedOwner != CLR_EmptyIndex;
     }
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_METHODREF) == sizeOf_CLR_RECORD_METHODREF)
 
 struct CLR_RECORD_TYPEDEF
 {
@@ -1324,6 +1351,8 @@ struct CLR_RECORD_TYPEDEF
     }
 };
 
+CT_ASSERT(sizeof(CLR_RECORD_TYPEDEF) == sizeOf_CLR_RECORD_TYPEDEF)
+
 struct CLR_RECORD_FIELDDEF
 {
     static const CLR_UINT16 FD_Scope_Mask = 0x0007;
@@ -1363,6 +1392,8 @@ struct CLR_RECORD_FIELDDEF
 
     CLR_UINT16 Flags;
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_FIELDDEF) == sizeOf_CLR_RECORD_FIELDDEF)
 
 struct CLR_RECORD_METHODDEF
 {
@@ -1504,6 +1535,8 @@ struct CLR_RECORD_METHODDEF
     CLR_SIG Sig;
 };
 
+CT_ASSERT(sizeof(CLR_RECORD_METHODDEF) == sizeOf_CLR_RECORD_METHODDEF)
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
@@ -1542,6 +1575,8 @@ struct CLR_RECORD_TYPESPEC
     CLR_SIG Sig;
 };
 
+CT_ASSERT(sizeof(CLR_RECORD_TYPESPEC) == sizeOf_CLR_RECORD_TYPESPEC)
+
 struct CLR_RECORD_GENERICPARAM
 {
     /// @brief 2-byte index of the generic parameter, numbered left -to-right, from zero.
@@ -1564,6 +1599,8 @@ struct CLR_RECORD_GENERICPARAM
     ///
     CLR_STRING Name;
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_GENERICPARAM) == sizeOf_CLR_RECORD_GENERICPARAM)
 
 struct CLR_RECORD_METHODSPEC
 {
@@ -1595,6 +1632,8 @@ struct CLR_RECORD_METHODSPEC
         return c_lookup[(encodedMethod >> 15)];
     }
 };
+
+CT_ASSERT(sizeof(CLR_RECORD_METHODSPEC) == sizeOf_CLR_RECORD_METHODSPEC)
 
 struct CLR_RECORD_EH
 {
