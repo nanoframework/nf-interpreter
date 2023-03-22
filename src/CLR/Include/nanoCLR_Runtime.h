@@ -2126,6 +2126,10 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     CLR_RT_Assembly *m_assm;
     const CLR_RECORD_TYPEDEF *m_target;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+    const char *Name;
+#endif
+
     //--//
 
     bool InitializeFromReflection(const CLR_RT_ReflectionDef_Index &reflex, CLR_UINT32 *levels);
@@ -2160,6 +2164,10 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
 
     const CLR_RT_TypeSpec_Index *genericType;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+    const char *Name;
+#endif
+
     //--//
 
     bool InitializeFromIndex(const CLR_RT_FieldDef_Index &index);
@@ -2183,6 +2191,10 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     const CLR_RECORD_METHODDEF *m_target;
 
     const CLR_RT_TypeSpec_Index *genericType;
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+    const char *Name;
+#endif
 
     //--//
 
@@ -2214,6 +2226,10 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 {
     CLR_RT_Assembly *m_assm;
     const CLR_RECORD_GENERICPARAM *m_target;
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+    const char *Name;
+#endif
 
     //--//
 

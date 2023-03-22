@@ -783,6 +783,10 @@ bool CLR_RT_TypeDef_Instance::InitializeFromIndex(const CLR_RT_TypeDef_Index &in
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetTypeDef(Type());
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
+
         return true;
     }
 
@@ -806,6 +810,9 @@ bool CLR_RT_TypeDef_Instance::InitializeFromMethod(const CLR_RT_MethodDef_Instan
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
         m_target = m_assm->GetTypeDef(indexType);
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
         return true;
     }
 
@@ -827,6 +834,9 @@ bool CLR_RT_TypeDef_Instance::InitializeFromMethod(const CLR_RT_MethodSpec_Insta
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
         // m_target = m_assm->GetTypeDef(indexType);
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
         return true;
     }
 
@@ -877,6 +887,9 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
             m_assm = g_CLR_RT_TypeSystem.m_assemblies[indexAssm - 1];
             m_target = m_assm->GetTypeDef(indexType);
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+            Name = m_assm->GetString(m_target->Name);
+#endif
             return true;
         }
     }
@@ -1081,6 +1094,9 @@ bool CLR_RT_FieldDef_Instance::InitializeFromIndex(const CLR_RT_FieldDef_Index &
         m_target = m_assm->GetFieldDef(Field());
         genericType = NULL;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
         return true;
     }
 
@@ -1152,6 +1168,9 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                         return false;
                 }
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
             }
             case TBL_FieldDef:
@@ -1163,6 +1182,9 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                 // invalidate generic type
                 genericType = NULL;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
 
             default:
@@ -1188,6 +1210,9 @@ bool CLR_RT_MethodDef_Instance::InitializeFromIndex(const CLR_RT_MethodDef_Index
         m_target = m_assm->GetMethodDef(Method());
         genericType = NULL;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
         return true;
     }
 
@@ -1250,6 +1275,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                     genericType = NULL;
                 }
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
             }
 
@@ -1262,6 +1290,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 // invalidate generic type
                 genericType = NULL;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
 
             case TBL_MethodSpec:
@@ -1296,6 +1327,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 // get generic type
                 genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container].GenericType;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
             }
             case TBL_TypeSpec:
@@ -1313,12 +1347,19 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         m_assm = assm;
                         m_target = m_assm->GetMethodDef(ms->MethodIndex());
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                        Name = m_assm->GetString(m_target->Name);
+#endif
                         return true;
 
                     case TBL_MethodRef:
                         m_data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].Target.m_data;
                         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         m_target = m_assm->GetMethodDef(Method());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                        Name = m_assm->GetString(m_target->Name);
+#endif
 
                         return true;
 
@@ -1331,6 +1372,9 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 // get generic type
                 genericType = &m_assm->m_pCrossReference_TypeSpec[ms->Container].GenericType;
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
                 return true;
             }
             default:
@@ -1355,6 +1399,10 @@ bool CLR_RT_GenericParam_Instance::InitializeFromIndex(const CLR_RT_GenericParam
         m_data = index.m_data;
         m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
         m_target = m_assm->GetGenericParam(GenericParam());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+        Name = m_assm->GetString(m_target->Name);
+#endif
 
         return true;
     }
