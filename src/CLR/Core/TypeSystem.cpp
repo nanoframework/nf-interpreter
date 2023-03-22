@@ -564,6 +564,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                                 break;
 
                             case TBL_TypeDef:
+                            {
                                 CLR_RT_TypeDef_Instance cls;
 
                                 if (cls.ResolveToken(tk, Assembly) == false)
@@ -573,6 +574,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
 
                                 res.Class = cls;
                                 break;
+                            }
 
                             default:
                                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
