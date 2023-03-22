@@ -127,11 +127,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
     rmt_get_idle_level((rmt_channel_t)channel, &retVal, &level);
-#else
-    retVal = ::RMT.conf_ch[(rmt_channel_t)channel].conf1.idle_out_en;
-#endif
 
     stack.SetResult_Boolean(retVal);
 
