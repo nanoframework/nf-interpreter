@@ -7,6 +7,45 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+HRESULT CLR_Checks::VerifyStackOK(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock *top, int num)
+{
+    CLR_RT_StackFrame *stackArg = &stack;
+    CLR_RT_HeapBlock *topArg = top;
+    CLR_RT_HeapBlock const *evalStackArg = &stackArg->m_evalStackPos[-num];
+    int argCount = abs(num);
+
+    //if (num > 0)
+    //{
+    //    // loop through each parameter, if any and check validity
+    //    for (int pos = 0; pos < num; pos++)
+    //    {
+    //        if (!(evalStackArg <= top))
+    //        {
+    //            return S_FALSE;
+    //        }
+
+    //        topArg++;
+    //        evalStackArg++;
+    //    }
+    //}
+    //else if (num < 0)
+    //{
+    //    // loop through each parameter, if any and check validity
+    //    for (int pos = 0; pos > num; pos--)
+    //    {
+    //        if (!(evalStackArg <= top))
+    //        {
+    //            return S_FALSE;
+    //        }
+
+    //        topArg--;
+    //        evalStackArg++;
+    //    }
+    //}
+
+    return S_OK;
+}
+
 HRESULT CLR_Checks::VerifyObject( CLR_RT_HeapBlock& top )
 {
     NATIVE_PROFILE_CLR_CORE();

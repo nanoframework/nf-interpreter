@@ -53,7 +53,7 @@ struct CLR_RT_DUMP
 
 struct CLR_Checks
 {
-    static HRESULT VerifyStackOK( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* top, int num ) { return S_OK; }
+    static HRESULT VerifyStackOK( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock* top, int num );
 
     static HRESULT VerifyObject                ( CLR_RT_HeapBlock& top );
 
