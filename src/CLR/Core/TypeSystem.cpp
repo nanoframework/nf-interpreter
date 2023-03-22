@@ -2711,9 +2711,15 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 #endif
 
 #if defined(VIRTUAL_DEVICE)
-                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+                NANOCLR_CHARMSG_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    "Unknown scope when resolving FieldRef: %08x\r\n",
+                    src->encodedOwner);
 #else
-                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+                NANOCLR_MSG1_SET_AND_LEAVE(
+                    CLR_E_FAIL,
+                    L"Unknown scope when resolving FieldRef: %08x\r\n",
+                    src->encodedOwner);
 #endif
             }
 
@@ -2729,7 +2735,6 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
 #endif
-         
             }
 
             // set TypeSpec
@@ -2878,11 +2883,9 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 #endif
 
 #if defined(VIRTUAL_DEVICE)
-                NANOCLR_CHARMSG_SET_AND_LEAVE(
-                    CLR_E_FAIL, "Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
+                NANOCLR_CHARMSG_SET_AND_LEAVE(CLR_E_FAIL, "Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
 #else
-                NANOCLR_MSG1_SET_AND_LEAVE(
-                    CLR_E_FAIL, L"Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
+                NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown MethodRef: %s.%s.%s\r\n", "???", "???", name);
 #endif
             }
         }
