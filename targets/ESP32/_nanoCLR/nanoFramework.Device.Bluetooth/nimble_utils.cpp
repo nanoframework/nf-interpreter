@@ -245,7 +245,7 @@ bool WaitForBleStackStart(int waitMs)
     return false;
 }
 
-bool StartBleStack(char *devicename)
+bool StartBleStack(char *devicename, uint16_t appearance)
 {
     // Ignore if already started
     if (ble_hs_is_enabled())
@@ -257,7 +257,7 @@ bool StartBleStack(char *devicename)
     DeviceBleInit();
 
     // Start BLE host task running
-    StartBleTask(devicename);
+    StartBleTask(devicename, appearance);
 
     // Wait for stack to be ready (Sync fired)
     WaitForBleStackStart(10000);

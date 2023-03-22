@@ -20,11 +20,12 @@ namespace nanoFramework.nanoCLR.CLI
         private const string _cloudSmithApiUrl = "https://api.cloudsmith.io/v1/packages/net-nanoframework/";
         private static HttpClient _httpClient = new HttpClient();
 
-        public static int ProcessVerb(
-            ClrInstanceOperationsOptions options,
-            nanoCLRHostBuilder hostBuilder)
+        public static int ProcessVerb(ClrInstanceOperationsOptions options)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
+
+            nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
+            hostBuilder.UseConsoleDebugPrint();
 
             if (options.UpdateCLR)
             {
@@ -35,6 +36,11 @@ namespace nanoFramework.nanoCLR.CLI
             }
             else if (options.GetCLRVersion)
             {
+                if (Program.VerbosityLevel > VerbosityLevel.Normal)
+                {
+                    hostBuilder.OutputNanoClrDllInfo();
+                }
+
                 Console.WriteLine($"nanoCLR version: {hostBuilder.GetCLRVersion()}");
 
                 return (int)ExitCode.OK;

@@ -81,7 +81,7 @@ struct bleServicesContext
     ble_context *bleSrvContexts;
 };
 
-void StartBleTask(char *deviceName);
+void StartBleTask(char *deviceName, uint16_t appearance);
 bool DeviceBleInit();
 void Device_ble_dispose();
 int Esp32GapEvent(struct ble_gap_event *event, void *arg);

@@ -36,7 +36,7 @@
   <ItemGroup>
     <None Include="..\..\..\build\bin\$(Configuration)\nanoFramework.nanoCLR.dll" Link="NanoCLR\nanoFramework.nanoCLR.dll">
       <Pack>True</Pack>
-      <PackagePath>tools\net6.0\any</PackagePath>
+      <PackagePath>tools\net6.0\any\NanoCLR</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\..\..\assets\nf-logo.png">
