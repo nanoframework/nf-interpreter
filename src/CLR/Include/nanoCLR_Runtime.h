@@ -2467,8 +2467,8 @@ struct CLR_RT_InlineBuffer
 
 struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCATION -
 {
-    static const int c_OverheadForNewObjOrInteropMethod =
-        2; // We need to have more slots in the stack to process a 'newobj' opcode.
+    // We need to have more slots in the stack to process a 'newobj' opcode.
+    static const int c_OverheadForNewObjOrInteropMethod = 2;
     static const int c_MinimumStack = 10;
 
     static const CLR_UINT32 c_MethodKind_Native = 0x00000000;
