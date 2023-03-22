@@ -49,7 +49,20 @@ bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
     conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
     conf.scl_io_num = ClockPin;
     conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.master.clk_speed = (busSpeed == 0) ? 100000 : 400000;
+    if (I2cBusSpeed::I2cBusSpeed_FastModePlus == busSpeed)
+    {
+        conf.master.clk_speed = 1000000;
+    }
+    else if (I2cBusSpeed::I2cBusSpeed_FastMode == busSpeed)
+    {
+        conf.master.clk_speed = 400000;
+    }
+    else
+    {
+        // Default is standard 100 KHz
+        conf.master.clk_speed = 100000;
+    }    
+    
     conf.clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
 
     esp_err_t err = i2c_param_config(bus, &conf);

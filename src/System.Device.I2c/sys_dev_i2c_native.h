@@ -16,6 +16,7 @@ typedef enum __nfpack I2cBusSpeed
 {
     I2cBusSpeed_StandardMode = 0,
     I2cBusSpeed_FastMode = 1,
+    I2cBusSpeed_FastModePlus = 2,
 } I2cBusSpeed;
 
 typedef enum __nfpack I2cTransferStatus
