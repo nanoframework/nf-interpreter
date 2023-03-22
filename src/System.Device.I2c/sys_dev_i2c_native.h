@@ -61,4 +61,4 @@ struct Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice
 
 extern const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Device_I2c;
 
-#endif //SYS_DEV_I2C_NATIVE_H
+#endif // SYS_DEV_I2C_NATIVE_H

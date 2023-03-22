@@ -61,8 +61,8 @@ bool SetConfig(i2c_port_t bus, CLR_RT_HeapBlock *config)
     {
         // Default is standard 100 KHz
         conf.master.clk_speed = 100000;
-    }    
-    
+    }
+
     conf.clk_flags = I2C_SCLK_SRC_FLAG_FOR_NOMAL;
 
     esp_err_t err = i2c_param_config(bus, &conf);

@@ -51,7 +51,7 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CSPM_Init_TypeDef *llConfig
         // Default is standard mode
         llConfig->i2cMaxFreq = I2C_FREQ_STANDARD_MAX;
         llConfig->i2cClhr = i2cClockHLRStandard;
-    }    
+    }
 }
 
 // estimate the time required to perform the I2C transaction
