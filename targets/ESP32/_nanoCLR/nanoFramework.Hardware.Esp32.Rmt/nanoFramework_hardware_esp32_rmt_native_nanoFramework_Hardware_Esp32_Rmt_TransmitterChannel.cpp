@@ -113,6 +113,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
     CLR_RT_HeapBlock *transmitter_channel_settings = NULL;
     int32_t channel;
     bool retVal = 0;
+    rmt_idle_level_t level;
 
     CLR_RT_HeapBlock *pThis = stack.This();
     FAULT_ON_NULL(pThis);
@@ -126,7 +127,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         NANOCLR_SET_AND_LEAVE(CLR_E_OBJECT_DISPOSED);
     }
 
-    retVal = ::RMT.conf_ch[(rmt_channel_t)channel].conf1.idle_out_en;
+    rmt_get_idle_level((rmt_channel_t)channel, &retVal, &level);
 
     stack.SetResult_Boolean(retVal);
 
