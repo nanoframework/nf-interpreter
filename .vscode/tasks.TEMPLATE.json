@@ -26,6 +26,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Flash nanoCLR to ESP32/S3",
+      "type": "shell",
+      "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"keep\" --flash_size detect 0x1000 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Flash nanoCLR to ESP32-C3",
       "type": "shell",
       "command": "python ${env:IDF_PATH}/components/esptool_py/esptool/esptool.py --chip auto --port \"${input:comPort}\" --baud 1500000 --before \"default_reset\" --after \"hard_reset\" write_flash -z --flash_mode \"dio\" --flash_freq \"keep\" --flash_size detect 0x0 ${workspaceFolder}/build/bootloader/bootloader.bin 0x10000 ${workspaceFolder}/build/nanoCLR.bin 0x8000 ${workspaceFolder}/build/partitions_${input:esp32Partitions}.bin",
