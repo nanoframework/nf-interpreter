@@ -1249,6 +1249,8 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
 
                 if (mr->Owner() == TBL_TypeSpec)
                 {
+                    // owner is TypeSpec
+
                     genericType = &assm->m_pCrossReference_MethodRef[index].GenericType;
 
                     const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
@@ -1267,8 +1269,13 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 }
                 else
                 {
-                    m_data = assm->m_pCrossReference_MethodRef[mr->OwnerIndex()].Target.m_data;
+                    // owner is TypeRef
+
+                    // get data for MethodRef (from index)
+                    m_data = assm->m_pCrossReference_MethodRef[index].Target.m_data;
+                    // get assembly for this type ref
                     m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
+                    // grab the MethodDef
                     m_target = m_assm->GetMethodDef(Method());
 
                     // invalidate GenericType
