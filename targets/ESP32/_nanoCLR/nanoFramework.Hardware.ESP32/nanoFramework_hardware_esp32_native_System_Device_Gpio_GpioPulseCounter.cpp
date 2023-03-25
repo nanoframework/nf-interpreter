@@ -6,13 +6,15 @@
 
 #include "nanoFramework_hardware_esp32_native.h"
 #include <Core.h>
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+
 #include "pcnt.h"
 
 typedef Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCount GpioPulseCount;
 typedef Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter GpioPulseCounter;
 typedef Library_corlib_native_System_TimeSpan TimeSpan;
 
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 // Map Gpio pin number to 1 of 8 ESP32 counters, -1 = not mapped
 // Each pulse counter is a 16 bit signed value.
 // The managed code requires a 64 bit counter so we accumulate the overflows in an interrupt when count gets to 0x7fff
@@ -212,8 +214,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
     {
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
 
-        CLR_RT_TypeDef_Index GpioPulseCountTypeDef;
-        CLR_RT_HeapBlock *GpioPulseCount;
+        CLR_RT_TypeDef_Index gpioPulseCountTypeDef;
+        CLR_RT_HeapBlock *gpioPulseCount;
 
         CLR_RT_HeapBlock *pThis = stack.This();
         FAULT_ON_NULL(pThis);
@@ -255,20 +257,20 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
         CLR_RT_HeapBlock &top = stack.PushValue();
 
         // find <GpioGpioPulseCount> type definition, don't bother checking the result as it exists for sure
-        g_CLR_RT_TypeSystem.FindTypeDef("GpioPulseCount", "System.Device.Gpio", GpioPulseCountTypeDef);
+        g_CLR_RT_TypeSystem.FindTypeDef("GpioPulseCount", "System.Device.Gpio", gpioPulseCountTypeDef);
 
         // create an instance of <GpioGpioPulseCount> in the stack
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, GpioPulseCountTypeDef));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, gpioPulseCountTypeDef));
 
         // dereference the <GpioGpioPulseCount> object in order to reach its fields
-        GpioPulseCount = top.Dereference();
+        gpioPulseCount = top.Dereference();
 
         // set fields
 
-        GpioPulseCount[GpioPulseCount::FIELD__Count].NumericByRef().s8 = totalCount;
+        gpioPulseCount[GpioPulseCount::FIELD__Count].NumericByRef().s8 = totalCount;
 
         // relative time is a TimeSpan, so needs to be access through a pointer
-        CLR_INT64 *val = TimeSpan::GetValuePtr(GpioPulseCount[GpioPulseCount::FIELD__RelativeTime]);
+        CLR_INT64 *val = TimeSpan::GetValuePtr(gpioPulseCount[GpioPulseCount::FIELD__RelativeTime]);
 
         // timespan in milliseconds, but...
         *val = (CLR_UINT64)relativeTime;
