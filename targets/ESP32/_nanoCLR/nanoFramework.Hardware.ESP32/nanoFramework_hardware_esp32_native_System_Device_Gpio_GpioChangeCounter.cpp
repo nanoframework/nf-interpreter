@@ -140,6 +140,16 @@ static bool InitialiseCounter(int counterIndex, int gpioNumA, int gpioNumB, bool
     return ec == ESP_OK;
 }
 
+void PulseCountUninitialize()
+{
+    if (isrInstalled)
+    {
+        pcnt_isr_service_uninstall();
+        isrInstalled = false;
+        numberCounterUsed = 0;
+    }
+}
+
 #endif
 
 HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeInit___VOID(
@@ -157,6 +167,8 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
 
         if (numberCounterUsed == 0)
         {
+            HAL_AddSoftRebootHandler(PulseCountUninitialize);
+
             // We need to initialize the array if it's the first one
             for (int i = 0; i < PCNT_UNIT_MAX; i++)
             {
@@ -178,6 +190,7 @@ HRESULT Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulse
             NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
         }
 
+        overflowCount[index] = 0;
         // Reserve pin for Counter use
         CPU_GPIO_ReservePin(pinNumberA, true);
         if (pinNumberB >= 0)
