@@ -171,7 +171,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     return true;
 }
 
-#elif CONFIG_USB_CDC_ENABLED
+#elif CONFIG_IDF_TARGET_ESP32S2 && CONFIG_USB_CDC_ENABLED
 
 static bool WP_Port_Intitialised = false;
 
