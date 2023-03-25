@@ -206,4 +206,3 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp3
 };
 
 // clang-format on
-
