@@ -749,6 +749,12 @@
         },
         {
             "inherits": "base-user",
+            "name": "XIAO_ESP32C3",
+            "displayName": "XIAO_ESP32C3",
+            "configurePreset": "XIAO_ESP32C3"
+        },
+        {
+            "inherits": "base-user",
             "name": "M5Stack",
             "displayName": "M5Stack",
             "configurePreset": "M5Stack"
