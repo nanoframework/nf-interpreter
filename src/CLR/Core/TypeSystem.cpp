@@ -5524,7 +5524,20 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
 
         if (parserLeft.IsGenericInst || parserRight.IsGenericInst)
         {
-            if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
+            if (resLeft.GenericParamPosition == 0xFFFF && resRight.GenericParamPosition == 0xFFFF)
+            {
+                // need to check if type of generic parameters match
+                if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
+                {
+                    return false;
+                }
+
+                if (resLeft.DataType != resRight.DataType)
+                {
+                    return false;
+                }
+            }
+            else if (resLeft.GenericParamPosition != resRight.GenericParamPosition)
             {
                 return false;
             }
