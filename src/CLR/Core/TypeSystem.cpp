@@ -932,6 +932,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 m_data = assm->m_pCrossReference_TypeRef[index].Target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 m_target = assm->GetTypeDef(Type());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
+
                 return true;
 
             case TBL_TypeDef:
@@ -939,6 +944,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                 m_assm = assm;
                 m_target = assm->GetTypeDef(index);
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
+
                 return true;
 
             case TBL_GenericParam:
@@ -949,6 +959,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
                 m_target = m_assm->GetTypeDef(gp.Class.Type());
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
 
                 return true;
             }
@@ -1010,6 +1024,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         return false;
                 }
 
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
+
                 return true;
             }
 
@@ -1027,6 +1045,11 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 //     m_assm = g_CLR_RT_TypeSystem.m_assemblies[g_CLR_RT_WellKnownTypes.m_Object.Assembly() - 1];
                 //     m_target = m_assm->GetTypeDef(g_CLR_RT_WellKnownTypes.m_Object.Type());
                 // }
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+                Name = m_assm->GetString(m_target->Name);
+#endif
+
                 return true;
                 // the remaining data types aren't to be handled
                 break;
