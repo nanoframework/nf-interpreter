@@ -931,7 +931,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
             case TBL_TypeRef:
                 m_data = assm->m_pCrossReference_TypeRef[index].Target.m_data;
                 m_assm = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
-                m_target = assm->GetTypeDef(Type());
+                m_target = m_assm->GetTypeDef(Type());
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 Name = m_assm->GetString(m_target->Name);
