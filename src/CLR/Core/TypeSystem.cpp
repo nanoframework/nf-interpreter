@@ -1547,9 +1547,6 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection(const CLR_RT_ReflectionD
         ConvertToArray();
     }
 
-    m_handlerCls.Clear();
-    m_handlerGenericType.Clear();
-
     NANOCLR_NOCLEANUP();
 }
 
