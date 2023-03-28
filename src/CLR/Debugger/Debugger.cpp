@@ -2401,9 +2401,8 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     }
 
     // try to get value
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL);
-
 
     return true;
 }
@@ -2423,7 +2422,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
     }
 
     // try to get value
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
 
     return true;
@@ -2829,7 +2828,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
         }
 
-        //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+        // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
         return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
 
         return true;
@@ -2942,9 +2941,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
         }
     }
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
-
 
     return true;
 }
@@ -2994,9 +2992,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         }
     }
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
-
 
     return true;
 }
@@ -3008,7 +3005,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_GetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
 
     return true;
@@ -3034,9 +3031,8 @@ bool CLR_DBG_Debugger::Debugging_Value_SetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_SetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    //WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
+    // WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
-
 
     return true;
 }
@@ -3095,9 +3091,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
         }
     }
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
-
 
     return true;
 }
@@ -3129,9 +3124,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
         }
     }
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
-
 
     return true;
 }
@@ -3159,9 +3153,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
         }
     }
 
-   //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
-
 
     return true;
 }
@@ -3373,9 +3366,8 @@ bool CLR_DBG_Debugger::Debugging_Value_Assign(WP_Message *msg)
         blkDst = NULL;
     }
 
-    //WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL), false, NULL, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL);
-
 
     return true;
 }

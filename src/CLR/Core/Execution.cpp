@@ -77,7 +77,7 @@ HRESULT CLR_RT_ExecutionEngine::ExecutionEngine_Initialize()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     m_scratchPadArray = NULL; // CLR_RT_HeapBlock_Array*             m_scratchPadArray;
-#endif                        //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                        // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_APPDOMAINS)
     m_appDomains.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList                m_appDomains;
@@ -218,7 +218,7 @@ void CLR_RT_ExecutionEngine::ExecutionEngine_Cleanup()
     m_breakpointsNum = 0;
 
     CLR_DBG_Debugger::DeleteInstance();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
     CLR_PRF_Profiler::DeleteInstance();
@@ -395,7 +395,7 @@ void CLR_RT_ExecutionEngine::Relocate()
     NATIVE_PROFILE_CLR_CORE();
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_globalLock);
@@ -490,7 +490,7 @@ bool CLR_RT_ExecutionEngine::TryToUnloadAppDomains()
         SignalEvents(Event_AppDomain);
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         Breakpoint_Assemblies_Loaded();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     }
 
     return fAnyAppDomainsUnloaded;
@@ -589,7 +589,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET_MASK(StateProgramRunning, StateMask);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, g_CLR_RT_TypeSystem.m_entryPoint, NULL));
 
@@ -648,7 +648,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 
             CLR_RT_ExecutionEngine::ExecutionConstraint_Resume();
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (CLR_EE_IS(Compaction_Pending))
         {
@@ -1127,7 +1127,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         CLR_RT_Thread *th = NULL;
 
@@ -1170,7 +1170,7 @@ HRESULT CLR_RT_ExecutionEngine::ScheduleThreads(int maxContextSwitch)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_S_NO_READY_THREADS);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         }
 
         // If there is ready thread - decrease m_executionCounter for this (th) thread.
@@ -1496,9 +1496,9 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForClassOrValueTypes(
     return hb;
 }
 
-CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
+CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
     CLR_UINT32 flags,
-    const CLR_RT_TypeSpec_Index& genericType,
+    const CLR_RT_TypeSpec_Index &genericType,
     CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -1509,7 +1509,7 @@ CLR_RT_HeapBlock* CLR_RT_ExecutionEngine::ExtractHeapBlocksForGenericInstance(
     }
 
     flags = flags | CLR_RT_HeapBlock::HB_InitializeToZero;
-    CLR_RT_HeapBlock* hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
+    CLR_RT_HeapBlock *hb = ExtractHeapBlocks(m_heap, DATATYPE_GENERICINST, flags, length);
 
     if (hb)
     {
@@ -1874,7 +1874,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     // otherwise the comparison won't be possible
                     sig--;
 
-                    if(!assembly->FindTypeSpec(sig, typeSpecIndex))
+                    if (!assembly->FindTypeSpec(sig, typeSpecIndex))
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -1895,10 +1895,11 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     CLR_UINT8 genericParamPosition = *sig++;
 
                     CLR_RT_GenericParam_Index gpIndex;
-                        
+
                     assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
 
-                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                    CLR_RT_GenericParam_CrossReference gp =
+                        assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
                     cls = gp.Class;
                     dt = gp.DataType;
@@ -2141,7 +2142,10 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, CLR_UINT3
 
 //--//
 
-HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock& reference, const CLR_RT_TypeDef_Instance& typeDef, const CLR_RT_TypeSpec_Index& genericType)
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &typeDef,
+    const CLR_RT_TypeSpec_Index &genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2158,13 +2162,16 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock& refer
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &reference, const CLR_RT_TypeDef_Instance& instance, CLR_RT_TypeSpec_Instance& genericInstance)
+HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
+    CLR_RT_HeapBlock &reference,
+    const CLR_RT_TypeDef_Instance &instance,
+    CLR_RT_TypeSpec_Instance &genericInstance)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_RECORD_FIELDDEF* target = NULL;
-    CLR_RT_Assembly* assm = NULL;
+    const CLR_RECORD_FIELDDEF *target = NULL;
+    CLR_RT_Assembly *assm = NULL;
     CLR_RT_TypeDef_Instance instSub = instance;
 
     reference.SetObjectReference(NULL);
@@ -2172,13 +2179,13 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(CLR_RT_HeapBlock &refer
     int clsFields = instance.m_target->InstanceFieldsCount;
     int totFields = instance.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
-    CLR_RT_HeapBlock_GenericInstance* genericInst;
+    CLR_RT_HeapBlock_GenericInstance *genericInst;
 
-    genericInst = (CLR_RT_HeapBlock_GenericInstance*)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
+    genericInst =
+        (CLR_RT_HeapBlock_GenericInstance *)ExtractHeapBlocksForGenericInstance(0, genericInstance, totFields);
     CHECK_ALLOCATION(genericInst);
 
     reference.SetObjectReference(genericInst);
-
 
     //
     // Initialize field types, from last to first.
@@ -2729,7 +2736,7 @@ void CLR_RT_ExecutionEngine::CheckThreads(CLR_INT64 &timeoutMin, CLR_RT_DblLinke
         {
             continue;
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //
         // Check events.
@@ -3742,7 +3749,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_Exception_Intercepted(CLR_RT_StackFrame 
     Breakpoint_System_Event(hit, event, NULL, stack, NULL);
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

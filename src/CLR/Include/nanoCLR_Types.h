@@ -556,13 +556,13 @@ inline CLR_UINT32 CLR_UncompressStringToken(CLR_UINT32 tk)
 
 inline CLR_UINT32 CLR_UncompressTypeToken(CLR_UINT32 tk)
 {
-    static const NanoCLRTable c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam };
+    static const NanoCLRTable c_lookup[] = {TBL_TypeDef, TBL_TypeRef, TBL_TypeSpec, TBL_GenericParam};
     return CLR_TkFromType(c_lookup[(tk >> 14)], 0x3fff & tk);
 }
 
 inline CLR_UINT32 CLR_UncompressFieldToken(CLR_UINT32 tk)
 {
-    static const NanoCLRTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef };
+    static const NanoCLRTable c_lookup[2] = {TBL_FieldDef, TBL_FieldRef};
     return CLR_TkFromType(c_lookup[(tk >> 15)], 0x7fff & tk);
 }
 
@@ -1053,22 +1053,21 @@ struct CLR_RECORD_ASSEMBLY
     static CLR_UINT32 ComputeAssemblyHash(const char *name, const CLR_RECORD_VERSION &ver);
 };
 
-
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 // size of CLR_RECORDs
 // these have to match the struct used in MDP
 // when changing any of these structs need to update the constant in MDP
-#define sizeOf_CLR_RECORD_ASSEMBLYREF   10
-#define sizeOf_CLR_RECORD_TYPEREF       6
-#define sizeOf_CLR_RECORD_FIELDREF      6
-#define sizeOf_CLR_RECORD_METHODREF     6
-#define sizeOf_CLR_RECORD_TYPEDEF       27
-#define sizeOf_CLR_RECORD_FIELDDEF      8
-#define sizeOf_CLR_RECORD_METHODDEF     19
-#define sizeOf_CLR_RECORD_TYPESPEC      2
-#define sizeOf_CLR_RECORD_GENERICPARAM  10
-#define sizeOf_CLR_RECORD_METHODSPEC    6
+#define sizeOf_CLR_RECORD_ASSEMBLYREF  10
+#define sizeOf_CLR_RECORD_TYPEREF      6
+#define sizeOf_CLR_RECORD_FIELDREF     6
+#define sizeOf_CLR_RECORD_METHODREF    6
+#define sizeOf_CLR_RECORD_TYPEDEF      27
+#define sizeOf_CLR_RECORD_FIELDDEF     8
+#define sizeOf_CLR_RECORD_METHODDEF    19
+#define sizeOf_CLR_RECORD_TYPESPEC     2
+#define sizeOf_CLR_RECORD_GENERICPARAM 10
+#define sizeOf_CLR_RECORD_METHODSPEC   6
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
@@ -1110,7 +1109,7 @@ struct CLR_RECORD_FIELDREF
     ///
     CLR_STRING Name;
 
-    /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing this field 
+    /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing this field
     CLR_EncodedTypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
@@ -1128,7 +1127,7 @@ struct CLR_RECORD_FIELDREF
     ///
     NanoCLRTable Owner() const
     {
-        static const NanoCLRTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+        static const NanoCLRTable c_lookup[2] = {TBL_TypeRef, TBL_TypeSpec};
 
         return c_lookup[(encodedOwner >> 15)];
     }
@@ -1163,7 +1162,7 @@ struct CLR_RECORD_METHODREF
     ///
     NanoCLRTable Owner() const
     {
-        static const NanoCLRTable c_lookup[2] = { TBL_TypeRef, TBL_TypeSpec };
+        static const NanoCLRTable c_lookup[2] = {TBL_TypeRef, TBL_TypeSpec};
 
         return c_lookup[(encodedOwner >> 15)];
     }
@@ -1329,7 +1328,7 @@ struct CLR_RECORD_TYPEDEF
     ///
     NanoCLRTable Extends() const
     {
-        static const NanoCLRTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+        static const NanoCLRTable c_lookup[2] = {TBL_TypeDef, TBL_TypeRef};
 
         return c_lookup[(encodedExtends >> 15)];
     }
@@ -1345,7 +1344,7 @@ struct CLR_RECORD_TYPEDEF
     ///
     NanoCLRTable EnclosingType() const
     {
-        static const NanoCLRTable c_lookup[2] = { TBL_TypeDef, TBL_TypeRef };
+        static const NanoCLRTable c_lookup[2] = {TBL_TypeDef, TBL_TypeRef};
 
         return c_lookup[(encodedEnclosingType >> 15)];
     }
@@ -1558,9 +1557,9 @@ struct CLR_RECORD_ATTRIBUTE
     ///
     CLR_SIG data;
 
-    CLR_UINT32 Key() const
+    CLR_UINT16 Key() const
     {
-        return *(CLR_UINT32 *)&OwnerType;
+        return *(CLR_UINT16 *)&OwnerType;
     }
 };
 
@@ -1627,7 +1626,7 @@ struct CLR_RECORD_METHODSPEC
     ///
     NanoCLRTable MethodKind() const
     {
-        static const NanoCLRTable c_lookup[2] = { TBL_MethodDef, TBL_MethodRef };
+        static const NanoCLRTable c_lookup[2] = {TBL_MethodDef, TBL_MethodRef};
 
         return c_lookup[(encodedMethod >> 15)];
     }
