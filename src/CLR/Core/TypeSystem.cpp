@@ -4207,7 +4207,7 @@ bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
 
     for (int i = 0; i <= genericParameterPosition; i++)
     {
-        if (parser.Advance(element) != S_OK)
+        if (FAILED(parser.Advance(element)))
         {
             return false;
         }
