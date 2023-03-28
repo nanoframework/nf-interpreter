@@ -982,25 +982,18 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 // store parameter position
                 CLR_INT8 genericParamPosition = (CLR_INT8)element.GenericParamPosition;
 
-                // get the caller generic type
-                CLR_RT_TypeSpec_Instance tsInstance;
-                tsInstance.InitializeFromIndex(*caller->genericType);
-
                 switch (element.DataType)
                 {
                     case DATATYPE_VAR:
                     {
-                        CLR_RT_GenericParam_Index gpIndex;
+                        CLR_RT_TypeDef_Index typeDef;
+                        NanoCLRDataType dataType;
 
-                        caller->m_assm->FindGenericParamAtTypeDef(*caller, genericParamPosition, gpIndex);
+                        caller->m_assm->FindGenericParamAtTypeSpec(*caller, genericParamPosition, typeDef, dataType);
 
-                        CLR_RT_GenericParam_CrossReference gp =
-                            caller->m_assm->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
-
-                        // get TypeDef instance from generic parameter index
-                        m_data = gp.Class.m_data;
-                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
-                        m_target = m_assm->GetTypeDef(gp.Class.Type());
+                        m_data = typeDef.m_data;
+                        m_assm = g_CLR_RT_TypeSystem.m_assemblies[typeDef.Assembly() - 1];
+                        m_target = m_assm->GetTypeDef(typeDef.Type());
 
                         break;
                     }
@@ -4196,32 +4189,34 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericPa
     return false;
 }
 
-bool CLR_RT_Assembly::FindGenericParamAtTypeDef(
+bool CLR_RT_Assembly::FindGenericParamAtTypeSpec(
     CLR_RT_MethodDef_Instance md,
     CLR_UINT32 genericParameterPosition,
-    CLR_RT_GenericParam_Index &index)
+    CLR_RT_TypeDef_Index &index,
+    NanoCLRDataType &dataType)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    CLR_INDEX indexType = md.CrossReference().GetOwner();
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(md.m_assm, md.m_assm->GetTypeSpec(md.genericType->TypeSpec()));
 
-    CLR_INDEX paramIndex = GetTypeDef(indexType)->FirstGenericParam;
+    CLR_RT_SignatureParser::Element element;
 
-    // sanity check for valid parameter index
-    if (paramIndex != CLR_EmptyIndex)
+    // get type
+    parser.Advance(element);
+
+    for (int i = 0; i <= genericParameterPosition; i++)
     {
-        paramIndex += genericParameterPosition;
-
-        index.Set(m_index, paramIndex);
-
-        return true;
+        if (parser.Advance(element) != S_OK)
+        {
+            return false;
+        }
     }
-    else
-    {
-        index.Clear();
 
-        return false;
-    }
+    index = element.Class;
+    dataType = element.DataType;
+
+    return true;
 }
 
 bool CLR_RT_Assembly::FindGenericParamAtMethodDef(

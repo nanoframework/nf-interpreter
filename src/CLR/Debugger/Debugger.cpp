@@ -2767,16 +2767,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             if (res.DataType == DATATYPE_VAR)
             {
                 // Generic parameter in a generic TypeDef
-                CLR_RT_Assembly *assembly = md.m_assm;
-
-                CLR_RT_GenericParam_Index gpIndex;
-                assembly->FindGenericParamAtTypeDef(md, res.GenericParamPosition, gpIndex);
-
-                CLR_RT_GenericParam_CrossReference gp =
-                    assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
-
-                targetClass = gp.Class;
-                targetDataType = gp.DataType;
+                md.m_assm->FindGenericParamAtTypeSpec(md, res.GenericParamPosition, targetClass, targetDataType);
 
                 // isGenericInstance = true;
             }

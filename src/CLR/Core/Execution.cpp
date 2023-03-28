@@ -1884,14 +1884,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 {
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    CLR_RT_GenericParam_Index gpIndex;
-
-                    assembly->FindGenericParamAtTypeDef(methodDefInstance, genericParamPosition, gpIndex);
-
-                    CLR_RT_GenericParam_CrossReference gp = assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
-
-                    cls = gp.Class;
-                    dt = gp.DataType;
+                    methodDefInstance.m_assm
+                        ->FindGenericParamAtTypeSpec(methodDefInstance, genericParamPosition, cls, dt);
 
                     goto done;
                 }
