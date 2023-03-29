@@ -24,14 +24,14 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     if ((CLR_INT32)length < 0)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    if (reflex.m_kind != REFLECTION_TYPE)
+    if (reflex.kind != REFLECTION_TYPE)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    if (reflex.m_levels == 1)
+    if (reflex.levels == 1)
     {
-        cls = reflex.m_data.m_type;
+        cls = reflex.data.type;
     }
     else
     {
@@ -73,9 +73,9 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
 
     CLR_RT_ReflectionDef_Index reflex;
 
-    reflex.m_kind = REFLECTION_TYPE;
-    reflex.m_levels = 1;
-    reflex.m_data.m_type = cls;
+    reflex.kind = REFLECTION_TYPE;
+    reflex.levels = 1;
+    reflex.data.type = cls;
 
     NANOCLR_SET_AND_LEAVE(CreateInstance(reference, length, reflex));
 
@@ -108,7 +108,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
 
-    ref.ReflectionData().m_levels++;
+    ref.ReflectionData().levels++;
 
     NANOCLR_SET_AND_LEAVE(CreateInstance(reference, length, ref.ReflectionData()));
 
@@ -128,7 +128,7 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
     if (m_fReference)
     {
         NanoCLRDataType dt = (NanoCLRDataType)m_typeOfElement;
-        bool fAllocate = (reflex.m_levels == 1 && dt == DATATYPE_VALUETYPE);
+        bool fAllocate = (reflex.levels == 1 && dt == DATATYPE_VALUETYPE);
         CLR_RT_HeapBlock *ptr = (CLR_RT_HeapBlock *)data;
 
         switch (dt)
@@ -150,7 +150,7 @@ HRESULT CLR_RT_HeapBlock_Array::ClearElements(int index, int length)
 
             if (fAllocate)
             {
-                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, reflex.m_data.m_type));
+                NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*ptr, reflex.data.type));
             }
 
             ptr++;

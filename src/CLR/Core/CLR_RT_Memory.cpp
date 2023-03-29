@@ -22,11 +22,11 @@ static int s_PreHeapInitIndex = 0;
 void CLR_RT_Memory::Reset()
 {
     NATIVE_PROFILE_CLR_CORE();
-    ::HeapLocation(s_CLR_RT_Heap.m_location, s_CLR_RT_Heap.m_size);
+    ::HeapLocation(s_CLR_RT_Heap.location, s_CLR_RT_Heap.size);
 
     // adjust GC thresholds
-    g_CLR_RT_GarbageCollector.c_memoryThreshold = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_RATIO);
-    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_UPPER_RATIO);
+    g_CLR_RT_GarbageCollector.c_memoryThreshold = (CLR_UINT32)(s_CLR_RT_Heap.size * HEAP_SIZE_THRESHOLD_RATIO);
+    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = (CLR_UINT32)(s_CLR_RT_Heap.size * HEAP_SIZE_THRESHOLD_UPPER_RATIO);
 
 #if defined(NANOCLR_TRACE_MALLOC)
     s_TotalAllocated = 0;
@@ -38,11 +38,11 @@ void *CLR_RT_Memory::SubtractFromSystem(size_t len)
     NATIVE_PROFILE_CLR_CORE();
     len = ROUNDTOMULTIPLE(len, CLR_UINT32);
 
-    if (len <= s_CLR_RT_Heap.m_size)
+    if (len <= s_CLR_RT_Heap.size)
     {
-        s_CLR_RT_Heap.m_size -= (CLR_UINT32)len;
+        s_CLR_RT_Heap.size -= (CLR_UINT32)len;
 
-        return &s_CLR_RT_Heap.m_location[s_CLR_RT_Heap.m_size];
+        return &s_CLR_RT_Heap.location[s_CLR_RT_Heap.size];
     }
 
     return NULL;
@@ -64,7 +64,7 @@ void CLR_RT_Memory::Release(void *ptr)
     NATIVE_PROFILE_CLR_CORE();
 
     // CLR heap not initialized yet, return (this is not an error condition because we allow pre
-    if (s_CLR_RT_Heap.m_size == 0)
+    if (s_CLR_RT_Heap.size == 0)
     {
         return;
     }
@@ -125,7 +125,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    if (s_CLR_RT_Heap.m_size == 0)
+    if (s_CLR_RT_Heap.size == 0)
     {
         unsigned char *heapStart = NULL;
         unsigned int heapSize = 0;

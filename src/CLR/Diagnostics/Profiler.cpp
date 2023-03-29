@@ -45,7 +45,7 @@ void CLR_PRF_Profiler::SendMemoryLayout()
     // Send Memory Layout
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Memory_Layout, CLR_PRF_CMDS::Bits::CommandHeader);
     PackAndWriteBits(0);
-    PackAndWriteBits(s_CLR_RT_Heap.m_size);
+    PackAndWriteBits(s_CLR_RT_Heap.size);
     Stream_Send();
 }
 
@@ -291,8 +291,8 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
                 // Special case needed to dump out array data type and levels.
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
 
-                PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
-                PackAndWriteBits(array->ReflectionDataConst().m_levels);
+                PackAndWriteBits(array->ReflectionDataConst().data.type);
+                PackAndWriteBits(array->ReflectionDataConst().levels);
 
                 if (array->m_fReference)
                 {
@@ -481,7 +481,7 @@ void CLR_PRF_Profiler::DumpEndOfRefsList()
 void CLR_PRF_Profiler::DumpPointer(void *ptr)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location));
+    PackAndWriteBits((CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.location));
 }
 
 void CLR_PRF_Profiler::DumpSingleReference(CLR_RT_HeapBlock *ptr)
@@ -653,8 +653,8 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
             else if (dt == DATATYPE_SZARRAY)
             {
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
-                PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
-                PackAndWriteBits(array->ReflectionDataConst().m_levels);
+                PackAndWriteBits(array->ReflectionDataConst().data.type);
+                PackAndWriteBits(array->ReflectionDataConst().levels);
             }
             Stream_Send();
         }

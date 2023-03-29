@@ -45,9 +45,9 @@ HRESULT Library_corlib_native_System_Object::GetType___SystemType(CLR_RT_StackFr
 
     if (pObj && arg0.DataType() == DATATYPE_REFLECTION)
     {
-        index.m_kind = REFLECTION_TYPE;
-        index.m_levels = 0;
-        index.m_data.m_type.data = desc.m_handlerCls.data;
+        index.kind = REFLECTION_TYPE;
+        index.levels = 0;
+        index.data.type.data = desc.m_handlerCls.data;
     }
     else
     {

@@ -115,7 +115,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::Initialize( CLR_RT_St
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
                 
-        obj = &obj[ instFD.CrossReference().m_offset ];
+        obj = &obj[ instFD.CrossReference().offset ];
     }
 
     NANOCLR_NOCLEANUP();

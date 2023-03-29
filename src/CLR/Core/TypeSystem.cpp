@@ -77,31 +77,31 @@ bool s_CLR_RT_fTimeWarp = false;
 void CLR_RT_ReflectionDef_Index::Clear()
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_kind = REFLECTION_INVALID;
-    m_levels = 0;
-    m_data.m_raw = 0;
+    kind = REFLECTION_INVALID;
+    levels = 0;
+    data.raw = 0;
 }
 
 CLR_UINT32 CLR_RT_ReflectionDef_Index::GetTypeHash() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    switch (m_kind)
+    switch (kind)
     {
         case REFLECTION_TYPE:
         {
             CLR_RT_TypeDef_Instance inst;
 
-            if (m_levels != 0)
+            if (levels != 0)
                 return 0;
 
-            if (!inst.InitializeFromIndex(m_data.m_type))
+            if (!inst.InitializeFromIndex(data.type))
                 return 0;
 
-            return inst.CrossReference().m_hash;
+            return inst.CrossReference().hash;
         }
 
         case REFLECTION_TYPE_DELAYED:
-            return m_data.m_raw;
+            return data.raw;
     }
 
     return 0;
@@ -110,9 +110,9 @@ CLR_UINT32 CLR_RT_ReflectionDef_Index::GetTypeHash() const
 void CLR_RT_ReflectionDef_Index::InitializeFromHash(CLR_UINT32 hash)
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_kind = REFLECTION_TYPE_DELAYED;
-    m_levels = 0;
-    m_data.m_raw = hash;
+    kind = REFLECTION_TYPE_DELAYED;
+    levels = 0;
+    data.raw = hash;
 }
 
 CLR_UINT64 CLR_RT_ReflectionDef_Index::GetRawData() const
@@ -139,7 +139,7 @@ bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_RT_Assembly_
     NATIVE_PROFILE_CLR_CORE();
     if (ref.DataType() == DATATYPE_REFLECTION)
     {
-        return inst.InitializeFromIndex(ref.ReflectionDataConst().m_data.m_assm);
+        return inst.InitializeFromIndex(ref.ReflectionDataConst().data.assembly);
     }
 
     return false;
@@ -161,11 +161,11 @@ bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_RT_MethodDef
     NATIVE_PROFILE_CLR_CORE();
     if (ref.DataType() == DATATYPE_REFLECTION)
     {
-        switch (ref.ReflectionData().m_kind)
+        switch (ref.ReflectionData().kind)
         {
             case REFLECTION_CONSTRUCTOR:
             case REFLECTION_METHOD:
-                return inst.InitializeFromIndex(ref.ReflectionDataConst().m_data.m_method);
+                return inst.InitializeFromIndex(ref.ReflectionDataConst().data.method);
         }
     }
 
@@ -175,9 +175,9 @@ bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_RT_MethodDef
 bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_RT_FieldDef_Instance &inst)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (ref.DataType() == DATATYPE_REFLECTION && ref.ReflectionData().m_kind == REFLECTION_FIELD)
+    if (ref.DataType() == DATATYPE_REFLECTION && ref.ReflectionData().kind == REFLECTION_FIELD)
     {
-        return inst.InitializeFromIndex(ref.ReflectionDataConst().m_data.m_field);
+        return inst.InitializeFromIndex(ref.ReflectionDataConst().data.field);
     }
 
     return false;
@@ -501,11 +501,11 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                 NANOCLR_CHECK_HRESULT(desc.InitializeFromObject(*ptr));
             }
 
-            desc.m_handlerCls.InitializeFromIndex(desc.m_reflex.m_data.m_type);
+            desc.m_handlerCls.InitializeFromIndex(desc.m_reflex.data.type);
 
-            res.Levels = desc.m_reflex.m_levels;
+            res.Levels = desc.m_reflex.levels;
             res.DataType = (NanoCLRDataType)desc.m_handlerCls.target->dataType;
-            res.Class = desc.m_reflex.m_data.m_type;
+            res.Class = desc.m_reflex.data.type;
 
             //
             // Special case for Object types.
@@ -560,7 +560,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                             break;
 
                             case TBL_TypeRef:
-                                res.Class = Assembly->m_pCrossReference_TypeRef[index].Target;
+                                res.Class = Assembly->m_pCrossReference_TypeRef[index].target;
                                 break;
 
                             case TBL_TypeDef:
@@ -748,23 +748,23 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
     const CLR_RT_TypeDef_Index *ptr = NULL;
 
     if (levels)
-        *levels = reflex.m_levels;
+        *levels = reflex.levels;
 
-    switch (reflex.m_kind)
+    switch (reflex.kind)
     {
         case REFLECTION_TYPE:
-            if (reflex.m_levels > 0 && levels == NULL)
+            if (reflex.levels > 0 && levels == NULL)
             {
                 ptr = &g_CLR_RT_WellKnownTypes.m_Array;
             }
             else
             {
-                ptr = &reflex.m_data.m_type;
+                ptr = &reflex.data.type;
             }
             break;
 
         case REFLECTION_TYPE_DELAYED:
-            if (g_CLR_RT_TypeSystem.FindTypeDef(reflex.m_data.m_raw, cls))
+            if (g_CLR_RT_TypeSystem.FindTypeDef(reflex.data.raw, cls))
             {
                 ptr = &cls;
             }
@@ -929,7 +929,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_TypeRef:
-                data = assm->m_pCrossReference_TypeRef[index].Target.data;
+                data = assm->m_pCrossReference_TypeRef[index].target.data;
                 assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 target = assembly->GetTypeDef(Type());
 
@@ -955,10 +955,10 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
             {
                 CLR_RT_GenericParam_CrossReference gp = assm->m_pCrossReference_GenericParam[index];
 
-                Set(gp.Class.Assembly(), gp.Class.Type());
+                Set(gp.classTypeDef.Assembly(), gp.classTypeDef.Type());
 
-                assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
-                target = assembly->GetTypeDef(gp.Class.Type());
+                assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
+                target = assembly->GetTypeDef(gp.classTypeDef.Type());
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -1007,9 +1007,9 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                             caller->assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
                         // get TypeDef instance from generic parameter index
-                        data = gp.Class.data;
-                        assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.Class.Assembly() - 1];
-                        target = assembly->GetTypeDef(gp.Class.Type());
+                        data = gp.classTypeDef.data;
+                        assembly = g_CLR_RT_TypeSystem.m_assemblies[gp.classTypeDef.Assembly() - 1];
+                        target = assembly->GetTypeDef(gp.classTypeDef.Type());
 
                         break;
                     }
@@ -1074,7 +1074,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
                     break;
 
                 case TBL_TypeRef:
-                    cls = &assembly->m_pCrossReference_TypeRef[target->ExtendsIndex()].Target;
+                    cls = &assembly->m_pCrossReference_TypeRef[target->ExtendsIndex()].target;
                     break;
 
                 // all others are not supported
@@ -1095,7 +1095,7 @@ bool CLR_RT_TypeDef_Instance::HasFinalizer() const
 {
     NATIVE_PROFILE_CLR_CORE();
     return NANOCLR_INDEX_IS_VALID(*this) &&
-           (CrossReference().m_flags & CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer);
+           (CrossReference().flags & CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer);
 }
 
 //////////////////////////////
@@ -1150,7 +1150,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                 switch (fr->Owner())
                 {
                     case TBL_TypeRef:
-                        data = assm->m_pCrossReference_FieldRef[fr->OwnerIndex()].Target.data;
+                        data = assm->m_pCrossReference_FieldRef[fr->OwnerIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetFieldDef(Field());
 
@@ -1161,7 +1161,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
 
                     case TBL_TypeSpec:
                     {
-                        genericType = &assm->m_pCrossReference_FieldRef[index].GenericType;
+                        genericType = &assm->m_pCrossReference_FieldRef[index].genericType;
 
                         const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
 
@@ -1267,7 +1267,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 {
                     // owner is TypeSpec
 
-                    genericType = &assm->m_pCrossReference_MethodRef[index].GenericType;
+                    genericType = &assm->m_pCrossReference_MethodRef[index].genericType;
 
                     const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
 
@@ -1288,7 +1288,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                     // owner is TypeRef
 
                     // get data for MethodRef (from index)
-                    data = assm->m_pCrossReference_MethodRef[index].Target.data;
+                    data = assm->m_pCrossReference_MethodRef[index].target.data;
                     // get assembly for this type ref
                     assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                     // grab the MethodDef
@@ -1336,7 +1336,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         break;
 
                     case TBL_MethodRef:
-                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].Target.data;
+                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetMethodDef(Method());
 
@@ -1348,7 +1348,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 }
 
                 // get generic type
-                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].GenericType;
+                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -1376,7 +1376,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         return true;
 
                     case TBL_MethodRef:
-                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].Target.data;
+                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetMethodDef(Method());
 
@@ -1393,7 +1393,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 break;
 
                 // get generic type
-                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].GenericType;
+                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -1510,9 +1510,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromDataType(NanoCLRDataType dt)
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
-            m_reflex.m_kind = REFLECTION_TYPE;
-            m_reflex.m_levels = 0;
-            m_reflex.m_data.m_type = *dtl.m_cls;
+            m_reflex.kind = REFLECTION_TYPE;
+            m_reflex.levels = 0;
+            m_reflex.data.type = *dtl.m_cls;
         }
         else
         {
@@ -1542,7 +1542,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromReflection(const CLR_RT_ReflectionD
 
     if (levels)
     {
-        m_reflex.m_levels = levels;
+        m_reflex.levels = levels;
 
         ConvertToArray();
     }
@@ -1585,9 +1585,9 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
 
         m_flags = dtl.m_flags & CLR_RT_DataTypeLookup::c_SemanticMask;
 
-        m_reflex.m_kind = REFLECTION_TYPE;
-        m_reflex.m_levels = 0;
-        m_reflex.m_data.m_type = m_handlerCls;
+        m_reflex.kind = REFLECTION_TYPE;
+        m_reflex.levels = 0;
+        m_reflex.data.type = m_handlerCls;
 
         if (m_flags == CLR_RT_DataTypeLookup::c_Primitive)
         {
@@ -1645,8 +1645,8 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromGenericType(const CLR_RT_TypeSpec_I
     {
         m_flags = CLR_RT_DataTypeLookup::c_ManagedType | CLR_RT_DataTypeLookup::c_GenericInstance;
 
-        m_reflex.m_kind = REFLECTION_GENERICTYPE;
-        m_reflex.m_data.m_genericType = m_handlerGenericType;
+        m_reflex.kind = REFLECTION_GENERICTYPE;
+        m_reflex.data.genericType = m_handlerGenericType;
     }
 
     m_handlerCls.Clear();
@@ -1692,7 +1692,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromSignatureParser(CLR_RT_SignaturePar
 
     if (res.Levels)
     {
-        m_reflex.m_levels = res.Levels;
+        m_reflex.levels = res.Levels;
 
         ConvertToArray();
     }
@@ -1739,7 +1739,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
         {
             case DATATYPE_SZARRAY:
                 reflex = &obj->ReflectionDataConst();
-                cls = &reflex->m_data.m_type;
+                cls = &reflex->data.type;
                 break;
 
             case DATATYPE_VALUETYPE:
@@ -1777,7 +1777,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
             case DATATYPE_REFLECTION:
                 reflex = &(obj->ReflectionDataConst());
 
-                switch (reflex->m_kind)
+                switch (reflex->kind)
                 {
                     case REFLECTION_ASSEMBLY:
                         cls = &g_CLR_RT_WellKnownTypes.m_Assembly;
@@ -1816,7 +1816,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                 }
 
                 reflex = &array->ReflectionDataConst();
-                cls = &reflex->m_data.m_type;
+                cls = &reflex->data.type;
             }
             break;
 
@@ -1879,7 +1879,7 @@ bool CLR_RT_TypeDescriptor::ShouldEmitHash()
         return false;
     }
 
-    if (m_handlerCls.CrossReference().m_hash != 0)
+    if (m_handlerCls.CrossReference().hash != 0)
     {
         return true;
     }
@@ -1890,18 +1890,18 @@ bool CLR_RT_TypeDescriptor::ShouldEmitHash()
 bool CLR_RT_TypeDescriptor::GetElementType(CLR_RT_TypeDescriptor &sub)
 {
     NATIVE_PROFILE_CLR_CORE();
-    switch (m_reflex.m_levels)
+    switch (m_reflex.levels)
     {
         case 0:
             return false;
 
         case 1:
-            sub.InitializeFromType(m_reflex.m_data.m_type);
+            sub.InitializeFromType(m_reflex.data.type);
             break;
 
         default:
             sub = *this;
-            sub.m_reflex.m_levels--;
+            sub.m_reflex.levels--;
             break;
     }
 
@@ -2193,9 +2193,9 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_TypeDef_CrossReference *dst = this->m_pCrossReference_TypeDef;
         for (i = 0; i < this->m_pTablesSize[TBL_TypeDef]; i++, src++, dst++)
         {
-            dst->m_flags = 0;
-            dst->m_totalFields = 0;
-            dst->m_hash = 0;
+            dst->flags = 0;
+            dst->totalFields = 0;
+            dst->hash = 0;
         }
     }
 
@@ -2204,7 +2204,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_FieldDef_CrossReference *dst = this->m_pCrossReference_FieldDef;
         for (i = 0; i < this->m_pTablesSize[TBL_FieldDef]; i++, src++, dst++)
         {
-            dst->m_offset = CLR_EmptyIndex;
+            dst->offset = CLR_EmptyIndex;
         }
     }
 
@@ -2213,7 +2213,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_MethodDef_CrossReference *dst = this->m_pCrossReference_MethodDef;
         for (i = 0; i < this->m_pTablesSize[TBL_MethodDef]; i++, src++, dst++)
         {
-            dst->m_data = CLR_EmptyIndex;
+            dst->data = CLR_EmptyIndex;
         }
     }
 
@@ -2222,7 +2222,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_GenericParam_CrossReference *dst = this->m_pCrossReference_GenericParam;
         for (i = 0; i < this->m_pTablesSize[TBL_GenericParam]; i++, src++, dst++)
         {
-            dst->m_data = CLR_EmptyIndex;
+            dst->data = CLR_EmptyIndex;
         }
     }
 
@@ -2231,7 +2231,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_MethodSpec_CrossReference *dst = this->m_pCrossReference_MethodSpec;
         for (i = 0; i < this->m_pTablesSize[TBL_MethodSpec]; i++, src++, dst++)
         {
-            dst->m_data = CLR_EmptyIndex;
+            dst->data = CLR_EmptyIndex;
         }
     }
 
@@ -2240,7 +2240,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
         CLR_RT_TypeSpec_CrossReference *dst = this->m_pCrossReference_TypeSpec;
         for (i = 0; i < this->m_pTablesSize[TBL_TypeSpec]; i++, src++, dst++)
         {
-            dst->GenericType.data = 0;
+            dst->genericType.data = 0;
         }
     }
 
@@ -2526,7 +2526,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
     {
         const char *szName = GetString(src->name);
 
-        if (dst->m_target == NULL)
+        if (dst->target == NULL)
         {
             CLR_RT_Assembly *target = g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, false);
 
@@ -2557,7 +2557,7 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
             }
             else
             {
-                dst->m_target = target;
+                dst->target = target;
             }
         }
     }
@@ -2607,7 +2607,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         {
             CLR_RT_TypeDef_Instance inst;
 
-            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->scope & 0x7FFF].Target) == false)
+            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->scope & 0x7FFF].target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->scope);
@@ -2621,7 +2621,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
             }
 
             const char *szName = GetString(src->name);
-            if (inst.assembly->FindTypeDef(szName, inst.Type(), dst->Target) == false)
+            if (inst.assembly->FindTypeDef(szName, inst.Type(), dst->target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s\r\n", szName);
@@ -2636,7 +2636,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         }
         else
         {
-            CLR_RT_Assembly *assm = m_pCrossReference_AssemblyRef[src->scope].m_target;
+            CLR_RT_Assembly *assm = m_pCrossReference_AssemblyRef[src->scope].target;
             if (assm == NULL)
             {
                 NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: assm is null\n");
@@ -2644,7 +2644,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
 
             const char *szNameSpace = GetString(src->nameSpace);
             const char *szName = GetString(src->name);
-            if (assm->FindTypeDef(szName, szNameSpace, dst->Target) == false)
+            if (assm->FindTypeDef(szName, szNameSpace, dst->target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown type: %s.%s\r\n", szNameSpace, szName);
@@ -2684,7 +2684,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].Target;
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].target;
                 break;
 
                 // case CLR_MemberRefParent::MRP_TypeDef:
@@ -2744,7 +2744,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             }
 
             if (!typeSpecInstance.assembly
-                     ->FindFieldDef(typeSpecInstance.target, fieldName, this, src->signature, dst->Target))
+                     ->FindFieldDef(typeSpecInstance.target, fieldName, this, src->signature, dst->target))
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
@@ -2758,11 +2758,11 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             }
 
             // set TypeSpec
-            dst->GenericType.data = typeSpec.data;
+            dst->genericType.data = typeSpec.data;
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
         {
-            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].Target) == false)
+            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
@@ -2783,7 +2783,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
 #endif
 
             if (typeDefInstance.assembly
-                    ->FindFieldDef(typeDefInstance.target, fieldName, this, src->signature, dst->Target) == false)
+                    ->FindFieldDef(typeDefInstance.target, fieldName, this, src->signature, dst->target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown FieldRef: %s\r\n", fieldName);
@@ -2797,7 +2797,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
             }
 
             // invalidate GenericType
-            dst->GenericType.data = CLR_EmptyToken;
+            dst->genericType.data = CLR_EmptyToken;
         }
     }
 
@@ -2829,7 +2829,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].Target;
+                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].target;
                 break;
 
                 // case CLR_MemberRefParent::MRP_TypeDef:
@@ -2888,12 +2888,12 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 #endif
             }
 
-            if (typeSpecInstance.assembly->FindMethodDef(typeSpecInstance.target, name, this, src->signature, dst->Target))
+            if (typeSpecInstance.assembly->FindMethodDef(typeSpecInstance.target, name, this, src->signature, dst->target))
             {
                 fGot = true;
 
                 // set TypeSpec
-                dst->GenericType.data = typeSpec.data;
+                dst->genericType.data = typeSpec.data;
             }
 
             if (fGot == false)
@@ -2943,12 +2943,12 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
 
             while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
             {
-                if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, name, this, src->signature, dst->Target))
+                if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, name, this, src->signature, dst->target))
                 {
                     fGot = true;
 
                     // invalidate GenericType
-                    dst->GenericType.data = CLR_EmptyToken;
+                    dst->genericType.data = CLR_EmptyToken;
 
                     break;
                 }
@@ -2999,11 +2999,11 @@ HRESULT CLR_RT_Assembly::Resolve_TypeSpec()
 
     ITERATE_THROUGH_RECORDS(this, i, TypeSpec, TYPESPEC)
     {
-        dst->GenericType.Set(assemblyIndex, i);
+        dst->genericType.Set(assemblyIndex, i);
 
         CLR_RT_TypeSpec_Instance inst;
 
-        if (inst.InitializeFromIndex(dst->GenericType) == false)
+        if (inst.InitializeFromIndex(dst->genericType) == false)
         {
 #if !defined(BUILD_RTM)
             CLR_Debug::Printf("Resolve TypeSpec: can't create TypeSpec instance: %08x\r\n", src->signature);
@@ -3036,7 +3036,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             for (; num; num--, fd++)
             {
-                fd->m_offset = iStaticFields++;
+                fd->offset = iStaticFields++;
             }
         }
 
@@ -3054,7 +3054,7 @@ void CLR_RT_Assembly::Resolve_Link()
             {
                 if (inst.target->flags & CLR_RECORD_TYPEDEF::TD_HasFinalizer)
                 {
-                    dst->m_flags |= CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer;
+                    dst->flags |= CLR_RT_TypeDef_CrossReference::TD_CR_HasFinalizer;
                 }
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -3067,7 +3067,7 @@ void CLR_RT_Assembly::Resolve_Link()
                 tot += inst.target->instanceFieldsCount;
             } while (inst.SwitchToParent());
 
-            dst->m_totalFields = tot;
+            dst->totalFields = tot;
 
             //--//
 
@@ -3079,7 +3079,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             for (; num; num--, i++, fd++)
             {
-                fd->m_offset = i;
+                fd->offset = i;
             }
         }
 
@@ -3093,7 +3093,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             for (; num; num--, md++)
             {
-                md->m_data = indexType;
+                md->data = indexType;
             }
         }
 
@@ -3116,8 +3116,8 @@ void CLR_RT_Assembly::Resolve_Link()
 
                     gp->m_target = gpIndex;
 
-                    gp->m_data = indexType;
-                    gp->m_TypeOrMethodDef = TBL_TypeDef;
+                    gp->data = indexType;
+                    gp->typeOrMethodDef = TBL_TypeDef;
 
                     CLR_RT_SignatureParser sub;
                     if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
@@ -3127,17 +3127,17 @@ void CLR_RT_Assembly::Resolve_Link()
                         // get generic param type
                         sub.Advance(res);
 
-                        gp->DataType = res.DataType;
-                        gp->Class = res.Class;
+                        gp->dataType = res.DataType;
+                        gp->classTypeDef = res.Class;
                     }
                     else
                     {
-                        gp->DataType = DATATYPE_VOID;
+                        gp->dataType = DATATYPE_VOID;
 
                         CLR_RT_TypeDef_Index td;
                         td.Clear();
 
-                        gp->Class = td;
+                        gp->classTypeDef = td;
                     }
                 }
             }
@@ -3969,8 +3969,8 @@ void CLR_RT_Assembly::Resolve_MethodDef()
 
                 gp->m_target = gpIndex;
 
-                gp->m_data = indexMethod;
-                gp->m_TypeOrMethodDef = TBL_MethodDef;
+                gp->data = indexMethod;
+                gp->typeOrMethodDef = TBL_MethodDef;
 
                 CLR_RT_SignatureParser sub;
                 if (sub.Initialize_GenericParamTypeSignature(this, GetGenericParam(indexGenericParam)))
@@ -3980,17 +3980,17 @@ void CLR_RT_Assembly::Resolve_MethodDef()
                     // get generic param type
                     sub.Advance(res);
 
-                    gp->DataType = res.DataType;
-                    gp->Class = res.Class;
+                    gp->dataType = res.DataType;
+                    gp->classTypeDef = res.Class;
                 }
                 else
                 {
-                    gp->DataType = DATATYPE_VOID;
+                    gp->dataType = DATATYPE_VOID;
 
                     CLR_RT_TypeDef_Index td;
                     td.Clear();
 
-                    gp->Class = td;
+                    gp->classTypeDef = td;
                 }
             }
         }
@@ -4010,7 +4010,7 @@ HRESULT CLR_RT_Assembly::Resolve_AllocateStaticFields(CLR_RT_HeapBlock *pStaticF
         {
             CLR_RT_FieldDef_CrossReference &res = m_pCrossReference_FieldDef[i];
 
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(pStaticFields[res.m_offset], fd, this));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(pStaticFields[res.offset], fd, this));
         }
     }
 
@@ -4038,11 +4038,11 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
 
         ITERATE_THROUGH_RECORDS(this, i, AssemblyRef, ASSEMBLYREF)
         {
-            _ASSERTE(dst->m_target != NULL);
+            _ASSERTE(dst->target != NULL);
 
-            if (dst->m_target != NULL)
+            if (dst->target != NULL)
             {
-                NANOCLR_CHECK_HRESULT(dst->m_target->PrepareForExecution());
+                NANOCLR_CHECK_HRESULT(dst->target->PrepareForExecution());
             }
         }
 
@@ -4142,7 +4142,7 @@ bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
 
     for (i = 0; i < tblSize; i++, p++)
     {
-        if (p->m_hash == hash)
+        if (p->hash == hash)
             break;
     }
 
@@ -4575,7 +4575,7 @@ HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
             inst.SwitchToParent();
         }
 
-        dst->m_hash = hash ? hash : 0xFFFFFFFF; // Don't allow zero as an hash value!!
+        dst->hash = hash ? hash : 0xFFFFFFFF; // Don't allow zero as an hash value!!
     }
 
     NANOCLR_NOCLEANUP();
@@ -4987,10 +4987,10 @@ bool CLR_RT_TypeSystem::FindTypeDef(const char *szClass, CLR_RT_Assembly *assm, 
                 } while (c == '+');
             }
 
-            reflex.m_kind = REFLECTION_TYPE;
+            reflex.kind = REFLECTION_TYPE;
             // make sure this works for multidimensional arrays.
-            reflex.m_levels = arrayType ? 1 : 0;
-            reflex.m_data.m_type = res;
+            reflex.levels = arrayType ? 1 : 0;
+            reflex.data.type = res;
             return true;
         }
     }
@@ -5452,13 +5452,13 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         CLR_RT_ReflectionDef_Index indexRight;
         CLR_RT_TypeDescriptor descRight;
 
-        indexLeft.m_kind = REFLECTION_TYPE;
-        indexLeft.m_levels = resLeft.Levels;
-        indexLeft.m_data.m_type = resLeft.Class;
+        indexLeft.kind = REFLECTION_TYPE;
+        indexLeft.levels = resLeft.Levels;
+        indexLeft.data.type = resLeft.Class;
 
-        indexRight.m_kind = REFLECTION_TYPE;
-        indexRight.m_levels = resRight.Levels;
-        indexRight.m_data.m_type = resRight.Class;
+        indexRight.kind = REFLECTION_TYPE;
+        indexRight.levels = resRight.Levels;
+        indexRight.data.type = resRight.Class;
 
         if (FAILED(descLeft.InitializeFromReflection(indexLeft)))
         {
@@ -5723,12 +5723,12 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
     const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->m_pCrossReference_MethodRef[method.Method()];
     const CLR_RECORD_METHODREF *methodRef = assembly->GetMethodRef(method.Method());
 
-    if (memberCrossRef.GenericType.data == CLR_EmptyToken)
+    if (memberCrossRef.genericType.data == CLR_EmptyToken)
     {
         // this is a MethodRef belonging to another assembly
 
         CLR_RT_MethodDef_Instance mdInstance;
-        mdInstance.data = memberCrossRef.Target.data;
+        mdInstance.data = memberCrossRef.target.data;
         mdInstance.assembly = g_CLR_RT_TypeSystem.m_assemblies[mdInstance.Assembly() - 1];
         mdInstance.target = mdInstance.assembly->GetMethodDef(mdInstance.Method());
 
@@ -5746,7 +5746,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
         // this is a MethodRef for a generic type
 
         CLR_RT_SignatureParser parser;
-        parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(memberCrossRef.GenericType.TypeSpec()));
+        parser.Initialize_TypeSpec(assembly, assembly->GetTypeSpec(memberCrossRef.genericType.TypeSpec()));
 
         CLR_RT_SignatureParser::Element element;
 
@@ -5850,7 +5850,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
                 assembly->m_pCrossReference_MethodRef[msRecord->MethodIndex()];
 
             CLR_RT_MethodDef_Instance mdInstance;
-            mdInstance.data = memberCrossRef.Target.data;
+            mdInstance.data = memberCrossRef.target.data;
             mdInstance.assembly = g_CLR_RT_TypeSystem.m_assemblies[mdInstance.Assembly() - 1];
             mdInstance.target = mdInstance.assembly->GetMethodDef(mdInstance.Method());
 
@@ -6068,7 +6068,7 @@ bool CLR_RT_AttributeEnumerator::Advance()
             // check TYPEDEF
             if (tk & 0x8000)
             {
-                m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].Target;
+                m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].target;
             }
             else
             {

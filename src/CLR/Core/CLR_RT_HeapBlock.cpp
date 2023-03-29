@@ -225,9 +225,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_Assembly_Index &assm)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_ASSEMBLY;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_assm = assm;
+    m_data.reflection.kind = REFLECTION_ASSEMBLY;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.assembly = assm;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -253,9 +253,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_TypeDef_Index &cls)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_TYPE;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_type = cls;
+    m_data.reflection.kind = REFLECTION_TYPE;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.type = cls;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -266,9 +266,9 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_FieldDef_Index &fd)
     NANOCLR_HEADER();
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind = REFLECTION_FIELD;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_field = fd;
+    m_data.reflection.kind = REFLECTION_FIELD;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.field = fd;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -286,10 +286,10 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
     }
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
-    m_data.reflection.m_kind =
+    m_data.reflection.kind =
         (inst.target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
-    m_data.reflection.m_levels = 0;
-    m_data.reflection.m_data.m_method = md;
+    m_data.reflection.levels = 0;
+    m_data.reflection.data.method = md;
 
     NANOCLR_NOCLEANUP();
 }
@@ -1161,7 +1161,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
 
                 if (fRecurse)
                 {
-                    int totFields = cls.CrossReference().m_totalFields;
+                    int totFields = cls.CrossReference().totalFields;
 
                     if (totFields > 0)
                     {
@@ -1416,7 +1416,7 @@ static const CLR_RT_HeapBlock *FixReflectionForType(const CLR_RT_HeapBlock &src,
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RT_ReflectionDef_Index &rd = src.ReflectionDataConst();
 
-    if (rd.m_kind == REFLECTION_TYPE)
+    if (rd.kind == REFLECTION_TYPE)
     {
         CLR_RT_TypeDef_Instance inst;
         CLR_UINT32 levels;
@@ -1427,7 +1427,7 @@ static const CLR_RT_HeapBlock *FixReflectionForType(const CLR_RT_HeapBlock &src,
 
             CLR_RT_ReflectionDef_Index &rd2 = tmp.ReflectionData();
 
-            rd2.InitializeFromHash(inst.CrossReference().m_hash);
+            rd2.InitializeFromHash(inst.CrossReference().hash);
 
             return &tmp;
         }
@@ -1636,7 +1636,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
                 CLR_RT_HeapBlock hbLeft;
                 CLR_RT_HeapBlock hbRight;
 
-                if (left.ReflectionDataConst().m_kind != right.ReflectionDataConst().m_kind)
+                if (left.ReflectionDataConst().kind != right.ReflectionDataConst().kind)
                 {
                     ptrLeft = FixReflectionForType(left, hbLeft);
                     ptrRight = FixReflectionForType(right, hbRight);

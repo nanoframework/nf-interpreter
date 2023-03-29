@@ -27,7 +27,7 @@ HRESULT Library_corlib_native_System_Reflection_ConstructorInfo::Invoke___OBJECT
     CLR_RT_HeapBlock *args = NULL;
     int ArgumentsCount = 0;
 
-    if (md.InitializeFromIndex(thisRef->ReflectionDataConst().m_data.m_method) == false)
+    if (md.InitializeFromIndex(thisRef->ReflectionDataConst().data.method) == false)
         NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
 
     if (stack.m_customState == 0)

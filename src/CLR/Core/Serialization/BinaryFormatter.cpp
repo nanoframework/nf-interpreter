@@ -153,7 +153,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
 
                 if (m_typeExpected->m_flags & CLR_RT_DataTypeLookup::c_Array)
                 {
-                    sub.InitializeFromType(m_typeExpected->m_reflex.m_data.m_type);
+                    sub.InitializeFromType(m_typeExpected->m_reflex.data.type);
 
                     td = &sub;
                 }
@@ -363,7 +363,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
 
     if (value && value->DataType() == DATATYPE_REFLECTION)
     {
-        switch (value->ReflectionDataConst().m_kind)
+        switch (value->ReflectionDataConst().kind)
         {
             case REFLECTION_TYPE:
             case REFLECTION_TYPE_DELAYED:
@@ -412,10 +412,10 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
 
             if ((mask & c_Signature_Type) != 0)
             {
-                NANOCLR_CHECK_HRESULT(m_bf->WriteBits((CLR_UINT32)type->m_reflex.m_levels, TE_ArrayDepth));
+                NANOCLR_CHECK_HRESULT(m_bf->WriteBits((CLR_UINT32)type->m_reflex.levels, TE_ArrayDepth));
 
                 CLR_RT_TypeDescriptor typeSub;
-                typeSub.InitializeFromType(type->m_reflex.m_data.m_type);
+                typeSub.InitializeFromType(type->m_reflex.data.type);
 
                 NANOCLR_CHECK_HRESULT(EmitSignature_Inner(c_Signature_Header | c_Signature_Type, &typeSub, NULL));
             }
@@ -486,7 +486,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
 
         if ((mask & c_Signature_Type) != 0)
         {
-            NANOCLR_SET_AND_LEAVE(m_bf->WriteType(type->m_handlerCls.CrossReference().m_hash));
+            NANOCLR_SET_AND_LEAVE(m_bf->WriteType(type->m_handlerCls.CrossReference().hash));
         }
     }
 
@@ -625,7 +625,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
                         NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_BADSTREAM);
                     }
 
-                    m_type->m_reflex.m_levels = depth;
+                    m_type->m_reflex.levels = depth;
                     m_type->ConvertToArray();
                 }
             }
@@ -732,7 +732,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
         {
             CLR_RT_TypeDescriptor sub;
 
-            if (m_type->m_reflex.m_levels != 1)
+            if (m_type->m_reflex.levels != 1)
             {
                 //
                 // Only simple arrays can have variable size.
@@ -740,7 +740,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
                 NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
             }
 
-            sub.InitializeFromType(m_type->m_reflex.m_data.m_type);
+            sub.InitializeFromType(m_type->m_reflex.data.type);
 
             len = m_hints._arraySize;
 
@@ -833,7 +833,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
 
     if (value->DataType() == DATATYPE_REFLECTION)
     {
-        switch (value->ReflectionDataConst().m_kind)
+        switch (value->ReflectionDataConst().kind)
         {
             case REFLECTION_TYPE:
             case REFLECTION_TYPE_DELAYED:
@@ -1343,7 +1343,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
 
                 reflex = &(src->ReflectionDataConst());
 
-                switch (reflex->m_kind)
+                switch (reflex->kind)
                 {
                     case REFLECTION_ASSEMBLY:
                         cls = &g_CLR_RT_WellKnownTypes.m_Assembly;
@@ -1669,7 +1669,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
             CLR_RT_FieldDef_Instance inst;
             inst.InitializeFromIndex(index);
 
-            m_fields_Pointer = m_value.m_value->Dereference() + inst.CrossReference().m_offset;
+            m_fields_Pointer = m_value.m_value->Dereference() + inst.CrossReference().offset;
 
             if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
             {

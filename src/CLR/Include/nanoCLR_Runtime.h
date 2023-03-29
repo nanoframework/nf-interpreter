@@ -501,8 +501,8 @@ struct CLR_PROF_Handler
 
 struct CLR_RT_MemoryRange
 {
-    unsigned char *m_location;
-    unsigned int m_size;
+    unsigned char *location;
+    unsigned int size;
 
     bool LimitToRange(CLR_RT_MemoryRange &filtered, unsigned char *address, unsigned int length) const;
 };
@@ -776,30 +776,30 @@ struct CLR_RT_MethodDef_Index
 
 struct CLR_RT_MethodRef_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 24 | indexMethod;
+        data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX Method() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
@@ -834,17 +834,18 @@ struct CLR_RT_GenericParam_Index
 
 struct CLR_RT_ReflectionDef_Index
 {
-    CLR_UINT16 m_kind; // CLR_ReflectionType
-    CLR_UINT16 m_levels;
+    // CLR_ReflectionType
+    CLR_UINT16 kind; 
+    CLR_UINT16 levels;
 
     union {
-        CLR_RT_Assembly_Index m_assm;
-        CLR_RT_TypeDef_Index m_type;
-        CLR_RT_MethodDef_Index m_method;
-        CLR_RT_FieldDef_Index m_field;
-        CLR_RT_TypeSpec_Index m_genericType;
-        CLR_UINT32 m_raw;
-    } m_data;
+        CLR_RT_Assembly_Index assembly;
+        CLR_RT_TypeDef_Index type;
+        CLR_RT_MethodDef_Index method;
+        CLR_RT_FieldDef_Index field;
+        CLR_RT_TypeSpec_Index genericType;
+        CLR_UINT32 raw;
+    } data;
 
     //--//
 
@@ -871,29 +872,29 @@ struct CLR_RT_ReflectionDef_Index
 
 struct CLR_RT_AssemblyRef_CrossReference
 {
-    CLR_RT_Assembly *m_target; // EVENT HEAP - NO RELOCATION -
+    CLR_RT_Assembly *target; // EVENT HEAP - NO RELOCATION -
 };
 
 struct CLR_RT_TypeRef_CrossReference
 {
-    CLR_RT_TypeDef_Index Target;
+    CLR_RT_TypeDef_Index target;
 };
 
 struct CLR_RT_FieldRef_CrossReference
 {
-    CLR_RT_FieldDef_Index Target;
-    CLR_RT_TypeSpec_Index GenericType;
+    CLR_RT_FieldDef_Index target;
+    CLR_RT_TypeSpec_Index genericType;
 };
 
 struct CLR_RT_MethodRef_CrossReference
 {
-    CLR_RT_MethodDef_Index Target;
-    CLR_RT_TypeSpec_Index GenericType;
+    CLR_RT_MethodDef_Index target;
+    CLR_RT_TypeSpec_Index genericType;
 };
 
 struct CLR_RT_FieldDef_CrossReference
 {
-    CLR_INDEX m_offset;
+    CLR_INDEX offset;
 };
 
 struct CLR_RT_TypeDef_CrossReference
@@ -902,9 +903,9 @@ struct CLR_RT_TypeDef_CrossReference
     static const CLR_UINT32 TD_CR_HasFinalizer = 0x0002;
     static const CLR_UINT32 TD_CR_IsMarshalByRefObject = 0x0004;
 
-    CLR_UINT16 m_flags;
-    CLR_INDEX m_totalFields;
-    CLR_UINT32 m_hash;
+    CLR_UINT16 flags;
+    CLR_INDEX totalFields;
+    CLR_UINT32 hash;
 };
 
 struct CLR_RT_MethodDef_CrossReference
@@ -912,11 +913,11 @@ struct CLR_RT_MethodDef_CrossReference
     static const CLR_UINT16 MD_CR_Patched = 0x8000;
     static const CLR_UINT16 MD_CR_OwnerMask = 0x7FFF;
 
-    CLR_UINT16 m_data;
+    CLR_UINT16 data;
 
     CLR_INDEX GetOwner() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
@@ -924,33 +925,33 @@ struct CLR_RT_GenericParam_CrossReference
 {
     /// @brief Generic Parameter Owner -> Index to TypeDef or MethodDef
     ///
-    CLR_UINT16 m_data;
+    CLR_UINT16 data;
 
     /// @brief Tag for owner (TypeDef or MethodDef)
     ///
-    NanoCLRTable m_TypeOrMethodDef;
+    NanoCLRTable typeOrMethodDef;
 
     CLR_RT_GenericParam_Index m_target;
 
     /// @brief DataType for the generic parameter
     ///
-    NanoCLRDataType DataType;
+    NanoCLRDataType dataType;
 
     /// @brief Class of the generic parameter
     ///
-    CLR_RT_TypeDef_Index Class;
+    CLR_RT_TypeDef_Index classTypeDef;
 };
 
 struct CLR_RT_MethodSpec_CrossReference
 {
-    CLR_RT_TypeSpec_Index GenericType;
+    CLR_RT_TypeSpec_Index genericType;
 
-    CLR_RT_MethodDef_Index MethodDef;
-    CLR_RT_MethodRef_Index MethodRef;
+    CLR_RT_MethodDef_Index methodDef;
+    CLR_RT_MethodRef_Index methodRef;
 
-    CLR_INDEX Signature;
+    CLR_INDEX signature;
 
-    CLR_UINT16 m_data;
+    CLR_UINT16 data;
 
     // CLR_INDEX GetMethod() const
     //{
@@ -960,13 +961,13 @@ struct CLR_RT_MethodSpec_CrossReference
 
 struct CLR_RT_TypeSpec_CrossReference
 {
-    CLR_RT_TypeSpec_Index GenericType;
+    CLR_RT_TypeSpec_Index genericType;
 };
 
 struct CLR_RT_MethodDef_Patch
 {
-    CLR_INDEX m_orig;
-    CLR_INDEX m_patched;
+    CLR_INDEX original;
+    CLR_INDEX patched;
 };
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -976,7 +977,7 @@ struct CLR_RT_MethodDef_DebuggingInfo
     static const CLR_UINT8 MD_DI_JustMyCode = 0x01;
     static const CLR_UINT8 MD_DI_HasBreakpoint = 0x02;
 
-    CLR_UINT8 m_flags;
+    CLR_UINT8 flags;
 
     bool IsJMC() const
     {
@@ -999,15 +1000,15 @@ struct CLR_RT_MethodDef_DebuggingInfo
   private:
     void SetFlags(CLR_UINT8 flags)
     {
-        m_flags |= flags;
+        flags |= flags;
     }
     void ResetFlags(CLR_UINT8 flags)
     {
-        m_flags &= ~flags;
+        flags &= ~flags;
     }
     bool IsFlagSet(CLR_UINT8 flags) const
     {
-        return (m_flags & flags) != 0;
+        return (flags & flags) != 0;
     }
     void SetResetFlags(bool b, CLR_UINT8 flags)
     {

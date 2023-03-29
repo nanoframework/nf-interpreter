@@ -2532,7 +2532,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
-                            evalPos[0].Assign(obj[fieldInst.CrossReference().m_offset]);
+                            evalPos[0].Assign(obj[fieldInst.CrossReference().offset]);
                             goto Execute_LoadAndPromote;
                         case DATATYPE_DATETIME:
                         case DATATYPE_TIMESPAN:
@@ -2583,7 +2583,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif
                     if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
                     {
-                        evalPos[0].SetReference(obj[fieldInst.CrossReference().m_offset]);
+                        evalPos[0].SetReference(obj[fieldInst.CrossReference().offset]);
                     }
                     else if (dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN) // Special case.
                     {
@@ -2623,7 +2623,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
                         case DATATYPE_GENERICINST:
-                            obj[fieldInst.CrossReference().m_offset].AssignAndPreserveType(evalPos[2]);
+                            obj[fieldInst.CrossReference().offset].AssignAndPreserveType(evalPos[2]);
                             break;
                         case DATATYPE_DATETIME: // Special case.
                         case DATATYPE_TIMESPAN: // Special case.
@@ -3381,7 +3381,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
                     else
                     {
-                        len = (CLR_RT_HeapBlock::HB_Object_Fields_Offset + clsInst.CrossReference().m_totalFields) *
+                        len = (CLR_RT_HeapBlock::HB_Object_Fields_Offset + clsInst.CrossReference().totalFields) *
                               sizeof(CLR_RT_HeapBlock);
                     }
 

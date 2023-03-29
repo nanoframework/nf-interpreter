@@ -135,8 +135,8 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 
     const CLR_UINT32 c_HeapClusterSize = sizeof(CLR_RT_HeapBlock) * CLR_RT_HeapBlock::HB_MaxSize;
 
-    CLR_UINT8 *heapFirstFree = s_CLR_RT_Heap.m_location;
-    CLR_UINT32 heapFree = s_CLR_RT_Heap.m_size;
+    CLR_UINT8 *heapFirstFree = s_CLR_RT_Heap.location;
+    CLR_UINT32 heapFree = s_CLR_RT_Heap.size;
     CLR_INT32 i = 0;
     CLR_UINT32 blockSize = 1;
 
@@ -958,7 +958,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
             CLR_RT_AssemblyRef_CrossReference *ar = pASSM->m_pCrossReference_AssemblyRef;
             for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, ar++)
             {
-                if ((ar->m_target->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                if ((ar->target->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
                 {
                     fDepedenciesRun = true;
                     break;
@@ -1725,7 +1725,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
             }
         }
 #else
-        return &inst.assembly->m_pStaticFields[inst.CrossReference().m_offset];
+        return &inst.assembly->m_pStaticFields[inst.CrossReference().offset];
 #endif
     }
 
@@ -1855,7 +1855,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     switch (CLR_TypeFromTk(tk))
                     {
                         case TBL_TypeRef:
-                            cls = assembly->m_pCrossReference_TypeRef[index].Target;
+                            cls = assembly->m_pCrossReference_TypeRef[index].target;
                             break;
 
                         case TBL_TypeDef:
@@ -1901,8 +1901,8 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     CLR_RT_GenericParam_CrossReference gp =
                         assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                    cls = gp.Class;
-                    dt = gp.DataType;
+                    cls = gp.classTypeDef;
+                    dt = gp.dataType;
 
                     goto done;
                 }
@@ -2062,7 +2062,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
             case DATATYPE_VALUETYPE:
             {
                 int clsFields = inst.target->instanceFieldsCount;
-                int totFields = inst.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
+                int totFields = inst.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
                 CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, 0, inst, totFields);
                 CHECK_ALLOCATION(obj);
 
@@ -2177,7 +2177,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
     reference.SetObjectReference(NULL);
 
     int clsFields = instance.target->instanceFieldsCount;
-    int totFields = instance.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
+    int totFields = instance.CrossReference().totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
     CLR_RT_HeapBlock_GenericInstance *genericInst;
 
@@ -2299,7 +2299,7 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType(CLR_RT_HeapBlock *destination, con
         {
             CLR_RT_TypeDef_Instance inst;
             inst.InitializeFromIndex(cls);
-            CLR_UINT32 totFields = inst.CrossReference().m_totalFields;
+            CLR_UINT32 totFields = inst.CrossReference().totalFields;
 
             if (source->IsBoxed())
                 destination->Box();
@@ -2422,7 +2422,7 @@ HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const cha
         res = reference.Dereference();
         FAULT_ON_NULL(res);
 
-        res += inst.CrossReference().m_offset;
+        res += inst.CrossReference().offset;
     }
 
     field = res;
@@ -2959,7 +2959,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     CLR_RT_TypeDef_Instance &instTarget = descTarget.m_handlerCls;
     bool fArray = false;
 
-    while (desc.m_reflex.m_levels > 0 && descTarget.m_reflex.m_levels > 0)
+    while (desc.m_reflex.levels > 0 && descTarget.m_reflex.levels > 0)
     {
         desc.GetElementType(desc);
         descTarget.GetElementType(descTarget);
@@ -2968,14 +2968,14 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
     }
 
     // only check reflection levels if this is not an array
-    if (!fArray && desc.m_reflex.m_levels < descTarget.m_reflex.m_levels)
+    if (!fArray && desc.m_reflex.levels < descTarget.m_reflex.levels)
     {
         return false;
     }
 
-    if (desc.m_reflex.m_levels > descTarget.m_reflex.m_levels)
+    if (desc.m_reflex.levels > descTarget.m_reflex.levels)
     {
-        if (descTarget.m_reflex.m_levels == 0 && !isInstInstruction)
+        if (descTarget.m_reflex.levels == 0 && !isInstInstruction)
         {
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.

@@ -444,7 +444,7 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 
 #define LOOKUP_ELEMENT_REF(index, tblName, tblNameUC, tblName2)                                                        \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
-    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[index].Target;                                   \
+    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[index].target;                                   \
     if (s->data == 0)                                                                                                \
     s = NULL
 

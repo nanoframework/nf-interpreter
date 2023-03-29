@@ -1869,8 +1869,8 @@ static bool FillValues(
             CLR_RT_HeapBlock_Array *ptr2 = (CLR_RT_HeapBlock_Array *)ptr;
 
             dst->m_array_numOfElements = ptr2->m_numOfElements;
-            dst->m_array_depth = ptr2->ReflectionDataConst().m_levels;
-            dst->m_array_typeIndex = ptr2->ReflectionDataConst().m_data.m_type;
+            dst->m_array_depth = ptr2->ReflectionDataConst().levels;
+            dst->m_array_typeIndex = ptr2->ReflectionDataConst().data.type;
         }
         break;
 
@@ -2781,8 +2781,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 CLR_RT_GenericParam_CrossReference gp =
                     assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
 
-                targetClass = gp.Class;
-                targetDataType = gp.DataType;
+                targetClass = gp.classTypeDef;
+                targetDataType = gp.dataType;
 
                 // isGenericInstance = true;
             }
@@ -2864,7 +2864,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
         while (true)
         {
             CLR_UINT32 iFields = td.target->instanceFieldsCount;
-            CLR_UINT32 totalFields = td.CrossReference().m_totalFields;
+            CLR_UINT32 totalFields = td.CrossReference().totalFields;
             CLR_UINT32 dFields = totalFields - iFields;
 
             if (offset >= dFields)
@@ -2895,7 +2895,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     {
         if (cmd->m_offset == 0)
         {
-            cmd->m_offset = inst.CrossReference().m_offset;
+            cmd->m_offset = inst.CrossReference().offset;
         }
 
         if (cmd->m_offset == 0)
@@ -2982,7 +2982,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
 
         if (IsBlockEnumMaybe(blk))
         {
-            if (td.InitializeFromIndex(array->ReflectionDataConst().m_data.m_type))
+            if (td.InitializeFromIndex(array->ReflectionDataConst().data.type))
             {
                 if (td.target->IsEnum())
                 {
@@ -3143,9 +3143,9 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
     {
         CLR_RT_ReflectionDef_Index reflex;
 
-        reflex.m_kind = REFLECTION_TYPE;
-        reflex.m_levels = cmd->m_depth;
-        reflex.m_data.m_type = cmd->m_td;
+        reflex.kind = REFLECTION_TYPE;
+        reflex.levels = cmd->m_depth;
+        reflex.data.type = cmd->m_td;
 
         if (SUCCEEDED(CLR_RT_HeapBlock_Array::CreateInstance(*ptr, cmd->m_numOfElements, reflex)))
         {
@@ -3617,7 +3617,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
                 instClass.InitializeFromField(inst);
 
                 cmdReply->m_td = instClass;
-                cmdReply->m_index = inst.CrossReference().m_offset;
+                cmdReply->m_index = inst.CrossReference().offset;
 
                 WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Field::Reply));
 

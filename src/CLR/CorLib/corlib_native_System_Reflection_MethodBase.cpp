@@ -259,7 +259,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
         // deal with array types
         if (paramElement.Levels > 0)
         {
-            hbObj->ReflectionData().m_levels = (CLR_UINT16)paramElement.Levels;
+            hbObj->ReflectionData().levels = (CLR_UINT16)paramElement.Levels;
         }
 
         // move pointer to the next element
