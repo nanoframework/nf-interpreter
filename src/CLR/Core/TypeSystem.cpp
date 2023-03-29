@@ -2246,10 +2246,10 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     {
-        m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
+        debuggingInfoMethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
         buffer += offsets.debuggingInfoMethods;
 
-        memset(m_pDebuggingInfo_MethodDef, 0, offsets.debuggingInfoMethods);
+        memset(debuggingInfoMethodDef, 0, offsets.debuggingInfoMethods);
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }

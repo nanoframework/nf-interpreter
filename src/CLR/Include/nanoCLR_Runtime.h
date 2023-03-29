@@ -1381,7 +1381,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_DebuggingInfo
-        *m_pDebuggingInfo_MethodDef;
+        *debuggingInfoMethodDef;
 #endif                               // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
