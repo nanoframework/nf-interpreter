@@ -946,7 +946,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
         CLR_RT_TypeDef_Instance &inst = srcTypeDes.m_handlerCls;
 
-        if (inst.data == g_CLR_RT_WellKnownTypes.m_Guid.data)
+        if (inst.data == g_CLR_RT_WellKnownTypes.Guid.data)
         {
             // can't cast GUID class to anything else except another GUID
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);

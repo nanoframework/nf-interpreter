@@ -782,7 +782,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
             //
             // Create an private object to implement global locks.
             //
-            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*obj, g_CLR_RT_WellKnownTypes.m_Object));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*obj, g_CLR_RT_WellKnownTypes.Object));
 
             *ppGlobalLock = obj->Dereference();
         }

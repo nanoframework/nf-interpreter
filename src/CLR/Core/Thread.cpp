@@ -384,7 +384,7 @@ HRESULT CLR_RT_Thread::Terminate()
     // between the start and end of killing the thread, a GC gets run.
     (void)Library_corlib_native_System_Exception::CreateInstance(
         m_currentException,
-        g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+        g_CLR_RT_WellKnownTypes.ThreadAbortException,
         S_OK,
         CurrentFrame());
 
@@ -405,7 +405,7 @@ HRESULT CLR_RT_Thread::Abort()
     {
         (void)Library_corlib_native_System_Exception::CreateInstance(
             m_currentException,
-            g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+            g_CLR_RT_WellKnownTypes.ThreadAbortException,
             S_OK,
             CurrentFrame());
 

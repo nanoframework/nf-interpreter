@@ -168,7 +168,7 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
     CLR_RT_HeapBlock& ref = stack.PushValue();
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType( g_CLR_RT_WellKnownTypes.m_DateTime ) );
+    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType( g_CLR_RT_WellKnownTypes.DateTime ) );
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT( g_CLR_RT_ExecutionEngine.NewObject( ref, dtType.m_handlerCls ) );
@@ -193,7 +193,7 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     CLR_RT_HeapBlock& ref = stack.PushValue();
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType( g_CLR_RT_WellKnownTypes.m_DateTime ) );
+    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType( g_CLR_RT_WellKnownTypes.DateTime ) );
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT( g_CLR_RT_ExecutionEngine.NewObject( ref, dtType.m_handlerCls ) );
@@ -245,7 +245,7 @@ CLR_INT64* Library_corlib_native_System_DateTime::GetValuePtr( CLR_RT_HeapBlock&
         return (CLR_INT64*)&obj->NumericByRef().s8;
     }
 
-    if(dt == DATATYPE_VALUETYPE && obj->ObjectCls().data == g_CLR_RT_WellKnownTypes.m_DateTime.data)
+    if(dt == DATATYPE_VALUETYPE && obj->ObjectCls().data == g_CLR_RT_WellKnownTypes.DateTime.data)
     {
         return (CLR_INT64*)&obj[ FIELD___ticks ].NumericByRef().s8;
     }

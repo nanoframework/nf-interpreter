@@ -501,7 +501,7 @@ HRESULT Library_win_storage_native_Windows_Storage_FileIO::
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 buffer,
                 (CLR_INT32)fileStat.st_size,
-                g_CLR_RT_WellKnownTypes.m_UInt8));
+                g_CLR_RT_WellKnownTypes.UInt8));
 
             // store this to the argument passed byref
             NANOCLR_CHECK_HRESULT(buffer.StoreToReference(stack.Arg1(), 0));

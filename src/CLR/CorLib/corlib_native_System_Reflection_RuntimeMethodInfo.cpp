@@ -26,7 +26,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::get_ReturnTyp
         CLR_RT_HeapBlock& top = stack.PushValue();
         CLR_RT_HeapBlock* hbObj;
         
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
         hbObj->SetReflection( desc.m_reflex );
     }
@@ -74,7 +74,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeMethodInfo::GetCustomAttr
 
             // create the result array
             // (2 positions for each attribute)
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.m_Object ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.Object ));
 
             // use this to skip to the 2nd pass if no attribute was found
             if (count == 0)

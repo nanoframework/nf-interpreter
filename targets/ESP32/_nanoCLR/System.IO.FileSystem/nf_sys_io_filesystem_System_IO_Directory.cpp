@@ -317,7 +317,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetFilesNative___STATI
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         folderArrayPaths,
         (CLR_UINT32)fileCount,
-        g_CLR_RT_WellKnownTypes.m_String));
+        g_CLR_RT_WellKnownTypes.String));
 
     if (fileCount > 0)
     {
@@ -361,7 +361,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetDirectoriesNative__
 
     // create an array of files paths <String> of directoryCount
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(folderArrayPaths, directoryCount, g_CLR_RT_WellKnownTypes.m_String));
+        CLR_RT_HeapBlock_Array::CreateInstance(folderArrayPaths, directoryCount, g_CLR_RT_WellKnownTypes.String));
 
     if (directoryCount > 0)
     {
@@ -437,7 +437,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLogicalDrivesNative
         NANOCLR_CHECK_HRESULT(EnumerateDrives(NULL, count));
 
         // create an array of files paths <String> for count drives
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.m_String));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.String));
 
         // 2nd pass fill array with drives
         NANOCLR_CHECK_HRESULT(EnumerateDrives(&top, count));
@@ -474,7 +474,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
     fileInfoTime = GetDateTimeFromStat(&fileInfo.st_mtime);
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.DateTime));
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));

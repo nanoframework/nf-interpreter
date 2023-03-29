@@ -20,7 +20,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::GetBytes___SZARRAY_U1__
     str    = stack.Arg1().RecoverString(); FAULT_ON_NULL(str);
     cBytes = hal_strlen_s(str);    
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ret, (CLR_UINT32)cBytes, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ret, (CLR_UINT32)cBytes, g_CLR_RT_WellKnownTypes.UInt8 ));
 
     arr = ret.DereferenceArray();
 
@@ -115,7 +115,7 @@ HRESULT Library_nf_system_text_System_Text_UTF8Encoding::Helper__GetChars(CLR_RT
     cBytesCopy = byteCnt+1;
         
     /* Copy the array to a temporary buffer to create a zero-terminated string */
-    NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( ref, cBytesCopy, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+    NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_Array::CreateInstance( ref, cBytesCopy, g_CLR_RT_WellKnownTypes.UInt8 ));
     
     pArrayBytesCopy = ref.DereferenceArray();
     szText = (const char*)pArrayBytesCopy->GetFirstElement(); 

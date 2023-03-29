@@ -540,7 +540,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     FAULT_ON_NULL_ARG(str);
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.DateTime));
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
@@ -765,7 +765,7 @@ HRESULT Library_corlib_native_System_Convert::FromBase64String___STATIC__SZARRAY
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         stack.PushValueAndClear(),
         outputLength,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
 
     // get a pointer to the array in the heap block array just created
     returnArray = stack.TopValue().DereferenceArray()->GetFirstElement();

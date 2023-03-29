@@ -160,7 +160,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::GetCustomAttributesNa
 
             // create the result array
             // (2 positions for each attribute)
-            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.m_Object ));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( top, ( count * 2 ), g_CLR_RT_WellKnownTypes.Object ));
 
             // use this to skip to the 2nd pass if no attribute was found
             if (count == 0)

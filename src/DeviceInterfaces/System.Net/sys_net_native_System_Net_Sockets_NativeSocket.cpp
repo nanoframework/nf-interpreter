@@ -244,7 +244,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                         *pAddress,
                         (CLR_UINT32)addrT->ai_addrlen,
-                        g_CLR_RT_WellKnownTypes.m_UInt8));
+                        g_CLR_RT_WellKnownTypes.UInt8));
 
                     // copy address.
                     memcpy(pAddress->DereferenceArray()->GetFirstElement(), addrT->ai_addr, addrT->ai_addrlen);
@@ -260,7 +260,7 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
 
                 idx.kind = REFLECTION_TYPE;
                 idx.levels = 2;
-                idx.data.type.data = g_CLR_RT_WellKnownTypes.m_UInt8.data;
+                idx.data.type.data = g_CLR_RT_WellKnownTypes.UInt8.data;
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, idx));
 
@@ -890,7 +890,7 @@ void Library_sys_net_native_System_Net_Sockets_NativeSocket::ThrowError(CLR_RT_S
 
     if ((Library_corlib_native_System_Exception::CreateInstance(
             res,
-            g_CLR_RT_WellKnownTypes.m_SocketException,
+            g_CLR_RT_WellKnownTypes.SocketException,
             CLR_E_FAIL,
             &stack)) == S_OK)
     {

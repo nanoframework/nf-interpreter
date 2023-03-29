@@ -842,7 +842,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetBitmap___SZAR
     }
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(array, bm.GetTotalSize(), g_CLR_RT_WellKnownTypes.m_UInt8));
+        CLR_RT_HeapBlock_Array::CreateInstance(array, bm.GetTotalSize(), g_CLR_RT_WellKnownTypes.UInt8));
 
     imageDataHB = array.DereferenceArray();
     FAULT_ON_NULL(imageDataHB);

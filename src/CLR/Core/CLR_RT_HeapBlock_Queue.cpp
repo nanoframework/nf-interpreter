@@ -55,7 +55,7 @@ HRESULT CLR_RT_HeapBlock_Queue::Enqueue( CLR_RT_HeapBlock* value )
 
         capacity *= 2;
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newArrayHB, capacity, g_CLR_RT_WellKnownTypes.m_Object ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newArrayHB, capacity, g_CLR_RT_WellKnownTypes.Object ));
 
         array = newArrayHB.DereferenceArray();
 

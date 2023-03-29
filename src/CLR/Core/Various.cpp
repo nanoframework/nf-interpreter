@@ -30,7 +30,7 @@ HRESULT CLR_RT_ArrayListHelper::PrepareArrayList( CLR_RT_HeapBlock& thisRef, int
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
     }
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pThis[ FIELD___items ], capacity, g_CLR_RT_WellKnownTypes.m_Object ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( pThis[ FIELD___items ], capacity, g_CLR_RT_WellKnownTypes.Object ));
 
     pThis[ FIELD___size ].NumericByRef().s4 = count;
 

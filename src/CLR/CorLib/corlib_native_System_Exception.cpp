@@ -16,21 +16,21 @@ static const ExceptionLookup c_ExceptionLookup[] = {
     {                                                                                                                  \
         hr, &g_CLR_RT_WellKnownTypes.fld                                                                               \
     }
-    EL(CLR_E_APPDOMAIN_EXITED, m_AppDomainUnloadedException),
-    EL(CLR_E_INVALID_PARAMETER, m_ArgumentException),
-    EL(CLR_E_ARGUMENT_NULL, m_ArgumentNullException),
-    EL(CLR_E_OUT_OF_RANGE, m_ArgumentOutOfRangeException),
-    EL(CLR_E_INDEX_OUT_OF_RANGE, m_IndexOutOfRangeException),
-    EL(CLR_E_INVALID_CAST, m_InvalidCastException),
-    EL(CLR_E_FORMAT_EXCEPTION, m_FormatException),
-    EL(CLR_E_INVALID_OPERATION, m_InvalidOperationException),
-    EL(CLR_E_NOT_SUPPORTED, m_NotSupportedException),
-    EL(CLR_E_NOTIMPL, m_NotImplementedException),
-    EL(CLR_E_NULL_REFERENCE, m_NullReferenceException),
-    EL(CLR_E_OUT_OF_MEMORY, m_OutOfMemoryException),
-    EL(CLR_E_TIMEOUT, m_TimeoutException),
-    EL(CLR_E_OBJECT_DISPOSED, m_ObjectDisposedException),
-    EL(CLR_E_WATCHDOG_TIMEOUT, m_WatchdogException),
+    EL(CLR_E_APPDOMAIN_EXITED, AppDomainUnloadedException),
+    EL(CLR_E_INVALID_PARAMETER, ArgumentException),
+    EL(CLR_E_ARGUMENT_NULL, ArgumentNullException),
+    EL(CLR_E_OUT_OF_RANGE, ArgumentOutOfRangeException),
+    EL(CLR_E_INDEX_OUT_OF_RANGE, IndexOutOfRangeException),
+    EL(CLR_E_INVALID_CAST, InvalidCastException),
+    EL(CLR_E_FORMAT_EXCEPTION, FormatException),
+    EL(CLR_E_INVALID_OPERATION, InvalidOperationException),
+    EL(CLR_E_NOT_SUPPORTED, NotSupportedException),
+    EL(CLR_E_NOTIMPL, NotImplementedException),
+    EL(CLR_E_NULL_REFERENCE, NullReferenceException),
+    EL(CLR_E_OUT_OF_MEMORY, OutOfMemoryException),
+    EL(CLR_E_TIMEOUT, TimeoutException),
+    EL(CLR_E_OBJECT_DISPOSED, ObjectDisposedException),
+    EL(CLR_E_WATCHDOG_TIMEOUT, WatchdogException),
 
 #undef EL
 };
@@ -67,7 +67,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     if (depth == 0)
         NANOCLR_SET_AND_LEAVE(stack.SetResult_String(NULL));
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmpArray, depth, g_CLR_RT_WellKnownTypes.m_String));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmpArray, depth, g_CLR_RT_WellKnownTypes.String));
 
     pStackTrace = (StackTrace *)pArray->GetFirstElement();
     pBlkString = (CLR_RT_HeapBlock *)tmpArray.DereferenceArray()->GetFirstElement();
@@ -118,7 +118,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance(
 
     CLR_RT_HeapBlock *obj;
 
-    _ASSERTE(CLR_RT_ExecutionEngine::IsInstanceOf(cls, g_CLR_RT_WellKnownTypes.m_Exception));
+    _ASSERTE(CLR_RT_ExecutionEngine::IsInstanceOf(cls, g_CLR_RT_WellKnownTypes.Exception));
 
     if (FAILED(hr = g_CLR_RT_ExecutionEngine.NewObjectFromIndex(ref, cls)))
     {
@@ -154,7 +154,7 @@ HRESULT Library_corlib_native_System_Exception::CreateInstance(
     CLR_RT_StackFrame *stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDef_Index *cls = &g_CLR_RT_WellKnownTypes.m_Exception;
+    CLR_RT_TypeDef_Index *cls = &g_CLR_RT_WellKnownTypes.Exception;
 
     _ASSERTE(FAILED(hrIn));
 
@@ -182,7 +182,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
         StackTrace *dst;
         CLR_UINT32 depth;
 
-        if (CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.m_Exception) == false)
+        if (CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.Exception) == false)
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
         //--//
@@ -201,7 +201,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
             obj[FIELD___stackTrace],
             depth * sizeof(StackTrace),
-            g_CLR_RT_WellKnownTypes.m_UInt8));
+            g_CLR_RT_WellKnownTypes.UInt8));
 
         //--//
 
@@ -233,7 +233,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 CLR_RT_HeapBlock *Library_corlib_native_System_Exception::GetTarget(CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.m_Exception) ? ref.Dereference() : NULL;
+    return CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.Exception) ? ref.Dereference() : NULL;
 }
 
 Library_corlib_native_System_Exception::StackTrace *Library_corlib_native_System_Exception::GetStackTrace(

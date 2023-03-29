@@ -93,7 +93,7 @@ HRESULT CLR_RT_HeapBlock_MemoryStream::ToArray( CLR_RT_HeapBlock& ref )
     }
     NANOCLR_FOREACH_NODE_END();
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, tot, g_CLR_RT_WellKnownTypes.m_UInt8 ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, tot, g_CLR_RT_WellKnownTypes.UInt8 ));
 
     array = ref.DereferenceArray();
     buf   = array->GetFirstElement();

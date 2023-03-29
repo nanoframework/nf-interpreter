@@ -35,7 +35,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     }
     else
     {
-        cls = g_CLR_RT_WellKnownTypes.m_Array;
+        cls = g_CLR_RT_WellKnownTypes.Array;
     }
 
     if (inst.InitializeFromIndex(cls) == false)

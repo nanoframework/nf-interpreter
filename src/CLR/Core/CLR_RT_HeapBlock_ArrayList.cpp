@@ -170,7 +170,7 @@ HRESULT CLR_RT_HeapBlock_ArrayList::SetCapacity( CLR_UINT32 newCapacity )
             newCapacity = c_DefaultCapacity;
         }
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newItemsHB, newCapacity, g_CLR_RT_WellKnownTypes.m_Object ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( newItemsHB, newCapacity, g_CLR_RT_WellKnownTypes.Object ));
 
         newItems = newItemsHB.DereferenceArray();
 

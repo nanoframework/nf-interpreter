@@ -12,7 +12,7 @@
 
 #define ITERATE_THROUGH_RECORDS(assm, i, tblName, tblNameUC)                                                           \
     const CLR_RECORD_##tblNameUC *src = (const CLR_RECORD_##tblNameUC *)assm->GetTable(TBL_##tblName);                 \
-    CLR_RT_##tblName##_CrossReference *dst = assm->crossReference##tblName;                                        \
+    CLR_RT_##tblName##_CrossReference *dst = assm->crossReference##tblName;                                            \
     for (i = 0; i < assm->tablesSize[TBL_##tblName]; i++, src++, dst++)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -510,7 +510,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
             //
             // Special case for Object types.
             //
-            if (res.Class.data == g_CLR_RT_WellKnownTypes.m_Object.data)
+            if (res.Class.data == g_CLR_RT_WellKnownTypes.Object.data)
             {
                 res.DataType = DATATYPE_OBJECT;
             }
@@ -593,11 +593,11 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                     }
 
                     case DATATYPE_OBJECT:
-                        res.Class = g_CLR_RT_WellKnownTypes.m_Object;
+                        res.Class = g_CLR_RT_WellKnownTypes.Object;
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
                     case DATATYPE_VOID:
-                        res.Class = g_CLR_RT_WellKnownTypes.m_Void;
+                        res.Class = g_CLR_RT_WellKnownTypes.Void;
                         NANOCLR_SET_AND_LEAVE(S_OK);
 
                     case DATATYPE_GENERICINST:
@@ -755,7 +755,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromReflection(const CLR_RT_ReflectionDe
         case REFLECTION_TYPE:
             if (reflex.levels > 0 && levels == NULL)
             {
-                ptr = &g_CLR_RT_WellKnownTypes.m_Array;
+                ptr = &g_CLR_RT_WellKnownTypes.Array;
             }
             else
             {
@@ -902,7 +902,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
 bool CLR_RT_TypeDef_Instance::IsATypeHandler()
 {
     NATIVE_PROFILE_CLR_CORE();
-    return (data == g_CLR_RT_WellKnownTypes.m_Type.data || data == g_CLR_RT_WellKnownTypes.m_TypeStatic.data);
+    return (data == g_CLR_RT_WellKnownTypes.Type.data || data == g_CLR_RT_WellKnownTypes.TypeStatic.data);
 }
 
 void CLR_RT_TypeDef_Instance::Clear()
@@ -1616,12 +1616,12 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromType(const CLR_RT_TypeDef_Index &cl
             }
         }
 
-        if (m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_Array.data)
+        if (m_handlerCls.data == g_CLR_RT_WellKnownTypes.Array.data)
         {
             m_flags |= CLR_RT_DataTypeLookup::c_Array;
         }
 
-        if (m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_ArrayList.data)
+        if (m_handlerCls.data == g_CLR_RT_WellKnownTypes.ArrayList.data)
         {
             m_flags |= CLR_RT_DataTypeLookup::c_ArrayList;
         }
@@ -1751,7 +1751,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
             {
                 CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)obj;
 
-                cls = NANOCLR_INDEX_IS_VALID(dlg->m_cls) ? &dlg->m_cls : &g_CLR_RT_WellKnownTypes.m_Delegate;
+                cls = NANOCLR_INDEX_IS_VALID(dlg->m_cls) ? &dlg->m_cls : &g_CLR_RT_WellKnownTypes.Delegate;
             }
             break;
 
@@ -1759,8 +1759,8 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
             {
                 CLR_RT_HeapBlock_Delegate_List *dlgLst = (CLR_RT_HeapBlock_Delegate_List *)obj;
 
-                cls = NANOCLR_INDEX_IS_VALID(dlgLst->m_cls) ? &dlgLst->m_cls
-                                                            : &g_CLR_RT_WellKnownTypes.m_MulticastDelegate;
+                cls =
+                    NANOCLR_INDEX_IS_VALID(dlgLst->m_cls) ? &dlgLst->m_cls : &g_CLR_RT_WellKnownTypes.MulticastDelegate;
             }
             break;
 
@@ -1768,7 +1768,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
 
             case DATATYPE_WEAKCLASS:
             {
-                cls = &g_CLR_RT_WellKnownTypes.m_WeakReference;
+                cls = &g_CLR_RT_WellKnownTypes.WeakReference;
             }
             break;
 
@@ -1780,22 +1780,22 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
                 switch (reflex->kind)
                 {
                     case REFLECTION_ASSEMBLY:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Assembly;
+                        cls = &g_CLR_RT_WellKnownTypes.Assembly;
                         break;
                     case REFLECTION_TYPE:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Type;
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_TYPE_DELAYED:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Type;
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_CONSTRUCTOR:
-                        cls = &g_CLR_RT_WellKnownTypes.m_ConstructorInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.ConstructorInfo;
                         break;
                     case REFLECTION_METHOD:
-                        cls = &g_CLR_RT_WellKnownTypes.m_MethodInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.MethodInfo;
                         break;
                     case REFLECTION_FIELD:
-                        cls = &g_CLR_RT_WellKnownTypes.m_FieldInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.FieldInfo;
                         break;
                 }
 
@@ -1862,7 +1862,7 @@ void CLR_RT_TypeDescriptor::ConvertToArray()
     m_flags &= CLR_RT_DataTypeLookup::c_SemanticMask;
     m_flags |= CLR_RT_DataTypeLookup::c_Array;
 
-    m_handlerCls.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_Array);
+    m_handlerCls.InitializeFromIndex(g_CLR_RT_WellKnownTypes.Array);
 }
 
 bool CLR_RT_TypeDescriptor::ShouldEmitHash()
@@ -2108,7 +2108,7 @@ bool CLR_RT_ExceptionHandler::ConvertFromEH(
             break;
 
         case CLR_RECORD_EH::EH_CatchAll:
-            m_typeFilter = g_CLR_RT_WellKnownTypes.m_Object;
+            m_typeFilter = g_CLR_RT_WellKnownTypes.Object;
             break;
 
         case CLR_RECORD_EH::EH_Catch:
@@ -2325,9 +2325,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         offsets.fieldRef =
             ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference), CLR_UINT32);
 
-        offsets.methodRef = ROUNDTOMULTIPLE(
-            skeleton->tablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
-            CLR_UINT32);
+        offsets.methodRef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference), CLR_UINT32);
 
         offsets.typeDef =
             ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference), CLR_UINT32);
@@ -2335,9 +2334,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         offsets.fieldDef =
             ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference), CLR_UINT32);
 
-        offsets.methodDef = ROUNDTOMULTIPLE(
-            skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
-            CLR_UINT32);
+        offsets.methodDef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference), CLR_UINT32);
 
         offsets.genericParam = ROUNDTOMULTIPLE(
             skeleton->tablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
@@ -2355,9 +2353,8 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        offsets.debuggingInfoMethods = ROUNDTOMULTIPLE(
-            skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
-            CLR_UINT32);
+        offsets.debuggingInfoMethods =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo), CLR_UINT32);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         size_t iTotalRamSize = offsets.base + offsets.assemblyRef + offsets.typeRef + offsets.fieldRef +
@@ -2888,7 +2885,8 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
 #endif
             }
 
-            if (typeSpecInstance.assembly->FindMethodDef(typeSpecInstance.target, name, this, src->signature, dst->target))
+            if (typeSpecInstance.assembly
+                    ->FindMethodDef(typeSpecInstance.target, name, this, src->signature, dst->target))
             {
                 fGot = true;
 
@@ -2943,7 +2941,8 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
 
             while (NANOCLR_INDEX_IS_VALID(typeDefInstance))
             {
-                if (typeDefInstance.assembly->FindMethodDef(typeDefInstance.target, name, this, src->signature, dst->target))
+                if (typeDefInstance.assembly
+                        ->FindMethodDef(typeDefInstance.target, name, this, src->signature, dst->target))
                 {
                     fGot = true;
 
@@ -3771,95 +3770,99 @@ struct TypeIndexLookup
     CLR_RT_TypeDef_Index *ptr;
 };
 
+// clang-format off
+
 static const TypeIndexLookup c_TypeIndexLookup[] = {
 #define TIL(ns, nm, fld)                                                                                               \
     {                                                                                                                  \
         ns, nm, &g_CLR_RT_WellKnownTypes.fld                                                                           \
     }
-    TIL("System", "Boolean", m_Boolean),
-    TIL("System", "Char", m_Char),
-    TIL("System", "SByte", m_Int8),
-    TIL("System", "Byte", m_UInt8),
-    TIL("System", "Int16", m_Int16),
-    TIL("System", "UInt16", m_UInt16),
-    TIL("System", "Int32", m_Int32),
-    TIL("System", "UInt32", m_UInt32),
-    TIL("System", "Int64", m_Int64),
-    TIL("System", "UInt64", m_UInt64),
-    TIL("System", "Single", m_Single),
-    TIL("System", "Double", m_Double),
-    TIL("System", "DateTime", m_DateTime),
-    TIL("System", "TimeSpan", m_TimeSpan),
-    TIL("System", "String", m_String),
+    TIL("System",                                   "Boolean",                          Boolean),
+    TIL("System",                                   "Char",                             Char),
+    TIL("System",                                   "SByte",                            Int8),
+    TIL("System",                                   "Byte",                             UInt8),
+    TIL("System",                                   "Int16",                            Int16),
+    TIL("System",                                   "UInt16",                           UInt16),
+    TIL("System",                                   "Int32",                            Int32),
+    TIL("System",                                   "UInt32",                           UInt32),
+    TIL("System",                                   "Int64",                            Int64),
+    TIL("System",                                   "UInt64",                           UInt64),
+    TIL("System",                                   "Single",                           Single),
+    TIL("System",                                   "Double",                           Double),
+    TIL("System",                                   "DateTime",                         DateTime),
+    TIL("System",                                   "TimeSpan",                         TimeSpan),
+    TIL("System",                                   "String",                           String),
 
-    TIL("System", "Void", m_Void),
-    TIL("System", "Object", m_Object),
-    TIL("System", "ValueType", m_ValueType),
-    TIL("System", "Enum", m_Enum),
+    TIL("System",                                   "Void",                             Void),
+    TIL("System",                                   "Object",                           Object),
+    TIL("System",                                   "ValueType",                        ValueType),
+    TIL("System",                                   "Enum",                             Enum),
 
-    TIL("System", "AppDomainUnloadedException", m_AppDomainUnloadedException),
-    TIL("System", "ArgumentNullException", m_ArgumentNullException),
-    TIL("System", "ArgumentException", m_ArgumentException),
-    TIL("System", "ArgumentOutOfRangeException", m_ArgumentOutOfRangeException),
-    TIL("System", "Exception", m_Exception),
-    TIL("System", "IndexOutOfRangeException", m_IndexOutOfRangeException),
-    TIL("System", "InvalidCastException", m_InvalidCastException),
-    TIL("System", "FormatException", m_FormatException),
-    TIL("System", "InvalidOperationException", m_InvalidOperationException),
-    TIL("System", "NotSupportedException", m_NotSupportedException),
-    TIL("System", "NotImplementedException", m_NotImplementedException),
-    TIL("System", "NullReferenceException", m_NullReferenceException),
-    TIL("System", "OutOfMemoryException", m_OutOfMemoryException),
-    TIL("System", "TimeoutException", m_TimeoutException),
-    TIL("System", "ObjectDisposedException", m_ObjectDisposedException),
-    TIL("System.Threading", "ThreadAbortException", m_ThreadAbortException),
-    TIL("nanoFramework.Runtime.Native", "ConstraintException", m_ConstraintException),
+    TIL("System",                                   "AppDomainUnloadedException",       AppDomainUnloadedException),
+    TIL("System",                                   "ArgumentNullException",            ArgumentNullException),
+    TIL("System",                                   "ArgumentException",                ArgumentException),
+    TIL("System",                                   "ArgumentOutOfRangeException",      ArgumentOutOfRangeException),
+    TIL("System",                                   "Exception",                        Exception),
+    TIL("System",                                   "IndexOutOfRangeException",         IndexOutOfRangeException),
+    TIL("System",                                   "InvalidCastException",             InvalidCastException),
+    TIL("System",                                   "FormatException",                  FormatException),
+    TIL("System",                                   "InvalidOperationException",        InvalidOperationException),
+    TIL("System",                                   "NotSupportedException",            NotSupportedException),
+    TIL("System",                                   "NotImplementedException",          NotImplementedException),
+    TIL("System",                                   "NullReferenceException",           NullReferenceException),
+    TIL("System",                                   "OutOfMemoryException",             OutOfMemoryException),
+    TIL("System",                                   "TimeoutException",                 TimeoutException),
+    TIL("System",                                   "ObjectDisposedException",          ObjectDisposedException),
+    TIL("System.Threading",                         "ThreadAbortException",             ThreadAbortException),
+    TIL("nanoFramework.Runtime.Native",             "ConstraintException",              ConstraintException),
 
-    TIL("System", "Delegate", m_Delegate),
-    TIL("System", "MulticastDelegate", m_MulticastDelegate),
+    TIL("System",                                   "Delegate",                         Delegate),
+    TIL("System",                                   "MulticastDelegate",                MulticastDelegate),
 
-    TIL("System", "Array", m_Array),
-    TIL("System.Collections", "ArrayList", m_ArrayList),
-    TIL("System", "ICloneable", m_ICloneable),
-    TIL("System.Collections", "IList", m_IList),
+    TIL("System",                                   "Array",                            Array),
+    TIL("System.Collections",                       "ArrayList",                        ArrayList),
+    TIL("System",                                   "ICloneable",                       ICloneable),
+    TIL("System.Collections",                       "IList",                            IList),
 
-    TIL("System.Reflection", "Assembly", m_Assembly),
-    TIL("System", "Type", m_TypeStatic),
-    TIL("System", "RuntimeType", m_Type),
-    TIL("System.Reflection", "RuntimeConstructorInfo", m_ConstructorInfo),
-    TIL("System.Reflection", "RuntimeMethodInfo", m_MethodInfo),
-    TIL("System.Reflection", "RuntimeFieldInfo", m_FieldInfo),
+    TIL("System.Reflection",                        "Assembly",                         Assembly),
+    TIL("System",                                   "Type",                             TypeStatic),
+    TIL("System",                                   "RuntimeType",                      Type),
+    TIL("System.Reflection",                        "RuntimeConstructorInfo",           ConstructorInfo),
+    TIL("System.Reflection",                        "RuntimeMethodInfo",                MethodInfo),
+    TIL("System.Reflection",                        "RuntimeFieldInfo",                 FieldInfo),
 
-    TIL("System", "WeakReference", m_WeakReference),
+    TIL("System",                                   "WeakReference",                    WeakReference),
 
-    TIL("System", "Guid", m_Guid),
+    TIL("System",                                   "Guid",                             Guid),
 
-    TIL("nanoFramework.UI", "Bitmap", m_Bitmap),
-    TIL("nanoFramework.UI", "Font", m_Font),
-    TIL("nanoFramework.Touch", "TouchEvent", m_TouchEvent),
-    TIL("nanoFramework.Touch", "TouchInput", m_TouchInput),
+    TIL("nanoFramework.UI",                         "Bitmap",                           Bitmap),
+    TIL("nanoFramework.UI",                         "Font",                             Font),
+    TIL("nanoFramework.Touch",                      "TouchEvent",                       TouchEvent),
+    TIL("nanoFramework.Touch",                      "TouchInput",                       TouchInput),
 
-    TIL("System.Net.NetworkInformation", "NetworkInterface", m_NetworkInterface),
-    TIL("System.Net.NetworkInformation", "Wireless80211Configuration", m_Wireless80211Configuration),
-    TIL("System.Net.NetworkInformation", "WirelessAPConfiguration", m_WirelessAPConfiguration),
-    TIL("System.Net.NetworkInformation", "WirelessAPStation", m_WirelessAPStation),
+    TIL("System.Net.NetworkInformation",            "NetworkInterface",                 NetworkInterface),
+    TIL("System.Net.NetworkInformation",            "Wireless80211Configuration",       Wireless80211Configuration),
+    TIL("System.Net.NetworkInformation",            "WirelessAPConfiguration",          WirelessAPConfiguration),
+    TIL("System.Net.NetworkInformation",            "WirelessAPStation",                WirelessAPStation),
 
 #if defined(NANOCLR_APPDOMAINS)
-    TIL("System", "AppDomain", m_AppDomain),
-    TIL("System", "MarshalByRefObject", m_MarshalByRefObject),
+    TIL("System",                                   "AppDomain",                        m_AppDomain),
+    TIL("System",                                   "MarshalByRefObject",               m_MarshalByRefObject),
 #endif
 
-    TIL("System.Threading", "Thread", m_Thread),
-    TIL("System.Resources", "ResourceManager", m_ResourceManager),
+    TIL("System.Threading",                         "Thread",                           Thread),
+    TIL("System.Resources",                         "ResourceManager",                  ResourceManager),
 
-    TIL("System.Net.Sockets", "SocketException", m_SocketException),
+    TIL("System.Net.Sockets",                       "SocketException",                  SocketException),
 
-    TIL("System.Device.I2c", "I2cTransferResult", m_I2cTransferResult),
+    TIL("System.Device.I2c",                        "I2cTransferResult",                I2cTransferResult),
 
-    TIL("nanoFramework.Hardware.Esp32.Rmt", "RmtCommand", m_RmtCommand),
+    TIL("nanoFramework.Hardware.Esp32.Rmt",         "RmtCommand",                       RmtCommand),
 
 #undef TIL
 };
+
+// clang-format on
 
 //--//
 
@@ -3876,8 +3879,12 @@ static const MethodIndexLookup c_MethodIndexLookup[] = {
         nm, &g_CLR_RT_WellKnownTypes.type, &g_CLR_RT_WellKnownMethods.method                                           \
     }
 
-    MIL("GetObjectFromId", m_ResourceManager, m_ResourceManager_GetObjectFromId),
-    MIL("GetObjectChunkFromId", m_ResourceManager, m_ResourceManager_GetObjectChunkFromId),
+    // clang-format off
+
+    MIL("GetObjectFromId", ResourceManager, m_ResourceManager_GetObjectFromId),
+    MIL("GetObjectChunkFromId", ResourceManager, m_ResourceManager_GetObjectChunkFromId),
+
+// clang-format on
 
 #undef MIL
 };
@@ -5175,18 +5182,16 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.assemblyRef += ROUNDTOMULTIPLE(
                     pASSM->tablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
                     CLR_UINT32);
-                offsets.typeRef += ROUNDTOMULTIPLE(
-                    pASSM->tablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference),
-                    CLR_UINT32);
+                offsets.typeRef +=
+                    ROUNDTOMULTIPLE(pASSM->tablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference), CLR_UINT32);
                 offsets.fieldRef += ROUNDTOMULTIPLE(
                     pASSM->tablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference),
                     CLR_UINT32);
                 offsets.methodRef += ROUNDTOMULTIPLE(
                     pASSM->tablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
                     CLR_UINT32);
-                offsets.typeDef += ROUNDTOMULTIPLE(
-                    pASSM->tablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference),
-                    CLR_UINT32);
+                offsets.typeDef +=
+                    ROUNDTOMULTIPLE(pASSM->tablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference), CLR_UINT32);
                 offsets.fieldDef += ROUNDTOMULTIPLE(
                     pASSM->tablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference),
                     CLR_UINT32);
@@ -5198,7 +5203,8 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                     CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
-                offsets.staticFieldsCount += ROUNDTOMULTIPLE(pASSM->staticFieldsCount * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
+                offsets.staticFieldsCount +=
+                    ROUNDTOMULTIPLE(pASSM->staticFieldsCount * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -5210,8 +5216,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 iMetaData += pASSM->header->SizeOfTable(TBL_AssemblyRef) + pASSM->header->SizeOfTable(TBL_TypeRef) +
                              pASSM->header->SizeOfTable(TBL_FieldRef) + pASSM->header->SizeOfTable(TBL_MethodRef) +
                              pASSM->header->SizeOfTable(TBL_TypeDef) + pASSM->header->SizeOfTable(TBL_FieldDef) +
-                             pASSM->header->SizeOfTable(TBL_MethodDef) +
-                             pASSM->header->SizeOfTable(TBL_GenericParam) +
+                             pASSM->header->SizeOfTable(TBL_MethodDef) + pASSM->header->SizeOfTable(TBL_GenericParam) +
                              pASSM->header->SizeOfTable(TBL_TypeSpec) + pASSM->header->SizeOfTable(TBL_Attributes) +
                              pASSM->header->SizeOfTable(TBL_Signatures);
 
@@ -5353,7 +5358,7 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
         CLR_RT_HeapBlock exception;
 
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.m_OutOfMemoryException));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(exception, g_CLR_RT_WellKnownTypes.OutOfMemoryException));
 
         g_CLR_RT_ExecutionEngine.m_outOfMemoryException = exception.Dereference();
     }
@@ -5885,8 +5890,7 @@ bool CLR_RT_TypeSystem::FindVirtualMethodDef(
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromMethod(calleeInst);
 
-        if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
-            CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
+        if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Interface)
         {
             //
             // It's an interface method, it could be that the class is implementing explicitly the method.
@@ -6215,7 +6219,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 m_lastValue.m_value,
                 paramCount,
-                g_CLR_RT_WellKnownTypes.m_Object));
+                g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
             CLR_RT_HeapBlock *currentParam =
@@ -6380,7 +6384,7 @@ HRESULT CLR_RT_AttributeParser::ReadString(CLR_RT_HeapBlock *&value)
     CLR_UINT32 tk;
 
     CLR_RT_TypeDescriptor desc;
-    NANOCLR_CHECK_HRESULT(desc.InitializeFromType(g_CLR_RT_WellKnownTypes.m_String));
+    NANOCLR_CHECK_HRESULT(desc.InitializeFromType(g_CLR_RT_WellKnownTypes.String));
 
     NANOCLR_READ_UNALIGNED_UINT16(tk, m_blob);
 
@@ -6403,7 +6407,7 @@ HRESULT CLR_RT_AttributeParser::ReadNumericValue(
     CLR_RT_TypeDescriptor desc;
     NANOCLR_CHECK_HRESULT(desc.InitializeFromType(*m_cls));
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*value, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*value, g_CLR_RT_WellKnownTypes.TypeStatic));
 
     // need to setup reflection and data type Id to properly setup the object
     value->SetReflection(*m_cls);

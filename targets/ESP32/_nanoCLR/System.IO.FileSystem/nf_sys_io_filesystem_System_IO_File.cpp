@@ -358,7 +358,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
     fileInfoTime = GetDateTimeFromStat(&(fileInfo.st_mtime));
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.DateTime));
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));

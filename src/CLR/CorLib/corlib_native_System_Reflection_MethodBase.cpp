@@ -38,7 +38,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_DeclaringType___
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
         hbObj->SetReflection(cls);
@@ -252,7 +252,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
         // create a new instance of the parameter type
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(paraTypeHB, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = paraTypeHB.Dereference();
         hbObj->SetReflection(paramElement.Class);
 

@@ -634,7 +634,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
                 if ((mask & c_Signature_Type) != 0)
                 {
                     m_type = &m_type_tmp;
-                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType(g_CLR_RT_WellKnownTypes.m_ArrayList));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType(g_CLR_RT_WellKnownTypes.ArrayList));
                 }
             }
             else if (levelTwo == TE_L2_Other)
@@ -643,7 +643,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
                 if (levelThree == TE_L3_Type)
                 {
                     m_type = &m_type_tmp;
-                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType(g_CLR_RT_WellKnownTypes.m_Type));
+                    NANOCLR_CHECK_HRESULT(m_type->InitializeFromType(g_CLR_RT_WellKnownTypes.Type));
                 }
 #if defined(NANOCLR_APPDOMAINS)
                 else if (levelThree == TE_L3_Reflection)
@@ -861,7 +861,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_DateTime.data)
+    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.DateTime.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_DateTime::GetValuePtr(*value);
         FAULT_ON_NULL(pVal);
@@ -870,7 +870,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
         bits = 64;
         fSigned = false;
     }
-    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_TimeSpan.data)
+    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.TimeSpan.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_TimeSpan::GetValuePtr(*value);
         FAULT_ON_NULL(pVal);
@@ -1010,7 +1010,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
     CLR_UINT32 bits;
     bool fSigned;
 
-    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_DateTime.data)
+    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.DateTime.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_DateTime::GetValuePtr(*m_value);
         FAULT_ON_NULL(pVal);
@@ -1019,7 +1019,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
         bits = 64;
         fSigned = false;
     }
-    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_TimeSpan.data)
+    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.TimeSpan.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_TimeSpan::GetValuePtr(*m_value);
         FAULT_ON_NULL(pVal);
@@ -1209,7 +1209,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
     if (cls.target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
         CLR_RT_AttributeEnumerator en;
         en.Initialize(cls);
 
@@ -1246,7 +1246,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
     if (fld.target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
-        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
+        inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.SerializationHintsAttribute);
         CLR_RT_AttributeEnumerator en;
         en.Initialize(fld);
 
@@ -1346,22 +1346,22 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
                 switch (reflex->kind)
                 {
                     case REFLECTION_ASSEMBLY:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Assembly;
+                        cls = &g_CLR_RT_WellKnownTypes.Assembly;
                         break;
                     case REFLECTION_TYPE:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Type;
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_TYPE_DELAYED:
-                        cls = &g_CLR_RT_WellKnownTypes.m_Type;
+                        cls = &g_CLR_RT_WellKnownTypes.Type;
                         break;
                     case REFLECTION_CONSTRUCTOR:
-                        cls = &g_CLR_RT_WellKnownTypes.m_ConstructorInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.ConstructorInfo;
                         break;
                     case REFLECTION_METHOD:
-                        cls = &g_CLR_RT_WellKnownTypes.m_MethodInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.MethodInfo;
                         break;
                     case REFLECTION_FIELD:
-                        cls = &g_CLR_RT_WellKnownTypes.m_FieldInfo;
+                        cls = &g_CLR_RT_WellKnownTypes.FieldInfo;
                         break;
                 }
 

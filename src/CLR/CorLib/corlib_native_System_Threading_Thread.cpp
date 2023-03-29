@@ -488,7 +488,7 @@ HRESULT Library_corlib_native_System_Threading_Thread::get_CurrentThread___STATI
     // for the data before the thread is started.  Once the thread is started, they are copied over to the unmanaged
     // thread object and no longer used.  The managed object is then used simply as a wrapper for the unmanaged thread.
     // Therefore, it is safe to simply make another managed thread here.
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Thread));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Thread));
 
     pRes = top.Dereference();
 

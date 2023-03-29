@@ -3212,7 +3212,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                             (void)Library_corlib_native_System_Exception::CreateInstance(
                                 th->m_currentException,
-                                g_CLR_RT_WellKnownTypes.m_ThreadAbortException,
+                                g_CLR_RT_WellKnownTypes.ThreadAbortException,
                                 S_OK,
                                 stack);
 

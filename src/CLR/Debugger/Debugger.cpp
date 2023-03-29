@@ -2371,7 +2371,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
         // placeholder for the data before the thread is started.  Once the thread is started, they are copied over to
         // the unmanaged thread object and no longer used.  The managed object is then used simply as a wrapper for the
         // unmanaged thread.  Therefore, it is safe to simply make another managed thread here.
-        if (SUCCEEDED(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pThread, g_CLR_RT_WellKnownTypes.m_Thread)))
+        if (SUCCEEDED(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pThread, g_CLR_RT_WellKnownTypes.Thread)))
         {
             CLR_RT_HeapBlock *pRes = pThread->Dereference();
 
@@ -2633,7 +2633,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
     }
     else
     {
-        if (SUCCEEDED(CLR_RT_HeapBlock_Array::CreateInstance(ref, cmd->m_size, g_CLR_RT_WellKnownTypes.m_Object)))
+        if (SUCCEEDED(CLR_RT_HeapBlock_Array::CreateInstance(ref, cmd->m_size, g_CLR_RT_WellKnownTypes.Object)))
         {
             CLR_RT_HeapBlock_Array *pOld = g_CLR_RT_ExecutionEngine.m_scratchPadArray;
             CLR_RT_HeapBlock_Array *pNew = ref.DereferenceArray();
@@ -3277,7 +3277,7 @@ static HRESULT AnalyzeObject_Helper(CLR_RT_HeapBlock *ptr, AnalyzeObject &ao)
                     case CLR_RT_DataTypeLookup::c_ValueType:
                     case CLR_RT_DataTypeLookup::c_Enum:
                         ao.m_fCanBeNull =
-                            ao.m_fBoxed || (ao.m_desc.m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_String.data);
+                            ao.m_fBoxed || (ao.m_desc.m_handlerCls.data == g_CLR_RT_WellKnownTypes.String.data);
                         break;
 
                     default:

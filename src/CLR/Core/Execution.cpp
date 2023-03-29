@@ -549,7 +549,7 @@ HRESULT CLR_RT_ExecutionEngine::CreateEntryPointArgs(CLR_RT_HeapBlock &argsBlk, 
     }
 
     NANOCLR_CHECK_HRESULT(
-        CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.m_String));
+        CLR_RT_HeapBlock_Array::CreateInstance(argsBlk, (CLR_UINT32)args.size(), g_CLR_RT_WellKnownTypes.String));
 
     array = argsBlk.Array();
     iArg = 0;
@@ -618,7 +618,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
 #endif
             {
                 NANOCLR_CHECK_HRESULT(
-                    CLR_RT_HeapBlock_Array::CreateInstance(stack->m_arguments[0], 0, g_CLR_RT_WellKnownTypes.m_String));
+                    CLR_RT_HeapBlock_Array::CreateInstance(stack->m_arguments[0], 0, g_CLR_RT_WellKnownTypes.String));
             }
         }
     }
@@ -1077,7 +1077,7 @@ void CLR_DebuggerBreak()
         {
             Library_corlib_native_System_Exception::CreateInstance(
                 g_CLR_RT_ExecutionEngine.m_currentThread->m_currentException,
-                g_CLR_RT_WellKnownTypes.m_WatchdogException,
+                g_CLR_RT_WellKnownTypes.WatchdogException,
                 CLR_E_WATCHDOG_TIMEOUT,
                 g_CLR_RT_ExecutionEngine.m_currentThread->CurrentFrame());
         }
@@ -2024,7 +2024,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
     //
     // You cannot create an array this way.
     //
-    if (inst.data == g_CLR_RT_WellKnownTypes.m_Array.data)
+    if (inst.data == g_CLR_RT_WellKnownTypes.Array.data)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -2338,7 +2338,7 @@ HRESULT CLR_RT_ExecutionEngine::NewArrayList(CLR_RT_HeapBlock &ref, int size, CL
     int count = size;
     int capacity = size < minCapacity ? minCapacity : size;
 
-    NANOCLR_CHECK_HRESULT(NewObjectFromIndex(ref, g_CLR_RT_WellKnownTypes.m_ArrayList));
+    NANOCLR_CHECK_HRESULT(NewObjectFromIndex(ref, g_CLR_RT_WellKnownTypes.ArrayList));
 
     NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::PrepareArrayList(ref, count, capacity));
     NANOCLR_CHECK_HRESULT(CLR_RT_ArrayListHelper::ExtractArrayFromArrayList(ref, array, count, capacity));
@@ -2798,7 +2798,7 @@ void CLR_RT_ExecutionEngine::CheckThreads(CLR_INT64 &timeoutMin, CLR_RT_DblLinke
                 {
                     (void)Library_corlib_native_System_Exception::CreateInstance(
                         th->m_currentException,
-                        g_CLR_RT_WellKnownTypes.m_ConstraintException,
+                        g_CLR_RT_WellKnownTypes.ConstraintException,
                         S_OK,
                         th->CurrentFrame());
 
@@ -2980,10 +2980,10 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.
             //
-            if (inst.data == g_CLR_RT_WellKnownTypes.m_Array.data ||
-                inst.data == g_CLR_RT_WellKnownTypes.m_Object.data ||
-                inst.data == g_CLR_RT_WellKnownTypes.m_IList.data ||
-                inst.data == g_CLR_RT_WellKnownTypes.m_ICloneable.data)
+            if (inst.data == g_CLR_RT_WellKnownTypes.Array.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.Object.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.IList.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.ICloneable.data)
             {
                 return true;
             }

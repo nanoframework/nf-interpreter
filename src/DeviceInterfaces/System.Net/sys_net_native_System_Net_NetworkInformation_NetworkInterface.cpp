@@ -58,7 +58,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         pConfig[FIELD___macAddress],
         NETIF_MAX_HWADDR_LEN,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
     memcpy(pConfig[FIELD___macAddress].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN);
 
     NANOCLR_NOCLEANUP();
@@ -260,7 +260,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     // now load adapter configuration on top of the stored config
     NANOCLR_CHECK_HRESULT(SOCK_CONFIGURATION_LoadConfiguration(&config, interfaceIndex));
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_NetworkInterface));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.NetworkInterface));
 
     pConfig = top.Dereference();
     FAULT_ON_NULL(pConfig);
@@ -287,7 +287,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         pConfig[FIELD___macAddress],
         NETIF_MAX_HWADDR_LEN,
-        g_CLR_RT_WellKnownTypes.m_UInt8));
+        g_CLR_RT_WellKnownTypes.UInt8));
     memcpy(pConfig[FIELD___macAddress].DereferenceArray()->GetFirstElement(), config.MacAddress, NETIF_MAX_HWADDR_LEN);
 
     NANOCLR_NOCLEANUP();

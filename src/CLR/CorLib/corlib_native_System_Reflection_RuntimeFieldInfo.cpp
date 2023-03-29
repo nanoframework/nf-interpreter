@@ -36,7 +36,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_DeclaringT
         CLR_RT_HeapBlock& top = stack.PushValue();
         CLR_RT_HeapBlock* hbObj;
         
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = top.Dereference();
         hbObj->SetReflection( cls );
@@ -62,7 +62,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_FieldType_
         CLR_RT_HeapBlock& top = stack.PushValue();
         CLR_RT_HeapBlock* hbObj;
         
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
         hbObj = top.Dereference();
         hbObj->SetReflection( desc.m_handlerCls );
     }

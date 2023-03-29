@@ -64,7 +64,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__
     if (g_CLR_RT_TypeSystem.FindTypeDef(szClass, assm.assembly, td))
     {
         NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = hbRef->Dereference();
         hbObj->SetReflection(td);
@@ -89,7 +89,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, num, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, num, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         if (num)
         {
@@ -101,7 +101,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
                 index.Set(pASSM->assemblyIndex, i);
 
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_TypeStatic));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.TypeStatic));
 
                 hbObj = pArray->Dereference();
                 hbObj->SetReflection(index);
@@ -159,7 +159,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
             result,
             pAssm->tablesSize[TBL_ResourcesFiles],
-            g_CLR_RT_WellKnownTypes.m_String));
+            g_CLR_RT_WellKnownTypes.String));
 
         {
             CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
@@ -197,7 +197,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetExecutingAssembly__
         CLR_RT_Assembly_Index index;
         index.Set(caller->MethodCall().assembly->assemblyIndex);
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
 
         hbObj = top.Dereference();
         hbObj->SetReflection(index);
@@ -260,7 +260,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
 #endif
     index.Set(assembly->assemblyIndex);
 
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_Assembly));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.Assembly));
 
     hbObj = top.Dereference();
     hbObj->SetReflection(index);
@@ -373,7 +373,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     stack.PopValue();
 
     NANOCLR_CHECK_HRESULT(
-        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.m_Assembly));
+        g_CLR_RT_ExecutionEngine.NewObjectFromIndex(stack.PushValue(), g_CLR_RT_WellKnownTypes.Assembly));
 
     hbObj = stack.TopValue().Dereference();
     hbObj->SetReflection(assemblyIndex);

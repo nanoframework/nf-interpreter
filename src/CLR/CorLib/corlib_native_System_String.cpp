@@ -215,7 +215,7 @@ HRESULT Library_corlib_native_System_String::_ctor___VOID__CHAR__I4( CLR_RT_Stac
         CLR_RT_HeapBlock     tmp; tmp.SetObjectReference( NULL );
         CLR_RT_ProtectFromGC gc( tmp );
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmp, len, g_CLR_RT_WellKnownTypes.m_Char ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( tmp, len, g_CLR_RT_WellKnownTypes.Char ));
 
         {
             CLR_RT_HeapBlock_Array* tmpArray = tmp.DereferenceArray();
@@ -993,7 +993,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
     {
         CLR_RT_HeapBlock& refTarget = stack.PushValue();
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, 0, g_CLR_RT_WellKnownTypes.m_String ));
+        NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, 0, g_CLR_RT_WellKnownTypes.String ));
 
         arrayDst = refTarget.DereferenceArray();
     }
@@ -1072,7 +1072,7 @@ HRESULT Library_corlib_native_System_String::Split( CLR_RT_StackFrame& stack, CL
                 {
                     CLR_RT_HeapBlock& refTarget = stack.PushValue();
 
-                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, count, g_CLR_RT_WellKnownTypes.m_String ));
+                    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( refTarget, count, g_CLR_RT_WellKnownTypes.String ));
 
                     arrayDst = refTarget.DereferenceArray();
                 }
@@ -1159,7 +1159,7 @@ HRESULT Library_corlib_native_System_String::ConvertToCharArray( const char* szT
 
     if(CLR_RT_HeapBlock_Array::CheckRange( startIndex, length, totLength ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, length, g_CLR_RT_WellKnownTypes.m_Char ));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance( ref, length, g_CLR_RT_WellKnownTypes.Char ));
 
     array = ref.DereferenceArray();
 

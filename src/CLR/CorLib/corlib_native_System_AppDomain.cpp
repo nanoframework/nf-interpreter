@@ -276,7 +276,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
                 index.Set(pASSM->assemblyIndex);
 
                 NANOCLR_CHECK_HRESULT(
-                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));
+                    g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.Assembly));
                 hbObj = pArray->Dereference();
 
                 hbObj->SetReflection(index);
@@ -289,7 +289,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
         if (pass == 0)
         {
             NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.m_Assembly));
+                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.Assembly));
 
             pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
         }

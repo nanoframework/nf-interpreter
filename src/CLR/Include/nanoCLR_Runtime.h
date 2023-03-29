@@ -1667,94 +1667,93 @@ struct CLR_RT_AppDomainAssembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - N
 
 struct CLR_RT_WellKnownTypes
 {
-    CLR_RT_TypeDef_Index m_Boolean;
-    CLR_RT_TypeDef_Index m_Int8;
-    CLR_RT_TypeDef_Index m_UInt8;
+    CLR_RT_TypeDef_Index Boolean;
+    CLR_RT_TypeDef_Index Int8;
+    CLR_RT_TypeDef_Index UInt8;
 
-    CLR_RT_TypeDef_Index m_Char;
-    CLR_RT_TypeDef_Index m_Int16;
-    CLR_RT_TypeDef_Index m_UInt16;
+    CLR_RT_TypeDef_Index Char;
+    CLR_RT_TypeDef_Index Int16;
+    CLR_RT_TypeDef_Index UInt16;
 
-    CLR_RT_TypeDef_Index m_Int32;
-    CLR_RT_TypeDef_Index m_UInt32;
-    CLR_RT_TypeDef_Index m_Single;
+    CLR_RT_TypeDef_Index Int32;
+    CLR_RT_TypeDef_Index UInt32;
+    CLR_RT_TypeDef_Index Single;
 
-    CLR_RT_TypeDef_Index m_Int64;
-    CLR_RT_TypeDef_Index m_UInt64;
-    CLR_RT_TypeDef_Index m_Double;
-    CLR_RT_TypeDef_Index m_DateTime;
-    CLR_RT_TypeDef_Index m_TimeSpan;
-    CLR_RT_TypeDef_Index m_String;
+    CLR_RT_TypeDef_Index Int64;
+    CLR_RT_TypeDef_Index UInt64;
+    CLR_RT_TypeDef_Index Double;
+    CLR_RT_TypeDef_Index DateTime;
+    CLR_RT_TypeDef_Index TimeSpan;
+    CLR_RT_TypeDef_Index String;
 
-    CLR_RT_TypeDef_Index m_Void;
-    CLR_RT_TypeDef_Index m_Object;
-    CLR_RT_TypeDef_Index m_ValueType;
-    CLR_RT_TypeDef_Index m_Enum;
+    CLR_RT_TypeDef_Index Void;
+    CLR_RT_TypeDef_Index Object;
+    CLR_RT_TypeDef_Index ValueType;
+    CLR_RT_TypeDef_Index Enum;
 
-    CLR_RT_TypeDef_Index m_AppDomainUnloadedException;
-    CLR_RT_TypeDef_Index m_ArgumentNullException;
-    CLR_RT_TypeDef_Index m_ArgumentException;
-    CLR_RT_TypeDef_Index m_ArgumentOutOfRangeException;
-    CLR_RT_TypeDef_Index m_Exception;
-    CLR_RT_TypeDef_Index m_IndexOutOfRangeException;
-    CLR_RT_TypeDef_Index m_ThreadAbortException;
-    CLR_RT_TypeDef_Index m_InvalidOperationException;
-    CLR_RT_TypeDef_Index m_InvalidCastException;
-    CLR_RT_TypeDef_Index m_FormatException;
-    CLR_RT_TypeDef_Index m_NotSupportedException;
-    CLR_RT_TypeDef_Index m_NotImplementedException;
-    CLR_RT_TypeDef_Index m_NullReferenceException;
-    CLR_RT_TypeDef_Index m_OutOfMemoryException;
-    CLR_RT_TypeDef_Index m_TimeoutException;
-    CLR_RT_TypeDef_Index m_ObjectDisposedException;
-    CLR_RT_TypeDef_Index m_ConstraintException;
-    CLR_RT_TypeDef_Index m_WatchdogException;
+    CLR_RT_TypeDef_Index AppDomainUnloadedException;
+    CLR_RT_TypeDef_Index ArgumentNullException;
+    CLR_RT_TypeDef_Index ArgumentException;
+    CLR_RT_TypeDef_Index ArgumentOutOfRangeException;
+    CLR_RT_TypeDef_Index Exception;
+    CLR_RT_TypeDef_Index IndexOutOfRangeException;
+    CLR_RT_TypeDef_Index ThreadAbortException;
+    CLR_RT_TypeDef_Index InvalidOperationException;
+    CLR_RT_TypeDef_Index InvalidCastException;
+    CLR_RT_TypeDef_Index FormatException;
+    CLR_RT_TypeDef_Index NotSupportedException;
+    CLR_RT_TypeDef_Index NotImplementedException;
+    CLR_RT_TypeDef_Index NullReferenceException;
+    CLR_RT_TypeDef_Index OutOfMemoryException;
+    CLR_RT_TypeDef_Index TimeoutException;
+    CLR_RT_TypeDef_Index ObjectDisposedException;
+    CLR_RT_TypeDef_Index ConstraintException;
+    CLR_RT_TypeDef_Index WatchdogException;
 
-    CLR_RT_TypeDef_Index m_Delegate;
-    CLR_RT_TypeDef_Index m_MulticastDelegate;
+    CLR_RT_TypeDef_Index Delegate;
+    CLR_RT_TypeDef_Index MulticastDelegate;
 
-    CLR_RT_TypeDef_Index m_Array;
-    CLR_RT_TypeDef_Index m_ArrayList;
-    CLR_RT_TypeDef_Index m_ICloneable;
-    CLR_RT_TypeDef_Index m_IList;
+    CLR_RT_TypeDef_Index Array;
+    CLR_RT_TypeDef_Index ArrayList;
+    CLR_RT_TypeDef_Index ICloneable;
+    CLR_RT_TypeDef_Index IList;
 
-    CLR_RT_TypeDef_Index m_Assembly;
-    CLR_RT_TypeDef_Index m_TypeStatic;
-    CLR_RT_TypeDef_Index m_Type;
-    CLR_RT_TypeDef_Index m_ConstructorInfo;
-    CLR_RT_TypeDef_Index m_MethodInfo;
-    CLR_RT_TypeDef_Index m_FieldInfo;
+    CLR_RT_TypeDef_Index Assembly;
+    CLR_RT_TypeDef_Index TypeStatic;
+    CLR_RT_TypeDef_Index Type;
+    CLR_RT_TypeDef_Index ConstructorInfo;
+    CLR_RT_TypeDef_Index MethodInfo;
+    CLR_RT_TypeDef_Index FieldInfo;
 
-    CLR_RT_TypeDef_Index m_WeakReference;
+    CLR_RT_TypeDef_Index WeakReference;
 
-    CLR_RT_TypeDef_Index m_Guid;
+    CLR_RT_TypeDef_Index Guid;
 
-    CLR_RT_TypeDef_Index m_SerializationHintsAttribute;
-    CLR_RT_TypeDef_Index m_Bitmap;
-    CLR_RT_TypeDef_Index m_Font;
+    CLR_RT_TypeDef_Index SerializationHintsAttribute;
+    CLR_RT_TypeDef_Index Bitmap;
+    CLR_RT_TypeDef_Index Font;
 
-    CLR_RT_TypeDef_Index m_TouchEvent;
-    CLR_RT_TypeDef_Index m_TouchInput;
+    CLR_RT_TypeDef_Index TouchEvent;
+    CLR_RT_TypeDef_Index TouchInput;
 
-    CLR_RT_TypeDef_Index m_NetworkInterface;
-    CLR_RT_TypeDef_Index m_Wireless80211Configuration;
-    CLR_RT_TypeDef_Index m_WirelessAPConfiguration;
-    CLR_RT_TypeDef_Index m_WirelessAPStation;
+    CLR_RT_TypeDef_Index NetworkInterface;
+    CLR_RT_TypeDef_Index Wireless80211Configuration;
+    CLR_RT_TypeDef_Index WirelessAPConfiguration;
+    CLR_RT_TypeDef_Index WirelessAPStation;
 
 #if defined(NANOCLR_APPDOMAINS)
     CLR_RT_TypeDef_Index m_AppDomain;
     CLR_RT_TypeDef_Index m_MarshalByRefObject;
 #endif
 
-    CLR_RT_TypeDef_Index m_Thread;
-    CLR_RT_TypeDef_Index m_ResourceManager;
+    CLR_RT_TypeDef_Index Thread;
+    CLR_RT_TypeDef_Index ResourceManager;
 
-    CLR_RT_TypeDef_Index m_SocketException;
+    CLR_RT_TypeDef_Index SocketException;
 
-    CLR_RT_TypeDef_Index m_I2cTransferResult;
-    CLR_RT_TypeDef_Index m_I2cTransferResult_old;
+    CLR_RT_TypeDef_Index I2cTransferResult;
 
-    CLR_RT_TypeDef_Index m_RmtCommand;
+    CLR_RT_TypeDef_Index RmtCommand;
 
     PROHIBIT_COPY_CONSTRUCTORS(CLR_RT_WellKnownTypes);
 };
