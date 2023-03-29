@@ -676,10 +676,10 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
     {
 
 #if !defined(NANOCLR_APPDOMAINS)
-        CheckMultipleBlocks(pASSM->m_pStaticFields, pASSM->m_iStaticFields);
+        CheckMultipleBlocks(pASSM->staticFields, pASSM->staticFieldsCount);
 #endif
 
-        CheckSingleBlock(&pASSM->m_pFile);
+        CheckSingleBlock(&pASSM->file);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 }

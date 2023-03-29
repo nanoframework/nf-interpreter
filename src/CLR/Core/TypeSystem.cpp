@@ -12,8 +12,8 @@
 
 #define ITERATE_THROUGH_RECORDS(assm, i, tblName, tblNameUC)                                                           \
     const CLR_RECORD_##tblNameUC *src = (const CLR_RECORD_##tblNameUC *)assm->GetTable(TBL_##tblName);                 \
-    CLR_RT_##tblName##_CrossReference *dst = assm->m_pCrossReference_##tblName;                                        \
-    for (i = 0; i < assm->m_pTablesSize[TBL_##tblName]; i++, src++, dst++)
+    CLR_RT_##tblName##_CrossReference *dst = assm->crossReference##tblName;                                        \
+    for (i = 0; i < assm->tablesSize[TBL_##tblName]; i++, src++, dst++)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -560,7 +560,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                             break;
 
                             case TBL_TypeRef:
-                                res.Class = Assembly->m_pCrossReference_TypeRef[index].target;
+                                res.Class = Assembly->crossReferenceTypeRef[index].target;
                                 break;
 
                             case TBL_TypeDef:
@@ -853,7 +853,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         CLR_RT_Assembly *assm = fd.assembly;
         const CLR_RECORD_TYPEDEF *td = (const CLR_RECORD_TYPEDEF *)assm->GetTable(TBL_TypeDef);
         CLR_INDEX indexField = fd.Field();
-        int i = assm->m_pTablesSize[TBL_TypeDef];
+        int i = assm->tablesSize[TBL_TypeDef];
 
         if (fd.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
         {
@@ -880,7 +880,7 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
         if (i)
         {
             CLR_INDEX indexAssm = fd.Assembly();
-            CLR_INDEX indexType = assm->m_pTablesSize[TBL_TypeDef] - i;
+            CLR_INDEX indexType = assm->tablesSize[TBL_TypeDef] - i;
 
             Set(indexAssm, indexType);
 
@@ -929,7 +929,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
         switch (CLR_TypeFromTk(tk))
         {
             case TBL_TypeRef:
-                data = assm->m_pCrossReference_TypeRef[index].target.data;
+                data = assm->crossReferenceTypeRef[index].target.data;
                 assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                 target = assembly->GetTypeDef(Type());
 
@@ -953,7 +953,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
 
             case TBL_GenericParam:
             {
-                CLR_RT_GenericParam_CrossReference gp = assm->m_pCrossReference_GenericParam[index];
+                CLR_RT_GenericParam_CrossReference gp = assm->crossReferenceGenericParam[index];
 
                 Set(gp.classTypeDef.Assembly(), gp.classTypeDef.Type());
 
@@ -1004,7 +1004,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                         caller->assembly->FindGenericParamAtMethodDef(*caller, genericParamPosition, gpIndex);
 
                         CLR_RT_GenericParam_CrossReference gp =
-                            caller->assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                            caller->assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
                         // get TypeDef instance from generic parameter index
                         data = gp.classTypeDef.data;
@@ -1074,7 +1074,7 @@ bool CLR_RT_TypeDef_Instance::SwitchToParent()
                     break;
 
                 case TBL_TypeRef:
-                    cls = &assembly->m_pCrossReference_TypeRef[target->ExtendsIndex()].target;
+                    cls = &assembly->crossReferenceTypeRef[target->ExtendsIndex()].target;
                     break;
 
                 // all others are not supported
@@ -1150,7 +1150,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
                 switch (fr->Owner())
                 {
                     case TBL_TypeRef:
-                        data = assm->m_pCrossReference_FieldRef[fr->OwnerIndex()].target.data;
+                        data = assm->crossReferenceFieldRef[fr->OwnerIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetFieldDef(Field());
 
@@ -1161,7 +1161,7 @@ bool CLR_RT_FieldDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm
 
                     case TBL_TypeSpec:
                     {
-                        genericType = &assm->m_pCrossReference_FieldRef[index].genericType;
+                        genericType = &assm->crossReferenceFieldRef[index].genericType;
 
                         const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
 
@@ -1267,7 +1267,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 {
                     // owner is TypeSpec
 
-                    genericType = &assm->m_pCrossReference_MethodRef[index].genericType;
+                    genericType = &assm->crossReferenceMethodRef[index].genericType;
 
                     const CLR_RECORD_TYPESPEC *ts = assm->GetTypeSpec(genericType->TypeSpec());
 
@@ -1288,7 +1288,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                     // owner is TypeRef
 
                     // get data for MethodRef (from index)
-                    data = assm->m_pCrossReference_MethodRef[index].target.data;
+                    data = assm->crossReferenceMethodRef[index].target.data;
                     // get assembly for this type ref
                     assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                     // grab the MethodDef
@@ -1336,7 +1336,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         break;
 
                     case TBL_MethodRef:
-                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].target.data;
+                        data = assm->crossReferenceMethodRef[ms->MethodIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetMethodDef(Method());
 
@@ -1348,7 +1348,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 }
 
                 // get generic type
-                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].genericType;
+                genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -1376,7 +1376,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                         return true;
 
                     case TBL_MethodRef:
-                        data = assm->m_pCrossReference_MethodRef[ms->MethodIndex()].target.data;
+                        data = assm->crossReferenceMethodRef[ms->MethodIndex()].target.data;
                         assembly = g_CLR_RT_TypeSystem.m_assemblies[Assembly() - 1];
                         target = assembly->GetMethodDef(Method());
 
@@ -1393,7 +1393,7 @@ bool CLR_RT_MethodDef_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *ass
                 break;
 
                 // get generic type
-                genericType = &assembly->m_pCrossReference_TypeSpec[ms->container].genericType;
+                genericType = &assembly->crossReferenceTypeSpec[ms->container].genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
                 name = assembly->GetString(target->name);
@@ -2140,7 +2140,7 @@ bool CLR_RT_ExceptionHandler::ConvertFromEH(
 
 bool CLR_RT_Assembly::IsSameAssembly(const CLR_RT_Assembly &assm) const
 {
-    if (m_header->headerCRC == assm.m_header->headerCRC && m_header->assemblyCRC == assm.m_header->assemblyCRC)
+    if (header->headerCRC == assm.header->headerCRC && header->assemblyCRC == assm.header->assemblyCRC)
     {
         return true;
     }
@@ -2148,50 +2148,50 @@ bool CLR_RT_Assembly::IsSameAssembly(const CLR_RT_Assembly &assm) const
     return false;
 }
 
-void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
+void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8 *buffer = (CLR_UINT8 *)this;
     int i;
 
-    m_szName = GetString(m_header->assemblyName);
+    name = GetString(header->assemblyName);
 
     //--//
-    buffer += offsets.iBase;
-    m_pCrossReference_AssemblyRef = (CLR_RT_AssemblyRef_CrossReference *)buffer;
-    buffer += offsets.iAssemblyRef;
-    m_pCrossReference_TypeRef = (CLR_RT_TypeRef_CrossReference *)buffer;
-    buffer += offsets.iTypeRef;
-    m_pCrossReference_FieldRef = (CLR_RT_FieldRef_CrossReference *)buffer;
-    buffer += offsets.iFieldRef;
-    m_pCrossReference_MethodRef = (CLR_RT_MethodRef_CrossReference *)buffer;
-    buffer += offsets.iMethodRef;
-    m_pCrossReference_TypeDef = (CLR_RT_TypeDef_CrossReference *)buffer;
-    buffer += offsets.iTypeDef;
-    m_pCrossReference_FieldDef = (CLR_RT_FieldDef_CrossReference *)buffer;
-    buffer += offsets.iFieldDef;
-    m_pCrossReference_MethodDef = (CLR_RT_MethodDef_CrossReference *)buffer;
-    buffer += offsets.iMethodDef;
-    m_pCrossReference_GenericParam = (CLR_RT_GenericParam_CrossReference *)buffer;
-    buffer += offsets.iGenericParam;
-    m_pCrossReference_MethodSpec = (CLR_RT_MethodSpec_CrossReference *)buffer;
-    buffer += offsets.iMethodSpec;
-    m_pCrossReference_TypeSpec = (CLR_RT_TypeSpec_CrossReference *)buffer;
-    buffer += offsets.iTypeSpec;
+    buffer += offsets.base;
+    crossReferenceAssemblyRef = (CLR_RT_AssemblyRef_CrossReference *)buffer;
+    buffer += offsets.assemblyRef;
+    crossReferenceTypeRef = (CLR_RT_TypeRef_CrossReference *)buffer;
+    buffer += offsets.typeRef;
+    crossReferenceFieldRef = (CLR_RT_FieldRef_CrossReference *)buffer;
+    buffer += offsets.fieldRef;
+    crossReferenceMethodRef = (CLR_RT_MethodRef_CrossReference *)buffer;
+    buffer += offsets.methodRef;
+    crossReferenceTypeDef = (CLR_RT_TypeDef_CrossReference *)buffer;
+    buffer += offsets.typeDef;
+    crossReferenceFieldDef = (CLR_RT_FieldDef_CrossReference *)buffer;
+    buffer += offsets.fieldDef;
+    crossReferenceMethodDef = (CLR_RT_MethodDef_CrossReference *)buffer;
+    buffer += offsets.methodDef;
+    crossReferenceGenericParam = (CLR_RT_GenericParam_CrossReference *)buffer;
+    buffer += offsets.genericParam;
+    crossReferenceMethodSpec = (CLR_RT_MethodSpec_CrossReference *)buffer;
+    buffer += offsets.methodSpec;
+    crossReferenceTypeSpec = (CLR_RT_TypeSpec_CrossReference *)buffer;
+    buffer += offsets.typeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
-    m_pStaticFields = (CLR_RT_HeapBlock *)buffer;
-    buffer += offsets.iStaticFields;
+    staticFields = (CLR_RT_HeapBlock *)buffer;
+    buffer += offsets.staticFieldsCount;
 
-    memset(m_pStaticFields, 0, offsets.iStaticFields);
+    memset(staticFields, 0, offsets.staticFieldsCount);
 #endif
 
     //--//
 
     {
         const CLR_RECORD_TYPEDEF *src = (const CLR_RECORD_TYPEDEF *)this->GetTable(TBL_TypeDef);
-        CLR_RT_TypeDef_CrossReference *dst = this->m_pCrossReference_TypeDef;
-        for (i = 0; i < this->m_pTablesSize[TBL_TypeDef]; i++, src++, dst++)
+        CLR_RT_TypeDef_CrossReference *dst = this->crossReferenceTypeDef;
+        for (i = 0; i < this->tablesSize[TBL_TypeDef]; i++, src++, dst++)
         {
             dst->flags = 0;
             dst->totalFields = 0;
@@ -2201,8 +2201,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     {
         const CLR_RECORD_FIELDDEF *src = (const CLR_RECORD_FIELDDEF *)this->GetTable(TBL_FieldDef);
-        CLR_RT_FieldDef_CrossReference *dst = this->m_pCrossReference_FieldDef;
-        for (i = 0; i < this->m_pTablesSize[TBL_FieldDef]; i++, src++, dst++)
+        CLR_RT_FieldDef_CrossReference *dst = this->crossReferenceFieldDef;
+        for (i = 0; i < this->tablesSize[TBL_FieldDef]; i++, src++, dst++)
         {
             dst->offset = CLR_EmptyIndex;
         }
@@ -2210,8 +2210,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     {
         const CLR_RECORD_METHODDEF *src = (const CLR_RECORD_METHODDEF *)this->GetTable(TBL_MethodDef);
-        CLR_RT_MethodDef_CrossReference *dst = this->m_pCrossReference_MethodDef;
-        for (i = 0; i < this->m_pTablesSize[TBL_MethodDef]; i++, src++, dst++)
+        CLR_RT_MethodDef_CrossReference *dst = this->crossReferenceMethodDef;
+        for (i = 0; i < this->tablesSize[TBL_MethodDef]; i++, src++, dst++)
         {
             dst->data = CLR_EmptyIndex;
         }
@@ -2219,8 +2219,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     {
         const CLR_RECORD_GENERICPARAM *src = (const CLR_RECORD_GENERICPARAM *)this->GetTable(TBL_GenericParam);
-        CLR_RT_GenericParam_CrossReference *dst = this->m_pCrossReference_GenericParam;
-        for (i = 0; i < this->m_pTablesSize[TBL_GenericParam]; i++, src++, dst++)
+        CLR_RT_GenericParam_CrossReference *dst = this->crossReferenceGenericParam;
+        for (i = 0; i < this->tablesSize[TBL_GenericParam]; i++, src++, dst++)
         {
             dst->data = CLR_EmptyIndex;
         }
@@ -2228,8 +2228,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     {
         const CLR_RECORD_METHODSPEC *src = (const CLR_RECORD_METHODSPEC *)this->GetTable(TBL_MethodSpec);
-        CLR_RT_MethodSpec_CrossReference *dst = this->m_pCrossReference_MethodSpec;
-        for (i = 0; i < this->m_pTablesSize[TBL_MethodSpec]; i++, src++, dst++)
+        CLR_RT_MethodSpec_CrossReference *dst = this->crossReferenceMethodSpec;
+        for (i = 0; i < this->tablesSize[TBL_MethodSpec]; i++, src++, dst++)
         {
             dst->data = CLR_EmptyIndex;
         }
@@ -2237,8 +2237,8 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     {
         const CLR_RECORD_TYPESPEC *src = (const CLR_RECORD_TYPESPEC *)this->GetTable(TBL_TypeSpec);
-        CLR_RT_TypeSpec_CrossReference *dst = this->m_pCrossReference_TypeSpec;
-        for (i = 0; i < this->m_pTablesSize[TBL_TypeSpec]; i++, src++, dst++)
+        CLR_RT_TypeSpec_CrossReference *dst = this->crossReferenceTypeSpec;
+        for (i = 0; i < this->tablesSize[TBL_TypeSpec]; i++, src++, dst++)
         {
             dst->genericType.data = 0;
         }
@@ -2247,9 +2247,9 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     {
         m_pDebuggingInfo_MethodDef = (CLR_RT_MethodDef_DebuggingInfo *)buffer;
-        buffer += offsets.iDebuggingInfoMethods;
+        buffer += offsets.debuggingInfoMethods;
 
-        memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
+        memset(m_pDebuggingInfo_MethodDef, 0, offsets.debuggingInfoMethods);
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }
@@ -2272,28 +2272,28 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Failed in type system: assembly is not good.\n");
     }
 
-    skeleton->m_header = header;
+    skeleton->header = header;
 
     // Compute overall size for assembly data structure.
     {
-        for (uint32_t i = 0; i < ARRAYSIZE(skeleton->m_pTablesSize) - 1; i++)
+        for (uint32_t i = 0; i < ARRAYSIZE(skeleton->tablesSize) - 1; i++)
         {
-            skeleton->m_pTablesSize[i] = header->SizeOfTable((NanoCLRTable)i);
+            skeleton->tablesSize[i] = header->SizeOfTable((NanoCLRTable)i);
         }
 
-        skeleton->m_pTablesSize[TBL_AssemblyRef] /= sizeof(CLR_RECORD_ASSEMBLYREF);
-        skeleton->m_pTablesSize[TBL_TypeRef] /= sizeof(CLR_RECORD_TYPEREF);
-        skeleton->m_pTablesSize[TBL_FieldRef] /= sizeof(CLR_RECORD_FIELDREF);
-        skeleton->m_pTablesSize[TBL_MethodRef] /= sizeof(CLR_RECORD_METHODREF);
-        skeleton->m_pTablesSize[TBL_TypeDef] /= sizeof(CLR_RECORD_TYPEDEF);
-        skeleton->m_pTablesSize[TBL_FieldDef] /= sizeof(CLR_RECORD_FIELDDEF);
-        skeleton->m_pTablesSize[TBL_MethodDef] /= sizeof(CLR_RECORD_METHODDEF);
-        skeleton->m_pTablesSize[TBL_GenericParam] /= sizeof(CLR_RECORD_GENERICPARAM);
-        skeleton->m_pTablesSize[TBL_MethodSpec] /= sizeof(CLR_RECORD_METHODSPEC);
-        skeleton->m_pTablesSize[TBL_TypeSpec] /= sizeof(CLR_RECORD_TYPESPEC);
-        skeleton->m_pTablesSize[TBL_Attributes] /= sizeof(CLR_RECORD_ATTRIBUTE);
-        skeleton->m_pTablesSize[TBL_Resources] /= sizeof(CLR_RECORD_RESOURCE);
-        skeleton->m_pTablesSize[TBL_ResourcesFiles] /= sizeof(CLR_RECORD_RESOURCE_FILE);
+        skeleton->tablesSize[TBL_AssemblyRef] /= sizeof(CLR_RECORD_ASSEMBLYREF);
+        skeleton->tablesSize[TBL_TypeRef] /= sizeof(CLR_RECORD_TYPEREF);
+        skeleton->tablesSize[TBL_FieldRef] /= sizeof(CLR_RECORD_FIELDREF);
+        skeleton->tablesSize[TBL_MethodRef] /= sizeof(CLR_RECORD_METHODREF);
+        skeleton->tablesSize[TBL_TypeDef] /= sizeof(CLR_RECORD_TYPEDEF);
+        skeleton->tablesSize[TBL_FieldDef] /= sizeof(CLR_RECORD_FIELDDEF);
+        skeleton->tablesSize[TBL_MethodDef] /= sizeof(CLR_RECORD_METHODDEF);
+        skeleton->tablesSize[TBL_GenericParam] /= sizeof(CLR_RECORD_GENERICPARAM);
+        skeleton->tablesSize[TBL_MethodSpec] /= sizeof(CLR_RECORD_METHODSPEC);
+        skeleton->tablesSize[TBL_TypeSpec] /= sizeof(CLR_RECORD_TYPESPEC);
+        skeleton->tablesSize[TBL_Attributes] /= sizeof(CLR_RECORD_ATTRIBUTE);
+        skeleton->tablesSize[TBL_Resources] /= sizeof(CLR_RECORD_RESOURCE);
+        skeleton->tablesSize[TBL_ResourcesFiles] /= sizeof(CLR_RECORD_RESOURCE_FILE);
     }
 
     //--//
@@ -2302,9 +2302,9 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     {
         const CLR_RECORD_TYPEDEF *src = (const CLR_RECORD_TYPEDEF *)skeleton->GetTable(TBL_TypeDef);
 
-        for (int i = 0; i < skeleton->m_pTablesSize[TBL_TypeDef]; i++, src++)
+        for (int i = 0; i < skeleton->tablesSize[TBL_TypeDef]; i++, src++)
         {
-            skeleton->m_iStaticFields += src->staticFieldsCount;
+            skeleton->staticFieldsCount += src->staticFieldsCount;
         }
     }
 
@@ -2313,63 +2313,63 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     {
         CLR_RT_Assembly::Offsets offsets;
 
-        offsets.iBase = ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly), CLR_UINT32);
+        offsets.base = ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly), CLR_UINT32);
 
-        offsets.iAssemblyRef = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
+        offsets.assemblyRef = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
             CLR_UINT32);
 
-        offsets.iTypeRef =
-            ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference), CLR_UINT32);
+        offsets.typeRef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference), CLR_UINT32);
 
-        offsets.iFieldRef =
-            ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference), CLR_UINT32);
+        offsets.fieldRef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference), CLR_UINT32);
 
-        offsets.iMethodRef = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
+        offsets.methodRef = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
             CLR_UINT32);
 
-        offsets.iTypeDef =
-            ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference), CLR_UINT32);
+        offsets.typeDef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference), CLR_UINT32);
 
-        offsets.iFieldDef =
-            ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference), CLR_UINT32);
+        offsets.fieldDef =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference), CLR_UINT32);
 
-        offsets.iMethodDef = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
+        offsets.methodDef = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
             CLR_UINT32);
 
-        offsets.iGenericParam = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
+        offsets.genericParam = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
             CLR_UINT32);
 
-        offsets.iMethodSpec = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_MethodSpec] * sizeof(CLR_RT_MethodSpec_CrossReference),
+        offsets.methodSpec = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_MethodSpec] * sizeof(CLR_RT_MethodSpec_CrossReference),
             CLR_UINT32);
 
-        offsets.iTypeSpec =
-            ROUNDTOMULTIPLE(skeleton->m_pTablesSize[TBL_TypeSpec] * sizeof(CLR_RT_TypeSpec_CrossReference), CLR_UINT32);
+        offsets.typeSpec =
+            ROUNDTOMULTIPLE(skeleton->tablesSize[TBL_TypeSpec] * sizeof(CLR_RT_TypeSpec_CrossReference), CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
-        offsets.iStaticFields = ROUNDTOMULTIPLE(skeleton->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
+        offsets.staticFieldsCount = ROUNDTOMULTIPLE(skeleton->staticFieldsCount * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        offsets.iDebuggingInfoMethods = ROUNDTOMULTIPLE(
-            skeleton->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
+        offsets.debuggingInfoMethods = ROUNDTOMULTIPLE(
+            skeleton->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
             CLR_UINT32);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        size_t iTotalRamSize = offsets.iBase + offsets.iAssemblyRef + offsets.iTypeRef + offsets.iFieldRef +
-                               offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef +
-                               offsets.iGenericParam + offsets.iMethodSpec + offsets.iTypeSpec;
+        size_t iTotalRamSize = offsets.base + offsets.assemblyRef + offsets.typeRef + offsets.fieldRef +
+                               offsets.methodRef + offsets.typeDef + offsets.fieldDef + offsets.methodDef +
+                               offsets.genericParam + offsets.methodSpec + offsets.typeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
-        iTotalRamSize += offsets.iStaticFields;
+        iTotalRamSize += offsets.staticFieldsCount;
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        iTotalRamSize += offsets.iDebuggingInfoMethods;
+        iTotalRamSize += offsets.debuggingInfoMethods;
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //--//
@@ -2393,12 +2393,12 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
             memcpy(&dst[1], &src[1], sizeof(*assm) - sizeof(CLR_RT_HeapBlock));
         }
 
-        assm->Assembly_Initialize(offsets);
+        assm->AssemblyInitialize(offsets);
 
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf(
             "   Assembly: %s (%d.%d.%d.%d)  ",
-            assm->m_szName,
+            assm->name,
             header->version.majorVersion,
             header->version.minorVersion,
             header->version.buildNumber,
@@ -2421,69 +2421,69 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
             CLR_Debug::Printf(
                 "   AssemblyRef     = %6d bytes (%5d elements)\r\n",
-                offsets.iAssemblyRef,
-                skeleton->m_pTablesSize[TBL_AssemblyRef]);
+                offsets.assemblyRef,
+                skeleton->tablesSize[TBL_AssemblyRef]);
             CLR_Debug::Printf(
                 "   TypeRef         = %6d bytes (%5d elements)\r\n",
-                offsets.iTypeRef,
-                skeleton->m_pTablesSize[TBL_TypeRef]);
+                offsets.typeRef,
+                skeleton->tablesSize[TBL_TypeRef]);
             CLR_Debug::Printf(
                 "   FieldRef        = %6d bytes (%5d elements)\r\n",
-                offsets.iFieldRef,
-                skeleton->m_pTablesSize[TBL_FieldRef]);
+                offsets.fieldRef,
+                skeleton->tablesSize[TBL_FieldRef]);
             CLR_Debug::Printf(
                 "   MethodRef       = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodRef,
-                skeleton->m_pTablesSize[TBL_MethodRef]);
+                offsets.methodRef,
+                skeleton->tablesSize[TBL_MethodRef]);
             CLR_Debug::Printf(
                 "   TypeDef         = %6d bytes (%5d elements)\r\n",
-                offsets.iTypeDef,
-                skeleton->m_pTablesSize[TBL_TypeDef]);
+                offsets.typeDef,
+                skeleton->tablesSize[TBL_TypeDef]);
             CLR_Debug::Printf(
                 "   FieldDef        = %6d bytes (%5d elements)\r\n",
-                offsets.iFieldDef,
-                skeleton->m_pTablesSize[TBL_FieldDef]);
+                offsets.fieldDef,
+                skeleton->tablesSize[TBL_FieldDef]);
             CLR_Debug::Printf(
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodDef,
-                skeleton->m_pTablesSize[TBL_MethodDef]);
+                offsets.methodDef,
+                skeleton->tablesSize[TBL_MethodDef]);
             CLR_Debug::Printf(
                 "   GenericParam    = %6d bytes (%5d elements)\r\n",
-                offsets.iGenericParam,
-                skeleton->m_pTablesSize[TBL_GenericParam]);
+                offsets.genericParam,
+                skeleton->tablesSize[TBL_GenericParam]);
             CLR_Debug::Printf(
                 "   MethodSpec      = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodSpec,
-                skeleton->m_pTablesSize[TBL_MethodSpec]);
+                offsets.methodSpec,
+                skeleton->tablesSize[TBL_MethodSpec]);
 
 #if !defined(NANOCLR_APPDOMAINS)
             CLR_Debug::Printf(
                 "   StaticFields    = %6d bytes (%5d elements)\r\n",
-                offsets.iStaticFields,
-                skeleton->m_iStaticFields);
+                offsets.staticFieldsCount,
+                skeleton->staticFieldsCount);
 #endif
             CLR_Debug::Printf("\r\n");
 
             CLR_Debug::Printf(
                 "   Attributes      = %6d bytes (%5d elements)\r\n",
-                skeleton->m_pTablesSize[TBL_Attributes] * sizeof(CLR_RECORD_ATTRIBUTE),
-                skeleton->m_pTablesSize[TBL_Attributes]);
+                skeleton->tablesSize[TBL_Attributes] * sizeof(CLR_RECORD_ATTRIBUTE),
+                skeleton->tablesSize[TBL_Attributes]);
             CLR_Debug::Printf(
                 "   TypeSpec        = %6d bytes (%5d elements)\r\n",
-                skeleton->m_pTablesSize[TBL_TypeSpec] * sizeof(CLR_RECORD_TYPESPEC),
-                skeleton->m_pTablesSize[TBL_TypeSpec]);
+                skeleton->tablesSize[TBL_TypeSpec] * sizeof(CLR_RECORD_TYPESPEC),
+                skeleton->tablesSize[TBL_TypeSpec]);
             CLR_Debug::Printf(
                 "   Resources       = %6d bytes (%5d elements)\r\n",
-                skeleton->m_pTablesSize[TBL_Resources] * sizeof(CLR_RECORD_RESOURCE),
-                skeleton->m_pTablesSize[TBL_Resources]);
+                skeleton->tablesSize[TBL_Resources] * sizeof(CLR_RECORD_RESOURCE),
+                skeleton->tablesSize[TBL_Resources]);
             CLR_Debug::Printf(
                 "   Resources Files = %6d bytes (%5d elements)\r\n",
-                skeleton->m_pTablesSize[TBL_ResourcesFiles] * sizeof(CLR_RECORD_RESOURCE),
-                skeleton->m_pTablesSize[TBL_ResourcesFiles]);
-            CLR_Debug::Printf("   Resources Data  = %6d bytes\r\n", skeleton->m_pTablesSize[TBL_ResourcesData]);
-            CLR_Debug::Printf("   Strings         = %6d bytes\r\n", skeleton->m_pTablesSize[TBL_Strings]);
-            CLR_Debug::Printf("   Signatures      = %6d bytes\r\n", skeleton->m_pTablesSize[TBL_Signatures]);
-            CLR_Debug::Printf("   ByteCode        = %6d bytes\r\n", skeleton->m_pTablesSize[TBL_ByteCode]);
+                skeleton->tablesSize[TBL_ResourcesFiles] * sizeof(CLR_RECORD_RESOURCE),
+                skeleton->tablesSize[TBL_ResourcesFiles]);
+            CLR_Debug::Printf("   Resources Data  = %6d bytes\r\n", skeleton->tablesSize[TBL_ResourcesData]);
+            CLR_Debug::Printf("   Strings         = %6d bytes\r\n", skeleton->tablesSize[TBL_Strings]);
+            CLR_Debug::Printf("   Signatures      = %6d bytes\r\n", skeleton->tablesSize[TBL_Signatures]);
+            CLR_Debug::Printf("   ByteCode        = %6d bytes\r\n", skeleton->tablesSize[TBL_ByteCode]);
             CLR_Debug::Printf("\r\n\r\n");
         }
 #endif
@@ -2509,14 +2509,14 @@ HRESULT CLR_RT_Assembly::CreateInstance(
     {
         CLR_RT_UnicodeHelper::ConvertToUTF8(szName, strPath);
 
-        assm->m_strPath = new std::string(strPath);
+        assm->path = new std::string(strPath);
     }
 
     NANOCLR_NOCLEANUP();
 }
 #endif
 
-bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
+bool CLR_RT_Assembly::ResolveAssemblyRef(bool fOutput)
 {
     NATIVE_PROFILE_CLR_CORE();
     bool fGot = true;
@@ -2530,18 +2530,18 @@ bool CLR_RT_Assembly::Resolve_AssemblyRef(bool fOutput)
         {
             CLR_RT_Assembly *target = g_CLR_RT_TypeSystem.FindAssembly(szName, &src->version, false);
 
-            if (target == NULL || (target->m_flags & CLR_RT_Assembly::Resolved) == 0)
+            if (target == NULL || (target->flags & CLR_RT_Assembly::Resolved) == 0)
             {
 #if !defined(BUILD_RTM)
                 if (fOutput)
                 {
                     CLR_Debug::Printf(
                         "Assembly: %s (%d.%d.%d.%d)",
-                        m_szName,
-                        m_header->version.majorVersion,
-                        m_header->version.minorVersion,
-                        m_header->version.buildNumber,
-                        m_header->version.revisionNumber);
+                        name,
+                        header->version.majorVersion,
+                        header->version.minorVersion,
+                        header->version.buildNumber,
+                        header->version.revisionNumber);
 
                     CLR_Debug::Printf(
                         " needs assembly '%s' (%d.%d.%d.%d)\r\n",
@@ -2574,17 +2574,17 @@ void CLR_RT_Assembly::DestroyInstance()
     }
 
 #if defined(VIRTUAL_DEVICE)
-    if (this->m_strPath != NULL)
+    if (this->path != NULL)
     {
-        delete this->m_strPath;
-        this->m_strPath = NULL;
+        delete this->path;
+        this->path = NULL;
     }
 #endif
 
     // check if header has to be freed (in case the assembly lives in RAM)
-    if ((this->m_flags & CLR_RT_Assembly::FreeOnDestroy) != 0)
+    if ((this->flags & CLR_RT_Assembly::FreeOnDestroy) != 0)
     {
-        platform_free((void *)this->m_header);
+        platform_free((void *)this->header);
     }
 
     //--//
@@ -2593,7 +2593,7 @@ void CLR_RT_Assembly::DestroyInstance()
 }
 
 //--//
-HRESULT CLR_RT_Assembly::Resolve_TypeRef()
+HRESULT CLR_RT_Assembly::ResolveTypeRef()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2607,7 +2607,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         {
             CLR_RT_TypeDef_Instance inst;
 
-            if (inst.InitializeFromIndex(m_pCrossReference_TypeRef[src->scope & 0x7FFF].target) == false)
+            if (inst.InitializeFromIndex(crossReferenceTypeRef[src->scope & 0x7FFF].target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Resolve: unknown scope: %08x\r\n", src->scope);
@@ -2636,7 +2636,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
         }
         else
         {
-            CLR_RT_Assembly *assm = m_pCrossReference_AssemblyRef[src->scope].target;
+            CLR_RT_Assembly *assm = crossReferenceAssemblyRef[src->scope].target;
             if (assm == NULL)
             {
                 NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: assm is null\n");
@@ -2662,7 +2662,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeRef()
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_Assembly::Resolve_FieldRef()
+HRESULT CLR_RT_Assembly::ResolveFieldRef()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2684,7 +2684,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].target;
+                typeDef = crossReferenceTypeRef[src->OwnerIndex()].target;
                 break;
 
                 // case CLR_MemberRefParent::MRP_TypeDef:
@@ -2762,7 +2762,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
         {
-            if (typeDefInstance.InitializeFromIndex(m_pCrossReference_TypeRef[src->OwnerIndex()].target) == false)
+            if (typeDefInstance.InitializeFromIndex(crossReferenceTypeRef[src->OwnerIndex()].target) == false)
             {
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
@@ -2804,7 +2804,7 @@ HRESULT CLR_RT_Assembly::Resolve_FieldRef()
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_Assembly::Resolve_MethodRef()
+HRESULT CLR_RT_Assembly::ResolveMethodRef()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -2829,7 +2829,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
         switch (src->Owner())
         {
             case TBL_TypeRef:
-                typeDef = m_pCrossReference_TypeRef[src->OwnerIndex()].target;
+                typeDef = crossReferenceTypeRef[src->OwnerIndex()].target;
                 break;
 
                 // case CLR_MemberRefParent::MRP_TypeDef:
@@ -2990,7 +2990,7 @@ HRESULT CLR_RT_Assembly::Resolve_MethodRef()
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_Assembly::Resolve_TypeSpec()
+HRESULT CLR_RT_Assembly::ResolveTypeSpec()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -3015,7 +3015,7 @@ HRESULT CLR_RT_Assembly::Resolve_TypeSpec()
     NANOCLR_NOCLEANUP();
 }
 
-void CLR_RT_Assembly::Resolve_Link()
+void CLR_RT_Assembly::ResolveLink()
 {
     NATIVE_PROFILE_CLR_CORE();
     int iStaticFields = 0;
@@ -3030,7 +3030,7 @@ void CLR_RT_Assembly::Resolve_Link()
         // Link static fields.
         //
         {
-            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->firstStaticField];
+            CLR_RT_FieldDef_CrossReference *fd = &crossReferenceFieldDef[src->firstStaticField];
 
             num = src->staticFieldsCount;
 
@@ -3071,7 +3071,7 @@ void CLR_RT_Assembly::Resolve_Link()
 
             //--//
 
-            CLR_RT_FieldDef_CrossReference *fd = &m_pCrossReference_FieldDef[src->firstInstanceField];
+            CLR_RT_FieldDef_CrossReference *fd = &crossReferenceFieldDef[src->firstInstanceField];
 
             num = src->instanceFieldsCount;
             i = tot - num + CLR_RT_HeapBlock::HB_Object_Fields_Offset; // Take into account the offset from the
@@ -3087,7 +3087,7 @@ void CLR_RT_Assembly::Resolve_Link()
         // Link methods.
         //
         {
-            CLR_RT_MethodDef_CrossReference *md = &m_pCrossReference_MethodDef[src->firstMethod];
+            CLR_RT_MethodDef_CrossReference *md = &crossReferenceMethodDef[src->firstMethod];
 
             num = src->virtualMethodCount + src->instanceMethodCount + src->staticMethodCount;
 
@@ -3103,7 +3103,7 @@ void CLR_RT_Assembly::Resolve_Link()
         {
             if (src->genericParamCount)
             {
-                CLR_RT_GenericParam_CrossReference *gp = &m_pCrossReference_GenericParam[src->firstGenericParam];
+                CLR_RT_GenericParam_CrossReference *gp = &crossReferenceGenericParam[src->firstGenericParam];
 
                 // get generic parameter count for stop condition
                 int num = src->genericParamCount;
@@ -3882,7 +3882,7 @@ static const MethodIndexLookup c_MethodIndexLookup[] = {
 #undef MIL
 };
 
-void CLR_RT_Assembly::Resolve_TypeDef()
+void CLR_RT_Assembly::ResolveTypeDef()
 {
     NATIVE_PROFILE_CLR_CORE();
     const TypeIndexLookup *tilOuterClass = NULL;
@@ -3914,12 +3914,12 @@ void CLR_RT_Assembly::Resolve_TypeDef()
     }
 }
 
-void CLR_RT_Assembly::Resolve_MethodDef()
+void CLR_RT_Assembly::ResolveMethodDef()
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODDEF *md = GetMethodDef(0);
 
-    for (int indexMethod = 0; indexMethod < m_pTablesSize[TBL_MethodDef]; indexMethod++, md++)
+    for (int indexMethod = 0; indexMethod < tablesSize[TBL_MethodDef]; indexMethod++, md++)
     {
         const MethodIndexLookup *mil = c_MethodIndexLookup;
 
@@ -3956,7 +3956,7 @@ void CLR_RT_Assembly::Resolve_MethodDef()
         // link generic parameters
         if (md->genericParamCount)
         {
-            CLR_RT_GenericParam_CrossReference *gp = &m_pCrossReference_GenericParam[md->firstGenericParam];
+            CLR_RT_GenericParam_CrossReference *gp = &crossReferenceGenericParam[md->firstGenericParam];
 
             // get generic parameter count for stop condition
             int num = md->genericParamCount;
@@ -3997,18 +3997,18 @@ void CLR_RT_Assembly::Resolve_MethodDef()
     }
 }
 
-HRESULT CLR_RT_Assembly::Resolve_AllocateStaticFields(CLR_RT_HeapBlock *pStaticFields)
+HRESULT CLR_RT_Assembly::ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
-    for (int i = 0; i < m_pTablesSize[TBL_FieldDef]; i++, fd++)
+    for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
         if (fd->flags & CLR_RECORD_FIELDDEF::FD_Static)
         {
-            CLR_RT_FieldDef_CrossReference &res = m_pCrossReference_FieldDef[i];
+            CLR_RT_FieldDef_CrossReference &res = crossReferenceFieldDef[i];
 
             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeReference(pStaticFields[res.offset], fd, this));
         }
@@ -4022,7 +4022,7 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if ((m_flags & CLR_RT_Assembly::PreparingForExecution) != 0)
+    if ((flags & CLR_RT_Assembly::PreparingForExecution) != 0)
     {
         // Circular dependency
         _ASSERTE(false);
@@ -4030,11 +4030,11 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
         NANOCLR_MSG_SET_AND_LEAVE(CLR_E_FAIL, L"Failed to prepare type system for execution\n");
     }
 
-    if ((m_flags & CLR_RT_Assembly::PreparedForExecution) == 0)
+    if ((flags & CLR_RT_Assembly::PreparedForExecution) == 0)
     {
         int i;
 
-        m_flags |= CLR_RT_Assembly::PreparingForExecution;
+        flags |= CLR_RT_Assembly::PreparingForExecution;
 
         ITERATE_THROUGH_RECORDS(this, i, AssemblyRef, ASSEMBLYREF)
         {
@@ -4058,8 +4058,8 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
     NANOCLR_CLEANUP();
 
     // Only try once.  If this fails, then what?
-    m_flags |= CLR_RT_Assembly::PreparedForExecution;
-    m_flags &= ~CLR_RT_Assembly::PreparingForExecution;
+    flags |= CLR_RT_Assembly::PreparedForExecution;
+    flags &= ~CLR_RT_Assembly::PreparingForExecution;
 
     NANOCLR_CLEANUP_END();
 }
@@ -4069,13 +4069,13 @@ HRESULT CLR_RT_Assembly::PrepareForExecution()
 CLR_UINT32 CLR_RT_Assembly::ComputeAssemblyHash()
 {
     NATIVE_PROFILE_CLR_CORE();
-    return m_header->ComputeAssemblyHash(m_szName, m_header->version);
+    return header->ComputeAssemblyHash(name, header->version);
 }
 
 CLR_UINT32 CLR_RT_Assembly::ComputeAssemblyHash(const CLR_RECORD_ASSEMBLYREF *ar)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return m_header->ComputeAssemblyHash(GetString(ar->name), ar->version);
+    return header->ComputeAssemblyHash(GetString(ar->name), ar->version);
 }
 
 //--//
@@ -4084,7 +4084,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, const char *nameSpace, CLR_R
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
-    int tblSize = m_pTablesSize[TBL_TypeDef];
+    int tblSize = tablesSize[TBL_TypeDef];
 
     for (int i = 0; i < tblSize; i++, target++)
     {
@@ -4111,7 +4111,7 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_TYPEDEF *target = GetTypeDef(0);
-    int tblSize = m_pTablesSize[TBL_TypeDef];
+    int tblSize = tablesSize[TBL_TypeDef];
 
     for (int i = 0; i < tblSize; i++, target++)
     {
@@ -4136,8 +4136,8 @@ bool CLR_RT_Assembly::FindTypeDef(const char *name, CLR_INDEX scope, CLR_RT_Type
 bool CLR_RT_Assembly::FindTypeDef(CLR_UINT32 hash, CLR_RT_TypeDef_Index &index)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_TypeDef_CrossReference *p = m_pCrossReference_TypeDef;
-    CLR_UINT32 tblSize = m_pTablesSize[TBL_TypeDef];
+    CLR_RT_TypeDef_CrossReference *p = crossReferenceTypeDef;
+    CLR_UINT32 tblSize = tablesSize[TBL_TypeDef];
     CLR_UINT32 i;
 
     for (i = 0; i < tblSize; i++, p++)
@@ -4164,7 +4164,7 @@ bool CLR_RT_Assembly::FindGenericParam(CLR_INDEX typeSpecIndex, CLR_RT_GenericPa
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_GENERICPARAM *gp = this->GetGenericParam(0);
-    int tblSize = this->m_pTablesSize[TBL_GenericParam];
+    int tblSize = this->tablesSize[TBL_GenericParam];
 
     for (int i = 0; i < tblSize; i++, gp++)
     {
@@ -4246,7 +4246,7 @@ bool CLR_RT_Assembly::FindMethodSpecFromTypeSpec(CLR_INDEX typeSpecIndex, CLR_RT
 {
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODSPEC *ms = this->GetMethodSpec(0);
-    int tblSize = this->m_pTablesSize[TBL_MethodSpec];
+    int tblSize = this->tablesSize[TBL_MethodSpec];
 
     for (int i = 0; i < tblSize; i++, ms++)
     {
@@ -4338,7 +4338,7 @@ bool CLR_RT_Assembly::FindFieldDef(
 
     const CLR_RECORD_FIELDDEF *fd = GetFieldDef(0);
 
-    for (int i = 0; i < m_pTablesSize[TBL_FieldDef]; i++, fd++)
+    for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
         const char *fieldName = GetString(fd->name);
 
@@ -4438,7 +4438,7 @@ bool CLR_RT_Assembly::FindTypeSpec(CLR_PMETADATA sig, CLR_RT_TypeSpec_Index &ind
 {
     NATIVE_PROFILE_CLR_CORE();
 
-    for (int i = 0; i < m_pTablesSize[TBL_TypeSpec]; i++)
+    for (int i = 0; i < tablesSize[TBL_TypeSpec]; i++)
     {
         const CLR_RECORD_TYPESPEC *ts = GetTypeSpec(i);
 
@@ -4484,9 +4484,9 @@ bool CLR_RT_Assembly::FindMethodBoundaries(CLR_INDEX i, CLR_OFFSET &start, CLR_O
         p++;
         i++;
 
-        if (i == m_pTablesSize[TBL_MethodDef])
+        if (i == tablesSize[TBL_MethodDef])
         {
-            end = m_pTablesSize[TBL_ByteCode];
+            end = tablesSize[TBL_ByteCode];
             break;
         }
 
@@ -4505,7 +4505,7 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
     NATIVE_PROFILE_CLR_CORE();
     _ASSERTE(assemblyIndex == index.Assembly());
 
-    for (int i = index.Method(); i < m_pTablesSize[TBL_MethodDef]; i++)
+    for (int i = index.Method(); i < tablesSize[TBL_MethodDef]; i++)
     {
         const CLR_RECORD_METHODDEF *md = GetMethodDef(i);
 
@@ -4523,15 +4523,15 @@ bool CLR_RT_Assembly::FindNextStaticConstructor(CLR_RT_MethodDef_Index &index)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HRESULT CLR_RT_Assembly::Resolve_ComputeHashes()
+HRESULT CLR_RT_Assembly::ResolveComputeHashes()
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
     const CLR_RECORD_TYPEDEF *src = GetTypeDef(0);
-    CLR_RT_TypeDef_CrossReference *dst = m_pCrossReference_TypeDef;
+    CLR_RT_TypeDef_CrossReference *dst = crossReferenceTypeDef;
 
-    for (int i = 0; i < m_pTablesSize[TBL_TypeDef]; i++, src++, dst++)
+    for (int i = 0; i < tablesSize[TBL_TypeDef]; i++, src++, dst++)
     {
         CLR_RT_TypeDef_Index index;
         index.Set(assemblyIndex, i);
@@ -4621,7 +4621,7 @@ CLR_RT_HeapBlock *CLR_RT_Assembly::GetStaticField(const int index)
 
 #else
 
-    return &m_pStaticFields[index];
+    return &staticFields[index];
 
 #endif
 }
@@ -4633,13 +4633,13 @@ void CLR_RT_Assembly::Relocate()
     NATIVE_PROFILE_CLR_CORE();
 
 #if !defined(NANOCLR_APPDOMAINS)
-    CLR_RT_GarbageCollector::Heap_Relocate(m_pStaticFields, m_iStaticFields);
+    CLR_RT_GarbageCollector::Heap_Relocate(staticFields, staticFieldsCount);
 #endif
 
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_header);
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_szName);
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_pFile);
-    CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_nativeCode);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&header);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&name);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&file);
+    CLR_RT_GarbageCollector::Heap_Relocate((void **)&nativeCode);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4689,11 +4689,11 @@ void CLR_RT_TypeSystem::Link(CLR_RT_Assembly *assm)
 void CLR_RT_TypeSystem::PostLinkageProcessing(CLR_RT_Assembly *assm)
 {
     NATIVE_PROFILE_CLR_CORE();
-    if (!strcmp(assm->m_szName, "mscorlib"))
+    if (!strcmp(assm->name, "mscorlib"))
     {
         m_assemblyMscorlib = assm;
     }
-    if (!strcmp(assm->m_szName, "nanoFramework.Runtime.Native"))
+    if (!strcmp(assm->name, "nanoFramework.Runtime.Native"))
     {
         m_assemblyNative = assm;
     }
@@ -4705,7 +4705,7 @@ CLR_RT_Assembly *CLR_RT_TypeSystem::FindAssembly(const char *szName, const CLR_R
 
     NANOCLR_FOREACH_ASSEMBLY(*this)
     {
-        if (!strcmp(pASSM->m_szName, szName))
+        if (!strcmp(pASSM->name, szName))
         {
             // if there is no version information, anything goes
             if (NULL == ver)
@@ -4715,7 +4715,7 @@ CLR_RT_Assembly *CLR_RT_TypeSystem::FindAssembly(const char *szName, const CLR_R
             // exact match requested: must take into accoutn all numbers in the version
             else if (fExact)
             {
-                if (0 == memcmp(&pASSM->m_header->version, ver, sizeof(*ver)))
+                if (0 == memcmp(&pASSM->header->version, ver, sizeof(*ver)))
                 {
                     return pASSM;
                 }
@@ -4724,8 +4724,8 @@ CLR_RT_Assembly *CLR_RT_TypeSystem::FindAssembly(const char *szName, const CLR_R
             // we will enforce only the first two number because (by convention)
             // only the minor field is required to be bumped when native assemblies change CRC
             else if (
-                ver->majorVersion == pASSM->m_header->version.majorVersion &&
-                ver->minorVersion == pASSM->m_header->version.minorVersion)
+                ver->majorVersion == pASSM->header->version.majorVersion &&
+                ver->minorVersion == pASSM->header->version.minorVersion)
             {
                 return pASSM;
             }
@@ -5025,7 +5025,7 @@ HRESULT CLR_RT_TypeSystem::LocateResourceFile(
 
     CLR_RT_Assembly *pAssm = assm.assembly;
 
-    for (indexResourceFile = 0; indexResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles]; indexResourceFile++)
+    for (indexResourceFile = 0; indexResourceFile < pAssm->tablesSize[TBL_ResourcesFiles]; indexResourceFile++)
     {
         const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(indexResourceFile);
 
@@ -5059,7 +5059,7 @@ HRESULT CLR_RT_TypeSystem::LocateResource(
     res = NULL;
     size = 0;
 
-    if (indexResourceFile < 0 || indexResourceFile >= pAssm->m_pTablesSize[TBL_ResourcesFiles])
+    if (indexResourceFile < 0 || indexResourceFile >= pAssm->tablesSize[TBL_ResourcesFiles])
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
 
     resourceFile = pAssm->GetResourceFile(indexResourceFile);
@@ -5077,7 +5077,7 @@ HRESULT CLR_RT_TypeSystem::LocateResource(
     {
         // compute size here...
         // assert not the last resource
-        _ASSERTE(res + 1 <= pAssm->GetResource(pAssm->m_pTablesSize[TBL_Resources] - 1));
+        _ASSERTE(res + 1 <= pAssm->GetResource(pAssm->tablesSize[TBL_Resources] - 1));
         resNext = res + 1;
 
         size = resNext->offset - res->offset;
@@ -5103,30 +5103,30 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
         NANOCLR_FOREACH_ASSEMBLY(*this)
         {
-            if ((pASSM->m_flags & CLR_RT_Assembly::Resolved) == 0)
+            if ((pASSM->flags & CLR_RT_Assembly::Resolved) == 0)
             {
                 fNeedResolution = true;
 
-                if (pASSM->Resolve_AssemblyRef(fOutput))
+                if (pASSM->ResolveAssemblyRef(fOutput))
                 {
                     fGot = true;
 
-                    pASSM->m_flags |= CLR_RT_Assembly::Resolved;
+                    pASSM->flags |= CLR_RT_Assembly::Resolved;
 
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_TypeRef());
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_FieldRef());
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_MethodRef());
-                    /********************/ pASSM->Resolve_TypeDef();
-                    /********************/ pASSM->Resolve_MethodDef();
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_TypeSpec());
-                    /********************/ pASSM->Resolve_Link();
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_ComputeHashes());
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveTypeRef());
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveFieldRef());
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveMethodRef());
+                    /********************/ pASSM->ResolveTypeDef();
+                    /********************/ pASSM->ResolveMethodDef();
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveTypeSpec());
+                    /********************/ pASSM->ResolveLink();
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveComputeHashes());
 
 #if !defined(NANOCLR_APPDOMAINS)
-                    NANOCLR_CHECK_HRESULT(pASSM->Resolve_AllocateStaticFields(pASSM->m_pStaticFields));
+                    NANOCLR_CHECK_HRESULT(pASSM->ResolveAllocateStaticFields(pASSM->staticFields));
 #endif
 
-                    pASSM->m_flags |= CLR_RT_Assembly::ResolutionCompleted;
+                    pASSM->flags |= CLR_RT_Assembly::ResolutionCompleted;
                 }
             }
         }
@@ -5171,67 +5171,67 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
             NANOCLR_FOREACH_ASSEMBLY(*this)
             {
-                offsets.iBase += ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly), CLR_UINT32);
-                offsets.iAssemblyRef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
+                offsets.base += ROUNDTOMULTIPLE(sizeof(CLR_RT_Assembly), CLR_UINT32);
+                offsets.assemblyRef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_AssemblyRef] * sizeof(CLR_RT_AssemblyRef_CrossReference),
                     CLR_UINT32);
-                offsets.iTypeRef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference),
+                offsets.typeRef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_TypeRef] * sizeof(CLR_RT_TypeRef_CrossReference),
                     CLR_UINT32);
-                offsets.iFieldRef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference),
+                offsets.fieldRef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_FieldRef] * sizeof(CLR_RT_FieldRef_CrossReference),
                     CLR_UINT32);
-                offsets.iMethodRef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
+                offsets.methodRef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_MethodRef] * sizeof(CLR_RT_MethodRef_CrossReference),
                     CLR_UINT32);
-                offsets.iTypeDef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference),
+                offsets.typeDef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_TypeDef] * sizeof(CLR_RT_TypeDef_CrossReference),
                     CLR_UINT32);
-                offsets.iFieldDef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference),
+                offsets.fieldDef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_FieldDef] * sizeof(CLR_RT_FieldDef_CrossReference),
                     CLR_UINT32);
-                offsets.iMethodDef += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
+                offsets.methodDef += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_CrossReference),
                     CLR_UINT32);
-                offsets.iGenericParam += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
+                offsets.genericParam += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_GenericParam] * sizeof(CLR_RT_GenericParam_CrossReference),
                     CLR_UINT32);
 
 #if !defined(NANOCLR_APPDOMAINS)
-                offsets.iStaticFields += ROUNDTOMULTIPLE(pASSM->m_iStaticFields * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
+                offsets.staticFieldsCount += ROUNDTOMULTIPLE(pASSM->staticFieldsCount * sizeof(CLR_RT_HeapBlock), CLR_UINT32);
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-                offsets.iDebuggingInfoMethods += ROUNDTOMULTIPLE(
-                    pASSM->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
+                offsets.debuggingInfoMethods += ROUNDTOMULTIPLE(
+                    pASSM->tablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
                     CLR_UINT32);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-                iMetaData += pASSM->m_header->SizeOfTable(TBL_AssemblyRef) + pASSM->m_header->SizeOfTable(TBL_TypeRef) +
-                             pASSM->m_header->SizeOfTable(TBL_FieldRef) + pASSM->m_header->SizeOfTable(TBL_MethodRef) +
-                             pASSM->m_header->SizeOfTable(TBL_TypeDef) + pASSM->m_header->SizeOfTable(TBL_FieldDef) +
-                             pASSM->m_header->SizeOfTable(TBL_MethodDef) +
-                             pASSM->m_header->SizeOfTable(TBL_GenericParam) +
-                             pASSM->m_header->SizeOfTable(TBL_TypeSpec) + pASSM->m_header->SizeOfTable(TBL_Attributes) +
-                             pASSM->m_header->SizeOfTable(TBL_Signatures);
+                iMetaData += pASSM->header->SizeOfTable(TBL_AssemblyRef) + pASSM->header->SizeOfTable(TBL_TypeRef) +
+                             pASSM->header->SizeOfTable(TBL_FieldRef) + pASSM->header->SizeOfTable(TBL_MethodRef) +
+                             pASSM->header->SizeOfTable(TBL_TypeDef) + pASSM->header->SizeOfTable(TBL_FieldDef) +
+                             pASSM->header->SizeOfTable(TBL_MethodDef) +
+                             pASSM->header->SizeOfTable(TBL_GenericParam) +
+                             pASSM->header->SizeOfTable(TBL_TypeSpec) + pASSM->header->SizeOfTable(TBL_Attributes) +
+                             pASSM->header->SizeOfTable(TBL_Signatures);
 
                 for (int tbl = 0; tbl < TBL_Max; tbl++)
                 {
-                    pTablesSize[tbl] += pASSM->m_pTablesSize[tbl];
+                    pTablesSize[tbl] += pASSM->tablesSize[tbl];
                 }
 
-                iTotalRomSize += pASSM->m_header->TotalSize();
+                iTotalRomSize += pASSM->header->TotalSize();
 
-                iStaticFields += pASSM->m_iStaticFields;
+                iStaticFields += pASSM->staticFieldsCount;
             }
             NANOCLR_FOREACH_ASSEMBLY_END();
 
-            iTotalRamSize = offsets.iBase + offsets.iAssemblyRef + offsets.iTypeRef + offsets.iFieldRef +
-                            offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef +
-                            offsets.iGenericParam;
+            iTotalRamSize = offsets.base + offsets.assemblyRef + offsets.typeRef + offsets.fieldRef +
+                            offsets.methodRef + offsets.typeDef + offsets.fieldDef + offsets.methodDef +
+                            offsets.genericParam;
 
 #if !defined(NANOCLR_APPDOMAINS)
-            iTotalRamSize += offsets.iStaticFields;
+            iTotalRamSize += offsets.staticFieldsCount;
 #endif
 
             CLR_Debug::Printf(
@@ -5242,52 +5242,52 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 
             CLR_Debug::Printf(
                 "   AssemblyRef     = %6d bytes (%5d elements)\r\n",
-                offsets.iAssemblyRef,
+                offsets.assemblyRef,
                 pTablesSize[TBL_AssemblyRef]);
             CLR_Debug::Printf(
                 "   TypeRef         = %6d bytes (%5d elements)\r\n",
-                offsets.iTypeRef,
+                offsets.typeRef,
                 pTablesSize[TBL_TypeRef]);
             CLR_Debug::Printf(
                 "   FieldRef        = %6d bytes (%5d elements)\r\n",
-                offsets.iFieldRef,
+                offsets.fieldRef,
                 pTablesSize[TBL_FieldRef]);
             CLR_Debug::Printf(
                 "   MethodRef       = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodRef,
+                offsets.methodRef,
                 pTablesSize[TBL_MethodRef]);
             CLR_Debug::Printf(
                 "   TypeDef         = %6d bytes (%5d elements)\r\n",
-                offsets.iTypeDef,
+                offsets.typeDef,
                 pTablesSize[TBL_TypeDef]);
             CLR_Debug::Printf(
                 "   FieldDef        = %6d bytes (%5d elements)\r\n",
-                offsets.iFieldDef,
+                offsets.fieldDef,
                 pTablesSize[TBL_FieldDef]);
             CLR_Debug::Printf(
                 "   MethodDef       = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodDef,
+                offsets.methodDef,
                 pTablesSize[TBL_MethodDef]);
             CLR_Debug::Printf(
                 "   GenericParam    = %6d bytes (%5d elements)\r\n",
-                offsets.iGenericParam,
+                offsets.genericParam,
                 pTablesSize[TBL_GenericParam]);
             CLR_Debug::Printf(
                 "   MethodSpec      = %6d bytes (%5d elements)\r\n",
-                offsets.iMethodSpec,
+                offsets.methodSpec,
                 pTablesSize[TBL_MethodSpec]);
 
 #if !defined(NANOCLR_APPDOMAINS)
             CLR_Debug::Printf(
                 "   StaticFields    = %6d bytes (%5d elements)\r\n",
-                offsets.iStaticFields,
+                offsets.staticFieldsCount,
                 iStaticFields);
 #endif
 
             CLR_Debug::Printf("\r\n");
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-            CLR_Debug::Printf("   DebuggingInfo   = %6d bytes\r\n", offsets.iDebuggingInfoMethods);
+            CLR_Debug::Printf("   DebuggingInfo   = %6d bytes\r\n", offsets.debuggingInfoMethods);
             CLR_Debug::Printf("\r\n");
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
@@ -5327,7 +5327,7 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecutionHelper(const char *szAssembly)
 
     NANOCLR_FOREACH_ASSEMBLY(*this)
     {
-        if (!strcmp(szAssembly, pASSM->m_szName))
+        if (!strcmp(szAssembly, pASSM->name))
         {
             NANOCLR_CHECK_HRESULT(pASSM->PrepareForExecution());
         }
@@ -5720,7 +5720,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
 
     CLR_RT_Assembly *assembly = g_CLR_RT_TypeSystem.m_assemblies[method.Assembly() - 1];
 
-    const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->m_pCrossReference_MethodRef[method.Method()];
+    const CLR_RT_MethodRef_CrossReference memberCrossRef = assembly->crossReferenceMethodRef[method.Method()];
     const CLR_RECORD_METHODREF *methodRef = assembly->GetMethodRef(method.Method());
 
     if (memberCrossRef.genericType.data == CLR_EmptyToken)
@@ -5735,7 +5735,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodRefName(const CLR_RT_MethodRef_Index &meth
         CLR_RT_TypeDef_Index typeOwner;
         typeOwner.Set(
             mdInstance.Assembly(),
-            mdInstance.assembly->m_pCrossReference_MethodDef[mdInstance.Method()].GetOwner());
+            mdInstance.assembly->crossReferenceMethodDef[mdInstance.Method()].GetOwner());
 
         NANOCLR_CHECK_HRESULT(BuildTypeName(typeOwner, szBuffer, iBuffer));
 
@@ -5847,7 +5847,7 @@ HRESULT CLR_RT_TypeSystem::BuildMethodSpecName(const CLR_RT_MethodSpec_Index &ms
         case TBL_MethodRef:
         {
             const CLR_RT_MethodRef_CrossReference memberCrossRef =
-                assembly->m_pCrossReference_MethodRef[msRecord->MethodIndex()];
+                assembly->crossReferenceMethodRef[msRecord->MethodIndex()];
 
             CLR_RT_MethodDef_Instance mdInstance;
             mdInstance.data = memberCrossRef.target.data;
@@ -6054,7 +6054,7 @@ bool CLR_RT_AttributeEnumerator::Advance()
     if (ptr == NULL)
     {
         ptr = m_assm->GetAttribute(0) - 1;
-        num = m_assm->m_pTablesSize[TBL_Attributes];
+        num = m_assm->tablesSize[TBL_Attributes];
     }
 
     while (num)
@@ -6068,7 +6068,7 @@ bool CLR_RT_AttributeEnumerator::Advance()
             // check TYPEDEF
             if (tk & 0x8000)
             {
-                m_match = m_assm->m_pCrossReference_MethodRef[tk & 0x7FFF].target;
+                m_match = m_assm->crossReferenceMethodRef[tk & 0x7FFF].target;
             }
             else
             {

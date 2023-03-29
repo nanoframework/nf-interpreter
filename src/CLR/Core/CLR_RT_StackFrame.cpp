@@ -143,7 +143,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
             stack->m_flags = CLR_RT_StackFrame::c_MethodKind_Native;
             stack->m_IPstart = NULL;
         }
-        else if (assm->m_nativeCode && (impl = assm->m_nativeCode[stack->m_call.Method()]) != NULL)
+        else if (assm->nativeCode && (impl = assm->nativeCode[stack->m_call.Method()]) != NULL)
         {
             stack->m_nativeMethod = impl;
 
@@ -290,7 +290,7 @@ bool CLR_RT_StackFrame::PushInline(
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
-        (calleeInst.assembly->m_nativeCode != NULL && (calleeInst.assembly->m_nativeCode[calleeInst.Method()] !=
+        (calleeInst.assembly->nativeCode != NULL && (calleeInst.assembly->nativeCode[calleeInst.Method()] !=
                                                      NULL)) || // Make sure the callee is not an internal method
         (md->rva == CLR_EmptyIndex) ||                         // Make sure we have a valid IP address for the method
         !g_CLR_RT_EventCache.GetInlineFrameBuffer(

@@ -260,7 +260,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     if (cls.Assembly() == mdVirtual.Assembly())
     {
         CLR_RT_Assembly *assm = g_CLR_RT_TypeSystem.m_assemblies[mdVirtual.Assembly() - 1];
-        CLR_INDEX owner = assm->m_pCrossReference_MethodDef[mdVirtual.Method()].GetOwner();
+        CLR_INDEX owner = assm->crossReferenceMethodDef[mdVirtual.Method()].GetOwner();
 
         if (cls.Type() == owner)
         {

@@ -998,24 +998,24 @@ struct CLR_RT_MethodDef_DebuggingInfo
     }
 
   private:
-    void SetFlags(CLR_UINT8 flags)
+    void SetFlags(CLR_UINT8 newFlags)
     {
-        flags |= flags;
+        flags |= newFlags;
     }
-    void ResetFlags(CLR_UINT8 flags)
+    void ResetFlags(CLR_UINT8 newFlags)
     {
-        flags &= ~flags;
+        flags &= ~newFlags;
     }
-    bool IsFlagSet(CLR_UINT8 flags) const
+    bool IsFlagSet(CLR_UINT8 newFlags) const
     {
-        return (flags & flags) != 0;
+        return (flags & newFlags) != 0;
     }
-    void SetResetFlags(bool b, CLR_UINT8 flags)
+    void SetResetFlags(bool b, CLR_UINT8 newFlags)
     {
         if (b)
-            SetFlags(flags);
+            SetFlags(newFlags);
         else
-            ResetFlags(flags);
+            ResetFlags(newFlags);
     }
 };
 
@@ -1287,24 +1287,24 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 {
     struct Offsets
     {
-        size_t iBase;
-        size_t iAssemblyRef;
-        size_t iTypeRef;
-        size_t iFieldRef;
-        size_t iMethodRef;
-        size_t iTypeDef;
-        size_t iFieldDef;
-        size_t iMethodDef;
-        size_t iGenericParam;
-        size_t iMethodSpec;
-        size_t iTypeSpec;
+        size_t base;
+        size_t assemblyRef;
+        size_t typeRef;
+        size_t fieldRef;
+        size_t methodRef;
+        size_t typeDef;
+        size_t fieldDef;
+        size_t methodDef;
+        size_t genericParam;
+        size_t methodSpec;
+        size_t typeSpec;
 
 #if !defined(NANOCLR_APPDOMAINS)
-        size_t iStaticFields;
+        size_t staticFieldsCount;
 #endif
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-        size_t iDebuggingInfoMethods;
+        size_t debuggingInfoMethods;
 #endif
     };
 
@@ -1326,56 +1326,71 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     // Relative to the type system (for static fields access).
     CLR_UINT32 assemblyIndex;
-    CLR_UINT32 m_flags;
+    CLR_UINT32 flags;
 
-    const CLR_RECORD_ASSEMBLY *m_header; // ANY HEAP - DO RELOCATION -
-    const char *m_szName;                // ANY HEAP - DO RELOCATION -
+    // ANY HEAP - DO RELOCATION -
+    const CLR_RECORD_ASSEMBLY *header;
+    // ANY HEAP - DO RELOCATION -
+    const char *name;                
 
-    const CLR_RT_MethodHandler *m_nativeCode;
+    const CLR_RT_MethodHandler *nativeCode;
 
-    int m_pTablesSize[TBL_Max];
+    int tablesSize[TBL_Max];
 
 #if !defined(NANOCLR_APPDOMAINS)
-    CLR_RT_HeapBlock *m_pStaticFields; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+    CLR_RT_HeapBlock *staticFields; 
 #endif
 
-    int m_iStaticFields;
+    int staticFieldsCount;
 
-    CLR_RT_HeapBlock_Array *m_pFile; // ANY HEAP - DO RELOCATION -
+    // ANY HEAP - DO RELOCATION -
+    CLR_RT_HeapBlock_Array *file; 
 
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_AssemblyRef_CrossReference
-        *m_pCrossReference_AssemblyRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceAssemblyRef; 
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeRef_CrossReference
-        *m_pCrossReference_TypeRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceTypeRef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_FieldRef_CrossReference
-        *m_pCrossReference_FieldRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceFieldRef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodRef_CrossReference
-        *m_pCrossReference_MethodRef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceMethodRef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeDef_CrossReference
-        *m_pCrossReference_TypeDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceTypeDef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_FieldDef_CrossReference
-        *m_pCrossReference_FieldDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceFieldDef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_CrossReference
-        *m_pCrossReference_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceMethodDef;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_GenericParam_CrossReference *
-        m_pCrossReference_GenericParam; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        crossReferenceGenericParam;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodSpec_CrossReference
-        *m_pCrossReference_MethodSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceMethodSpec;
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_TypeSpec_CrossReference
-        *m_pCrossReference_TypeSpec; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
+        *crossReferenceTypeSpec;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+    // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
     CLR_RT_MethodDef_DebuggingInfo
-        *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+        *m_pDebuggingInfo_MethodDef;
+#endif                               // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
-    int m_maxOpcodes;
-    int *m_stackDepth;
+    int maxOpcodes;
+    int *stackDepth;
 #endif
 
 #if defined(VIRTUAL_DEVICE)
-    std::string *m_strPath;
+    std::string *path;
 #endif
 
     //--//
@@ -1396,18 +1411,18 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static HRESULT CreateInstance(const CLR_RECORD_ASSEMBLY *data, CLR_RT_Assembly *&assm);
     void DestroyInstance();
 
-    void Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets);
+    void AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets);
 
-    bool Resolve_AssemblyRef(bool fOutput);
-    HRESULT Resolve_TypeRef();
-    HRESULT Resolve_FieldRef();
-    HRESULT Resolve_MethodRef();
-    HRESULT Resolve_TypeSpec();
-    void Resolve_TypeDef();
-    void Resolve_MethodDef();
-    void Resolve_Link();
-    HRESULT Resolve_ComputeHashes();
-    HRESULT Resolve_AllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
+    bool ResolveAssemblyRef(bool fOutput);
+    HRESULT ResolveTypeRef();
+    HRESULT ResolveFieldRef();
+    HRESULT ResolveMethodRef();
+    HRESULT ResolveTypeSpec();
+    void ResolveTypeDef();
+    void ResolveMethodDef();
+    void ResolveLink();
+    HRESULT ResolveComputeHashes();
+    HRESULT ResolveAllocateStaticFields(CLR_RT_HeapBlock *pStaticFields);
 
     HRESULT PrepareForExecution();
 
@@ -1469,75 +1484,75 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
     //--//
 
-    CLR_PMETADATA GetTable(NanoCLRTable tbl)
+    CLR_PMETADATA GetTable(NanoCLRTable tbl) const
     {
-        return (CLR_PMETADATA)m_header + m_header->startOfTables[tbl];
+        return (CLR_PMETADATA)header + header->startOfTables[tbl];
     }
 
 #define NANOCLR_ASSEMBLY_RESOLVE(cls, tbl, index)                                                                      \
-    (const cls *)((CLR_UINT8 *)m_header + m_header->startOfTables[tbl] + (sizeof(cls) * index))
-    const CLR_RECORD_ASSEMBLYREF *GetAssemblyRef(CLR_INDEX i)
+    (const cls *)((CLR_UINT8 *)header + header->startOfTables[tbl] + (sizeof(cls) * index))
+    const CLR_RECORD_ASSEMBLYREF *GetAssemblyRef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ASSEMBLYREF, TBL_AssemblyRef, i);
     }
-    const CLR_RECORD_TYPEREF *GetTypeRef(CLR_INDEX i)
+    const CLR_RECORD_TYPEREF *GetTypeRef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEREF, TBL_TypeRef, i);
     }
-    const CLR_RECORD_FIELDREF *GetFieldRef(CLR_INDEX i)
+    const CLR_RECORD_FIELDREF *GetFieldRef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDREF, TBL_FieldRef, i);
     }
-    const CLR_RECORD_METHODREF *GetMethodRef(CLR_INDEX i)
+    const CLR_RECORD_METHODREF *GetMethodRef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODREF, TBL_MethodRef, i);
     }
-    const CLR_RECORD_TYPEDEF *GetTypeDef(CLR_INDEX i)
+    const CLR_RECORD_TYPEDEF *GetTypeDef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPEDEF, TBL_TypeDef, i);
     }
-    const CLR_RECORD_FIELDDEF *GetFieldDef(CLR_INDEX i)
+    const CLR_RECORD_FIELDDEF *GetFieldDef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_FIELDDEF, TBL_FieldDef, i);
     }
-    const CLR_RECORD_METHODDEF *GetMethodDef(CLR_INDEX i)
+    const CLR_RECORD_METHODDEF *GetMethodDef(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODDEF, TBL_MethodDef, i);
     }
-    const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i)
+    const CLR_RECORD_GENERICPARAM *GetGenericParam(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_GENERICPARAM, TBL_GenericParam, i);
     }
-    const CLR_RECORD_METHODSPEC *GetMethodSpec(CLR_INDEX i)
+    const CLR_RECORD_METHODSPEC *GetMethodSpec(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_METHODSPEC, TBL_MethodSpec, i);
     }
-    const CLR_RECORD_ATTRIBUTE *GetAttribute(CLR_INDEX i)
+    const CLR_RECORD_ATTRIBUTE *GetAttribute(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_ATTRIBUTE, TBL_Attributes, i);
     }
-    const CLR_RECORD_TYPESPEC *GetTypeSpec(CLR_INDEX i)
+    const CLR_RECORD_TYPESPEC *GetTypeSpec(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_TYPESPEC, TBL_TypeSpec, i);
     }
-    const CLR_RECORD_RESOURCE_FILE *GetResourceFile(CLR_INDEX i)
+    const CLR_RECORD_RESOURCE_FILE *GetResourceFile(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE_FILE, TBL_ResourcesFiles, i);
     }
-    const CLR_RECORD_RESOURCE *GetResource(CLR_INDEX i)
+    const CLR_RECORD_RESOURCE *GetResource(CLR_INDEX i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_RECORD_RESOURCE, TBL_Resources, i);
     }
-    CLR_PMETADATA GetResourceData(CLR_UINT32 i)
+    CLR_PMETADATA GetResourceData(CLR_UINT32 i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_ResourcesData, i);
     }
     const char *GetString(CLR_STRING i);
-    CLR_PMETADATA GetSignature(CLR_SIG i)
+    CLR_PMETADATA GetSignature(CLR_SIG i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_Signatures, i);
     }
-    CLR_PMETADATA GetByteCode(CLR_OFFSET i)
+    CLR_PMETADATA GetByteCode(CLR_OFFSET i) const
     {
         return NANOCLR_ASSEMBLY_RESOLVE(CLR_UINT8, TBL_ByteCode, i);
     }
@@ -1564,6 +1579,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     void DumpSignature(CLR_SIG sig) DECL_POSTFIX;
     void DumpSignature(CLR_PMETADATA &p) DECL_POSTFIX;
     void DumpSignatureToken(CLR_PMETADATA &p) DECL_POSTFIX;
+    void DumpFieldOwner(CLR_UINT32 index) DECL_POSTFIX;
+    void DumpMethodOwner(CLR_UINT32 index) DECL_POSTFIX;
 
     //--//
 
@@ -1572,16 +1589,16 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     static FILE *s_toclose;
 
   public:
-    static void Dump_SetDevice(FILE *&outputDeviceFile, const wchar_t *szFileName);
-    static void Dump_SetDevice(const wchar_t *szFileName);
+    static void DumpSetDevice(FILE *&outputDeviceFile, const wchar_t *szFileName);
+    static void DumpSetDevice(const wchar_t *szFileName);
 
-    static void Dump_CloseDevice(FILE *&outputDeviceFile);
-    static void Dump_CloseDevice();
+    static void DumpCloseDevice(FILE *&outputDeviceFile);
+    static void DumpCloseDevice();
 
-    static void Dump_Printf(FILE *outputDeviceFile, const char *format, ...);
-    static void Dump_Printf(const char *format, ...);
+    static void DumpPrintf(FILE *outputDeviceFile, const char *format, ...);
+    static void DumpPrintf(const char *format, ...);
 
-    static void Dump_Indent(const CLR_RECORD_METHODDEF *md, size_t offset, size_t level);
+    static void DumpIndent(const CLR_RECORD_METHODDEF *md, size_t offset, size_t level);
 
     void Dump(bool fNoByteCode);
 
@@ -1608,16 +1625,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     void BuildTypeName(const CLR_RECORD_TYPEDEF *td, std::string &type_name);
 
 #endif
-  private:
-#if defined(VIRTUAL_DEVICE)
-    void Dump_Token(CLR_UINT32 tk);
-    void Dump_FieldOwner(CLR_UINT32 index);
-    void Dump_MethodOwner(CLR_UINT32 index);
-    void Dump_Signature(CLR_SIG sig);
-    void Dump_Signature(CLR_PMETADATA &p);
-    void Dump_SignatureToken(CLR_PMETADATA &p);
-#endif
-
     //--//
 
     PROHIBIT_ALL_CONSTRUCTORS(CLR_RT_Assembly);
@@ -2149,7 +2156,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     CLR_RT_TypeDef_CrossReference &CrossReference() const
     {
-        return assembly->m_pCrossReference_TypeDef[Type()];
+        return assembly->crossReferenceTypeDef[Type()];
     }
 
     bool SwitchToParent();
@@ -2182,7 +2189,7 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
 
     CLR_RT_FieldDef_CrossReference &CrossReference() const
     {
-        return assembly->m_pCrossReference_FieldDef[Field()];
+        return assembly->crossReferenceFieldDef[Field()];
     }
 };
 
@@ -2210,7 +2217,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     CLR_RT_MethodDef_CrossReference &CrossReference() const
     {
-        return assembly->m_pCrossReference_MethodDef[Method()];
+        return assembly->crossReferenceMethodDef[Method()];
     }
     CLR_UINT32 Hits() const
     {
@@ -2246,7 +2253,7 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     CLR_RT_GenericParam_CrossReference &CrossReference() const
     {
-        return assembly->m_pCrossReference_GenericParam[GenericParam()];
+        return assembly->crossReferenceGenericParam[GenericParam()];
     }
 };
 
@@ -2263,7 +2270,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_RT_MethodSpec_CrossReference &CrossReference() const
     {
-        return assembly->m_pCrossReference_MethodSpec[Method()];
+        return assembly->crossReferenceMethodSpec[Method()];
     }
 
     CLR_INDEX Container();

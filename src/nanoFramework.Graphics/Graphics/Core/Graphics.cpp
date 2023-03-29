@@ -129,10 +129,10 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
 
     if (bm->m_type == CLR_GFX_BitmapDescription::c_TypeJpeg || bm->m_type == CLR_GFX_BitmapDescription::c_TypeGif)
     {
-        if (assm->m_pFile)
+        if (assm->file)
         {
-            unpinAssm = !assm->m_pFile->IsPinned();
-            assm->m_pFile->Pin();
+            unpinAssm = !assm->file->IsPinned();
+            assm->file->Pin();
         }
 
         NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, data, size, bm->m_type));
@@ -195,7 +195,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
     if (unpinAssm)
     {
         // Unpin the assembly if we pinned it earlier
-        assm->m_pFile->Unpin();
+        assm->file->Unpin();
     }
 
     NANOCLR_CLEANUP_END();

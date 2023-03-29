@@ -309,7 +309,7 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
 
                 if (SUCCEEDED(CLR_RT_Assembly::CreateInstance(header, assm)))
                 {
-                    assm->m_pFile = weak->m_targetSerialized;
+                    assm->file = weak->m_targetSerialized;
 
                     g_CLR_RT_TypeSystem.Link(assm);
                 }
@@ -322,14 +322,14 @@ void CLR_RT_ExecutionEngine::LoadDownloadedAssemblies()
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        if (pASSM->m_pFile)
+        if (pASSM->file)
         {
             //
             // For those assemblies that failed to load (missing dependency?), clean up.
             //
-            if ((pASSM->m_flags & CLR_RT_Assembly::ResolutionCompleted) == 0)
+            if ((pASSM->flags & CLR_RT_Assembly::ResolutionCompleted) == 0)
             {
-                pASSM->m_pFile = NULL;
+                pASSM->file = NULL;
 
                 pASSM->DestroyInstance();
             }
@@ -913,7 +913,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
         }
     }
 
-    assembly->m_flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
+    assembly->flags |= CLR_RT_Assembly::StaticConstructorsExecuted;
     return false;
 }
 
@@ -948,17 +948,17 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
         // Find an AppDomainAssembly that does not have it's static constructor bit set...
-        if ((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+        if ((pASSM->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {
             CLR_RT_MethodDef_Index index;
             index.Set(pASSM->assemblyIndex, 0);
             bool fDepedenciesRun = true;
 
             // Check that all dependent assemblies have had static constructors run.
-            CLR_RT_AssemblyRef_CrossReference *ar = pASSM->m_pCrossReference_AssemblyRef;
-            for (int i = 0; i < pASSM->m_pTablesSize[TBL_AssemblyRef]; i++, ar++)
+            CLR_RT_AssemblyRef_CrossReference *ar = pASSM->crossReferenceAssemblyRef;
+            for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, ar++)
             {
-                if ((ar->target->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
+                if ((ar->target->flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
                 {
                     fDepedenciesRun = true;
                     break;
@@ -1725,7 +1725,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
             }
         }
 #else
-        return &inst.assembly->m_pStaticFields[inst.CrossReference().offset];
+        return &inst.assembly->staticFields[inst.CrossReference().offset];
 #endif
     }
 
@@ -1855,7 +1855,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     switch (CLR_TypeFromTk(tk))
                     {
                         case TBL_TypeRef:
-                            cls = assembly->m_pCrossReference_TypeRef[index].target;
+                            cls = assembly->crossReferenceTypeRef[index].target;
                             break;
 
                         case TBL_TypeDef:
@@ -1899,7 +1899,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                     assembly->FindGenericParamAtMethodDef(methodDefInstance, genericParamPosition, gpIndex);
 
                     CLR_RT_GenericParam_CrossReference gp =
-                        assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                        assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
                     cls = gp.classTypeDef;
                     dt = gp.dataType;

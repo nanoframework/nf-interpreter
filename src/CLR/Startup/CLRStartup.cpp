@@ -73,14 +73,14 @@ struct Settings
         NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
         // Get handlers for native functions in assembly
-        pNativeAssmData = GetAssemblyNativeData(assm->m_szName);
+        pNativeAssmData = GetAssemblyNativeData(assm->name);
 
         // If pNativeAssmData not NULL- means this assembly has native calls and there is pointer to table with native
         // calls.
         if (pNativeAssmData != NULL)
         {
             // First verify that check sum in assembly object matches hardcoded check sum.
-            if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
+            if (assm->header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
@@ -90,8 +90,8 @@ struct Settings
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf(
                     "* Invalid native checksum: %s 0x%08X!=0x%08X *\r\n",
-                    assm->m_szName,
-                    assm->m_header->nativeMethodsChecksum,
+                    assm->name,
+                    assm->header->nativeMethodsChecksum,
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
@@ -100,7 +100,7 @@ struct Settings
             }
 
             // Assembly has valid pointer to table with native methods. Save it.
-            assm->m_nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
+            assm->nativeCode = (const CLR_RT_MethodHandler *)pNativeAssmData->m_pNativeMethods;
         }
         g_CLR_RT_TypeSystem.Link(assm);
         NANOCLR_NOCLEANUP();
@@ -300,12 +300,12 @@ struct Settings
             }
 
             // load successful, mark as deployed
-            assm->m_flags |= CLR_RT_Assembly::Deployed;
+            assm->flags |= CLR_RT_Assembly::Deployed;
 
             // if header was malloced, set the flag to request freeing it
             if (!isXIP)
             {
-                assm->m_flags |= CLR_RT_Assembly::FreeOnDestroy;
+                assm->flags |= CLR_RT_Assembly::FreeOnDestroy;
             }
         }
 

@@ -20,9 +20,9 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
     NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, instance));
 
     assm = instance.assembly;
-    header = assm->m_header;
+    header = assm->header;
 
-    if (hal_strlen_s(assm->m_szName) > NANOCLR_MAX_ASSEMBLY_NAME)
+    if (hal_strlen_s(assm->name) > NANOCLR_MAX_ASSEMBLY_NAME)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
@@ -30,7 +30,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::get_FullName___STRING(
     sprintf(
         buffer,
         "%s, Version=%d.%d.%d.%d",
-        assm->m_szName,
+        assm->name,
         header->version.majorVersion,
         header->version.minorVersion,
         header->version.buildNumber,
@@ -85,7 +85,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
 
     {
         CLR_RT_Assembly *pASSM = assm.assembly;
-        CLR_UINT32 num = pASSM->m_pTablesSize[TBL_TypeDef];
+        CLR_UINT32 num = pASSM->tablesSize[TBL_TypeDef];
         CLR_RT_HeapBlock &top = stack.PushValue();
         CLR_RT_HeapBlock *hbObj;
 
@@ -130,7 +130,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
 
         NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbAsm, assm));
 
-        const CLR_RECORD_VERSION &version = assm.assembly->m_header->version;
+        const CLR_RECORD_VERSION &version = assm.assembly->header->version;
 
         // we do not check for the reference not to be NULL because this is an internal method
         stack.Arg1().Dereference()->NumericByRef().s4 = version.majorVersion;
@@ -158,13 +158,13 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
 
         NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
             result,
-            pAssm->m_pTablesSize[TBL_ResourcesFiles],
+            pAssm->tablesSize[TBL_ResourcesFiles],
             g_CLR_RT_WellKnownTypes.m_String));
 
         {
             CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
 
-            for (int indexResourceFile = 0; indexResourceFile < pAssm->m_pTablesSize[TBL_ResourcesFiles];
+            for (int indexResourceFile = 0; indexResourceFile < pAssm->tablesSize[TBL_ResourcesFiles];
                  indexResourceFile++)
             {
                 const CLR_RECORD_RESOURCE_FILE *resourceFile = pAssm->GetResourceFile(indexResourceFile);
@@ -308,7 +308,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
         {
             NANOCLR_CHECK_HRESULT(CLR_RT_Assembly::CreateInstance(header, assm));
 
-            assm->m_pFile = array;
+            assm->file = array;
 
             g_CLR_RT_TypeSystem.Link(assm);
 
@@ -348,7 +348,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
 
     while (eventResult)
     {
-        if (assm->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted)
+        if (assm->flags & CLR_RT_Assembly::StaticConstructorsExecuted)
         {
             // static constructors executed, we are good here
             break;

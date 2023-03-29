@@ -258,9 +258,9 @@ HRESULT Library_sys_net_native_System_Net_Sockets_NativeSocket::
                 // allocate array of byte arrays
                 CLR_RT_ReflectionDef_Index idx;
 
-                idx.m_kind = REFLECTION_TYPE;
-                idx.m_levels = 2;
-                idx.m_data.m_type.m_data = g_CLR_RT_WellKnownTypes.m_UInt8.m_data;
+                idx.kind = REFLECTION_TYPE;
+                idx.levels = 2;
+                idx.data.type.data = g_CLR_RT_WellKnownTypes.m_UInt8.data;
 
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(hbAddresses, cAddresses, idx));
 

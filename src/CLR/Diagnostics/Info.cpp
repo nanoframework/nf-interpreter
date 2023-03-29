@@ -440,27 +440,27 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LOOKUP_ELEMENT(index, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(index)
+#define LOOKUP_ELEMENT(idx, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(idx)
 
-#define LOOKUP_ELEMENT_REF(index, tblName, tblNameUC, tblName2)                                                        \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
-    const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[index].target;                                   \
+#define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                        \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                             \
+    const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                   \
     if (s->data == 0)                                                                                                \
     s = NULL
 
-#define LOOKUP_ELEMENT_IDX(index, tblName, tblNameUC)                                                                  \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
+#define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                  \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                             \
     CLR_RT_##tblName##_Index s;                                                                                        \
-    s.Set(assemblyIndex, index)
+    s.Set(assemblyIndex, idx)
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
+void CLR_RT_Assembly::DumpToken(CLR_UINT32 token)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 index = CLR_DataFromTk(tk);
+    CLR_UINT32 index = CLR_DataFromTk(token);
 
-    switch (CLR_TypeFromTk(tk))
+    switch (CLR_TypeFromTk(token))
     {
         case TBL_AssemblyRef:
         {
@@ -534,7 +534,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
         }
 
         default:
-            CLR_Debug::Printf("[%08x]", tk);
+            CLR_Debug::Printf("[%08x]", token);
     }
 }
 
@@ -655,9 +655,9 @@ void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 void CLR_RT_Assembly::DumpSignatureToken(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
-    CLR_UINT32 tk = CLR_TkFromStream(p);
+    CLR_UINT32 token = CLR_TkFromStream(p);
 
-    CLR_Debug::Printf("[%08x]", tk);
+    CLR_Debug::Printf("[%08x]", token);
 }
 
 //--//

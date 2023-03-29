@@ -1422,9 +1422,9 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
         PLATFORMNAMESTRING,
         ARRAYSIZE(PLATFORMNAMESTRING));
 
-    if (g_CLR_RT_TypeSystem.m_assemblyMscorlib && g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header)
+    if (g_CLR_RT_TypeSystem.m_assemblyMscorlib && g_CLR_RT_TypeSystem.m_assemblyMscorlib->header)
     {
-        const CLR_RECORD_VERSION *mscorlibVer = &(g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header->version);
+        const CLR_RECORD_VERSION *mscorlibVer = &(g_CLR_RT_TypeSystem.m_assemblyMscorlib->header->version);
         NFVersion::Init(
             clrInfo.m_TargetFrameworkVersion,
             mscorlibVer->majorVersion,
@@ -2030,7 +2030,7 @@ bool CLR_DBG_Debugger::CheckTypeDef(const CLR_RT_TypeDef_Index &td, CLR_RT_TypeD
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_Assembly *assm = IsGoodAssembly(td.Assembly());
 
-    if (assm && td.Type() < assm->m_pTablesSize[TBL_TypeDef])
+    if (assm && td.Type() < assm->tablesSize[TBL_TypeDef])
     {
         return inst.InitializeFromIndex(td);
     }
@@ -2043,7 +2043,7 @@ bool CLR_DBG_Debugger::CheckFieldDef(const CLR_RT_FieldDef_Index &fd, CLR_RT_Fie
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_Assembly *assm = IsGoodAssembly(fd.Assembly());
 
-    if (assm && fd.Field() < assm->m_pTablesSize[TBL_FieldDef])
+    if (assm && fd.Field() < assm->tablesSize[TBL_FieldDef])
     {
         return inst.InitializeFromIndex(fd);
     }
@@ -2056,7 +2056,7 @@ bool CLR_DBG_Debugger::CheckMethodDef(const CLR_RT_MethodDef_Index &md, CLR_RT_M
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_RT_Assembly *assm = IsGoodAssembly(md.Assembly());
 
-    if (assm && md.Method() < assm->m_pTablesSize[TBL_MethodDef])
+    if (assm && md.Method() < assm->tablesSize[TBL_MethodDef])
     {
         return inst.InitializeFromIndex(md);
     }
@@ -2779,7 +2779,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
 
                 CLR_RT_GenericParam_CrossReference gp =
-                    assembly->m_pCrossReference_GenericParam[gpIndex.GenericParam()];
+                    assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
                 targetClass = gp.classTypeDef;
                 targetDataType = gp.dataType;
@@ -3505,14 +3505,14 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
         {
 #if defined(VIRTUAL_DEVICE)
             // append path
-            if (assm->m_strPath != NULL)
+            if (assm->path != NULL)
             {
                 sprintf_s(
                     cmdReply->m_szName,
                     ARRAYSIZE(cmdReply->m_szName),
                     "%s,%s",
-                    assm->m_szName,
-                    assm->m_strPath->c_str());
+                    assm->name,
+                    assm->path->c_str());
             }
             else
 #endif
@@ -3520,12 +3520,12 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
                 hal_strncpy_s(
                     cmdReply->m_szName,
                     ARRAYSIZE(cmdReply->m_szName),
-                    assm->m_szName,
+                    assm->name,
                     MAXSTRLEN(cmdReply->m_szName));
             }
 
-            cmdReply->m_flags = assm->m_flags;
-            cmdReply->m_version = assm->m_header->version;
+            cmdReply->m_flags = assm->flags;
+            cmdReply->m_version = assm->header->version;
 
             WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply));
 
@@ -3835,7 +3835,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
                 return false;
             }
 
-            for (int i = 0; i < assm->m_pTablesSize[TBL_TypeDef]; i++)
+            for (int i = 0; i < assm->tablesSize[TBL_TypeDef]; i++)
             {
                 CLR_RT_TypeDef_Index idx;
 

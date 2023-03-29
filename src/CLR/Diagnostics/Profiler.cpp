@@ -304,9 +304,9 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
             case DATATYPE_ASSEMBLY:
             {
                 CLR_RT_Assembly *assembly = (CLR_RT_Assembly *)ptr;
-                DumpSingleReference(assembly->m_pFile);
+                DumpSingleReference(assembly->file);
 #if !defined(NANOCLR_APPDOMAINS)
-                DumpListOfReferences(assembly->m_pStaticFields, assembly->m_iStaticFields);
+                DumpListOfReferences(assembly->staticFields, assembly->staticFieldsCount);
 #endif
                 break;
             }
