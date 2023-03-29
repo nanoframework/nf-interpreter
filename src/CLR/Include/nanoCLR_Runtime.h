@@ -618,14 +618,14 @@ struct CLR_RT_Assembly_Index
 
     void Set(CLR_UINT32 indexAssm)
     {
-        m_data = indexAssm << 16;
+        m_data = indexAssm << 24;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 };
 
@@ -642,14 +642,14 @@ struct CLR_RT_TypeSpec_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexType)
     {
-        m_data = indexAssm << 16 | indexType;
+        m_data = indexAssm << 24 | indexType;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX TypeSpec() const
@@ -671,14 +671,14 @@ struct CLR_RT_TypeDef_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexType)
     {
-        m_data = indexAssm << 16 | indexType;
+        m_data = indexAssm << 24 | indexType;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX Type() const
@@ -700,14 +700,14 @@ struct CLR_RT_MethodSpec_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 16 | indexMethod;
+        m_data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX Method() const
@@ -729,14 +729,14 @@ struct CLR_RT_FieldDef_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexField)
     {
-        m_data = indexAssm << 16 | indexField;
+        m_data = indexAssm << 24 | indexField;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX Field() const
@@ -758,14 +758,14 @@ struct CLR_RT_MethodDef_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 16 | indexMethod;
+        m_data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX Method() const
@@ -787,14 +787,14 @@ struct CLR_RT_MethodRef_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 16 | indexMethod;
+        m_data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_INDEX Method() const
@@ -816,14 +816,14 @@ struct CLR_RT_GenericParam_Index
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexGenericParam)
     {
-        m_data = indexAssm << 16 | indexGenericParam;
+        m_data = indexAssm << 24 | indexGenericParam;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 16);
+        return (CLR_INDEX)(m_data >> 24);
     }
 
     CLR_UINT8 GenericParam() const
