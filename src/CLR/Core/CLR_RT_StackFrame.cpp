@@ -31,12 +31,12 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
     }
 #endif
 
-    assm = callInstPtr->m_assm;
-    md = callInstPtr->m_target;
+    assm = callInstPtr->assembly;
+    md = callInstPtr->target;
 
-    sizeLocals = md->LocalsCount;
+    sizeLocals = md->localsCount;
 #ifndef NANOCLR_NO_IL_INLINE
-    sizeEvalStack = md->LengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
+    sizeEvalStack = md->lengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod + 1;
 #else
     sizeEvalStack = md->LengthEvalStack + CLR_RT_StackFrame::c_OverheadForNewObjOrInteropMethod;
 #endif
@@ -136,7 +136,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         stack->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();
 #endif
 
-        if (md->Flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke) // Special case for delegate calls.
+        if (md->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke) // Special case for delegate calls.
         {
             stack->m_nativeMethod = (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_DelegateInvoke;
 
@@ -155,11 +155,11 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         {
             stack->m_nativeMethod = (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_IL;
 
-            if (md->RVA == CLR_EmptyIndex)
+            if (md->rva == CLR_EmptyIndex)
                 NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 
             stack->m_flags = CLR_RT_StackFrame::c_MethodKind_Interpreted;
-            stack->m_IPstart = assm->GetByteCode(md->RVA);
+            stack->m_IPstart = assm->GetByteCode(md->rva);
             stack->m_IP = stack->m_IPstart;
         }
 
@@ -180,13 +180,13 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 #endif
     }
 
-    if (md->LocalsCount)
+    if (md->localsCount)
     {
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.InitializeLocals(stack->m_locals, callInst));
     }
 
     {
-        CLR_UINT32 syncFlags = md->Flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
+        CLR_UINT32 syncFlags = md->flags & (md->MD_Synchronized | md->MD_GloballySynchronized);
 
         if (syncFlags)
         {
@@ -251,7 +251,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         //
         // Everything is set up correctly, pop the operands.
         //
-        stack->m_arguments = &caller->m_evalStackPos[-md->ArgumentsCount];
+        stack->m_arguments = &caller->m_evalStackPos[-md->argumentsCount];
 
         caller->m_evalStackPos = stack->m_arguments;
 
@@ -280,26 +280,26 @@ bool CLR_RT_StackFrame::PushInline(
     CLR_RT_MethodDef_Instance &calleeInst,
     CLR_RT_HeapBlock *pThis)
 {
-    const CLR_RECORD_METHODDEF *md = calleeInst.m_target;
+    const CLR_RECORD_METHODDEF *md = calleeInst.target;
 
     if ((m_inlineFrame != NULL) || // We can only support one inline at a time per stack call
-        (m_evalStackEnd - evalPos) <= (md->ArgumentsCount + md->LocalsCount + md->LengthEvalStack +
+        (m_evalStackEnd - evalPos) <= (md->argumentsCount + md->localsCount + md->lengthEvalStack +
                                        2) || // We must have enough space on the current stack for the inline method
         (m_nativeMethod != (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_IL) || // We only support IL inlining
-        (md->Flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
+        (md->flags & ~CLR_RECORD_METHODDEF::MD_HasExceptionHandlers) >=
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
-        (0 != (md->Flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
-        (calleeInst.m_assm->m_nativeCode != NULL && (calleeInst.m_assm->m_nativeCode[calleeInst.Method()] !=
+        (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
+        (calleeInst.assembly->m_nativeCode != NULL && (calleeInst.assembly->m_nativeCode[calleeInst.Method()] !=
                                                      NULL)) || // Make sure the callee is not an internal method
-        (md->RVA == CLR_EmptyIndex) ||                         // Make sure we have a valid IP address for the method
+        (md->rva == CLR_EmptyIndex) ||                         // Make sure we have a valid IP address for the method
         !g_CLR_RT_EventCache.GetInlineFrameBuffer(
             &m_inlineFrame)) // Make sure we have an extra slot in the inline cache
     {
         return false;
     }
 
-    CLR_PMETADATA ipTmp = calleeInst.m_assm->GetByteCode(md->RVA);
+    CLR_PMETADATA ipTmp = calleeInst.assembly->GetByteCode(md->rva);
 
 #if defined(PLATFORM_WINDOWS_EMULATOR)
     if (s_CLR_RT_fTrace_SimulateSpeed > c_CLR_RT_Trace_None)
@@ -323,11 +323,11 @@ bool CLR_RT_StackFrame::PushInline(
 
     // increment the evalPos pointer so that we don't corrupt the real stack
     evalPos++;
-    assm = calleeInst.m_assm;
+    assm = calleeInst.assembly;
     ip = ipTmp;
 
     m_arguments = pThis;
-    m_locals = &m_evalStackEnd[-md->LocalsCount];
+    m_locals = &m_evalStackEnd[-md->localsCount];
     m_call = calleeInst;
     m_evalStackEnd = m_locals;
     m_evalStack = evalPos;
@@ -335,14 +335,14 @@ bool CLR_RT_StackFrame::PushInline(
     m_IPstart = ip;
     m_IP = ip;
 
-    if (md->LocalsCount)
+    if (md->localsCount)
     {
         g_CLR_RT_ExecutionEngine.InitializeLocals(m_locals, calleeInst);
     }
 
     m_flags |= CLR_RT_StackFrame::c_MethodKind_Inlined;
 
-    if (md->RetVal != DATATYPE_VOID)
+    if (md->retValDataType != DATATYPE_VOID)
     {
         m_flags |= CLR_RT_StackFrame::c_InlineMethodHasReturnValue;
     }
@@ -403,7 +403,7 @@ void CLR_RT_StackFrame::RestoreFromInlineStack()
 {
     m_arguments = m_inlineFrame->m_frame.m_args;
     m_locals = m_inlineFrame->m_frame.m_locals;
-    m_evalStackEnd += m_call.m_target->LocalsCount;
+    m_evalStackEnd += m_call.target->localsCount;
     m_call = m_inlineFrame->m_frame.m_call;
     m_IP = m_inlineFrame->m_frame.m_IP;
     m_IPstart = m_inlineFrame->m_frame.m_IPStart;
@@ -420,7 +420,7 @@ void CLR_RT_StackFrame::RestoreStack(CLR_RT_InlineFrame &frame)
     m_IPstart = frame.m_IPStart;
     m_evalStack = frame.m_evalStack;
     m_evalStackPos = frame.m_evalPos;
-    m_evalStackEnd -= m_call.m_target->LocalsCount;
+    m_evalStackEnd -= m_call.target->localsCount;
 }
 
 void CLR_RT_StackFrame::SaveStack(CLR_RT_InlineFrame &frame)
@@ -571,16 +571,16 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_RECORD_METHODDEF *mdR = md.m_target;
-    bool fStatic = (mdR->Flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
-    int ArgumentsCount = mdR->ArgumentsCount;
+    const CLR_RECORD_METHODDEF *mdR = md.target;
+    bool fStatic = (mdR->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
+    int ArgumentsCount = mdR->argumentsCount;
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
     tmp.SetObjectReference(NULL);
     CLR_RT_ProtectFromGC gc(tmp);
 
-    if (mdR->Flags & CLR_RECORD_METHODDEF::MD_Constructor)
+    if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
     {
         CLR_RT_TypeDef_Instance owner;
         owner.InitializeFromMethod(md);
@@ -612,7 +612,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     //
     // In case the invoked method is abstract or virtual, resolve it to the correct method implementation.
     //
-    if (mdR->Flags & (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual))
+    if (mdR->flags & (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual))
     {
         CLR_RT_TypeDef_Index cls;
         CLR_RT_MethodDef_Index mdReal;
@@ -629,7 +629,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
 
         md.InitializeFromIndex(mdReal);
 
-        mdR = md.m_target;
+        mdR = md.target;
     }
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -645,7 +645,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     else
 #endif
     {
-        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(m_owningThread, md, md.m_target->ArgumentsCount));
+        NANOCLR_CHECK_HRESULT(CLR_RT_StackFrame::Push(m_owningThread, md, md.target->argumentsCount));
 
         stackSub = m_owningThread->CurrentFrame();
 
@@ -672,8 +672,8 @@ HRESULT CLR_RT_StackFrame::FixCall()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    const CLR_RECORD_METHODDEF *target = m_call.m_target;
-    CLR_UINT8 ArgumentsCount = target->ArgumentsCount;
+    const CLR_RECORD_METHODDEF *target = m_call.target;
+    CLR_UINT8 ArgumentsCount = target->argumentsCount;
 
     //
     // The copy of ValueTypes is delayed as much as possible.
@@ -708,7 +708,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
             {
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(res.Class);
-                NanoCLRDataType dtT = (NanoCLRDataType)inst.m_target->DataType;
+                NanoCLRDataType dtT = (NanoCLRDataType)inst.target->dataType;
                 const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dtT];
 
                 if (dtl.m_flags & (CLR_RT_DataTypeLookup::c_OptimizedValueType | CLR_RT_DataTypeLookup::c_ValueType))
@@ -721,7 +721,7 @@ HRESULT CLR_RT_StackFrame::FixCall()
                         // It's a boxed primitive/enum type.
                         args->Assign(*value);
                     }
-                    else if (args->Dereference()->ObjectCls().m_data == res.Class.m_data)
+                    else if (args->Dereference()->ObjectCls().data == res.Class.data)
                     {
                         if (args->Dereference()->IsBoxed())
                         {
@@ -787,7 +787,7 @@ HRESULT CLR_RT_StackFrame::HandleSynchronized(bool fAcquire, bool fGlobal)
             *ppGlobalLock = obj->Dereference();
         }
     }
-    else if (m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static)
+    else if (m_call.target->flags & CLR_RECORD_METHODDEF::MD_Static)
     {
         CLR_RT_TypeDef_Index index;
 
@@ -937,7 +937,7 @@ void CLR_RT_StackFrame::Pop()
                 //
                 // Push the return, if any.
                 //
-                if (m_call.m_target->RetVal != DATATYPE_VOID)
+                if (m_call.target->retValDataType != DATATYPE_VOID)
                 {
                     if (m_owningThread->m_currentException.Dereference() == NULL)
                     {
@@ -970,7 +970,7 @@ void CLR_RT_StackFrame::Pop()
                 {
                     dst->SetObjectReference(exception);
                 }
-                else if (m_call.m_target->RetVal != DATATYPE_VOID)
+                else if (m_call.target->retValDataType != DATATYPE_VOID)
                 {
                     CLR_RT_SignatureParser sig;
                     sig.Initialize_MethodSignature(&this->m_call);
@@ -987,7 +987,7 @@ void CLR_RT_StackFrame::Pop()
 
                     if (c_CLR_RT_DataTypeLookup[this->DataType()].m_flags &
                             CLR_RT_DataTypeLookup::c_OptimizedValueType ||
-                        desc.m_handlerCls.m_target->IsEnum())
+                        desc.m_handlerCls.target->IsEnum())
                     {
                         if (FAILED(dst->PerformBoxing(desc.m_handlerCls)))
                         {
@@ -1245,39 +1245,39 @@ void CLR_RT_StackFrame::Relocate()
 #ifndef NANOCLR_NO_IL_INLINE
     if (m_inlineFrame)
     {
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_call.m_assm);
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_call.m_target);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_call.assembly);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_call.target);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_IPStart);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_inlineFrame->m_frame.m_IP);
 
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.m_assm);
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.m_target);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.assembly);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.target);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_nativeMethod);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IPstart);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IP);
 
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_args,
-            m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount);
+            m_inlineFrame->m_frame.m_call.target->argumentsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_locals,
-            m_inlineFrame->m_frame.m_call.m_target->LocalsCount);
+            m_inlineFrame->m_frame.m_call.target->localsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(
             m_inlineFrame->m_frame.m_evalStack,
             (int)(m_evalStackPos - m_inlineFrame->m_frame.m_evalStack));
-        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->LocalsCount);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.target->localsCount);
     }
     else
 #endif
     {
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.m_assm);
-        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.m_target);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.assembly);
+        CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_call.target);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_nativeMethod);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IPstart);
         CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_IP);
 
-        CLR_RT_GarbageCollector::Heap_Relocate(m_arguments, m_call.m_target->ArgumentsCount);
-        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.m_target->LocalsCount);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_arguments, m_call.target->argumentsCount);
+        CLR_RT_GarbageCollector::Heap_Relocate(m_locals, m_call.target->localsCount);
         CLR_RT_GarbageCollector::Heap_Relocate(m_evalStack, TopValuePosition());
     }
 }
@@ -1289,7 +1289,7 @@ HRESULT CLR_RT_StackFrame::NotImplementedStub()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    if (m_call.m_target->RetVal != DATATYPE_VOID)
+    if (m_call.target->retValDataType != DATATYPE_VOID)
     {
         SetResult_I4(0);
     }

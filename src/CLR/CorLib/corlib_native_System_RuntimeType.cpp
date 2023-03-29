@@ -128,7 +128,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
         {
             // Scan the list of interfaces.
             CLR_RT_SignatureParser parser;
-            parser.Initialize_Interfaces(td.m_assm, td.m_target);
+            parser.Initialize_Interfaces(td.assembly, td.target);
             CLR_RT_SignatureParser::Element res;
 
             // 1. pass count
@@ -379,7 +379,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         // get the type for the class object
                         // the assembly has to be the instance type
                         CLR_RT_MethodDef_Index md;
-                        md.Set(instanceTypeDef.m_assm->m_index, parser.m_mdIndex.Method());
+                        md.Set(instanceTypeDef.assembly->assemblyIndex, parser.m_mdIndex.Method());
                         CLR_RT_MethodDef_Instance mdInst;
                         mdInst.InitializeFromIndex(md);
 

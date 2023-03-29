@@ -595,8 +595,8 @@ static const int MAXTYPENAMELEN = 256; // Including terminating null byte. Enfor
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define NANOCLR_INDEX_IS_VALID(index)   ((index).m_data != 0)
-#define NANOCLR_INDEX_IS_INVALID(index) ((index).m_data == 0)
+#define NANOCLR_INDEX_IS_VALID(index)   ((index).data != 0)
+#define NANOCLR_INDEX_IS_INVALID(index) ((index).data == 0)
 
 //
 // IMPORTANT: THE ASSEMBLY IDX IN ALL THE CLR_RT_*_Index STRUCTURES SHOULD ALWAYS BE ENCODED THE SAME WAY!!!
@@ -607,170 +607,170 @@ static const int MAXTYPENAMELEN = 256; // Including terminating null byte. Enfor
 
 struct CLR_RT_Assembly_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm)
     {
-        m_data = indexAssm << 24;
+        data = indexAssm << 24;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 };
 
 struct CLR_RT_TypeSpec_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexType)
     {
-        m_data = indexAssm << 24 | indexType;
+        data = indexAssm << 24 | indexType;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX TypeSpec() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
 struct CLR_RT_TypeDef_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexType)
     {
-        m_data = indexAssm << 24 | indexType;
+        data = indexAssm << 24 | indexType;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX Type() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
 struct CLR_RT_MethodSpec_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 24 | indexMethod;
+        data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX Method() const
     {
-        return (m_data & 0x7FFF);
+        return (data & 0x7FFF);
     }
 };
 
 struct CLR_RT_FieldDef_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexField)
     {
-        m_data = indexAssm << 24 | indexField;
+        data = indexAssm << 24 | indexField;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX Field() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
 struct CLR_RT_MethodDef_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexMethod)
     {
-        m_data = indexAssm << 24 | indexMethod;
+        data = indexAssm << 24 | indexMethod;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_INDEX Method() const
     {
-        return (CLR_INDEX)(m_data);
+        return (CLR_INDEX)(data);
     }
 };
 
@@ -805,30 +805,30 @@ struct CLR_RT_MethodRef_Index
 
 struct CLR_RT_GenericParam_Index
 {
-    CLR_UINT32 m_data;
+    CLR_UINT32 data;
 
     //--//
 
     void Clear()
     {
-        m_data = 0;
+        data = 0;
     }
 
     void Set(CLR_UINT32 indexAssm, CLR_UINT32 indexGenericParam)
     {
-        m_data = indexAssm << 24 | indexGenericParam;
+        data = indexAssm << 24 | indexGenericParam;
     }
 
     //--//
 
     CLR_INDEX Assembly() const
     {
-        return (CLR_INDEX)(m_data >> 24);
+        return (CLR_INDEX)(data >> 24);
     }
 
     CLR_UINT8 GenericParam() const
     {
-        return (CLR_UINT8)(m_data);
+        return (CLR_UINT8)(data);
     }
 };
 
@@ -1323,7 +1323,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     // this flag should be set when the m_header was malloc'ed
     static const CLR_UINT32 FreeOnDestroy = 0x00000100;
 
-    CLR_UINT32 m_index; // Relative to the type system (for static fields access).
+    // Relative to the type system (for static fields access).
+    CLR_UINT32 assemblyIndex;
     CLR_UINT32 m_flags;
 
     const CLR_RECORD_ASSEMBLY *m_header; // ANY HEAP - DO RELOCATION -
@@ -2097,7 +2098,7 @@ extern CLR_RT_TypeSystem g_CLR_RT_TypeSystem;
 
 struct CLR_RT_Assembly_Instance : public CLR_RT_Assembly_Index
 {
-    CLR_RT_Assembly *m_assm;
+    CLR_RT_Assembly *assembly;
 
     //--//
 
@@ -2107,10 +2108,10 @@ struct CLR_RT_Assembly_Instance : public CLR_RT_Assembly_Index
 
 struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_TYPESPEC *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_TYPESPEC *target;
 
-    CLR_INDEX TypeDefIndex;
+    CLR_INDEX typeDefIndex;
 
     //--//
 
@@ -2124,11 +2125,11 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
 
 struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_TYPEDEF *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_TYPEDEF *target;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
-    const char *Name;
+    const char *name;
 #endif
 
     //--//
@@ -2147,7 +2148,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     CLR_RT_TypeDef_CrossReference &CrossReference() const
     {
-        return m_assm->m_pCrossReference_TypeDef[Type()];
+        return assembly->m_pCrossReference_TypeDef[Type()];
     }
 
     bool SwitchToParent();
@@ -2160,13 +2161,13 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
 struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_FIELDDEF *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_FIELDDEF *target;
 
     const CLR_RT_TypeSpec_Index *genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
-    const char *Name;
+    const char *name;
 #endif
 
     //--//
@@ -2180,7 +2181,7 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
 
     CLR_RT_FieldDef_CrossReference &CrossReference() const
     {
-        return m_assm->m_pCrossReference_FieldDef[Field()];
+        return assembly->m_pCrossReference_FieldDef[Field()];
     }
 };
 
@@ -2188,13 +2189,13 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
 
 struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_METHODDEF *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_METHODDEF *target;
 
     const CLR_RT_TypeSpec_Index *genericType;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
-    const char *Name;
+    const char *name;
 #endif
 
     //--//
@@ -2208,7 +2209,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 
     CLR_RT_MethodDef_CrossReference &CrossReference() const
     {
-        return m_assm->m_pCrossReference_MethodDef[Method()];
+        return assembly->m_pCrossReference_MethodDef[Method()];
     }
     CLR_UINT32 Hits() const
     {
@@ -2218,18 +2219,18 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo &DebuggingInfo() const
     {
-        return m_assm->m_pDebuggingInfo_MethodDef[Method()];
+        return assembly->m_pDebuggingInfo_MethodDef[Method()];
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_GENERICPARAM *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_GENERICPARAM *target;
 
 #if defined(NANOCLR_INSTANCE_NAMES)
-    const char *Name;
+    const char *name;
 #endif
 
     //--//
@@ -2244,14 +2245,14 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     CLR_RT_GenericParam_CrossReference &CrossReference() const
     {
-        return m_assm->m_pCrossReference_GenericParam[GenericParam()];
+        return assembly->m_pCrossReference_GenericParam[GenericParam()];
     }
 };
 
 struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 {
-    CLR_RT_Assembly *m_assm;
-    const CLR_RECORD_METHODSPEC *m_target;
+    CLR_RT_Assembly *assembly;
+    const CLR_RECORD_METHODSPEC *target;
 
     //--//
 
@@ -2261,7 +2262,7 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     CLR_RT_MethodSpec_CrossReference &CrossReference() const
     {
-        return m_assm->m_pCrossReference_MethodSpec[Method()];
+        return assembly->m_pCrossReference_MethodSpec[Method()];
     }
 
     CLR_INDEX Container();
@@ -2359,9 +2360,9 @@ struct CLR_RT_TypeDescriptor
 
     NanoCLRDataType GetDataType() const
     {
-        if (m_handlerCls.m_data != 0)
+        if (m_handlerCls.data != 0)
         {
-            return (NanoCLRDataType)m_handlerCls.m_target->DataType;
+            return (NanoCLRDataType)m_handlerCls.target->dataType;
         }
         else
         {

@@ -228,7 +228,7 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch( CLR_RT_Applicatio
 
     args = stackTop->m_arguments;
 
-    if((stackTop->m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+    if((stackTop->m_call.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
     {
         ++args;
     }

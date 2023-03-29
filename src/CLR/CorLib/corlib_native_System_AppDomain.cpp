@@ -273,7 +273,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
             {
                 CLR_RT_HeapBlock *hbObj;
                 CLR_RT_Assembly_Index index;
-                index.Set(pASSM->m_index);
+                index.Set(pASSM->assemblyIndex);
 
                 NANOCLR_CHECK_HRESULT(
                     g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*pArray, g_CLR_RT_WellKnownTypes.m_Assembly));

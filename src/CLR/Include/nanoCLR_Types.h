@@ -997,10 +997,10 @@ struct CLR_Debug
 
 struct CLR_RECORD_VERSION
 {
-    CLR_UINT16 iMajorVersion;
-    CLR_UINT16 iMinorVersion;
-    CLR_UINT16 iBuildNumber;
-    CLR_UINT16 iRevisionNumber;
+    CLR_UINT16 majorVersion;
+    CLR_UINT16 minorVersion;
+    CLR_UINT16 buildNumber;
+    CLR_UINT16 revisionNumber;
 };
 
 struct CLR_RECORD_ASSEMBLY
@@ -1090,15 +1090,15 @@ struct CLR_RECORD_TYPEREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING NameSpace;
+    CLR_STRING nameSpace;
 
     /// @brief TypeRefOrAssemblyRef -> Index into TBL_AssemblyRef (ORed with 0x0000) | TBL_TypeRef (ORed with 0x8000)
     ///
-    CLR_INDEX Scope;
+    CLR_INDEX scope;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_TYPEREF) == sizeOf_CLR_RECORD_TYPEREF)
@@ -1107,14 +1107,14 @@ struct CLR_RECORD_FIELDREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing this field
     CLR_EncodedTypeRefOrSpec encodedOwner;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 
     /// @brief Index into owner table
     ///
@@ -1139,7 +1139,7 @@ struct CLR_RECORD_METHODREF
 {
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Encoded index into TBL_TypeRef or TBL_TypeSpec for the type containing the method
     ///
@@ -1147,7 +1147,7 @@ struct CLR_RECORD_METHODREF
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 
     //--//
 
@@ -1229,11 +1229,11 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief Index into TBL_Strings with the name of the type
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Index into TBL_Strings  with the name of the namespace containing the type
     ///
-    CLR_STRING NameSpace;
+    CLR_STRING nameSpace;
 
     /// @brief Encoded index for TypeDefOrRef -> Index into  TBL_TypeDef | TBL_TypeRef
     ///
@@ -1245,66 +1245,66 @@ struct CLR_RECORD_TYPEDEF
 
     /// @brief Index into TBL_Signatures blob table for the set of interfaces implemented by this type
     ///
-    CLR_SIG Interfaces;
+    CLR_SIG interfaces;
 
     /// @brief Index into TBL_MethodDef for the first method of the type
     ///
-    CLR_INDEX FirstMethod;
+    CLR_INDEX firstMethod;
 
     /// @brief Count of virtual methods in the type
     ///
-    CLR_UINT8 VirtualMethodCount;
+    CLR_UINT8 virtualMethodCount;
 
     /// @brief Count of instance methods in the type
     ///
-    CLR_UINT8 InstanceMethodCount;
+    CLR_UINT8 instanceMethodCount;
 
     /// @brief Count of static methods in the type
     ///
-    CLR_UINT8 StaticMethodCount;
+    CLR_UINT8 staticMethodCount;
 
     /// @brief Data type identity for the type
     ///
-    CLR_UINT8 DataType;
+    CLR_UINT8 dataType;
 
     /// @brief Index into  TBL_FieldDef for the first static field of the type
     ///
-    CLR_INDEX FirstStaticField;
+    CLR_INDEX firstStaticField;
 
     /// @brief Index into  TBL_FieldDef for the first instance field of the type
     ///
-    CLR_INDEX FirstInstanceField;
+    CLR_INDEX firstInstanceField;
 
     /// @brief Count of static fields in the type
     ///
-    CLR_UINT8 StaticFieldsCount;
+    CLR_UINT8 staticFieldsCount;
 
     /// @brief Count of instance fields in the type
     ///
-    CLR_UINT8 InstanceFieldsCount;
+    CLR_UINT8 instanceFieldsCount;
 
     /// @brief Index into TBL_GenericParam for the first generic parameter for the type
     ///
-    CLR_INDEX FirstGenericParam;
+    CLR_INDEX firstGenericParam;
 
     /// @brief Count of generic parameters for the type
     ///
-    CLR_UINT8 GenericParamCount;
+    CLR_UINT8 genericParamCount;
 
     /// @brief Flags defining intrinsic attributes and access modifiers for the type
     ///
-    CLR_UINT16 Flags;
+    CLR_UINT16 flags;
 
     //--//
 
     bool IsEnum() const
     {
-        return (Flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
+        return (flags & (TD_Semantics_Mask)) == TD_Semantics_Enum;
     }
 
     bool IsDelegate() const
     {
-        return (Flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
+        return (flags & (TD_Delegate | TD_MulticastDelegate)) != 0;
     }
 
     bool HasValidExtendsType() const
@@ -1379,17 +1379,17 @@ struct CLR_RECORD_FIELDDEF
 
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG DefaultValue;
+    CLR_SIG defaultValue;
 
-    CLR_UINT16 Flags;
+    CLR_UINT16 flags;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_FIELDDEF) == sizeOf_CLR_RECORD_FIELDDEF)
@@ -1491,47 +1491,47 @@ struct CLR_RECORD_METHODDEF
 
     /// @brief Index into TBL_Strings for the name of the method
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 
     /// @brief Offset into the IL byte code blob table for the opcodes of the method
     ///
-    CLR_OFFSET RVA;
+    CLR_OFFSET rva;
 
     /// @brief Flags to indicate intrinsic attributes and semantics of the method
     ///
-    CLR_UINT32 Flags;
+    CLR_UINT32 flags;
 
     /// @brief DataType of the return value for the method
     ///
-    CLR_UINT8 RetVal;
+    CLR_UINT8 retValDataType;
 
     /// @brief Count of arguments to the method
     ///
-    CLR_UINT8 ArgumentsCount;
+    CLR_UINT8 argumentsCount;
 
     /// @brief Count of local variables for the method
     ///
-    CLR_UINT8 LocalsCount;
+    CLR_UINT8 localsCount;
 
     /// @brief Length of the evaluation stack for the method
     ///
-    CLR_UINT8 LengthEvalStack;
+    CLR_UINT8 lengthEvalStack;
 
     /// @brief Index into TBL_Signatures to describe the locals for the method
     ///
-    CLR_SIG Locals;
+    CLR_SIG locals;
 
     /// @brief Index into TBL_GenericParam for the first generic parameter for the method
     ///
-    CLR_INDEX FirstGenericParam;
+    CLR_INDEX firstGenericParam;
 
     /// @brief Count of generic parameters for the method
     ///
-    CLR_UINT8 GenericParamCount;
+    CLR_UINT8 genericParamCount;
 
     /// @brief Index into TBL_Signatures that describes the method itself
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_METHODDEF) == sizeOf_CLR_RECORD_METHODDEF)
@@ -1546,7 +1546,7 @@ struct CLR_RECORD_ATTRIBUTE
 {
     /// @brief one of TBL_TypeDef, TBL_MethodDef, or TBL_FieldDef.
     ///
-    CLR_UINT16 OwnerType;
+    CLR_UINT16 ownerType;
 
     /// @brief TBL_TypeDef | TBL_MethodDef | TBL_FielfDef
     ///
@@ -1559,7 +1559,7 @@ struct CLR_RECORD_ATTRIBUTE
 
     CLR_UINT16 Key() const
     {
-        return *(CLR_UINT16 *)&OwnerType;
+        return *(CLR_UINT16 *)&ownerType;
     }
 };
 
@@ -1571,7 +1571,7 @@ struct CLR_RECORD_TYPESPEC
 {
     /// @brief Index into TBL_Signatures
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_TYPESPEC) == sizeOf_CLR_RECORD_TYPESPEC)
@@ -1580,23 +1580,23 @@ struct CLR_RECORD_GENERICPARAM
 {
     /// @brief 2-byte index of the generic parameter, numbered left -to-right, from zero.
     ///
-    CLR_UINT16 Number;
+    CLR_UINT16 number;
 
     /// @brief 2-byte bitmask of type GenericParamAttributes
     ///
-    CLR_UINT16 Flags;
+    CLR_UINT16 flags;
 
     /// @brief TypeOrMethodDef -> Index into TBL_TypeDef TBL_MethodDef
     ///
-    CLR_TYPEORMETHODDEF Owner;
+    CLR_TYPEORMETHODDEF owner;
 
     /// @brief Index into TBL_Signatures for parameter type signature
     ///
-    CLR_SIG Sig;
+    CLR_SIG signature;
 
     /// @brief Index into TBL_Strings
     ///
-    CLR_STRING Name;
+    CLR_STRING name;
 };
 
 CT_ASSERT(sizeof(CLR_RECORD_GENERICPARAM) == sizeOf_CLR_RECORD_GENERICPARAM)
@@ -1609,11 +1609,11 @@ struct CLR_RECORD_METHODSPEC
 
     /// @brief Index into TBL_Signatures holding the signature of this instantiation
     ///
-    CLR_SIG Instantiation;
+    CLR_SIG instantiation;
 
     /// @brief Index into TBL_Signatures for the type specification containing the method
     ///
-    CLR_INDEX Container;
+    CLR_INDEX container;
 
     /// @brief Index into table pointed by  TBL_MethodDef | TBL_MethodRef
     ///

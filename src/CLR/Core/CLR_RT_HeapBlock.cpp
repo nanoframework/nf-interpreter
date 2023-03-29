@@ -287,7 +287,7 @@ HRESULT CLR_RT_HeapBlock::SetReflection(const CLR_RT_MethodDef_Index &md)
 
     m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_REFLECTION, 0, 1);
     m_data.reflection.m_kind =
-        (inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
+        (inst.target->flags & CLR_RECORD_METHODDEF::MD_Constructor) ? REFLECTION_CONSTRUCTOR : REFLECTION_METHOD;
     m_data.reflection.m_levels = 0;
     m_data.reflection.m_data.m_method = md;
 
@@ -481,7 +481,7 @@ HRESULT CLR_RT_HeapBlock::LoadFromReference(CLR_RT_HeapBlock &ref)
                     NANOCLR_SET_AND_LEAVE(CLR_E_TYPE_UNAVAILABLE);
                 }
 
-                if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+                if (inst.target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
                 {
                     obj = &objT[1];
                 }
@@ -839,7 +839,7 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
     }
 
     {
-        NanoCLRDataType dataType = (NanoCLRDataType)cls.m_target->DataType;
+        NanoCLRDataType dataType = (NanoCLRDataType)cls.target->dataType;
         const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dataType];
 
         if (dtl.m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType)
@@ -926,12 +926,12 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
     // Validates the type of data kept by object corresponds to type in cls.
     // If typedef indexes are the same, then skip and go to assigment of objects.
-    if (src->ObjectCls().m_data != cls.m_data)
+    if (src->ObjectCls().data != cls.data)
     {
         // The typedef indexes are different, but src and cls may have identical basic data type.
         // Need to check it. If identical - the unboxing is allowed.
         // This "if" compares underlying type in object and cls. Should be equal in order to continue.
-        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.m_target->DataType)))
+        if (!(src->DataSize() > 1 && (src[1].DataType() == cls.target->dataType)))
         {
             // No luck. The types in src object and specified by cls are different. Need to throw exceptioin.
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
@@ -946,14 +946,14 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
 
         CLR_RT_TypeDef_Instance &inst = srcTypeDes.m_handlerCls;
 
-        if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Guid.m_data)
+        if (inst.data == g_CLR_RT_WellKnownTypes.m_Guid.data)
         {
             // can't cast GUID class to anything else except another GUID
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_CAST);
         }
     }
 
-    if (cls.m_target->DataType == DATATYPE_VALUETYPE)
+    if (cls.target->dataType == DATATYPE_VALUETYPE)
     {
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.CloneObject(*this, *this));
 
@@ -963,7 +963,7 @@ HRESULT CLR_RT_HeapBlock::PerformUnboxing(const CLR_RT_TypeDef_Instance &cls)
     {
         this->Assign(src[1]);
 
-        this->ChangeDataType(cls.m_target->DataType);
+        this->ChangeDataType(cls.target->dataType);
     }
 
     NANOCLR_NOCLEANUP();
@@ -988,7 +988,7 @@ CLR_RT_HeapBlock *CLR_RT_HeapBlock::FixBoxingReference()
             if (!inst.InitializeFromIndex(src->ObjectCls()))
                 return NULL;
 
-            if (inst.m_target->DataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
+            if (inst.target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
             {
                 return &src[1];
             }
@@ -1149,7 +1149,7 @@ CLR_UINT32 CLR_RT_HeapBlock::GetHashCode(CLR_RT_HeapBlock *ptr, bool fRecurse, C
             // DATATYPE_I8
             // DATATYPE_U8
             // DATATYPE_R8
-            if (fRecurse && cls.m_target->DataType <= DATATYPE_R8)
+            if (fRecurse && cls.target->dataType <= DATATYPE_R8)
             {
                 // pass the 1st field which is the one holding the actual value
                 crc = GetHashCode(&ptr[CLR_RT_HeapBlock::HB_Object_Fields_Offset], false, crc);
@@ -1261,7 +1261,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
         switch (leftDataType)
         {
             case DATATYPE_VALUETYPE:
-                if (pArgLeft.ObjectCls().m_data == pArgRight.ObjectCls().m_data)
+                if (pArgLeft.ObjectCls().data == pArgRight.ObjectCls().data)
                 {
                     const CLR_RT_HeapBlock *objLeft = &pArgLeft;
                     const CLR_RT_HeapBlock *objRight = &pArgRight;
@@ -1375,7 +1375,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
                 {
                 }
 
-                if (inst.m_target->DataType != DATATYPE_VALUETYPE)
+                if (inst.target->dataType != DATATYPE_VALUETYPE)
                 {
                     // boxed primitive or enum type
                     obj = &rightObj[1];
@@ -1612,8 +1612,8 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             {
                 CLR_RT_HeapBlock_Delegate *leftDlg = (CLR_RT_HeapBlock_Delegate *)&left;
                 CLR_RT_HeapBlock_Delegate *rightDlg = (CLR_RT_HeapBlock_Delegate *)&right;
-                CLR_UINT32 leftData = leftDlg->DelegateFtn().m_data;
-                CLR_UINT32 rightData = rightDlg->DelegateFtn().m_data;
+                CLR_UINT32 leftData = leftDlg->DelegateFtn().data;
+                CLR_UINT32 rightData = rightDlg->DelegateFtn().data;
 
                 if (leftData > rightData)
                     return 1;

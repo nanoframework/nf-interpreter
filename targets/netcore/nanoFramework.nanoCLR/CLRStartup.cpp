@@ -513,10 +513,10 @@ struct Settings
                     printf(
                         "Missing assembly: %s (%d.%d.%d.%d)\n",
                         szName,
-                        src->version.iMajorVersion,
-                        src->version.iMinorVersion,
-                        src->version.iBuildNumber,
-                        src->version.iRevisionNumber);
+                        src->version.majorVersion,
+                        src->version.minorVersion,
+                        src->version.buildNumber,
+                        src->version.revisionNumber);
 
                     fError = true;
                 }

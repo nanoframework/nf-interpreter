@@ -229,8 +229,8 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     Payload::Key key;
     CLR_UINT32 index;
     CLR_UINT32 indexHead;
-    CLR_UINT32 clsData = cls.m_data;
-    CLR_UINT32 mdVirtualData = mdVirtual.m_data;
+    CLR_UINT32 clsData = cls.data;
+    CLR_UINT32 mdVirtualData = mdVirtual.data;
 
 #if defined(VIRTUAL_DEVICE)
     bool fVerify = false;
@@ -245,9 +245,9 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         //
         // Shortcut for terminal virtual methods.
         //
-        if (clsData == instCLS.m_data)
+        if (clsData == instCLS.data)
         {
-            if ((instMD.m_target->Flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
+            if ((instMD.target->flags & CLR_RECORD_METHODDEF::MD_Abstract) == 0)
             {
                 md = mdVirtual;
 
@@ -269,9 +269,9 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
             {
                 CLR_Debug::Printf(
                     "INTERNAL ERROR: Shortcut for terminal virtual methods failed: CLS:%08x:%08x => %08x\r\n",
-                    cls.m_data,
-                    mdVirtual.m_data,
-                    md.m_data);
+                    cls.data,
+                    mdVirtual.data,
+                    md.data);
                 ::DebugBreak();
             }
 #endif
@@ -287,14 +287,14 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
     {
         CLR_Debug::Printf(
             "INTERNAL ERROR: Shortcut for terminal virtual methods failed: CLS:%08x:%08x\r\n",
-            cls.m_data,
-            mdVirtual.m_data);
+            cls.data,
+            mdVirtual.data);
         ::DebugBreak();
     }
 #endif
 
-    key.m_mdVirtual.m_data = mdVirtualData;
-    key.m_cls.m_data = clsData;
+    key.m_mdVirtual.data = mdVirtualData;
+    key.m_cls.data = clsData;
 
     indexHead =
         (SUPPORT_ComputeCRC(&key, sizeof(key), 0) % (LinkArraySize() - PayloadArraySize())) + PayloadArraySize();
@@ -305,9 +305,9 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         {
             Payload &res = m_payloads[index];
 
-            if (res.m_key.m_mdVirtual.m_data != mdVirtualData)
+            if (res.m_key.m_mdVirtual.data != mdVirtualData)
                 continue;
-            if (res.m_key.m_cls.m_data != clsData)
+            if (res.m_key.m_cls.data != clsData)
                 continue;
 
             md = res.m_md;

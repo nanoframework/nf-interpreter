@@ -602,7 +602,7 @@ HRESULT CLR_RT_ExecutionEngine::Execute(wchar_t *entryPointArgs, int maxContextS
     {
         CLR_RT_StackFrame *stack = thMain->CurrentFrame();
 
-        if (stack->m_call.m_target->ArgumentsCount > 0)
+        if (stack->m_call.target->argumentsCount > 0)
         {
             // Main entrypoint takes an optional String[] parameter.
             // Set the arg to NULL, if that's the case.
@@ -888,7 +888,7 @@ bool CLR_RT_ExecutionEngine::SpawnStaticConstructorHelper(
     _ASSERTE(m_cctorThread != NULL);
     _ASSERTE(m_cctorThread->CanThreadBeReused());
 
-    indexNext.m_data = index.m_data;
+    indexNext.data = index.data;
 
     _ASSERTE(assembly != NULL);
 
@@ -938,9 +938,9 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
 
         // This is ok if index is no longer valid.  SpawnStaticConstructorHelper will call FindNextStaticConstructor
         // which will fail
-        index.m_data++;
+        index.data++;
 
-        if (SpawnStaticConstructorHelper(inst.m_assm, index))
+        if (SpawnStaticConstructorHelper(inst.assembly, index))
             return;
     }
 
@@ -951,7 +951,7 @@ void CLR_RT_ExecutionEngine::SpawnStaticConstructor(CLR_RT_Thread *&pCctorThread
         if ((pASSM->m_flags & CLR_RT_Assembly::StaticConstructorsExecuted) == 0)
         {
             CLR_RT_MethodDef_Index index;
-            index.Set(pASSM->m_index, 0);
+            index.Set(pASSM->assemblyIndex, 0);
             bool fDepedenciesRun = true;
 
             // Check that all dependent assemblies have had static constructors run.
@@ -1438,7 +1438,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocksForArray(
     const CLR_RT_ReflectionDef_Index &reflex)
 {
     NATIVE_PROFILE_CLR_CORE();
-    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[dt];
 
     CLR_UINT32 totLength = (CLR_UINT32)(sizeof(CLR_RT_HeapBlock_Array) + length * dtl.m_sizeInBytes);
@@ -1712,7 +1712,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_FieldDef_Instance inst;
 
-    if (inst.InitializeFromIndex(fd) && inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.InitializeFromIndex(fd) && inst.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
 #if defined(NANOCLR_APPDOMAINS)
         {
@@ -1725,7 +1725,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::AccessStaticField(const CLR_RT_FieldDe
             }
         }
 #else
-        return &inst.m_assm->m_pStaticFields[inst.CrossReference().m_offset];
+        return &inst.assembly->m_pStaticFields[inst.CrossReference().m_offset];
 #endif
     }
 
@@ -1761,9 +1761,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeReference(CLR_RT_HeapBlock &ref, CLR_R
             CLR_RT_TypeDef_Instance inst;
             inst.InitializeFromIndex(res.Class);
 
-            if ((inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
+            if ((inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) == CLR_RECORD_TYPEDEF::TD_Semantics_Enum)
             {
-                dt = (NanoCLRDataType)inst.m_target->DataType;
+                dt = (NanoCLRDataType)inst.target->dataType;
             }
             else
             {
@@ -1816,10 +1816,10 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
 
     NANOCLR_HEADER();
 
-    CLR_RT_Assembly *assembly = methodDefInstance.m_assm;
-    const CLR_RECORD_METHODDEF *methodDef = methodDefInstance.m_target;
-    CLR_PMETADATA sig = assembly->GetSignature(methodDef->Locals);
-    CLR_UINT32 count = methodDef->LocalsCount;
+    CLR_RT_Assembly *assembly = methodDefInstance.assembly;
+    const CLR_RECORD_METHODDEF *methodDef = methodDefInstance.target;
+    CLR_PMETADATA sig = assembly->GetSignature(methodDef->locals);
+    CLR_UINT32 count = methodDef->localsCount;
     bool fZeroed = false;
 
     while (count)
@@ -1859,7 +1859,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                             break;
 
                         case TBL_TypeDef:
-                            cls.Set(assembly->m_index, index);
+                            cls.Set(assembly->assemblyIndex, index);
                             break;
 
                         default:
@@ -1884,7 +1884,7 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 {
                     CLR_INT8 genericParamPosition = *sig++;
 
-                    methodDefInstance.m_assm
+                    methodDefInstance.assembly
                         ->FindGenericParamAtTypeSpec(methodDefInstance, genericParamPosition, cls, dt);
 
                     goto done;
@@ -1941,9 +1941,9 @@ HRESULT CLR_RT_ExecutionEngine::InitializeLocals(
                 CLR_RT_TypeDef_Instance inst;
                 inst.InitializeFromIndex(cls);
 
-                if (inst.m_target->DataType != DATATYPE_VALUETYPE)
+                if (inst.target->dataType != DATATYPE_VALUETYPE)
                 {
-                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.m_target->DataType, CLR_RT_HeapBlock::HB_Alive, 1));
+                    locals->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(inst.target->dataType, CLR_RT_HeapBlock::HB_Alive, 1));
                     locals->ClearData();
                 }
                 else
@@ -2019,12 +2019,12 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
 
     reference.SetObjectReference(NULL);
 
-    NanoCLRDataType dt = (NanoCLRDataType)inst.m_target->DataType;
+    NanoCLRDataType dt = (NanoCLRDataType)inst.target->dataType;
 
     //
     // You cannot create an array this way.
     //
-    if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data)
+    if (inst.data == g_CLR_RT_WellKnownTypes.m_Array.data)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
     }
@@ -2061,7 +2061,7 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
             case DATATYPE_CLASS:
             case DATATYPE_VALUETYPE:
             {
-                int clsFields = inst.m_target->InstanceFieldsCount;
+                int clsFields = inst.target->instanceFieldsCount;
                 int totFields = inst.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
                 CLR_RT_HeapBlock *obj = ExtractHeapBlocksForClassOrValueTypes(dt, 0, inst, totFields);
                 CHECK_ALLOCATION(obj);
@@ -2089,14 +2089,14 @@ HRESULT CLR_RT_ExecutionEngine::NewObject(CLR_RT_HeapBlock &reference, const CLR
                             if (instSub.SwitchToParent() == false)
                                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
 
-                            clsFields = instSub.m_target->InstanceFieldsCount;
+                            clsFields = instSub.target->instanceFieldsCount;
                             target = NULL;
                         }
 
                         if (target == NULL)
                         {
-                            assm = instSub.m_assm;
-                            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
+                            assm = instSub.assembly;
+                            target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
                         }
 
                         obj--;
@@ -2176,7 +2176,7 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
 
     reference.SetObjectReference(NULL);
 
-    int clsFields = instance.m_target->InstanceFieldsCount;
+    int clsFields = instance.target->instanceFieldsCount;
     int totFields = instance.CrossReference().m_totalFields + CLR_RT_HeapBlock::HB_Object_Fields_Offset;
 
     CLR_RT_HeapBlock_GenericInstance *genericInst;
@@ -2203,14 +2203,14 @@ HRESULT CLR_RT_ExecutionEngine::NewGenericInstanceObject(
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
 
-            clsFields = instSub.m_target->InstanceFieldsCount;
+            clsFields = instSub.target->instanceFieldsCount;
             target = NULL;
         }
 
         if (target == NULL)
         {
-            assm = instSub.m_assm;
-            target = assm->GetFieldDef(instSub.m_target->FirstInstanceField + clsFields);
+            assm = instSub.assembly;
+            target = assm->GetFieldDef(instSub.target->firstInstanceField + clsFields);
         }
 
         genericInst--;
@@ -2295,7 +2295,7 @@ HRESULT CLR_RT_ExecutionEngine::CopyValueType(CLR_RT_HeapBlock *destination, con
     if (destination != source)
     {
         const CLR_RT_TypeDef_Index &cls = source->ObjectCls();
-        if (cls.m_data == destination->ObjectCls().m_data)
+        if (cls.data == destination->ObjectCls().data)
         {
             CLR_RT_TypeDef_Instance inst;
             inst.InitializeFromIndex(cls);
@@ -2360,7 +2360,7 @@ HRESULT CLR_RT_ExecutionEngine::FindFieldDef(
 
     do
     {
-        if (local.m_assm->FindFieldDef(local.m_target, szText, NULL, 0, res))
+        if (local.assembly->FindFieldDef(local.target, szText, NULL, 0, res))
             NANOCLR_SET_AND_LEAVE(S_OK);
     } while (local.SwitchToParent());
 
@@ -2411,7 +2411,7 @@ HRESULT CLR_RT_ExecutionEngine::FindField(CLR_RT_HeapBlock &reference, const cha
 
     inst.InitializeFromIndex(index);
 
-    if (inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_Static)
+    if (inst.target->flags & CLR_RECORD_FIELDDEF::FD_Static)
     {
         res = CLR_RT_ExecutionEngine::AccessStaticField(index);
         if (res == NULL)
@@ -2980,23 +2980,23 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
             //
             // Casting from <type>[] to System.Array or System.Object is always allowed.
             //
-            if (inst.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_Object.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_IList.m_data ||
-                inst.m_data == g_CLR_RT_WellKnownTypes.m_ICloneable.m_data)
+            if (inst.data == g_CLR_RT_WellKnownTypes.m_Array.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.m_Object.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.m_IList.data ||
+                inst.data == g_CLR_RT_WellKnownTypes.m_ICloneable.data)
             {
                 return true;
             }
         }
 
-        if (inst.m_target->DataType != instTarget.m_target->DataType)
+        if (inst.target->dataType != instTarget.target->dataType)
         {
             return false;
         }
     }
 
-    CLR_UINT32 semantic = (inst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
-    CLR_UINT32 semanticTarget = (instTarget.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semantic = (inst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
+    CLR_UINT32 semanticTarget = (instTarget.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask);
 
     if (fArray)
     {
@@ -3008,7 +3008,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
 
     do
     {
-        if (inst.m_data == instTarget.m_data)
+        if (inst.data == instTarget.data)
         {
             return true;
         }
@@ -3016,10 +3016,10 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         // Scan the list of interfaces.
         //
-        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.m_target->Interfaces != CLR_EmptyIndex)
+        if (semanticTarget == CLR_RECORD_TYPEDEF::TD_Semantics_Interface && inst.target->interfaces != CLR_EmptyIndex)
         {
             CLR_RT_SignatureParser parser;
-            parser.Initialize_Interfaces(inst.m_assm, inst.m_target);
+            parser.Initialize_Interfaces(inst.assembly, inst.target);
             CLR_RT_SignatureParser::Element res;
 
             while (parser.Available() > 0)
@@ -3027,7 +3027,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
                 if (FAILED(parser.Advance(res)))
                     break;
 
-                if (res.Class.m_data == instTarget.m_data)
+                if (res.Class.data == instTarget.data)
                 {
                     return true;
                 }
@@ -3086,7 +3086,7 @@ bool CLR_RT_ExecutionEngine::IsInstanceOf(
         //
         // Shortcut for identity.
         //
-        if (desc.m_handlerCls.m_data == clsTarget.m_data)
+        if (desc.m_handlerCls.data == clsTarget.data)
             return true;
 
         if (FAILED(descTarget.InitializeFromType(clsTarget)))
@@ -3679,7 +3679,7 @@ void CLR_RT_ExecutionEngine::Breakpoint_StackFrame_Hard(CLR_RT_StackFrame *stack
                 if (def.m_pid == stack->m_owningThread->m_pid ||
                     def.m_pid == CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_PID_ANY)
                 {
-                    if (def.m_md.m_data == stack->m_call.m_data && def.m_IP == IPoffset)
+                    if (def.m_md.data == stack->m_call.data && def.m_IP == IPoffset)
                     {
                         CLR_DBG_Commands::Debugging_Execution_BreakpointDef hit = def;
 

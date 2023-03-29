@@ -424,7 +424,7 @@ bool CLR_RT_Thread::FindEhBlock(
     bool onlyFinallys)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_Assembly *assm = stack->m_call.m_assm;
+    CLR_RT_Assembly *assm = stack->m_call.assembly;
     CLR_RT_ExceptionHandler *ptrEhExt = NULL;
     const CLR_RECORD_EH *ptrEh = NULL;
     CLR_UINT32 numEh = 0;
@@ -449,7 +449,7 @@ bool CLR_RT_Thread::FindEhBlock(
     }
 #endif
 
-    if (stack->m_call.m_target->Flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
+    if (stack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
     {
         switch (stack->m_flags & CLR_RT_StackFrame::c_MethodKind_Mask)
         {
@@ -933,7 +933,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
     dlg = ptr->DereferenceDelegate();
     FAULT_ON_NULL(dlg);
 
-    md = stack->m_call.m_target;
+    md = stack->m_call.target;
 
     switch (dlg->DataType())
     {
@@ -978,13 +978,13 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
         CLR_RT_ProtectFromGC gc(*dlg);
         CLR_RT_MethodDef_Instance inst;
         inst.InitializeFromIndex(dlg->DelegateFtn());
-        bool fStaticMethod = (inst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
+        bool fStaticMethod = (inst.target->flags & CLR_RECORD_METHODDEF::MD_Static) != 0;
 
         NANOCLR_CHECK_HRESULT(stack->MakeCall(
             inst,
             fStaticMethod ? NULL : &dlg->m_object,
             &stack->m_arguments[1],
-            md->ArgumentsCount - 1));
+            md->argumentsCount - 1));
     }
 
     NANOCLR_NOCLEANUP();
@@ -998,7 +998,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
     CLR_RT_StackFrame *stack = &stackArg;
 
     CLR_RT_Thread *th = stack->m_owningThread;
-    CLR_RT_Assembly *assm = stack->m_call.m_assm;
+    CLR_RT_Assembly *assm = stack->m_call.assembly;
     CLR_RT_HeapBlock *evalPos;
     CLR_PMETADATA ip;
     bool fCondition;
@@ -2108,10 +2108,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     bool fAppDomainTransition = false;
 #endif
 
-                    pThis = &evalPos[1 - calleeInst.m_target->ArgumentsCount]; // Point to the first arg, 'this' if an
+                    pThis = &evalPos[1 - calleeInst.target->argumentsCount]; // Point to the first arg, 'this' if an
                                                                                // instance method
 
-                    if (calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
+                    if (calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
                     {
                         CLR_RT_HeapBlock_Delegate *dlg = pThis->DereferenceDelegate();
                         FAULT_ON_NULL(dlg);
@@ -2120,7 +2120,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             calleeInst.InitializeFromIndex(dlg->DelegateFtn());
 
-                            if ((calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                            if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                             {
                                 pThis->Assign(dlg->m_object);
 
@@ -2133,7 +2133,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 memmove(
                                     &pThis[0],
                                     &pThis[1],
-                                    calleeInst.m_target->ArgumentsCount * sizeof(CLR_RT_HeapBlock));
+                                    calleeInst.target->argumentsCount * sizeof(CLR_RT_HeapBlock));
 
                                 evalPos--;
                             }
@@ -2149,7 +2149,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         CLR_RT_MethodDef_Index calleeReal;
 
-                        if ((calleeInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             // Instance method, pThis[ 0 ] is valid
 
@@ -2168,7 +2168,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 // instance method isn't virtual we don't need to do the more expensive virtual method
                                 // lookup.
                                 if (op == CEE_CALLVIRT &&
-                                    (calleeInst.m_target->Flags &
+                                    (calleeInst.target->flags &
                                      (CLR_RECORD_METHODDEF::MD_Abstract | CLR_RECORD_METHODDEF::MD_Virtual)))
                                 {
                                     if (g_CLR_RT_EventCache.FindVirtualMethod(cls, calleeInst, calleeReal) == false)
@@ -2224,7 +2224,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         stack->PopInline();
 
                         ip = stack->m_IP;
-                        assm = stack->m_call.m_assm;
+                        assm = stack->m_call.assembly;
                         evalPos = stack->m_evalStackPos - 1;
                         fDirty = true;
 
@@ -2288,7 +2288,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
 
                     // Check this is an object of the requested type.
-                    if (type.m_data != cls.m_data)
+                    if (type.data != cls.data)
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     }
@@ -2347,13 +2347,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     WRITEBACK(stack, evalPos, ip, fDirty);
 
-                    if (cls.m_target->IsDelegate())
+                    if (cls.target->IsDelegate())
                     {
                         //
                         // Special case for delegates. LDFTN or LDVIRTFTN have already created the delegate object, just
                         // check that...
                         //
-                        changes = -calleeInst.m_target->ArgumentsCount;
+                        changes = -calleeInst.target->argumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2383,7 +2383,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                         }
 
-                        if ((dlgInst.m_target->Flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
+                        if ((dlgInst.target->flags & CLR_RECORD_METHODDEF::MD_Static) == 0)
                         {
                             dlg->m_object.Assign(top[0]);
                         }
@@ -2392,7 +2392,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
                     else
                     {
-                        changes = calleeInst.m_target->ArgumentsCount;
+                        changes = calleeInst.target->argumentsCount;
                         NANOCLR_CHECK_HRESULT(CLR_Checks::VerifyStackOK(
                             *stack,
                             stack->m_evalStackPos,
@@ -2440,7 +2440,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         //
                         // See CLR_RT_StackFrame::Pop()
                         //
-                        if ((cls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        if ((cls.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                             CLR_RECORD_TYPEDEF::TD_Semantics_ValueType)
                         {
                             if (top[0].DataType() == DATATYPE_OBJECT)
@@ -2457,7 +2457,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                                 //
                                 top = stack->m_evalStackPos++;
 
-                                changes = calleeInst.m_target->ArgumentsCount;
+                                changes = calleeInst.target->argumentsCount;
                                 while (--changes > 0)
                                 {
                                     top[0].Assign(top[-1]);
@@ -2767,9 +2767,9 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     UPDATESTACK(stack, evalPos);
 
-                    if (((typeInst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                    if (((typeInst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_ValueType) ||
-                        ((typeInst.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
+                        ((typeInst.target->flags & CLR_RECORD_TYPEDEF::TD_Semantics_Mask) ==
                          CLR_RECORD_TYPEDEF::TD_Semantics_Enum))
                     {
                         //"unbox"
@@ -2919,7 +2919,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(evalPos[0], cls));
 
                     // Check this is an object of the requested type.
-                    if (type.m_data != cls.m_data)
+                    if (type.data != cls.data)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     UPDATESTACK(stack, evalPos);
@@ -3375,7 +3375,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                     CLR_INT32 len;
 
-                    if (clsInst.m_target->DataType)
+                    if (clsInst.target->dataType)
                     {
                         len = sizeof(CLR_RT_HeapBlock);
                     }
@@ -3615,7 +3615,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         {
             stack->m_flags |= CLR_RT_StackFrame::c_ExecutingIL;
 
-            assm = stack->m_call.m_assm;
+            assm = stack->m_call.assembly;
 
             READCACHE(stack, evalPos, ip, fDirty);
             continue;

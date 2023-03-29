@@ -145,7 +145,7 @@ HRESULT CLR_RT_HeapBlock_Delegate_List::Change( CLR_RT_HeapBlock& reference, CLR
                 CLR_RT_HeapBlock_Delegate* ptr = newDlgs->DereferenceDelegate();
                 if(ptr)
                 {
-                    if( ptr->DelegateFtn().m_data   == dlg->DelegateFtn().m_data   &&
+                    if( ptr->DelegateFtn().data   == dlg->DelegateFtn().data   &&
                         ptr->m_object.Dereference() == dlg->m_object.Dereference()  )
                     {
                         break;

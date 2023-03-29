@@ -16,10 +16,10 @@ HRESULT Library_corlib_native_System_Type::get_DeclaringType___SystemType(CLR_RT
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if (td.m_target->HasValidEnclosingType())
+    if (td.target->HasValidEnclosingType())
     {
         CLR_RT_HeapBlock *hbObj;
-        td.Set(td.Assembly(), td.m_target->EnclosingType());
+        td.Set(td.Assembly(), td.target->EnclosingType());
 
         NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.m_TypeStatic));
         hbObj = top.Dereference();
@@ -252,7 +252,7 @@ HRESULT Library_corlib_native_System_Type::get_IsArray___BOOLEAN(CLR_RT_StackFra
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    stack.SetResult_Boolean(td.m_data == g_CLR_RT_WellKnownTypes.m_Array.m_data);
+    stack.SetResult_Boolean(td.data == g_CLR_RT_WellKnownTypes.m_Array.data);
 
     NANOCLR_NOCLEANUP();
 }
@@ -287,10 +287,10 @@ HRESULT Library_corlib_native_System_Type::GetTypeInternal___STATIC__SystemType_
         FAULT_ON_NULL(verArray);
         ver = (CLR_INT32 *)verArray->GetFirstElement();
 
-        version.iMajorVersion = ver[0];
-        version.iMinorVersion = ver[1];
-        version.iBuildNumber = ver[2];
-        version.iRevisionNumber = ver[3];
+        version.majorVersion = ver[0];
+        version.minorVersion = ver[1];
+        version.buildNumber = ver[2];
+        version.revisionNumber = ver[3];
     }
     else
     {
@@ -371,7 +371,7 @@ HRESULT Library_corlib_native_System_Type::CheckFlags(CLR_RT_StackFrame &stack, 
 
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_RuntimeType::GetTypeDescriptor(*hbType, td));
 
-    if ((td.m_target->Flags & mask) == flag)
+    if ((td.target->flags & mask) == flag)
     {
         fRes = true;
     }
@@ -422,23 +422,23 @@ HRESULT Library_corlib_native_System_Type::GetFields(
 
             do
             {
-                CLR_RT_Assembly *assm = td.m_assm;
-                const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-                const CLR_RECORD_FIELDDEF *fd = td.m_assm->GetFieldDef(tdR->FirstStaticField);
-                int iTot = tdR->InstanceFieldsCount + tdR->StaticFieldsCount;
+                CLR_RT_Assembly *assm = td.assembly;
+                const CLR_RECORD_TYPEDEF *tdR = td.target;
+                const CLR_RECORD_FIELDDEF *fd = td.assembly->GetFieldDef(tdR->firstStaticField);
+                int iTot = tdR->instanceFieldsCount + tdR->staticFieldsCount;
                 int i;
                 CLR_RT_FieldDef_Index index;
 
                 for (i = 0; i < iTot; i++, fd++)
                 {
-                    const char *fieldName = assm->GetString(fd->Name);
+                    const char *fieldName = assm->GetString(fd->name);
 
-                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
+                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_NoReflection)
                     {
                         continue;
                     }
 
-                    if (fd->Flags & CLR_RECORD_FIELDDEF::FD_Static)
+                    if (fd->flags & CLR_RECORD_FIELDDEF::FD_Static)
                     {
                         if ((bindingFlags & c_BindingFlags_Static) == 0)
                             continue;
@@ -449,7 +449,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    if ((fd->Flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
+                    if ((fd->flags & CLR_RECORD_FIELDDEF::FD_Scope_Mask) == CLR_RECORD_FIELDDEF::FD_Scope_Public)
                     {
                         if ((bindingFlags & c_BindingFlags_Public) == 0)
                             continue;
@@ -475,7 +475,7 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                             continue;
                     }
 
-                    index.Set(td.Assembly(), i + tdR->FirstStaticField);
+                    index.Set(td.Assembly(), i + tdR->firstStaticField);
 
                     if (!fAllMatches)
                     {
@@ -559,10 +559,10 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
         do
         {
-            CLR_RT_Assembly *assm = td.m_assm;
-            const CLR_RECORD_TYPEDEF *tdR = td.m_target;
-            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->FirstMethod);
-            int iTot = tdR->StaticMethodCount + tdR->InstanceMethodCount + tdR->VirtualMethodCount;
+            CLR_RT_Assembly *assm = td.assembly;
+            const CLR_RECORD_TYPEDEF *tdR = td.target;
+            const CLR_RECORD_METHODDEF *md = assm->GetMethodDef(tdR->firstMethod);
+            int iTot = tdR->staticMethodCount + tdR->instanceMethodCount + tdR->virtualMethodCount;
             int i;
 
             if (staticInstanceOnly)
@@ -583,7 +583,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
             for (i = 0; i < iTot; i++, md++)
             {
-                if (md->Flags & CLR_RECORD_METHODDEF::MD_Static)
+                if (md->flags & CLR_RECORD_METHODDEF::MD_Static)
                 {
                     if ((bindingFlags & c_BindingFlags_Static) == 0)
                     {
@@ -598,7 +598,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                     }
                 }
 
-                if ((md->Flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
+                if ((md->flags & CLR_RECORD_METHODDEF::MD_Scope_Mask) == CLR_RECORD_METHODDEF::MD_Scope_Public)
                 {
                     if ((bindingFlags & c_BindingFlags_Public) == 0)
                     {
@@ -615,7 +615,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                 //--//
 
-                if (md->Flags & CLR_RECORD_METHODDEF::MD_Constructor)
+                if (md->flags & CLR_RECORD_METHODDEF::MD_Constructor)
                 {
                     if ((bindingFlags & c_BindingFlags_CreateInstance) == 0)
                     {
@@ -629,7 +629,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         continue;
                     }
 
-                    if (szText != NULL && !strcmp(assm->GetString(md->Name), szText) == false)
+                    if (szText != NULL && !strcmp(assm->GetString(md->name), szText) == false)
                     {
                         continue;
                     }
@@ -655,7 +655,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                 }
 
                 CLR_RT_MethodDef_Index index;
-                index.Set(td.Assembly(), i + tdR->FirstMethod);
+                index.Set(td.Assembly(), i + tdR->firstMethod);
                 CLR_RT_MethodDef_Instance inst2;
                 inst2.InitializeFromIndex(index);
 
@@ -672,7 +672,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                         // store token for type
                         hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
-                            index.m_data;
+                            index.data;
                     }
 
                     iMethod++;
@@ -766,7 +766,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
 
                     // store token for type
                     hbObj[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4 =
-                        inst.m_data;
+                        inst.data;
                 }
             }
 

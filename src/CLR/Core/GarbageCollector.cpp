@@ -723,17 +723,17 @@ void CLR_RT_GarbageCollector::Thread_Mark(CLR_RT_Thread *th)
         {
             CheckMultipleBlocks(
                 stack->m_inlineFrame->m_frame.m_args,
-                stack->m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount);
+                stack->m_inlineFrame->m_frame.m_call.target->argumentsCount);
             CheckMultipleBlocks(
                 stack->m_inlineFrame->m_frame.m_locals,
-                stack->m_inlineFrame->m_frame.m_call.m_target->LocalsCount);
+                stack->m_inlineFrame->m_frame.m_call.target->localsCount);
             CheckMultipleBlocks(
                 stack->m_inlineFrame->m_frame.m_evalStack,
                 (int)(stack->m_inlineFrame->m_frame.m_evalPos - stack->m_inlineFrame->m_frame.m_evalStack));
         }
 #endif
-        CheckMultipleBlocks(stack->m_arguments, stack->m_call.m_target->ArgumentsCount);
-        CheckMultipleBlocks(stack->m_locals, stack->m_call.m_target->LocalsCount);
+        CheckMultipleBlocks(stack->m_arguments, stack->m_call.target->argumentsCount);
+        CheckMultipleBlocks(stack->m_locals, stack->m_call.target->localsCount);
         CheckMultipleBlocks(stack->m_evalStack, stack->TopValuePosition());
     }
     NANOCLR_FOREACH_NODE_END();

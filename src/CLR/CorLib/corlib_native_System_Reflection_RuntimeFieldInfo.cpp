@@ -14,7 +14,7 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::get_Name___STR
 
     CLR_RT_FieldDef_Instance fd; if(GetFieldDescriptor( stack, *hbField, fd ) == false) NANOCLR_SET_AND_LEAVE(CLR_E_NULL_REFERENCE);
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), fd.m_target->Name, fd.m_assm ));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance( stack.PushValue(), fd.target->name, fd.assembly ));
 
     NANOCLR_NOCLEANUP();
 }
@@ -83,8 +83,8 @@ HRESULT Library_corlib_native_System_Reflection_RuntimeFieldInfo::GetValue___OBJ
                     
     NANOCLR_CHECK_HRESULT(Library_corlib_native_System_Reflection_FieldInfo::Initialize( stack, instFD, instTD, obj ));
 
-    fd = instFD.m_target;
-    if(fd->Flags & CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
+    fd = instFD.target;
+    if(fd->flags & CLR_RECORD_FIELDDEF::FD_NoReflection) // don't allow reflection for fields with NoReflection attribute
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
     }

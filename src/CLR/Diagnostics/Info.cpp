@@ -445,13 +445,13 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 #define LOOKUP_ELEMENT_REF(index, tblName, tblNameUC, tblName2)                                                        \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
     const CLR_RT_##tblName2##_Index *s = &m_pCrossReference_##tblName[index].Target;                                   \
-    if (s->m_data == 0)                                                                                                \
+    if (s->data == 0)                                                                                                \
     s = NULL
 
 #define LOOKUP_ELEMENT_IDX(index, tblName, tblNameUC)                                                                  \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(index);                                                             \
     CLR_RT_##tblName##_Index s;                                                                                        \
-    s.Set(m_index, index)
+    s.Set(assemblyIndex, index)
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
@@ -479,7 +479,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
             }
             else
             {
-                CLR_Debug::Printf("%s.%s", GetString(p->NameSpace), GetString(p->Name));
+                CLR_Debug::Printf("%s.%s", GetString(p->nameSpace), GetString(p->name));
             }
             break;
         }
@@ -492,7 +492,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
             }
             else
             {
-                CLR_Debug::Printf("%s", GetString(p->Name));
+                CLR_Debug::Printf("%s", GetString(p->name));
             }
             break;
         }

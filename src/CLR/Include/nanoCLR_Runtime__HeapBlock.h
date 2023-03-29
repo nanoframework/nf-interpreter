@@ -1165,7 +1165,7 @@ struct CLR_RT_HeapBlock
     void SetGenericType(const CLR_RT_TypeSpec_Index& genericType)
     {
         m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_GENERICINST, 0, 1);
-        m_data.genericInstance.genericType.m_data = genericType.m_data;
+        m_data.genericInstance.genericType.data = genericType.data;
     }
 
     const CLR_RT_TypeSpec_Index& ObjectGenericType() const

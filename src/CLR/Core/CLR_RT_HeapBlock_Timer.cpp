@@ -113,7 +113,7 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer(CLR_RT_Thread *th)
         CLR_RT_StackFrame *stack = th->FirstFrame();
         if (stack->Next() != NULL)
         {
-            int ArgumentsCount = stack->m_call.m_target->ArgumentsCount;
+            int ArgumentsCount = stack->m_call.target->argumentsCount;
             if (ArgumentsCount > 0)
             {
                 stack->m_arguments[ArgumentsCount - 1].Assign(*state);

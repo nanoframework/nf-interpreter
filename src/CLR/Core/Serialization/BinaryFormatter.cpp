@@ -94,7 +94,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
 
 #endif
 
-        if ((m_type->m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Serializable) == 0)
+        if ((m_type->m_handlerCls.target->flags & CLR_RECORD_TYPEDEF::TD_Serializable) == 0)
         {
 #if defined(NANOCLR_APPDOMAINS)
 
@@ -162,7 +162,7 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
                     td = m_typeExpected;
                 }
 
-                if (td->m_handlerCls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_Sealed)
+                if (td->m_handlerCls.target->flags & CLR_RECORD_TYPEDEF::TD_Sealed)
                 {
                     res &= ~c_Signature_Type;
                     break;
@@ -198,7 +198,7 @@ bool CLR_RT_BinaryFormatter::TypeHandler::CompareTypes(CLR_RT_TypeDescriptor *le
 NanoCLRDataType CLR_RT_BinaryFormatter::TypeHandler::GetDataType(CLR_RT_TypeDescriptor *type)
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    return (NanoCLRDataType)type->m_handlerCls.m_target->DataType;
+    return (NanoCLRDataType)type->m_handlerCls.target->dataType;
 }
 
 CLR_UINT32 CLR_RT_BinaryFormatter::TypeHandler::GetSizeOfType(CLR_RT_TypeDescriptor *type)
@@ -861,7 +861,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
 
-    if (m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
+    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_DateTime.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_DateTime::GetValuePtr(*value);
         FAULT_ON_NULL(pVal);
@@ -870,7 +870,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
         bits = 64;
         fSigned = false;
     }
-    else if (m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
+    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_TimeSpan.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_TimeSpan::GetValuePtr(*value);
         FAULT_ON_NULL(pVal);
@@ -1010,7 +1010,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
     CLR_UINT32 bits;
     bool fSigned;
 
-    if (m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_DateTime.m_data)
+    if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_DateTime.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_DateTime::GetValuePtr(*m_value);
         FAULT_ON_NULL(pVal);
@@ -1019,7 +1019,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
         bits = 64;
         fSigned = false;
     }
-    else if (m_type->m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_TimeSpan.m_data)
+    else if (m_type->m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_TimeSpan.data)
     {
         CLR_INT64 *pVal = Library_corlib_native_System_TimeSpan::GetValuePtr(*m_value);
         FAULT_ON_NULL(pVal);
@@ -1206,7 +1206,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
 
     NANOCLR_CLEAR(hints);
 
-    if (cls.m_target->Flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
+    if (cls.target->flags & CLR_RECORD_TYPEDEF::TD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
@@ -1243,7 +1243,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
 
     NANOCLR_CLEAR(hints);
 
-    if (fld.m_target->Flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
+    if (fld.target->flags & CLR_RECORD_FIELDDEF::FD_HasAttributes)
     {
         CLR_RT_TypeDef_Instance inst;
         inst.InitializeFromIndex(g_CLR_RT_WellKnownTypes.m_SerializationHintsAttribute);
@@ -1661,9 +1661,9 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 
     while (NANOCLR_INDEX_IS_VALID(m_fields_CurrentClass))
     {
-        if (m_fields_CurrentField < m_fields_CurrentClass.m_target->InstanceFieldsCount)
+        if (m_fields_CurrentField < m_fields_CurrentClass.target->instanceFieldsCount)
         {
-            int offset = m_fields_CurrentClass.m_target->FirstInstanceField + m_fields_CurrentField++;
+            int offset = m_fields_CurrentClass.target->firstInstanceField + m_fields_CurrentField++;
             CLR_RT_FieldDef_Index index;
             index.Set(m_fields_CurrentClass.Assembly(), offset);
             CLR_RT_FieldDef_Instance inst;
@@ -1671,7 +1671,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextField()
 
             m_fields_Pointer = m_value.m_value->Dereference() + inst.CrossReference().m_offset;
 
-            if ((inst.m_target->Flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
+            if ((inst.target->flags & CLR_RECORD_FIELDDEF::FD_NotSerialized) == 0)
             {
                 SerializationHintsAttribute hints;
                 CLR_RT_TypeDescriptor desc;

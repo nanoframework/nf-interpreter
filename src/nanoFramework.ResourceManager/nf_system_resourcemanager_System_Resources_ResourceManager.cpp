@@ -45,7 +45,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
 
     if (resource != NULL) // otherwise NULL is returned
     {
-        pAssm = assm.m_assm;
+        pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);
 
         switch (resource->kind)
@@ -139,7 +139,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
 
     if (resource != NULL) // otherwise NULL is returned
     {
-        pAssm = assm.m_assm;
+        pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);
 
         switch (resource->kind)

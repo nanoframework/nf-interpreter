@@ -15,7 +15,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::get_Name___STRING(CL
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.m_target->Name, md.m_assm));
+    NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(stack.PushValue(), md.target->name, md.assembly));
 
     NANOCLR_NOCLEANUP();
 }
@@ -114,7 +114,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    mdR = md.m_target;
+    mdR = md.target;
 
     if (stack.m_customState == 0)
     {
@@ -130,11 +130,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     }
     else
     {
-        if (mdR->RetVal != DATATYPE_VOID)
+        if (mdR->retValDataType != DATATYPE_VOID)
         {
-            if (mdR->RetVal < DATATYPE_I4)
+            if (mdR->retValDataType < DATATYPE_I4)
             {
-                stack.TopValue().ChangeDataType(mdR->RetVal);
+                stack.TopValue().ChangeDataType(mdR->retValDataType);
             }
 
             NANOCLR_CHECK_HRESULT(stack.TopValue().PerformBoxingIfNeeded());
@@ -175,7 +175,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::CheckFlags(
 
     NANOCLR_CHECK_HRESULT(GetMethodDescriptor(stack, *hbMeth, md));
 
-    if ((md.m_target->Flags & mask) == flag)
+    if ((md.target->flags & mask) == flag)
     {
         fRes = true;
     }
@@ -208,11 +208,11 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
 
     CLR_RT_HeapBlock *hbMethodInfo = stack.Arg0().Dereference();
 
-    idx.m_data = hbMethodInfo[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4;
+    idx.data = hbMethodInfo[Library_corlib_native_System_Reflection_MethodBase::FIELD___token].NumericByRef().u4;
     inst.InitializeFromIndex(idx);
 
     // 1st pass: get the number of parameters
-    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+    sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
     sigParser.Advance(paramElement);
@@ -233,7 +233,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::GetParametersNative_
     paramInfoElement = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
     // 2nd pass: get the actual type of each parameter
-    sigParser.Initialize_MethodSignature(inst.m_assm, inst.m_target);
+    sigParser.Initialize_MethodSignature(inst.assembly, inst.target);
 
     // discard return value
     sigParser.Advance(paramElement);

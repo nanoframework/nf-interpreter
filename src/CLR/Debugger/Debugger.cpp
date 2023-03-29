@@ -1427,10 +1427,10 @@ static void GetClrReleaseInfo(CLR_DBG_Commands::Debugging_Execution_QueryCLRCapa
         const CLR_RECORD_VERSION *mscorlibVer = &(g_CLR_RT_TypeSystem.m_assemblyMscorlib->m_header->version);
         NFVersion::Init(
             clrInfo.m_TargetFrameworkVersion,
-            mscorlibVer->iMajorVersion,
-            mscorlibVer->iMinorVersion,
-            mscorlibVer->iBuildNumber,
-            mscorlibVer->iRevisionNumber);
+            mscorlibVer->majorVersion,
+            mscorlibVer->minorVersion,
+            mscorlibVer->buildNumber,
+            mscorlibVer->revisionNumber);
     }
     else
     {
@@ -1491,10 +1491,10 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t 
 
             NFVersion::Init(
                 interopNativeAssemblies[index].Version,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.iMajorVersion,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.iMinorVersion,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.iBuildNumber,
-                g_CLR_InteropAssembliesNativeData[i]->m_Version.iRevisionNumber);
+                g_CLR_InteropAssembliesNativeData[i]->m_Version.majorVersion,
+                g_CLR_InteropAssembliesNativeData[i]->m_Version.minorVersion,
+                g_CLR_InteropAssembliesNativeData[i]->m_Version.buildNumber,
+                g_CLR_InteropAssembliesNativeData[i]->m_Version.revisionNumber);
 
             index++;
         }
@@ -2017,7 +2017,7 @@ CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_INDEX indexAssm)
     NATIVE_PROFILE_CLR_DEBUGGER();
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        if (pASSM->m_index == indexAssm)
+        if (pASSM->assemblyIndex == indexAssm)
             return pASSM;
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
@@ -2121,8 +2121,8 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
 
     {
         CLR_RT_StackFrame *stack = th->CurrentFrame();
-        const CLR_RECORD_METHODDEF *target = stack->m_call.m_target;
-        CLR_UINT8 numArgs = target->ArgumentsCount;
+        const CLR_RECORD_METHODDEF *target = stack->m_call.target;
+        CLR_UINT8 numArgs = target->argumentsCount;
 
         if (numArgs)
         {
@@ -2477,8 +2477,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_inlineFrame->m_frame.m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_inlineFrame->m_frame.m_IP - call->m_inlineFrame->m_frame.m_IPStart);
-            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.m_target->ArgumentsCount;
-            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.m_target->LocalsCount;
+            cmdReply.m_numOfArguments = call->m_inlineFrame->m_frame.m_call.target->argumentsCount;
+            cmdReply.m_numOfLocals = call->m_inlineFrame->m_frame.m_call.target->localsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)(call->m_evalStack - call->m_inlineFrame->m_frame.m_evalStack);
         }
         else
@@ -2486,8 +2486,8 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
         {
             cmdReply.m_md = call->m_call;
             cmdReply.m_IP = (CLR_UINT32)(call->m_IP - call->m_IPstart);
-            cmdReply.m_numOfArguments = call->m_call.m_target->ArgumentsCount;
-            cmdReply.m_numOfLocals = call->m_call.m_target->LocalsCount;
+            cmdReply.m_numOfArguments = call->m_call.target->argumentsCount;
+            cmdReply.m_numOfLocals = call->m_call.target->localsCount;
             cmdReply.m_depthOfEvalStack = (CLR_UINT32)call->TopValuePosition();
         }
 
@@ -2543,7 +2543,7 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     if (FAILED(desc.InitializeFromObject(*blk)))
         return false;
 
-    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.m_target->DataType];
+    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.target->dataType];
 
     return (dtl.m_flags & c_MaskForPrimitive) == c_MaskForPrimitive;
 }
@@ -2683,7 +2683,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Argument:
 #ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_args : call->m_arguments;
-                num = isInline ? md.m_target->ArgumentsCount : md.m_target->ArgumentsCount;
+                num = isInline ? md.target->argumentsCount : md.target->argumentsCount;
 #else
                 array = call->m_arguments;
                 num = call->m_call.m_target->ArgumentsCount;
@@ -2693,7 +2693,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             case CLR_DBG_Commands::Debugging_Value_GetStack::c_Local:
 #ifndef NANOCLR_NO_IL_INLINE
                 array = isInline ? call->m_inlineFrame->m_frame.m_locals : call->m_locals;
-                num = isInline ? md.m_target->LocalsCount : md.m_target->LocalsCount;
+                num = isInline ? md.target->localsCount : md.target->localsCount;
 #else
                 array = call->m_locals;
                 num = call->m_call.m_target->LocalsCount;
@@ -2754,7 +2754,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
             else
             {
-                parser.Initialize_MethodLocals(md.m_assm, md.m_target);
+                parser.Initialize_MethodLocals(md.assembly, md.target);
             }
 
             do
@@ -2766,14 +2766,14 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             if (res.DataType == DATATYPE_VAR)
             {
                 // Generic parameter in a generic TypeDef
-                md.m_assm->FindGenericParamAtTypeSpec(md, res.GenericParamPosition, targetClass, targetDataType);
+                md.assembly->FindGenericParamAtTypeSpec(md, res.GenericParamPosition, targetClass, targetDataType);
 
                 // isGenericInstance = true;
             }
             else if (res.DataType == DATATYPE_MVAR)
             {
                 // Generic parameter in a generic method definition
-                CLR_RT_Assembly *assembly = md.m_assm;
+                CLR_RT_Assembly *assembly = md.assembly;
 
                 CLR_RT_GenericParam_Index gpIndex;
                 assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
@@ -2820,7 +2820,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 desc.InitializeFromType(targetClass);
 
                 // Check for enum
-                if (desc.m_handlerCls.m_target->IsEnum())
+                if (desc.m_handlerCls.target->IsEnum())
                 {
                     td = desc.m_handlerCls;
                     pTD = &td;
@@ -2863,7 +2863,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 
         while (true)
         {
-            CLR_UINT32 iFields = td.m_target->InstanceFieldsCount;
+            CLR_UINT32 iFields = td.target->instanceFieldsCount;
             CLR_UINT32 totalFields = td.CrossReference().m_totalFields;
             CLR_UINT32 dFields = totalFields - iFields;
 
@@ -2879,7 +2879,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
             }
         }
 
-        cmd->m_fd.Set(td.Assembly(), td.m_target->FirstInstanceField + offset);
+        cmd->m_fd.Set(td.Assembly(), td.target->firstInstanceField + offset);
     }
 
     if (!g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
@@ -2934,7 +2934,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     {
         if (SUCCEEDED(desc.InitializeFromFieldDefinition(inst)))
         {
-            if (desc.m_handlerCls.m_target->IsEnum())
+            if (desc.m_handlerCls.target->IsEnum())
             {
                 pTD = &desc.m_handlerCls;
             }
@@ -2984,7 +2984,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         {
             if (td.InitializeFromIndex(array->ReflectionDataConst().m_data.m_type))
             {
-                if (td.m_target->IsEnum())
+                if (td.target->IsEnum())
                 {
                     pTD = &td;
                 }
@@ -3277,7 +3277,7 @@ static HRESULT AnalyzeObject_Helper(CLR_RT_HeapBlock *ptr, AnalyzeObject &ao)
                     case CLR_RT_DataTypeLookup::c_ValueType:
                     case CLR_RT_DataTypeLookup::c_Enum:
                         ao.m_fCanBeNull =
-                            ao.m_fBoxed || (ao.m_desc.m_handlerCls.m_data == g_CLR_RT_WellKnownTypes.m_String.m_data);
+                            ao.m_fBoxed || (ao.m_desc.m_handlerCls.data == g_CLR_RT_WellKnownTypes.m_String.data);
                         break;
 
                     default:
@@ -3383,7 +3383,7 @@ bool CLR_DBG_Debugger::Debugging_TypeSys_Assemblies(WP_Message *msg)
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        assemblies[num++].Set(pASSM->m_index);
+        assemblies[num++].Set(pASSM->assemblyIndex);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 
@@ -3664,7 +3664,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 
             cmdReply->m_td = instOwner;
 
-            CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.m_assm->GetString(inst.m_target->Name));
+            CLR_SafeSprintf(szBuffer, iBuffer, "%s", inst.assembly->GetString(inst.target->name));
 
             WP_ReplyToCommand(msg, true, false, cmdReply, sizeof(CLR_DBG_Commands::Debugging_Resolve_Method::Reply));
 
@@ -3753,7 +3753,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
 
         CLR_RT_Memory::ZeroFill(cmdReply, totLength);
 
-        cmdReply->EntryPoint = g_CLR_RT_TypeSystem.m_entryPoint.m_data;
+        cmdReply->EntryPoint = g_CLR_RT_TypeSystem.m_entryPoint.data;
         cmdReply->StorageStart = deploySectorStart;
         cmdReply->StorageLength = deployLength;
 
@@ -3783,7 +3783,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Method(const CLR_RT_MethodDef_Index
         return false;
     }
 
-    if (inst.m_target->RVA == CLR_EmptyIndex)
+    if (inst.target->rva == CLR_EmptyIndex)
     {
         return false;
     }
@@ -3804,12 +3804,12 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC_Type(const CLR_RT_TypeDef_Index &id
     if (!CheckTypeDef(idx, inst))
         return false;
 
-    td = inst.m_target;
-    totMethods = td->VirtualMethodCount + td->InstanceMethodCount + td->StaticFieldsCount;
+    td = inst.target;
+    totMethods = td->virtualMethodCount + td->instanceMethodCount + td->staticFieldsCount;
 
     for (int i = 0; i < totMethods; i++)
     {
-        md.Set(idx.Assembly(), td->FirstMethod + i);
+        md.Set(idx.Assembly(), td->firstMethod + i);
 
         Debugging_Info_SetJMC_Method(md, fJMC);
     }
