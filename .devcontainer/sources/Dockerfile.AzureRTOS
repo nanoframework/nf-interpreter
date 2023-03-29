@@ -7,7 +7,7 @@ RUN apt-get update \
     unzip \
     wget 
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-arm-none-eabi.tar.xz
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
     && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
@@ -53,7 +53,7 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
-    && git svn clone https://svn.osdn.net/svnroot/chibios/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
+    && git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch v6.2.0_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
     && git clone --branch v6.2.0_rel --recursive https://github.com/azure-rtos/netxduo.git --depth 1 ./sources/NextDuo
 # Clone mbedtls and fatfs

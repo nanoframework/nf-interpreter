@@ -25,8 +25,8 @@ void CLR_RT_Memory::Reset()
     ::HeapLocation(s_CLR_RT_Heap.m_location, s_CLR_RT_Heap.m_size);
 
     // adjust GC thresholds
-    g_CLR_RT_GarbageCollector.c_memoryThreshold = s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_RATIO;
-    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_UPPER_RATIO;
+    g_CLR_RT_GarbageCollector.c_memoryThreshold = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_RATIO);
+    g_CLR_RT_GarbageCollector.c_memoryThreshold2 = (CLR_UINT32)(s_CLR_RT_Heap.m_size * HEAP_SIZE_THRESHOLD_UPPER_RATIO);
 
 #if defined(NANOCLR_TRACE_MALLOC)
     s_TotalAllocated = 0;

@@ -45,7 +45,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.3
+      ref: refs/tags/v4.4.4
       
 jobs:
 
@@ -105,7 +105,7 @@ jobs:
       git config --global user.email "nfbot"
       git config --global user.name "nanoframework@outlook.com"
 
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
       
       if($env:StartReleaseCandidate -like "true")
       {
@@ -246,7 +246,7 @@ jobs:
 
       # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
       # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
 
       cd "$env:Agent_TempDirectory" > $null
 
@@ -357,17 +357,20 @@ jobs:
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: false
+        CMakePreset: ST_STM32F429I_DISCOVERY
+
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: true
+        CMakePreset: ST_STM32F769I_DISCOVERY
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     GccArm_Version: ''
     TargetPlatform: 'stm32'
@@ -414,6 +417,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
+        CMakePreset: ESP32_PSRAM_REV0
+
       ESP32_BLE_REV0:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -421,6 +426,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_BLE_REV0
+        CMakePreset: ESP32_BLE_REV0
+
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
@@ -428,6 +435,8 @@ jobs:
          IDF_Target: esp32
          TargetName: ESP_WROVER_KIT
          PackageName: ESP_WROVER_KIT
+         CMakePreset: ESP_WROVER_KIT
+
       ESP32_LILYGO:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -435,6 +444,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32_LILYGO
         PackageName: ESP32_LILYGO
+        CMakePreset: ESP32_LILYGO
+
       FEATHER_S2:
         TargetBoard: ESP32_S2
         TargetSeries: 'esp32_s2'
@@ -442,19 +453,21 @@ jobs:
         IDF_Target: esp32s2
         TargetName: FEATHER_S2
         PackageName: FEATHER_S2
+        CMakePreset: FEATHER_S2
 
-      ESP32_C3_REV2:
+      ESP32_C3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
         BuildOptions: 
         IDF_Target: esp32c3
-        TargetName: ESP32_C3_REV2
-        PackageName: ESP32_C3_REV2
+        TargetName: ESP32_C3
+        PackageName: ESP32_C3
+        CMakePreset: ESP32_C3
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_8_1_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -465,6 +478,8 @@ jobs:
     fetchDepth: 1
 
   - template: azure-pipelines-templates/build-preparations.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/nb-gitversioning.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
@@ -520,11 +535,12 @@ jobs:
         BuildOptions: 
         GccArm_Version: 
         NeedsSRECORD: true
+        CMakePreset: NXP_MIMXRT1060_EVK
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('NXP_1_8_1_versioncounter', 0)]
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
 
@@ -590,11 +606,12 @@ jobs:
         BuildOptions: >-
           -DRADIO_FREQUENCY=915
         GccArm_Version:
+        CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('TI_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
 
@@ -637,6 +654,7 @@ jobs:
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
+        CMakePreset: ST_B_L475E_IOT01A
 
       # ORGPAL_PALTHREE:
       #   TargetBoard: ORGPAL_PALTHREE
@@ -645,10 +663,20 @@ jobs:
       #   GccArm_Version: 
       #   NeedsDFU: true
       #   NeedsSRECORD: false
+      #   CMakePreset: ORGPAL_PALTHREE
+
+      SL_STK3701A:
+        TargetBoard: SL_STK3701A
+        TargetSeries: 'efm32gg11'
+        BuildOptions:
+        GccArm_Version: 
+        NeedsDFU: false
+        NeedsSRECORD: false
+        CMakePreset: SL_STK3701A
 
   variables:
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('AZURERTOS_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('AZURERTOS_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'azure_rtos'
 
@@ -688,7 +716,7 @@ jobs:
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_8_0__versioncounter', 400)]
+    REVISION: $[counter('WIN32_1_8_1_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
@@ -1149,7 +1177,7 @@ jobs:
 
         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
         # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
     condition: >-

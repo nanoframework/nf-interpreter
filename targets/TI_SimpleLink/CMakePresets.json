@@ -1,0 +1,7 @@
+{
+    "version": 4,
+    "include": [
+        "TI_CC1352R1_LAUNCHXL/CMakePresets.json",
+        "TI_CC3220SF_LAUNCHXL/CMakePresets.json"
+    ]
+}

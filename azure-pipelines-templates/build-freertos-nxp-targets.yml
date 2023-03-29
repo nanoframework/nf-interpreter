@@ -14,12 +14,12 @@ steps:
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--preset $(TargetBoard) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)'
+      cmakeArgs: '--preset $(CMakePreset) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) -DTOOL_SRECORD_PREFIX=$(SRECORD_PATH)/srecord/ $(BuildOptions)'
       workingDirectory:  ${{ parameters.repoDirectory }}
     displayName: Setup build with CMake
 
   - task: CMake@1
     inputs:
-      cmakeArgs: '--build --preset $(TargetBoard) --target all --config MinSizeRel'
+      cmakeArgs: '--build --preset $(CMakePreset) --target all --config MinSizeRel'
       workingDirectory:  ${{ parameters.repoDirectory }}
     displayName: Build with CMake

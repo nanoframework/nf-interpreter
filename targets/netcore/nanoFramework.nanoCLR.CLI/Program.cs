@@ -5,14 +5,16 @@
 
 using CommandLine;
 using CommandLine.Text;
-using nanoFramework.nanoCLR.Host;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories | DllImportSearchPath.UseDllDirectoryForDependencies)]
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -90,8 +92,8 @@ namespace nanoFramework.nanoCLR.CLI
                 VirtualSerialDeviceManager virtualSerialBridgeManager = new();
                 virtualSerialBridgeManager.Initialize();
 
-                nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
-                hostBuilder.UseConsoleDebugPrint();
+                // need to set DLL directory to HHD interop DLL
+                SetDllDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Vendor"));
 
                 var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrInstanceOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
@@ -101,12 +103,10 @@ namespace nanoFramework.nanoCLR.CLI
                         (ExecuteCommandLineOptions opts) =>
                             ExecuteCommandProcessor.ProcessVerb(
                                 opts,
-                                hostBuilder,
                                 virtualSerialBridgeManager),
                         (ClrInstanceOperationsOptions opts) =>
                             ClrInstanceOperationsProcessor.ProcessVerb(
-                                opts,
-                                hostBuilder),
+                                opts),
                         (VirtualSerialDeviceCommandLineOptions opts) =>
                             VirtualSerialDeviceCommandProcessor.ProcessVerb(
                                 opts,
@@ -210,5 +210,9 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
+
     }
 }

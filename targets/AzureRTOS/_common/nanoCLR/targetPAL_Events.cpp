@@ -100,7 +100,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
         }
 
         // no events, pass control to the OS
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(100));
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
 
         // check if reboot or exit flags were set when the other OS threads executed
         if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))
