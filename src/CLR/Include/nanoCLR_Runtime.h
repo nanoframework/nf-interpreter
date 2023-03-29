@@ -835,7 +835,7 @@ struct CLR_RT_GenericParam_Index
 struct CLR_RT_ReflectionDef_Index
 {
     // CLR_ReflectionType
-    CLR_UINT16 kind; 
+    CLR_UINT16 kind;
     CLR_UINT16 levels;
 
     union {
@@ -1331,7 +1331,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
     // ANY HEAP - DO RELOCATION -
     const CLR_RECORD_ASSEMBLY *header;
     // ANY HEAP - DO RELOCATION -
-    const char *name;                
+    const char *name;
 
     const CLR_RT_MethodHandler *nativeCode;
 
@@ -1339,50 +1339,39 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if !defined(NANOCLR_APPDOMAINS)
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_HeapBlock *staticFields; 
+    CLR_RT_HeapBlock *staticFields;
 #endif
 
     int staticFieldsCount;
 
     // ANY HEAP - DO RELOCATION -
-    CLR_RT_HeapBlock_Array *file; 
+    CLR_RT_HeapBlock_Array *file;
 
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_AssemblyRef_CrossReference
-        *crossReferenceAssemblyRef; 
+    CLR_RT_AssemblyRef_CrossReference *crossReferenceAssemblyRef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_TypeRef_CrossReference
-        *crossReferenceTypeRef;
+    CLR_RT_TypeRef_CrossReference *crossReferenceTypeRef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_FieldRef_CrossReference
-        *crossReferenceFieldRef;
+    CLR_RT_FieldRef_CrossReference *crossReferenceFieldRef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_MethodRef_CrossReference
-        *crossReferenceMethodRef;
+    CLR_RT_MethodRef_CrossReference *crossReferenceMethodRef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_TypeDef_CrossReference
-        *crossReferenceTypeDef;
+    CLR_RT_TypeDef_CrossReference *crossReferenceTypeDef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_FieldDef_CrossReference
-        *crossReferenceFieldDef;
+    CLR_RT_FieldDef_CrossReference *crossReferenceFieldDef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_MethodDef_CrossReference
-        *crossReferenceMethodDef;
+    CLR_RT_MethodDef_CrossReference *crossReferenceMethodDef;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_GenericParam_CrossReference *
-        crossReferenceGenericParam;
+    CLR_RT_GenericParam_CrossReference *crossReferenceGenericParam;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_MethodSpec_CrossReference
-        *crossReferenceMethodSpec;
+    CLR_RT_MethodSpec_CrossReference *crossReferenceMethodSpec;
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_TypeSpec_CrossReference
-        *crossReferenceTypeSpec;
+    CLR_RT_TypeSpec_CrossReference *crossReferenceTypeSpec;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-    CLR_RT_MethodDef_DebuggingInfo
-        *debuggingInfoMethodDef;
-#endif                               // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
+    CLR_RT_MethodDef_DebuggingInfo *debuggingInfoMethodDef;
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int maxOpcodes;
@@ -1587,44 +1576,8 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(VIRTUAL_DEVICE)
     static FILE *s_output;
     static FILE *s_toclose;
+#endif // VIRTUAL_DEVICE
 
-  public:
-    static void DumpSetDevice(FILE *&outputDeviceFile, const wchar_t *szFileName);
-    static void DumpSetDevice(const wchar_t *szFileName);
-
-    static void DumpCloseDevice(FILE *&outputDeviceFile);
-    static void DumpCloseDevice();
-
-    static void DumpPrintf(FILE *outputDeviceFile, const char *format, ...);
-    static void DumpPrintf(const char *format, ...);
-
-    static void DumpIndent(const CLR_RECORD_METHODDEF *md, size_t offset, size_t level);
-
-    void Dump(bool fNoByteCode);
-
-    unsigned int GenerateSignatureForNativeMethods();
-
-    bool AreInternalMethodsPresent(const CLR_RECORD_TYPEDEF *td);
-    void GenerateSkeleton(const wchar_t *szFileName, const wchar_t *szProjectName);
-    void GenerateSkeletonFromComplientNames(const wchar_t *szFileName, const wchar_t *szProjectName);
-
-    void BuildParametersList(CLR_PMETADATA pMetaData, CLR_RT_VectorOfManagedElements &elemPtrArray);
-    void GenerateSkeletonStubFieldsDef(
-        const CLR_RECORD_TYPEDEF *pClsType,
-        FILE *pFileStubHead,
-        std::string strIndent,
-        std::string strMngClassName);
-    void GenerateSkeletonStubCode(const wchar_t *szFilePath, FILE *pFileDotNetProj);
-
-    void BuildMethodName_NoInterop(const CLR_RECORD_METHODDEF *md, std::string &name, CLR_RT_StringMap &mapMethods);
-    void GenerateSkeleton_NoInterop(LPCWSTR szFileName, LPCWSTR szProjectName);
-
-    void BuildMethodName(const CLR_RECORD_METHODDEF *md, std::string &name, CLR_RT_StringMap &mapMethods);
-    void BuildClassName(const CLR_RECORD_TYPEREF *tr, std::string &cls_name, bool fEscape);
-    void BuildClassName(const CLR_RECORD_TYPEDEF *td, std::string &cls_name, bool fEscape);
-    void BuildTypeName(const CLR_RECORD_TYPEDEF *td, std::string &type_name);
-
-#endif
     //--//
 
     PROHIBIT_ALL_CONSTRUCTORS(CLR_RT_Assembly);
@@ -1633,7 +1586,6 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
   private:
     CLR_UINT32 ComputeHashForName(const CLR_RT_TypeDef_Index &td, CLR_UINT32 hash);
-
     static CLR_UINT32 ComputeHashForType(NanoCLRDataType dt, CLR_UINT32 hash);
 };
 
@@ -2227,7 +2179,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo &DebuggingInfo() const
     {
-        return assembly->m_pDebuggingInfo_MethodDef[Method()];
+        return assembly->debuggingInfoMethodDef[Method()];
     }
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };

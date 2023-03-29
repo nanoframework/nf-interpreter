@@ -442,14 +442,14 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #define LOOKUP_ELEMENT(idx, tblName, tblNameUC) const CLR_RECORD_##tblNameUC *p = Get##tblName(idx)
 
-#define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                        \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                             \
-    const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                   \
-    if (s->data == 0)                                                                                                \
+#define LOOKUP_ELEMENT_REF(idx, tblName, tblNameUC, tblName2)                                                          \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
+    const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                         \
+    if (s->data == 0)                                                                                                  \
     s = NULL
 
-#define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                  \
-    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                             \
+#define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                    \
+    const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
     CLR_RT_##tblName##_Index s;                                                                                        \
     s.Set(assemblyIndex, idx)
 
@@ -896,7 +896,7 @@ void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     char rgBuffer[512];
-    char* szBuffer = rgBuffer;
+    char *szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildMethodRefName(method, szBuffer, iBuffer);
@@ -904,12 +904,12 @@ void CLR_RT_DUMP::METHODREF(const CLR_RT_MethodRef_Index &method)
     CLR_Debug::Printf("%s", rgBuffer);
 }
 
-void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index& method)
+void CLR_RT_DUMP::METHODSPEC(const CLR_RT_MethodSpec_Index &method)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     char rgBuffer[512];
-    char* szBuffer = rgBuffer;
+    char *szBuffer = rgBuffer;
     size_t iBuffer = MAXSTRLEN(rgBuffer);
 
     g_CLR_RT_TypeSystem.BuildMethodSpecName(method, szBuffer, iBuffer);

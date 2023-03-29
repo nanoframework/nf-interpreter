@@ -5,19 +5,18 @@
 //
 #include "Diagnostics.h"
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(VIRTUAL_DEVICE)
 
-__nfweak void CLR_Debug::RedirectToString( std::string* str )
+__nfweak void CLR_Debug::RedirectToString(std::string *str)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
 #endif
 
-__nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc, const char* szFile, int line )
+__nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION(HRESULT hr, const char *szFunc, const char *szFile, int line)
 {
     (void)szFunc;
     (void)szFile;
@@ -27,7 +26,7 @@ __nfweak HRESULT NANOCLR_DEBUG_PROCESS_EXCEPTION( HRESULT hr, const char* szFunc
     return hr;
 }
 
-__nfweak bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* format, va_list arg )
+__nfweak bool CLR_SafeSprintfV(char *&szBuffer, size_t &iBuffer, const char *format, va_list arg)
 {
     (void)szBuffer;
     (void)iBuffer;
@@ -39,12 +38,12 @@ __nfweak bool CLR_SafeSprintfV( char*& szBuffer, size_t& iBuffer, const char* fo
     return FALSE;
 }
 
-__nfweak bool CLR_SafeSprintf( char*& szBuffer, size_t& iBuffer, const char* format, ... )
+__nfweak bool CLR_SafeSprintf(char *&szBuffer, size_t &iBuffer, const char *format, ...)
 {
     (void)szBuffer;
     (void)iBuffer;
     (void)format;
-    
+
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 
     return FALSE;
@@ -57,7 +56,7 @@ __nfweak void CLR_Debug::Flush()
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_Debug::Emit( const char *text, int len )
+__nfweak void CLR_Debug::Emit(const char *text, int len)
 {
     (void)text;
     (void)len;
@@ -65,7 +64,7 @@ __nfweak void CLR_Debug::Emit( const char *text, int len )
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak int CLR_Debug::PrintfV( const char *format, va_list arg )
+__nfweak int CLR_Debug::PrintfV(const char *format, va_list arg)
 {
     (void)format;
     (void)arg;
@@ -74,7 +73,7 @@ __nfweak int CLR_Debug::PrintfV( const char *format, va_list arg )
     return 0;
 }
 
-__nfweak int CLR_Debug::Printf( const char *format, ... )
+__nfweak int CLR_Debug::Printf(const char *format, ...)
 {
     (void)format;
 
@@ -84,7 +83,7 @@ __nfweak int CLR_Debug::Printf( const char *format, ... )
 
 //--//
 
-__nfweak CLR_UINT32 CLR_ReadTokenCompressed( const CLR_UINT8*& ip, CLR_OPCODE opcode )
+__nfweak CLR_UINT32 CLR_ReadTokenCompressed(const CLR_UINT8 *&ip, CLR_OPCODE opcode)
 {
     (void)ip;
     (void)opcode;
@@ -93,16 +92,16 @@ __nfweak CLR_UINT32 CLR_ReadTokenCompressed( const CLR_UINT8*& ip, CLR_OPCODE op
     return 0;
 }
 
-__nfweak const CLR_UINT8* CLR_SkipBodyOfOpcode( const CLR_UINT8* ip, CLR_OPCODE opcode )
+__nfweak const CLR_UINT8 *CLR_SkipBodyOfOpcode(const CLR_UINT8 *ip, CLR_OPCODE opcode)
 {
     (void)ip;
     (void)opcode;
-   
+
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     return 0;
 }
 
-__nfweak const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, CLR_OPCODE opcode )
+__nfweak const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE opcode)
 {
     (void)ip;
     (void)opcode;
@@ -113,34 +112,38 @@ __nfweak const CLR_UINT8* CLR_SkipBodyOfOpcodeCompressed( const CLR_UINT8* ip, C
 
 #if defined(NANOCLR_TRACE_INSTRUCTIONS)
 
-__nfweak void CLR_RT_Assembly::DumpToken( CLR_UINT32 tk )
+__nfweak void CLR_RT_Assembly::DumpToken(CLR_UINT32 tk)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpSignature( CLR_SIG sig )
+__nfweak void CLR_RT_Assembly::DumpSignature(CLR_SIG sig)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpSignature( const CLR_UINT8*& p )
+__nfweak void CLR_RT_Assembly::DumpSignature(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpSignatureToken( const CLR_UINT8*& p )
+__nfweak void CLR_RT_Assembly::DumpSignatureToken(const CLR_UINT8 *&p)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
 //--//
 
-__nfweak void CLR_RT_Assembly::DumpOpcode( CLR_RT_StackFrame* stack, CLR_PMETADATA ip )
+__nfweak void CLR_RT_Assembly::DumpOpcode(CLR_RT_StackFrame *stack, CLR_PMETADATA ip)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call, CLR_PMETADATA ip, CLR_PMETADATA ipStart, int pid )
+__nfweak void CLR_RT_Assembly::DumpOpcodeDirect(
+    CLR_RT_MethodDef_Instance &call,
+    CLR_PMETADATA ip,
+    CLR_PMETADATA ipStart,
+    int pid)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
@@ -149,37 +152,37 @@ __nfweak void CLR_RT_Assembly::DumpOpcodeDirect( CLR_RT_MethodDef_Instance& call
 
 #if defined(NANOCLR_TRACE_CALLS)
 
-__nfweak void CLR_RT_Assembly::DumpCall( CLR_RT_StackFrame& stack, bool fPush )
+__nfweak void CLR_RT_Assembly::DumpCall(CLR_RT_StackFrame &stack, bool fPush)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_Assembly::DumpCall( CLR_RT_MethodDef_Instance& md, const char* szPrefix )
+__nfweak void CLR_RT_Assembly::DumpCall(CLR_RT_MethodDef_Instance &md, const char *szPrefix)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-#endif 
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(NANOCLR_TRACE_ERRORS)
 
-__nfweak void CLR_RT_DUMP::TYPE( const CLR_RT_TypeDef_Index& cls )
+__nfweak void CLR_RT_DUMP::TYPE(const CLR_RT_TypeDef_Index &cls)
 {
     (void)cls;
-    
+
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::TYPE( const CLR_RT_ReflectionDef_Index& reflex )
+__nfweak void CLR_RT_DUMP::TYPE(const CLR_RT_ReflectionDef_Index &reflex)
 {
     (void)reflex;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index& method, const CLR_RT_TypeSpec_Index *genericType)
+__nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index &method, const CLR_RT_TypeSpec_Index *genericType)
 {
     (void)method;
     (void)genericType;
@@ -187,14 +190,14 @@ __nfweak void CLR_RT_DUMP::METHOD(const CLR_RT_MethodDef_Index& method, const CL
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::FIELD( const CLR_RT_FieldDef_Index& field )
+__nfweak void CLR_RT_DUMP::FIELD(const CLR_RT_FieldDef_Index &field)
 {
     (void)field;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
+__nfweak void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 {
     (void)ptr;
     (void)text;
@@ -208,7 +211,7 @@ __nfweak void CLR_RT_DUMP::OBJECT( CLR_RT_HeapBlock* ptr, const char* text )
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
 
-__nfweak void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock& ref )
+__nfweak void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
 {
     (void)stack;
     (void)ref;
@@ -216,18 +219,18 @@ __nfweak void CLR_RT_DUMP::EXCEPTION( CLR_RT_StackFrame& stack, CLR_RT_HeapBlock
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_RT_DUMP::POST_PROCESS_EXCEPTION( CLR_RT_HeapBlock& ref )
+__nfweak void CLR_RT_DUMP::POST_PROCESS_EXCEPTION(CLR_RT_HeapBlock &ref)
 {
     (void)ref;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-#endif 
+#endif
 
 //--//
 
-__nfweak const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
+__nfweak const char *CLR_RT_DUMP::GETERRORMESSAGE(HRESULT hrError)
 {
     (void)hrError;
 
@@ -239,7 +242,7 @@ __nfweak const char* CLR_RT_DUMP::GETERRORMESSAGE( HRESULT hrError )
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
 
-__nfweak void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
+__nfweak void *CLR_PROF_CounterCallChain::Prepare(CLR_PROF_Handler *handler)
 {
     (void)handler;
 
@@ -247,7 +250,7 @@ __nfweak void* CLR_PROF_CounterCallChain::Prepare( CLR_PROF_Handler* handler )
     return NULL;
 }
 
-__nfweak void CLR_PROF_CounterCallChain::Complete( CLR_UINT64& t, CLR_PROF_Handler* handler )
+__nfweak void CLR_PROF_CounterCallChain::Complete(CLR_UINT64 &t, CLR_PROF_Handler *handler)
 {
     (void)t;
     (void)handler;
@@ -255,7 +258,7 @@ __nfweak void CLR_PROF_CounterCallChain::Complete( CLR_UINT64& t, CLR_PROF_Handl
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PROF_CounterCallChain::Enter( CLR_RT_StackFrame* stack )
+__nfweak void CLR_PROF_CounterCallChain::Enter(CLR_RT_StackFrame *stack)
 {
     (void)stack;
 
@@ -278,7 +281,7 @@ __nfweak void CLR_PROF_Handler::Constructor()
 }
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
-__nfweak void CLR_PROF_Handler::Constructor( CLR_PROF_CounterCallChain& target )
+__nfweak void CLR_PROF_Handler::Constructor(CLR_PROF_CounterCallChain &target)
 {
     (void)target;
 
@@ -291,14 +294,12 @@ __nfweak void CLR_PROF_Handler::Destructor()
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-
-__nfweak void CLR_PROF_Handler::Init( void* target )
+__nfweak void CLR_PROF_Handler::Init(void *target)
 {
     (void)target;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
-
 
 //--//
 
@@ -324,7 +325,7 @@ __nfweak CLR_UINT64 CLR_PROF_Handler::ResumeTime()
     return 0;
 }
 
-__nfweak CLR_UINT64 CLR_PROF_Handler::ResumeTime( CLR_INT64 t )
+__nfweak CLR_UINT64 CLR_PROF_Handler::ResumeTime(CLR_INT64 t)
 {
     (void)t;
 
@@ -332,7 +333,7 @@ __nfweak CLR_UINT64 CLR_PROF_Handler::ResumeTime( CLR_INT64 t )
     return 0;
 }
 
-#endif //#if defined(NANOCLR_PROFILE_HANDLER)
+#endif // #if defined(NANOCLR_PROFILE_HANDLER)
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -377,7 +378,11 @@ __nfweak HRESULT CLR_PRF_Profiler::DumpRoots()
     return S_OK;
 }
 
-__nfweak void CLR_PRF_Profiler::DumpRoot(CLR_RT_HeapBlock* root, CLR_UINT32 type, CLR_UINT32 flags, CLR_RT_MethodDef_Index* source)
+__nfweak void CLR_PRF_Profiler::DumpRoot(
+    CLR_RT_HeapBlock *root,
+    CLR_UINT32 type,
+    CLR_UINT32 flags,
+    CLR_RT_MethodDef_Index *source)
 {
     (void)root;
     (void)type;
@@ -387,14 +392,14 @@ __nfweak void CLR_PRF_Profiler::DumpRoot(CLR_RT_HeapBlock* root, CLR_UINT32 type
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock* ptr)
+__nfweak void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 {
     (void)ptr;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak CLR_RT_HeapBlock* CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock* ref)
+__nfweak CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock *ref)
 {
     (void)ref;
 
@@ -407,21 +412,21 @@ __nfweak void CLR_PRF_Profiler::DumpEndOfRefsList()
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::DumpPointer(void* ptr)
+__nfweak void CLR_PRF_Profiler::DumpPointer(void *ptr)
 {
     (void)ptr;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::DumpSingleReference(CLR_RT_HeapBlock* ptr)
+__nfweak void CLR_PRF_Profiler::DumpSingleReference(CLR_RT_HeapBlock *ptr)
 {
     (void)ptr;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_HeapBlock* firstItem, CLR_UINT16 count)
+__nfweak void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_HeapBlock *firstItem, CLR_UINT16 count)
 {
     (void)firstItem;
     (void)count;
@@ -429,7 +434,7 @@ __nfweak void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_HeapBlock* firstItem
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_DblLinkedList& list)
+__nfweak void CLR_PRF_Profiler::DumpListOfReferences(CLR_RT_DblLinkedList &list)
 {
     (void)list;
 
@@ -445,7 +450,7 @@ __nfweak void CLR_PRF_Profiler::Timestamp()
 
 //--//
 
-__nfweak HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread* nextThread)
+__nfweak HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread *nextThread)
 {
     (void)nextThread;
 
@@ -453,7 +458,7 @@ __nfweak HRESULT CLR_PRF_Profiler::RecordContextSwitch(CLR_RT_Thread* nextThread
     return S_OK;
 }
 
-__nfweak HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread* th, CLR_RT_MethodDef_Index md)
+__nfweak HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread *th, CLR_RT_MethodDef_Index md)
 {
     (void)th;
     (void)md;
@@ -462,7 +467,7 @@ __nfweak HRESULT CLR_PRF_Profiler::RecordFunctionCall(CLR_RT_Thread* th, CLR_RT_
     return S_OK;
 }
 
-__nfweak HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread* th, CLR_PROF_CounterCallChain& prof)
+__nfweak HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread *th, CLR_PROF_CounterCallChain &prof)
 {
     (void)th;
     (void)prof;
@@ -473,14 +478,14 @@ __nfweak HRESULT CLR_PRF_Profiler::RecordFunctionReturn(CLR_RT_Thread* th, CLR_P
 
 //--//
 
-__nfweak void CLR_PRF_Profiler::TrackObjectCreation( CLR_RT_HeapBlock* ptr )
+__nfweak void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
 {
     (void)ptr;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::TrackObjectDeletion( CLR_RT_HeapBlock* ptr )
+__nfweak void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
 {
     (void)ptr;
 
@@ -531,14 +536,14 @@ __nfweak void CLR_PRF_Profiler::PackAndWriteBits(CLR_UINT32 value)
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::PackAndWriteBits(const CLR_RT_TypeDef_Index& typeDef)
+__nfweak void CLR_PRF_Profiler::PackAndWriteBits(const CLR_RT_TypeDef_Index &typeDef)
 {
     (void)typeDef;
 
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
 }
 
-__nfweak void CLR_PRF_Profiler::PackAndWriteBits(const CLR_RT_MethodDef_Index& methodDef)
+__nfweak void CLR_PRF_Profiler::PackAndWriteBits(const CLR_RT_MethodDef_Index &methodDef)
 {
     (void)methodDef;
 
@@ -559,4 +564,4 @@ __nfweak HRESULT CLR_PRF_Profiler::Stream_Flush()
     return S_OK;
 }
 
-#endif //#if defined(NANOCLR_PROFILE_NEW)
+#endif // #if defined(NANOCLR_PROFILE_NEW)
