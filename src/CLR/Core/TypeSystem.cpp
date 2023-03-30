@@ -5402,10 +5402,16 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 bool CLR_RT_TypeSystem::MatchSignature(CLR_RT_SignatureParser &parserLeft, CLR_RT_SignatureParser &parserRight)
 {
     NATIVE_PROFILE_CLR_CORE();
+
     if (parserLeft.Type != parserRight.Type)
+    {
         return false;
+    }
+
     if (parserLeft.Flags != parserRight.Flags)
+    {
         return false;
+    }
 
     return MatchSignatureDirect(parserLeft, parserRight, false);
 }
@@ -5533,10 +5539,13 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
         {
             if (resLeft.GenericParamPosition == 0xFFFF && resRight.GenericParamPosition == 0xFFFF)
             {
-                // need to check if type of generic parameters match
-                if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
+                // need to check if type of generic parameters match, if there are more
+                if (parserLeft.ParamCount > 0 && parserRight.ParamCount > 0)
                 {
-                    return false;
+                    if (FAILED(parserLeft.Advance(resLeft)) || FAILED(parserRight.Advance(resRight)))
+                    {
+                        return false;
+                    }
                 }
 
                 if (resLeft.DataType != resRight.DataType)
@@ -6277,8 +6286,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
                 g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
-            auto *currentParam =
-                (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
+            auto *currentParam = (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
 
             do
             {
