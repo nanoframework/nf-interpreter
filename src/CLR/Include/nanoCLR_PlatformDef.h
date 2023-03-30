@@ -36,6 +36,8 @@
 #endif
 //#define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
 //#define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+// enable tracing of type resolution
+// #define NANOCLR_TRACE_TYPE_RESOLUTION 1
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // PLATFORMS

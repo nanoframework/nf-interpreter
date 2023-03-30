@@ -2555,6 +2555,17 @@ bool CLR_RT_Assembly::ResolveAssemblyRef(bool fOutput)
             else
             {
                 dst->target = target;
+
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+                CLR_Debug::Printf(
+                    "\r\nResolved assembly: %s (%d.%d.%d.%d) [%04X]\r\n",
+                    name,
+                    header->version.majorVersion,
+                    header->version.minorVersion,
+                    header->version.buildNumber,
+                    header->version.revisionNumber,
+                    target->assemblyIndex - 1);
+#endif
             }
         }
     }
@@ -2595,6 +2606,10 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+    CLR_Debug::Printf("    Resolving TypeRef...\r\n");
+#endif
+
     int i;
 
     ITERATE_THROUGH_RECORDS(this, i, TypeRef, TYPEREF)
@@ -2618,6 +2633,7 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
             }
 
             const char *szName = GetString(src->name);
+
             if (inst.assembly->FindTypeDef(szName, inst.Type(), dst->target) == false)
             {
 #if !defined(BUILD_RTM)
@@ -2630,6 +2646,12 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                CLR_Debug::Printf("        [%04X] '%s' in current assembly\r\n", i, szName);
+            }
+#endif
         }
         else
         {
@@ -2641,6 +2663,7 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
 
             const char *szNameSpace = GetString(src->nameSpace);
             const char *szName = GetString(src->name);
+
             if (assm->FindTypeDef(szName, szNameSpace, dst->target) == false)
             {
 #if !defined(BUILD_RTM)
@@ -2653,6 +2676,12 @@ HRESULT CLR_RT_Assembly::ResolveTypeRef()
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Resolve: unknown type: %s\r\n", szName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                CLR_Debug::Printf("        [%04X] '%s.%s' from '%s'\r\n", i, szNameSpace, szName, assm->name);
+            }
+#endif
         }
     }
 
@@ -2664,10 +2693,21 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+    bool outputHint = false;
+#endif
+
     int i;
 
     ITERATE_THROUGH_RECORDS(this, i, FieldRef, FIELDREF)
     {
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        if (!outputHint)
+        {
+            CLR_Debug::Printf("    Resolving FieldRef...\r\n");
+            outputHint = true;
+        }
+#endif
         CLR_RT_TypeDef_Index typeDef;
         typeDef.Clear();
 
@@ -2678,8 +2718,11 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
 
         CLR_RT_TypeSpec_Instance typeSpecInstance;
 
+        const char *fieldName = GetString(src->name);
+
         switch (src->Owner())
         {
+
             case TBL_TypeRef:
                 typeDef = crossReferenceTypeRef[src->OwnerIndex()].target;
                 break;
@@ -2700,43 +2743,46 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    fieldName);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    fieldName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    L"Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x\r\n",
-                    src->encodedOwner);
+                    L"Unknown or unsupported TypeRefOrSpec when resolving FieldRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    fieldName);
 #endif
         }
-
-        const char *fieldName = GetString(src->name);
 
         if (NANOCLR_INDEX_IS_VALID(typeSpec))
         {
             if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x\r\n", src->encodedOwner);
+                CLR_Debug::Printf("Unknown scope when resolving FieldRef: %08x '%s'\r\n", src->encodedOwner, fieldName);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    "Unknown scope when resolving FieldRef: %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown scope when resolving FieldRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    fieldName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    L"Unknown scope when resolving FieldRef: %08x\r\n",
-                    src->encodedOwner);
+                    L"Unknown scope when resolving FieldRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    fieldName);
 #endif
             }
 
@@ -2753,6 +2799,19 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown FieldRef: %s.%s.%s\r\n", "???", "???", fieldName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                char rgBuffer[512];
+                char *szBuffer = rgBuffer;
+                size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(typeSpecInstance, szBuffer, iBuffer);
+                rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+
+                CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, fieldName, rgBuffer);
+            }
+#endif
 
             // set TypeSpec
             dst->genericType.data = typeSpec.data;
@@ -2792,6 +2851,19 @@ HRESULT CLR_RT_Assembly::ResolveFieldRef()
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown FieldRef: %s\r\n", fieldName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                char rgBuffer[512];
+                char *szBuffer = rgBuffer;
+                size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(typeDefInstance, szBuffer, iBuffer);
+                rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+
+                CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, fieldName, rgBuffer);
+            }
+#endif
 
             // invalidate GenericType
             dst->genericType.data = CLR_EmptyToken;
@@ -2806,10 +2878,22 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+    bool outputHint = false;
+#endif
+
     int i;
 
     ITERATE_THROUGH_RECORDS(this, i, MethodRef, METHODREF)
     {
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        if (!outputHint)
+        {
+            CLR_Debug::Printf("    Resolving MethodRef...\r\n");
+            outputHint = true;
+        }
+#endif
+
         CLR_RT_TypeDef_Index typeDef;
         typeDef.Clear();
 
@@ -2821,7 +2905,7 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
         CLR_RT_TypeSpec_Instance typeSpecInstance;
 
         bool fGot = false;
-        const char *methodName = nullptr;
+        const char *methodName = GetString(src->name);
 
         switch (src->Owner())
         {
@@ -2845,43 +2929,46 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
             default:
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    L"Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x\r\n",
-                    src->encodedOwner);
+                    L"Unknown or unsupported TypeRefOrSpec when resolving MethodRef %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #endif
         }
-
-        methodName = GetString(src->name);
 
         if (NANOCLR_INDEX_IS_VALID(typeSpec))
         {
             if (typeSpecInstance.InitializeFromIndex(typeSpec) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
+                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x '%s'\r\n", src->encodedOwner);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     "Unknown scope when resolving MethodRef: %08x\r\n",
-                    src->encodedOwner);
+                    src->encodedOwner,
+                    methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
                     L"Unknown scope when resolving MethodRef: %08x\r\n",
-                    src->encodedOwner);
+                    src->encodedOwner,
+                    methodName);
 #endif
             }
 
@@ -2906,25 +2993,43 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                 NANOCLR_MSG1_SET_AND_LEAVE(CLR_E_FAIL, L"Unknown MethodRef: %s.%s.%s\r\n", "???", "???", methodName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                char rgBuffer[512];
+                char *szBuffer = rgBuffer;
+                size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(typeSpecInstance, szBuffer, iBuffer);
+                rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+
+                CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, methodName, rgBuffer);
+            }
+#endif
         }
         else if (NANOCLR_INDEX_IS_VALID(typeDef))
         {
             if (typeDefInstance.InitializeFromIndex(typeDef) == false)
             {
 #if !defined(BUILD_RTM)
-                CLR_Debug::Printf("Unknown scope when resolving MethodRef: %08x\r\n", src->encodedOwner);
+                CLR_Debug::Printf(
+                    "Unknown scope when resolving MethodRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #endif
 
 #if defined(VIRTUAL_DEVICE)
                 NANOCLR_CHARMSG_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    "Unknown scope when resolving MethodRef: %08x\r\n",
-                    src->encodedOwner);
+                    "Unknown scope when resolving MethodRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #else
                 NANOCLR_MSG1_SET_AND_LEAVE(
                     CLR_E_FAIL,
-                    L"Unknown scope when resolving MethodRef: %08x\r\n",
-                    src->encodedOwner);
+                    L"Unknown scope when resolving MethodRef: %08x '%s'\r\n",
+                    src->encodedOwner,
+                    methodName);
 #endif
             }
 
@@ -2983,6 +3088,19 @@ HRESULT CLR_RT_Assembly::ResolveMethodRef()
                     methodName);
 #endif
             }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+            else
+            {
+                char rgBuffer[512];
+                char *szBuffer = rgBuffer;
+                size_t iBuffer = MAXSTRLEN(rgBuffer);
+
+                g_CLR_RT_TypeSystem.BuildTypeName(typeDefInstance, szBuffer, iBuffer);
+                rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
+
+                CLR_Debug::Printf("        [%04X] Resolving '%s' from '%s'\r\n", i, methodName, rgBuffer);
+            }
+#endif
         }
     }
 
@@ -2994,10 +3112,22 @@ HRESULT CLR_RT_Assembly::ResolveTypeSpec()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+    bool outputHint = false;
+#endif
+
     int i;
 
     ITERATE_THROUGH_RECORDS(this, i, TypeSpec, TYPESPEC)
     {
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        if (!outputHint)
+        {
+            CLR_Debug::Printf("    Resolving TypeSpec...\r\n");
+            outputHint = true;
+        }
+#endif
+
         dst->genericType.Set(assemblyIndex, i);
 
         CLR_RT_TypeSpec_Instance inst;
@@ -3009,6 +3139,12 @@ HRESULT CLR_RT_Assembly::ResolveTypeSpec()
 #endif
             NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
         }
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        else
+        {
+            CLR_Debug::Printf("        [%04X]\r\n", i);
+        }
+#endif
     }
 
     NANOCLR_NOCLEANUP();
@@ -3918,6 +4054,13 @@ void CLR_RT_Assembly::ResolveTypeDef()
         {
             tilOuterClass = til;
         }
+
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        else
+        {
+            CLR_Debug::Printf("        [%04X] '%s.%s'\r\n", i, til->nameSpace, til->name);
+        }
+#endif
     }
 }
 
@@ -3926,12 +4069,26 @@ void CLR_RT_Assembly::ResolveMethodDef()
     NATIVE_PROFILE_CLR_CORE();
     const CLR_RECORD_METHODDEF *md = GetMethodDef(0);
 
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+    bool outputHint = false;
+#endif
+
     for (int indexMethod = 0; indexMethod < tablesSize[TBL_MethodDef]; indexMethod++, md++)
     {
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        if (!outputHint)
+        {
+            CLR_Debug::Printf("    Resolving MethodDef...\r\n");
+            outputHint = true;
+        }
+#endif
+
         const MethodIndexLookup *mil = c_MethodIndexLookup;
 
         CLR_RT_MethodDef_Index index;
         index.Set(assemblyIndex, indexMethod);
+
+        const char *methodName = GetString(md->name);
 
         // Check for wellKnownMethods
         for (size_t ii = 0; ii < ARRAYSIZE(c_MethodIndexLookup); ii++, mil++)
@@ -3947,7 +4104,7 @@ void CLR_RT_Assembly::ResolveMethodDef()
 
                 if (instType.assembly == this)
                 {
-                    if (!strcmp(GetString(md->name), mil->name))
+                    if (!strcmp(methodName, mil->name))
                     {
                         mIndex.data = index.data;
                     }
@@ -4001,6 +4158,10 @@ void CLR_RT_Assembly::ResolveMethodDef()
                 }
             }
         }
+
+#ifdef NANOCLR_TRACE_TYPE_RESOLUTION
+        CLR_Debug::Printf("        [%04X] Resolving '%s'\r\n", indexMethod, methodName);
+#endif
     }
 }
 
@@ -4327,7 +4488,7 @@ bool CLR_RT_Assembly::FindFieldDef(
     {
         return true;
     }
-    
+
     if (local_FindFieldDef(this, td->firstStaticField, td->staticFieldsCount, fieldName, base, sig, index))
     {
         return true;
