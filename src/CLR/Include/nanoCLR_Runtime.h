@@ -2062,7 +2062,7 @@ struct CLR_RT_Assembly_Instance : public CLR_RT_Assembly_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_Assembly_Index &index);
-    void Clear();
+    void ClearInstance();
 };
 
 struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
@@ -2075,7 +2075,7 @@ struct CLR_RT_TypeSpec_Instance : public CLR_RT_TypeSpec_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_TypeSpec_Index &index);
-    void Clear();
+    void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
 };
@@ -2099,7 +2099,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
     bool InitializeFromField(const CLR_RT_FieldDef_Instance &fd);
     bool InitializeFromMethod(const CLR_RT_MethodSpec_Instance &ms);
 
-    void Clear();
+    void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 
@@ -2132,7 +2132,7 @@ struct CLR_RT_FieldDef_Instance : public CLR_RT_FieldDef_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_FieldDef_Index &index);
-    void Clear();
+    void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
 
@@ -2160,7 +2160,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     //--//
 
     bool InitializeFromIndex(const CLR_RT_MethodDef_Index &index);
-    void Clear();
+    void ClearInstance();
 
     bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
 
@@ -2196,9 +2196,7 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     bool InitializeFromIndex(const CLR_RT_GenericParam_Index &index);
 
-    void Clear();
-
-    CLR_INDEX OwnerType();
+    void ClearInstance();
 
     //--//
 
@@ -2217,16 +2215,12 @@ struct CLR_RT_MethodSpec_Instance : public CLR_RT_MethodSpec_Index
 
     bool InitializeFromIndex(const CLR_RT_MethodSpec_Index &index);
 
-    void Clear();
+    void ClearInstance();
 
     CLR_RT_MethodSpec_CrossReference &CrossReference() const
     {
         return assembly->crossReferenceMethodSpec[Method()];
     }
-
-    CLR_INDEX Container();
-
-    CLR_INDEX Instantiation();
 
     CLR_EncodedMethodDefOrRef InstanceOfMethod;
 };

@@ -1475,7 +1475,7 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t 
     interopNativeAssemblies = (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::NativeAssemblyDetails *)data;
 
     // clear buffer memory
-    memset(interopNativeAssemblies, 0, (uint32_t)*size);
+    memset(interopNativeAssemblies, 0, *size);
 
     // fill the array
     for (uint32_t i = 0; i < g_CLR_InteropAssembliesCount; i++)
