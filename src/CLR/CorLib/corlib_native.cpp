@@ -1483,11 +1483,11 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_mscorlib =
 
 #if (NANOCLR_REFLECTION == TRUE)
 
-    0xCCE8376E,
+    0x454A3634,
 
 #elif (NANOCLR_REFLECTION == FALSE)
 
-    0xF60D1B13,
+    0x1D98C525,
 
 #else
 #error "NANOCLR_REFLECTION has to be define either TRUE or FALSE. Check the build options."
