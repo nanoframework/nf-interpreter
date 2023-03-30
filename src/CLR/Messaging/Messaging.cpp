@@ -73,7 +73,7 @@ bool CLR_Messaging::AllocateAndQueueMessage(
 bool CLR_Messaging::Messaging_Query(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging_Commands::Messaging_Query *cmd = (CLR_Messaging_Commands::Messaging_Query *)msg->m_payload;
+    auto *cmd = (CLR_Messaging_Commands::Messaging_Query *)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Query::Reply res;
     CLR_RT_HeapBlock_EndPoint *ep = CLR_RT_HeapBlock_EndPoint::FindEndPoint(cmd->m_addr.m_to);
 
@@ -89,7 +89,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
 
-    CLR_Messaging_Commands::Messaging_Query::Reply *cmd =
+    auto *cmd =
         (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
 
     g_CLR_Messaging.AllocateAndQueueMessage(
@@ -108,7 +108,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
 bool CLR_Messaging::Messaging_Send(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging_Commands::Messaging_Send *cmd = (CLR_Messaging_Commands::Messaging_Send *)msg->m_payload;
+    auto *cmd = (CLR_Messaging_Commands::Messaging_Send *)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Send::Reply res;
     CLR_UINT32 len;
     bool fRes;
@@ -148,7 +148,7 @@ bool CLR_Messaging::Messaging_Send__Reply(WP_Message *msg)
 bool CLR_Messaging::Messaging_Reply(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging_Commands::Messaging_Reply *cmd = (CLR_Messaging_Commands::Messaging_Reply *)msg->m_payload;
+    auto *cmd = (CLR_Messaging_Commands::Messaging_Reply *)msg->m_payload;
     CLR_Messaging_Commands::Messaging_Reply::Reply res;
     bool fRes;
     CLR_UINT32 len;
@@ -189,7 +189,7 @@ bool CLR_Messaging::Messaging_Reply__Reply(WP_Message *msg)
 bool CLR_Messaging::App_ProcessHeader(void *state, WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging *pThis = (CLR_Messaging *)state;
+    auto *pThis = (CLR_Messaging *)state;
 
     Watchdog_Reset();
 
@@ -218,7 +218,7 @@ bool CLR_Messaging::App_ProcessHeader(void *state, WP_Message *msg)
 bool CLR_Messaging::App_ProcessPayload(void *state, WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    CLR_Messaging *pThis = (CLR_Messaging *)state;
+    auto *pThis = (CLR_Messaging *)state;
 
     Watchdog_Reset();
 

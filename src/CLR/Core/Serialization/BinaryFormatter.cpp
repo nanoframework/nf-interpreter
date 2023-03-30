@@ -957,7 +957,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
 
     if (fSigned)
     {
-        CLR_INT64 valS = (CLR_INT64)val;
+        auto valS = (CLR_INT64)val;
 
         if (m_hints._scale != 0)
             valS /= (CLR_INT64)m_hints._scale;
@@ -976,7 +976,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitValue(int &res)
     }
     else
     {
-        CLR_UINT64 valU = (CLR_UINT64)val;
+        auto valU = (CLR_UINT64)val;
 
         if (m_hints._scale != 0)
             valU /= (CLR_UINT64)m_hints._scale;
@@ -1048,9 +1048,9 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
             {
                 CLR_RT_HeapBlock_String *str = CLR_RT_HeapBlock_String::CreateInstance(*m_value, len);
                 CHECK_ALLOCATION(str);
-                char *dst = (char *)str->StringText();
+                auto dstString = (char *)str->StringText();
 
-                NANOCLR_CHECK_HRESULT(m_bf->ReadArray((CLR_UINT8 *)dst, len));
+                NANOCLR_CHECK_HRESULT(m_bf->ReadArray((CLR_UINT8 *)dstString, len));
                 dst[len] = 0;
             }
 
@@ -1180,7 +1180,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance(
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    State *ptr = EVENTCACHE_EXTRACT_NODE_INITTOZERO(g_CLR_RT_EventCache, State, DATATYPE_SERIALIZER_STATE);
+    auto *ptr = EVENTCACHE_EXTRACT_NODE_INITTOZERO(g_CLR_RT_EventCache, State, DATATYPE_SERIALIZER_STATE);
 
     CHECK_ALLOCATION(ptr);
 
@@ -1422,7 +1422,7 @@ HRESULT CLR_RT_BinaryFormatter::State::GetValue()
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    State *prev = (State *)Prev();
+    auto *prev = (State *)Prev();
     if (prev->Prev() == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(m_value.SetValue(&m_parent->m_value));
@@ -1454,7 +1454,7 @@ HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
 
     if (m_parent->m_fDeserialize)
     {
-        State *prev = (State *)Prev();
+        auto *prev = (State *)Prev();
 
         if (prev->Prev() == nullptr)
         {
@@ -1778,7 +1778,7 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    CLR_RT_BinaryFormatter *ptr =
+    auto *ptr =
         EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache, CLR_RT_BinaryFormatter, DATATYPE_SERIALIZER_HEAD);
 
     res = ptr;
@@ -1820,7 +1820,7 @@ HRESULT CLR_RT_BinaryFormatter::Advance()
 
     while (true)
     {
-        State *top = (State *)m_states.LastNode();
+        auto *top = (State *)m_states.LastNode();
 
         if (top->Prev() == nullptr)
         {
@@ -1840,7 +1840,7 @@ void CLR_RT_BinaryFormatter::PrepareForGC(void *data)
     NATIVE_PROFILE_CLR_SERIALIZATION();
     if (data != nullptr)
     {
-        CLR_RT_BinaryFormatter *bf = (CLR_RT_BinaryFormatter *)data;
+        auto *bf = (CLR_RT_BinaryFormatter *)data;
 
         g_CLR_RT_GarbageCollector.CheckSingleBlock_Force(&bf->m_value);
 
@@ -1997,7 +1997,7 @@ HRESULT CLR_RT_BinaryFormatter::TrackDuplicate(CLR_RT_HeapBlock *object)
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    DuplicateTracker *ptr =
+    auto *ptr =
         EVENTCACHE_EXTRACT_NODE(g_CLR_RT_EventCache, DuplicateTracker, DATATYPE_SERIALIZER_DUPLICATE);
 
     CHECK_ALLOCATION(ptr);

@@ -118,20 +118,20 @@ void CLR_RT_ReflectionDef_Index::InitializeFromHash(CLR_UINT32 hash)
 CLR_UINT64 CLR_RT_ReflectionDef_Index::GetRawData() const
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT64 data;
-    _ASSERTE(sizeof(data) == sizeof(*this));
+    CLR_UINT64 dataRaw;
+    _ASSERTE(sizeof(dataRaw) == sizeof(*this));
 
-    memcpy(&data, this, sizeof(data));
+    memcpy(&dataRaw, this, sizeof(dataRaw));
 
-    return data;
+    return dataRaw;
 }
 
-void CLR_RT_ReflectionDef_Index::SetRawData(CLR_UINT64 data)
+void CLR_RT_ReflectionDef_Index::SetRawData(CLR_UINT64 dataRaw)
 {
     NATIVE_PROFILE_CLR_CORE();
-    _ASSERTE(sizeof(data) == sizeof(*this));
+    _ASSERTE(sizeof(dataRaw) == sizeof(*this));
 
-    memcpy(this, &data, sizeof(data));
+    memcpy(this, &dataRaw, sizeof(dataRaw));
 }
 
 bool CLR_RT_ReflectionDef_Index::Convert(CLR_RT_HeapBlock &ref, CLR_RT_Assembly_Instance &inst)
@@ -606,7 +606,7 @@ HRESULT CLR_RT_SignatureParser::Advance(Element &res)
                         IsGenericInst = true;
 
                         // get data type
-                        NanoCLRDataType dt = (NanoCLRDataType)*Signature++;
+                        auto dt = (NanoCLRDataType)*Signature++;
 
                         // sanity check
                         if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
@@ -850,8 +850,8 @@ bool CLR_RT_TypeDef_Instance::InitializeFromField(const CLR_RT_FieldDef_Instance
     NATIVE_PROFILE_CLR_CORE();
     if (NANOCLR_INDEX_IS_VALID(fd))
     {
-        CLR_RT_Assembly *assm = fd.assembly;
-        const CLR_RECORD_TYPEDEF *td = (const CLR_RECORD_TYPEDEF *)assm->GetTable(TBL_TypeDef);
+        CLR_RT_Assembly const *assm = fd.assembly;
+        auto *td = (const CLR_RECORD_TYPEDEF *)assm->GetTable(TBL_TypeDef);
         CLR_INDEX indexField = fd.Field();
         int i = assm->tablesSize[TBL_TypeDef];
 
@@ -980,7 +980,7 @@ bool CLR_RT_TypeDef_Instance::ResolveToken(
                 parser.Advance(element);
 
                 // store parameter position
-                CLR_INT8 genericParamPosition = (CLR_INT8)element.GenericParamPosition;
+                auto genericParamPosition = (CLR_INT8)element.GenericParamPosition;
 
                 switch (element.DataType)
                 {
@@ -1749,7 +1749,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
 
             case DATATYPE_DELEGATE_HEAD:
             {
-                CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)obj;
+                auto *dlg = (const CLR_RT_HeapBlock_Delegate *)obj;
 
                 cls = NANOCLR_INDEX_IS_VALID(dlg->m_cls) ? &dlg->m_cls : &g_CLR_RT_WellKnownTypes.Delegate;
             }
@@ -1757,7 +1757,7 @@ HRESULT CLR_RT_TypeDescriptor::InitializeFromObject(const CLR_RT_HeapBlock &ref)
 
             case DATATYPE_DELEGATELIST_HEAD:
             {
-                CLR_RT_HeapBlock_Delegate_List *dlgLst = (CLR_RT_HeapBlock_Delegate_List *)obj;
+                auto *dlgLst = (const CLR_RT_HeapBlock_Delegate_List *)obj;
 
                 cls =
                     NANOCLR_INDEX_IS_VALID(dlgLst->m_cls) ? &dlgLst->m_cls : &g_CLR_RT_WellKnownTypes.MulticastDelegate;
@@ -1940,7 +1940,7 @@ HRESULT CLR_RT_TypeDescriptor::ExtractTypeIndexFromObject(const CLR_RT_HeapBlock
 
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *obj = (CLR_RT_HeapBlock *)&ref;
+    auto *obj = (CLR_RT_HeapBlock *)&ref;
     NanoCLRDataType dt;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_TypeDescriptor::ExtractObjectAndDataType(obj, dt));
@@ -2151,7 +2151,7 @@ bool CLR_RT_Assembly::IsSameAssembly(const CLR_RT_Assembly &assm) const
 void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT8 *buffer = (CLR_UINT8 *)this;
+    auto *buffer = (CLR_UINT8 *)this;
     int i;
 
     name = GetString(header->assemblyName);
@@ -2189,7 +2189,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     //--//
 
     {
-        const CLR_RECORD_TYPEDEF *src = (const CLR_RECORD_TYPEDEF *)this->GetTable(TBL_TypeDef);
+        const auto *src = (const CLR_RECORD_TYPEDEF *)this->GetTable(TBL_TypeDef);
         CLR_RT_TypeDef_CrossReference *dst = this->crossReferenceTypeDef;
         for (i = 0; i < this->tablesSize[TBL_TypeDef]; i++, src++, dst++)
         {
@@ -2200,7 +2200,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
-        const CLR_RECORD_FIELDDEF *src = (const CLR_RECORD_FIELDDEF *)this->GetTable(TBL_FieldDef);
+        auto *src = (const CLR_RECORD_FIELDDEF *)this->GetTable(TBL_FieldDef);
         CLR_RT_FieldDef_CrossReference *dst = this->crossReferenceFieldDef;
         for (i = 0; i < this->tablesSize[TBL_FieldDef]; i++, src++, dst++)
         {
@@ -2209,7 +2209,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
-        const CLR_RECORD_METHODDEF *src = (const CLR_RECORD_METHODDEF *)this->GetTable(TBL_MethodDef);
+        auto *src = (const CLR_RECORD_METHODDEF *)this->GetTable(TBL_MethodDef);
         CLR_RT_MethodDef_CrossReference *dst = this->crossReferenceMethodDef;
         for (i = 0; i < this->tablesSize[TBL_MethodDef]; i++, src++, dst++)
         {
@@ -2218,7 +2218,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
-        const CLR_RECORD_GENERICPARAM *src = (const CLR_RECORD_GENERICPARAM *)this->GetTable(TBL_GenericParam);
+        auto *src = (const CLR_RECORD_GENERICPARAM *)this->GetTable(TBL_GenericParam);
         CLR_RT_GenericParam_CrossReference *dst = this->crossReferenceGenericParam;
         for (i = 0; i < this->tablesSize[TBL_GenericParam]; i++, src++, dst++)
         {
@@ -2227,7 +2227,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
-        const CLR_RECORD_METHODSPEC *src = (const CLR_RECORD_METHODSPEC *)this->GetTable(TBL_MethodSpec);
+        auto *src = (const CLR_RECORD_METHODSPEC *)this->GetTable(TBL_MethodSpec);
         CLR_RT_MethodSpec_CrossReference *dst = this->crossReferenceMethodSpec;
         for (i = 0; i < this->tablesSize[TBL_MethodSpec]; i++, src++, dst++)
         {
@@ -2236,7 +2236,7 @@ void CLR_RT_Assembly::AssemblyInitialize(CLR_RT_Assembly::Offsets &offsets)
     }
 
     {
-        const CLR_RECORD_TYPESPEC *src = (const CLR_RECORD_TYPESPEC *)this->GetTable(TBL_TypeSpec);
+        auto *src = (const CLR_RECORD_TYPESPEC *)this->GetTable(TBL_TypeSpec);
         CLR_RT_TypeSpec_CrossReference *dst = this->crossReferenceTypeSpec;
         for (i = 0; i < this->tablesSize[TBL_TypeSpec]; i++, src++, dst++)
         {
@@ -2263,7 +2263,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
     NANOCLR_HEADER();
 
     CLR_UINT8 buf[sizeof(CLR_RT_Assembly)];
-    CLR_RT_Assembly *skeleton = (CLR_RT_Assembly *)buf;
+    auto *skeleton = (CLR_RT_Assembly *)buf;
 
     NANOCLR_CLEAR(*skeleton);
 
@@ -2300,7 +2300,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
     // Count static fields.
     {
-        const CLR_RECORD_TYPEDEF *src = (const CLR_RECORD_TYPEDEF *)skeleton->GetTable(TBL_TypeDef);
+        auto *src = (const CLR_RECORD_TYPEDEF *)skeleton->GetTable(TBL_TypeDef);
 
         for (int i = 0; i < skeleton->tablesSize[TBL_TypeDef]; i++, src++)
         {
@@ -3105,10 +3105,10 @@ void CLR_RT_Assembly::ResolveLink()
                 CLR_RT_GenericParam_CrossReference *gp = &crossReferenceGenericParam[src->firstGenericParam];
 
                 // get generic parameter count for stop condition
-                int num = src->genericParamCount;
+                int count = src->genericParamCount;
                 CLR_UINT16 indexGenericParam = src->firstGenericParam;
 
-                for (; num; num--, gp++, indexGenericParam++)
+                for (; count; count--, gp++, indexGenericParam++)
                 {
                     CLR_RT_GenericParam_Index gpIndex;
                     gpIndex.Set(assemblyIndex, indexGenericParam);
@@ -4353,9 +4353,9 @@ bool CLR_RT_Assembly::FindFieldDef(
 
     for (int i = 0; i < tablesSize[TBL_FieldDef]; i++, fd++)
     {
-        const char *fieldName = GetString(fd->name);
+        const char *tempFieldName = GetString(fd->name);
 
-        if (!strcmp(fieldName, fieldName))
+        if (!strcmp(fieldName, tempFieldName))
         {
             if (base)
             {
@@ -4384,7 +4384,7 @@ bool CLR_RT_Assembly::FindFieldDef(
 
 bool CLR_RT_Assembly::FindMethodDef(
     const CLR_RECORD_TYPEDEF *td,
-    const char *name,
+    const char *methodName,
     CLR_RT_Assembly *base,
     CLR_SIG sig,
     CLR_RT_MethodDef_Index &index)
@@ -4396,9 +4396,9 @@ bool CLR_RT_Assembly::FindMethodDef(
 
     for (i = 0; i < num; i++, md++)
     {
-        const char *methodName = GetString(md->name);
+        const char *tempMethodName = GetString(md->name);
 
-        if (!strcmp(methodName, name))
+        if (!strcmp(methodName, tempMethodName))
         {
             bool fMatch = true;
 
@@ -4441,7 +4441,7 @@ bool CLR_RT_Assembly::FindMethodDef(
     CLR_RT_TypeSpec_Instance tsInstance;
     tsInstance.InitializeFromIndex(tsIndex);
 
-    const CLR_RECORD_TYPEDEF *td = (const CLR_RECORD_TYPEDEF *)base->GetTable(TBL_TypeDef);
+    auto *td = (const CLR_RECORD_TYPEDEF *)base->GetTable(TBL_TypeDef);
     td += tsInstance.typeDefIndex;
 
     return CLR_RT_Assembly::FindMethodDef(td, methodName, base, sig, index);
@@ -4611,7 +4611,7 @@ CLR_UINT32 CLR_RT_Assembly::ComputeHashForName(const CLR_RT_TypeDef_Index &td, C
 CLR_UINT32 CLR_RT_Assembly::ComputeHashForType(NanoCLRDataType et, CLR_UINT32 hash)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT8 val = (CLR_UINT8)CLR_RT_TypeSystem::MapDataTypeToElementType(et);
+    auto val = (CLR_UINT8)CLR_RT_TypeSystem::MapDataTypeToElementType(et);
 
     CLR_UINT32 hashPost = SUPPORT_ComputeCRC(&val, sizeof(val), hash);
 
@@ -5026,8 +5026,8 @@ int
     CompareResource(const void *p1, const void *p2)
 {
     NATIVE_PROFILE_CLR_CORE();
-    const CLR_RECORD_RESOURCE *resource1 = (const CLR_RECORD_RESOURCE *)p1;
-    const CLR_RECORD_RESOURCE *resource2 = (const CLR_RECORD_RESOURCE *)p2;
+    auto *resource1 = (const CLR_RECORD_RESOURCE *)p1;
+    auto *resource2 = (const CLR_RECORD_RESOURCE *)p2;
 
     return (int)resource1->id - (int)resource2->id;
 }
@@ -6232,7 +6232,7 @@ HRESULT CLR_RT_AttributeParser::Next(Value *&res)
                 g_CLR_RT_WellKnownTypes.Object));
 
             // get a pointer to the first element
-            CLR_RT_HeapBlock *currentParam =
+            auto *currentParam =
                 (CLR_RT_HeapBlock *)m_lastValue.m_value.DereferenceArray()->GetFirstElement();
 
             do

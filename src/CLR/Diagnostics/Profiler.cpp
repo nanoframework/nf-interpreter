@@ -288,7 +288,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
             case DATATYPE_SZARRAY:
             {
                 // Special case needed to dump out array data type and levels.
-                CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                auto *array = (CLR_RT_HeapBlock_Array *)ptr;
 
                 PackAndWriteBits(array->ReflectionDataConst().data.type);
                 PackAndWriteBits(array->ReflectionDataConst().levels);
@@ -302,7 +302,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 
             case DATATYPE_ASSEMBLY:
             {
-                CLR_RT_Assembly *assembly = (CLR_RT_Assembly *)ptr;
+                auto *assembly = (CLR_RT_Assembly *)ptr;
                 DumpSingleReference(assembly->file);
 #if !defined(NANOCLR_APPDOMAINS)
                 DumpListOfReferences(assembly->staticFields, assembly->staticFieldsCount);
@@ -312,28 +312,28 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 
             case DATATYPE_WEAKCLASS:
             {
-                CLR_RT_HeapBlock_WeakReference *wr = (CLR_RT_HeapBlock_WeakReference *)ptr;
+                auto *wr = (CLR_RT_HeapBlock_WeakReference *)ptr;
                 DumpSingleReference(wr->m_targetDirect);
                 break;
             }
 
             case DATATYPE_DELEGATE_HEAD:
             {
-                CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
+                auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
                 DumpSingleReference(&dlg->m_object);
                 break;
             }
 
             case DATATYPE_DELEGATELIST_HEAD:
             {
-                CLR_RT_HeapBlock_Delegate_List *dlgList = (CLR_RT_HeapBlock_Delegate_List *)ptr;
+                auto *dlgList = (CLR_RT_HeapBlock_Delegate_List *)ptr;
                 DumpListOfReferences(dlgList->GetDelegates(), dlgList->m_length);
                 break;
             }
 
             case DATATYPE_THREAD:
             {
-                CLR_RT_Thread *th = (CLR_RT_Thread *)ptr;
+                auto *th = (CLR_RT_Thread *)ptr;
 
                 DumpSingleReference(th->m_dlg);
                 DumpSingleReference(th->m_currentException.Dereference());
@@ -354,7 +354,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 
             case DATATYPE_STACK_FRAME:
             {
-                CLR_RT_StackFrame *stack = (CLR_RT_StackFrame *)ptr;
+                auto *stack = (CLR_RT_StackFrame *)ptr;
                 DumpListOfReferences(stack->m_arguments, stack->m_call.target->argumentsCount);
                 DumpListOfReferences(stack->m_locals, stack->m_call.target->localsCount);
                 DumpListOfReferences(stack->m_evalStack, stack->TopValuePosition());
@@ -363,7 +363,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 
             case DATATYPE_OBJECT_TO_EVENT:
             {
-                CLR_RT_ObjectToEvent_Source *otes = (CLR_RT_ObjectToEvent_Source *)ptr;
+                auto *otes = (CLR_RT_ObjectToEvent_Source *)ptr;
                 DumpSingleReference(
                     otes->m_eventPtr); // The managed object should reference this obj, which references the event.
                 break;
@@ -373,7 +373,7 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
             {
                 // Object points to Lock Head, Thread points to Lock Head, Lock Head points to list of lock owners and
                 // requests
-                CLR_RT_HeapBlock_Lock *lock = (CLR_RT_HeapBlock_Lock *)ptr;
+                auto *lock = (CLR_RT_HeapBlock_Lock *)ptr;
                 DumpListOfReferences(lock->m_owners);
                 DumpListOfReferences(lock->m_requests);
                 break;
@@ -381,35 +381,35 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 
             case DATATYPE_ENDPOINT_HEAD:
             {
-                CLR_RT_HeapBlock_EndPoint *ep = (CLR_RT_HeapBlock_EndPoint *)ptr;
+                auto *ep = (CLR_RT_HeapBlock_EndPoint *)ptr;
                 DumpListOfReferences(ep->m_messages);
                 break;
             }
 
             case DATATYPE_WAIT_FOR_OBJECT_HEAD:
             {
-                CLR_RT_HeapBlock_WaitForObject *wfo = (CLR_RT_HeapBlock_WaitForObject *)ptr;
+                auto *wfo = (CLR_RT_HeapBlock_WaitForObject *)ptr;
                 DumpListOfReferences(wfo->GetWaitForObjects(), wfo->m_cObjects);
                 break;
             }
 
             case DATATYPE_FINALIZER_HEAD:
             {
-                CLR_RT_HeapBlock_Finalizer *f = (CLR_RT_HeapBlock_Finalizer *)ptr;
+                auto *f = (CLR_RT_HeapBlock_Finalizer *)ptr;
                 DumpSingleReference(f->m_object);
                 break;
             }
 
             case DATATYPE_MEMORY_STREAM_HEAD:
             {
-                CLR_RT_HeapBlock_MemoryStream *ms = (CLR_RT_HeapBlock_MemoryStream *)ptr;
+                auto *ms = (CLR_RT_HeapBlock_MemoryStream *)ptr;
                 DumpListOfReferences(ms->m_buffers);
                 break;
             }
 
             case DATATYPE_SERIALIZER_HEAD:
             {
-                CLR_RT_BinaryFormatter *bf = (CLR_RT_BinaryFormatter *)ptr;
+                auto *bf = (CLR_RT_BinaryFormatter *)ptr;
                 DumpSingleReference(bf->m_stream);
                 DumpListOfReferences(bf->m_duplicates);
                 DumpListOfReferences(bf->m_states);
@@ -520,7 +520,7 @@ void CLR_PRF_Profiler::Timestamp()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     // Send Profiling Timestamp
-    CLR_UINT32 time =
+    auto time =
         (CLR_UINT32)((HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))) >> CLR_PRF_CMDS::Bits::TimestampShift);
     if (time > m_lastTimestamp)
     {
@@ -650,7 +650,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
             }
             else if (dt == DATATYPE_SZARRAY)
             {
-                CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                auto *array = (CLR_RT_HeapBlock_Array *)ptr;
                 PackAndWriteBits(array->ReflectionDataConst().data.type);
                 PackAndWriteBits(array->ReflectionDataConst().levels);
             }
@@ -861,7 +861,7 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
     const CLR_UINT32 messageType = CLR_DBG_Commands::c_Profiling_Stream;
 
     CLR_UINT8 buffer[2 * sizeof(CLR_UINT16) + CLR_RT_HeapBlock_MemoryStream::Buffer::c_PayloadSize];
-    CLR_DBG_Commands::Profiling_Stream *packet = (CLR_DBG_Commands::Profiling_Stream *)buffer;
+    auto *packet = (CLR_DBG_Commands::Profiling_Stream *)buffer;
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_MemoryStream::Buffer, ptr, m_stream->m_buffers)
     {

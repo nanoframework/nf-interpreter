@@ -458,7 +458,7 @@ struct CLR_RT_HeapBlock
 
                 R8 &operator+=(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     value += (double)num;         // uses conversion and then built-in type double
                     *this = value;                // uses assignment operator (operator=)
                     return *this;
@@ -466,7 +466,7 @@ struct CLR_RT_HeapBlock
 
                 R8 &operator-=(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     value -= (double)num;         // uses conversion and then built-in type double
                     *this = value;                // uses assignment operator (operator=)
                     return *this;
@@ -474,7 +474,7 @@ struct CLR_RT_HeapBlock
 
                 R8 operator*(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     R8 ret_value;
                     value *= (double)num; // uses conversion and then built-in type __int64
                     ret_value = value;    // uses assignment operator (operator=)
@@ -483,7 +483,7 @@ struct CLR_RT_HeapBlock
 
                 R8 operator/(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     R8 ret_value;
                     value /= (double)num; // uses conversion and then built-in type __int64
                     ret_value = value;    // uses assignment operator (operator=)
@@ -492,25 +492,25 @@ struct CLR_RT_HeapBlock
 
                 bool operator<(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     return (value < (double)num);
                 }
 
                 bool operator>(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     return (value > (double)num);
                 }
 
                 bool operator==(const R8 &num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     return (value == (double)num);
                 }
 
                 bool operator==(const double num)
                 {
-                    double value = (double)*this; // uses conversion
+                    auto value = (double)*this; // uses conversion
                     return (value == num);
                 }
 
@@ -1261,8 +1261,8 @@ struct CLR_RT_HeapBlock
 
         value.Debug_CheckPointer();
 
-        CLR_RT_HeapBlock_Raw *src = (CLR_RT_HeapBlock_Raw *)this;
-        CLR_RT_HeapBlock_Raw *dst = (CLR_RT_HeapBlock_Raw *)&value;
+        auto *src = (CLR_RT_HeapBlock_Raw *)this;
+        auto *dst = (CLR_RT_HeapBlock_Raw *)&value;
 
         *src = *dst;
     }

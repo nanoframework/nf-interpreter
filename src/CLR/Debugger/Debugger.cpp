@@ -376,7 +376,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     if ((msg->m_header.m_flags & WP_Flags_c_Reply) == 0)
     {
         Monitor_Ping_Reply cmdReply;
-        Monitor_Ping_Command *cmd = (Monitor_Ping_Command *)msg->m_payload;
+        auto *cmd = (Monitor_Ping_Command *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
         fStopOnBoot = (cmd != nullptr) && (cmd->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
@@ -427,7 +427,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
     }
     else
     {
-        Monitor_Ping_Reply *pingReply = (Monitor_Ping_Reply *)msg->m_payload;
+        auto *pingReply = (Monitor_Ping_Reply *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
         fStopOnBoot = (pingReply != nullptr) && (pingReply->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
@@ -896,7 +896,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
 #if defined(VIRTUAL_DEVICE)
 
-        bool proceed = false;
+        proceed = false;
         void *temp;
         temp = (void *)sectAddr;
 
@@ -963,7 +963,7 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_ReadMemory *cmd = (CLR_DBG_Commands_Monitor_ReadMemory *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands_Monitor_ReadMemory *)msg->m_payload;
     uint8_t *buffer;
     uint32_t errorCode;
 
@@ -1008,7 +1008,7 @@ bool CLR_DBG_Debugger::Monitor_WriteMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_WriteMemory *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands_Monitor_WriteMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_WriteMemory_Reply cmdReply;
 
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, cmd->data, AccessMemory_Write, &cmdReply);
@@ -1022,7 +1022,7 @@ bool CLR_DBG_Debugger::Monitor_CheckMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_CheckMemory *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands_Monitor_CheckMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_CheckMemory_Reply cmdReply;
     uint32_t errorCode;
 
@@ -1038,7 +1038,7 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
 
     g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, nullptr, AccessMemory_Erase, &cmdReply);
@@ -1052,7 +1052,7 @@ bool CLR_DBG_Debugger::Monitor_Execute(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Monitor_Execute *cmd = (CLR_DBG_Commands::Monitor_Execute *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Monitor_Execute *)msg->m_payload;
 
 #if defined(BUILD_RTM)
     if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
@@ -1072,7 +1072,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
 
     bool success = true;
 
-    CLR_DBG_Commands::Monitor_Reboot *cmd = (CLR_DBG_Commands::Monitor_Reboot *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Monitor_Reboot *)msg->m_payload;
 
     if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
         (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
@@ -1365,7 +1365,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Execution_ChangeConditions *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Execution_ChangeConditions *)msg->m_payload;
 
     // save current value
@@ -1509,7 +1509,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities *)msg->m_payload;
 
     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ReplyUnion reply;
@@ -1744,7 +1744,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_Allocate(WP_Message *msg)
 bool CLR_DBG_Debugger::Debugging_UpgradeToSsl(WP_Message *msg)
 {
 
-    CLR_DBG_Commands::Debugging_UpgradeToSsl *cmd = (CLR_DBG_Commands::Debugging_UpgradeToSsl *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_UpgradeToSsl *)msg->m_payload;
     CLR_DBG_Commands::Debugging_UpgradeToSsl::Reply reply;
 
     if (!DebuggerPort_IsSslSupported(HalSystemConfig.DebuggerPort))
@@ -1866,7 +1866,7 @@ static bool FillValues(
 
         case DATATYPE_SZARRAY:
         {
-            CLR_RT_HeapBlock_Array *ptr2 = (CLR_RT_HeapBlock_Array *)ptr;
+            CLR_RT_HeapBlock_Array const *ptr2 = (CLR_RT_HeapBlock_Array *)ptr;
 
             dst->m_array_numOfElements = ptr2->m_numOfElements;
             dst->m_array_depth = ptr2->ReflectionDataConst().levels;
@@ -1982,7 +1982,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_Breakpoints(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Execution_Breakpoints *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Execution_Breakpoints *)msg->m_payload;
 
     g_CLR_RT_ExecutionEngine.InstallBreakpoints(
@@ -2231,7 +2231,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Stack(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_Stack *cmd = (CLR_DBG_Commands::Debugging_Thread_Stack *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Stack *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Thread_Stack::Reply *cmdReply = nullptr;
     int len = 0;
 
@@ -2253,7 +2253,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Kill(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_Kill *cmd = (CLR_DBG_Commands::Debugging_Thread_Kill *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Kill *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Thread_Kill::Reply cmdReply;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
 
@@ -2277,7 +2277,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Suspend(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_Suspend *cmd = (CLR_DBG_Commands::Debugging_Thread_Suspend *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Suspend *)msg->m_payload;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
 
     if (th)
@@ -2294,7 +2294,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Resume(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_Resume *cmd = (CLR_DBG_Commands::Debugging_Thread_Resume *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Resume *)msg->m_payload;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
 
     if (th)
@@ -2311,7 +2311,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_DBG_Debugger *dbg = g_CLR_DBG_Debugger;
-    CLR_DBG_Commands::Debugging_Thread_Get *cmd = (CLR_DBG_Commands::Debugging_Thread_Get *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Get *)msg->m_payload;
     CLR_RT_Thread *th = dbg->GetThreadFromPid(cmd->m_pid);
     CLR_RT_HeapBlock *pThread;
     bool fFound = false;
@@ -2411,7 +2411,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_GetException *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Thread_GetException *)msg->m_payload;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
     CLR_RT_HeapBlock *blk = nullptr;
@@ -2432,7 +2432,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Unwind(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_Unwind *cmd = (CLR_DBG_Commands::Debugging_Thread_Unwind *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_Unwind *)msg->m_payload;
     CLR_RT_StackFrame *call;
     CLR_RT_Thread *th;
     bool isInline = false;
@@ -2465,7 +2465,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Stack_Info *cmd = (CLR_DBG_Commands::Debugging_Stack_Info *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Stack_Info *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Stack_Info::Reply cmdReply;
     CLR_RT_StackFrame *call;
     bool isInline = false;
@@ -2503,7 +2503,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Stack_SetIP *cmd = (CLR_DBG_Commands::Debugging_Stack_SetIP *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Stack_SetIP *)msg->m_payload;
     CLR_RT_StackFrame *call;
     bool isInline = false;
 
@@ -2623,7 +2623,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock ref;
 
@@ -2664,7 +2664,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_GetStack *cmd = (CLR_DBG_Commands::Debugging_Value_GetStack *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_GetStack *)msg->m_payload;
     CLR_RT_StackFrame *call;
     bool isInline = false;
 
@@ -2840,7 +2840,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_GetField *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
     CLR_RT_HeapBlock *reference = nullptr;
     CLR_RT_HeapBlock tmp;
@@ -2950,7 +2950,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_GetArray *cmd = (CLR_DBG_Commands::Debugging_Value_GetArray *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_GetArray *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *reference = nullptr;
     CLR_RT_HeapBlock tmp;
@@ -3001,7 +3001,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetBlock(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_GetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_GetBlock *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_GetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
     // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
@@ -3014,7 +3014,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetScratchPad(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_GetScratchPad *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_index);
 
@@ -3027,7 +3027,7 @@ bool CLR_DBG_Debugger::Debugging_Value_SetBlock(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_SetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
     // WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, nullptr, 0);
@@ -3040,7 +3040,7 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_SetArray *cmd = (CLR_DBG_Commands::Debugging_Value_SetArray *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_SetArray *)msg->m_payload;
     CLR_RT_HeapBlock_Array *array = cmd->m_heapblock;
     CLR_RT_HeapBlock tmp;
 
@@ -3077,7 +3077,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_AllocateObject *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateObject *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
@@ -3100,7 +3100,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_AllocateString *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateString *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
@@ -3111,7 +3111,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
 
         if (str)
         {
-            char *dst = (char *)str->StringText();
+            auto *dst = (char *)str->StringText();
 
             //
             // Fill the string with spaces, it will be set at a later stage.
@@ -3133,7 +3133,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_AllocateArray *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateArray *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
@@ -3165,7 +3165,7 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
     CLR_DBG_Debugger *dbg = g_CLR_DBG_Debugger;
-    CLR_DBG_Commands::Profiling_Command *cmd = (CLR_DBG_Commands::Profiling_Command *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Profiling_Command *)msg->m_payload;
     CLR_UINT8 command = cmd->m_command;
 
     switch (command)
@@ -3186,8 +3186,8 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
 bool CLR_DBG_Debugger::Profiling_ChangeConditions(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
-    CLR_DBG_Commands::Profiling_Command *parent_cmd = (CLR_DBG_Commands::Profiling_Command *)msg->m_payload;
-    CLR_DBG_Commands::Profiling_ChangeConditions *cmd = (CLR_DBG_Commands::Profiling_ChangeConditions *)&parent_cmd[1];
+    auto *parent_cmd = (CLR_DBG_Commands::Profiling_Command *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Profiling_ChangeConditions *)&parent_cmd[1];
 
     g_CLR_RT_ExecutionEngine.m_iProfiling_Conditions |= cmd->m_set;
     g_CLR_RT_ExecutionEngine.m_iProfiling_Conditions &= ~cmd->m_reset;
@@ -3356,7 +3356,7 @@ bool CLR_DBG_Debugger::Debugging_Value_Assign(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Value_Assign *cmd = (CLR_DBG_Commands::Debugging_Value_Assign *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_Assign *)msg->m_payload;
     CLR_RT_HeapBlock *blkDst = cmd->m_heapblockDst;
     CLR_RT_HeapBlock *blkSrc = cmd->m_heapblockSrc;
 
@@ -3485,7 +3485,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Resolve_Assembly::Reply *cmdReply;
 
-    CLR_DBG_Commands::Debugging_Resolve_Assembly *cmd = (CLR_DBG_Commands::Debugging_Resolve_Assembly *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_Assembly *)msg->m_payload;
     CLR_RT_Assembly *assm = g_CLR_DBG_Debugger->IsGoodAssembly(cmd->m_index.Assembly());
 
 #ifdef TARGET_RAM_CONSTRAINED
@@ -3542,7 +3542,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Type(WP_Message *msg)
     CLR_RT_TypeDef_Instance inst;
     CLR_DBG_Commands::Debugging_Resolve_Type::Reply *cmdReply;
 
-    CLR_DBG_Commands::Debugging_Resolve_Type *cmd = (CLR_DBG_Commands::Debugging_Resolve_Type *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_Type *)msg->m_payload;
 
 #ifdef TARGET_RAM_CONSTRAINED
     // try allocating memory for reply struct
@@ -3585,7 +3585,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Resolve_Field::Reply *cmdReply;
     CLR_RT_FieldDef_Instance inst;
 
-    CLR_DBG_Commands::Debugging_Resolve_Field *cmd = (CLR_DBG_Commands::Debugging_Resolve_Field *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_Field *)msg->m_payload;
 
 #ifdef TARGET_RAM_CONSTRAINED
     // try allocating memory for reply struct
@@ -3636,7 +3636,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
     CLR_RT_MethodDef_Instance inst;
     CLR_RT_TypeDef_Instance instOwner;
 
-    CLR_DBG_Commands::Debugging_Resolve_Method *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_Method *)msg->m_payload;
 
 #ifdef TARGET_RAM_CONSTRAINED
     // try allocating memory for reply struct
@@ -3677,7 +3677,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *cmd =
+    auto *cmd =
         (CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply;
     CLR_RT_TypeDef_Index cls;
@@ -3815,7 +3815,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Info_SetJMC *cmd = (CLR_DBG_Commands::Debugging_Info_SetJMC *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Info_SetJMC *)msg->m_payload;
     bool fJMC = (cmd->m_fIsJMC != 0);
 
     switch (cmd->m_kind)

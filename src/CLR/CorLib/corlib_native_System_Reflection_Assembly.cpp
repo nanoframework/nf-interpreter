@@ -92,7 +92,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetTypes___SZARRAY_Sys
 
         if (num)
         {
-            CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
+            auto *pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
 
             for (CLR_UINT32 i = 0; i < num; i++, pArray++)
             {
@@ -161,7 +161,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetManifestResourceNam
             g_CLR_RT_WellKnownTypes.String));
 
         {
-            CLR_RT_HeapBlock *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
+            auto *pArray = (CLR_RT_HeapBlock *)result.Array()->GetFirstElement();
 
             for (int indexResourceFile = 0; indexResourceFile < pAssm->tablesSize[TBL_ResourcesFiles];
                  indexResourceFile++)

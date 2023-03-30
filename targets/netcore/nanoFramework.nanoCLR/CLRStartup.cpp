@@ -138,7 +138,7 @@ struct Settings
         for (CLR_RT_ParseOptions::BufferMapIter it = m_assemblies.begin(); it != m_assemblies.end(); it++)
         {
             CLR_RT_Assembly *assm;
-            const CLR_RT_Buffer *buffer = (const CLR_RT_Buffer *)it->second;
+            auto *buffer = (const CLR_RT_Buffer *)it->second;
             const CLR_RECORD_ASSEMBLY *header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
 
             // Creates instance of assembly, sets pointer to native functions, links to g_CLR_RT_TypeSystem
@@ -199,7 +199,7 @@ struct Settings
 
             if (deviceInfo->Attribute & MediaAttribute_SupportsXIP)
             {
-                unsigned char *datAssembliesBuffer =
+                auto *datAssembliesBuffer =
                     (unsigned char *)CLR_RT_Memory::Allocate_And_Erase(datSize, CLR_RT_HeapBlock ::HB_Unmovable);
                 CHECK_ALLOCATION(datAssembliesBuffer);
 
@@ -413,7 +413,7 @@ struct Settings
     {
         NANOCLR_HEADER();
 
-        CLR_RT_Buffer *buffer = new CLR_RT_Buffer(data, data + size);
+        auto *buffer = new CLR_RT_Buffer(data, data + size);
         CLR_RECORD_ASSEMBLY *header;
 
         header = (CLR_RECORD_ASSEMBLY *)&(*buffer)[0];
@@ -451,7 +451,7 @@ struct Settings
 
             while (header + 1 <= headerEnd && header->GoodAssembly())
             {
-                CLR_RT_Buffer *bufferSub = new CLR_RT_Buffer();
+                auto *bufferSub = new CLR_RT_Buffer();
                 CLR_RECORD_ASSEMBLY *headerSub;
                 CLR_RT_Assembly *assm;
 
@@ -503,7 +503,7 @@ struct Settings
 
         NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
         {
-            const CLR_RECORD_ASSEMBLYREF *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
+            auto *src = (const CLR_RECORD_ASSEMBLYREF *)pASSM->GetTable(TBL_AssemblyRef);
             for (int i = 0; i < pASSM->tablesSize[TBL_AssemblyRef]; i++, src++)
             {
                 const char *szName = pASSM->GetString(src->name);

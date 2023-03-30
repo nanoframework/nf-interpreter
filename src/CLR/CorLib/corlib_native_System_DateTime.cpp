@@ -73,7 +73,7 @@ HRESULT Library_corlib_native_System_DateTime::GetDateTimePart___I4__SystemDateT
     signed int days;
     SYSTEMTIME st;
 
-    DateTimePart dateTimePart = (DateTimePart)stack.Arg1().NumericByRef().s4;
+    auto dateTimePart = (DateTimePart)stack.Arg1().NumericByRef().s4;
 
     if (Expand(stack, st))
     {

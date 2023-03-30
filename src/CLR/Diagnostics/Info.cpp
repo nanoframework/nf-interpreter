@@ -150,7 +150,7 @@ void CLR_Debug::Emit(const char *text, int len)
 
     if (s_CLR_RT_fTrace_RedirectOutput.size())
     {
-        static HANDLE hFile = INVALID_HANDLE_VALUE;
+        static auto hFile = INVALID_HANDLE_VALUE;
         static int lines = 0;
         static int num = 0;
 
@@ -832,7 +832,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 
         case DATATYPE_SZARRAY:
         {
-            CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+            auto *array = (CLR_RT_HeapBlock_Array *)ptr;
 
             CLR_RT_DUMP::TYPE(array->ReflectionData());
         }
@@ -840,7 +840,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
 
         case DATATYPE_DELEGATE_HEAD:
         {
-            CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
+            auto *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
             CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
         }
