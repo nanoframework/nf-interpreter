@@ -5576,6 +5576,51 @@ HRESULT CLR_RT_TypeSystem::QueueStringToBuffer(char *&szBuffer, size_t &iBuffer,
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT CLR_RT_TypeSystem::BuildTypeName(const CLR_RT_TypeSpec_Index &typeIndex, char *&szBuffer, size_t &iBuffer)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    CLR_RT_TypeSpec_Instance instance;
+
+    if (instance.InitializeFromIndex(typeIndex) == false)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+    }
+
+    CLR_RT_SignatureParser parser;
+    parser.Initialize_TypeSpec(instance.assembly, instance.assembly->GetTypeSpec(typeIndex.TypeSpec()));
+
+    CLR_RT_SignatureParser::Element element;
+
+    // get type
+    parser.Advance(element);
+
+    CLR_RT_TypeDef_Index typeDef;
+    typeDef.data = element.Class.data;
+
+    BuildTypeName(typeDef, szBuffer, iBuffer);
+
+    NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, "<"));
+
+    for (int i = 0; i < parser.GenParamCount; i++)
+    {
+        parser.Advance(element);
+
+#if defined(VIRTUAL_DEVICE)
+        NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, c_CLR_RT_DataTypeLookup[element.DataType].m_name));
+#endif
+        if (i + 1 < parser.GenParamCount)
+        {
+            NANOCLR_CHECK_HRESULT(QueueStringToBuffer(szBuffer, iBuffer, ","));
+        }
+    }
+
+    CLR_SafeSprintf(szBuffer, iBuffer, ">");
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT CLR_RT_TypeSystem::BuildTypeName(const CLR_RT_TypeDef_Index &cls, char *&szBuffer, size_t &iBuffer)
 {
     NATIVE_PROFILE_CLR_CORE();
