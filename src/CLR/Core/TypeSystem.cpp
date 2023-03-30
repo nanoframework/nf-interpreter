@@ -5512,14 +5512,14 @@ bool CLR_RT_TypeSystem::MatchSignatureElement(
             return false;
         }
 
-        if ((resLeft.DataType == DATATYPE_MVAR && resLeft.DataType == DATATYPE_MVAR) &&
-            (resLeft.GenericParamPosition && resRight.GenericParamPosition))
+        if ((resLeft.DataType == DATATYPE_MVAR && resRight.DataType == DATATYPE_MVAR) &&
+            (resLeft.GenericParamPosition != resRight.GenericParamPosition))
         {
             return false;
         }
 
-        if ((resLeft.DataType == DATATYPE_VAR && resLeft.DataType == DATATYPE_VAR) &&
-            (resLeft.GenericParamPosition && resRight.GenericParamPosition))
+        if ((resLeft.DataType == DATATYPE_VAR && resRight.DataType == DATATYPE_VAR) &&
+            (resLeft.GenericParamPosition != resRight.GenericParamPosition))
         {
             return false;
         }
