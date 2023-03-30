@@ -13,7 +13,7 @@ HRESULT Library_corlib_native_System_RuntimeType::get_Assembly___SystemReflectio
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
 
-    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, NULL));
+    NANOCLR_CHECK_HRESULT(GetTypeDescriptor(*hbType, td, nullptr));
 
     {
         CLR_RT_Assembly_Index index;
@@ -87,7 +87,13 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetMethods___SZARRAY_SystemReflectionMethodInfo__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetMethods(stack, NULL, stack.Arg1().NumericByRef().s4, NULL, 0, true);
+    return Library_corlib_native_System_Type::GetMethods(
+        stack,
+        nullptr,
+        stack.Arg1().NumericByRef().s4,
+        nullptr,
+        0,
+        true);
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::
@@ -105,7 +111,7 @@ HRESULT Library_corlib_native_System_RuntimeType::
     GetFields___SZARRAY_SystemReflectionFieldInfo__SystemReflectionBindingFlags(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return Library_corlib_native_System_Type::GetFields(stack, NULL, stack.Arg1().NumericByRef().s4, true);
+    return Library_corlib_native_System_Type::GetFields(stack, nullptr, stack.Arg1().NumericByRef().s4, true);
 }
 
 HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_SystemType(CLR_RT_StackFrame &stack)
@@ -115,7 +121,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetInterfaces___SZARRAY_System
 
     CLR_RT_TypeDef_Instance td;
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
-    CLR_RT_HeapBlock *ptr = NULL;
+    CLR_RT_HeapBlock *ptr = nullptr;
     CLR_RT_HeapBlock *hbType = stack.Arg0().Dereference();
     int count = 0;
 
@@ -263,8 +269,8 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributesNative___SZ
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *returnArray = NULL;
-    CLR_RT_HeapBlock *callerType = NULL;
+    CLR_RT_HeapBlock *returnArray = nullptr;
+    CLR_RT_HeapBlock *callerType = nullptr;
     CLR_RT_TypeDef_Instance typeDefinition;
     int count = 0;
 
@@ -352,7 +358,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                 // parse next attribute, if there is another
                 NANOCLR_CHECK_HRESULT(parser.Next(val));
 
-                if (val == NULL)
+                if (val == nullptr)
                 {
                     break;
                 }
@@ -370,7 +376,7 @@ HRESULT Library_corlib_native_System_RuntimeType::GetCustomAttributes(
                         returnArray++;
 
                         // set next position to NULL
-                        returnArray->SetObjectReference(NULL);
+                        returnArray->SetObjectReference(nullptr);
                     }
                     else if (val->m_mode == CLR_RT_AttributeParser::Value::c_ConstructorArgument)
                     {

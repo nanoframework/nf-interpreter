@@ -37,7 +37,7 @@
 
 #define NANOCLR_PARAMCHECK_POINTER(ptr)                                                                                \
     {                                                                                                                  \
-        if (ptr == NULL)                                                                                               \
+        if (ptr == nullptr)                                                                                            \
         {                                                                                                              \
             hrInner = CLR_E_NULL_REFERENCE;                                                                            \
         }                                                                                                              \
@@ -45,7 +45,7 @@
 
 #define NANOCLR_PARAMCHECK_POINTER_AND_SET(ptr, val)                                                                   \
     {                                                                                                                  \
-        if (ptr == NULL)                                                                                               \
+        if (ptr == nullptr)                                                                                            \
         {                                                                                                              \
             hrInner = CLR_E_NULL_REFERENCE;                                                                            \
         }                                                                                                              \
@@ -57,7 +57,7 @@
 
 #define NANOCLR_PARAMCHECK_NOTNULL(ptr)                                                                                \
     {                                                                                                                  \
-        if (ptr == NULL)                                                                                               \
+        if (ptr == nullptr)                                                                                            \
         {                                                                                                              \
             hrInner = CLR_E_INVALID_PARAMETER;                                                                         \
         }                                                                                                              \
@@ -65,7 +65,7 @@
 
 #define NANOCLR_PARAMCHECK_STRING_NOT_EMPTY(ptr)                                                                       \
     {                                                                                                                  \
-        if (ptr == NULL || ptr[0] == 0)                                                                                \
+        if (ptr == nullptr || ptr[0] == 0)                                                                             \
         {                                                                                                              \
             hrInner = CLR_E_INVALID_PARAMETER;                                                                         \
         }                                                                                                              \

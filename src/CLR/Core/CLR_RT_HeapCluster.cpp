@@ -34,15 +34,15 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
         {
             CLR_RT_HeapBlock_WeakReference *weak = (CLR_RT_HeapBlock_WeakReference *)ptr;
 
-            if (weak->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(sizeof(*weak)) && weak->m_targetSerialized != NULL &&
+            if (weak->DataSize() == CONVERTFROMSIZETOHEAPBLOCKS(sizeof(*weak)) && weak->m_targetSerialized != nullptr &&
                 (weak->m_identity.m_flags & CLR_RT_HeapBlock_WeakReference::WR_SurviveBoot))
             {
-                weak->SetNext(NULL);
-                weak->SetPrev(NULL);
+                weak->SetNext(nullptr);
+                weak->SetPrev(nullptr);
 
                 weak->m_identity.m_flags &= ~CLR_RT_HeapBlock_WeakReference::WR_Persisted;
 
-                weak->m_targetDirect = NULL;
+                weak->m_targetDirect = nullptr;
 
                 weak->MarkAlive();
 
@@ -96,7 +96,7 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
 CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock_Node *res = NULL;
+    CLR_RT_HeapBlock_Node *res = nullptr;
     CLR_UINT32 available = 0;
 
     m_freeList.ValidateList();
@@ -200,7 +200,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
     // Open the free list.
     //
     CLR_RT_HeapBlock_Node *last = m_freeList.Head();
-    last->SetPrev(NULL);
+    last->SetPrev(nullptr);
 
     while (ptr < end)
     {
@@ -259,7 +259,7 @@ void CLR_RT_HeapCluster::RecoverFromGC()
     //
     last->SetNext(m_freeList.Tail());
     m_freeList.Tail()->SetPrev(last);
-    m_freeList.Tail()->SetNext(NULL);
+    m_freeList.Tail()->SetNext(nullptr);
 }
 
 CLR_RT_HeapBlock_Node *CLR_RT_HeapCluster::InsertInOrder(CLR_RT_HeapBlock_Node *node, CLR_UINT32 size)

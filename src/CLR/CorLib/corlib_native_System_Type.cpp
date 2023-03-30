@@ -38,7 +38,7 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     const char *szText = stack.Arg1().RecoverString();
     FAULT_ON_NULL(szText);
 
-    NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, stack.Arg2().NumericByRef().s4, NULL, 0, false));
+    NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, stack.Arg2().NumericByRef().s4, nullptr, 0, false));
 
     NANOCLR_NOCLEANUP();
 }
@@ -91,7 +91,7 @@ HRESULT Library_corlib_native_System_Type::GetConstructor___SystemReflectionCons
 
     NANOCLR_SET_AND_LEAVE(GetMethods(
         stack,
-        NULL,
+        nullptr,
         c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public | c_BindingFlags_NonPublic,
         pParams,
         iParams,
@@ -107,9 +107,9 @@ HRESULT Library_corlib_native_System_Type::GetConstructors___SZARRAY_SystemRefle
 
     NANOCLR_SET_AND_LEAVE(GetMethods(
         stack,
-        NULL,
+        nullptr,
         c_BindingFlags_CreateInstance | c_BindingFlags_Instance | c_BindingFlags_Public,
-        NULL,
+        nullptr,
         0,
         true));
 
@@ -133,7 +133,7 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     }
     else
     {
-        pParams = NULL;
+        pParams = nullptr;
         iParams = 0;
     }
 
@@ -153,7 +153,7 @@ HRESULT Library_corlib_native_System_Type::GetMethod___SystemReflectionMethodInf
     const char *szText = stack.Arg1().RecoverString();
     FAULT_ON_NULL(szText);
 
-    NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, c_BindingFlags_DefaultLookup, NULL, 0, false));
+    NANOCLR_SET_AND_LEAVE(GetMethods(stack, szText, c_BindingFlags_DefaultLookup, nullptr, 0, false));
 
     NANOCLR_NOCLEANUP();
 }
@@ -299,11 +299,11 @@ HRESULT Library_corlib_native_System_Type::GetTypeInternal___STATIC__SystemType_
 
     if (szAssembly)
     {
-        assm = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, fVersion ? &version : NULL, fVersion);
+        assm = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, fVersion ? &version : nullptr, fVersion);
     }
     else
     {
-        assm = NULL;
+        assm = nullptr;
     }
 
     if (g_CLR_RT_TypeSystem.FindTypeDef(szClass, assm, td))
@@ -331,8 +331,7 @@ HRESULT Library_corlib_native_System_Type::GetTypeInternal___STATIC__SystemType_
             if (!g_CLR_RT_ExecutionEngine.GetCurrentAppDomain()->FindAppDomainAssembly(inst.m_assm))
                 NANOCLR_SET_AND_LEAVE(S_OK);
 #endif
-            NANOCLR_CHECK_HRESULT(
-                g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
+            NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(top, g_CLR_RT_WellKnownTypes.TypeStatic));
             hbObj = top.Dereference();
             hbObj->SetReflection(reflex);
         }
@@ -465,14 +464,18 @@ HRESULT Library_corlib_native_System_Type::GetFields(
                     if (bindingFlags & c_BindingFlags_IgnoreCase)
                     {
                         // If strings are not eqaul - continue
-                        if (szText != NULL && hal_stricmp(fieldName, szText))
+                        if (szText != nullptr && hal_stricmp(fieldName, szText))
+                        {
                             continue;
+                        }
                     }
                     else // Case sensitive compare
                     {
                         // If strings are not eqaul - continue
-                        if (szText != NULL && strcmp(fieldName, szText))
+                        if (szText != nullptr && strcmp(fieldName, szText))
+                        {
                             continue;
+                        }
                     }
 
                     index.Set(td.Assembly(), i + tdR->firstStaticField);
@@ -629,7 +632,7 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                         continue;
                     }
 
-                    if (szText != NULL && !strcmp(assm->GetString(md->name), szText) == false)
+                    if (szText != nullptr && !strcmp(assm->GetString(md->name), szText) == false)
                     {
                         continue;
                     }
@@ -718,10 +721,18 @@ HRESULT Library_corlib_native_System_Type::GetMethods(
                                 NANOCLR_CHECK_HRESULT(parserLeft.Advance(resLeft));
                                 NANOCLR_CHECK_HRESULT(parserRight.Advance(resRight));
 
-                                bool fRightBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resLeft, resRight, parserLeft, parserRight, true);
-                                bool fLeftBetterMatchT =
-                                    CLR_RT_TypeSystem::MatchSignatureElement(resRight, resLeft, parserLeft, parserRight, true);
+                                bool fRightBetterMatchT = CLR_RT_TypeSystem::MatchSignatureElement(
+                                    resLeft,
+                                    resRight,
+                                    parserLeft,
+                                    parserRight,
+                                    true);
+                                bool fLeftBetterMatchT = CLR_RT_TypeSystem::MatchSignatureElement(
+                                    resRight,
+                                    resLeft,
+                                    parserLeft,
+                                    parserRight,
+                                    true);
 
                                 // If fLeftBetterMatchT && fRightBetterMatchT, one is assignable from the other, they
                                 // must be the same

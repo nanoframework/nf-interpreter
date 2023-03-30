@@ -182,7 +182,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     config.SpecificConfigId = (CLR_UINT32)pConfig[FIELD___specificConfigId].NumericByRef().u4;
     config.StartupAddressMode = (AddressMode)pConfig[FIELD___startupAddressMode].NumericByRef().u4;
 
-    if (pMACAddress != NULL)
+    if (pMACAddress != nullptr)
     {
         memcpy(&config.MacAddress, pMACAddress->GetFirstElement(), NETIF_MAX_HWADDR_LEN);
     }

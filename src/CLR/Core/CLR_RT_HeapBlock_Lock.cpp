@@ -138,7 +138,7 @@ void CLR_RT_HeapBlock_Lock::ChangeOwner()
             {
                 case DATATYPE_VALUETYPE:
                 case DATATYPE_CLASS:
-                    ptr->SetObjectLock(NULL);
+                    ptr->SetObjectLock(nullptr);
                     break;
 
                 default:

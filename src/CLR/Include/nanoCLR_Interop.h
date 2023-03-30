@@ -298,7 +298,7 @@ template <class T> class CLR_RT_TypedArray
   public:
     CLR_RT_TypedArray()
     {
-        m_pData = NULL;
+        m_pData = nullptr;
         m_ElemCount = 0;
     }
 

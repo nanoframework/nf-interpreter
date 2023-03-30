@@ -45,11 +45,11 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Clear___VOID
         bucket = bucketElement->Dereference();
 
         // sanity check: can only clear buckets that already have objects
-        if (bucket != NULL)
+        if (bucket != nullptr)
         {
             bucket[BucketType::FIELD___hash].NumericByRef().u4 = 0;
-            bucket[BucketType::FIELD___value].SetObjectReference(NULL);
-            bucket[BucketType::FIELD___key].SetObjectReference(NULL);
+            bucket[BucketType::FIELD___value].SetObjectReference(nullptr);
+            bucket[BucketType::FIELD___key].SetObjectReference(nullptr);
         }
     }
 
@@ -97,7 +97,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Contains___B
         bucketElement = ((CLR_RT_HeapBlock *)buckets->GetElement(bucketNumber));
         bucket = bucketElement->Dereference();
 
-        if (bucket != NULL && bucket[BucketType::FIELD___key].Dereference() != NULL &&
+        if (bucket != nullptr && bucket[BucketType::FIELD___key].Dereference() != nullptr &&
             (bucket[BucketType::FIELD___hash].NumericByRef().u4 == hashcode) &&
             (CLR_RT_HeapBlock::ObjectsEqual(*bucket[BucketType::FIELD___key].Dereference(), *key, true)))
         {
@@ -152,15 +152,15 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Remove___VOI
         bucketElement = ((CLR_RT_HeapBlock *)buckets->GetElement(bucketNumber));
         bucket = bucketElement->Dereference();
 
-        if (bucket != NULL && bucket[BucketType::FIELD___key].Dereference() != NULL &&
+        if (bucket != nullptr && bucket[BucketType::FIELD___key].Dereference() != nullptr &&
             (bucket[BucketType::FIELD___hash].NumericByRef().u4 == hashcode) &&
             (CLR_RT_HeapBlock::ObjectsEqual(*bucket[BucketType::FIELD___key].Dereference(), *key, true)))
         {
             // Clear hash field, then key, then value
 
             bucket[BucketType::FIELD___hash].NumericByRef().u4 = 0;
-            bucket[BucketType::FIELD___value].SetObjectReference(NULL);
-            bucket[BucketType::FIELD___key].SetObjectReference(NULL);
+            bucket[BucketType::FIELD___value].SetObjectReference(nullptr);
+            bucket[BucketType::FIELD___key].SetObjectReference(nullptr);
 
             // subtract count field
             pThis[FIELD___count].NumericByRef().s4--;
@@ -226,7 +226,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
         bucket = bucketElement->Dereference();
 
         // Insert the key/value pair into this bucket if this bucket is empty
-        if (bucket == NULL || (bucket != NULL && bucket[BucketType::FIELD___key].Dereference() == NULL))
+        if (bucket == nullptr || (bucket != nullptr && bucket[BucketType::FIELD___key].Dereference() == nullptr))
         {
             // We pretty much have to insert in this order.  Don't set hash
             // code until the value & key are set appropriately.
@@ -234,7 +234,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
             CLR_RT_TypeDef_Index bucketTypeDef;
             CLR_RT_HeapBlock newBucket;
 
-            if (bucket == NULL)
+            if (bucket == nullptr)
             {
                 // find <Bucket> type, don't bother checking the result as it exists for sure
                 g_CLR_RT_TypeSystem.FindTypeDef("Bucket", "System.Collections", bucketTypeDef);
@@ -257,7 +257,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::InsertNative
             NANOCLR_SET_AND_LEAVE(S_OK)
         }
 
-        if (bucket != NULL &&
+        if (bucket != nullptr &&
             (CLR_RT_HeapBlock::ObjectsEqual(*bucket[BucketType::FIELD___key].Dereference(), *key, true)))
         {
             if (add)
@@ -319,7 +319,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::GetNative___
         bucketElement = ((CLR_RT_HeapBlock *)buckets->GetElement(bucketNumber));
         bucket = bucketElement->Dereference();
 
-        if (bucket != NULL && (bucket[BucketType::FIELD___hash].NumericByRef().u4 == hashcode) &&
+        if (bucket != nullptr && (bucket[BucketType::FIELD___hash].NumericByRef().u4 == hashcode) &&
             (CLR_RT_HeapBlock::ObjectsEqual(*bucket[BucketType::FIELD___key].Dereference(), *key, true)))
         {
             stack.SetResult_Object(bucket[BucketType::FIELD___value].Dereference());
@@ -330,7 +330,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::GetNative___
     } while (++entry < bucketsLength);
 
     // no key found
-    stack.SetResult_Object(NULL);
+    stack.SetResult_Object(nullptr);
 
     NANOCLR_NOCLEANUP();
 }
@@ -432,7 +432,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
         oldBucket = oldBucketElement->Dereference();
 
         // sanity check: can only clear buckets that already have objects
-        if (oldBucket != NULL && oldBucket[BucketType::FIELD___key].Dereference() != NULL)
+        if (oldBucket != nullptr && oldBucket[BucketType::FIELD___key].Dereference() != nullptr)
         {
             seed = oldBucket[BucketType::FIELD___hash].NumericByRef().u4;
             incr = 1 + ((seed * HashPrime) % ((uint32_t)newSize - 1));
@@ -444,7 +444,7 @@ HRESULT Library_nf_system_collections_System_Collections_Hashtable::Expand(CLR_R
                 newBucketElement = ((CLR_RT_HeapBlock *)newBuckets->GetElement(newBucketNumber));
                 bucket = newBucketElement->Dereference();
 
-                if (bucket == NULL || bucket[BucketType::FIELD___key].Dereference() == NULL)
+                if (bucket == nullptr || bucket[BucketType::FIELD___key].Dereference() == nullptr)
                 {
                     // create a new <Bucket>
                     CLR_RT_HeapBlock newBucket;

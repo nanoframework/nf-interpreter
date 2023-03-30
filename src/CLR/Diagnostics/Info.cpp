@@ -12,7 +12,7 @@
 #include <iostream>
 #include <nanoCLR_Win32.h>
 
-static std::string *s_redirectedString = NULL;
+static std::string *s_redirectedString = nullptr;
 
 void CLR_Debug::RedirectToString(std::string *str)
 {
@@ -177,11 +177,11 @@ void CLR_Debug::Emit(const char *text, int len)
         {
             unsigned long dwWritten;
 
-            ::WriteFile(hFile, text, (unsigned long)len, &dwWritten, NULL);
+            ::WriteFile(hFile, text, (unsigned long)len, &dwWritten, nullptr);
 
             if (s_CLR_RT_fTrace_RedirectLinesPerFile)
             {
-                while ((text = strchr(text, '\n')) != NULL)
+                while ((text = strchr(text, '\n')) != nullptr)
                 {
                     lines++;
                     text++;
@@ -286,7 +286,7 @@ int CLR_Debug::PrintfV(const char *format, va_list arg)
 #endif
 
 #ifndef VIRTUAL_DEVICE
-    if (buffer != NULL)
+    if (buffer != nullptr)
     {
         platform_free(buffer);
     }
@@ -446,7 +446,7 @@ const CLR_UINT8 *CLR_SkipBodyOfOpcodeCompressed(const CLR_UINT8 *ip, CLR_OPCODE 
     const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
     const CLR_RT_##tblName2##_Index *s = &crossReference##tblName[idx].target;                                         \
     if (s->data == 0)                                                                                                  \
-    s = NULL
+    s = nullptr
 
 #define LOOKUP_ELEMENT_IDX(idx, tblName, tblNameUC)                                                                    \
     const CLR_RECORD_##tblNameUC *p = Get##tblName(idx);                                                               \
@@ -517,7 +517,7 @@ void CLR_RT_Assembly::DumpToken(CLR_UINT32 token)
         case TBL_MethodDef:
         {
             LOOKUP_ELEMENT_IDX(index, MethodDef, METHODDEF);
-            CLR_RT_DUMP::METHOD(s, NULL);
+            CLR_RT_DUMP::METHOD(s, nullptr);
             break;
         }
         case TBL_MethodSpec:
@@ -842,7 +842,7 @@ void CLR_RT_DUMP::OBJECT(CLR_RT_HeapBlock *ptr, const char *text)
         {
             CLR_RT_HeapBlock_Delegate *dlg = (CLR_RT_HeapBlock_Delegate *)ptr;
 
-            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), NULL);
+            CLR_RT_DUMP::METHOD(dlg->DelegateFtn(), nullptr);
         }
         break;
 
@@ -943,7 +943,7 @@ void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
 
     msg = Library_corlib_native_System_Exception::GetMessage(obj);
 
-    CLR_Debug::Printf("    ++++ Message: %s\r\n", msg == NULL ? "" : msg);
+    CLR_Debug::Printf("    ++++ Message: %s\r\n", msg == nullptr ? "" : msg);
 
     CLR_UINT32 depth;
     Library_corlib_native_System_Exception::StackTrace *stackTrace =
@@ -954,7 +954,7 @@ void CLR_RT_DUMP::EXCEPTION(CLR_RT_StackFrame &stack, CLR_RT_HeapBlock &ref)
     while (depth-- > 0)
     {
         CLR_Debug::Printf("    ++++ ");
-        CLR_RT_DUMP::METHOD(stackTrace->m_md, NULL);
+        CLR_RT_DUMP::METHOD(stackTrace->m_md, nullptr);
         CLR_Debug::Printf(" [IP: %04x] ++++\r\n", stackTrace->m_IP);
 
         stackTrace++;

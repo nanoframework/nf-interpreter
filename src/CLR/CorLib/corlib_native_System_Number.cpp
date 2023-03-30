@@ -16,7 +16,7 @@ bool Library_corlib_native_System_Number::ParseFormat(char *format, char *format
     bool ret = true;
 
     // parse received format
-    if (format != NULL && format[0] != 0)
+    if (format != nullptr && format[0] != 0)
     {
         *formatChar = format[0];
         *precision = -1;

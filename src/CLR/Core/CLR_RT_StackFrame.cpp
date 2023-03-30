@@ -109,17 +109,17 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
             stack->m_evalStack; // CLR_RT_HeapBlock*         m_evalStackPos;     // EVENT HEAP - NO RELOCATION -
         stack->m_evalStackEnd =
             stack->m_evalStack +
-            sizeEvalStack;         // CLR_RT_HeapBlock*         m_evalStackEnd;     // EVENT HEAP - NO RELOCATION -
-        stack->m_arguments = NULL; // CLR_RT_HeapBlock*         m_arguments;        // EVENT HEAP - NO RELOCATION -
-                                   //
-                                   // union
-                                   // {
-        stack->m_customState = 0;  //    CLR_UINT32             m_customState;
-                                   //    void*                  m_customPointer;
-                                   // };
-                                   //
+            sizeEvalStack;            // CLR_RT_HeapBlock*         m_evalStackEnd;     // EVENT HEAP - NO RELOCATION -
+        stack->m_arguments = nullptr; // CLR_RT_HeapBlock*         m_arguments;        // EVENT HEAP - NO RELOCATION -
+                                      //
+                                      // union
+                                      // {
+        stack->m_customState = 0;     //    CLR_UINT32             m_customState;
+                                      //    void*                  m_customPointer;
+                                      // };
+                                      //
 #ifndef NANOCLR_NO_IL_INLINE
-        stack->m_inlineFrame = NULL;
+        stack->m_inlineFrame = nullptr;
 #endif
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
         stack->m_callchain.Enter(stack); // CLR_PROF_CounterCallChain m_callchain;
@@ -141,15 +141,15 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
             stack->m_nativeMethod = (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_DelegateInvoke;
 
             stack->m_flags = CLR_RT_StackFrame::c_MethodKind_Native;
-            stack->m_IPstart = NULL;
+            stack->m_IPstart = nullptr;
         }
-        else if (assm->nativeCode && (impl = assm->nativeCode[stack->m_call.Method()]) != NULL)
+        else if (assm->nativeCode && (impl = assm->nativeCode[stack->m_call.Method()]) != nullptr)
         {
             stack->m_nativeMethod = impl;
 
             stack->m_flags = CLR_RT_StackFrame::c_MethodKind_Native;
-            stack->m_IPstart = NULL;
-            stack->m_IP = NULL;
+            stack->m_IPstart = nullptr;
+            stack->m_IP = nullptr;
         }
         else
         {
@@ -212,7 +212,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
         }
 
         if (stack->m_owningThread->m_fHasJMCStepper || (stack->m_flags & c_HasBreakpoint) ||
-            (caller->Prev() != NULL && (caller->m_flags & c_HasBreakpoint)))
+            (caller->Prev() != nullptr && (caller->m_flags & c_HasBreakpoint)))
         {
             g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Push(
                 stack,
@@ -223,7 +223,7 @@ HRESULT CLR_RT_StackFrame::Push(CLR_RT_Thread *th, const CLR_RT_MethodDef_Instan
 
     //--//
 
-    if (caller->Prev() != NULL && caller->m_nativeMethod == stack->m_nativeMethod)
+    if (caller->Prev() != nullptr && caller->m_nativeMethod == stack->m_nativeMethod)
     {
         if (stack->m_flags & CLR_RT_StackFrame::c_ProcessSynchronize)
         {
@@ -282,7 +282,7 @@ bool CLR_RT_StackFrame::PushInline(
 {
     const CLR_RECORD_METHODDEF *md = calleeInst.target;
 
-    if ((m_inlineFrame != NULL) || // We can only support one inline at a time per stack call
+    if ((m_inlineFrame != nullptr) || // We can only support one inline at a time per stack call
         (m_evalStackEnd - evalPos) <= (md->argumentsCount + md->localsCount + md->lengthEvalStack +
                                        2) || // We must have enough space on the current stack for the inline method
         (m_nativeMethod != (CLR_RT_MethodHandler)CLR_RT_Thread::Execute_IL) || // We only support IL inlining
@@ -290,9 +290,9 @@ bool CLR_RT_StackFrame::PushInline(
             CLR_RECORD_METHODDEF::MD_Constructor || // Do not try to inline constructors, etc because they require
                                                     // special processing
         (0 != (md->flags & CLR_RECORD_METHODDEF::MD_Static)) || // Static methods also requires special processing
-        (calleeInst.assembly->nativeCode != NULL && (calleeInst.assembly->nativeCode[calleeInst.Method()] !=
-                                                     NULL)) || // Make sure the callee is not an internal method
-        (md->rva == CLR_EmptyIndex) ||                         // Make sure we have a valid IP address for the method
+        (calleeInst.assembly->nativeCode != nullptr && (calleeInst.assembly->nativeCode[calleeInst.Method()] !=
+                                                        nullptr)) || // Make sure the callee is not an internal method
+        (md->rva == CLR_EmptyIndex) || // Make sure we have a valid IP address for the method
         !g_CLR_RT_EventCache.GetInlineFrameBuffer(
             &m_inlineFrame)) // Make sure we have an extra slot in the inline cache
     {
@@ -378,7 +378,7 @@ void CLR_RT_StackFrame::PopInline()
 
     if (m_flags & CLR_RT_StackFrame::c_InlineMethodHasReturnValue)
     {
-        if (m_owningThread->m_currentException.Dereference() == NULL)
+        if (m_owningThread->m_currentException.Dereference() == nullptr)
         {
             CLR_RT_HeapBlock &dst = PushValueAndAssign(src);
 
@@ -387,7 +387,7 @@ void CLR_RT_StackFrame::PopInline()
     }
 
     g_CLR_RT_EventCache.FreeInlineBuffer(m_inlineFrame);
-    m_inlineFrame = NULL;
+    m_inlineFrame = nullptr;
     m_flags &= ~(CLR_RT_StackFrame::c_MethodKind_Inlined | CLR_RT_StackFrame::c_InlineMethodHasReturnValue);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -445,7 +445,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
     CLR_RT_HeapBlock exception;
     CLR_RT_StackFrame *caller = this->Caller();
 
-    exception.SetObjectReference(NULL);
+    exception.SetObjectReference(nullptr);
 
     if (m_flags & CLR_RT_StackFrame::c_AppDomainInjectException)
     {
@@ -454,7 +454,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
 
         _ASSERTE(m_owningThread->m_flags & CLR_RT_Thread::TH_F_Aborted);
         _ASSERTE(m_owningThread->m_flags & CLR_RT_Thread::TH_F_ContainsDoomedAppDomain);
-        _ASSERTE(m_owningThread->m_currentException.Dereference() != NULL);
+        _ASSERTE(m_owningThread->m_currentException.Dereference() != nullptr);
         _ASSERTE(
             m_owningThread->m_currentException.Dereference()->ObjectCls().m_data ==
             g_CLR_RT_WellKnownTypes.m_ThreadAbortException.m_data);
@@ -464,7 +464,7 @@ HRESULT CLR_RT_StackFrame::PopAppDomainTransition()
 
         hr = CLR_E_APPDOMAIN_EXITED;
     }
-    else if (m_owningThread->m_currentException.Dereference() == NULL)
+    else if (m_owningThread->m_currentException.Dereference() == nullptr)
     {
         _ASSERTE((m_flags & CLR_RT_StackFrame::c_AppDomainInjectException) == 0);
 
@@ -532,7 +532,7 @@ HRESULT CLR_RT_StackFrame::PushAppDomainTransition(
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_StackFrame *frame = NULL;
+    CLR_RT_StackFrame *frame = nullptr;
     int cArgs = callInst.m_target->ArgumentsCount;
     CLR_RT_HeapBlock *proxy;
 
@@ -577,7 +577,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
     int argsOffset = 0;
     CLR_RT_StackFrame *stackSub;
     CLR_RT_HeapBlock tmp;
-    tmp.SetObjectReference(NULL);
+    tmp.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmp);
 
     if (mdR->flags & CLR_RECORD_METHODDEF::MD_Constructor)
@@ -585,7 +585,7 @@ HRESULT CLR_RT_StackFrame::MakeCall(
         CLR_RT_TypeDef_Instance owner;
         owner.InitializeFromMethod(md);
 
-        _ASSERTE(obj == NULL);
+        _ASSERTE(obj == nullptr);
 
         _SIDE_ASSERTE(owner.InitializeFromMethod(md));
 
@@ -881,7 +881,7 @@ void CLR_RT_StackFrame::Pop()
 
     CLR_RT_StackFrame *caller = Caller();
 
-    if (caller->Prev() != NULL)
+    if (caller->Prev() != nullptr)
     {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (caller->m_flags & CLR_RT_StackFrame::c_HasBreakpoint)
@@ -939,7 +939,7 @@ void CLR_RT_StackFrame::Pop()
                 //
                 if (m_call.target->retValDataType != DATATYPE_VOID)
                 {
-                    if (m_owningThread->m_currentException.Dereference() == NULL)
+                    if (m_owningThread->m_currentException.Dereference() == nullptr)
                     {
                         CLR_RT_HeapBlock &src = this->TopValue();
                         CLR_RT_HeapBlock &dst = caller->PushValueAndAssign(src);
@@ -964,9 +964,9 @@ void CLR_RT_StackFrame::Pop()
                 CLR_RT_HeapBlock *dst = (CLR_RT_HeapBlock *)array->GetElement((CLR_UINT32)index);
                 CLR_RT_HeapBlock *exception = m_owningThread->m_currentException.Dereference();
 
-                dst->SetObjectReference(NULL);
+                dst->SetObjectReference(nullptr);
 
-                if (exception != NULL)
+                if (exception != nullptr)
                 {
                     dst->SetObjectReference(exception);
                 }
@@ -991,7 +991,7 @@ void CLR_RT_StackFrame::Pop()
                     {
                         if (FAILED(dst->PerformBoxing(desc.m_handlerCls)))
                         {
-                            dst->SetObjectReference(NULL);
+                            dst->SetObjectReference(nullptr);
                         }
                     }
                 }
@@ -1004,7 +1004,7 @@ void CLR_RT_StackFrame::Pop()
     // We could be jumping outside of a nested exception handler.
     //
 
-    m_owningThread->PopEH(this, NULL);
+    m_owningThread->PopEH(this, nullptr);
 
     //
     // If this StackFrame owns a SubThread, kill it.

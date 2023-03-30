@@ -9,7 +9,7 @@
 
 static const CLR_RT_MethodHandler method_lookup[] =
 {
-    NULL,
+    nullptr,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC__VOID,
     Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___STATIC__VOID,

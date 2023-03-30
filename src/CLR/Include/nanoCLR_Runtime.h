@@ -90,8 +90,8 @@ class CLR_XmlUtil
 
   public:
     CLR_XmlUtil(/*[in]*/ const CLR_XmlUtil &xml);
-    CLR_XmlUtil(/*[in]*/ IXMLDOMDocument *xddDoc, /*[in]*/ const wchar_t *szRootTag = NULL);
-    CLR_XmlUtil(/*[in]*/ IXMLDOMNode *xdnRoot = NULL, /*[in]*/ const wchar_t *szRootTag = NULL);
+    CLR_XmlUtil(/*[in]*/ IXMLDOMDocument *xddDoc, /*[in]*/ const wchar_t *szRootTag = nullptr);
+    CLR_XmlUtil(/*[in]*/ IXMLDOMNode *xdnRoot = nullptr, /*[in]*/ const wchar_t *szRootTag = nullptr);
 
     ~CLR_XmlUtil();
 
@@ -106,17 +106,17 @@ class CLR_XmlUtil
         /*[in ]*/ const wchar_t *szFile,
         /*[in]*/ const wchar_t *szRootTag,
         /*[out]*/ bool &fLoaded,
-        /*[out]*/ bool *fFound = NULL);
+        /*[out]*/ bool *fFound = nullptr);
     HRESULT LoadAsStream(
         /*[in ]*/ IUnknown *pStream,
         /*[in]*/ const wchar_t *szRootTag,
         /*[out]*/ bool &fLoaded,
-        /*[out]*/ bool *fFound = NULL);
+        /*[out]*/ bool *fFound = nullptr);
     HRESULT LoadAsString(
         /*[in ]*/ BSTR bstrData,
         /*[in]*/ const wchar_t *szRootTag,
         /*[out]*/ bool &fLoaded,
-        /*[out]*/ bool *fFound = NULL);
+        /*[out]*/ bool *fFound = nullptr);
     HRESULT Save(/*[in ]*/ const wchar_t *szFile);
     HRESULT SaveAsStream(/*[out]*/ IUnknown **ppStream);
     HRESULT SaveAsString(/*[out]*/ BSTR *pbstrData);
@@ -133,145 +133,145 @@ class CLR_XmlUtil
     HRESULT CreateNode(
         /*[in]*/ const wchar_t *szTag,
         /*[out]*/ IXMLDOMNode **pVal,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
 
     HRESULT GetAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[out]*/ IXMLDOMAttribute **pValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[out]*/ _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[out]*/ std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[out]*/ signed int &lValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetValue(
         /*[in]*/ const wchar_t *szTag,
         /*[out]*/ _variant_t &vValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetValue(
         /*[in]*/ const wchar_t *szTag,
         /*[out]*/ _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT GetValue(
         /*[in]*/ const wchar_t *szTag,
         /*[out]*/ std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
 
     HRESULT ModifyAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const wchar_t *szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ signed int lValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const _variant_t &vValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT ModifyValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
 
     HRESULT PutAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ IXMLDOMAttribute **pValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ const wchar_t *szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
         /*[in] */ signed int lValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const _variant_t &vValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const _bstr_t &bstrValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const std::wstring &szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
     HRESULT PutValue(
         /*[in]*/ const wchar_t *szTag,
         /*[in] */ const wchar_t *szValue,
         /*[out]*/ bool &fFound,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
 
     HRESULT RemoveAttribute(
         /*[in]*/ const wchar_t *szTag,
         /*[in]*/ const wchar_t *szAttr,
-        /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
-    HRESULT RemoveValue(/*[in]*/ const wchar_t *szTag, /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
-    HRESULT RemoveNode(/*[in]*/ const wchar_t *szTag, /*[in]*/ IXMLDOMNode *pxdnNode = NULL);
+        /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
+    HRESULT RemoveValue(/*[in]*/ const wchar_t *szTag, /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
+    HRESULT RemoveNode(/*[in]*/ const wchar_t *szTag, /*[in]*/ IXMLDOMNode *pxdnNode = nullptr);
 };
 
 //--//
@@ -1250,7 +1250,7 @@ struct CLR_RT_SignatureParser
         CLR_INDEX index = 1;                                                                                           \
         for (; iASSM--; ppASSM++, index++)                                                                             \
         {                                                                                                              \
-            if (*ppASSM == NULL)
+            if (*ppASSM == nullptr)
 
 #define NANOCLR_FOREACH_ASSEMBLY_NULL_END()                                                                            \
     }                                                                                                                  \
@@ -1627,13 +1627,13 @@ struct CLR_RT_AppDomain : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP 
 
     CLR_RT_AppDomainAssembly *FindAppDomainAssembly(CLR_RT_Assembly *assm);
 
-    HRESULT MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock &dst, CLR_RT_AppDomain *appDomainSrc = NULL);
+    HRESULT MarshalObject(CLR_RT_HeapBlock &src, CLR_RT_HeapBlock &dst, CLR_RT_AppDomain *appDomainSrc = nullptr);
     HRESULT MarshalParameters(
         CLR_RT_HeapBlock *callerArgs,
         CLR_RT_HeapBlock *calleeArgs,
         int count,
         bool fOnReturn,
-        CLR_RT_AppDomain *appDomainSrc = NULL);
+        CLR_RT_AppDomain *appDomainSrc = nullptr);
 
     HRESULT VerifyTypeIsLoaded(const CLR_RT_TypeDef_Index &index);
     HRESULT GetAssemblies(CLR_RT_HeapBlock &ref);
@@ -2101,7 +2101,7 @@ struct CLR_RT_TypeDef_Instance : public CLR_RT_TypeDef_Index
 
     void Clear();
 
-    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = NULL);
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm, const CLR_RT_MethodDef_Instance *caller = nullptr);
 
     //--//
 
@@ -2677,7 +2677,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
     {
         CLR_RT_HeapBlock &val = PushValue();
 
-        val.SetObjectReference(NULL);
+        val.SetObjectReference(nullptr);
 
         return val;
     }
@@ -3366,7 +3366,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
     CLR_RT_AppDomain *CurrentAppDomain() const
     {
         CLR_RT_StackFrame *stack = CurrentFrame();
-        return stack->Prev() ? stack->m_appDomain : NULL;
+        return stack->Prev() ? stack->m_appDomain : nullptr;
     }
 #endif
 
@@ -3837,7 +3837,7 @@ struct CLR_RT_ExecutionEngine
 #define CLR_EE_REBOOT_CLR g_CLR_RT_ExecutionEngine.m_iReboot_Options = CLR_DBG_Commands::Monitor_Reboot::c_ClrOnly
 
 #define CLR_EE_DBG_EVENT_SEND(cmd, size, payload, flags)                                                               \
-    ((g_CLR_DBG_Debugger->m_messaging != NULL)                                                                         \
+    ((g_CLR_DBG_Debugger->m_messaging != nullptr)                                                                      \
          ? g_CLR_DBG_Debugger->m_messaging->SendEvent(cmd, size, (unsigned char *)payload, flags)                      \
          : false)
 

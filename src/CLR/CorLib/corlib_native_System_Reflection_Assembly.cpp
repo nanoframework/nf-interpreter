@@ -63,8 +63,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetType___SystemType__
 
     if (g_CLR_RT_TypeSystem.FindTypeDef(szClass, assm.assembly, td))
     {
-        NANOCLR_CHECK_HRESULT(
-            g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.TypeStatic));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObjectFromIndex(*hbRef, g_CLR_RT_WellKnownTypes.TypeStatic));
 
         hbObj = hbRef->Dereference();
         hbObj->SetReflection(td);
@@ -119,7 +118,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetVersion___VOID__BYR
     NANOCLR_HEADER();
 
     CLR_RT_StackFrame *caller = stack.Caller();
-    if (caller == NULL)
+    if (caller == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
@@ -190,7 +189,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::GetExecutingAssembly__
     CLR_RT_HeapBlock *hbObj;
 
     CLR_RT_StackFrame *caller = stack.Caller();
-    if (caller == NULL)
+    if (caller == nullptr)
         NANOCLR_SET_AND_LEAVE(S_OK);
 
     {
@@ -251,7 +250,7 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::
     }
     else
     {
-        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, NULL, false);
+        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, nullptr, false);
         FAULT_ON_NULL_HR(assembly, CLR_E_INVALID_PARAMETER);
     }
 
@@ -280,8 +279,8 @@ HRESULT Library_corlib_native_System_Reflection_Assembly::Load___STATIC__SystemR
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Array *array = NULL;
-    CLR_RT_Assembly *assm = NULL;
+    CLR_RT_HeapBlock_Array *array = nullptr;
+    CLR_RT_Assembly *assm = nullptr;
     CLR_RT_HeapBlock *hbObj;
     CLR_RECORD_ASSEMBLY *header;
     CLR_RT_Assembly_Index assemblyIndex;

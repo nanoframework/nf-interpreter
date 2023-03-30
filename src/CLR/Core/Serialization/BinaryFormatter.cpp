@@ -25,8 +25,10 @@ CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixDereference(CLR_RT_Hea
 CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::TypeHandler::FixNull(CLR_RT_HeapBlock *v)
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    if (v && v->DataType() == DATATYPE_OBJECT && v->Dereference() == NULL)
-        return NULL;
+    if (v && v->DataType() == DATATYPE_OBJECT && v->Dereference() == nullptr)
+    {
+        return nullptr;
+    }
 
     return v;
 }
@@ -65,8 +67,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    m_value = NULL;
-    m_type = NULL;
+    m_value = nullptr;
+    m_type = nullptr;
 
     v = TypeHandler::FixNull(v);
     if (v)
@@ -110,8 +112,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::SetValue(CLR_RT_HeapBlock *v)
                 NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_MARSHAL_EXCEPTION);
             }
 #endif
-            m_value = NULL;
-            m_type = NULL;
+            m_value = nullptr;
+            m_type = nullptr;
         }
     }
 
@@ -132,9 +134,9 @@ int CLR_RT_BinaryFormatter::TypeHandler::SignatureRequirements()
         res &= ~c_Signature_Length;
     }
 
-    m_typeForced = NULL;
+    m_typeForced = nullptr;
 
-    if (m_typeExpected != NULL)
+    if (m_typeExpected != nullptr)
     {
         switch (m_typeExpected->m_flags)
         {
@@ -244,7 +246,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature(int &res)
         }
     }
 
-    if (m_value == NULL)
+    if (m_value == nullptr)
     {
         if (mask == 0)
         {
@@ -417,7 +419,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::EmitSignature_Inner(
                 CLR_RT_TypeDescriptor typeSub;
                 typeSub.InitializeFromType(type->m_reflex.data.type);
 
-                NANOCLR_CHECK_HRESULT(EmitSignature_Inner(c_Signature_Header | c_Signature_Type, &typeSub, NULL));
+                NANOCLR_CHECK_HRESULT(EmitSignature_Inner(c_Signature_Header | c_Signature_Type, &typeSub, nullptr));
             }
 
             sizeReal = value->DereferenceArray()->m_numOfElements;
@@ -502,8 +504,8 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
 
     int mask = SignatureRequirements();
 
-    m_value = NULL;
-    m_type = NULL;
+    m_value = nullptr;
+    m_type = nullptr;
 
     if (m_typeForced)
     {
@@ -539,7 +541,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadSignature(int &res)
             NANOCLR_CHECK_HRESULT(m_bf->ReadCompressedUnsigned(index));
 
             dup = m_bf->GetDuplicate(index);
-            if (dup == NULL)
+            if (dup == nullptr)
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_SERIALIZATION_VIOLATION);
             }
@@ -1040,7 +1042,7 @@ HRESULT CLR_RT_BinaryFormatter::TypeHandler::ReadValue(int &res)
 
             if (len == 0xFFFFFFFF)
             {
-                m_value->SetObjectReference(NULL);
+                m_value->SetObjectReference(nullptr);
             }
             else
             {
@@ -1145,13 +1147,13 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance(
     CLR_RT_TypeDescriptor *pDesc;
     SerializationHintsAttribute hintsTmp;
 
-    if (type && CLR_RT_ReflectionDef_Index::Convert(*type, inst, NULL))
+    if (type && CLR_RT_ReflectionDef_Index::Convert(*type, inst, nullptr))
     {
         NANOCLR_CHECK_HRESULT(desc.InitializeFromType(inst));
 
         pDesc = &desc;
 
-        if (hints == NULL)
+        if (hints == nullptr)
         {
             hints = &hintsTmp;
 
@@ -1162,7 +1164,7 @@ HRESULT CLR_RT_BinaryFormatter::State::CreateInstance(
     }
     else
     {
-        pDesc = NULL;
+        pDesc = nullptr;
     }
 
     NANOCLR_SET_AND_LEAVE(CreateInstance(parent, hints, pDesc));
@@ -1213,7 +1215,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
         CLR_RT_AttributeEnumerator en;
         en.Initialize(cls);
 
-        if (en.MatchNext(&inst, NULL))
+        if (en.MatchNext(&inst, nullptr))
         {
             CLR_RT_AttributeParser parser;
 
@@ -1225,8 +1227,10 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(SerializationHintsAttribute &hi
 
                 NANOCLR_CHECK_HRESULT(parser.Next(val));
 
-                if (val == NULL)
+                if (val == nullptr)
+                {
                     break;
+                }
             }
         }
     }
@@ -1250,7 +1254,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
         CLR_RT_AttributeEnumerator en;
         en.Initialize(fld);
 
-        if (en.MatchNext(&inst, NULL))
+        if (en.MatchNext(&inst, nullptr))
         {
             CLR_RT_AttributeParser parser;
 
@@ -1262,7 +1266,7 @@ HRESULT CLR_RT_BinaryFormatter::State::FindHints(
 
                 NANOCLR_CHECK_HRESULT(parser.Next(val));
 
-                if (val == NULL)
+                if (val == nullptr)
                 {
                     break;
                 }
@@ -1305,7 +1309,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
             src = TypeHandler::FixNull(src);
         }
 
-        if (src == NULL ||
+        if (src == nullptr ||
             (c_CLR_RT_DataTypeLookup[src->DataType()].m_flags & CLR_RT_DataTypeLookup::c_OptimizedValueType) == 0)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -1397,7 +1401,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AssignAndFixBoxing(CLR_RT_HeapBlock &dst)
         else
         {
             src = &m_value.m_value_tmp;
-            src->SetObjectReference(NULL);
+            src->SetObjectReference(nullptr);
         }
     }
 
@@ -1419,7 +1423,7 @@ HRESULT CLR_RT_BinaryFormatter::State::GetValue()
     NANOCLR_HEADER();
 
     State *prev = (State *)Prev();
-    if (prev->Prev() == NULL)
+    if (prev->Prev() == nullptr)
     {
         NANOCLR_SET_AND_LEAVE(m_value.SetValue(&m_parent->m_value));
     }
@@ -1452,7 +1456,7 @@ HRESULT CLR_RT_BinaryFormatter::State::SetValueAndDestroyInstance()
     {
         State *prev = (State *)Prev();
 
-        if (prev->Prev() == NULL)
+        if (prev->Prev() == nullptr)
         {
             NANOCLR_CHECK_HRESULT(AssignAndFixBoxing(m_parent->m_value));
         }
@@ -1601,7 +1605,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                     m_fields_NeedProcessing = true;
                     m_fields_CurrentClass = m_value.m_type->m_handlerCls;
                     m_fields_CurrentField = 0;
-                    m_fields_Pointer = NULL;
+                    m_fields_Pointer = nullptr;
                     break;
                 }
 
@@ -1620,7 +1624,7 @@ HRESULT CLR_RT_BinaryFormatter::State::Advance()
                             m_array_LastPos,
                             capacity));
 
-                        m_array_ExpectedType = NULL;
+                        m_array_ExpectedType = nullptr;
                     }
                     else
                     {
@@ -1756,7 +1760,7 @@ HRESULT CLR_RT_BinaryFormatter::State::AdvanceToTheNextElement()
         }
         else
         {
-            hints = NULL;
+            hints = nullptr;
         }
 
         NANOCLR_SET_AND_LEAVE(State::CreateInstance(m_parent, hints, m_array_ExpectedType));
@@ -1780,7 +1784,7 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
     res = ptr;
     CHECK_ALLOCATION(ptr);
 
-    ptr->m_stream = NULL;    // CLR_RT_HeapBlock_MemoryStream* m_stream;
+    ptr->m_stream = nullptr; // CLR_RT_HeapBlock_MemoryStream* m_stream;
     ptr->m_index = 0;        // CLR_UINT32                     m_index;
     ptr->m_lastTypeRead = 0; // CLR_UINT32                     m_lastTypeRead;
     ptr->m_duplicates
@@ -1789,8 +1793,8 @@ HRESULT CLR_RT_BinaryFormatter::CreateInstance(CLR_UINT8 *buf, int len, CLR_RT_B
     ptr->m_states.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList           m_states;                // EVENT HEAP -
                                               // NO RELOCATION - list of CLR_RT_BinaryFormatter::State
                                               //
-    ptr->m_fDeserialize = (buf != NULL);      // bool                           m_fDeserialize;
-    ptr->m_value.SetObjectReference(NULL);    // CLR_RT_HeapBlock               m_value;
+    ptr->m_fDeserialize = (buf != nullptr);   // bool                           m_fDeserialize;
+    ptr->m_value.SetObjectReference(nullptr); // CLR_RT_HeapBlock               m_value;
     ptr->m_value_desc.TypeDescriptor_Initialize(); // CLR_RT_TypeDescriptor          m_value_desc;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(ptr->m_stream, buf, len));
@@ -1817,8 +1821,11 @@ HRESULT CLR_RT_BinaryFormatter::Advance()
     while (true)
     {
         State *top = (State *)m_states.LastNode();
-        if (top->Prev() == NULL)
+
+        if (top->Prev() == nullptr)
+        {
             break;
+        }
 
         NANOCLR_CHECK_HRESULT(top->Advance());
     }
@@ -1831,7 +1838,7 @@ HRESULT CLR_RT_BinaryFormatter::Advance()
 void CLR_RT_BinaryFormatter::PrepareForGC(void *data)
 {
     NATIVE_PROFILE_CLR_SERIALIZATION();
-    if (data != NULL)
+    if (data != nullptr)
     {
         CLR_RT_BinaryFormatter *bf = (CLR_RT_BinaryFormatter *)data;
 
@@ -1853,7 +1860,7 @@ HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_Heap
     CLR_RT_HeapBlock cls;
     CLR_UINT32 flags = 0;
 
-    cls.SetObjectReference(NULL);
+    cls.SetObjectReference(nullptr);
 
     // unbox reflection types
     CLR_RT_HeapBlock *pObj = &object;
@@ -1868,14 +1875,14 @@ HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_Heap
         }
     }
 
-    CLR_RT_BinaryFormatter *bf = NULL;
+    CLR_RT_BinaryFormatter *bf = nullptr;
     CLR_RT_ProtectFromGC pgc((void **)&bf, CLR_RT_BinaryFormatter::PrepareForGC);
 
-    refData.SetObjectReference(NULL);
+    refData.SetObjectReference(nullptr);
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance(NULL, 0, bf));
+    NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance(nullptr, 0, bf));
 
-    NANOCLR_CHECK_HRESULT(State::CreateInstance(bf, NULL, &cls));
+    NANOCLR_CHECK_HRESULT(State::CreateInstance(bf, nullptr, &cls));
 
     bf->m_flags = flags;
     bf->m_value.Assign(object);
@@ -1890,7 +1897,7 @@ HRESULT CLR_RT_BinaryFormatter::Serialize(CLR_RT_HeapBlock &refData, CLR_RT_Heap
     {
         bf->DestroyInstance();
 
-        bf = NULL;
+        bf = nullptr;
     }
 
     NANOCLR_CLEANUP_END();
@@ -1907,7 +1914,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
 
     CLR_RT_HeapBlock cls;
 
-    cls.SetObjectReference(NULL);
+    cls.SetObjectReference(nullptr);
 
     // unbox reflection types
     CLR_RT_HeapBlock *pObj = &object;
@@ -1924,9 +1931,9 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
 
     CLR_RT_HeapBlock_Array *array = object.DereferenceArray();
 
-    refData.SetObjectReference(NULL);
+    refData.SetObjectReference(nullptr);
 
-    if (array != NULL)
+    if (array != nullptr)
     {
         NANOCLR_SET_AND_LEAVE(CLR_RT_BinaryFormatter::Deserialize(
             refData,
@@ -1951,14 +1958,14 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
     NATIVE_PROFILE_CLR_SERIALIZATION();
     NANOCLR_HEADER();
 
-    CLR_RT_BinaryFormatter *bf = NULL;
+    CLR_RT_BinaryFormatter *bf = nullptr;
     CLR_RT_ProtectFromGC pgc((void **)&bf, CLR_RT_BinaryFormatter::PrepareForGC);
 
-    refData.SetObjectReference(NULL);
+    refData.SetObjectReference(nullptr);
 
     NANOCLR_CHECK_HRESULT(CLR_RT_BinaryFormatter::CreateInstance(data, size, bf));
 
-    NANOCLR_CHECK_HRESULT(State::CreateInstance(bf, NULL, cls));
+    NANOCLR_CHECK_HRESULT(State::CreateInstance(bf, nullptr, cls));
 
     bf->m_flags = flags;
 
@@ -1977,7 +1984,7 @@ HRESULT CLR_RT_BinaryFormatter::Deserialize(
 
         bf->DestroyInstance();
 
-        bf = NULL;
+        bf = nullptr;
     }
 
     NANOCLR_CLEANUP_END();
@@ -2032,7 +2039,7 @@ CLR_RT_HeapBlock *CLR_RT_BinaryFormatter::GetDuplicate(CLR_UINT32 index)
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }
 
 //--//--//

@@ -12,7 +12,7 @@ HRESULT CLR_RT_HeapBlock_Timer::CreateInstance(CLR_UINT32 flags, CLR_RT_HeapBloc
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock_Timer *timer = NULL;
+    CLR_RT_HeapBlock_Timer *timer = nullptr;
 
     //
     // Create a request and stop the calling thread.
@@ -99,9 +99,13 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer(CLR_RT_Thread *th)
     CLR_RT_HeapBlock_Delegate *delegate = callback->DereferenceDelegate();
     CLR_RT_ProtectFromGC gc(*managedTimer);
 
-    _ASSERTE(delegate != NULL);
-    if (delegate == NULL)
+    _ASSERTE(delegate != nullptr);
+
+    if (delegate == nullptr)
+    {
         return;
+    }
+
     _ASSERTE(delegate->DataType() == DATATYPE_DELEGATE_HEAD);
 
     m_ticksLastExpiration = HAL_Time_CurrentTime();
@@ -111,7 +115,7 @@ void CLR_RT_HeapBlock_Timer::SpawnTimer(CLR_RT_Thread *th)
     if (SUCCEEDED(th->PushThreadProcDelegate(delegate)))
     {
         CLR_RT_StackFrame *stack = th->FirstFrame();
-        if (stack->Next() != NULL)
+        if (stack->Next() != nullptr)
         {
             int ArgumentsCount = stack->m_call.target->argumentsCount;
             if (ArgumentsCount > 0)

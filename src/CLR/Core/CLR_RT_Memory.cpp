@@ -45,7 +45,7 @@ void *CLR_RT_Memory::SubtractFromSystem(size_t len)
         return &s_CLR_RT_Heap.location[s_CLR_RT_Heap.size];
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -127,7 +127,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
 
     if (s_CLR_RT_Heap.size == 0)
     {
-        unsigned char *heapStart = NULL;
+        unsigned char *heapStart = nullptr;
         unsigned int heapSize = 0;
 
         ::HeapLocation(heapStart, heapSize);
@@ -135,7 +135,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
         if (len > heapSize)
         {
             ASSERT(false);
-            return NULL;
+            return nullptr;
         }
 
         // use the current index to prevent heap thrashing before initialization
@@ -178,7 +178,7 @@ void *CLR_RT_Memory::Allocate(size_t len, CLR_UINT32 flags)
         return res;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void *CLR_RT_Memory::Allocate_And_Erase(size_t len, CLR_UINT32 flags)
@@ -198,8 +198,11 @@ void *CLR_RT_Memory::ReAllocate(void *ptr, size_t len)
 
     // allocate always as an event but do not run GC on failure
     void *p = CLR_RT_Memory::Allocate(len, CLR_RT_HeapBlock::HB_Event | CLR_RT_HeapBlock::HB_NoGcOnFailedAllocation);
+
     if (!p)
-        return NULL;
+    {
+        return nullptr;
+    }
 
     if (ptr)
     {

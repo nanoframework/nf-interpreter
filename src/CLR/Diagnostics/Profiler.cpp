@@ -15,13 +15,12 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
     NANOCLR_HEADER();
 
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
-    g_CLR_PRF_Profiler.m_stream = NULL;
-    g_CLR_PRF_Profiler.m_lastTimestamp = (CLR_UINT32)(
-        (CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
-        CLR_PRF_CMDS::Bits::TimestampShift);
+    g_CLR_PRF_Profiler.m_stream = nullptr;
+    g_CLR_PRF_Profiler.m_lastTimestamp =
+        (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >> CLR_PRF_CMDS::Bits::TimestampShift);
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, nullptr, 0));
 
     NANOCLR_NOCLEANUP();
 }
@@ -123,7 +122,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
         _ASSERTE(fin->m_object->DataType() != DATATYPE_FREEBLOCK);
         _ASSERTE(fin->m_object->DataType() != DATATYPE_CACHEDBLOCK);
 
-        DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, NULL);
+        DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, nullptr);
     }
     NANOCLR_FOREACH_NODE_END();
 
@@ -133,7 +132,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
         _ASSERTE(fin->m_object->DataType() != DATATYPE_FREEBLOCK);
         _ASSERTE(fin->m_object->DataType() != DATATYPE_CACHEDBLOCK);
 
-        DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, NULL);
+        DumpRoot(fin->m_object, CLR_PRF_CMDS::RootTypes::Root_Finalizer, 0, nullptr);
     }
     NANOCLR_FOREACH_NODE_END();
 
@@ -141,7 +140,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
     // Iterate through all the appdomains
     NANOCLR_FOREACH_NODE(CLR_RT_AppDomain, appDomain, g_CLR_RT_ExecutionEngine.m_appDomains)
     {
-        DumpRoot(appDomain, CLR_PRF_CMDS::RootTypes::Root_AppDomain, 0, NULL);
+        DumpRoot(appDomain, CLR_PRF_CMDS::RootTypes::Root_AppDomain, 0, nullptr);
     }
     NANOCLR_FOREACH_NODE_END();
 #endif
@@ -149,7 +148,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
     // Iterate through all the assemblies.
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)
     {
-        DumpRoot(pASSM, CLR_PRF_CMDS::RootTypes::Root_Assembly, 0, NULL);
+        DumpRoot(pASSM, CLR_PRF_CMDS::RootTypes::Root_Assembly, 0, nullptr);
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 
@@ -161,7 +160,7 @@ HRESULT CLR_PRF_Profiler::DumpRoots()
         {
             NANOCLR_FOREACH_NODE(CLR_RT_Thread, th, *threadLists[list])
             {
-                DumpRoot(th, CLR_PRF_CMDS::RootTypes::Root_Thread, 0, NULL);
+                DumpRoot(th, CLR_PRF_CMDS::RootTypes::Root_Thread, 0, nullptr);
             }
             NANOCLR_FOREACH_NODE_END();
         }
@@ -190,7 +189,7 @@ void CLR_PRF_Profiler::DumpRoot(
     }
     else
     {
-        _ASSERTE(source == NULL);
+        _ASSERTE(source == nullptr);
     }
 }
 
@@ -469,7 +468,7 @@ CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock *ref)
                 return ref;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void CLR_PRF_Profiler::DumpEndOfRefsList()
@@ -521,9 +520,8 @@ void CLR_PRF_Profiler::Timestamp()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     // Send Profiling Timestamp
-    CLR_UINT32 time = (CLR_UINT32)(
-        (HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))) >>
-        CLR_PRF_CMDS::Bits::TimestampShift);
+    CLR_UINT32 time =
+        (CLR_UINT32)((HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))) >> CLR_PRF_CMDS::Bits::TimestampShift);
     if (time > m_lastTimestamp)
     {
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Timestamp, CLR_PRF_CMDS::Bits::CommandHeader);
@@ -903,4 +901,4 @@ HRESULT CLR_PRF_Profiler::Stream_Flush()
     NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(NANOCLR_PROFILE_NEW)
+#endif // #if defined(NANOCLR_PROFILE_NEW)

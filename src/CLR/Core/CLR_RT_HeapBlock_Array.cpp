@@ -19,7 +19,7 @@ HRESULT CLR_RT_HeapBlock_Array::CreateInstance(
     CLR_RT_TypeDef_Index cls;
     CLR_RT_TypeDef_Instance inst;
 
-    reference.SetObjectReference(NULL);
+    reference.SetObjectReference(nullptr);
 
     if ((CLR_INT32)length < 0)
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
@@ -359,7 +359,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
 
             for (int i = 0; i < length; i++, ptrSrc++, ptrDst++)
             {
-                if (ptrSrc->DataType() == DATATYPE_OBJECT && ptrSrc->Dereference() == NULL)
+                if (ptrSrc->DataType() == DATATYPE_OBJECT && ptrSrc->Dereference() == nullptr)
                 {
                     ;
                 }
@@ -382,7 +382,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
             CLR_RT_TypeDescriptor descDst;
             CLR_RT_HeapBlock ref;
             CLR_RT_HeapBlock elem;
-            elem.SetObjectReference(NULL);
+            elem.SetObjectReference(nullptr);
             CLR_RT_ProtectFromGC gc(elem);
 
             NANOCLR_CHECK_HRESULT(descDst.InitializeFromObject(*arrayDst));
@@ -393,7 +393,7 @@ HRESULT CLR_RT_HeapBlock_Array::Copy(
                 ref.InitializeArrayReferenceDirect(*arraySrc, indexSrc++);
                 NANOCLR_CHECK_HRESULT(elem.LoadFromReference(ref));
 
-                if (elem.DataType() == DATATYPE_OBJECT && elem.Dereference() == NULL)
+                if (elem.DataType() == DATATYPE_OBJECT && elem.Dereference() == nullptr)
                 {
                     ;
                 }

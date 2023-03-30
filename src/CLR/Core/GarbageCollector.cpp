@@ -7,7 +7,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CLR_RT_ProtectFromGC *CLR_RT_ProtectFromGC::s_first = NULL;
+CLR_RT_ProtectFromGC *CLR_RT_ProtectFromGC::s_first = nullptr;
 
 void CLR_RT_ProtectFromGC::Initialize(CLR_RT_HeapBlock &ref)
 {
@@ -16,7 +16,7 @@ void CLR_RT_ProtectFromGC::Initialize(CLR_RT_HeapBlock &ref)
     s_first = this;
 
     m_data = (void **)&ref;
-    m_fpn = NULL;
+    m_fpn = nullptr;
 
     if (ref.IsForcedAlive())
     {
@@ -85,7 +85,7 @@ void CLR_RT_ProtectFromGC::InvokeAll()
 
 #if defined(NANOCLR_TRACE_EARLYCOLLECTION)
 
-CLR_RT_AssertEarlyCollection *CLR_RT_AssertEarlyCollection::s_first = NULL;
+CLR_RT_AssertEarlyCollection *CLR_RT_AssertEarlyCollection::s_first = nullptr;
 
 CLR_RT_AssertEarlyCollection::CLR_RT_AssertEarlyCollection(CLR_RT_HeapBlock *ptr)
 {
@@ -105,7 +105,7 @@ CLR_RT_AssertEarlyCollection::~CLR_RT_AssertEarlyCollection()
 void CLR_RT_AssertEarlyCollection::Cancel()
 {
     NATIVE_PROFILE_CLR_CORE();
-    m_ptr = NULL;
+    m_ptr = nullptr;
 }
 
 void CLR_RT_AssertEarlyCollection::CheckAll(CLR_RT_HeapBlock *ptr)
@@ -206,7 +206,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                     {
                         CLR_RT_HeapBlock_Array *arr = (CLR_RT_HeapBlock_Array *)ptr;
 
-                        if (arr != NULL)
+                        if (arr != nullptr)
                         {
                             dt = arr->m_typeOfElement;
 
@@ -344,7 +344,7 @@ void CLR_RT_GarbageCollector::Mark()
     // Call global markers.
     //
 #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
-    (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(NULL);
+    (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(nullptr);
 #endif
 
     CLR_RT_ProtectFromGC::InvokeAll();
@@ -393,12 +393,12 @@ void CLR_RT_GarbageCollector::Mark()
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_currentUICulture);
 
 #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
-        (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(NULL);
+        (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(nullptr);
 #endif // NANOCLR_VALIDATE_APPDOMAIN_ISOLATION
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_fOutOfStackSpaceForGC)
         {
@@ -455,8 +455,8 @@ void CLR_RT_GarbageCollector::Mark()
         CLR_RT_Memory::Release(markStackT);
     }
 
-    m_markStackList = NULL;
-    m_markStack = NULL;
+    m_markStackList = nullptr;
+    m_markStack = nullptr;
 
 #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
     (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(appDomainSav);
@@ -492,7 +492,7 @@ void CLR_RT_GarbageCollector::MarkWeak()
                 }
                 else
                 {
-                    weak->m_targetDirect = NULL;
+                    weak->m_targetDirect = nullptr;
                 }
             }
         }
@@ -532,7 +532,7 @@ void CLR_RT_GarbageCollector::Sweep()
                     //
                     // Found a dead delegate, kill it!!
                     //
-                    dlgs->SetObjectReference(NULL);
+                    dlgs->SetObjectReference(nullptr);
                     continue;
                 }
 
@@ -601,7 +601,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
                     weak,
                     g_CLR_RT_ExecutionEngine.m_weakReferences)
                 {
-                    if (weak->m_targetSerialized && weak->m_targetDirect == NULL)
+                    if (weak->m_targetSerialized && weak->m_targetDirect == nullptr)
                     {
 #if !defined(BUILD_RTM)
                         CLR_RT_ReflectionDef_Index val;
@@ -614,7 +614,7 @@ void CLR_RT_GarbageCollector::CheckMemoryPressure()
 
                         val.InitializeFromHash(weak->m_identity.m_selectorHash);
 
-                        if (inst.InitializeFromReflection(val, NULL))
+                        if (inst.InitializeFromReflection(val, nullptr))
                         {
                             g_CLR_RT_TypeSystem.BuildTypeName(inst, szBuffer, iBuffer);
                             rgBuffer[MAXSTRLEN(rgBuffer)] = 0;
@@ -669,7 +669,7 @@ void CLR_RT_GarbageCollector::Assembly_Mark()
 {
     NATIVE_PROFILE_CLR_CORE();
 #if defined(NANOCLR_VALIDATE_APPDOMAIN_ISOLATION)
-    (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(NULL);
+    (void)g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(nullptr);
 #endif
 
     NANOCLR_FOREACH_ASSEMBLY(g_CLR_RT_TypeSystem)

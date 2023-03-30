@@ -43,7 +43,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_TypeSystem.LocateResource(assm, resourceFileId, pArgs[0].NumericByRefConst().s2, resource, size));
 
-    if (resource != NULL) // otherwise NULL is returned
+    if (resource != nullptr) // otherwise nullptr is returned
     {
         pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);
@@ -135,7 +135,7 @@ HRESULT Library_nf_system_resourcemanager_System_Resources_ResourceManager::GetO
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_TypeSystem.LocateResource(assm, resourceFileId, pArgs[0].NumericByRefConst().s2, resource, size));
 
-    if (resource != NULL) // otherwise NULL is returned
+    if (resource != nullptr) // otherwise nullptr is returned
     {
         pAssm = assm.assembly;
         buf = pAssm->GetResourceData(resource->offset);

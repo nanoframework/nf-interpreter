@@ -19,7 +19,7 @@
 
 CLR_DBG_Debugger *g_CLR_DBG_Debugger;
 
-BlockStorageDevice *CLR_DBG_Debugger::m_deploymentStorageDevice = NULL;
+BlockStorageDevice *CLR_DBG_Debugger::m_deploymentStorageDevice = nullptr;
 
 //--//
 
@@ -128,7 +128,7 @@ HRESULT CLR_DBG_Debugger::CreateInstance()
     }
     else
     {
-        m_deploymentStorageDevice = NULL;
+        m_deploymentStorageDevice = nullptr;
     }
 
     // UNDONE: FIXME: MFUpdate_Initialize();
@@ -167,7 +167,7 @@ HRESULT CLR_DBG_Debugger::DeleteInstance()
     // free debugger
     platform_free(g_CLR_DBG_Debugger);
 
-    g_CLR_DBG_Debugger = NULL;
+    g_CLR_DBG_Debugger = nullptr;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -212,7 +212,7 @@ CLR_RT_AppDomain *CLR_DBG_Debugger::GetAppDomainFromID(CLR_UINT32 id)
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }
 #endif // NANOCLR_APPDOMAINS
 
@@ -233,7 +233,7 @@ CLR_RT_Thread *CLR_DBG_Debugger::GetThreadFromPid(CLR_INT32 pid)
     }
     NANOCLR_FOREACH_NODE_END();
 
-    return NULL;
+    return nullptr;
 }
 
 HRESULT CLR_DBG_Debugger::CreateListOfThreads(CLR_DBG_Commands::Debugging_Thread_List::Reply *&cmdReply, int &totLen)
@@ -379,7 +379,7 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         Monitor_Ping_Command *cmd = (Monitor_Ping_Command *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
-        fStopOnBoot = (cmd != NULL) && (cmd->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
+        fStopOnBoot = (cmd != nullptr) && (cmd->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
 
         cmdReply.Source = Monitor_Ping_c_Ping_Source_NanoCLR;
 
@@ -430,10 +430,10 @@ bool CLR_DBG_Debugger::Monitor_Ping(WP_Message *msg)
         Monitor_Ping_Reply *pingReply = (Monitor_Ping_Reply *)msg->m_payload;
 
         // default is to stop the debugger (backwards compatibility)
-        fStopOnBoot = (pingReply != NULL) && (pingReply->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
+        fStopOnBoot = (pingReply != nullptr) && (pingReply->Flags & Monitor_Ping_c_Ping_DbgFlag_Stop);
 
         // done, send reply
-        WP_ReplyToCommand(msg, true, false, NULL, 0);
+        WP_ReplyToCommand(msg, true, false, nullptr, 0);
     }
 
     if (CLR_EE_DBG_IS_MASK(StateInitialize, StateMask))
@@ -455,10 +455,10 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    BlockStorageDevice *storageDevices = NULL;
-    BlockStorageDevice *device = NULL;
-    DeviceBlockInfo *devicesBlockInfos = NULL;
-    Flash_BlockRegionInfo *pData = NULL;
+    BlockStorageDevice *storageDevices = nullptr;
+    BlockStorageDevice *device = nullptr;
+    DeviceBlockInfo *devicesBlockInfos = nullptr;
+    Flash_BlockRegionInfo *pData = nullptr;
     bool success = false;
     unsigned int rangeCount = 0;
     unsigned int rangeIndex = 0;
@@ -471,14 +471,14 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 
         // get an array of pointer to all the storage devices in the list and then request the device info
         storageDevices = (BlockStorageDevice *)platform_malloc(numDevices * sizeof(BlockStorageDevice));
-        if (storageDevices == NULL)
+        if (storageDevices == nullptr)
         {
             // allocation failed
             goto cmd_executed;
         }
 
         devicesBlockInfos = (DeviceBlockInfo *)platform_malloc(numDevices * sizeof(DeviceBlockInfo));
-        if (devicesBlockInfos == NULL)
+        if (devicesBlockInfos == nullptr)
         {
             // allocation failed
             goto cmd_executed;
@@ -501,7 +501,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 
             // sanity check
             device = &storageDevices[i];
-            if (device == NULL)
+            if (device == nullptr)
             {
                 // failed
                 goto cmd_executed;
@@ -518,7 +518,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
 
                 pData = (Flash_BlockRegionInfo *)platform_malloc(size);
 
-                if (pData == NULL)
+                if (pData == nullptr)
                 {
                     goto cmd_executed;
                 }
@@ -985,7 +985,7 @@ bool CLR_DBG_Debugger::Monitor_ReadMemory(WP_Message *msg)
     buffer = (uint8_t *)platform_malloc(allocationSize);
 
     // sanity check
-    if (buffer != NULL)
+    if (buffer != nullptr)
     {
         // clear allocated memory
         memset(buffer, 0, allocationSize);
@@ -1041,7 +1041,7 @@ bool CLR_DBG_Debugger::Monitor_EraseMemory(WP_Message *msg)
     CLR_DBG_Commands_Monitor_EraseMemory *cmd = (CLR_DBG_Commands_Monitor_EraseMemory *)msg->m_payload;
     CLR_DBG_Commands_Monitor_EraseMemory_Reply cmdReply;
 
-    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, NULL, AccessMemory_Erase, &cmdReply);
+    g_CLR_DBG_Debugger->AccessMemory(cmd->address, cmd->length, nullptr, AccessMemory_Erase, &cmdReply);
 
     WP_ReplyToCommand(msg, true, false, &cmdReply, sizeof(cmdReply));
 
@@ -1059,7 +1059,7 @@ bool CLR_DBG_Debugger::Monitor_Execute(WP_Message *msg)
         return false;
 #endif
 
-    WP_ReplyToCommand(msg, true, false, NULL, 0);
+    WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
     ((void (*)())(size_t)cmd->m_address)();
 
@@ -1086,7 +1086,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
         success = RequestToLaunchProprietaryBootloader();
     }
 
-    WP_ReplyToCommand(msg, success, false, NULL, 0);
+    WP_ReplyToCommand(msg, success, false, nullptr, 0);
 
     // on success, apply reboot options and set reboot pending flag
     if (success)
@@ -1122,7 +1122,7 @@ bool CLR_DBG_Debugger::Monitor_DeploymentMap(WP_Message *msg)
 {
     (void)msg;
 
-    WP_ReplyToCommand(msg, true, false, NULL, 0);
+    WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
     return true;
 }
@@ -1151,7 +1151,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
                 (HAL_Configuration_NetworkInterface *)platform_malloc(sizeof(HAL_Configuration_NetworkInterface));
 
             // check allocation
-            if (configNetworkInterface != NULL)
+            if (configNetworkInterface != nullptr)
             {
 
                 memset(configNetworkInterface, 0, sizeof(HAL_Configuration_NetworkInterface));
@@ -1179,7 +1179,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
                 (HAL_Configuration_Wireless80211 *)platform_malloc(sizeof(HAL_Configuration_Wireless80211));
 
             // check allocation
-            if (configWireless80211NetworkInterface != NULL)
+            if (configWireless80211NetworkInterface != nullptr)
             {
                 memset(configWireless80211NetworkInterface, 0, sizeof(HAL_Configuration_Wireless80211));
 
@@ -1219,7 +1219,7 @@ bool CLR_DBG_Debugger::Monitor_QueryConfiguration(WP_Message *message)
                 x509Certificate = (HAL_Configuration_X509CaRootBundle *)platform_malloc(sizeOfBlock);
 
                 // check allocation
-                if (x509Certificate != NULL)
+                if (x509Certificate != nullptr)
                 {
                     memset(x509Certificate, 0, sizeof(sizeOfBlock));
 
@@ -1466,7 +1466,7 @@ static bool GetInteropNativeAssemblies(uint8_t *&data, uint32_t *size, uint32_t 
     data = (uint8_t *)platform_malloc(*size);
 
     // check for malloc failure
-    if (data == NULL)
+    if (data == nullptr)
     {
         return false;
     }
@@ -1515,7 +1515,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ReplyUnion reply;
     reply.u_capsFlags = 0;
 
-    CLR_UINT8 *data = NULL;
+    CLR_UINT8 *data = nullptr;
     uint32_t size = 0;
     bool fSuccess = true;
     bool freeAllocFlag = false;
@@ -1713,7 +1713,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
     WP_ReplyToCommand(msg, fSuccess, false, data, size);
 
     // check if we need to free data pointer
-    if (freeAllocFlag && data != NULL)
+    if (freeAllocFlag && data != nullptr)
     {
         platform_free(data);
     }
@@ -1787,12 +1787,12 @@ static bool FillValues(
 
     memset(dst, 0, sizeof(*dst));
 
-    dst->m_referenceID = (reference != NULL) ? reference : ptr;
+    dst->m_referenceID = (reference != nullptr) ? reference : ptr;
     dst->m_dt = ptr->DataType();
     dst->m_flags = ptr->DataFlags();
     dst->m_size = ptr->DataSize();
 
-    if (pTD != NULL)
+    if (pTD != nullptr)
     {
         dst->m_td = *pTD;
     }
@@ -1831,7 +1831,7 @@ static bool FillValues(
         {
             const char *text = ptr->StringText();
 
-            if (text != NULL)
+            if (text != nullptr)
             {
                 dst->m_charsInString = text;
                 dst->m_bytesInString = (CLR_UINT32)hal_strlen_s(text);
@@ -1844,7 +1844,7 @@ static bool FillValues(
             }
             else
             {
-                dst->m_charsInString = NULL;
+                dst->m_charsInString = nullptr;
                 dst->m_bytesInString = 0;
                 dst->m_builtinValue[0] = 0;
             }
@@ -1853,7 +1853,7 @@ static bool FillValues(
 
         case DATATYPE_OBJECT:
         case DATATYPE_BYREF:
-            return FillValues(ptr->Dereference(), array, num, NULL, pTD);
+            return FillValues(ptr->Dereference(), array, num, nullptr, pTD);
 
         case DATATYPE_CLASS:
         case DATATYPE_VALUETYPE:
@@ -1948,7 +1948,7 @@ bool CLR_DBG_Debugger::GetValue(
         return true;
     }
 
-    WP_ReplyToCommand(msg, false, false, NULL, 0);
+    WP_ReplyToCommand(msg, false, false, nullptr, 0);
 
     return false;
 }
@@ -1969,7 +1969,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_SetCurrentAppDomain(WP_Message *msg)
         g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(appDomain);
     }
 
-    WP_ReplyToCommand(msg, appDomain != NULL, false, NULL, 0);
+    WP_ReplyToCommand(msg, appDomain != nullptr, false, nullptr, 0);
 
     return true;
 #else
@@ -1989,7 +1989,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_Breakpoints(WP_Message *msg)
         cmd->m_data,
         (msg->m_header.m_size - sizeof(cmd->m_flags)) / sizeof(CLR_DBG_Commands::Debugging_Execution_BreakpointDef));
 
-    WP_ReplyToCommand(msg, true, false, NULL, 0);
+    WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
     return true;
 }
@@ -2022,7 +2022,7 @@ CLR_RT_Assembly *CLR_DBG_Debugger::IsGoodAssembly(CLR_INDEX indexAssm)
     }
     NANOCLR_FOREACH_ASSEMBLY_END();
 
-    return NULL;
+    return nullptr;
 }
 
 bool CLR_DBG_Debugger::CheckTypeDef(const CLR_RT_TypeDef_Index &td, CLR_RT_TypeDef_Instance &inst)
@@ -2092,7 +2092,7 @@ CLR_RT_StackFrame *CLR_DBG_Debugger::CheckStackFrame(CLR_INT32 pid, CLR_UINT32 d
         NANOCLR_FOREACH_NODE_END();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -2103,13 +2103,13 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
     NANOCLR_HEADER();
 
     CLR_RT_HeapBlock ref;
-    ref.SetObjectReference(NULL);
+    ref.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(ref);
-    CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : NULL;
+    CLR_RT_Thread *realThread = (pid != 0) ? CLR_DBG_Debugger::GetThreadFromPid(pid) : nullptr;
 
-    th = NULL;
+    th = nullptr;
 
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, md, NULL));
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Delegate::CreateInstance(ref, md, nullptr));
 
     NANOCLR_CHECK_HRESULT(
         g_CLR_RT_ExecutionEngine.NewThread(th, ref.DereferenceDelegate(), ThreadPriority::Highest, -1));
@@ -2133,7 +2133,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
 
             if (parser.Flags & PIMAGE_CEE_CS_CALLCONV_HASTHIS)
             {
-                args->SetObjectReference(NULL);
+                args->SetObjectReference(nullptr);
 
                 numArgs--;
                 args++;
@@ -2175,7 +2175,7 @@ static HRESULT Debugging_Thread_Create_Helper(CLR_RT_MethodDef_Index &md, CLR_RT
         if (th)
         {
             th->Terminate();
-            th = NULL;
+            th = nullptr;
         }
     }
 
@@ -2210,7 +2210,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_List(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    CLR_DBG_Commands::Debugging_Thread_List::Reply *cmdReply = NULL;
+    CLR_DBG_Commands::Debugging_Thread_List::Reply *cmdReply = nullptr;
     int len = 0;
 
     if (FAILED(g_CLR_DBG_Debugger->CreateListOfThreads(cmdReply, len)))
@@ -2232,7 +2232,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Stack(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     CLR_DBG_Commands::Debugging_Thread_Stack *cmd = (CLR_DBG_Commands::Debugging_Thread_Stack *)msg->m_payload;
-    CLR_DBG_Commands::Debugging_Thread_Stack::Reply *cmdReply = NULL;
+    CLR_DBG_Commands::Debugging_Thread_Stack::Reply *cmdReply = nullptr;
     int len = 0;
 
     if (FAILED(g_CLR_DBG_Debugger->CreateListOfCalls(cmd->m_pid, cmdReply, len)))
@@ -2285,7 +2285,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Suspend(WP_Message *msg)
         th->Suspend();
     }
 
-    WP_ReplyToCommand(msg, th != NULL, false, NULL, 0);
+    WP_ReplyToCommand(msg, th != nullptr, false, nullptr, 0);
 
     return true;
 }
@@ -2302,7 +2302,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Resume(WP_Message *msg)
         th->Resume();
     }
 
-    WP_ReplyToCommand(msg, th != NULL, false, NULL, 0);
+    WP_ReplyToCommand(msg, th != nullptr, false, nullptr, 0);
 
     return true;
 }
@@ -2316,7 +2316,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     CLR_RT_HeapBlock *pThread;
     bool fFound = false;
 
-    if (th == NULL)
+    if (th == nullptr)
     {
         return false;
     }
@@ -2334,14 +2334,14 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     NANOCLR_FOREACH_NODE(CLR_RT_ObjectToEvent_Source, src, th->m_references)
     {
         CLR_RT_HeapBlock *pManagedThread = src->m_objectPtr;
-        _ASSERTE(pManagedThread != NULL);
+        _ASSERTE(pManagedThread != nullptr);
 
 #if defined(NANOCLR_APPDOMAINS)
         {
             CLR_RT_ObjectToEvent_Source *appDomainSrc = CLR_RT_ObjectToEvent_Source::ExtractInstance(
                 pManagedThread[Library_corlib_native_System_Threading_Thread::FIELD___appDomain]);
 
-            if (appDomainSrc == NULL)
+            if (appDomainSrc == nullptr)
             {
                 break;
             }
@@ -2401,8 +2401,8 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     }
 
     // try to get value
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, pThread, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, pThread, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, pThread, nullptr, nullptr);
 
     return true;
 }
@@ -2414,7 +2414,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Thread_GetException *cmd =
         (CLR_DBG_Commands::Debugging_Thread_GetException *)msg->m_payload;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
-    CLR_RT_HeapBlock *blk = NULL;
+    CLR_RT_HeapBlock *blk = nullptr;
 
     if (th)
     {
@@ -2422,8 +2422,8 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
     }
 
     // try to get value
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -2437,7 +2437,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Unwind(WP_Message *msg)
     CLR_RT_Thread *th;
     bool isInline = false;
 
-    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
+    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != nullptr)
     {
         _ASSERTE((call->m_flags & CLR_RT_StackFrame::c_MethodKind_Native) == 0);
 
@@ -2454,7 +2454,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Unwind(WP_Message *msg)
         us.SetPhase(CLR_RT_Thread::UnwindStack::p_2_RunningFinallys_0);
     }
 
-    WP_ReplyToCommand(msg, true, false, NULL, 0);
+    WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
     return true;
 }
@@ -2470,7 +2470,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_Info(WP_Message *msg)
     CLR_RT_StackFrame *call;
     bool isInline = false;
 
-    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
+    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != nullptr)
     {
 #ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
@@ -2507,7 +2507,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP(WP_Message *msg)
     CLR_RT_StackFrame *call;
     bool isInline = false;
 
-    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
+    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != nullptr)
     {
 #ifndef NANOCLR_NO_IL_INLINE
         if (isInline)
@@ -2523,7 +2523,7 @@ bool CLR_DBG_Debugger::Debugging_Stack_SetIP(WP_Message *msg)
 
         call->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
 
-        WP_ReplyToCommand(msg, true, false, NULL, 0);
+        WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
         return true;
     }
@@ -2571,11 +2571,11 @@ static bool SetBlockHelper(CLR_RT_HeapBlock *blk, NanoCLRDataType dt, CLR_UINT8 
         {
             if (dt == DATATYPE_REFLECTION)
             {
-                fCanAssign = (dtDst == DATATYPE_OBJECT && blk->Dereference() == NULL);
+                fCanAssign = (dtDst == DATATYPE_OBJECT && blk->Dereference() == nullptr);
             }
             else if (dt == DATATYPE_OBJECT)
             {
-                fCanAssign = (src.Dereference() == NULL && dtDst == DATATYPE_REFLECTION);
+                fCanAssign = (src.Dereference() == nullptr && dtDst == DATATYPE_REFLECTION);
             }
             else
             {
@@ -2614,7 +2614,7 @@ static CLR_RT_HeapBlock *GetScratchPad_Helper(int index)
         return (CLR_RT_HeapBlock *)array->GetElement(index);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 //--//
@@ -2629,7 +2629,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 
     if (cmd->m_size == 0)
     {
-        g_CLR_RT_ExecutionEngine.m_scratchPadArray = NULL;
+        g_CLR_RT_ExecutionEngine.m_scratchPadArray = nullptr;
     }
     else
     {
@@ -2649,7 +2649,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
             g_CLR_RT_ExecutionEngine.m_scratchPadArray = pNew;
 
             // done
-            WP_ReplyToCommand(msg, true, false, NULL, 0);
+            WP_ReplyToCommand(msg, true, false, nullptr, 0);
         }
         else
         {
@@ -2668,7 +2668,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
     CLR_RT_StackFrame *call;
     bool isInline = false;
 
-    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != NULL)
+    if ((call = g_CLR_DBG_Debugger->CheckStackFrame(cmd->m_pid, cmd->m_depth, isInline)) != nullptr)
     {
         CLR_RT_HeapBlock *array;
         CLR_UINT32 num;
@@ -2721,9 +2721,9 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
         }
 
         CLR_RT_HeapBlock *blk = &array[cmd->m_index];
-        CLR_RT_HeapBlock *reference = NULL;
+        CLR_RT_HeapBlock *reference = nullptr;
         CLR_RT_HeapBlock tmp;
-        CLR_RT_TypeDef_Instance *pTD = NULL;
+        CLR_RT_TypeDef_Instance *pTD = nullptr;
         CLR_RT_TypeDef_Instance td;
 
         if (cmd->m_kind != CLR_DBG_Commands::Debugging_Value_GetStack::c_EvalStack && IsBlockEnumMaybe(blk))
@@ -2778,8 +2778,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
                 CLR_RT_GenericParam_Index gpIndex;
                 assembly->FindGenericParamAtMethodDef(md, res.GenericParamPosition, gpIndex);
 
-                CLR_RT_GenericParam_CrossReference gp =
-                    assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
+                CLR_RT_GenericParam_CrossReference gp = assembly->crossReferenceGenericParam[gpIndex.GenericParam()];
 
                 targetClass = gp.classTypeDef;
                 targetDataType = gp.dataType;
@@ -2828,7 +2827,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetStack(WP_Message *msg)
             }
         }
 
-        // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+        // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, nullptr, 0);
         return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
 
         return true;
@@ -2843,15 +2842,15 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_GetField *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
-    CLR_RT_HeapBlock *reference = NULL;
+    CLR_RT_HeapBlock *reference = nullptr;
     CLR_RT_HeapBlock tmp;
     CLR_RT_TypeDescriptor desc;
     CLR_RT_TypeDef_Instance td;
-    CLR_RT_TypeDef_Instance *pTD = NULL;
+    CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_FieldDef_Instance inst;
     CLR_UINT32 offset;
 
-    if (blk != NULL && cmd->m_offset > 0)
+    if (blk != nullptr && cmd->m_offset > 0)
     {
         if (FAILED(desc.InitializeFromObject(*blk)))
         {
@@ -2887,7 +2886,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
         return false;
     }
 
-    if (blk == NULL)
+    if (blk == nullptr)
     {
         blk = CLR_RT_ExecutionEngine::AccessStaticField(cmd->m_fd);
     }
@@ -2941,7 +2940,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
         }
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, nullptr, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
 
     return true;
@@ -2952,11 +2951,11 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     CLR_DBG_Commands::Debugging_Value_GetArray *cmd = (CLR_DBG_Commands::Debugging_Value_GetArray *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = NULL;
-    CLR_RT_HeapBlock *reference = NULL;
+    CLR_RT_HeapBlock *blk = nullptr;
+    CLR_RT_HeapBlock *reference = nullptr;
     CLR_RT_HeapBlock tmp;
     CLR_RT_HeapBlock ref;
-    CLR_RT_TypeDef_Instance *pTD = NULL;
+    CLR_RT_TypeDef_Instance *pTD = nullptr;
     CLR_RT_TypeDef_Instance td;
 
     tmp.SetObjectReference(cmd->m_heapblock);
@@ -2992,7 +2991,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetArray(WP_Message *msg)
         }
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, NULL, 0);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD), false, nullptr, 0);
     return g_CLR_DBG_Debugger->GetValue(msg, blk, reference, pTD);
 
     return true;
@@ -3005,8 +3004,8 @@ bool CLR_DBG_Debugger::Debugging_Value_GetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_GetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -3019,7 +3018,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetScratchPad(WP_Message *msg)
         (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_index);
 
-    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
+    WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
 
     return true;
 }
@@ -3031,8 +3030,8 @@ bool CLR_DBG_Debugger::Debugging_Value_SetBlock(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_SetBlock *cmd = (CLR_DBG_Commands::Debugging_Value_SetBlock *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
 
-    // WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, SetBlockHelper(blk, (NanoCLRDataType)cmd->m_dt, cmd->m_builtinValue), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -3050,7 +3049,7 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
     //
     // We can only set values in arrays of primitive types.
     //
-    if (array != NULL && !array->m_fReference)
+    if (array != nullptr && !array->m_fReference)
     {
         CLR_RT_HeapBlock ref;
 
@@ -3062,7 +3061,7 @@ bool CLR_DBG_Debugger::Debugging_Value_SetArray(WP_Message *msg)
                 {
                     if (SUCCEEDED(tmp.StoreToReference(ref, 0)))
                     {
-                        WP_ReplyToCommand(msg, true, false, NULL, 0);
+                        WP_ReplyToCommand(msg, true, false, nullptr, 0);
                     }
                 }
             }
@@ -3080,7 +3079,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_AllocateObject *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateObject *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = NULL;
+    CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
     if (ptr)
@@ -3091,8 +3090,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
         }
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -3103,7 +3102,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_AllocateString *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateString *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = NULL;
+    CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
     if (ptr)
@@ -3124,8 +3123,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
         }
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -3136,7 +3135,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
 
     CLR_DBG_Commands::Debugging_Value_AllocateArray *cmd =
         (CLR_DBG_Commands::Debugging_Value_AllocateArray *)msg->m_payload;
-    CLR_RT_HeapBlock *blk = NULL;
+    CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
     if (ptr)
@@ -3153,8 +3152,8 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
         }
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blk, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr);
 
     return true;
 }
@@ -3172,11 +3171,11 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
     switch (command)
     {
         case CLR_DBG_Commands::Profiling_Command::c_Command_ChangeConditions:
-            WP_ReplyToCommand(msg, dbg->Profiling_ChangeConditions(msg), false, NULL, 0);
+            WP_ReplyToCommand(msg, dbg->Profiling_ChangeConditions(msg), false, nullptr, 0);
             break;
 
         case CLR_DBG_Commands::Profiling_Command::c_Command_FlushStream:
-            WP_ReplyToCommand(msg, dbg->Profiling_FlushStream(msg), false, NULL, 0);
+            WP_ReplyToCommand(msg, dbg->Profiling_FlushStream(msg), false, nullptr, 0);
             break;
 
         default:
@@ -3250,7 +3249,7 @@ static HRESULT AnalyzeObject_Helper(CLR_RT_HeapBlock *ptr, AnalyzeObject &ao)
 
     ao.m_ptr = ptr;
 
-    if (ptr == NULL || (ptr->DataType() == DATATYPE_OBJECT && ptr->Dereference() == NULL))
+    if (ptr == nullptr || (ptr->DataType() == DATATYPE_OBJECT && ptr->Dereference() == nullptr))
     {
         ao.m_fNull = true;
         ao.m_fBoxed = false;
@@ -3301,7 +3300,7 @@ static HRESULT Assign_Helper(CLR_RT_HeapBlock *blkDst, CLR_RT_HeapBlock *blkSrc)
     AnalyzeObject aoDst;
     AnalyzeObject aoSrc;
     CLR_RT_HeapBlock srcVal;
-    srcVal.SetObjectReference(NULL);
+    srcVal.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(srcVal);
 
     NANOCLR_CHECK_HRESULT(AnalyzeObject_Helper(blkDst, aoDst));
@@ -3363,11 +3362,11 @@ bool CLR_DBG_Debugger::Debugging_Value_Assign(WP_Message *msg)
 
     if (blkDst && FAILED(Assign_Helper(blkDst, blkSrc)))
     {
-        blkDst = NULL;
+        blkDst = nullptr;
     }
 
-    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL), false, NULL, 0);
-    return g_CLR_DBG_Debugger->GetValue(msg, blkDst, NULL, NULL);
+    // WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blkDst, nullptr, nullptr), false, nullptr, 0);
+    return g_CLR_DBG_Debugger->GetValue(msg, blkDst, nullptr, nullptr);
 
     return true;
 }
@@ -3499,20 +3498,15 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
 #endif
 
     // sanity check
-    if (cmdReply != NULL)
+    if (cmdReply != nullptr)
     {
         if (assm)
         {
 #if defined(VIRTUAL_DEVICE)
             // append path
-            if (assm->path != NULL)
+            if (assm->path != nullptr)
             {
-                sprintf_s(
-                    cmdReply->m_szName,
-                    ARRAYSIZE(cmdReply->m_szName),
-                    "%s,%s",
-                    assm->name,
-                    assm->path->c_str());
+                sprintf_s(cmdReply->m_szName, ARRAYSIZE(cmdReply->m_szName), "%s,%s", assm->name, assm->path->c_str());
             }
             else
 #endif
@@ -3560,7 +3554,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Type(WP_Message *msg)
 #endif
 
     // sanity check
-    if (cmdReply != NULL)
+    if (cmdReply != nullptr)
     {
         if (g_CLR_DBG_Debugger->CheckTypeDef(cmd->m_td, inst))
         {
@@ -3603,7 +3597,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Field(WP_Message *msg)
 #endif
 
     // sanity check
-    if (cmdReply != NULL)
+    if (cmdReply != nullptr)
     {
 
         if (g_CLR_DBG_Debugger->CheckFieldDef(cmd->m_fd, inst))
@@ -3654,7 +3648,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Method(WP_Message *msg)
 #endif
 
     // sanity check
-    if (cmdReply != NULL)
+    if (cmdReply != nullptr)
     {
 
         if (g_CLR_DBG_Debugger->CheckMethodDef(cmd->m_md, inst) && instOwner.InitializeFromMethod(inst))
@@ -3719,7 +3713,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
     CLR_UINT32 deployLength = 0;
 
     // find the first device in list with DEPLOYMENT blocks
-    if (m_deploymentStorageDevice != NULL)
+    if (m_deploymentStorageDevice != nullptr)
     {
         BlockStorageStream stream;
 
@@ -3761,7 +3755,7 @@ bool CLR_DBG_Debugger::Debugging_Deployment_Status(WP_Message *msg)
 
         CLR_RT_Memory::Release(cmdReply);
 
-        WP_ReplyToCommand(msg, true, false, NULL, 0);
+        WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
         return true;
     }
@@ -3844,7 +3838,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
                 g_CLR_DBG_Debugger->Debugging_Info_SetJMC_Type(idx, fJMC);
             }
 
-            WP_ReplyToCommand(msg, true, false, NULL, 0);
+            WP_ReplyToCommand(msg, true, false, nullptr, 0);
 
             return true;
         }
@@ -3854,7 +3848,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
                 msg,
                 g_CLR_DBG_Debugger->Debugging_Info_SetJMC_Type(cmd->m_data.m_type, fJMC),
                 false,
-                NULL,
+                nullptr,
                 0);
             return true;
 
@@ -3863,7 +3857,7 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
                 msg,
                 g_CLR_DBG_Debugger->Debugging_Info_SetJMC_Method(cmd->m_data.m_method, fJMC),
                 false,
-                NULL,
+                nullptr,
                 0);
             return true;
 
@@ -3872,4 +3866,4 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
     }
 }
 
-#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING

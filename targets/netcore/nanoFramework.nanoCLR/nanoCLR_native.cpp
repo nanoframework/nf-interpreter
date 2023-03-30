@@ -46,10 +46,10 @@
 
 #endif
 
-DebugPrintCallback gDebugPrintCallback = NULL;
+DebugPrintCallback gDebugPrintCallback = nullptr;
 
-WireTransmitCallback WireProtocolTransmitCallback = NULL;
-WireReceiveCallback WireProtocolReceiveCallback = NULL;
+WireTransmitCallback WireProtocolTransmitCallback = nullptr;
+WireReceiveCallback WireProtocolReceiveCallback = nullptr;
 
 // flag requesting stopping of WP processing
 bool _wireProtocolStopProcess;

@@ -13,7 +13,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_AppDomain *appDomainSav = NULL;
+    CLR_RT_AppDomain *appDomainSav = nullptr;
     CLR_RT_AppDomain *appDomain;
 
     NANOCLR_CHECK_HRESULT(GetAppDomain(stack.ThisRef(), appDomain, appDomainSav, true));
@@ -71,7 +71,7 @@ HRESULT Library_corlib_native_System_AppDomain::
     }
     else
     {
-        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, NULL, false);
+        assembly = g_CLR_RT_TypeSystem.FindAssembly(szAssembly, nullptr, false);
         FAULT_ON_NULL_HR(assembly, CLR_E_INVALID_PARAMETER);
     }
 
@@ -101,10 +101,10 @@ HRESULT Library_corlib_native_System_AppDomain::CreateDomain___STATIC__SystemApp
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_AppDomain *appDomain = NULL;
+    CLR_RT_AppDomain *appDomain = nullptr;
     CLR_RT_HeapBlock &pArgs = stack.Arg0();
     CLR_RT_HeapBlock res;
-    res.SetObjectReference(NULL);
+    res.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(res);
     const char *szName;
 
@@ -117,7 +117,7 @@ HRESULT Library_corlib_native_System_AppDomain::CreateDomain___STATIC__SystemApp
     NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly(g_CLR_RT_TypeSystem.m_assemblyMscorlib));
 
     // load Runtime.Native
-    if (g_CLR_RT_TypeSystem.m_assemblyNative != NULL)
+    if (g_CLR_RT_TypeSystem.m_assemblyNative != nullptr)
     {
         NANOCLR_CHECK_HRESULT(appDomain->LoadAssembly(g_CLR_RT_TypeSystem.m_assemblyNative));
     }
@@ -246,7 +246,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAppDomain(
     NANOCLR_NOCLEANUP();
 }
 
-#else //#if defined(NANOCLR_APPDOMAINS)
+#else // #if defined(NANOCLR_APPDOMAINS)
 
 #if (NANOCLR_REFLECTION == TRUE)
 
@@ -259,7 +259,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
     CLR_RT_HeapBlock &top = stack.PushValueAndClear();
 
     int count = 0;
-    CLR_RT_HeapBlock *pArray = NULL;
+    CLR_RT_HeapBlock *pArray = nullptr;
 
     for (int pass = 0; pass < 2; pass++)
     {
@@ -288,8 +288,7 @@ HRESULT Library_corlib_native_System_AppDomain::GetAssemblies___SZARRAY_SystemRe
 
         if (pass == 0)
         {
-            NANOCLR_CHECK_HRESULT(
-                CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.Assembly));
+            NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(top, count, g_CLR_RT_WellKnownTypes.Assembly));
 
             pArray = (CLR_RT_HeapBlock *)top.DereferenceArray()->GetFirstElement();
         }
@@ -331,4 +330,4 @@ HRESULT Library_corlib_native_System_AppDomain::Unload___STATIC__VOID__SystemApp
 
 #endif // NANOCLR_REFLECTION
 
-#endif //#if defined(NANOCLR_APPDOMAINS)
+#endif // #if defined(NANOCLR_APPDOMAINS)

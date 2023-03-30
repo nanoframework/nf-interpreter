@@ -107,7 +107,7 @@ bool CLR_RT_EventCache::VirtualMethodTable::FindVirtualMethod(
         if (m_list_freeItems.IsEmpty())
         {
             en = (LookupEntry *)m_list_inUse.LastNode();
-            if (en->Prev() == NULL)
+            if (en->Prev() == nullptr)
             {
                 //
                 // No node to steal, return.
@@ -401,7 +401,7 @@ void CLR_RT_EventCache::EventCache_Initialize()
     {
         m_inlineBufferStart[i].m_pNext = &m_inlineBufferStart[i + 1];
     }
-    m_inlineBufferStart[num].m_pNext = NULL;
+    m_inlineBufferStart[num].m_pNext = nullptr;
 #endif
 }
 
@@ -458,7 +458,7 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Slow(CLR_UINT32 dataType, CLR_
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock_Node *node;
-    CLR_RT_HeapBlock_Node *best = NULL;
+    CLR_RT_HeapBlock_Node *best = nullptr;
     CLR_UINT32 bestSize = 0;
 
     NANOCLR_FOREACH_NODE(CLR_RT_HeapBlock_Node, ptr, m_events[0].m_blocks)
@@ -598,7 +598,7 @@ bool CLR_RT_EventCache::FindVirtualMethod(
 #ifndef NANOCLR_NO_IL_INLINE
 bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer)
 {
-    if (m_inlineBufferStart != NULL)
+    if (m_inlineBufferStart != nullptr)
     {
         *ppBuffer = m_inlineBufferStart;
 
@@ -607,7 +607,7 @@ bool CLR_RT_EventCache::GetInlineFrameBuffer(CLR_RT_InlineBuffer **ppBuffer)
         return true;
     }
 
-    *ppBuffer = NULL;
+    *ppBuffer = nullptr;
 
     return false;
 }

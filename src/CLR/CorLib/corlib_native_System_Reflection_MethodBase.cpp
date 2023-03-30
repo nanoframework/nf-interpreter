@@ -108,7 +108,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
     CLR_RT_MethodDef_Instance md;
     const CLR_RECORD_METHODDEF *mdR;
     CLR_RT_HeapBlock_Array *pArray = stack.Arg2().DereferenceArray();
-    CLR_RT_HeapBlock *args = NULL;
+    CLR_RT_HeapBlock *args = nullptr;
     int ArgumentsCount = 0;
     CLR_RT_HeapBlock *hbMeth = stack.Arg0().Dereference();
 
@@ -141,7 +141,7 @@ HRESULT Library_corlib_native_System_Reflection_MethodBase::Invoke___OBJECT__OBJ
         }
         else
         {
-            stack.SetResult_Object(NULL);
+            stack.SetResult_Object(nullptr);
         }
     }
 

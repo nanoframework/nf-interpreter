@@ -41,14 +41,14 @@ bool CLR_Messaging::AllocateAndQueueMessage(
     CLR_RT_HeapBlock_EndPoint::Message *rpc;
     CLR_RT_HeapBlock_EndPoint *ep;
 
-    if ((ep = CLR_RT_HeapBlock_EndPoint::FindEndPoint(port)) == NULL)
+    if ((ep = CLR_RT_HeapBlock_EndPoint::FindEndPoint(port)) == nullptr)
         return false;
 
     {
         CLR_RT_ProtectFromGC gc(*ep);
 
         if ((rpc = (CLR_RT_HeapBlock_EndPoint::Message *)
-                 CLR_RT_Memory::Allocate(sizeof(*rpc) + length, CLR_RT_HeapBlock::HB_CompactOnFailure)) == NULL)
+                 CLR_RT_Memory::Allocate(sizeof(*rpc) + length, CLR_RT_HeapBlock::HB_CompactOnFailure)) == nullptr)
             return false;
 
         rpc->ClearData();
@@ -77,7 +77,7 @@ bool CLR_Messaging::Messaging_Query(WP_Message *msg)
     CLR_Messaging_Commands::Messaging_Query::Reply res;
     CLR_RT_HeapBlock_EndPoint *ep = CLR_RT_HeapBlock_EndPoint::FindEndPoint(cmd->m_addr.m_to);
 
-    res.m_found = (ep != NULL);
+    res.m_found = (ep != nullptr);
     res.m_addr = cmd->m_addr;
 
     WP_ReplyToCommand(msg, true, false, &res, sizeof(res));
@@ -95,7 +95,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
     g_CLR_Messaging.AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Query,
         0,
-        NULL,
+        nullptr,
         cmd->m_addr.m_from,
         cmd->m_addr,
         cmd->m_found);
@@ -203,7 +203,7 @@ bool CLR_Messaging::App_ProcessHeader(void *state, WP_Message *msg)
     {
         void *ptr = CLR_RT_Memory::Allocate(msg->m_header.m_size, CLR_RT_HeapBlock::HB_CompactOnFailure);
 
-        if (ptr == NULL)
+        if (ptr == nullptr)
         {
             TRACE0(TRACE_HEADERS, "Failed to allocate 0x%08X bytes for message payload!\n");
             return false;
@@ -235,11 +235,11 @@ bool CLR_Messaging::App_Release(void *state, WP_Message *msg)
     (void)state;
 
     NATIVE_PROFILE_CLR_MESSAGING();
-    if (msg->m_payload != NULL)
+    if (msg->m_payload != nullptr)
     {
         CLR_RT_Memory::Release(msg->m_payload);
 
-        msg->m_payload = NULL;
+        msg->m_payload = nullptr;
     }
 
     return true;
@@ -256,7 +256,7 @@ HRESULT CLR_Messaging::CreateInstance()
 
     NANOCLR_CLEAR(g_CLR_Messaging);
 
-    g_CLR_Messaging.Initialize(NULL, 0, NULL, 0);
+    g_CLR_Messaging.Initialize(nullptr, 0, nullptr, 0);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -345,10 +345,10 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 
     //--//
 
-    CLR_Messaging_CommandHandlerLookups *tables = NULL;
+    CLR_Messaging_CommandHandlerLookups *tables = nullptr;
     int tableCount = CMD_HANDLER_LOOKUP_TABLE_SIZE;
     size_t num;
-    const CLR_Messaging_CommandHandlerLookup *cmd = NULL;
+    const CLR_Messaging_CommandHandlerLookup *cmd = nullptr;
 
     // developer note: load lookup tables, starting with the upper one
     // until there is use for RPC Messaging, useful replies and request are in the second table
@@ -361,7 +361,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
         tables = &m_Lookup_Requests[CMD_HANDLER_LOOKUP_TABLE_SIZE - 1];
     }
 
-    _ASSERTE(tables != NULL);
+    _ASSERTE(tables != nullptr);
 
     // go over lookup tables
     while (tableCount-- > 0)
@@ -369,7 +369,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
         num = tables->size;
         cmd = tables->table;
 
-        while (num-- > 0 && cmd != NULL)
+        while (num-- > 0 && cmd != nullptr)
         {
             if (cmd->cmd == msg->m_header.m_cmd)
             {
@@ -382,7 +382,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
                 if (!(*(cmd->hnd))(msg))
                 {
                     // only need to reply if outcome is false
-                    WP_ReplyToCommand(msg, false, false, NULL, 0);
+                    WP_ReplyToCommand(msg, false, false, nullptr, 0);
                 }
 
                 // done here
@@ -399,7 +399,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
     }
 
     // getting here means failure, as no command handler was found for this request
-    WP_ReplyToCommand(msg, false, false, NULL, 0);
+    WP_ReplyToCommand(msg, false, false, nullptr, 0);
 
     return true;
 }
@@ -408,7 +408,7 @@ bool CLR_Messaging::ProcessPayload(WP_Message *msg)
 // has to mirror declaration of the function with the same name for platforms that implement nanoBooter
 extern "C" uint8_t Messaging_ProcessPayload(WP_Message *msg)
 {
-    if (g_CLR_DBG_Debugger == NULL)
+    if (g_CLR_DBG_Debugger == nullptr)
     {
         return false;
     }

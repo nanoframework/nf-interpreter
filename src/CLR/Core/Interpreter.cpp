@@ -112,7 +112,7 @@ bool CLR_RT_HeapBlock::InitObject()
         if (ptr->InitObject() == false)
             return false;
 
-        obj->SetObjectReference(NULL);
+        obj->SetObjectReference(nullptr);
     }
 
     return true;
@@ -425,8 +425,8 @@ bool CLR_RT_Thread::FindEhBlock(
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_Assembly *assm = stack->m_call.assembly;
-    CLR_RT_ExceptionHandler *ptrEhExt = NULL;
-    const CLR_RECORD_EH *ptrEh = NULL;
+    CLR_RT_ExceptionHandler *ptrEhExt = nullptr;
+    const CLR_RECORD_EH *ptrEh = nullptr;
     CLR_UINT32 numEh = 0;
 
     // FROM is always non-NULL and indicates the current IP
@@ -443,7 +443,7 @@ bool CLR_RT_Thread::FindEhBlock(
         if (!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
             CLR_Debug::Printf("Unwinding at ");
-            CLR_RT_DUMP::METHOD(stack->m_call, NULL);
+            CLR_RT_DUMP::METHOD(stack->m_call, nullptr);
             CLR_Debug::Printf(" [IP: %04x - %d]\r\n", (size_t)stack->m_IP, (stack->m_IP - stack->m_IPstart));
         }
     }
@@ -476,7 +476,7 @@ bool CLR_RT_Thread::FindEhBlock(
                     return false;
                 }
 
-                ptrEhExt = NULL;
+                ptrEhExt = nullptr;
             }
             break;
 
@@ -499,7 +499,7 @@ bool CLR_RT_Thread::FindEhBlock(
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
             if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
             {
-                if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+                if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                 {
                     CLR_Debug::Printf(
                         "Checking EH: %04X-%04X => %04X\r\n",
@@ -591,7 +591,7 @@ bool CLR_RT_Thread::FindEhBlock(
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
     if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
-        if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+        if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
             CLR_Debug::Printf("No match\r\n");
         }
@@ -616,7 +616,7 @@ HRESULT CLR_RT_Thread::Execute()
 
     g_CLR_RT_ExecutionEngine.m_currentThread = this;
 
-    if (m_currentException.Dereference() != NULL)
+    if (m_currentException.Dereference() != nullptr)
     {
         hr = CLR_E_PROCESS_EXCEPTION;
     }
@@ -658,7 +658,7 @@ HRESULT CLR_RT_Thread::Execute()
 
             default: // Allocate a new exception.
                 stack = CurrentFrame();
-                if (stack->Prev() != NULL)
+                if (stack->Prev() != nullptr)
                 {
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
                     for (int i = 0; i < ARRAYSIZE(s_track); i++)
@@ -707,7 +707,7 @@ HRESULT CLR_RT_Thread::Execute()
             break;
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-        if (m_currentException.Dereference() != NULL)
+        if (m_currentException.Dereference() != nullptr)
         {
             break;
         }
@@ -723,7 +723,7 @@ HRESULT CLR_RT_Thread::Execute()
 
     g_CLR_RT_ExecutionEngine.m_currentThread = currentThreadSav;
 
-    ::Events_SetBoolTimer(NULL, 0);
+    ::Events_SetBoolTimer(nullptr, 0);
 
     NANOCLR_CLEANUP_END();
 }
@@ -744,7 +744,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
         }
 #endif
 
-        if (stack->Prev() == NULL)
+        if (stack->Prev() == nullptr)
         {
             m_status = CLR_RT_Thread::TH_S_Terminated;
 
@@ -849,7 +849,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 }
 
                 // check for exception injected by native code
-                if (m_currentException.Dereference() != NULL)
+                if (m_currentException.Dereference() != nullptr)
                 {
                     hr = CLR_E_PROCESS_EXCEPTION;
                 }
@@ -857,7 +857,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
                 // The inner loop may push or pop more stack frames
                 stack = CurrentFrame();
 
-                if (stack->Prev() == NULL)
+                if (stack->Prev() == nullptr)
                 {
                     m_status = CLR_RT_Thread::TH_S_Terminated;
 
@@ -964,7 +964,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
 
         dlg = array[stack->m_customState++].DereferenceDelegate();
 
-        if (dlg == NULL || dlg->DataType() != DATATYPE_DELEGATE_HEAD)
+        if (dlg == nullptr || dlg->DataType() != DATATYPE_DELEGATE_HEAD)
             continue;
 
         break;
@@ -982,7 +982,7 @@ HRESULT CLR_RT_Thread::Execute_DelegateInvoke(CLR_RT_StackFrame &stackArg)
 
         NANOCLR_CHECK_HRESULT(stack->MakeCall(
             inst,
-            fStaticMethod ? NULL : &dlg->m_object,
+            fStaticMethod ? nullptr : &dlg->m_object,
             &stack->m_arguments[1],
             md->argumentsCount - 1));
     }
@@ -1336,7 +1336,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    evalPos[0].SetObjectReference(NULL);
+                    evalPos[0].SetObjectReference(nullptr);
                     break;
                 }
 
@@ -2109,7 +2109,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif
 
                     pThis = &evalPos[1 - calleeInst.target->argumentsCount]; // Point to the first arg, 'this' if an
-                                                                               // instance method
+                                                                             // instance method
 
                     if (calleeInst.target->flags & CLR_RECORD_METHODDEF::MD_DelegateInvoke)
                     {
@@ -2153,7 +2153,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         {
                             // Instance method, pThis[ 0 ] is valid
 
-                            if (op == CEE_CALL && pThis[0].Dereference() == NULL)
+                            if (op == CEE_CALL && pThis[0].Dereference() == nullptr)
                             {
                                 // CALL on a null instance is allowed, and should not throw a NullReferenceException on
                                 // the call although a NullReferenceException is likely to be thrown soon thereafter if
@@ -2191,7 +2191,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         WRITEBACK(stack, evalPos, ip, fDirty);
 
-                        _ASSERTE(FIMPLIES(pThis->DataType() == DATATYPE_OBJECT, pThis->Dereference() != NULL));
+                        _ASSERTE(FIMPLIES(pThis->DataType() == DATATYPE_OBJECT, pThis->Dereference() != nullptr));
                         NANOCLR_CHECK_HRESULT(
                             CLR_RT_StackFrame::PushAppDomainTransition(th, calleeInst, &pThis[0], &pThis[1]));
                     }
@@ -2369,7 +2369,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         CLR_RT_HeapBlock_Delegate *dlg = top[1].DereferenceDelegate();
 
-                        if (dlg == NULL)
+                        if (dlg == nullptr)
                         {
                             NANOCLR_CHECK_HRESULT(CLR_E_NULL_REFERENCE);
                         }
@@ -2409,13 +2409,13 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             top[0].Assign(top[-1]);
                             top--;
                         }
-                        top->SetObjectReference(NULL);
+                        top->SetObjectReference(nullptr);
 
                         // Stack: ... <null> <arg1> <arg2> ... <argN> -> ...
                         //            ^
                         //            Top points here.
 
-                        if (calleeInst.genericType == NULL)
+                        if (calleeInst.genericType == nullptr)
                         {
                             NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(top[0], cls));
                         }
@@ -2668,8 +2668,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     }
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
@@ -2691,8 +2694,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
@@ -2713,8 +2719,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
 
                     CLR_RT_HeapBlock *ptr = CLR_RT_ExecutionEngine::AccessStaticField(field);
-                    if (ptr == NULL)
+
+                    if (ptr == nullptr)
+                    {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                    }
 
                     evalPos--;
                     CHECKSTACK(stack, evalPos);
@@ -3096,7 +3105,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     evalPos++;
                     CHECKSTACK(stack, evalPos);
 
-                    evalPos[0].SetObjectReference(NULL);
+                    evalPos[0].SetObjectReference(nullptr);
 
                     switch (CLR_TypeFromTk(arg))
                     {
@@ -3159,7 +3168,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                     NANOCLR_CHECK_HRESULT(th->ProcessException_EndFinally());
 
-                    _ASSERTE(th->m_currentException.Dereference() == NULL);
+                    _ASSERTE(th->m_currentException.Dereference() == nullptr);
                     stack = th->CurrentFrame();
                     goto Execute_Reload;
                 }
@@ -3194,7 +3203,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                             _ASSERTE(us);
 
                             us->m_stack = stack;
-                            us->m_exception = NULL;
+                            us->m_exception = nullptr;
                             us->m_ip = ipLeave;
                             us->m_currentBlockStart = eh.m_handlerStart;
                             us->m_currentBlockEnd = eh.m_handlerEnd;
@@ -3208,7 +3217,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                         if (th->m_flags & CLR_RT_Thread::TH_F_Aborted)
                         {
-                            _ASSERTE(th->m_currentException.Dereference() == NULL);
+                            _ASSERTE(th->m_currentException.Dereference() == nullptr);
 
                             (void)Library_corlib_native_System_Exception::CreateInstance(
                                 th->m_currentException,

@@ -45,7 +45,7 @@ HRESULT CLR_RT_FileStore::SaveFile(const wchar_t *szFile, const CLR_RT_Buffer &v
 {
     NANOCLR_HEADER();
 
-    const CLR_UINT8 *buf = NULL;
+    const CLR_UINT8 *buf = nullptr;
     size_t size = vec.size();
 
     if (size > 0)
@@ -69,7 +69,7 @@ HRESULT CLR_RT_FileStore::SaveFile(const wchar_t *szFile, const CLR_UINT8 *buf, 
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
     }
 
-    if (buf != NULL && size != 0)
+    if (buf != nullptr && size != 0)
     {
         if (fwrite(buf, size, 1, stream) != 1)
         {
@@ -113,8 +113,8 @@ void CLR_RT_FileStore::ExtractTokens(
     bool fNoComments)
 {
     std::wstring tmp;
-    char *szBufA = NULL;
-    wchar_t *szBufW = NULL;
+    char *szBufA = nullptr;
+    wchar_t *szBufW = nullptr;
     const wchar_t *src;
     size_t len;
 

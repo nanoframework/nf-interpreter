@@ -13,7 +13,7 @@ HRESULT CLR_RT_HeapBlock_GenericInstance::CreateInstance(CLR_RT_HeapBlock& refer
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-//     reference.SetObjectReference( NULL );
+//     reference.SetObjectReference( nullptr );
 
 //     CLR_UINT32 length = 0;
 
@@ -48,7 +48,7 @@ HRESULT CLR_RT_HeapBlock_GenericInstance::CreateInstance(CLR_RT_HeapBlock& refer
 //     dlg->m_numOfStackFrames = length;
 // #endif
     
-//     dlg->m_object.SetObjectReference( NULL );
+//     dlg->m_object.SetObjectReference( nullptr );
 
 // #if defined(NANOCLR_APPDOMAINS)
 //     dlg->m_appDomain = g_CLR_RT_ExecutionEngine.GetCurrentAppDomain();

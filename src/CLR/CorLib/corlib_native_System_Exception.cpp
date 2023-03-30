@@ -49,7 +49,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     char *strName;
     size_t iName;
     CLR_RT_HeapBlock tmpArray;
-    tmpArray.SetObjectReference(NULL);
+    tmpArray.SetObjectReference(nullptr);
     CLR_RT_ProtectFromGC gc(tmpArray);
     int depth = 0;
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -65,7 +65,9 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
     }
 
     if (depth == 0)
-        NANOCLR_SET_AND_LEAVE(stack.SetResult_String(NULL));
+    {
+        NANOCLR_SET_AND_LEAVE(stack.SetResult_String(nullptr));
+    }
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(tmpArray, depth, g_CLR_RT_WellKnownTypes.String));
 
@@ -77,7 +79,7 @@ HRESULT Library_corlib_native_System_Exception::get_StackTrace___STRING(CLR_RT_S
         strName = &buf[0];
         iName = MAXSTRLEN(buf) - 2;
 
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName(pStackTrace->m_md, NULL, strName, iName));
+        NANOCLR_CHECK_HRESULT(g_CLR_RT_TypeSystem.BuildMethodName(pStackTrace->m_md, nullptr, strName, iName));
 
         memcpy(strName, "\r\n\0", 3);
 
@@ -233,7 +235,7 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
 CLR_RT_HeapBlock *Library_corlib_native_System_Exception::GetTarget(CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_CORE();
-    return CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.Exception) ? ref.Dereference() : NULL;
+    return CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.Exception) ? ref.Dereference() : nullptr;
 }
 
 Library_corlib_native_System_Exception::StackTrace *Library_corlib_native_System_Exception::GetStackTrace(
@@ -255,5 +257,5 @@ Library_corlib_native_System_Exception::StackTrace *Library_corlib_native_System
 
     depth = 0;
 
-    return NULL;
+    return nullptr;
 }

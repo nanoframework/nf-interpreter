@@ -307,12 +307,12 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     }
 
     m_data.objectHeader.cls = cls;
-    m_data.objectHeader.lock = NULL;
+    m_data.objectHeader.lock = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& genericType)
+HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index &genericType)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -325,7 +325,7 @@ HRESULT CLR_RT_HeapBlock::SetGenericInstanceObject(const CLR_RT_TypeSpec_Index& 
     }
 
     m_data.genericInstance.genericType = genericType;
-    m_data.genericInstance.ptr = NULL;
+    m_data.genericInstance.ptr = nullptr;
 
     NANOCLR_NOCLEANUP();
 }
@@ -750,7 +750,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &valu
     // This code is called only if "fixed" keyword is present in the managed code. Executed on assignment to "fixed"
     // pointer. First check if there is object referenced by the local var. We unpin it, since the reference is
     // replaced.
-    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
+    if ((m_data.objectReference.ptr != nullptr && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
         m_id.type.dataType == DATATYPE_BYREF)
     {
         // Unpin the object that has been pointed by local variable.
@@ -770,7 +770,7 @@ void CLR_RT_HeapBlock::AssignAndPinReferencedObject(const CLR_RT_HeapBlock &valu
     }
 
     // Pin the object referenced by local variable.
-    if ((m_data.objectReference.ptr != NULL && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
+    if ((m_data.objectReference.ptr != nullptr && m_id.type.dataType == DATATYPE_ARRAY_BYREF) ||
         m_id.type.dataType == DATATYPE_BYREF)
     {
         m_data.objectReference.ptr->Pin();
@@ -986,7 +986,9 @@ CLR_RT_HeapBlock *CLR_RT_HeapBlock::FixBoxingReference()
             CLR_RT_TypeDef_Instance inst;
 
             if (!inst.InitializeFromIndex(src->ObjectCls()))
-                return NULL;
+            {
+                return nullptr;
+            }
 
             if (inst.target->dataType != DATATYPE_VALUETYPE) // It's a boxed primitive/enum type.
             {
@@ -1006,7 +1008,7 @@ bool CLR_RT_HeapBlock::IsZero() const
     switch (DataType())
     {
         case DATATYPE_OBJECT:
-            return (m_data.objectReference.ptr == NULL);
+            return (m_data.objectReference.ptr == nullptr);
 
         case DATATYPE_I8:
         case DATATYPE_U8:
@@ -1369,7 +1371,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             if (rightObj->DataType() == DATATYPE_VALUETYPE)
             {
                 CLR_RT_TypeDef_Instance inst;
-                CLR_RT_HeapBlock *obj = NULL;
+                CLR_RT_HeapBlock *obj = nullptr;
 
                 if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
                 {
@@ -1390,7 +1392,7 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
             }
             else
             {
-                if (rightObj == NULL)
+                if (rightObj == nullptr)
                 {
                     return false;
                 }
@@ -2396,7 +2398,7 @@ HRESULT CLR_RT_HeapBlock::TransparentProxyValidate() const
     CLR_RT_AppDomain *appDomain = TransparentProxyAppDomain();
     CLR_RT_HeapBlock *obj = TransparentProxyDereference();
 
-    if (appDomain == NULL || !appDomain->IsLoaded())
+    if (appDomain == nullptr || !appDomain->IsLoaded())
         NANOCLR_SET_AND_LEAVE(CLR_E_APPDOMAIN_EXITED);
 
     FAULT_ON_NULL(obj);

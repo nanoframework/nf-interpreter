@@ -203,8 +203,11 @@ CLR_INT64 *Library_corlib_native_System_TimeSpan::GetValuePtr(CLR_RT_HeapBlock &
     if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference();
+
         if (!obj)
-            return NULL;
+        {
+            return nullptr;
+        }
 
         dt = obj->DataType();
     }
@@ -224,5 +227,5 @@ CLR_INT64 *Library_corlib_native_System_TimeSpan::GetValuePtr(CLR_RT_HeapBlock &
         return (CLR_INT64 *)&obj[FIELD___ticks].NumericByRef().s8;
     }
 
-    return NULL;
+    return nullptr;
 }

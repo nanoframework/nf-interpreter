@@ -19,7 +19,7 @@ void local_Events_SetBoolTimer_Callback()
 
 bool Events_Initialize_Platform()
 {
-    boolEventsTimer = NULL;
+    boolEventsTimer = nullptr;
 
     return true;
 }
@@ -29,7 +29,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
     NATIVE_PROFILE_PAL_EVENTS();
 
     // we assume only 1 can be active, abort previous just in case
-    if (boolEventsTimer != NULL)
+    if (boolEventsTimer != nullptr)
     {
         delete boolEventsTimer.release();
     }

@@ -46,8 +46,11 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
     while (true)
     {
         CLR_RT_SubThread *sth = th->CurrentSubThread();
-        if (sth->Prev() == NULL)
+
+        if (sth->Prev() == nullptr)
+        {
             break;
+        }
 
         //
         // Release all the frames for this subthread.
@@ -55,11 +58,16 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
         while (true)
         {
             CLR_RT_StackFrame *stack = th->CurrentFrame();
-            if (stack->Prev() == NULL)
+
+            if (stack->Prev() == nullptr)
+            {
                 break;
+            }
 
             if (stack == sth->m_owningStackFrame)
+            {
                 break;
+            }
 
             stack->Pop();
         }
@@ -76,7 +84,7 @@ void CLR_RT_SubThread::DestroyInstance(CLR_RT_Thread *th, CLR_RT_SubThread *sthB
         //
         // Release all the lock requests.
         //
-        g_CLR_RT_ExecutionEngine.DeleteLockRequests(NULL, sth);
+        g_CLR_RT_ExecutionEngine.DeleteLockRequests(nullptr, sth);
 
         if (sth == sthBase && (flags & CLR_RT_SubThread::MODE_IncludeSelf) == 0)
             break;
@@ -149,7 +157,7 @@ HRESULT CLR_RT_Thread::PushThreadProcDelegate(CLR_RT_HeapBlock_Delegate *pDelega
     CLR_RT_AppDomain *appDomainSav = g_CLR_RT_ExecutionEngine.SetCurrentAppDomain(pDelegate->m_appDomain);
 #endif
 
-    if (pDelegate == NULL || pDelegate->DataType() != DATATYPE_DELEGATE_HEAD ||
+    if (pDelegate == nullptr || pDelegate->DataType() != DATATYPE_DELEGATE_HEAD ||
         inst.InitializeFromIndex(pDelegate->DelegateFtn()) == false)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -208,22 +216,22 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
 
         th->Initialize();
 
-        th->m_pid = pid;                                 // int                        m_pid;
-        th->m_status = TH_S_Unstarted;                   // CLR_UINT32                 m_status;
-        th->m_flags = flags;                             // CLR_UINT32                 m_flags;
-        th->m_executionCounter = 0;                      // int                        m_executionCounter;
-        th->m_timeQuantumExpired = false;                // bool                       m_timeQuantumExpired;
-                                                         //
-        th->m_dlg = NULL;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
-        th->m_currentException.SetObjectReference(NULL); // CLR_RT_HeapBlock           m_currentException;
-                                                         // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
-        th->m_nestedExceptionsPos = 0;                   // int                        m_nestedExceptionsPos;
+        th->m_pid = pid;                                    // int                        m_pid;
+        th->m_status = TH_S_Unstarted;                      // CLR_UINT32                 m_status;
+        th->m_flags = flags;                                // CLR_UINT32                 m_flags;
+        th->m_executionCounter = 0;                         // int                        m_executionCounter;
+        th->m_timeQuantumExpired = false;                   // bool                       m_timeQuantumExpired;
+                                                            //
+        th->m_dlg = nullptr;                                // CLR_RT_HeapBlock_Delegate* m_dlg;
+        th->m_currentException.SetObjectReference(nullptr); // CLR_RT_HeapBlock           m_currentException;
+                                                            // UnwindStack m_nestedExceptions[c_MaxStackUnwindDepth];
+        th->m_nestedExceptionsPos = 0;                      // int                        m_nestedExceptionsPos;
 
         //
         // //--//
         //
-        th->m_terminationCallback = NULL;                    // ThreadTerminationCallback  m_terminationCallback;
-        th->m_terminationParameter = NULL;                   // void*                      m_terminationParameter;
+        th->m_terminationCallback = nullptr;                 // ThreadTerminationCallback  m_terminationCallback;
+        th->m_terminationParameter = nullptr;                // void*                      m_terminationParameter;
                                                              //
         th->m_waitForEvents = 0;                             // CLR_UINT32                 m_waitForEvents;
         th->m_waitForEvents_Timeout = TIMEOUT_INFINITE;      // CLR_INT64                  m_waitForEvents_Timeout;
@@ -231,7 +239,7 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
                                                              //
         th->m_locks.DblLinkedList_Initialize();              // CLR_RT_DblLinkedList       m_locks;
         th->m_lockRequestsCount = 0;                         // CLR_UINT32                 m_lockRequestsCount;
-        th->m_waitForObject = NULL;
+        th->m_waitForObject = nullptr;
         //
         th->m_stackFrames.DblLinkedList_Initialize(); // CLR_RT_DblLinkedList       m_stackFrames;
                                                       //
@@ -249,11 +257,11 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
         // If debugger creates managed thread for function evaluation, then m_realThread  points to the thread that has
         // focus in debugger
         th->m_realThread = th; // CLR_RT_Thread*             m_realThread
-#endif                         //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                         // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
         //--//
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_SubThread::CreateInstance(th, NULL, priority, sth));
+        NANOCLR_CHECK_HRESULT(CLR_RT_SubThread::CreateInstance(th, nullptr, priority, sth));
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (g_CLR_RT_ExecutionEngine.m_breakpointsNum)
@@ -263,7 +271,7 @@ HRESULT CLR_RT_Thread::CreateInstance(int pid, int priority, CLR_RT_Thread *&th,
             //
             g_CLR_RT_ExecutionEngine.Breakpoint_Thread_Created(th);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
     }
 
     NANOCLR_NOCLEANUP();
@@ -318,13 +326,24 @@ bool CLR_RT_Thread::ReleaseWhenDeadEx()
         return false;
 
     if (this == g_CLR_RT_ExecutionEngine.m_finalizerThread)
-        g_CLR_RT_ExecutionEngine.m_finalizerThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_finalizerThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_interruptThread)
-        g_CLR_RT_ExecutionEngine.m_interruptThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_interruptThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_timerThread)
-        g_CLR_RT_ExecutionEngine.m_timerThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_timerThread = nullptr;
+    }
+
     if (this == g_CLR_RT_ExecutionEngine.m_cctorThread)
-        g_CLR_RT_ExecutionEngine.m_cctorThread = NULL;
+    {
+        g_CLR_RT_ExecutionEngine.m_cctorThread = nullptr;
+    }
 
     return ReleaseWhenDead();
 }
@@ -442,14 +461,14 @@ void CLR_RT_Thread::OnThreadTerminated()
     //
     // Release all the subthreads.
     //
-    CLR_RT_SubThread::DestroyInstance(this, NULL, 0);
+    CLR_RT_SubThread::DestroyInstance(this, nullptr, 0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     if (g_CLR_RT_ExecutionEngine.m_breakpointsNum)
     {
         g_CLR_RT_ExecutionEngine.Breakpoint_Thread_Terminated(this);
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 }
 
 void CLR_RT_Thread::Passivate()
@@ -465,10 +484,10 @@ void CLR_RT_Thread::Passivate()
 
     //--//
 
-    if (m_waitForObject != NULL)
+    if (m_waitForObject != nullptr)
     {
         g_CLR_RT_EventCache.Append_Node(m_waitForObject);
-        m_waitForObject = NULL;
+        m_waitForObject = nullptr;
     }
 
     //--//
@@ -483,7 +502,7 @@ void CLR_RT_Thread::Passivate()
         m_status = CLR_RT_Thread::TH_S_Unstarted;
     }
 
-    m_currentException.SetObjectReference(NULL); // Reset exception flag.
+    m_currentException.SetObjectReference(nullptr); // Reset exception flag.
 
     //
     // If the thread is associated with a timer, advance the state of the timer.
@@ -491,7 +510,7 @@ void CLR_RT_Thread::Passivate()
     if (m_terminationCallback)
     {
         ThreadTerminationCallback terminationCallback = m_terminationCallback;
-        m_terminationCallback = NULL;
+        m_terminationCallback = nullptr;
 
         terminationCallback(m_terminationParameter);
     }
@@ -499,7 +518,7 @@ void CLR_RT_Thread::Passivate()
     if (m_status == CLR_RT_Thread::TH_S_Terminated || m_status == CLR_RT_Thread::TH_S_Unstarted)
     {
         // This is used by Static constructor thread.
-        m_dlg = NULL;
+        m_dlg = nullptr;
     }
 
     ReleaseWhenDeadEx();
@@ -618,13 +637,13 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
     ProcessException_FilterPseudoFrameCopyVars(us.m_handlerStack, stack);
 
     // Clear the stack variable so Pop doesn't remove us from the UnwindStack.
-    us.m_stack = NULL;
+    us.m_stack = nullptr;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     // We don't want to send any breakpoints until after we set the IP appropriately
     bool fBreakpointsDisabledSav = CLR_EE_DBG_IS(BreakpointsDisabled);
     CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     stack->Pop();
 
@@ -633,7 +652,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
     {
         CLR_EE_DBG_CLR(BreakpointsDisabled);
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
     if (choice == 1)
     {
@@ -644,7 +663,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
             us.m_handlerStack,
             CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_EXCEPTION_HANDLER_FOUND,
             us.m_handlerBlockStart);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
     }
     else
     {
@@ -663,13 +682,13 @@ HRESULT CLR_RT_Thread::ProcessException_EndFilter()
         m_currentException.SetObjectReference(us.m_exception);
         NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
     (void)ProcessException();
 
     // Swap results around. ProcessException must return a success code in Thread::Execute and set m_currentException to
     // continue processing. Execute_IL must get a FAILED hr in order to break outside of the execution loop.
-    if (m_currentException.Dereference() == NULL)
+    if (m_currentException.Dereference() == nullptr)
     {
         // Return S_OK because exception handling is complete or handling is in-flight and needs to execute IL to
         // continue.
@@ -701,7 +720,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
         if (FindEhBlock(stack, stack->m_IP - 1, ipLeave, eh, true))
         {
             us.m_stack = stack;
-            us.m_exception = NULL;
+            us.m_exception = nullptr;
             us.m_ip = ipLeave;
             us.m_currentBlockStart = eh.m_handlerStart;
             us.m_currentBlockEnd = eh.m_handlerEnd;
@@ -722,7 +741,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
         {
             g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, stack->m_IP);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
         NANOCLR_SET_AND_LEAVE(S_OK);
     }
@@ -736,7 +755,7 @@ HRESULT CLR_RT_Thread::ProcessException_EndFinally()
         // Similar to EndFilter, we need to swap the return codes around. Thread::Execute needs a success code or the
         // thread will be aborted. ExecuteIL needs a failure code or we'll continue to execute IL when we possibly
         // shouldn't.
-        if (m_currentException.Dereference() == NULL)
+        if (m_currentException.Dereference() == nullptr)
         {
             // Return S_OK because exception handling is complete or handling is in-flight and needs to execute IL to
             // continue.
@@ -779,14 +798,14 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
     }
 
     // Search for a willing catch handler.
-    while (stack->Caller() != NULL)
+    while (stack->Caller() != nullptr)
     {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (g_CLR_RT_ExecutionEngine.m_breakpointsNum &&
             us.GetPhase() < UnwindStack::p_1_SearchingForHandler_2_SentUsersChance && stack->m_IP)
         { // We have a debugger attached and we need to send some messages before we start searching.
-            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to NULL
-            // for native code, so therefore we need IP to be non-NULL
+            // These messages should only get sent when the search reaches managed code. Stack::Push sets m_IP to
+            // NULL for native code, so therefore we need IP to be non-NULL
 
             us.m_handlerStack = stack;
 
@@ -795,7 +814,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 g_CLR_RT_ExecutionEngine.Breakpoint_Exception(
                     stack,
                     CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_EXCEPTION_FIRST_CHANCE,
-                    NULL);
+                    nullptr);
                 us.SetPhase(UnwindStack::p_1_SearchingForHandler_1_SentFirstChance);
 
                 // Break out here, because of synchronization issues (false positives) with JMC checking.
@@ -813,7 +832,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 g_CLR_RT_ExecutionEngine.Breakpoint_Exception(
                     stack,
                     CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_EXCEPTION_USERS_CHANCE,
-                    NULL);
+                    nullptr);
                 us.SetPhase(UnwindStack::p_1_SearchingForHandler_2_SentUsersChance);
                 if (CLR_EE_DBG_IS(Stopped))
                 {
@@ -821,15 +840,15 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                 }
             }
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
         if (stack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
         {
             CLR_PMETADATA ip;
             if (us.m_ip)
             {
-                ip = us.m_ip;   // Use the IP set by endfilter
-                us.m_ip = NULL; // Reset to prevent catch block & PopEH issues via 'leave' or 'endfinally'
+                ip = us.m_ip;      // Use the IP set by endfilter
+                us.m_ip = nullptr; // Reset to prevent catch block & PopEH issues via 'leave' or 'endfinally'
             }
             else
             {
@@ -838,7 +857,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
 
             if (ip) // No IP? Either out of memory during allocation of stack frame or native method.
             {
-                if (FindEhBlock(stack, ip, NULL, eh, false))
+                if (FindEhBlock(stack, ip, nullptr, eh, false))
                 { // There are two cases here:
                     // 1. We found a catch block... in this case, we want to break out and go to phase 2.
                     // 2. We found a filter... in this case, we want to duplicate the stack and execute the filter.
@@ -858,7 +877,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
 
                     if (eh.IsFilter())
                     {
-                        CLR_RT_StackFrame *newStack = NULL;
+                        CLR_RT_StackFrame *newStack = nullptr;
 
                         // Store the IP range that we're currently executing so leave/PopEH doesn't accidentally pop the
                         // filter off.
@@ -872,7 +891,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         // We don't want to send any breakpoints until after we set the IP appropriately
                         bool fBreakpointsDisabledSav = CLR_EE_DBG_IS(BreakpointsDisabled);
                         CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
                         hr = CLR_RT_StackFrame::Push(stack->m_owningThread, stack->m_call, ArgumentsCount);
 
@@ -881,7 +900,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         {
                             CLR_EE_DBG_CLR(BreakpointsDisabled);
                         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
                         if (FAILED(hr))
                         { // We probably ran out of memory. In either case, don't run this handler.
@@ -918,13 +937,13 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                         newStack->m_IP = eh.m_userFilterStart;
 
                         // We are willing to execute IL again so clear the m_currentException flag.
-                        m_currentException.SetObjectReference(NULL);
+                        m_currentException.SetObjectReference(nullptr);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
                         g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Push(
                             newStack,
                             CLR_DBG_Commands::Debugging_Execution_BreakpointDef::c_DEPTH_STEP_INTERCEPT);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
                         // Return a success value to break out of ProcessException and to signal that execution of IL
                         // can continue.
@@ -947,7 +966,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                                 goto ContinueAndExit;
                             }
                         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
                         // We want to continue running EH "goo" code so leave m_currentException set and return
                         // PROCESS_EXCEPTION
@@ -962,7 +981,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         // Both of these shouldn't be set at once because of the two-pass handling mechanism.
         if (stack->m_flags & CLR_RT_StackFrame::c_AppDomainTransition)
         {
-            us.m_handlerStack = NULL;
+            us.m_handlerStack = nullptr;
             us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -979,19 +998,19 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
                     goto ContinueAndExit;
                 }
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
         if (stack->m_flags & CLR_RT_StackFrame::c_PseudoStackFrameForFilter)
         {
-            us.m_handlerStack = NULL;
+            us.m_handlerStack = nullptr;
             us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
             NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
         }
 
 #ifndef NANOCLR_NO_IL_INLINE
-        if (stack->m_inlineFrame != NULL && tmpInline.m_IP == NULL)
+        if (stack->m_inlineFrame != nullptr && tmpInline.m_IP == nullptr)
         {
             stack->SaveStack(tmpInline);
             stack->RestoreFromInlineStack();
@@ -1001,7 +1020,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             if (tmpInline.m_IP)
             {
                 stack->RestoreStack(tmpInline);
-                tmpInline.m_IP = NULL;
+                tmpInline.m_IP = nullptr;
             }
 #else
         {
@@ -1011,7 +1030,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
         }
     }
 
-    us.m_handlerStack = NULL;
+    us.m_handlerStack = nullptr;
     us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
@@ -1023,14 +1042,14 @@ HRESULT CLR_RT_Thread::ProcessException_Phase1()
             goto ContinueAndExit;
         }
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
     // We want to continue running EH "goo" code so leave m_currentException set and return PROCESS_EXCEPTION
     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 ContinueAndExit:
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
     // There are multiple cases where we want to break out of this function, send debug messages, and then resume
     // exactly where we were. All of those cases jump to here. However, there are cases where we may be stopped but we
@@ -1068,7 +1087,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
     CLR_RT_ExceptionHandler eh;
 
     // Unwind the stack, running finally's as we go
-    while (iterStack->Caller() != NULL)
+    while (iterStack->Caller() != nullptr)
     {
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (g_CLR_RT_ExecutionEngine.m_breakpointsNum && iterStack == us.m_handlerStack &&
@@ -1080,7 +1099,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             iterStack->ResetStack();
 
             // We are willing to execute IL again so clear the m_currentException flag.
-            m_currentException.SetObjectReference(NULL);
+            m_currentException.SetObjectReference(nullptr);
 
             // CPDE better reset the IP, or there are going to be issues.
             iterStack->m_flags |= CLR_RT_StackFrame::c_InvalidIP;
@@ -1092,88 +1111,91 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             NANOCLR_SET_AND_LEAVE(S_OK);
         }
         else
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
+
             if (iterStack->m_call.target->flags & CLR_RECORD_METHODDEF::MD_HasExceptionHandlers)
-        {
-            if (iterStack->m_IP) // No IP? Either out of memory during allocation of iterStack frame or native method.
             {
-                // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler itself.
-                // NULL is used when we're not in the handler stack frame to make it work in the case of recursive
-                // functions with filtered handlers.
-                if (FindEhBlock(
-                        iterStack,
-                        iterStack->m_IP,
-                        (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : NULL,
-                        eh,
-                        true))
+                if (iterStack
+                        ->m_IP) // No IP? Either out of memory during allocation of iterStack frame or native method.
                 {
-                    // We have a finally block to process
-
-                    us.m_stack = iterStack;
-                    us.m_ip = NULL;
-                    us.m_currentBlockStart = eh.m_handlerStart;
-                    us.m_currentBlockEnd = eh.m_handlerEnd;
-                    us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
-
-                    m_currentException.SetObjectReference(NULL); // Reset exception flag.
-
-                    iterStack->ResetStack();
-                    iterStack->m_IP = eh.m_handlerStart;
-                    iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
-
-#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
-#ifndef NANOCLR_NO_IL_INLINE
-                    if (iterStack->m_inlineFrame == NULL)
-#endif
+                    // handlerBlockStart is used to not execute finally's who's protected blocks contain the handler
+                    // itself. NULL is used when we're not in the handler stack frame to make it work in the case of
+                    // recursive functions with filtered handlers.
+                    if (FindEhBlock(
+                            iterStack,
+                            iterStack->m_IP,
+                            (us.m_handlerStack == iterStack) ? us.m_handlerBlockStart : nullptr,
+                            eh,
+                            true))
                     {
-                        g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
-                    }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+                        // We have a finally block to process
 
-                    NANOCLR_SET_AND_LEAVE(S_OK);
-                }
+                        us.m_stack = iterStack;
+                        us.m_ip = nullptr;
+                        us.m_currentBlockStart = eh.m_handlerStart;
+                        us.m_currentBlockEnd = eh.m_handlerEnd;
+                        us.SetPhase(UnwindStack::p_2_RunningFinallys_0);
 
-                if (iterStack == us.m_handlerStack)
-                {
-#ifndef NANOCLR_NO_IL_INLINE
-                    if (iterStack->m_inlineFrame == NULL || 0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
-#endif
-                    {
-                        // We've popped off all stack frames above the target.
-                        // Now we should run the exception handler.
-
-                        // Store the range of the block and the stack frame we're executing for PopEH
-                        us.m_currentBlockStart = us.m_handlerBlockStart;
-                        us.m_currentBlockEnd = us.m_handlerBlockEnd;
-                        us.m_stack = us.m_handlerStack;
-                        us.SetPhase(UnwindStack::p_3_RunningHandler);
-
-                        // Set the IP and push the exception object on the stack.
-                        iterStack->m_IP = us.m_handlerBlockStart;
-                        iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
+                        m_currentException.SetObjectReference(nullptr); // Reset exception flag.
 
                         iterStack->ResetStack();
-                        iterStack->PushValue().SetObjectReference(us.m_exception);
-
-                        // We are willing to execute IL again so clear the m_currentException flag.
-                        m_currentException.SetObjectReference(NULL);
+                        iterStack->m_IP = eh.m_handlerStart;
+                        iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 #ifndef NANOCLR_NO_IL_INLINE
-                        if (iterStack->m_inlineFrame == NULL)
+                        if (iterStack->m_inlineFrame == nullptr)
 #endif
                         {
                             g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
                         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
-                        // Return a success value to break out of ProcessException and to signal that execution of IL
-                        // can continue.
                         NANOCLR_SET_AND_LEAVE(S_OK);
+                    }
+
+                    if (iterStack == us.m_handlerStack)
+                    {
+#ifndef NANOCLR_NO_IL_INLINE
+                        if (iterStack->m_inlineFrame == nullptr ||
+                            0 == (us.m_flags & UnwindStack::c_MagicCatchForInline))
+#endif
+                        {
+                            // We've popped off all stack frames above the target.
+                            // Now we should run the exception handler.
+
+                            // Store the range of the block and the stack frame we're executing for PopEH
+                            us.m_currentBlockStart = us.m_handlerBlockStart;
+                            us.m_currentBlockEnd = us.m_handlerBlockEnd;
+                            us.m_stack = us.m_handlerStack;
+                            us.SetPhase(UnwindStack::p_3_RunningHandler);
+
+                            // Set the IP and push the exception object on the stack.
+                            iterStack->m_IP = us.m_handlerBlockStart;
+                            iterStack->m_flags &= ~CLR_RT_StackFrame::c_InvalidIP;
+
+                            iterStack->ResetStack();
+                            iterStack->PushValue().SetObjectReference(us.m_exception);
+
+                            // We are willing to execute IL again so clear the m_currentException flag.
+                            m_currentException.SetObjectReference(nullptr);
+
+#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#ifndef NANOCLR_NO_IL_INLINE
+                            if (iterStack->m_inlineFrame == nullptr)
+#endif
+                            {
+                                g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Pop(iterStack, true);
+                            }
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
+
+                            // Return a success value to break out of ProcessException and to signal that execution of
+                            // IL can continue.
+                            NANOCLR_SET_AND_LEAVE(S_OK);
+                        }
                     }
                 }
             }
-        }
 
         // We didn't find a finally block at this level...
         // Check to see if we trickled up to a pseudoiterStack frame that we created to execute a filter handler:
@@ -1195,13 +1217,13 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             // Set IP so we can resume looking for the next filter.
             otherUnwindStack.m_ip = otherUnwindStack.m_currentBlockStart;
 
-            otherUnwindStack.m_stack = NULL; // Prevent Pop from taking this handler off the stack.
+            otherUnwindStack.m_stack = nullptr; // Prevent Pop from taking this handler off the stack.
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             // We don't want to send any breakpoints until after we set the IP appropriately
             bool fBreakpointsDisabledSav = CLR_EE_DBG_IS(BreakpointsDisabled);
             CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
             iterStack->Pop(); // No finally's for the current ip in this method, pop to the next.
 
@@ -1210,7 +1232,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             {
                 CLR_EE_DBG_CLR(BreakpointsDisabled);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
             m_currentException.SetObjectReference(otherUnwindStack.m_exception); // Drop current exception, use old one.
 
@@ -1236,7 +1258,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             bool fBreakpointsDisabledSav = CLR_EE_DBG_IS(BreakpointsDisabled);
             CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
 #ifndef NANOCLR_NO_IL_INLINE
             if (iterStack->m_inlineFrame)
@@ -1254,7 +1276,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
             {
                 CLR_EE_DBG_CLR(BreakpointsDisabled);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
             // We are not ready to execute IL yet so do NOT clear m_currentException flag.
             // There still remains hope for this thread so return S_OK so ProcessException can get called again via
@@ -1263,13 +1285,13 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         }
 #endif
 
-        us.m_stack = NULL; // Don't pop off the handler when we pop this stack frame
+        us.m_stack = nullptr; // Don't pop off the handler when we pop this stack frame
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         // We don't want to send any breakpoints until after we set the IP appropriately
         bool fBreakpointsDisabledSav = CLR_EE_DBG_IS(BreakpointsDisabled);
         CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
 
 #ifndef NANOCLR_NO_IL_INLINE
         if (iterStack->m_inlineFrame)
@@ -1288,7 +1310,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         {
             CLR_EE_DBG_CLR(BreakpointsDisabled);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
     }
 
     // If we reached this point, we've unwound the entire thread and have an unhandled exception.
@@ -1309,7 +1331,7 @@ HRESULT CLR_RT_Thread::ProcessException_Phase2()
         // retrieved?
     }
 #endif //! BUILD_RTM
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // NANOCLR_ENABLE_SOURCELEVELDEBUGGING
     NANOCLR_SET_AND_LEAVE(CLR_E_PROCESS_EXCEPTION);
     NANOCLR_NOCLEANUP();
 }
@@ -1319,7 +1341,7 @@ HRESULT CLR_RT_Thread::ProcessException()
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
     CLR_RT_StackFrame *stack = CurrentFrame();
-    UnwindStack *us = NULL;
+    UnwindStack *us = nullptr;
 
     // If the exception was thrown in the middle of an IL instruction,
     // back up the pointer to point to the executing instruction, not the next one.
@@ -1345,11 +1367,11 @@ HRESULT CLR_RT_Thread::ProcessException()
         else
         {
             // Signal that we need a new handler pushed on the stack.
-            us = NULL;
+            us = nullptr;
         }
     }
 
-    if (us == NULL)
+    if (us == nullptr)
     {
         // Push a new handler on the unwind stack that will last until its handler gets executed or
         // something out-of-band forces the stack frame to get popped.
