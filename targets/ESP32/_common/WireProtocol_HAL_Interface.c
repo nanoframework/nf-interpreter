@@ -92,12 +92,15 @@ static size_t UsbSerialWrite(const uint8_t *data, size_t dataSize, TickType_t xT
             writtenTotalSize += writtenSize;
 
             if (dataSize <= 0)
+            {
                 break;
+            }
         }
         else
         {
             taskYIELD();
         }
+
     } while (xTaskGetTickCount() - startTicks < xTicksToWait);
 
     return writtenTotalSize;
@@ -123,12 +126,15 @@ static size_t UsbSerialRead(uint8_t *data, size_t dataSize, TickType_t xTicksToW
             readTotalSize += readSize;
 
             if (dataSize <= 0)
+            {
                 break;
+            }
         }
         else
         {
             taskYIELD();
         }
+
     } while (xTaskGetTickCount() - startTicks < xTicksToWait);
 
     return readTotalSize;
@@ -139,10 +145,13 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     (void)ESP32_WP_UART;
 
     ASSERT(size);
-    if (*size == 0)
-        return;
     ASSERT(ptr);
     ASSERT(*ptr);
+
+    if (*size == 0)
+    {
+        return;
+    }
 
     const size_t read = UsbSerialRead(*ptr, *size, pdMS_TO_TICKS(250));
     ASSERT(read <= *size);
@@ -159,13 +168,17 @@ uint8_t WP_TransmitMessage(WP_Message *message)
 
     if (UsbSerialWrite((const uint8_t *)&message->m_header, sizeof(message->m_header), pdMS_TO_TICKS(250)) !=
         sizeof(message->m_header))
+    {
         return false;
+    }
 
     if (message->m_header.m_size && message->m_payload)
     {
         if (UsbSerialWrite(message->m_payload, message->m_header.m_size, pdMS_TO_TICKS(250)) !=
             message->m_header.m_size)
+        {
             return false;
+        }
     }
 
     return true;
