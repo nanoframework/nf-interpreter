@@ -25,16 +25,16 @@
 #define SNTP_UPDATE_DELAY (15)
 #endif
 
-// better have a startup delay because we can have DHCP enabled (default 30 seconds)
+// better have a startup delay because we can have DHCP enabled (default 2 seconds)
 // value in seconds
 #ifndef SNTP_STARTUP_DELAY
-#define SNTP_STARTUP_DELAY (30)
+#define SNTP_STARTUP_DELAY (2)
 #endif
 
 // retry timeout (15 minutes)
 // value in seconds
 #ifndef SNTP_RETRY_TIMEOUT
-#define SNTP_RETRY_TIMEOUT (15 * 60) // FIXME: possibily wrong?!
+#define SNTP_RETRY_TIMEOUT (15 * 60)
 #endif
 
 #define NTP_SERVERS     2
