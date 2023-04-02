@@ -16,7 +16,7 @@
 
 // better have a startup delay because we can have DHCP enabled (default 30 seconds)
 // value in seconds
-#define SNTP_STARTUP_DELAY (0)  // FIXME: possibily wrong?!
+#define SNTP_STARTUP_DELAY (0) // FIXME: possibily wrong?!
 
 // retry timeout (15 minutes)
 // value in seconds
