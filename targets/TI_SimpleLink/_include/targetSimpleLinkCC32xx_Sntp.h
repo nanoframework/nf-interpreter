@@ -34,7 +34,7 @@
 // retry timeout (15 minutes)
 // value in seconds
 #ifndef SNTP_RETRY_TIMEOUT
-#define SNTP_RETRY_TIMEOUT (15 * 60)
+#define SNTP_RETRY_TIMEOUT (15 * 60) // FIXME: possibily wrong?!
 #endif
 
 #define NTP_SERVERS     2
