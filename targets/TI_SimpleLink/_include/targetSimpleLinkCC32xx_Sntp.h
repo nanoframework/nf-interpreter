@@ -152,4 +152,4 @@ extern "C"
 }
 #endif
 
-#endif //TARGET_SNTP_H
+#endif // TARGET_SNTP_H
