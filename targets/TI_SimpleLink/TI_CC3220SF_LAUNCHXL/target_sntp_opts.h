@@ -12,7 +12,7 @@
 // update delay (default 1 hour)
 // (value in seconds)
 // Must wait at least 15 sec to retry NTP server (RFC 4330)
-#define SNTP_UPDATE_DELAY (60 * 60) // FIXME: possibily wrong?!
+#define SNTP_UPDATE_DELAY (60 * 60)
 
 // better have a startup delay because we can have DHCP enabled (default 2 seconds)
 // value in seconds
