@@ -1,4 +1,4 @@
-name: Build  SKY_EEVB
+name: Build SKY_EEVB
 
 on:
   workflow_dispatch

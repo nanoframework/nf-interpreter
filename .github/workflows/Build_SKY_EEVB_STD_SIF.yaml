@@ -1,10 +1,10 @@
-name: Build  SKY_EEVB
+name: Build SKY_EEVB_STD_SIF
 
 on:
   workflow_dispatch
 
 jobs:
-  build_SKY_EEVB:
+  build_SKY_EEVB_STD_SIF:
     runs-on: windows-latest
 
     steps:
