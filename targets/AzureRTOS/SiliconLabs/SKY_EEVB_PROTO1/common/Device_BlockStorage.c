@@ -13,10 +13,10 @@ const BlockRange BlockRange1[] = {
     {BlockRange_BLOCKTYPE_BOOTSTRAP, 0, 11},
 
     // 0000C00 nanoCLR
-    {BlockRange_BLOCKTYPE_CODE, 12, 64},
+    {BlockRange_BLOCKTYPE_CODE, 12, 65},
 
-    // 00041000 deployment
-    {BlockRange_BLOCKTYPE_DEPLOYMENT, 65, 510},
+    // 00042000 deployment
+    {BlockRange_BLOCKTYPE_DEPLOYMENT, 66, 510},
 
     ///////////////////////////////////////////////////////////////////////////////////////
     // because this target is using a configuration block need to add the
