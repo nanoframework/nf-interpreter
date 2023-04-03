@@ -1,0 +1,20 @@
+name: Build  @TARGET@
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_@TARGET@:
+    runs-on: windows-latest
+
+    steps:
+
+    - name: PLEASE RUN FROM TARGET BRANCH
+      run: |
+
+        "*****************************************************************" | Write-Host -ForegroundColor White 
+        "   ⚠️ Please run the action from the 'skyworks-evb' branch ⚠️   " | Write-Host -ForegroundColor White
+        "*****************************************************************" | Write-Host -ForegroundColor White
+        "" | Write-Host -ForegroundColor White -NoNewline
+        "You can do this by selecting the branch name in the drop-down    " | Write-Host -ForegroundColor White
+        "that shows in the GitHub action runner under 'Use workflow from' " | Write-Host -ForegroundColor White
