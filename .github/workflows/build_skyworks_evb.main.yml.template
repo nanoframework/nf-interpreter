@@ -1,4 +1,4 @@
-name: Build  @TARGET@
+name: Build @TARGET@
 
 on:
   workflow_dispatch
