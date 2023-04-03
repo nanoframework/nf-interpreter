@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_EEVB_PROTO1",
+            "name": "SKY_EEVB",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "${presetName}",
-                "TARGET_NAME": "SKY_EEVB_PROTO1",
+                "TARGET_NAME": "SKY_EEVB",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -53,6 +53,21 @@
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
                 "API_System.Device.UsbStream": "ON"
             }
+        },
+        {
+            "name": "SKY_EEVB_STD_SIF",
+            "inherits": [
+                "SKY_EEVB"
+            ],
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "TARGET_NAME": "SKY_EEVB_STD_SIF",
+                "API_System.Device.Spi": "ON",
+                "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "OFF",
+                "API_System.Device.I2c": "ON",
+                "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "OFF",
+                "API_System.Device.UsbStream": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -61,6 +76,12 @@
             "name": "SKY_EEVB_PROTO1",
             "displayName": "SKY_EEVB_PROTO1",
             "configurePreset": "SKY_EEVB_PROTO1"
+        },
+        {
+            "inherits": "base-user",
+            "name": "SKY_EEVB_STD_SIF",
+            "displayName": "SKY_EEVB_STD_SIF",
+            "configurePreset": "SKY_EEVB_STD_SIF"
         }
     ]
 }
