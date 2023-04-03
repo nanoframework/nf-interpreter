@@ -73,9 +73,9 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB_PROTO1",
-            "displayName": "SKY_EEVB_PROTO1",
-            "configurePreset": "SKY_EEVB_PROTO1"
+            "name": "SKY_EEVB",
+            "displayName": "SKY_EEVB",
+            "configurePreset": "SKY_EEVB"
         },
         {
             "inherits": "base-user",

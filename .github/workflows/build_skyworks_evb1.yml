@@ -1,10 +1,10 @@
-name: Build SKY_EEVB_PROTO1
+name: Build SKY_EVB
 
 on:
   workflow_dispatch
 
 jobs:
-  build_SKY_EEVB_PROTO1:
+  build_SKY_EVBs:
     runs-on: windows-latest
 
     steps:
@@ -78,14 +78,21 @@ jobs:
 
     - uses: lukka/run-cmake@v10
       with:
-        configurePreset: 'SKY_EEVB_PROTO1'
+        configurePreset: 'SKY_EEVB'
         configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
-        buildPreset: 'SKY_EEVB_PROTO1'
+        buildPreset: 'SKY_EEVB'
+        buildPresetAdditionalArgs: "['--config MinSizeRel']"
+
+    - uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'SKY_EEVB_STD_SIF'
+        configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
+        buildPreset: 'SKY_EEVB_STD_SIF'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
     - uses: actions/upload-artifact@v3
       with:
-        name: 'SKY_EEVB_PROTO1-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        name: 'SKY_EVB-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
@@ -98,6 +105,6 @@ jobs:
           github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/SKY_EEVB_PROTO1-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
+              ref: 'refs/tags/SKY_EEVB-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
               sha: context.sha
           })
