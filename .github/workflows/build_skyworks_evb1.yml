@@ -89,3 +89,15 @@ jobs:
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
+
+    - name: Tag the build
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const {DIST_VERSION} = process.env          
+          github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
+              sha: context.sha
+          })
