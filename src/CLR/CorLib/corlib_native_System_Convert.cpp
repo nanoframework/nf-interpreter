@@ -558,6 +558,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
 
     if (conversionResult == nullptr)
     {
+        // try 'o/O' Round Trip ISO 8601 compatible (yyyy-MM-ddTHH:mm:ss)
+        conversionResult = Nano_strptime(str, "%Y-%m-%dT%H:%M:%S", &ticks);
+    }
+
+    if (conversionResult == NULL)
+    {
         // try 'r/R' RFC 1123 date (ddd, dd MMM yyyy HH:mm:ss)
         conversionResult = Nano_strptime(str, "%a, %d %b %Y %H:%M:%S", &ticks);
     }
