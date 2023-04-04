@@ -136,6 +136,66 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_UpdateInterval___STATIC__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_UpdateInterval___STATIC__VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_StartupDelay___STATIC__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDelay___STATIC__VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_RetryPeriod___STATIC__VOID__I4(
+    CLR_RT_StackFrame &stack)
+{
+    NANOCLR_HEADER();
+    // FIXME: implementation required!
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 // need this declared as "C" because we are calling it from lwIP
 extern "C"
 {

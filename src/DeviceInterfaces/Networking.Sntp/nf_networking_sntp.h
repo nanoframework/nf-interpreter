@@ -38,6 +38,12 @@ struct Library_nf_networking_sntp_nanoFramework_Networking_Sntp
     NANOCLR_NATIVE_DECLARE(set_Server1___STATIC__VOID__STRING);
     NANOCLR_NATIVE_DECLARE(get_Server2___STATIC__STRING);
     NANOCLR_NATIVE_DECLARE(set_Server2___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(get_UpdateInterval___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(set_UpdateInterval___STATIC__VOID__I4);
+    NANOCLR_NATIVE_DECLARE(get_StartupDelay___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(set_StartupDelay___STATIC__VOID__I4);
+    NANOCLR_NATIVE_DECLARE(get_RetryPeriod___STATIC__I4);
+    NANOCLR_NATIVE_DECLARE(set_RetryPeriod___STATIC__VOID__I4);
 
     //--//
 };
