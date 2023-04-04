@@ -6,7 +6,7 @@ on:
 jobs:
   build_SKY_EEVB_STD_SIF:
     runs-on: windows-latest
-    
+
     env:
       TARGET_NAME: 'SKY_EEVB_STD_SIF'
 

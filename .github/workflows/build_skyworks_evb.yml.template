@@ -7,6 +7,9 @@ jobs:
   build_@PRESET@:
     runs-on: windows-latest
 
+    env:
+      TARGET_NAME: '@PRESET@'
+
     steps:
     - uses: actions/checkout@v3
       with:
@@ -78,14 +81,14 @@ jobs:
 
     - uses: lukka/run-cmake@v10
       with:
-        configurePreset: '@TARGET@'
+        configurePreset: '${{ env.TARGET_NAME }}'
         configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
-        buildPreset: '@PRESET@'
+        buildPreset: '${{ env.TARGET_NAME }}'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
     - uses: actions/upload-artifact@v3
       with:
-        name: '@PRESET@-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        name: ${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
@@ -98,6 +101,6 @@ jobs:
           github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/@PRESET@-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
+              ref: 'refs/tags/${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
               sha: context.sha
           })
