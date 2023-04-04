@@ -15,7 +15,7 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_BOARD": "${presetName}",
+                "TARGET_BOARD": "SKY_EVB",
                 "TARGET_NAME": "SKY_EEVB",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
@@ -60,7 +60,7 @@
                 "SKY_EEVB"
             ],
             "cacheVariables": {
-                "TARGET_BOARD": "${presetName}",
+                "TARGET_BOARD": "SKY_EVB",
                 "TARGET_NAME": "SKY_EEVB_STD_SIF",
                 "API_System.Device.Spi": "ON",
                 "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "OFF",
