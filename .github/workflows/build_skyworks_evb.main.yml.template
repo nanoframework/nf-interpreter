@@ -1,10 +1,10 @@
-name: Build @TARGET@
+name: Build @PRESET@
 
 on:
   workflow_dispatch
 
 jobs:
-  build_@TARGET@:
+  build_@PRESET@:
     runs-on: windows-latest
 
     steps:

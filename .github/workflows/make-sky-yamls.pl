@@ -14,13 +14,25 @@ if ($opt eq "--main") {
    die "bad usage\n";
 }
 
-my $targets_buff = read_file("SKY-TARGETS.txt");
-my @targets = split /\r\n|\n|\r/, $targets_buff;
+my %presets_found;
 
-foreach my $target (@targets)
+my $builds_file = "SKY-BUILDS.txt"; 
+my $buff = read_file($builds_file);
+my @lines = split /\r\n|\n|\r/, $buff;
+
+foreach my $line (@lines)
 {
-   print("$target ...\n");
+   # warn $line;
+   next if ($line =~ /^#/);
+   my($target,$preset) = split(/,/,$line);
+   
+   # Don't allow a preset name to be used more than once
+   die "preset $preset is used more than one in  $builds_file\n" if ($presets_found{$preset});
+   $presets_found{$preset} = 1;
+   
+   print("$target/$preset ...\n");
    my $yaml = read_file($yaml_file);
    $yaml =~ s/\@TARGET\@/$target/g;
-   write_file("Build_$target.yaml", $yaml);
+   $yaml =~ s/\@PRESET\@/$preset/g;
+   write_file("Build_$preset.yaml", $yaml);
 }

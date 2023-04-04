@@ -1,10 +1,10 @@
-name: Build @TARGET@
+name: Build @PRESET@
 
 on:
   workflow_dispatch
 
 jobs:
-  build_@TARGET@:
+  build_@PRESET@:
     runs-on: windows-latest
 
     steps:
@@ -80,12 +80,12 @@ jobs:
       with:
         configurePreset: '@TARGET@'
         configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
-        buildPreset: '@TARGET@'
+        buildPreset: '@PRESET@'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
     - uses: actions/upload-artifact@v3
       with:
-        name: '@TARGET@-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        name: '@PRESET@-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex

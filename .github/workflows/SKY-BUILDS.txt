@@ -1,0 +1,4 @@
+# Format is:
+# Target,Preset
+SKY_EVB,SKY_EEVB
+SKY_EVB,SKY_EEVB_STD_SIF
