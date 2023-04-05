@@ -163,42 +163,24 @@ void nanoHAL_Initialize()
     memset(&UsbStream_PAL, 0, sizeof(UsbStream_PAL));
 #endif
 
-    // #if (HAL_USE_UART == TRUE)
-
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    //     Uart1_PAL.UartDriver = NULL;
-    //     Uart1_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    //     Uart2_PAL.UartDriver = NULL;
-    //     Uart2_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    //     Uart3_PAL.UartDriver = NULL;
-    //     Uart3_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    //     Uart4_PAL.UartDriver = NULL;
-    //     Uart4_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    //     Uart5_PAL.UartDriver = NULL;
-    //     Uart5_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    //     Uart6_PAL.UartDriver = NULL;
-    //     Uart6_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    //     Uart7_PAL.UartDriver = NULL;
-    //     Uart7_PAL__.UartDriver = NULL;
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    //     Uart8_PAL.UartDriver = NULL;
-    //     Uart8_PAL__.UartDriver = NULL;
-    // #endif
-
-    // #endif
+#if defined(GECKO_USE_USART0) && (GECKO_USE_USART0 == TRUE)
+    Usart0_PAL = {0};
+#endif
+#if defined(GECKO_USE_USART1) && (GECKO_USE_USART1 == TRUE)
+    Usart1_PAL = {0};
+#endif
+#if defined(GECKO_USE_USART2) && (GECKO_USE_USART2 == TRUE)
+    Usart2_PAL = {0};
+#endif
+#if defined(GECKO_USE_USART3) && (GECKO_USE_USART3 == TRUE)
+    Usart3_PAL = {0};
+#endif
+#if defined(GECKO_USE_USART_UART4) && (GECKO_USE_USART_UART4 == TRUE)
+    Usart4_PAL = {0};
+#endif
+#if defined(GECKO_USE_USART_UART5) && (GECKO_USE_USART_UART5 == TRUE)
+    Usart5_PAL = {0};
+#endif
 
 #if (NANOCLR_GRAPHICS == TRUE)
     DisplayInterfaceConfig config; // not used for DSI display
@@ -313,42 +295,42 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 
 #endif
 
-    // #if (HAL_USE_UART == TRUE)
-
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART1) && (NF_SERIAL_COMM_STM32_UART_USE_USART1 == TRUE)
-    //     uartReleaseBus(&UARTD1);
-    //     uartStop(&UARTD1);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART2) && (NF_SERIAL_COMM_STM32_UART_USE_USART2 == TRUE)
-    //     uartReleaseBus(&UARTD2);
-    //     uartStop(&UARTD2);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART3) && (NF_SERIAL_COMM_STM32_UART_USE_USART3 == TRUE)
-    //     uartReleaseBus(&UARTD3);
-    //     uartStop(&UARTD3);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART4) && (NF_SERIAL_COMM_STM32_UART_USE_UART4 == TRUE)
-    //     uartReleaseBus(&UARTD4);
-    //     uartStop(&UARTD4);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART5) && (NF_SERIAL_COMM_STM32_UART_USE_UART5 == TRUE)
-    //     uartReleaseBus(&UARTD5);
-    //     uartStop(&UARTD5);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_USART6) && (NF_SERIAL_COMM_STM32_UART_USE_USART6 == TRUE)
-    //     uartReleaseBus(&UARTD6);
-    //     uartStop(&UARTD6);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART7) && (NF_SERIAL_COMM_STM32_UART_USE_UART7 == TRUE)
-    //     uartReleaseBus(&UARTD7);
-    //     uartStop(&UARTD7);
-    // #endif
-    // #if defined(NF_SERIAL_COMM_STM32_UART_USE_UART8) && (NF_SERIAL_COMM_STM32_UART_USE_UART8 == TRUE)
-    //     uartReleaseBus(&UARTD8);
-    //     uartStop(&UARTD8);
-    // #endif
-
-    // #endif
+#if defined(GECKO_USE_USART0) && (GECKO_USE_USART0 == TRUE)
+    if (Usart0_PAL.Usart != NULL)
+    {
+        UnInit_UART0();
+    }
+#endif
+#if defined(GECKO_USE_USART1) && (GECKO_USE_USART1 == TRUE)
+    if (Usart1_PAL.Usart != NULL)
+    {
+        UnInit_UART1();
+    }
+#endif
+#if defined(GECKO_USE_USART2) && (GECKO_USE_USART2 == TRUE)
+    if (Usart2_PAL.Usart != NULL)
+    {
+        UnInit_UART2();
+    }
+#endif
+#if defined(GECKO_USE_USART3) && (GECKO_USE_USART3 == TRUE)
+    if (Usart3_PAL.Usart != NULL)
+    {
+        UnInit_UART3();
+    }
+#endif
+#if defined(GECKO_USE_USART_UART4) && (GECKO_USE_USART_UART4 == TRUE)
+    if (Usart4_PAL.Usart != NULL)
+    {
+        UnInit_UART4();
+    }
+#endif
+#if defined(GECKO_USE_USART_UART5) && (GECKO_USE_USART_UART5 == TRUE)
+    if (Usart5_PAL.Usart != NULL)
+    {
+        UnInit_UART5();
+    }
+#endif
 
 #if (HAL_USE_PWM == TRUE)
     DeInitPwm();
