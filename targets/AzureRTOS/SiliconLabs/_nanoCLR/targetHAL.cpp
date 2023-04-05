@@ -39,6 +39,27 @@ extern void DeInitPwm();
 
 // global mutex protecting the internal state of the interpreter, including event flags
 // mutex_t interpreterGlobalMutex;
+//
+//  Reboot handlers clean up on reboot
+//
+static ON_SOFT_REBOOT_HANDLER s_rebootHandlers[16] =
+    {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+void HAL_AddSoftRebootHandler(ON_SOFT_REBOOT_HANDLER handler)
+{
+    for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if (s_rebootHandlers[i] == NULL)
+        {
+            s_rebootHandlers[i] = handler;
+            return;
+        }
+        else if (s_rebootHandlers[i] == handler)
+        {
+            return;
+        }
+    }
+}
 
 // because nanoHAL_Initialize/Uninitialize needs to be called in both C and C++ we need a proxy to allow it to be called
 // in 'C'
@@ -210,19 +231,18 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 
     // release the global mutex, just in case it's locked somewhere
     // chMtxUnlock(&interpreterGlobalMutex);
-
-    // TODO check for s_rebootHandlers
-    // for(int i = 0; i< ARRAYSIZE(s_rebootHandlers); i++)
-    // {
-    //     if(s_rebootHandlers[i] != NULL)
-    //     {
-    //         s_rebootHandlers[i]();
-    //     }
-    //     else
-    //     {
-    //         break;
-    //     }
-    // }
+    // process Reboot Handlers
+    for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
+    {
+        if (s_rebootHandlers[i] != NULL)
+        {
+            s_rebootHandlers[i]();
+        }
+        else
+        {
+            break;
+        }
+    }
 
     DMADRV_DeInit();
 
