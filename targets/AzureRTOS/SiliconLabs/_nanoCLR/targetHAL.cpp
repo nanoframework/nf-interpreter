@@ -37,8 +37,6 @@ extern void DeInitPwm();
 #include <sys_dev_usbstream_native_target.h>
 #endif
 
-// global mutex protecting the internal state of the interpreter, including event flags
-// mutex_t interpreterGlobalMutex;
 //
 //  Reboot handlers clean up on reboot
 //
@@ -79,9 +77,6 @@ extern "C"
 
 void nanoHAL_Initialize()
 {
-    // initialize global mutex
-    // chMtxObjectInit(&interpreterGlobalMutex);
-
     HAL_CONTINUATION::InitializeList();
     HAL_COMPLETION ::InitializeList();
 
@@ -229,8 +224,6 @@ void nanoHAL_Uninitialize(bool isPoweringDown)
 {
     (void)isPoweringDown;
 
-    // release the global mutex, just in case it's locked somewhere
-    // chMtxUnlock(&interpreterGlobalMutex);
     // process Reboot Handlers
     for (size_t i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
