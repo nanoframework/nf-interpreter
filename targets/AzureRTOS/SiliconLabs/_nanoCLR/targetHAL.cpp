@@ -122,7 +122,7 @@ void nanoHAL_Initialize()
     memset(&SPI1_PAL, 0, sizeof(NF_PAL_SPI));
 #endif
 #if (GECKO_USE_SPI2 == TRUE)
-    memset(&SPI0_PAL, 0, sizeof(NF_PAL_SPI));
+    memset(&SPI2_PAL, 0, sizeof(NF_PAL_SPI));
 #endif
 #if (GECKO_USE_SPI3 == TRUE)
     memset(&SPI3_PAL, 0, sizeof(NF_PAL_SPI));
