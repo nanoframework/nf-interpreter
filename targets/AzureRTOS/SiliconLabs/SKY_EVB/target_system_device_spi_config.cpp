@@ -16,7 +16,7 @@
 // SPI1_CS: PD3, location 1
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(1, 1, 1, 1, 1)
+INIT_SPI_CONFIG(1, 1, 1, 1)
 
 //////////
 // SPI2 //
@@ -29,5 +29,5 @@ INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 // SPI2_CS: PF9, location 1
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(2, 4, 4, 4, 4)
+INIT_SPI_CONFIG(2, 4, 4, 4)
 
