@@ -220,6 +220,13 @@ typedef enum __nfpack ValueTypes
     ValueTypes_DeviceType = 65536,
 } ValueTypes;
 
+typedef enum __nfpack GpioChangePolarity
+{
+    GpioChangePolarity_Both = 0,
+    GpioChangePolarity_Falling = 1,
+    GpioChangePolarity_Rising = 2,
+} GpioChangePolarity;
+
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Configuration
 {
     NANOCLR_NATIVE_DECLARE(NativeSetPinFunction___STATIC__VOID__I4__I4);
@@ -401,6 +408,33 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
 struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPadEventHandler
 {
     static const int FIELD___pinMap = 1;
+
+    //--//
+};
+
+struct Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCount
+{
+    static const int FIELD__Count = 1;
+    static const int FIELD__RelativeTime = 2;
+
+    //--//
+};
+
+struct Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter
+{
+    static const int FIELD___pinNumberA = 1;
+    static const int FIELD___pinNumberB = 2;
+    static const int FIELD___polarity = 3;
+    static const int FIELD___countActive = 4;
+    static const int FIELD___filter = 5;
+    static const int FIELD___syncLock = 6;
+    static const int FIELD___disposedValue = 7;
+
+    NANOCLR_NATIVE_DECLARE(NativeInit___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeRead___SystemDeviceGpioGpioPulseCount__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(NativeStart___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeStop___VOID);
+    NANOCLR_NATIVE_DECLARE(NativeDispose___VOID);
 
     //--//
 };

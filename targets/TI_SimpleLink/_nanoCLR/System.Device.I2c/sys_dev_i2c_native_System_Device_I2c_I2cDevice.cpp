@@ -31,6 +31,7 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
     NANOCLR_HEADER();
     {
         NF_PAL_I2C *palI2c = NULL;
+        I2cBusSpeed busSpeed;
 
         // get a pointer to the managed object instance and check that it's not NULL
         CLR_RT_HeapBlock *pThis = stack.This();
@@ -68,10 +69,21 @@ HRESULT Library_sys_dev_i2c_native_System_Device_I2c_I2cDevice::NativeInit___VOI
 
         // Create I2C for usage
         I2C_Params_init(&palI2c->i2cParams);
-        palI2c->i2cParams.bitRate =
-            (I2cBusSpeed)pConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4 == I2cBusSpeed_StandardMode
-                ? I2C_100kHz
-                : I2C_400kHz;
+        busSpeed = (I2cBusSpeed)pConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
+        if (busSpeed == I2cBusSpeed::I2cBusSpeed_FastModePlus)
+        {
+            palI2c->i2cParams.bitRate = I2C_1000kHz;
+        }
+        else if (busSpeed == I2cBusSpeed::I2cBusSpeed_FastMode)
+        {
+            palI2c->i2cParams.bitRate = I2C_400kHz;
+        }
+        else
+        {
+            // Default mode is standard
+            palI2c->i2cParams.bitRate = I2C_100kHz;
+        }
+
         palI2c->i2cParams.transferMode = I2C_MODE_CALLBACK;
         palI2c->i2cParams.transferCallbackFxn = HostI2C_CallbackFxn;
         palI2c->i2c = I2C_open(Board_I2C0, &palI2c->i2cParams);

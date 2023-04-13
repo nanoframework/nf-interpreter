@@ -209,11 +209,21 @@ HRESULT PushEmptyBufferToStack(CLR_RT_StackFrame &stack)
 
 bool LockEventMutex()
 {
+    if (ble_event_data.mutex == NULL)
+    {
+        return false;
+    }
+
     return xSemaphoreTake(ble_event_data.mutex, (TickType_t)(1000 / portTICK_PERIOD_MS));
 }
 
 void ReleaseEventMutex()
 {
+    if (ble_event_data.mutex == NULL)
+    {
+        return;
+    }
+
     xSemaphoreGive(ble_event_data.mutex);
 }
 
@@ -235,20 +245,102 @@ bool WaitForBleStackStart(int waitMs)
     return false;
 }
 
-void StartStack(char *devicename)
+bool StartBleStack(char *devicename, uint16_t appearance)
 {
     // Ignore if already started
     if (ble_hs_is_enabled())
     {
-        return;
+        return false;
     }
 
     // Initialise BLE stack
     DeviceBleInit();
 
     // Start BLE host task running
-    StartBleTask(devicename);
+    StartBleTask(devicename, appearance);
 
     // Wait for stack to be ready (Sync fired)
-    WaitForBleStackStart(5000);
+    WaitForBleStackStart(10000);
+
+    return true;
+}
+
+bool StopBleStack()
+{
+    // Not running
+    if (!ble_hs_is_enabled())
+    {
+        return false;
+    }
+
+    Device_ble_dispose();
+    return true;
+}
+
+// Map nimble error code to pairing status
+DevicePairingResultStatus MapNimbleErrorToStatus(int errorCode)
+{
+    DevicePairingResultStatus pairingStatus = DevicePairingResultStatus_Paired;
+
+    // ble_error_codes
+    switch (errorCode)
+    {
+        case 0:
+            pairingStatus = DevicePairingResultStatus_Paired;
+            break;
+
+        case BLE_ERR_HW_FAIL:
+            pairingStatus = DevicePairingResultStatus_HardwareFailure;
+            break;
+
+        case (BLE_HS_ERR_HCI_BASE + BLE_ERR_NO_PAIRING): // Pairing not allowed
+            pairingStatus = DevicePairingResultStatus_NotPaired;
+            break;
+
+        default:
+            pairingStatus = DevicePairingResultStatus_Failed;
+            break;
+    }
+    return pairingStatus;
+}
+
+// Pairing action to DevicePairingKinds conversion
+DevicePairingKinds PairingActionToDevicePairingKinds(int action)
+{
+    switch (action)
+    {
+        default:
+        case BLE_SM_IOACT_NONE:
+        case BLE_SM_IOACT_OOB:
+            return DevicePairingKinds_None;
+
+        case BLE_SM_IOACT_INPUT:
+            return DevicePairingKinds_ProvidePin;
+
+        case BLE_SM_IOACT_DISP:
+            return DevicePairingKinds_DisplayPin;
+
+        case BLE_SM_IOACT_NUMCMP:
+            return DevicePairingKinds_ConfirmPinMatch;
+    }
+}
+
+// DevicePairingKinds to pairing action conversion
+int DevicePairingKindsToPairingAction(DevicePairingKinds kinds)
+{
+    switch (kinds)
+    {
+        default:
+        case DevicePairingKinds_None:
+            return BLE_SM_IOACT_NONE;
+
+        case DevicePairingKinds_ProvidePin:
+            return BLE_SM_IOACT_INPUT;
+
+        case DevicePairingKinds_DisplayPin:
+            return BLE_SM_IOACT_DISP;
+
+        case DevicePairingKinds_ConfirmPinMatch:
+            return BLE_SM_IOACT_NUMCMP;
+    }
 }

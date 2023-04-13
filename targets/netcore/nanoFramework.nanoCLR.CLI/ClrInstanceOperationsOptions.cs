@@ -50,7 +50,7 @@ namespace nanoFramework.nanoCLR.CLI
             'v',
             "verbosity",
             Required = false,
-            Default = "d",
+            Default = "n",
             HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
         public string Verbosity { get; set; }
     }

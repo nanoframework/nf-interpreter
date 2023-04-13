@@ -59,4 +59,4 @@ extern "C" NANOCLRNATIVE_API void nanoCLR_SetWireProtocolTransmitCallback(WireTr
 
 extern "C" NANOCLRNATIVE_API void nanoCLR_WireProtocolProcess();
 
-extern "C" NANOCLRNATIVE_API char *nanoCLR_GetVersion();
+extern "C" NANOCLRNATIVE_API const char *nanoCLR_GetVersion();

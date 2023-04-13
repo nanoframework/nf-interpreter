@@ -46,6 +46,7 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig)
 #if defined(STM32F1XX) || defined(STM32F4XX) || defined(STM32L1XX)
 
     llConfig->op_mode = OPMODE_I2C;
+    // No FastMode+ on those devices.
     llConfig->clock_speed = busSpeed == I2cBusSpeed_StandardMode ? 100000U : 400000U;
     llConfig->duty_cycle = busSpeed == I2cBusSpeed_StandardMode ? STD_DUTY_CYCLE : FAST_DUTY_CYCLE_2;
 
@@ -58,6 +59,15 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CConfig *llConfig)
     llConfig->timingr = busSpeed == I2cBusSpeed_StandardMode ? 0x80201721 : 0x00B01B59;
     llConfig->cr1 = 0;
     llConfig->cr2 = 0;
+    // Todo: check if each series should get their own timing. From STM32CubeMX, with default clock values
+    // which were about 16MHz for APB, those were timing:
+    // Series   Standard    Fast        Fast+
+    // F0       0x00201D2B  0x0010020A  0x00100001
+    // F3		0x00201D2B  0x0010020A  0x00100001
+    // F7       0x00503D59  0x00300618  0x00200105
+    // L0       0x00000608  0x00000000
+    // L4       0x00100D14  0x00000102  0x00000000
+    // H7       0x10B07DB7  0x00E03951  0x00A00F1B
 
 #else
 #error Your board is unimplemented. Please provide the needed information for the realtime OS as done above!

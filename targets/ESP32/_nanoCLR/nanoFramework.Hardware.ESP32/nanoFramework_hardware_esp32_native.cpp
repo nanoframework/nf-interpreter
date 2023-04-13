@@ -175,14 +175,34 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeInit___VOID,
+    Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeRead___SystemDeviceGpioGpioPulseCount__BOOLEAN,
+    Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeStart___VOID,
+    Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeStop___VOID,
+    Library_nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter::NativeDispose___VOID,
+    NULL,
 };
 
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Hardware_Esp32 =
 {
     "nanoFramework.Hardware.Esp32",
-    0x573559C0,
+    0xC0E1540A,
     method_lookup,
-    { 100, 0, 8, 0 }
+    { 100, 0, 9, 0 }
 };
 
 // clang-format on
