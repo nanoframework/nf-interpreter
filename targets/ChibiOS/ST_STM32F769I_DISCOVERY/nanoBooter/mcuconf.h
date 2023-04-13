@@ -28,7 +28,6 @@
 #define STM32F769_MCUCONF
 //#define STM32F779_MCUCONF
 
-
 /*
  * HAL driver system settings.
  */
