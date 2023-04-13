@@ -8,9 +8,66 @@
 
 #include <nanoCLR_Interop.h>
 #include <nanoCLR_Runtime.h>
+#include <nanoPackStruct.h>
 #include <corlib_native.h>
 
+// This is added as well from the copy/paste of the stub
 #include "Graphics.h"
+
+typedef enum __nfpack UIElement_Flags
+{
+    UIElement_Flags_None = 0,
+    UIElement_Flags_IsSubtreeDirtyForRender = 2,
+    UIElement_Flags_IsDirtyForRender = 4,
+    UIElement_Flags_Enabled = 32,
+    UIElement_Flags_InvalidMeasure = 64,
+    UIElement_Flags_InvalidArrange = 128,
+    UIElement_Flags_MeasureInProgress = 256,
+    UIElement_Flags_ArrangeInProgress = 512,
+    UIElement_Flags_MeasureDuringArrange = 1024,
+    UIElement_Flags_NeverMeasured = 2048,
+    UIElement_Flags_NeverArranged = 4096,
+    UIElement_Flags_ShouldPostRender = 8192,
+    UIElement_Flags_IsLayoutSuspended = 16384,
+    UIElement_Flags_IsVisibleCache = 32768,
+} UIElement_Flags;
+
+/* moved to Display.h for convenience
+typedef enum __nfpack DisplayOrientation
+{
+    DisplayOrientation_Portrait = 0,
+    DisplayOrientation_Portrait180 = 1,
+    DisplayOrientation_Landscape = 2,
+    DisplayOrientation_Landscape180 = 3,
+} DisplayOrientation;
+
+typedef enum __nfpack GraphicDriverCommandType
+{
+    GraphicDriverCommandType_Sleep = 0,
+    GraphicDriverCommandType_Command = 1,
+} GraphicDriverCommandType;
+
+typedef enum __nfpack RoutedEventArgs_Flags
+{
+    RoutedEventArgs_Flags_Handled = 1,
+    RoutedEventArgs_Flags_InvokingHandler = 2,
+} RoutedEventArgs_Flags;
+
+typedef enum __nfpack SetWindowType
+{
+    SetWindowType_NoWindowing = 0,
+    SetWindowType_X8bitsY1Bit = 1,
+    SetWindowType_X8bitsY8Bits = 2,
+    SetWindowType_X16bitsY16Bit = 3,
+} SetWindowType;
+*/
+
+typedef enum __nfpack TouchCollectorConfiguration_TouchInput
+{
+    TouchCollectorConfiguration_TouchInput_LastTouchPoint = 2,
+    TouchCollectorConfiguration_TouchInput_SamplingDistance = 4,
+    TouchCollectorConfiguration_TouchInput_TouchMoveFrequency = 8,
+} TouchCollectorConfiguration_TouchInput;
 
 typedef enum __nfpack TouchInputFlags
 {
@@ -145,10 +202,10 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Font
     NANOCLR_NATIVE_DECLARE(ComputeTextInRect___VOID__STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4);
 
     //--//
-    //-- The Following was not generated //
+    // The Following was not generated //
+    // Update me every time you copy/paste this file //
     static HRESULT GetFont(CLR_RT_HeapBlock *pThis, CLR_GFX_Font *&font);
     static HRESULT GetFont(CLR_RT_StackFrame &stack, CLR_GFX_Font *&font);
-    //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
@@ -835,6 +892,7 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_ScreenConfiguration
     static const int FIELD___y = 2;
     static const int FIELD___width = 3;
     static const int FIELD___height = 4;
+    static const int FIELD___graphicDriver = 5;
 
     //--//
 };
@@ -869,6 +927,29 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
         NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
     NANOCLR_NATIVE_DECLARE(
         NativeInitI2c___STATIC__U4__nanoFrameworkUII2cConfiguration__nanoFrameworkUIScreenConfiguration__U4);
+
+    //--//
+};
+
+struct Library_nanoFramework_Graphics_nanoFramework_UI_GraphicDriver
+{
+    static const int FIELD___width = 1;
+    static const int FIELD___height = 2;
+    static const int FIELD___bitsPerPixel = 3;
+    static const int FIELD___initializationSequence = 4;
+    static const int FIELD___memoryWrite = 5;
+    static const int FIELD___setColumnAddress = 6;
+    static const int FIELD___setRowAddress = 7;
+    static const int FIELD___powerModeNormal = 8;
+    static const int FIELD___powerModeSleep = 9;
+    static const int FIELD___orientationPortrait = 10;
+    static const int FIELD___orientationPortrait180 = 11;
+    static const int FIELD___orientationLandscape = 12;
+    static const int FIELD___orientationLandscape180 = 13;
+    static const int FIELD___clear = 14;
+    static const int FIELD___brightness = 15;
+    static const int FIELD___defaultOrientation = 16;
+    static const int FIELD___setWindowType = 17;
 
     //--//
 };

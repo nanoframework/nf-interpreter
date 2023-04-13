@@ -66,7 +66,7 @@ HRESULT Library_nanoFramework_hardware_esp32_rmt_native_nanoFramework_Hardware_E
         rmt_rx_config.rx_config.carrier_freq_hz =
             receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveFrequency].NumericByRef().u4;
         rmt_rx_config.rx_config.carrier_duty_percent =
-            receiver_channel_settings[ReceiverChannelSettings::FIELD___enableDemodulation].NumericByRef().u1;
+            receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierWaveDutyPercentage].NumericByRef().u1;
         rmt_rx_config.rx_config.carrier_level =
             (bool)receiver_channel_settings[ReceiverChannelSettings::FIELD___carrierLevel].NumericByRef().u1
                 ? RMT_CARRIER_LEVEL_HIGH

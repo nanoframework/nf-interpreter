@@ -36,15 +36,21 @@ void GetI2cConfig(CLR_RT_HeapBlock *managedConfig, I2CSPM_Init_TypeDef *llConfig
 {
     I2cBusSpeed busSpeed = (I2cBusSpeed)managedConfig[I2cConnectionSettings::FIELD___busSpeed].NumericByRef().s4;
 
-    if (busSpeed == I2cBusSpeed_StandardMode)
+    if (busSpeed == I2cBusSpeed::I2cBusSpeed_FastModePlus)
     {
-        llConfig->i2cMaxFreq = I2C_FREQ_STANDARD_MAX;
+        llConfig->i2cMaxFreq = I2C_FREQ_FASTPLUS_MAX;
         llConfig->i2cClhr = i2cClockHLRStandard;
     }
-    else
+    else if (busSpeed == I2cBusSpeed::I2cBusSpeed_FastMode)
     {
         llConfig->i2cMaxFreq = I2C_FREQ_FAST_MAX;
         llConfig->i2cClhr = i2cClockHLRAsymetric;
+    }
+    else
+    {
+        // Default is standard mode
+        llConfig->i2cMaxFreq = I2C_FREQ_STANDARD_MAX;
+        llConfig->i2cClhr = i2cClockHLRStandard;
     }
 }
 
