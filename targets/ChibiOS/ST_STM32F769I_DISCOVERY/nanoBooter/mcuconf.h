@@ -28,6 +28,9 @@
 #define STM32F769_MCUCONF
 //#define STM32F779_MCUCONF
 
+// ADDED as a temporary check!
+#define STM32_NOCACHE_ENABLE               FALSE
+
 /*
  * HAL driver system settings.
  */
