@@ -4,8 +4,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-// clang-format off
-
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
@@ -30,8 +28,6 @@
 #define STM32F769_MCUCONF
 //#define STM32F779_MCUCONF
 
-// ADDED as a temporary check!
-#define STM32_NOCACHE_ENABLE               FALSE
 
 /*
  * HAL driver system settings.
@@ -434,5 +430,3 @@
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
 #endif /* MCUCONF_H */
-
-// clang-format on
