@@ -29,6 +29,10 @@ typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
     GattPresentationFormat;
 typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalDescriptor
     GattLocalDescriptor;
+typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisement
+    BluetoothLEAdvertisement;
+typedef Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher
+    BluetoothLEAdvertisementPublisher;
 
 bleServicesContext bleContext;
 
@@ -39,6 +43,18 @@ static void InitContext(bleServicesContext *context)
 
 static void FreeContext(bleServicesContext &srvContext)
 {
+    if (srvContext.advertData)
+    {
+        platform_free((void *)srvContext.advertData);
+        srvContext.advertData = NULL;
+    }
+
+    if (srvContext.scanResponse)
+    {
+        platform_free((void *)srvContext.scanResponse);
+        srvContext.scanResponse = NULL;
+    }
+
     if (srvContext.pDeviceName)
     {
         platform_free((void *)srvContext.pDeviceName);
@@ -91,6 +107,8 @@ static void FreeContext(bleServicesContext &srvContext)
             context->descriptorUuids = NULL;
         }
     }
+
+    srvContext.serviceCount = 0;
 
     if (srvContext.bleSrvContexts)
     {
@@ -616,8 +634,7 @@ void PrintSvrDefs(ble_gatt_svc_def *svcDef)
 }
 #endif
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeStartAdvertising___BOOLEAN__SystemCollectionsArrayList(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::NativeInitializeServiceConfig___BOOLEAN__SystemCollectionsArrayList( CLR_RT_StackFrame &stack )
 {
     bool result = true;
 
@@ -630,13 +647,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
         InitContext(&bleContext);
 
         UpdateNameInContext();
-
-        // Save Discoverable & Connectable flags in context
-        bool isDiscoverable = pThis[GattServiceProvider::FIELD___isDiscoverable].NumericByRef().s4 != 0;
-        bool isConnectable = pThis[GattServiceProvider::FIELD___isConnectable].NumericByRef().s4 != 0;
-
-        bleContext.isDiscoverable = isDiscoverable;
-        bleContext.isConnectable = isConnectable;
 
         // Pick up passed ArrayList of Services and get service count
         pArrayServiceProviders = (CLR_RT_HeapBlock_ArrayList *)stack.Arg1().Dereference();
@@ -715,12 +725,6 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
             }
         }
 
-        if (result)
-        {
-            result = Esp32BleStartAdvertise(&bleContext);
-            BLE_DEBUG_PRINTF("Esp32BleStartAdvertise -> %d\n", result);
-        }
-
         stack.SetResult_Boolean(result);
     }
 
@@ -734,18 +738,100 @@ HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttribu
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::
-    NativeStopAdvertising___VOID(CLR_RT_StackFrame &stack)
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider::NativeDisposeServiceConfig___VOID( CLR_RT_StackFrame &stack )
 {
-    (void)stack;
-
     NANOCLR_HEADER();
     {
-        BLE_DEBUG_PRINTF("Server: Stop Advertising\n");
+        BLE_DEBUG_PRINTF("GattServiceProvider: NativeDisposeServiceConfig context:%X\n", bleContext);
+        FreeContext(bleContext);
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher::NativeStartLegacyAdvertising___BOOLEAN__SZARRAY_U1__SZARRAY_U1( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+        uint8_t *advertData;
+        uint8_t *scanResponse;
+
+        CLR_RT_HeapBlock *pThis = stack.This();     // ptr to BluetoothLEAdvertisementPublisher object
+        FAULT_ON_NULL(pThis);
+
+        CLR_RT_HeapBlock *pAdvert = pThis[BluetoothLEAdvertisementPublisher::FIELD___advertisement].Dereference();
+        FAULT_ON_NULL(pAdvert);
+
+        bleContext.isConnectable = (bool)pAdvert[BluetoothLEAdvertisement::FIELD___isConnectable].NumericByRef().u1;
+        bleContext.isDiscoverable = (bool)pAdvert[BluetoothLEAdvertisement::FIELD___isDiscovable].NumericByRef().u1;
+        BLE_DEBUG_PRINTF("NativeStartLegacyAdvertising isConnectable=%d isDiscoverable=%d\n", bleContext.isConnectable, bleContext.isDiscoverable);
+
+        CLR_RT_HeapBlock_Array *pAdvertData = stack.Arg1().DereferenceArray();
+        FAULT_ON_NULL(pAdvertData);
+        CLR_RT_HeapBlock_Array *pScanResonse = stack.Arg2().DereferenceArray();
+        FAULT_ON_NULL(pScanResonse);
+
+        advertData = pAdvertData->GetElement(0);
+        bleContext.advertDataLen = pAdvertData->m_numOfElements;
+        scanResponse = pScanResonse->GetElement(0);
+        bleContext.scanResponseLen = pScanResonse->m_numOfElements;
+
+        if (bleContext.advertDataLen)
+        {
+            bleContext.advertData = (uint8_t *)platform_malloc(bleContext.advertDataLen);
+            memcpy(bleContext.advertData, advertData, bleContext.advertDataLen);
+        }
+
+        if (bleContext.scanResponseLen)
+        {
+        bleContext.scanResponse = (uint8_t *)platform_malloc(bleContext.scanResponseLen);
+        memcpy(bleContext.scanResponse, scanResponse, bleContext.scanResponseLen);
+        }
+
+        bleContext.useExtendedAdvert = (bool)pThis[BluetoothLEAdvertisementPublisher::FIELD___useExtendedAdvertisement].NumericByRef().u1;
+        
+        // Start advertisement using bleContext
+        stack.SetResult_Boolean(Esp32BleStartAdvertise(&bleContext));
+    }
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher::NativeStartExtendedAdvertising___BOOLEAN__I2__SZARRAY_U1( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+
+    // TODO - Will implement with ESP32 Bluetooth 5.0 targets
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher::NativeStopAdvertising___VOID( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+        BLE_DEBUG_PRINTF("Server: Stop Advertising context:%X\n", bleContext);
 
         ble_gap_adv_stop();
 
         FreeContext(bleContext);
+    }
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_BluetoothLEAdvertisementPublisher::NativeIsExtendedAdvertisingAvailable___BOOLEAN( CLR_RT_StackFrame &stack )
+{
+    NANOCLR_HEADER();
+    {
+        bool result = false;
+
+        // return true if running on Bluetooth 5 capable platform ESP32-C3 / ESP32-S3 etc
+        // with extended advertisement support
+        #ifdef CONFIG_BT_NIMBLE_EXT_ADV
+        result = true;
+        #endif
+
+        stack.SetResult_Boolean(result);
     }
     NANOCLR_NOCLEANUP_NOLABEL();
 }

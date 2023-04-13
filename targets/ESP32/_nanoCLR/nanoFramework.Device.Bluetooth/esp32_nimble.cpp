@@ -415,119 +415,43 @@ int Esp32GapEvent(struct ble_gap_event *event, void *arg)
 }
 
 //
-// Enables advertising with parameters:
-//     o General discoverable mode
-//     o Undirected connectable mode
+// Enables advertising with parameters from context.
 //
 bool Esp32BleStartAdvertise(bleServicesContext *context)
 {
-    struct ble_gap_adv_params adv_params;
-    struct ble_hs_adv_fields fields;
-    struct ble_hs_adv_fields scanResp;
-    bool useScanResponse = false;
     int rc;
+    bool result = true;
+    struct ble_gap_adv_params adv_params;
 
-    //
-    //  Set the advertisement data included in our advertisements:
-    //     o Flags (indicates advertisement type and other general info)
-    //     o Advertising tx power
-    //     o Device name
-    //
-    //  What doesn't fit in primary advert packet we add to scanData for Scan response
-    //
-    memset(&fields, 0, sizeof(fields));
-    memset(&scanResp, 0, sizeof(scanResp));
-
-    //
-    // Advertise two flags:
-    //     o Discoverability in forthcoming advertisement (general)
-    //     o BLE-only (BR/EDR unsupported)
-    //
-    fields.flags = BLE_HS_ADV_F_DISC_GEN | BLE_HS_ADV_F_BREDR_UNSUP;
-
-    //
-    // Indicate that the TX power level field should be included; have the
-    // stack fill this value automatically.  This is done by assigning the
-    // special value BLE_HS_ADV_TX_PWR_LVL_AUTO.
-    //
-    fields.tx_pwr_lvl_is_present = 1;
-    fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
-
-    fields.name = (uint8_t *)context->pDeviceName;
-    fields.name_len = hal_strlen_s(context->pDeviceName);
-    fields.name_is_complete = 1;
-
-    // Only advertise first Service UUID for now.
-    // if 16 or 32 add to advert fields.
-    // 128 uuid probably won't fix so add to scan response.
-    switch (context->gatt_service_def->uuid->type)
-    {
-        case BLE_UUID_TYPE_16:
-            fields.uuids16 = (ble_uuid16_t *)context->gatt_service_def->uuid;
-            fields.num_uuids16 = 1;
-            fields.uuids16_is_complete = 1;
-            break;
-
-        case BLE_UUID_TYPE_32:
-            fields.uuids32 = (ble_uuid32_t *)context->gatt_service_def->uuid;
-            fields.num_uuids32 = 1;
-            fields.uuids32_is_complete = 1;
-            break;
-
-        case BLE_UUID_TYPE_128:
-            scanResp.uuids128 = (ble_uuid128_t *)platform_malloc(sizeof(ble_uuid128_t));
-            memcpy((void *)scanResp.uuids128, context->gatt_service_def->uuid, sizeof(ble_uuid128_t));
-            scanResp.num_uuids128 = 1;
-            scanResp.uuids128_is_complete = 1;
-            useScanResponse = true;
-            break;
-    }
-
-    rc = ble_gap_adv_set_fields(&fields);
+    rc = ble_gap_adv_set_data((const uint8_t *)context->advertData, context->advertDataLen);
     if (rc != 0)
     {
-        BLE_DEBUG_PRINTF("error setting advertisement data; rc=%d\n", rc);
+        BLE_DEBUG_PRINTF("ble_gap_adv_set_data; rc=%d\n", rc);
     }
 
-    if (useScanResponse)
+    if(context->scanResponseLen>0)
     {
-        rc = ble_gap_adv_rsp_set_fields(&scanResp);
+        rc = ble_gap_adv_rsp_set_data((const uint8_t *)context->scanResponse, context->scanResponseLen);
         if (rc != 0)
         {
-            BLE_DEBUG_PRINTF("setting scan response data; rc=%d\n", rc);
+            BLE_DEBUG_PRINTF("ble_gap_adv_rsp_set_data; rc=%d\n", rc);
         }
-    }
-
-    // Free any allocated memory
-    if (scanResp.uuids128 != 0)
-    {
-        platform_free((void *)scanResp.uuids128);
-    }
-
-    if (rc != 0)
-    {
-        return false;
     }
 
     // Begin advertising
     memset(&adv_params, 0, sizeof(adv_params));
 
-    if (context->isConnectable)
-    {
-        adv_params.conn_mode |= BLE_GAP_CONN_MODE_UND;
-    }
-    if (context->isDiscoverable)
-    {
-        adv_params.conn_mode |= BLE_GAP_DISC_MODE_GEN;
-    }
-    rc = ble_gap_adv_start(esp32_addr_type, NULL, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
+    adv_params.conn_mode = bleContext.isConnectable? BLE_GAP_CONN_MODE_UND: BLE_GAP_CONN_MODE_NON;
+    adv_params.disc_mode = bleContext.isDiscoverable? BLE_GAP_DISC_MODE_GEN: BLE_GAP_DISC_MODE_NON;
+
+    rc = ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
     if (rc != 0)
     {
         BLE_DEBUG_PRINTF("error enabling advertisement; rc=%d\n", rc);
-        return false;
+        result = false;
     }
 
-    return true;
+    return result;
 }
 
 static void Esp32BleOnSync(void)
