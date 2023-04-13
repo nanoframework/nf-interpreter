@@ -4,6 +4,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 #ifndef MCUCONF_H
 #define MCUCONF_H
 
@@ -432,3 +434,5 @@
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 2
 
 #endif /* MCUCONF_H */
+
+// clang-format on
