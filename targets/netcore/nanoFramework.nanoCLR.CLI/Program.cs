@@ -57,6 +57,7 @@ namespace nanoFramework.nanoCLR.CLI
                 // because of short-comings in CommandLine parsing 
                 // need to customize the output to provide a consistent output
                 var parser = new Parser(config => config.HelpWriter = null);
+
                 var result = parser.ParseArguments<ExecuteCommandLineOptions, VirtualSerialDeviceCommandLineOptions, VirtualSerialDeviceCommandLineOptions>(new[] { "", "" });
 
                 var helpText = new HelpText(
@@ -112,6 +113,25 @@ namespace nanoFramework.nanoCLR.CLI
                                 opts,
                                 virtualSerialBridgeManager),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
+
+                // do we need to show version?
+                if (parsedArguments.Errors.Any(error => error is VersionRequestedError))
+                {
+                    // output version
+                    var versionAtt = Attribute.GetCustomAttribute(
+                        Assembly.GetEntryAssembly()!,
+                        typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
+
+                    var version = new Version(versionAtt.Version);
+
+                    Console.WriteLine(version.ToString(3));
+                }
+                else if (parsedArguments.Errors.Any(error => error is HelpVerbRequestedError)
+                         || parsedArguments.Errors.Any(error => error is HelpRequestedError))
+                {
+                    // output help
+                    return;
+                }
             });
 
             if (_verbosityLevel > VerbosityLevel.Quiet)
@@ -147,7 +167,16 @@ namespace nanoFramework.nanoCLR.CLI
 
         private static int HandleErrors(IEnumerable<Error> errors)
         {
-            _exitCode = ExitCode.E9000;
+            if (errors.Any(error => error is VersionRequestedError)
+                || errors.Any(error => error is HelpRequestedError)
+                || errors.Any(error => error is HelpVerbRequestedError))
+            {
+                // we're good here
+            }
+            else
+            {
+                _exitCode = ExitCode.E9000;
+            }
 
             return (int)_exitCode;
         }
