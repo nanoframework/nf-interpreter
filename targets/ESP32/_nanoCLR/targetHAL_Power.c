@@ -3,16 +3,21 @@
 // See LICENSE file in the project root for full license information.
 //
 
+#include <target_platform.h>
 #include <esp32_idf.h>
 #include <nanoHAL_v2.h>
 #include <soc/rtc_cntl_reg.h>
 
 inline void CPU_Reset()
 {
+#if CONFIG_IDF_TARGET_ESP32C3 && HAL_WP_USE_USB_CDC
     SET_PERI_REG_MASK(RTC_CNTL_OPTIONS0_REG, RTC_CNTL_SW_SYS_RST);
     while (true)
     {
     }
+#else
+    esp_restart();
+#endif
 };
 
 // CPU sleep is not currently implemented in this target
