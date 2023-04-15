@@ -52,6 +52,7 @@
 #define STM32_PLLN_VALUE                    432
 #define STM32_PLLP_VALUE                    2
 #define STM32_PLLQ_VALUE                    9
+#define STM32_PLLR_VALUE                    4 //NOT IN LATEST VERSION, KEEPING JUST INCASE
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE1                         STM32_PPRE1_DIV4
 #define STM32_PPRE2                         STM32_PPRE2_DIV2
@@ -260,6 +261,7 @@
 /*
  * PWM driver system settings.
  */
+#define STM32_PWM_USE_ADVANCED              FALSE //NOT IN LATEST VERSION, KEEPING JUST INCASE
 #define STM32_PWM_USE_TIM1                  FALSE
 #define STM32_PWM_USE_TIM2                  FALSE
 #define STM32_PWM_USE_TIM3                  FALSE
@@ -416,6 +418,9 @@
 #define STM32_USB_OTG2_IRQ_PRIORITY         14
 #define STM32_USB_OTG1_RX_FIFO_SIZE         512
 #define STM32_USB_OTG2_RX_FIFO_SIZE         1024
+#define STM32_USB_OTG_THREAD_PRIO           LOWPRIO //NOT IN LATEST VERSION, KEEPING JUST INCASE
+#define STM32_USB_OTG_THREAD_STACK_SIZE     128 //NOT IN LATEST VERSION, KEEPING JUST INCASE
+#define STM32_USB_OTGFIFO_FILL_BASEPRI      0 //NOT IN LATEST VERSION, KEEPING JUST INCASE
 
 /*
  * WDG driver system settings.
