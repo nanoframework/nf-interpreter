@@ -374,13 +374,13 @@ bool ParseAndBuildNimbleDefinition(ble_context &context, CLR_RT_HeapBlock *pGatt
 
     // Allocate tables
     context.descriptorDefs = (ble_gatt_dsc_def *)platform_malloc(sizeof(ble_gatt_dsc_def) * descriptorCount);
-    if (context.descriptorDefs == NULL)
+    if (context.descriptorDefs == NULL && descriptorCount != 0)
     {
         // Out of memory
         return false;
     }
     context.descriptorUuids = (ble_uuid_any_t *)platform_malloc(sizeof(ble_uuid_any_t) * descriptorCount);
-    if (context.descriptorUuids == NULL)
+    if (context.descriptorUuids == NULL && descriptorCount != 0)
     {
         // Out of memory
         return false;
