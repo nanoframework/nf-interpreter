@@ -1,1 +1,2 @@
 * text=auto eol=crlf
+*.{sh,[sS][hH]} text eol=lf
