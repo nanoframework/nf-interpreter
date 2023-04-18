@@ -236,7 +236,8 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             g_DisplayInterface.SendCommand(
                 2,
                 Memory_Access_Control,
-                (ILI9341_Orientation::MADCTL_MY | ILI9341_Orientation::MADCTL_MX | ILI9341_Orientation::MADCTL_MV | ILI9341_Orientation::MADCTL_BGR));
+                (ILI9341_Orientation::MADCTL_MY | ILI9341_Orientation::MADCTL_MX | ILI9341_Orientation::MADCTL_MV |
+                 ILI9341_Orientation::MADCTL_BGR));
             OS_DELAY(20);
             g_DisplayInterface.SendCommand(1, ILI9341_CMD::Memory_Write);
             OS_DELAY(20);
