@@ -165,6 +165,8 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(2, Entry_Mode_Set, 0x07); // Entry mode set
     g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x0A, 0x82, 0x27, 0x00);
 
+    g_DisplayInterface.SendCommand(1, Sleep_Out);
+    OS_DELAY(20); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, Normal_Display_On);
     OS_DELAY(10);
     g_DisplayInterface.SendCommand(1, Display_ON);
