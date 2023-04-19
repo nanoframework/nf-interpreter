@@ -433,7 +433,6 @@ static const CLR_RT_MethodHandler method_lookup[] =
     NULL,
     NULL,
     NULL,
-    NULL,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher::NativeStartAdvertisementWatcher___VOID__I4,
     Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher::NativeStopAdvertisementWatcher___VOID,
     NULL,
@@ -748,7 +747,7 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Bluetooth =
 {
     "nanoFramework.Device.Bluetooth",
-    0x0EBCB584,
+    0xA7C14F9F,
     method_lookup,
     { 100, 0, 4, 0 }
 };
