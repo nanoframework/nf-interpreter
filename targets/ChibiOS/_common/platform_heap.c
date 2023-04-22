@@ -3,41 +3,60 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// This file provides the platform specific implementation of memory functions for ChibiOS
+
 #include <ch.h>
-#include <nanoHAL_v2.h>
+#include <chmemheaps.h> // Required for platform_realloc heap_header
+#include <string.h>  // Required for platform_realloc memcpy
+//#include <nanoHAL_v2.h> // Not required as we are fully using the platform specific implementation.
 
 void *platform_malloc(size_t size)
 {
-
-// need to undef in order to call the real function
-#undef malloc
-
-    return malloc(size);
-
-// define back
-#define malloc YOU_SHALL_NOT_USE_malloc
+    return chHeapAlloc(NULL, size);
 }
 
 void platform_free(void *ptr)
 {
-
-// need to undef in order to call the real function
-#undef free
-
-    free(ptr);
-
-// define back
-#define free YOU_SHALL_NOT_USE_free
+    if (ptr) {
+        chHeapFree(ptr);
+    }
 }
 
-void *platform_realloc(void *ptr, size_t size)
+void *platform_realloc(void *addr, size_t size)
 {
+    union heap_header *hp;
+    uint32_t prev_size, new_size;
 
-// need to undef in order to call the real function
-#undef realloc
+    void *ptr;
 
-    return realloc(ptr, size);
+    if(addr == NULL) {
+        return chHeapAlloc(NULL, size);
+    }
 
-// define back
-#define realloc YOU_SHALL_NOT_USE_realloc
+    /* previous allocated segment is preceded by an heap_header */
+    hp = addr - sizeof(union heap_header);
+    prev_size = hp->used.size; /* size is always multiple of 8 */
+
+    /* check new size memory alignment */
+    if(size % 8 == 0) {
+        new_size = size;
+    }
+    else {
+        new_size = ((int) (size / 8)) * 8 + 8;
+    }
+
+    if(prev_size >= new_size) {
+        return addr;
+    }
+
+    ptr = chHeapAlloc(NULL, size);
+    if(ptr == NULL) {
+        return NULL;
+    }
+
+    memcpy(ptr, addr, prev_size);
+
+    chHeapFree(addr);
+
+    return ptr;
 }
