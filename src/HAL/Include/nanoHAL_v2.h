@@ -12,12 +12,14 @@
 // need to include stdlib.h **BEFORE** redefining malloc/free/realloc otherwise bad things happen
 #include <stdlib.h>
 
-// defines to prevent use of malloc, free and realloc
-// the platform implementations: platform_malloc(), platform_free and platform_realloc
-// are the preferred calls to use as they ensure thread safety and RTOS integration
-#define malloc  YOU_SHALL_NOT_USE_malloc
-#define free    YOU_SHALL_NOT_USE_free
-#define realloc YOU_SHALL_NOT_USE_realloc
+// Defines to prevent unhandled platform use of malloc, free and realloc
+// ensuring that the platform implementations: platform_malloc, platform_free and platform_realloc
+// are the preferred calls are used.
+// They ensure thread safety and RTOS integration.
+// FIXME: At least ChibiOS RTOS may need a macro
+#define malloc  EXPECTED_platform_malloc_INSTEAD
+#define free    EXPECTED_platform_free_INSTEAD
+#define realloc EXPECTED_platform_realloc_INSTEAD
 
 #endif
 
@@ -44,7 +46,7 @@ typedef enum SYSTEM_STATE
 } SYSTEM_STATE_type;
 
 //////////////////////////////////////////////////////////////////
-// !!! KEEP IN SYNC WITH Microsoft.SPOT.Hardware.SleepLevel !!! //
+// !!! KEEP IN SYNC WITH Platform_Target.Hardware.SleepLevel !!! //
 //////////////////////////////////////////////////////////////////
 typedef enum SLEEP_LEVEL
 {
@@ -55,7 +57,7 @@ typedef enum SLEEP_LEVEL
     SLEEP_LEVEL__OFF = 0x40,
 } SLEEP_LEVEL_type;
 
-// These events match emulator events in Framework\Tools\Emulator\Events.cs
+// FIXME: These events match virtual device (emulator) events???
 
 #define SYSTEM_EVENT_FLAG_COM_IN       0x00000001
 #define SYSTEM_EVENT_FLAG_COM_OUT      0x00000002
@@ -241,7 +243,7 @@ extern "C"
 
     void *platform_malloc(size_t size);
     void platform_free(void *ptr);
-    void *platform_realloc(void *ptr, size_t size);
+    void *platform_realloc(void *addr, size_t size);
 
 #ifdef __cplusplus
 }
@@ -409,6 +411,8 @@ extern "C"
 // Watchdog driver
 #include <nanoHAL_Watchdog.h>
 
+// FIXME: this is deprecated namespace - needs rename?!
+// perhaps `nanoHAL_Device_Storage.h`
 #include <nanoHAL_Windows_Storage.h>
 
 #endif // NANOHAL_V2_H
