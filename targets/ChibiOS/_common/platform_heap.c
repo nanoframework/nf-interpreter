@@ -26,7 +26,7 @@ void *platform_realloc(void *ptr, size_t size) // ptr is the memory address
     union heap_header *hp;
     uint32_t prev_size, new_size;
 
-    void *new_ptr;
+    void *new_ptr == NULL;
 
     if (ptr == NULL)
     {
