@@ -757,21 +757,24 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventL
     //--//
 };
 
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignalStrengthFilter
-{
-    static const int FIELD___inRangeThresholdInDBm = 1;
-    static const int FIELD___outOfRangeThresholdInDBm = 2;
-    static const int FIELD___outOfRangeTimeout = 3;
-
-    //--//
-};
-
-struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher__ScanItem
+struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignalStrengthFilter__ScanItem
 {
     static const int FIELD__rssi = 1;
     static const int FIELD__inRange = 2;
     static const int FIELD__outRangeTime = 3;
     static const int FIELD__active = 4;
+
+    //--//
+};
+
+struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignalStrengthFilter
+{
+    static const int FIELD___inRangeThresholdInDBm = 1;
+    static const int FIELD___outOfRangeThresholdInDBm = 2;
+    static const int FIELD___outOfRangeTimeout = 3;
+    static const int FIELD___scanCheck = 4;
+    static const int FIELD___scanResults = 5;
+    static const int FIELD___scanResultsLock = 6;
 
     //--//
 };
@@ -782,11 +785,8 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdve
     static const int FIELD___scanningMode = 2;
     static const int FIELD___advertisementFilter = 3;
     static const int FIELD___signalStrengthFilter = 4;
-    static const int FIELD___scanCheck = 5;
-    static const int FIELD___scanResults = 6;
-    static const int FIELD___scanResultsLock = 7;
-    static const int FIELD__Received = 8;
-    static const int FIELD__Stopped = 9;
+    static const int FIELD__Received = 5;
+    static const int FIELD__Stopped = 6;
 
     NANOCLR_NATIVE_DECLARE(NativeStartAdvertisementWatcher___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeStopAdvertisementWatcher___VOID);
