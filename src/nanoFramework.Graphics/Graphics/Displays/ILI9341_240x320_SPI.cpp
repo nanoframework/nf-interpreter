@@ -165,6 +165,8 @@ bool DisplayDriver::Initialize()
     g_DisplayInterface.SendCommand(2, Entry_Mode_Set, 0x07); // Entry mode set
     g_DisplayInterface.SendCommand(5, Display_Function_Control, 0x0A, 0x82, 0x27, 0x00);
 
+    g_DisplayInterface.SendCommand(1, Sleep_Out);
+    OS_DELAY(20); // Send Sleep Out command to display : no parameter
     g_DisplayInterface.SendCommand(1, Normal_Display_On);
     OS_DELAY(10);
     g_DisplayInterface.SendCommand(1, Display_ON);
@@ -193,17 +195,52 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     switch (orientation)
     {
         case DisplayOrientation::DisplayOrientation_Portrait:
+            Attributes.Height = Attributes.ShorterSide;
+            Attributes.Width = Attributes.LongerSide;
+            g_DisplayInterface.SendCommand(
+                2,
+                Memory_Access_Control,
+                (ILI9341_Orientation::MADCTL_MX | ILI9341_Orientation::MADCTL_BGR));
+            OS_DELAY(20);
+            g_DisplayInterface.SendCommand(1, ILI9341_CMD::Memory_Write);
+            OS_DELAY(20);
+            break;
+
         case DisplayOrientation::DisplayOrientation_Portrait180:
-            return false;
+            Attributes.Height = Attributes.ShorterSide;
+            Attributes.Width = Attributes.LongerSide;
+            g_DisplayInterface.SendCommand(
+                2,
+                Memory_Access_Control,
+                (ILI9341_Orientation::MADCTL_MY | ILI9341_Orientation::MADCTL_BGR));
+            OS_DELAY(20);
+            g_DisplayInterface.SendCommand(1, ILI9341_CMD::Memory_Write);
+            OS_DELAY(20);
+            break;
 
         case DisplayOrientation::DisplayOrientation_Landscape:
+            Attributes.Height = Attributes.ShorterSide;
+            Attributes.Width = Attributes.LongerSide;
+            g_DisplayInterface.SendCommand(
+                2,
+                Memory_Access_Control,
+                (ILI9341_Orientation::MADCTL_MV | ILI9341_Orientation::MADCTL_BGR));
+            OS_DELAY(20);
+            g_DisplayInterface.SendCommand(1, ILI9341_CMD::Memory_Write);
+            OS_DELAY(20);
+            break;
+
         case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             g_DisplayInterface.SendCommand(
                 2,
                 Memory_Access_Control,
-                (MADCTL_MY | MADCTL_MX | MADCTL_MV | MADCTL_BGR)); // Landscape  + BGR
+                (ILI9341_Orientation::MADCTL_MY | ILI9341_Orientation::MADCTL_MX | ILI9341_Orientation::MADCTL_MV |
+                 ILI9341_Orientation::MADCTL_BGR));
+            OS_DELAY(20);
+            g_DisplayInterface.SendCommand(1, ILI9341_CMD::Memory_Write);
+            OS_DELAY(20);
             break;
     }
     return true;
