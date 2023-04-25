@@ -759,10 +759,10 @@ struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothEventL
 
 struct Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothSignalStrengthFilter__ScanItem
 {
-    static const int FIELD__rssi = 1;
-    static const int FIELD__inRange = 2;
-    static const int FIELD__outRangeTime = 3;
-    static const int FIELD__active = 4;
+    static const int FIELD__Rssi = 1;
+    static const int FIELD__InRange = 2;
+    static const int FIELD__OutRangeTime = 3;
+    static const int FIELD__Active = 4;
 
     //--//
 };
