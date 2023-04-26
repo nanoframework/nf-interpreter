@@ -46,28 +46,3 @@ static size_t mem_size(void *pv)
 
     return 0;
 }
-
-void *platform_realloc(void *ptr, size_t size)
-{
-    void *newPtr;
-    size_t curSize;
-
-    if (ptr == 0)
-    {
-        return pvPortMalloc(size);
-    }
-
-    curSize = mem_size(ptr);
-
-    if (size <= curSize)
-    {
-        return ptr;
-    }
-
-    newPtr = pvPortMalloc(size);
-
-    memcpy(ptr, newPtr, size);
-
-    vPortFree(ptr);
-    return newPtr;
-}
