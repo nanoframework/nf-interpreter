@@ -16,8 +16,8 @@
 // the platform implementations: platform_malloc(), platform_free() should be used instead.
 // realloc should never be used.
 // as these the preferred calls to use as they ensure thread safety and RTOS integration.
-#define malloc  YOU_SHALL_NOT_USE_malloc
-#define free    YOU_SHALL_NOT_USE_free
+#define malloc YOU_SHALL_NOT_USE_malloc
+#define free   YOU_SHALL_NOT_USE_free
 
 #endif
 
