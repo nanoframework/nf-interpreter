@@ -44,6 +44,7 @@
                 "API_nanoFramework.System.Text": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Graphics": "ON",
+                "API_nanoFramework.System.Data.Sqlite": "ON",
                 "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
                 "GRAPHICS_DISPLAY": "Otm8009a_DSI_Video_Mode.cpp",
                 "GRAPHICS_DISPLAY_INTERFACE": "DSI_To_Display_Video_Mode.cpp",
