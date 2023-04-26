@@ -28,15 +28,3 @@ void platform_free(void *ptr)
     // define back
 #define malloc YOU_SHALL_NOT_USE_free
 }
-
-void *platform_realloc(void *ptr, size_t size)
-{
-
-// need to undef in order to call the real function
-#undef realloc
-
-    return realloc(ptr, size);
-
-    // define back
-#define realloc YOU_SHALL_NOT_USE_realloc
-}
