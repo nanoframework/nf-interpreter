@@ -27,22 +27,22 @@ static const size_t xHeapStructSize =
     (sizeof(BlockLink_t) + ((size_t)(portBYTE_ALIGNMENT - 1))) & ~((size_t)portBYTE_ALIGNMENT_MASK);
 static size_t xBlockAllocatedBit = ((size_t)1) << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
 
-static size_t mem_size(void *pv)
-{
-    uint8_t *puc = (uint8_t *)pv;
-    BlockLink_t *pxLink;
+// static size_t mem_size(void *pv)
+// {
+//     uint8_t *puc = (uint8_t *)pv;
+//     BlockLink_t *pxLink;
 
-    if (pv != NULL)
-    {
-        /* The memory being freed will have an BlockLink_t structure immediately
-        before it. */
-        puc -= xHeapStructSize;
+//     if (pv != NULL)
+//     {
+//         /* The memory being freed will have an BlockLink_t structure immediately
+//         before it. */
+//         puc -= xHeapStructSize;
 
-        /* This casting is to keep the compiler from issuing warnings. */
-        pxLink = (void *)puc;
+//         /* This casting is to keep the compiler from issuing warnings. */
+//         pxLink = (void *)puc;
 
-        return pxLink->xBlockSize & ~xBlockAllocatedBit;
-    }
+//         return pxLink->xBlockSize & ~xBlockAllocatedBit;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
