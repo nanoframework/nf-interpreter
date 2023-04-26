@@ -224,29 +224,26 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
     NANOCLR_NATIVE_DECLARE(
-        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
-    NANOCLR_NATIVE_DECLARE(DrawChar___VOID__U2__I4__I4__nanoFrameworkPresentationMediaColor__nanoFrameworkUIFont);
+        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__U4__nanoFrameworkUIFont);
+    NANOCLR_NATIVE_DECLARE(DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont);
     NANOCLR_NATIVE_DECLARE(SetClippingRectangle___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_Width___I4);
     NANOCLR_NATIVE_DECLARE(get_Height___I4);
-    NANOCLR_NATIVE_DECLARE(
-        DrawEllipse___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(MakeTransparent___VOID__nanoFrameworkPresentationMediaColor);
+    NANOCLR_NATIVE_DECLARE(MakeTransparent___VOID__U4);
     NANOCLR_NATIVE_DECLARE(StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawLine___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor);
-    NANOCLR_NATIVE_DECLARE(
-        DrawRectangle___VOID__nanoFrameworkPresentationMediaColor__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor);
-    NANOCLR_NATIVE_DECLARE(FillRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2);
-    NANOCLR_NATIVE_DECLARE(FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__U2);
-    NANOCLR_NATIVE_DECLARE(
-        FillGradientRectangle___VOID__I4__I4__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__nanoFrameworkPresentationMediaColor__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawText___VOID__STRING__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__I4__I4);
-    NANOCLR_NATIVE_DECLARE(SetPixel___VOID__I4__I4__nanoFrameworkPresentationMediaColor);
-    NANOCLR_NATIVE_DECLARE(GetPixel___nanoFrameworkPresentationMediaColor__I4__I4);
+    NANOCLR_NATIVE_DECLARE(DrawLine___VOID__U4__I4__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__I4__I4__I4__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(FillRectangle___VOID__I4__I4__I4__I4__U4__U2);
+    NANOCLR_NATIVE_DECLARE(FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__U4__U2);
+    NANOCLR_NATIVE_DECLARE(FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawText___VOID__STRING__nanoFrameworkUIFont__U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(SetPixel___VOID__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(GetPixelInt___U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(GetBitmap___SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(TileImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2);
@@ -908,9 +905,9 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_I2cConfiguration
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
 {
-    static const int FIELD_STATIC___maximumBufferSize = 20;
-    static const int FIELD_STATIC___fullScreen = 21;
-    static const int FIELD_STATIC___point = 22;
+    static const int FIELD_STATIC___maximumBufferSize = 19;
+    static const int FIELD_STATIC___fullScreen = 20;
+    static const int FIELD_STATIC___point = 21;
 
     NANOCLR_NATIVE_DECLARE(get_LongerSide___STATIC__I4);
     NANOCLR_NATIVE_DECLARE(get_ShorterSide___STATIC__I4);
@@ -920,8 +917,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_U2);
-    NANOCLR_NATIVE_DECLARE(
-        Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor);
+    NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_SystemDrawingColor);
+    NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__U4__U4);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(
         NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4);
