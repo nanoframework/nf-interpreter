@@ -105,7 +105,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_SystemDrawingColor(CLR_RT_StackFrame& stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_SystemDrawingColor(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
@@ -119,9 +120,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
         // Tose are 32bits ARGB colors which needs to be transformed into 16 bits BGR
         color32 = (CLR_UINT32 *)colors->GetFirstElement();
         color16 = (CLR_UINT16 *)platform_malloc(colors->m_numOfElements);
-        for(int i = 0; i < (int)colors->m_numOfElements; i++)
+        for (int i = 0; i < (int)colors->m_numOfElements; i++)
         {
-            color16[i] = (CLR_UINT16)(((color32[i] & 0xF8) << 8) | (((color32[i] >> 8) & 0xFC) << 3) | ((color32[i] >> 16) >> 3));
+            color16[i] =
+                (CLR_UINT16)(((color32[i] & 0xF8) << 8) | (((color32[i] >> 8) & 0xFC) << 3) | ((color32[i] >> 16) >> 3));
         }
 
         writeData = (CLR_UINT32 *)color16;
@@ -135,7 +137,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___
             stack.Arg0().NumericByRef().u2, // screenX
             stack.Arg1().NumericByRef().u2, // screenY
             writeData);
-        
+
         platform_free(color16);
     }
     NANOCLR_NOCLEANUP();
@@ -241,7 +243,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__U4__U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
+    Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {

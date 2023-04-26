@@ -263,8 +263,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -337,8 +337,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::get_Height___I4(
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -456,8 +455,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    MakeTransparent___VOID__U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent___VOID__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -510,8 +508,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawLine___VOID__U4__I4__I4__I4__I4__I4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawLine___VOID__U4__I4__I4__I4__I4__I4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
@@ -534,8 +532,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawRectangle___VOID__I4__I4__I4__I4__I4__U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::DrawRectangle___VOID__I4__I4__I4__I4__I4__U4(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -601,8 +599,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    FillRectangle___VOID__I4__I4__I4__I4__U4__U2(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::FillRectangle___VOID__I4__I4__I4__I4__U4__U2(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -671,8 +669,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -708,8 +705,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(
-        CLR_RT_StackFrame &stack)
+    DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_RT_HeapBlock *pArgs;
@@ -785,8 +781,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
-    SetPixel___VOID__I4__I4__U4(CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::SetPixel___VOID__I4__I4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
@@ -798,8 +793,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixelInt___U4__I4__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::GetPixelInt___U4__I4__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     CLR_GFX_Bitmap *bitmap;
