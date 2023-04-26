@@ -45,7 +45,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.2
+      ref: refs/tags/v4.4.4
       
 jobs:
 
@@ -76,6 +76,8 @@ jobs:
         # get commit details, if this is a PR
         if($env:System_PullRequest_PullRequestId -ne $null)
         {
+          Write-Host "**This is a PR build**"
+
           $commit = Invoke-RestMethod -Uri "https://api.github.com/repos/nanoframework/nf-interpreter/commits/$(Build.SourceVersion)" -ContentType "application/json" -Method GET
 
           if( ($commit.commit.author.name -eq "nfbot") -and ($commit.commit.message -like "*[version update]*") )
@@ -89,6 +91,8 @@ jobs:
         }
         else
         {
+          Write-Host "**build for other reasons**"
+
           echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"
         }
       }
@@ -101,7 +105,7 @@ jobs:
       git config --global user.email "nfbot"
       git config --global user.name "nanoframework@outlook.com"
 
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)"))))"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$(GitHubToken)")))"
       
       if($env:StartReleaseCandidate -like "true")
       {
@@ -140,6 +144,7 @@ jobs:
           echo "##vso[task.setvariable variable=BUILD_TI;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_AZURERTOS;isOutput=true]false"
           echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]false"  
+          echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]false"  
           echo "##vso[task.setvariable variable=BUILD_ALL;isOutput=true]false"  
 
           if( 
@@ -200,13 +205,30 @@ jobs:
               Write-host "Building Azure RTOS targets"
           }
 
-          if( ($files.where{$_.Contains('targets/win32')}).Count -gt 0)
+          if( 
+            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/win32')}).Count -gt 0)
+            )
           {
-              # files at win32 folder
+              # files at win32 or netcore folders
               echo "##vso[task.setvariable variable=BUILD_WIN32;isOutput=true]true"
 
-              Write-host "Building WIN32 target"
+              Write-host "Building nanoCLR target"
           }
+          
+          if( 
+            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.CLI')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/netcore/nanoCLR.sln')}).Count -gt 0) -Or
+            (($files.where{$_.Contains('targets/netcore/nanoFramework.nanoCLR.Host')}).Count -gt 0)
+            )
+          {
+              # files at nanoCLR CLI or Host folders
+              echo "##vso[task.setvariable variable=BUILD_NANOCLR_CLI;isOutput=true]true"
+
+              Write-host "Building nanoCLR CLI target"
+          }
+
       }
 
     name: TargetsToBuild
@@ -224,7 +246,7 @@ jobs:
 
       # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
       # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+      $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
 
       cd "$env:Agent_TempDirectory" > $null
 
@@ -302,6 +324,7 @@ jobs:
   steps:
   - checkout: self
     fetchDepth: 1
+    condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
   - template: azure-pipelines-templates/download-install-llvm.yml
   - template: azure-pipelines-templates/check-code-style.yml
@@ -332,21 +355,24 @@ jobs:
         TargetBoard: ST_STM32F429I_DISCOVERY
         TargetSeries: 'stm32f4xx'
         BuildOptions: 
-        GccArm_Version:
         NeedsDFU: false
         NeedsSRECORD: false
+        CMakePreset: ST_STM32F429I_DISCOVERY
+
       ST_STM32F769I_DISCOVERY:
         TargetBoard: ST_STM32F769I_DISCOVERY
         TargetSeries: 'stm32f7xx'
         BuildOptions: 
         NeedsDFU: false
         NeedsSRECORD: true
+        CMakePreset: ST_STM32F769I_DISCOVERY
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('STM32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('STM32_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
+    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -391,6 +417,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_PSRAM_REV0
+        CMakePreset: ESP32_PSRAM_REV0
+
       ESP32_BLE_REV0:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -398,6 +426,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32
         PackageName: ESP32_BLE_REV0
+        CMakePreset: ESP32_BLE_REV0
+
       ESP_WROVER_KIT:
          TargetBoard: ESP32
          TargetSeries: 'esp32'
@@ -405,6 +435,8 @@ jobs:
          IDF_Target: esp32
          TargetName: ESP_WROVER_KIT
          PackageName: ESP_WROVER_KIT
+         CMakePreset: ESP_WROVER_KIT
+
       ESP32_LILYGO:
         TargetBoard: ESP32
         TargetSeries: 'esp32'
@@ -412,6 +444,8 @@ jobs:
         IDF_Target: esp32
         TargetName: ESP32_LILYGO
         PackageName: ESP32_LILYGO
+        CMakePreset: ESP32_LILYGO
+
       FEATHER_S2:
         TargetBoard: ESP32_S2
         TargetSeries: 'esp32_s2'
@@ -419,11 +453,21 @@ jobs:
         IDF_Target: esp32s2
         TargetName: FEATHER_S2
         PackageName: FEATHER_S2
+        CMakePreset: FEATHER_S2
+
+      ESP32_C3:
+        TargetBoard: ESP32_C3
+        TargetSeries: 'esp32c3'
+        BuildOptions: 
+        IDF_Target: esp32c3
+        TargetName: ESP32_C3
+        PackageName: ESP32_C3
+        CMakePreset: ESP32_C3
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('ESP32_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('ESP32_1_8_1_versioncounter', 0)]
     IDF_PATH: 'D:/a/1/s/esp-idf'
     PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
     TargetPlatform: 'esp32'
@@ -434,6 +478,8 @@ jobs:
     fetchDepth: 1
 
   - template: azure-pipelines-templates/build-preparations.yml
+    parameters:
+      repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/nb-gitversioning.yml
     parameters:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
@@ -443,7 +489,7 @@ jobs:
       repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
   - template: azure-pipelines-templates/build-espressif-esp32-targets.yml
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
     displayName: Copying bootloader
     inputs:
@@ -452,6 +498,8 @@ jobs:
         bootloader.bin
       TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
       flattenFolders: true
+      ignoreMakeDirErrors: true
+
   - template: azure-pipelines-templates/copy-sdkconfig.yml
   - template: azure-pipelines-templates/pack-publish-artifacts.yml
     parameters:
@@ -487,11 +535,12 @@ jobs:
         BuildOptions: 
         GccArm_Version: 
         NeedsSRECORD: true
+        CMakePreset: NXP_MIMXRT1060_EVK
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('NXP_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('NXP_1_8_1_versioncounter', 0)]
     GIT_LFS_SKIP_SMUDGE: 1
     TargetPlatform: 'freertos'
 
@@ -557,11 +606,12 @@ jobs:
         BuildOptions: >-
           -DRADIO_FREQUENCY=915
         GccArm_Version:
+        CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('TI_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('TI_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'ti_simplelink'
 
@@ -604,6 +654,7 @@ jobs:
         GccArm_Version: 
         NeedsDFU: true
         NeedsSRECORD: false
+        CMakePreset: ST_B_L475E_IOT01A
 
       # ORGPAL_PALTHREE:
       #   TargetBoard: ORGPAL_PALTHREE
@@ -612,10 +663,20 @@ jobs:
       #   GccArm_Version: 
       #   NeedsDFU: true
       #   NeedsSRECORD: false
+      #   CMakePreset: ORGPAL_PALTHREE
+
+      SL_STK3701A:
+        TargetBoard: SL_STK3701A
+        TargetSeries: 'efm32gg11'
+        BuildOptions:
+        GccArm_Version: 
+        NeedsDFU: false
+        NeedsSRECORD: false
+        CMakePreset: SL_STK3701A
 
   variables:
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('AZURERTOS_1_8_0_versioncounter', 0)]
+    REVISION: $[counter('AZURERTOS_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
     TargetPlatform: 'azure_rtos'
 
@@ -632,13 +693,14 @@ jobs:
   - template: azure-pipelines-templates/pack-publish-managed-helpers.yml
 
 #################
-# WIN32 
+# WIN32 executable 
 - job: Build_WIN32_nanoCLR
   condition: >-
     and(
       succeeded('Check_Code_Style'),
       ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
       or(
+        eq(variables['BUILD_WINDOWS_NANOCLR__'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
       )
@@ -653,25 +715,64 @@ jobs:
 
   variables:
     DOTNET_NOLOGO: true
-    TargetPublishName: WIN32_nanoCLR
     # creates a counter and assigns it to the revision variable
-    REVISION: $[counter('WIN32_1_8_0__versioncounter', 400)]
+    REVISION: $[counter('WIN32_1_8_1_versioncounter', 0)]
 
   steps:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
+  - task: PowerShell@2
+    displayName: Store package version
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "$("##vso[task.setvariable variable=WINCLR_PACKAGE_VERSION]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)"
+        Write-Host "$("##vso[task.setvariable variable=WINCLR_AssemblyInformationalVersion]")$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER)$(NBGV_BuildMetadataFragment)"
+
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
+  - task: UseDotNet@2
+    displayName: Install .NET SDK
+    inputs:
+      packageType: sdk
+      version: 6.x
+      performMultiLevelLookup: true
+
+  - task: DotNetCoreCLI@2
+    displayName: Restore NuGet packages
+    inputs:
+      command: restore
+      restoreArguments: '--locked-mode'
+      verbosityRestore: minimal
+      projects: targets\netcore\nanoCLR.sln
+      feedsToUse: select
+      includeNuGetOrg: true
+
   - task: VSBuild@1
+    displayName: Build WIN32 EXE target
     inputs:
       solution: 'targets\win32\nanoCLR.sln'
       platform: 'x86'
+      maximumCpuCount: true
       msbuildArgs: '/p:PublicRelease=true'
       configuration: 'Release'
-      
+
+  - task: VSBuild@1
+    displayName: Build WIN DLL target
+    inputs:
+      solution: 'targets\netcore\nanoCLR.sln'
+      platform: 'Any CPU'
+      maximumCpuCount: true
+      msbuildArgs: '/p:PublicRelease=true'
+      configuration: 'Release'
+
   - task: DotNetCoreCLI@2
     displayName: Install SignTool tool
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     inputs:
       command: custom
       custom: tool
@@ -680,15 +781,15 @@ jobs:
   - pwsh: |
       .\SignClient "Sign" `
       --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
-      --input "**/nanoFramework.nanoCLR.exe" `
+      --input "**/nanoFramework.nanoCLR.*" `
       --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --user "$(SignClientUser)" `
       --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.Win32" `
-      --description "nanoFramework.nanoCLR.Win32" `
+      --name "nanoFramework.nanoCLR" `
+      --description "nanoFramework.nanoCLR" `
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
-    displayName: Sign nanoCLR WIN32 EXE
+    displayName: Sign nanoCLR assemblies
     continueOnError: true
     condition: >-
       and(
@@ -721,25 +822,38 @@ jobs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
 
-  - task: CopyFiles@1
+  - task: CopyFiles@2
     condition: succeeded()
-    displayName: Collecting managed helpers deployable artifacts
+    displayName: Collecting NuGet packages
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.nanoCLR.Win32*.nupkg
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
       flattenFolders: true
-  
-  - task: CopyFiles@1
+      ignoreMakeDirErrors: true
+
+  - task: CopyFiles@2
     condition: succeeded()
-    displayName: Collecting EXE to deployable artifacts
+    displayName: Adding nanoCLR WIN32 to deployable artifacts
     inputs:
       sourceFolder: $(Build.SourcesDirectory)
       Contents: |
         **\nanoFramework.nanoCLR.exe
-      TargetFolder: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN32_nanoCLR'
       flattenFolders: true
+      ignoreMakeDirErrors: true
+
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Adding nanoCLR DLL to deployable artifacts
+    inputs:
+      sourceFolder: $(Build.SourcesDirectory)
+      Contents: |
+        **\nanoFramework.nanoCLR.dll
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\WIN_DLL_nanoCLR'
+      flattenFolders: true
+      ignoreMakeDirErrors: true
 
   - pwsh: |
       .\SignClient "Sign" `
@@ -749,14 +863,18 @@ jobs:
       --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
       --user "$(SignClientUser)" `
       --secret '$(SignClientSecret)' `
-      --name "nanoFramework.nanoCLR.Win32 NuGet" `
-      --description "nanoFramework.nanoCLR.Win32 NuGet" `
+      --name "nanoFramework.nanoCLR NuGets" `
+      --description "nanoFramework.nanoCLR NuGets" `
       --descriptionUrl "https://github.com/$env:Build_Repository_Name"
     displayName: Sign packages
     continueOnError: true
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
     
-  # publish artifacts (only possible if this is not a PR originated on a fork)
+  # publish artifacts
   - task: PublishBuildArtifacts@1
     condition: succeeded()
     displayName: Publish deployables artifacts
@@ -765,9 +883,17 @@ jobs:
       ArtifactName: deployables
       ArtifactType: Container
 
-  # push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to Azure Artifacts
     inputs:
@@ -777,9 +903,17 @@ jobs:
       publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
       allowPackageConflicts: true
 
-  # push NuGet class lib package to NuGet (always happens except on PR builds)
+  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
-    condition: and( succeeded(), eq(variables['System.PullRequest.PullRequestId'], '') )
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
     continueOnError: true
     displayName: Push NuGet packages to NuGet
     inputs:
@@ -789,7 +923,171 @@ jobs:
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-nf-interpreter'
 
-  - template: azure-pipelines-templates/publish-win32-nanoclr.yml
+  - template: azure-pipelines-templates/publish-nanoclr.yml
+
+#################
+# nanoCLR CLI tool
+- job: Build_nanoCLR_CLI
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+      or(
+        eq(variables['BUILD_NANOCLR_CLI__'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+      )
+    )
+
+  dependsOn:
+  - Check_Build_Options
+  - Check_Code_Style
+
+  pool:
+    vmImage: 'windows-latest'
+
+  variables:
+    DOTNET_NOLOGO: true
+
+  steps:
+  - template: azure-pipelines-templates/nb-gitversioning.yml
+
+  - template: azure-pipelines-templates/install-nuget.yml@templates
+
+  - task: UseDotNet@2
+    displayName: Install .NET SDK
+    inputs:
+      packageType: sdk
+      version: 6.x
+      performMultiLevelLookup: true
+
+  - task: DotNetCoreCLI@2
+    displayName: Restore NuGet packages
+    inputs:
+      command: restore
+      verbosityRestore: minimal
+      projects: targets\netcore\nanoCLR.sln
+      feedsToUse: select
+      includeNuGetOrg: true
+
+  - task: VSBuild@1
+    displayName: Build .NET tool
+    condition: succeeded()
+    inputs:
+      solution: 'targets\netcore\nanoCLR.sln'
+      platform: 'Any CPU'
+      maximumCpuCount: true
+      msbuildArgs: '/p:PublicRelease=true'
+      configuration: 'Release'
+
+  - task: DotNetCoreCLI@2
+    displayName: Install SignTool tool
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
+    inputs:
+      command: custom
+      custom: tool
+      arguments: install --tool-path . SignClient
+
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.Repository.LocalPath)\build\bin\Release" `
+      --input "**/nanoFramework.nanoCLR.*" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.CLI" `
+      --description "nanoFramework.nanoCLR.CLI" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign nanoCLR assemblies
+    continueOnError: true
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
+
+  - task: MSBuild@1
+    condition: succeeded()
+    displayName: Pack nanoCLR CLI
+    inputs:
+      solution: 'targets\netcore\nanoFramework.nanoCLR.CLI\nanoFramework.nanoCLR.CLI.csproj'
+      platform: 'Any CPU'
+      msbuildArguments: '/p:PublicRelease=true /t:pack /p:PackageOutputPath=$(Build.ArtifactStagingDirectory) '
+      configuration: 'Release'
+      maximumCpuCount: true
+
+  - pwsh: |
+      .\SignClient "Sign" `
+      --baseDirectory "$(Build.ArtifactStagingDirectory)" `
+      --input "**/*.nupkg" `
+      --config "$(Build.Repository.LocalPath)\config\SignClient.json" `
+      --filelist "$(Build.Repository.LocalPath)\config\filelist.txt" `
+      --user "$(SignClientUser)" `
+      --secret '$(SignClientSecret)' `
+      --name "nanoFramework.nanoCLR.CLI NuGet" `
+      --description "nanoFramework.nanoCLR.CLI NuGet" `
+      --descriptionUrl "https://github.com/$env:Build_Repository_Name"
+    displayName: Sign packages
+    continueOnError: true
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], '')
+      )
+    
+  # publish artifacts
+  - task: PublishBuildArtifacts@1
+    condition: succeeded()
+    displayName: Publish deployables artifacts
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: deployables
+      ArtifactType: Container
+
+  # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
+  - task: NuGetCommand@2
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
+    continueOnError: true
+    displayName: Push NuGet packages to Azure Artifacts
+    inputs:
+      command: push
+      nuGetFeedType: external
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'AzureArtifacts-nf-interpreter'
+      allowPackageConflicts: true
+
+  # push NuGet packages to NuGet (always happens when building from main, except on PR builds)
+  - task: NuGetCommand@2
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        or(
+          eq(variables['ForceUpload'], true),
+          eq(variables['Build.SourceBranchName'], 'main')
+        )
+      )      
+    continueOnError: true
+    displayName: Push NuGet packages to NuGet
+    inputs:
+      command: push
+      nuGetFeedType: external
+      allowPackageConflicts: true
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      publishFeedCredentials: 'NuGet-nf-interpreter'
 
 ######################
 # generate change log
@@ -879,7 +1177,7 @@ jobs:
 
         # compute authorization header in format "AUTHORIZATION: basic 'encoded token'"
         # 'encoded token' is the Base64 of the string "nfbot:personal-token"
-        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)"))))"
+        $auth = "basic $([System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("nfbot:$(GitHubToken)")))"
 
         git -c http.extraheader="AUTHORIZATION: $auth" push origin "HEAD:$(Build.SourceBranchName)"
     condition: >-
@@ -904,6 +1202,7 @@ jobs:
   - Build_TI_SimpleLink_targets
   - Build_Azure_RTOS_targets
   - Build_WIN32_nanoCLR
+  - Build_nanoCLR_CLI
   - Generate_change_log
   - Check_Code_Style
   condition: >-
@@ -916,6 +1215,7 @@ jobs:
         failed('Build_TI_SimpleLink_targets'),
         failed('Build_Azure_RTOS_targets'),
         failed('Build_WIN32_nanoCLR'),
+        failed('Build_nanoCLR_CLI'),
         failed('Generate_change_log')
       )
     )

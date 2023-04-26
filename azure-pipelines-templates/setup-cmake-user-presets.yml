@@ -2,26 +2,29 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  repoDirectory: '$(Build.SourcesDirectory)'
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
 
 steps:
 
   - task: PowerShell@2
     displayName: Compose CMakeUserPresets
     inputs:
-      workingDirectory:  ${{ parameters.repoDirectory }}
+      workingDirectory:  ${{ parameters.repoDirectory }}/config
       targetType: 'inline'
       script: |
-        $file = "CMakeUserPresets.json"
+        $file = "user-tools-repos.json"
 
-        Rename-Item -Path "CMakeUserPresets.TEMPLATE.json" -NewName $file
+        Rename-Item -Path "user-tools-repos.TEMPLATE.json" -NewName $file
+
+        [regex]$pattern='user-tools-repos-cloud'
+        $pattern.replace([IO.File]::ReadAllText($file), 'user-tools-repos', 1) | Out-File $file -Encoding UTF8
+        
+        $file = "user-prefs.json"
+
+        Rename-Item -Path "user-prefs.TEMPLATE.json" -NewName $file
         
         $filecontent = Get-Content($file)
         attrib $file -r
         $filecontent -replace  'Debug', 'MinSizeRel' | Out-File $file -Encoding UTF8
-
-        [regex]$pattern='user-local-tools'
-        $pattern.replace([IO.File]::ReadAllText($file), 'user-local-tools-dummy', 1) | Out-File $file -Encoding UTF8
-
-        $filecontent = Get-Content($file)
-        $filecontent -replace  'user-local-tools-cloud', 'user-local-tools' | Out-File $file -Encoding UTF8

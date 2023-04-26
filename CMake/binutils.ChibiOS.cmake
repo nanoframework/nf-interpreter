@@ -197,7 +197,7 @@ macro(nf_add_platform_dependencies target)
 
             add_dependencies(${target}.elf nano::NF_Network)
 
-            # security provider is mbedTLS
+            # security provider is MbedTLS
             if(USE_SECURITY_MBEDTLS_OPTION)
                 add_dependencies(NF_Network nano::NF_Network)
             endif()
@@ -248,7 +248,7 @@ macro(nf_add_platform_include_directories target)
                 
         if(USE_SECURITY_MBEDTLS_OPTION)
 
-            # need to add extra include directories for mbedTLS
+            # need to add extra include directories for MbedTLS
             target_include_directories(
                 mbedcrypto PUBLIC
                 ${CHIBIOS_HAL_INCLUDE_DIRS}

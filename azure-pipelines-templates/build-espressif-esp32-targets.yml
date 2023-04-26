@@ -2,8 +2,12 @@
 # See LICENSE file in the project root for full license information.
 
 parameters:
-  repoDirectory: '$(Build.SourcesDirectory)\nf-interpreter'
-  partitionsDirectory: '$(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)'
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)\nf-interpreter
+  - name: partitionsDirectory
+    type: string
+    default: $(Build.SourcesDirectory)\nf-interpreter\targets\ESP32\_IDF\$(IDF_Target)
 
 steps:
 
@@ -15,27 +19,41 @@ steps:
     condition: succeeded()
     displayName: Setup build with CMake
     inputs:
-      cmakeArgs: ' --preset $(PackageName) -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_BOARD=$(TargetBoard) -DTARGET_NAME=$(TargetName) $(BuildOptions)'
+      cmakeArgs: '--preset $(CMakePreset) -DESP32_IDF_PATH=$(IDF_PATH) -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_VERSION=$(NBGV_VersionMajor).$(NBGV_VersionMinor).$(NBGV_BuildNumber).$(TARGET_BUILD_COUNTER) -DTARGET_NAME=$(TargetPublishName) $(BuildOptions)'
       workingDirectory: ${{ parameters.repoDirectory }}
 
   - task: CMake@1
     displayName: Build with CMake
     condition: succeeded()
     inputs:
-      cmakeArgs: '--build  --preset $(PackageName) --target all --config MinSizeRel '
+      cmakeArgs: '--build --preset $(CMakePreset) --target all --config MinSizeRel'
       workingDirectory:  ${{ parameters.repoDirectory }}
 
   # because of permission issues (the python script isn't allowed to write on the output folder)
   # we need to perform these steps by calling directly the python scripts
+
+  # 16MB partition table it's generated for ESP32 and ESP32_C3 only
   - task: PythonScript@0
-    condition: succeeded()
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['TargetSeries'], 'esp32c3')
+      )
     displayName: Generate ESP32 Partition tables for 16MB flash
     inputs:
       scriptSource: 'filePath'
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_16mb.csv ${{ parameters.repoDirectory }}\build\partitions_16mb.bin'
+
   - task: PythonScript@0
-    condition: succeeded()
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          eq(variables['TargetSeries'], 'esp32'),
+          eq(variables['TargetSeries'], 'esp32s2')
+        )
+      )
     displayName: Generate ESP32 Partition tables for 8MB flash
     inputs:
       scriptSource: 'filePath'
@@ -49,3 +67,18 @@ steps:
       scriptSource: 'filePath'
       scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
       arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_4mb.csv ${{ parameters.repoDirectory }}\build\partitions_4mb.bin'
+
+  - task: PythonScript@0
+    condition: >-
+      and(
+        succeeded(),
+        or(
+          eq(variables['TargetSeries'], 'esp32'),
+          eq(variables['TargetSeries'], 'esp32c3')
+        )
+      )
+    displayName: Generate ESP32 Partition tables for 2MB flash
+    inputs:
+      scriptSource: 'filePath'
+      scriptPath: '$(IDF_PATH)\components\partition_table\gen_esp32part.py'
+      arguments: '--verify ${{ parameters.partitionsDirectory }}\partitions_nanoclr_2mb.csv ${{ parameters.repoDirectory }}\build\partitions_2mb.bin'

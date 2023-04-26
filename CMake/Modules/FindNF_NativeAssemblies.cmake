@@ -24,12 +24,15 @@ option(API_System.Device.Adc                    "option for System.Device.Adc AP
 option(API_System.Device.Dac                    "option for System.Device.Dac API")
 option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
 option(API_System.Device.I2c                    "option for System.Device.I2c API")
+option(API_System.Device.I2s                    "option for System.Device.I2s API")
 option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
 option(API_System.IO.Ports                      "option for System.IO.Ports API")
 option(API_System.Device.Spi                    "option for System.Device.Spi API")
+option(API_System.Runtime.Serialization         "option for System.Runtime.Serialization API")
 option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
+option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
@@ -42,6 +45,10 @@ option(API_Hardware.Stm32                       "option for Hardware.Stm32")
 # TI CC13xxCC26xx
 option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
 option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
+
+# Silabs Giant Gecko only
+option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
+option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko")
 
 #################################################################
 # macro to perform individual settings to add an API to the build
@@ -244,6 +251,18 @@ if(API_nanoFramework.Hardware.TI)
     PerformSettingsForApiEntry("nanoFramework.Hardware.TI")
 endif()
 
+# nanoFramework.Hardware.TI
+if(API_nanoFramework.GiantGecko.Adc)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.GiantGecko.Adc")
+endif()
+
+# nanoFramework.Hardware.GiantGecko
+if(API_Hardware.GiantGecko)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
+endif()
+
 # nanoFramework.Runtime.Events
 if(API_nanoFramework.Runtime.Events)
     ##### API name here (doted name)
@@ -300,6 +319,12 @@ if(API_System.Device.I2c)
     PerformSettingsForApiEntry("System.Device.I2c")
 endif()
 
+# System.Device.I2s
+if(API_System.Device.I2s)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.I2s")
+endif()
+
 # System.Device.Pwm
 if(API_System.Device.Pwm)
     ##### API name here (doted name)
@@ -318,10 +343,22 @@ if(API_System.Device.Spi)
     PerformSettingsForApiEntry("System.Device.Spi")
 endif()
 
+# System.Runtime.Serialization
+if(API_System.Runtime.Serialization)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Runtime.Serialization")
+endif()
+
 # System.Device.Wifi
 if(API_System.Device.Wifi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("System.Device.Wifi")
+endif()
+
+# System.Device.UsbStream
+if(API_System.Device.UsbStream)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("System.Device.UsbStream")
 endif()
 
 # Windows.Storage
@@ -406,7 +443,7 @@ macro(nf_add_lib_native_assemblies)
     if(RTOS_ESP32_CHECK)
         # this is the only one different
 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
 
         nf_set_compile_definitions(
             TARGET ${LIB_NAME} 
@@ -418,7 +455,7 @@ macro(nf_add_lib_native_assemblies)
         nf_set_link_options(TARGET ${LIB_NAME})
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALNA_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

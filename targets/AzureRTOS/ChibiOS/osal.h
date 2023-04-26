@@ -150,7 +150,7 @@ typedef int32_t msg_t;
 /**
  * @brief   Type of system time counter.
  */
-typedef uint32_t systime_t;
+typedef uint64_t systime_t;
 
 /**
  * @brief   Type of system time interval.

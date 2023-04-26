@@ -30,8 +30,9 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Net
 
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/nanoCLR)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -135,7 +136,6 @@ set(NF_CoreCLR_SRCS
     
     # Core stubs
     RPC_stub.cpp
-    BinaryFormatter_stub.cpp
 
     # CLR stubs
     Debugger_stub.cpp
@@ -181,6 +181,18 @@ if(NF_FEATURE_SUPPORT_REFLECTION)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Reflection_RuntimeMethodInfo.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_RuntimeType.cpp)
     list(APPEND NF_CoreCLR_SRCS corlib_native_System_Type.cpp)
+
+    # should we include binary serialization support?
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter.cpp)    
+    else()
+        # binary serialization stubs because we're not supporting reflection
+        list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)    
+    endif()
+
+else()
+    # binary serialization stubs because we're not supporting reflection
+    list(APPEND NF_CoreCLR_SRCS BinaryFormatter_stub.cpp)    
 endif()
 
 # include Collection support files depending on build option
@@ -315,7 +327,7 @@ macro(nf_add_lib_coreclr)
         )
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALC_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

@@ -352,7 +352,7 @@ HRESULT CLR_DBG_Debugger::CreateListOfCalls(
     NANOCLR_NOCLEANUP();
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -456,6 +456,7 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
     NATIVE_PROFILE_CLR_DEBUGGER();
 
     BlockStorageDevice *storageDevices = NULL;
+    BlockStorageDevice *device = NULL;
     DeviceBlockInfo *devicesBlockInfos = NULL;
     Flash_BlockRegionInfo *pData = NULL;
     bool success = false;
@@ -499,7 +500,8 @@ bool CLR_DBG_Debugger::Monitor_FlashSectorMap(WP_Message *msg)
             }
 
             // sanity check
-            if (&storageDevices[i] == NULL)
+            device = &storageDevices[i];
+            if (device == NULL)
             {
                 // failed
                 goto cmd_executed;
@@ -818,8 +820,11 @@ void CLR_DBG_Debugger::AccessMemory(
                                 return;
                             }
 
-                            // adjust buffer pointer to match access address
-                            bufPtr = (unsigned char *)accessAddress;
+                            if (isMemoryMapped)
+                            {
+                                // adjust buffer pointer to match access address
+                                bufPtr = (unsigned char *)accessAddress;
+                            }
 
                             // compute CRC32 of the memory segment
                             *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
@@ -889,7 +894,7 @@ void CLR_DBG_Debugger::AccessMemory(
         //--// RAM write
         ByteAddress sectAddr = location;
 
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
 
         bool proceed = false;
         void *temp;
@@ -1390,6 +1395,11 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
     {
         // update conditions
         g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions = newConditions;
+
+#ifdef VIRTTUAL_DEVICE
+        // fire event with update on debugger activity
+        ::Events_Set(SYSTEM_EVENT_FLAG_DEBUGGER_ACTIVITY);
+#endif // VIRTTUAL_DEVICE
     }
 
     return true;
@@ -2303,7 +2313,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_Get(WP_Message *msg)
     // If we are a thread spawned by the debugger to perform evaluations,
     // return the thread object that correspond to thread that has focus in debugger.
     th = th->m_realThread;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     // Find an existing managed thread, if it exists
     // making sure to only return the managed object association with the current appdomain
@@ -3085,7 +3095,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW)
 bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
@@ -3150,7 +3160,7 @@ bool CLR_DBG_Debugger::Profiling_FlushStream(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_PROFILE_NEW)
+#endif // #if defined(NANOCLR_PROFILE_NEW)
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
@@ -3428,7 +3438,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_Assembly(WP_Message *msg)
     {
         if (assm)
         {
-#if defined(_WIN32)
+#if defined(VIRTUAL_DEVICE)
             // append path
             if (assm->m_strPath != NULL)
             {
@@ -3629,7 +3639,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
     return true;
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 //--//
 
@@ -3797,4 +3807,4 @@ bool CLR_DBG_Debugger::Debugging_Info_SetJMC(WP_Message *msg)
     }
 }
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

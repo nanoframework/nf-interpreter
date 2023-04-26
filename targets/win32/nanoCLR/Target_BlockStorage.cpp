@@ -8,6 +8,11 @@
 /////////////////////////////////////////////////////
 // DeviceBlockInfo stubs
 
+void BlockStorage_AddDevices()
+{
+
+}
+
 __nfweak SectorAddress DeviceBlockInfo_PhysicalToSectorAddress(
     DeviceBlockInfo *blockInfo,
     const BlockRegionInfo *pRegion,
@@ -418,6 +423,18 @@ __nfweak bool BlockStorageDevice_FindNextUsageBlock(
     unsigned int *blockRangeIndex)
 {
     return false;
+}
+
+bool BlockStorageList_InitializeDevices()
+{
+    // TODO FIXME
+    return true;
+}
+
+bool BlockStorageList_UnInitializeDevices()
+{
+    // TODO FIXME
+    return true;
 }
 
 /////////////////////////////////////////////////////

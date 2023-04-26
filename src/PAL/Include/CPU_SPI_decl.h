@@ -68,13 +68,13 @@ struct SPI_DEVICE_CONFIGURATION
     // GPIO pin used for device Chip select, if -1 it means the ChipSelect is handled manually
     int32_t DeviceChipSelect;
     // False = LOW active,      True = HIGH active
-    bool ChipSelectActive;
+    bool ChipSelectActiveState;
     // SPI mode 0 -> 3
     SpiMode Spi_Mode;
     // SPI bus Configuration (full-duplex is default)
     SpiBusConfiguration BusConfiguration;
     // True = SPI data takes the form of 16-bit words otherwise 8-bit words.
-    bool MD16bits;
+    bool DataIs16bits;
     // Data order for 16 bit operation
     DataBitOrder DataOrder16;
     // Rough estimate on the time it takes to send/receive one byte (in milliseconds)
@@ -93,6 +93,10 @@ struct SPI_WRITE_READ_SETTINGS
     int readOffset;        // Read offset on half duplex read ( from end of write )
     bool Bits16ReadWrite;  // True if a 16bit operation
     SPI_Callback callback; // NUll is operation is Synchronous
+    // GPIO pin used for device Chip select, if -1 it means the ChipSelect is handled manually
+    int32_t DeviceChipSelect;
+    // False = LOW active,      True = HIGH active
+    bool ChipSelectActiveState;
 };
 
 #define CPU_SPI_ERROR_PARAM   -1

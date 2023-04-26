@@ -25,7 +25,7 @@ void ClrReboot()
 }
 
 // the CLR Startup code on Windows version is different
-#ifndef WIN32
+#ifndef VIRTUAL_DEVICE
 
 struct Settings
 {
@@ -422,7 +422,7 @@ void ClrStartup(CLR_SETTINGS params)
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_EE_DBG_SET_MASK(StateProgramExited, StateMask);
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(BUILD_RTM)
             if (params.EnterDebuggerLoopAfterExit)
@@ -444,7 +444,7 @@ void ClrStartup(CLR_SETTINGS params)
 
                 s_ClrSettings.Cleanup();
 
-                nanoHAL_Uninitialize();
+                nanoHAL_Uninitialize(false);
 
                 // re-init the hal for the reboot (initially it is called in bootentry)
                 nanoHAL_Initialize();
@@ -468,4 +468,4 @@ void ClrStartup(CLR_SETTINGS params)
     CPU_Reset();
 }
 
-#endif // WIN32
+#endif // VIRTUAL_DEVICE

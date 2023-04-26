@@ -13,7 +13,7 @@
 // from nanoHAL_Time.h
 #define TIME_CONVERSION__TO_SYSTICKS 10000
 
-static uint16_t _lastOutboundMessage = 65535;
+static uint16_t _lastOutboundMessage = 0;
 static uint64_t _receiveExpiryTicks;
 static uint8_t _rxState;
 static uint8_t *_pos;
@@ -305,6 +305,13 @@ void WP_Message_Process()
                     // still missing some bytes for the header
                     _rxState = ReceiveState_ReadingHeader;
                     _receiveExpiryTicks = HAL_Time_CurrentSysTicks() + c_HeaderTimeout;
+                }
+
+                if (len == 0 && *_pos == 0)
+                {
+                    // this is probably just hanging and waiting for a connection, so we're better off and give
+                    // breading space to the RTOS
+                    return;
                 }
 
                 break;

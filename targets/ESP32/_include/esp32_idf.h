@@ -6,10 +6,14 @@
 #ifndef ESP32_IDF_H
 #define ESP32_IDF_H
 
-#include <string.h>
-#include <stdlib.h>
+#include <nanoCLR_Headers.h>
+
 #include <sys/time.h>
 #include <time.h>
+
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#include <stddef.h>
+#endif
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -34,15 +38,28 @@
 #define CONFIG_LOG_TIMESTAMP_SOURCE_RTOS 1
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
+
 #include <esp_log.h>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#endif
 
 #include <spi_master.h>
 #include <gpio.h>
 #include <i2c.h>
+#include <i2s.h>
 #include <uart.h>
 #include <ledc.h>
 #include <adc.h>
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)
 #include <dac.h>
+#endif
 #include <timer.h>
 #include <esp_spiffs.h>
 #include <pcnt.h>
@@ -53,13 +70,23 @@
 #include <esp_rom_crc.h>
 #include <esp_rom_caps.h>
 
+// Touch pad supported only on those platforms
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#include <touch_sensor.h>
+#include <touch_pad.h>
+#endif
+
 // includes specific for TinyUSB and CDC
 #if CONFIG_USB_CDC_ENABLED
 #include <tinyusb.h>
 #include <tusb_cdc_acm.h>
 #endif
 
+#if CONFIG_MBEDTLS_DEBUG
+#include <mbedtls/esp_debug.h>
+#endif
+
 // Uncomment to support Ethernet
-//#define ESP32_ETHERNET_SUPPORT
+// #define ESP32_ETHERNET_SUPPORT
 
 #endif // ESP32_IDF_H

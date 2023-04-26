@@ -3,7 +3,7 @@
 # See LICENSE file in the project root for full license information.
 #
 
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 include(CMakeToolsHelpers OPTIONAL)
 include(ExternalProject)
@@ -37,10 +37,23 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 include(binutils.common)
 include(binutils.ESP32)
 
+nf_check_path_limits()
+
 ######################################################
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
+else()
+
+    # validate valid build types
+    set(SUPPORTED_CMAKE_BUILD_TYPES "Debug" "Release" "MinSizeRel" "RelWithDebInfo" CACHE INTERNAL "supported CMake build types")
+
+    list(FIND SUPPORTED_CMAKE_BUILD_TYPES ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_INDEX)
+    if(CMAKE_BUILD_TYPE_INDEX EQUAL -1)
+        # build type is NOT supported 
+        message(FATAL_ERROR "\n\nSorry but the CMAKE_BUILD_TYPE set: '${CMAKE_BUILD_TYPE}' is not supported!\nPlease double check the CMAKE_BUILD_TYPE build configuration.\n\n")
+    endif()
+    
 endif()
 ######################################################
 
@@ -429,8 +442,8 @@ endif()
 # (default is OFF so Networking is NOT supported)
 option(USE_NETWORKING_OPTION "option to use networking")
 
-# (default is OFF so mbed TLS is NOT used)
-option(NF_SECURITY_MBEDTLS "option to use mbed TLS as the network security provider" ON)
+# (default is OFF so Mbed TLS is NOT used)
+option(NF_SECURITY_MBEDTLS "option to use Mbed TLS as the network security provider" ON)
 
 # set default option for SNTP to ON
 option(NF_NETWORKING_SNTP "option to use add SNTP support, requires networking otherwise has no effect" ON)
@@ -444,15 +457,30 @@ option(NF_NETWORKING_ENC28J60 "option to use ENC28J60 network driver")
 # handles inclusion of System.Reflection API
 #############################################
 
-# set default option for SNTP to ON
+# set default option for Reflection API to ON
 option(NF_FEATURE_SUPPORT_REFLECTION "option to add support for System.Reflection API" ON)
+# set default option for Serialization API to ON
+option(NF_FEATURE_BINARY_SERIALIZATION "option to add support for binary serialization" ON)
 
 if(NF_FEATURE_SUPPORT_REFLECTION)
     set(TARGET_NANOCLR_REFLECTION TRUE CACHE INTERNAL "enable support for System.Reflection API")
     message(STATUS "Support for System.Reflection API enabled")
+    
+    if(NF_FEATURE_BINARY_SERIALIZATION)
+        set(API_System.Runtime.Serialization TRUE CACHE INTERNAL "enable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization enabled")
+    else()
+        set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+        message(STATUS "Support for binary serialization **IS NOT** enabled")
+    endif()
+
 else()
     set(TARGET_NANOCLR_REFLECTION FALSE CACHE INTERNAL "DISABLE support for System.Reflection API")
     message(STATUS "Support for System.Reflection API **IS NOT** enabled")
+
+    # disable binary serialization if Reflection is disabled
+    set(API_System.Runtime.Serialization FALSE CACHE INTERNAL "disable support for System.Runtime.Serialization API")
+    message(STATUS "Support for binary serialization **IS NOT** enabled")
 endif()
 
 #################################################################
@@ -550,6 +578,14 @@ else()
 endif()
 
 
+if(API_nanoFramework.GiantGecko.Adc)
+    # check if the standard ADC lib is already enabled
+    if(API_System.Device.Adc)
+        message(FATAL_ERROR "\n\nERROR:Can't enable simultaneously System.Device.Adc and GiantGecko.Adc APIs")
+    endif()
+endif()
+
+
 if(API_System.Device.Dac)
     set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 else()
@@ -568,6 +604,13 @@ if(API_System.Device.I2c)
     set(HAL_USE_I2C_OPTION TRUE CACHE INTERNAL "HAL I2C for System.Device.I2c")
 else()
     set(HAL_USE_I2C_OPTION FALSE CACHE INTERNAL "HAL I2C for System.Device.I2c")
+endif()
+
+
+if(API_System.Device.I2s)
+    set(HAL_USE_I2S_OPTION TRUE CACHE INTERNAL "HAL I2S for System.Device.I2s")
+else()
+    set(HAL_USE_I2S_OPTION FALSE CACHE INTERNAL "HAL I2S for System.Device.I2s")
 endif()
 
 
@@ -594,8 +637,10 @@ endif()
 
 if(API_nanoFramework.Device.OneWire)
     set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################
@@ -664,7 +709,7 @@ if(USE_NETWORKING_OPTION)
     endif()
 
     if(NF_SECURITY_MBEDTLS)
-        message(STATUS "Support for networking enabled with security from mbedTLS")
+        message(STATUS "Support for networking enabled with security from MbedTLS")
     elseif(RTOS_TI_SIMPLELINK_CHECK OR RTOS_AZURE_CHECK)
         # these platforms include their own TLS implementation, no need to add any build option
         message(STATUS "Support for networking enabled with security")
@@ -688,7 +733,7 @@ if(USE_NETWORKING_OPTION)
     # which is required for network
 
     if(NOT NF_FEATURE_HAS_CONFIG_BLOCK)
-        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that on your cmake-variants or in the build command line.")
+        message(FATAL_ERROR "\n\nERROR: network build requires NF_FEATURE_HAS_CONFIG_BLOCK build option to be 'ON'. Make sure you have that in your CMakePresets or in the build command line.")
     endif()
 
 else()
@@ -858,15 +903,9 @@ elseif(RTOS_ESP32_CHECK)
 
         else()
             # board NOT found in targets folder
-            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\You can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
+            message(FATAL_ERROR "\n\nSorry but support for ${TARGET_BOARD} target is not available...\n\nYou can wait for that to be added or you might want to contribute and start working on a PR for that.\n\n")
         endif()
     endif()
-
-    # need to add this here to keep IDF build system happy
-    add_executable(
-        ${NANOCLR_PROJECT_NAME}.elf
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/dummy.c
-    )
 
     # add common directory for ESP32
     add_subdirectory(${CMAKE_SOURCE_DIR}/targets/ESP32)

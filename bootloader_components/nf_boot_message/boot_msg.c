@@ -14,9 +14,3 @@ void __wrap_bootloader_print_banner(void)
     ESP_LOGI(TAG, ".NET nanoFramework 2nd stage bootloader ESP-IDF %s", IDF_VER_FIXED);
     ESP_LOGI(TAG, "build " __DATE__ " " __TIME__);
 }
-
-// need to have a main(), otherwise this won't make it into the final binary
-int main(void)
-{
-    return 0;
-}

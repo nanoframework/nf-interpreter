@@ -102,6 +102,54 @@ function(nf_set_linker_file target linker_file_name)
 
 endfunction()
 
+# fixes the ESP32_C3 rom linker script for rom_temp_to_power symbol
+# this is required if the CPU it's a revision <= 2 
+macro(nf_fix_esp32c3_rom_file)
+
+    if((${TARGET_SERIES_SHORT} STREQUAL "esp32c3"))
+        # build is for esp32c3
+
+        if(${ESP32_REVISION} LESS_EQUAL 2)
+            # need to UNcomment the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+        
+            string(REPLACE
+                    "/* rom_temp_to_power = 0x40001ab4; */"
+                    "rom_temp_to_power = 0x40001ab4;"
+                    ESP32_C3_ROM_LD_NEW_CONTENT
+                    "${ESP32_C3_ROM_LD_CONTENT}")
+        
+            file(WRITE 
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+        else()
+            # need to COMMENT the rom_temp_to_power symbol
+            file(READ
+                ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                ESP32_C3_ROM_LD_CONTENT)
+
+            string(FIND "${ESP32_C3_ROM_LD_CONTENT}" "/* rom_temp_to_power = 0x40001ab4; */" ROM_TEMP_SYMBOL_INDEX)
+        
+            if(ROM_TEMP_SYMBOL_INDEX EQUAL -1)
+             
+                string(REPLACE
+                        "rom_temp_to_power = 0x40001ab4;"
+                        "/* rom_temp_to_power = 0x40001ab4; */"
+                        ESP32_C3_ROM_LD_NEW_CONTENT
+                        "${ESP32_C3_ROM_LD_CONTENT}")
+            
+                file(WRITE 
+                    ${esp32_idf_SOURCE_DIR}/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+                    "${ESP32_C3_ROM_LD_NEW_CONTENT}")
+            endif()
+
+        endif()
+
+    endif()
+    
+endmacro()
 
 # setting compile definitions for a target based on general build options
 # TARGET parameter to set the target that's setting them for
@@ -134,6 +182,13 @@ function(nf_set_esp32_target_series)
 
     # store the series name for later use
     set(TARGET_SERIES_SHORT ${TARGET_SERIES_2} CACHE INTERNAL "ESP32 target series lower case, short version")
+
+    # set the CPU type
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32h2")
+        set(ESP32_CPU_TYPE "riscv" CACHE INTERNAL "Setting CPU type")
+    else()
+        set(ESP32_CPU_TYPE "xtensa" CACHE INTERNAL "Setting CPU type")
+    endif()
 
 endfunction()
 
@@ -229,7 +284,7 @@ macro(nf_add_platform_dependencies target)
 
         add_dependencies(${target}.elf nano::NF_Network)
 
-        # security provider is mbedTLS
+        # security provider is MbedTLS
         if(USE_SECURITY_MBEDTLS_OPTION)
             add_dependencies(NF_Network mbedtls)
         endif()
@@ -281,7 +336,7 @@ macro(nf_add_platform_sources target)
 
     # add header files with common OS definitions and board definitions
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/target_common.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
+                   ${CMAKE_CURRENT_BINARY_DIR}/target_common.h @ONLY)
 
     # sources common to both builds
     target_sources(${target}.elf PUBLIC
@@ -415,63 +470,44 @@ macro(nf_setup_partition_tables_generator)
     # create command line for partition table generator
     set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32")
-
-        # partition tables for ESP32
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
             --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_4mb.csv
             ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
-        
+            COMMENT "Generate partition table for 4MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 8MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_8mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
+            COMMENT "Generate partition table for 8MB flash" )
+
+        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+            COMMAND ${gen_partition_table} 
+            --flash-size 16MB 
+            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/partitions_nanoclr_16mb.csv
+            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
+            COMMENT "Generate partition table for 16MB flash" )
+
+    endif()
+
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" )
+        # 2MB partition table for ESP32
+       
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table}  
             --flash-size 2MB 
             ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_2mb.csv
             ${CMAKE_BINARY_DIR}/partitions_2mb.bin
-            COMMENT "Generate Esp32 partition table for 2MB flash" )
-
-    elseif(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
-        # partition tables for ESP32-S2)
-
-                
-        # partition tables for ESP32
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 16MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_16mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_16mb.bin
-            COMMENT "Generate ESP32 partition table for 16MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 8MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_8mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_8mb.bin
-            COMMENT "Generate ESP32 partition table for 8MB flash" )
-
-        add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
-            COMMAND ${gen_partition_table} 
-            --flash-size 4MB 
-            ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/esp32/partitions_nanoclr_4mb.csv
-            ${CMAKE_BINARY_DIR}/partitions_4mb.bin
-            COMMENT "Generate Esp32 partition table for 4MB flash" )
-
+            COMMENT "Generate partition table for 2MB flash" )
     endif()
 
 endmacro()
@@ -495,10 +531,6 @@ macro(nf_add_idf_as_library)
     set_property(TARGET __idf_build_target PROPERTY COMPILE_DEFINITIONS ${IDF_COMPILE_DEFINITIONS_FIXED})
     
     message(STATUS "Fixed IDF version. Is now: ${MY_IDF_VER_FIXED}")
-
-    # add IDF app_main
-    target_sources(${NANOCLR_PROJECT_NAME}.elf PUBLIC
-        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c)
 
     # check for SDK config from build options
     if(SDK_CONFIG_FILE)
@@ -546,7 +578,7 @@ macro(nf_add_idf_as_library)
         idf::esptool_py
         idf::spiffs
         idf::fatfs
-    )
+  )
 
     if(HAL_USE_BLE_OPTION)
         list(APPEND IDF_COMPONENTS_TO_ADD bt)
@@ -662,6 +694,16 @@ macro(nf_add_idf_as_library)
             ${SDKCONFIG_DEFAULTS_FILE}
         PROJECT_NAME "nanoCLR"
         PROJECT_VER ${BUILD_VERSION}
+        PROJECT_DIR ${CMAKE_SOURCE_DIR}
+    )
+
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+    # add IDF app_main
+    add_executable(
+        ${NANOCLR_PROJECT_NAME}.elf
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/project_elf_src_${TARGET_SERIES_SHORT}.c
     )
 
     #Restore original sdkconfig back to defaults
@@ -775,10 +817,15 @@ macro(nf_add_idf_as_library)
         SDKCONFIG_DEFAULT_CONTENTS)
 
     # find out if there is support for PSRAM
-    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" CONFIG_ESP32_SPIRAM_SUPPORT_POS)
+    set(SPIRAM_SUPPORT_PRESENT -1)
+    if(TARGET_SERIES_SHORT STREQUAL "esp32" OR TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    endif()
 
     # set variable
-    if(${CONFIG_ESP32_SPIRAM_SUPPORT_POS} GREATER -1)
+    if(${SPIRAM_SUPPORT_PRESENT} GREATER -1)
         set(PSRAM_INFO ", support for PSRAM")
         message(STATUS "Support for PSRAM included")
     else()
@@ -786,7 +833,7 @@ macro(nf_add_idf_as_library)
         message(STATUS "Support for PSRAM **IS NOT** included")
     endif()
 
-    # find out revision info
+    # find out revision info (ESP32)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_0=y" CONFIG_ESP32_REV_MIN_0_POS)
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_REV_MIN_3=y" CONFIG_ESP32_REV_MIN_3_POS)
 
@@ -799,6 +846,29 @@ macro(nf_add_idf_as_library)
         message(STATUS "Building for chip revision 3")
     endif()
 
+    # find out revision info (ESP32-C3)
+    unset(ESP32_REVISION)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_2=y" CONFIG_ESP32C3_REV_MIN_2_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_3=y" CONFIG_ESP32C3_REV_MIN_3_POS)
+    string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32C3_REV_MIN_4=y" CONFIG_ESP32C3_REV_MIN_4_POS)
+
+    # set variable
+    if(${CONFIG_ESP32C3_REV_MIN_2_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 2")
+        message(STATUS "Building for chip revision >= 2")
+        set(ESP32_REVISION "2" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32C3_REV_MIN_3_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. >= 3")
+        message(STATUS "Building for chip revision >= 3")
+        set(ESP32_REVISION "3" CACHE STRING "ESP32 revision")
+    elseif(${CONFIG_ESP32C3_REV_MIN_4_POS} GREATER -1)
+        set(REVISION_INFO ", chip rev. 4")
+        message(STATUS "Building for chip revision 4")
+        set(ESP32_REVISION "4" CACHE STRING "ESP32 revision")
+    endif()
+
+    nf_fix_esp32c3_rom_file()
+
     # find out if there is support for BLE
     string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_BT_ENABLED=y" CONFIG_BT_ENABLED_POS)
 
@@ -806,6 +876,24 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_BT_ENABLED_POS} GREATER -1)
         set(BLE_INFO ", support for BLE")
     endif()    
+
+    ############################################################
+    # output component size summary for the nanoCLR executable #
+    # more on this here: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/performance/size.html#size-summary-idf-py-size
+    
+    # set the map file with the components
+    set(nanoCLRMapfile "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map")
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf "-Wl,--cref" "-Wl,--Map=\"${nanoCLRMapfile}\"")
+
+    # setup the call to the python script to generate the size summary
+    set(ESP32_IDF_SIZE_UTILITY ${IDF_PATH_CMAKED}/tools/idf_size.py)
+    set(output_idf_size "python" "${ESP32_IDF_SIZE_UTILITY}")
+
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${output_idf_size}
+        --archives --target ${TARGET_SERIES_SHORT} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
+        COMMENT "Ouptut IDF size summary")
 
 endmacro()
 

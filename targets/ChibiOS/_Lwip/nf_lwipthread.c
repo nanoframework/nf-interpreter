@@ -56,7 +56,7 @@ static void low_level_init(struct netif *netif)
 
     /* device capabilities */
     /* don't set NETIF_FLAG_ETHARP if this device is not an Ethernet one */
-    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+    netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
     /* Do whatever else is needed to initialize interface. */
 }
@@ -92,7 +92,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     /* Iterates through the pbuf chain. */
     for (q = p; q != NULL; q = q->next)
         macWriteTransmitDescriptor(&td, (uint8_t *)q->payload, (size_t)q->len);
-    macReleaseTransmitDescriptor(&td);
+    macReleaseTransmitDescriptorX(&td);
 
     MIB2_STATS_NETIF_ADD(netif, ifoutoctets, p->tot_len);
     if (((u8_t *)p->payload)[0] & 1)
@@ -156,7 +156,7 @@ static bool low_level_input(struct netif *netif, struct pbuf **pbuf)
         /* Iterates through the pbuf chain. */
         for (q = *pbuf; q != NULL; q = q->next)
             macReadReceiveDescriptor(&rd, (uint8_t *)q->payload, (size_t)q->len);
-        macReleaseReceiveDescriptor(&rd);
+        macReleaseReceiveDescriptorX(&rd);
 
         MIB2_STATS_NETIF_ADD(netif, ifinoctets, (*pbuf)->tot_len);
 
@@ -179,7 +179,7 @@ static bool low_level_input(struct netif *netif, struct pbuf **pbuf)
     }
     else
     {
-        macReleaseReceiveDescriptor(&rd); // Drop packet
+        macReleaseReceiveDescriptorX(&rd); // Drop packet
         LINK_STATS_INC(link.memerr);
         LINK_STATS_INC(link.drop);
         MIB2_STATS_NETIF_INC(netif, ifindiscards);
@@ -389,7 +389,7 @@ static THD_FUNCTION(lwip_thread, p)
     evtObjectInit(&evt, LWIP_LINK_POLL_INTERVAL);
     evtStart(&evt);
     chEvtRegisterMask(&evt.et_es, &el0, PERIODIC_TIMER_ID);
-    chEvtRegisterMask(macGetReceiveEventSource(&ETHD1), &el1, FRAME_RECEIVED_ID);
+    chEvtRegisterMaskWithFlags(macGetEventSource(&ETHD1), &el1, FRAME_RECEIVED_ID, MAC_FLAGS_RX);
     chEvtAddEvents(PERIODIC_TIMER_ID | FRAME_RECEIVED_ID);
 
     /* Resumes the caller and goes to the final priority.*/

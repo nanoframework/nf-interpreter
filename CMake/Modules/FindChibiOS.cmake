@@ -19,8 +19,8 @@ if(TARGET_SERIES_NAME_INDEX EQUAL -1)
     # series is NOT supported by STM 
     message(FATAL_ERROR "\n\nSorry but the ${TARGET_SERIES} is not supported at this time...\nYou can wait for it to be added, or you might want to contribute by working on a PR for it.\n\n")
 else()
-    # series is supported by STM
-    set(TARGET_VENDOR "STM" CACHE INTERNAL "target vendor is STM")
+    # series is supported by ST
+    set(TARGET_VENDOR "ST" CACHE INTERNAL "target vendor is ST")
 endif()
 
 # store the package name for later use
@@ -31,7 +31,9 @@ include(CHIBIOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
 include(CHIBIOS_${TARGET_SERIES}_GCC_options)
 
-# message("ChibiOS board series is ${TARGET_SERIES}") # debug helper
+if (BUILD_VERBOSE)
+    message("ChibiOS board series is ${TARGET_SERIES}")
+endif()
 
 # set include directories for ChibiOS
 list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os) 
@@ -51,7 +53,9 @@ list(APPEND CHIBIOS_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/common/ext/CMSIS/ST/${
 
 #
 list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_nf-overlay/os/common/startup/ARMCMx/devices/${TARGET_SERIES})
-
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/nanoBooter)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/${TARGET_BOARD}/nanoCLR)
+list(APPEND CHIBIOS_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/ChibiOS/ST/${TARGET_BOARD})
 
 # source files and GCC options according to target vendor and series
 

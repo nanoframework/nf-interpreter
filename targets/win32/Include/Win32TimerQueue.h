@@ -136,7 +136,7 @@ class Timer
     {
         swap(hQueue, other.hQueue);
         swap(hTimer, other.hTimer);
-        swap(std::move(Callback), std::move(other.Callback));
+        swap(*std::move(Callback), *std::move(other.Callback));
         Period = other.Period;
         Flags = other.Flags;
     }
