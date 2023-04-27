@@ -53,7 +53,7 @@
  * @note    Allowed values are 16, 32 or 64 bits.
  */
 #if !defined(CH_CFG_ST_RESOLUTION)
-#define CH_CFG_ST_RESOLUTION 64
+#define CH_CFG_ST_RESOLUTION 32
 #endif
 
 /**
@@ -178,7 +178,7 @@
  * @note    The default is @p TRUE.
  */
 #if !defined(CH_CFG_USE_TIMESTAMP)
-#define CH_CFG_USE_TIMESTAMP FALSE
+#define CH_CFG_USE_TIMESTAMP TRUE
 #endif
 
 /**

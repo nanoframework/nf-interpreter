@@ -23,6 +23,8 @@ set(nanoFramework.Hardware.Esp32_SRCS
     nanoFramework_hardware_esp32_native_Hardware_Esp32_HighResTimer.cpp
 	nanoFramework_hardware_esp32_native_Hardware_Esp32_Configuration.cpp
     nanoFramework_hardware_esp32_native_Hardware_Esp32_NativeMemory.cpp
+    nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_Touch_TouchPad.cpp
+    nanoFramework_hardware_esp32_native_System_Device_Gpio_GpioPulseCounter.cpp
 )
 
 foreach(SRC_FILE ${nanoFramework.Hardware.Esp32_SRCS})

@@ -21,6 +21,7 @@ namespace nanoFramework.nanoCLR.Host
 
         internal nanoCLRHost()
         {
+
         }
 
         public void Run()
@@ -65,7 +66,9 @@ namespace nanoFramework.nanoCLR.Host
             return Interop.nanoCLR.ClrOk;
         }
 
-        public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder { };
+        public static nanoCLRHostBuilder CreateBuilder() => new nanoCLRHostBuilder() { };
+
+        public static nanoCLRHostBuilder CreateBuilder(string dllPath) => new nanoCLRHostBuilder(dllPath) { };
 
         public void Shutdown()
         {

@@ -9,11 +9,6 @@ include(binutils.ESP32)
 # Set target series in lower case
 nf_set_esp32_target_series()
 
-# checking unsupported features
-if(${TARGET_SERIES_SHORT} STREQUAL "esp32c3" AND ${API_nanoFramework.Hardware.Esp32.Rmt})
-    message(FATAL_ERROR "Currently RMT is not supported for ESP32-C3 builds")
-endif()
-
 # option to reserve RAM for IDF allocator
 option(ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION "Reserved RAM for IDF allocation (in kBytes)")
 
@@ -48,7 +43,7 @@ endif()
 # WHEN CHANGING THIS MAKE SURE TO UPDATE:
 # 1. the dev containers
 # 2. ref in AZDO pipeline yaml in Community Targets repo
-set(ESP32_IDF_TAG "4.4.3" CACHE INTERNAL "ESP32 IDF tag")
+set(ESP32_IDF_TAG "4.4.4" CACHE INTERNAL "ESP32 IDF tag")
 
 if(NO_ESP32_IDF_PATH)
     # no ESP32 IDF source specified, download it from official repo

@@ -43,6 +43,17 @@ nf_check_path_limits()
 # set build type to release if not specified otherwise
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
+else()
+
+    # validate valid build types
+    set(SUPPORTED_CMAKE_BUILD_TYPES "Debug" "Release" "MinSizeRel" "RelWithDebInfo" CACHE INTERNAL "supported CMake build types")
+
+    list(FIND SUPPORTED_CMAKE_BUILD_TYPES ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_INDEX)
+    if(CMAKE_BUILD_TYPE_INDEX EQUAL -1)
+        # build type is NOT supported 
+        message(FATAL_ERROR "\n\nSorry but the CMAKE_BUILD_TYPE set: '${CMAKE_BUILD_TYPE}' is not supported!\nPlease double check the CMAKE_BUILD_TYPE build configuration.\n\n")
+    endif()
+    
 endif()
 ######################################################
 
@@ -553,6 +564,14 @@ else()
 endif()
 
 
+if(API_nanoFramework.GiantGecko.Adc)
+    # check if the standard ADC lib is already enabled
+    if(API_System.Device.Adc)
+        message(FATAL_ERROR "\n\nERROR:Can't enable simultaneously System.Device.Adc and GiantGecko.Adc APIs")
+    endif()
+endif()
+
+
 if(API_System.Device.Dac)
     set(HAL_USE_DAC_OPTION TRUE CACHE INTERNAL "HAL DAC for System.Device.Dac")
 else()
@@ -604,8 +623,10 @@ endif()
 
 if(API_nanoFramework.Device.OneWire)
     set(HAL_USE_STM32_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION TRUE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 else()
     set(HAL_USE_STM32_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL STM32_ONEWIRE for nanoFramework.Device.OneWire")
+    set(HAL_USE_ONEWIRE_OPTION FALSE CACHE INTERNAL "HAL ONEWIRE for nanoFramework.Device.OneWire")
 endif()
 
 #################################################################################

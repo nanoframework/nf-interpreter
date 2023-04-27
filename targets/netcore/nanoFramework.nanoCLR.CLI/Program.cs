@@ -5,14 +5,16 @@
 
 using CommandLine;
 using CommandLine.Text;
-using nanoFramework.nanoCLR.Host;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories | DllImportSearchPath.UseDllDirectoryForDependencies)]
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -55,6 +57,7 @@ namespace nanoFramework.nanoCLR.CLI
                 // because of short-comings in CommandLine parsing 
                 // need to customize the output to provide a consistent output
                 var parser = new Parser(config => config.HelpWriter = null);
+
                 var result = parser.ParseArguments<ExecuteCommandLineOptions, VirtualSerialDeviceCommandLineOptions, VirtualSerialDeviceCommandLineOptions>(new[] { "", "" });
 
                 var helpText = new HelpText(
@@ -90,8 +93,8 @@ namespace nanoFramework.nanoCLR.CLI
                 VirtualSerialDeviceManager virtualSerialBridgeManager = new();
                 virtualSerialBridgeManager.Initialize();
 
-                nanoCLRHostBuilder hostBuilder = nanoCLRHost.CreateBuilder();
-                hostBuilder.UseConsoleDebugPrint();
+                // need to set DLL directory to HHD interop DLL
+                SetDllDirectory(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Vendor"));
 
                 var parsedArguments = Parser.Default.ParseArguments<ExecuteCommandLineOptions, ClrInstanceOperationsOptions, VirtualSerialDeviceCommandLineOptions>(args);
 
@@ -101,17 +104,34 @@ namespace nanoFramework.nanoCLR.CLI
                         (ExecuteCommandLineOptions opts) =>
                             ExecuteCommandProcessor.ProcessVerb(
                                 opts,
-                                hostBuilder,
                                 virtualSerialBridgeManager),
                         (ClrInstanceOperationsOptions opts) =>
                             ClrInstanceOperationsProcessor.ProcessVerb(
-                                opts,
-                                hostBuilder),
+                                opts),
                         (VirtualSerialDeviceCommandLineOptions opts) =>
                             VirtualSerialDeviceCommandProcessor.ProcessVerb(
                                 opts,
                                 virtualSerialBridgeManager),
                         (IEnumerable<Error> errors) => HandleErrors(errors));
+
+                // do we need to show version?
+                if (parsedArguments.Errors.Any(error => error is VersionRequestedError))
+                {
+                    // output version
+                    var versionAtt = Attribute.GetCustomAttribute(
+                        Assembly.GetEntryAssembly()!,
+                        typeof(AssemblyFileVersionAttribute)) as AssemblyFileVersionAttribute;
+
+                    var version = new Version(versionAtt.Version);
+
+                    Console.WriteLine(version.ToString(3));
+                }
+                else if (parsedArguments.Errors.Any(error => error is HelpVerbRequestedError)
+                         || parsedArguments.Errors.Any(error => error is HelpRequestedError))
+                {
+                    // output help
+                    return;
+                }
             });
 
             if (_verbosityLevel > VerbosityLevel.Quiet)
@@ -147,7 +167,16 @@ namespace nanoFramework.nanoCLR.CLI
 
         private static int HandleErrors(IEnumerable<Error> errors)
         {
-            _exitCode = ExitCode.E9000;
+            if (errors.Any(error => error is VersionRequestedError)
+                || errors.Any(error => error is HelpRequestedError)
+                || errors.Any(error => error is HelpVerbRequestedError))
+            {
+                // we're good here
+            }
+            else
+            {
+                _exitCode = ExitCode.E9000;
+            }
 
             return (int)_exitCode;
         }
@@ -210,5 +239,9 @@ namespace nanoFramework.nanoCLR.CLI
                 Console.WriteLine($"Error: {e.Message}");
             }
         }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
+
     }
 }

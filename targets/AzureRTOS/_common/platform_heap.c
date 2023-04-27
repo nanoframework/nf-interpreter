@@ -24,10 +24,3 @@ void platform_free(void *ptr)
     uint32_t freeStatus = tx_byte_release(ptr);
     ASSERT(freeStatus == TX_SUCCESS);
 }
-
-void *platform_realloc(void *ptr, size_t size)
-{
-    (void)size;
-
-    return ptr;
-}

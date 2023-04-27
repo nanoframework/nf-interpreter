@@ -81,11 +81,16 @@ struct bleServicesContext
     ble_context *bleSrvContexts;
 };
 
-void StartBleTask(char *deviceName);
+void StartBleTask(char *deviceName, uint16_t appearance);
 bool DeviceBleInit();
 void Device_ble_dispose();
 int Esp32GapEvent(struct ble_gap_event *event, void *arg);
 int ConnectionCount();
+void SetSecuritySettings(
+    DevicePairingIOCapabilities IOCaps,
+    DevicePairingProtectionLevel protectionLevel,
+    bool allowBonding,
+    bool allowOob);
 
 extern bleServicesContext bleContext;
 extern device_ble_event_data ble_event_data;

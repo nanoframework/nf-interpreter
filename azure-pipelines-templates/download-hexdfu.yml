@@ -4,7 +4,7 @@
 steps:
   - task: Cache@2
     inputs:
-      key: '1-0 | hex2dfuKey'
+      key: '3-0 | hex2dfuKey'
       restoreKeys: hex2dfuKey
       path: $(Agent.TempDirectory)/hex2dfu
       cacheHitVar: HEX2DFU_CACHE_RESTORED

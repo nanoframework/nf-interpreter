@@ -1556,7 +1556,7 @@ void CLR_RT_Assembly::Assembly_Initialize(CLR_RT_Assembly::Offsets &offsets)
 
     memset(m_pDebuggingInfo_MethodDef, 0, offsets.iDebuggingInfoMethods);
 }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 }
 
 HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_RT_Assembly *&assm)
@@ -1650,7 +1650,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
         offsets.iDebuggingInfoMethods = ROUNDTOMULTIPLE(
             skeleton->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
             CLR_UINT32);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         size_t iTotalRamSize = offsets.iBase + offsets.iAssemblyRef + offsets.iTypeRef + offsets.iFieldRef +
                                offsets.iMethodRef + offsets.iTypeDef + offsets.iFieldDef + offsets.iMethodDef;
@@ -1661,7 +1661,7 @@ HRESULT CLR_RT_Assembly::CreateInstance(const CLR_RECORD_ASSEMBLY *header, CLR_R
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         iTotalRamSize += offsets.iDebuggingInfoMethods;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         //--//
 
@@ -3955,7 +3955,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
                 offsets.iDebuggingInfoMethods += ROUNDTOMULTIPLE(
                     pASSM->m_pTablesSize[TBL_MethodDef] * sizeof(CLR_RT_MethodDef_DebuggingInfo),
                     CLR_UINT32);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
                 iMetaData += pASSM->m_header->SizeOfTable(TBL_AssemblyRef) + pASSM->m_header->SizeOfTable(TBL_TypeRef) +
                              pASSM->m_header->SizeOfTable(TBL_FieldRef) + pASSM->m_header->SizeOfTable(TBL_MethodRef) +
@@ -4026,7 +4026,7 @@ HRESULT CLR_RT_TypeSystem::ResolveAll()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             CLR_Debug::Printf("   DebuggingInfo  = %8d bytes\r\n", offsets.iDebuggingInfoMethods);
             CLR_Debug::Printf("\r\n");
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             CLR_Debug::Printf(
                 "   Attributes      = %8d bytes (%8d elements)\r\n",
@@ -4082,7 +4082,7 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_EE_DBG_SET(BreakpointsDisabled);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(NANOCLR_APPDOMAINS)
     if (g_CLR_RT_ExecutionEngine.m_outOfMemoryException == NULL)
@@ -4114,7 +4114,7 @@ HRESULT CLR_RT_TypeSystem::PrepareForExecution()
     CLR_EE_DBG_CLR(BreakpointsDisabled);
 
     g_CLR_RT_ExecutionEngine.Breakpoint_Assemblies_Loaded();
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     NANOCLR_CLEANUP_END();
 }

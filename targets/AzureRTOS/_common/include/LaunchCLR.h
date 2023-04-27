@@ -6,6 +6,8 @@
 #ifndef LAUNCHCLR_H
 #define LAUNCHCLR_H
 
+#include <nanoCLR_Headers.h>
+
 void LaunchCLR(uint32_t address);
 bool CheckValidCLRImage(uint32_t address);
 

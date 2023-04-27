@@ -7,6 +7,7 @@ using nanoFramework.nanoCLR.Host;
 using nanoFramework.nanoCLR.Host.Port.TcpIp;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -17,10 +18,29 @@ namespace nanoFramework.nanoCLR.CLI
         [SupportedOSPlatform("windows")]
         public static int ProcessVerb(
             ExecuteCommandLineOptions options,
-            nanoCLRHostBuilder hostBuilder,
             VirtualSerialDeviceManager virtualBridgeManager)
         {
             Program.ProcessVerbosityOptions(options.Verbosity);
+
+            nanoCLRHostBuilder hostBuilder;
+
+            // are we to use a local DLL?
+            if (options.LocalInstance != null)
+            {
+                // check if path exists
+                if (!File.Exists(options.LocalInstance))
+                {
+                    throw new CLIException(ExitCode.E9009);
+                }
+
+                hostBuilder = nanoCLRHost.CreateBuilder(Path.GetDirectoryName(options.LocalInstance));
+            }
+            else
+            {
+                hostBuilder = nanoCLRHost.CreateBuilder();
+            }
+
+            hostBuilder.UseConsoleDebugPrint();
 
             // flag to signal that the intenal serial port has already been configured
             bool internalSerialPortConfig = false;
@@ -71,6 +91,11 @@ namespace nanoFramework.nanoCLR.CLI
                 }
             }
 
+            if (Program.VerbosityLevel > VerbosityLevel.Normal)
+            {
+                hostBuilder.OutputNanoClrDllInfo();
+            }
+
             if (options.AssembliesToLoad.Any())
             {
                 hostBuilder.LoadAssemblies(options.AssembliesToLoad);
@@ -104,7 +129,6 @@ namespace nanoFramework.nanoCLR.CLI
 
             hostBuilder.WaitForDebugger = options.WaitForDebugger;
             hostBuilder.EnterDebuggerLoopAfterExit = options.EnterDebuggerLoopAfterExit;
-
 
             if (options.MonitorParentPid != null)
             {

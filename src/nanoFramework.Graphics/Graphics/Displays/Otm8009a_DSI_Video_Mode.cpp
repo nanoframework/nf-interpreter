@@ -464,7 +464,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
             return false;
 
         // Landscape only at the moment
-        case LANDSCAPE:
+        case DisplayOrientation::DisplayOrientation_Landscape:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             g_DisplayInterface.SendCommand(2, MADCTR, 0x60);
@@ -475,7 +475,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 void DisplayDriver::Clear()

@@ -25,7 +25,7 @@ macro(nf_set_compile_options)
     endif()
 
     # include any extra options coming from any extra args?
-    target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO__EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m0plus -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
+    target_compile_options(${NFSCO_TARGET} PUBLIC  ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m0plus -mtune=cortex-m0plus -nostdlib -Wall -Wextra -Werror -Wundef -Wshadow -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # this series doesn't have FPU 
     # enable:
@@ -58,7 +58,7 @@ macro(nf_set_link_options)
     nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO_EXTRA_LINK_FLAGS} ")
       
     # set optimization flags
     nf_set_optimization_options(${NFSLO_TARGET})
