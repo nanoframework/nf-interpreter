@@ -106,44 +106,6 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_SystemDrawingColor(CLR_RT_StackFrame &stack)
-{
-    NANOCLR_HEADER();
-    {
-        CLR_RT_HeapBlock_Array *colors;
-        CLR_UINT32 *color32;
-        CLR_UINT16 *color16;
-        CLR_UINT32 *writeData;
-        colors = stack.Arg4().DereferenceArray();
-        FAULT_ON_NULL(colors);
-
-        // Tose are 32bits ARGB colors which needs to be transformed into 16 bits BGR
-        color32 = (CLR_UINT32 *)colors->GetFirstElement();
-        color16 = (CLR_UINT16 *)platform_malloc(colors->m_numOfElements);
-        for (int i = 0; i < (int)colors->m_numOfElements; i++)
-        {
-            color16[i] =
-                (CLR_UINT16)(((color32[i] & 0xF8) << 8) | (((color32[i] >> 8) & 0xFC) << 3) | ((color32[i] >> 16) >> 3));
-        }
-
-        writeData = (CLR_UINT32 *)color16;
-
-        g_DisplayDriver.BitBlt(
-            0,                              // srcX
-            0,                              // srcY
-            stack.Arg2().NumericByRef().u2, // width
-            stack.Arg3().NumericByRef().u2, // height
-            stack.Arg2().NumericByRef().u2, // stride
-            stack.Arg0().NumericByRef().u2, // screenX
-            stack.Arg1().NumericByRef().u2, // screenY
-            writeData);
-
-        platform_free(color16);
-    }
-    NANOCLR_NOCLEANUP();
-}
-
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
     NativeInitSpi___STATIC__U4__nanoFrameworkUISpiConfiguration__nanoFrameworkUIScreenConfiguration__U4(
         CLR_RT_StackFrame &stack)
 {

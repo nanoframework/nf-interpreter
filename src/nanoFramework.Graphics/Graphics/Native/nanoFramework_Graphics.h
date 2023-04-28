@@ -32,21 +32,38 @@ typedef enum __nfpack UIElement_Flags
     UIElement_Flags_IsVisibleCache = 32768,
 } UIElement_Flags;
 
-/* moved to Display.h for convenience
-typedef enum __nfpack DisplayOrientation
+typedef enum __nfpack DrawTextOptions
 {
-    DisplayOrientation_Portrait = 0,
-    DisplayOrientation_Portrait180 = 1,
-    DisplayOrientation_Landscape = 2,
-    DisplayOrientation_Landscape180 = 3,
-} DisplayOrientation;
+    DrawTextOptions_None = 0,
+    DrawTextOptions_WordWrap = 1,
+    DrawTextOptions_TruncateAtBottom = 4,
+    DrawTextOptions_Ellipsis = 8,
+    DrawTextOptions_IgnoreHeight = 16,
+    DrawTextOptions_AlignmentLeft = 0,
+    DrawTextOptions_AlignmentCenter = 2,
+    DrawTextOptions_AlignmentRight = 32,
+    DrawTextOptions_AlignmentMask = 34,
+    DrawTextOptions_TrimmingNone = 0,
+    DrawTextOptions_TrimmingWordEllipsis = 8,
+    DrawTextOptions_TrimmingCharacterEllipsis = 64,
+    DrawTextOptions_TrimmingMask = 72,
+} DrawTextOptions;
 
+/* moved to Display.h for convenience
 typedef enum __nfpack GraphicDriverCommandType
 {
     GraphicDriverCommandType_Sleep = 0,
     GraphicDriverCommandType_Command = 1,
 } GraphicDriverCommandType;
+*/
 
+typedef enum __nfpack TouchCaptureMode
+{
+    TouchCaptureMode_None = 0,
+    TouchCaptureMode_Element = 1,
+    TouchCaptureMode_SubTree = 2,
+} TouchCaptureMode;
+/*
 typedef enum __nfpack RoutedEventArgs_Flags
 {
     RoutedEventArgs_Flags_Handled = 1,
@@ -85,16 +102,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEvent
     static const int FIELD___routingStrategy = 2;
     static const int FIELD___handlerType = 3;
     static const int FIELD___globalIndex = 4;
-
-    //--//
-};
-
-struct Library_nanoFramework_Graphics_nanoFramework_UI_RoutedEventArgs
-{
-    static const int FIELD___routedEvent = 1;
-    static const int FIELD___source = 2;
-    static const int FIELD___originalSource = 3;
-    static const int FIELD___flags = 4;
 
     //--//
 };
@@ -146,20 +153,20 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_Dispatcher
     static const int FIELD_STATIC___dispatchers = 1;
     static const int FIELD_STATIC___possibleDispatcher = 2;
 
-    static const int FIELD__ShutdownStarted = 1;
-    static const int FIELD__ShutdownFinished = 2;
-    static const int FIELD___currentFrame = 3;
-    static const int FIELD___frameDepth = 4;
-    static const int FIELD___hasShutdownStarted = 5;
-    static const int FIELD___hasShutdownFinished = 6;
-    static const int FIELD___queue = 7;
-    static const int FIELD___event = 8;
-    static const int FIELD___instanceLock = 9;
-    static const int FIELD___thread = 10;
-    static const int FIELD___finalExceptionHandler = 11;
-    static const int FIELD___layoutManager = 12;
-    static const int FIELD___inputManager = 13;
-    static const int FIELD___mediaContext = 14;
+    static const int FIELD___currentFrame = 1;
+    static const int FIELD___frameDepth = 2;
+    static const int FIELD___hasShutdownStarted = 3;
+    static const int FIELD___hasShutdownFinished = 4;
+    static const int FIELD___queue = 5;
+    static const int FIELD___event = 6;
+    static const int FIELD___instanceLock = 7;
+    static const int FIELD___thread = 8;
+    static const int FIELD___finalExceptionHandler = 9;
+    static const int FIELD___layoutManager = 10;
+    static const int FIELD___inputManager = 11;
+    static const int FIELD___mediaContext = 12;
+    static const int FIELD__ShutdownStarted = 13;
+    static const int FIELD__ShutdownFinished = 14;
 
     //--//
 };
@@ -175,13 +182,13 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherFrame
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOperation
 {
-    static const int FIELD__Aborted = 1;
-    static const int FIELD__Completed = 2;
-    static const int FIELD___dispatcher = 3;
-    static const int FIELD___method = 4;
-    static const int FIELD___args = 5;
-    static const int FIELD___result = 6;
-    static const int FIELD___status = 7;
+    static const int FIELD___dispatcher = 1;
+    static const int FIELD___method = 2;
+    static const int FIELD___args = 3;
+    static const int FIELD___result = 4;
+    static const int FIELD___status = 5;
+    static const int FIELD__Aborted = 6;
+    static const int FIELD__Completed = 7;
 
     //--//
 };
@@ -223,32 +230,32 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap
     NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Flush___VOID__I4__I4__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(Clear___VOID);
-    NANOCLR_NATIVE_DECLARE(
-        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__U4__nanoFrameworkUIFont);
-    NANOCLR_NATIVE_DECLARE(DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont);
     NANOCLR_NATIVE_DECLARE(SetClippingRectangle___VOID__I4__I4__I4__I4);
     NANOCLR_NATIVE_DECLARE(get_Width___I4);
     NANOCLR_NATIVE_DECLARE(get_Height___I4);
-    NANOCLR_NATIVE_DECLARE(DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(DrawImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(RotateImage___VOID__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(MakeTransparent___VOID__U4);
     NANOCLR_NATIVE_DECLARE(StretchImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawLine___VOID__U4__I4__I4__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__I4__I4__I4__I4__I4__U4);
-    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__U4);
-    NANOCLR_NATIVE_DECLARE(FillRectangle___VOID__I4__I4__I4__I4__U4__U2);
-    NANOCLR_NATIVE_DECLARE(FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__U4__U2);
-    NANOCLR_NATIVE_DECLARE(FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
-    NANOCLR_NATIVE_DECLARE(DrawText___VOID__STRING__nanoFrameworkUIFont__U4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(SetPixel___VOID__I4__I4__U4);
-    NANOCLR_NATIVE_DECLARE(GetPixelInt___U4__I4__I4);
     NANOCLR_NATIVE_DECLARE(GetBitmap___SZARRAY_U1);
     NANOCLR_NATIVE_DECLARE(StretchImage___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(TileImage___VOID__I4__I4__nanoFrameworkUIBitmap__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(Scale9Image___VOID__I4__I4__I4__I4__nanoFrameworkUIBitmap__I4__I4__I4__I4__U2);
     NANOCLR_NATIVE_DECLARE(Dispose___VOID__BOOLEAN);
+    NANOCLR_NATIVE_DECLARE(DrawChar___VOID__U2__I4__I4__U4__nanoFrameworkUIFont);
+    NANOCLR_NATIVE_DECLARE(DrawEllipse___VOID__U4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(MakeTransparent___VOID__U4);
+    NANOCLR_NATIVE_DECLARE(DrawLine___VOID__U4__I4__I4__I4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__U4__I4__I4__I4__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawRectangle___VOID__I4__I4__I4__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(FillGradientRectangle___VOID__I4__I4__I4__I4__U4__I4__I4__U4__I4__I4__U2);
+    NANOCLR_NATIVE_DECLARE(FillRectangle___VOID__I4__I4__I4__I4__U4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(FillRoundRectangle___VOID__I4__I4__I4__I4__I4__I4__U4__U2);
+    NANOCLR_NATIVE_DECLARE(DrawText___VOID__STRING__nanoFrameworkUIFont__U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(SetPixel___VOID__I4__I4__U4);
+    NANOCLR_NATIVE_DECLARE(GetPixelInt___U4__I4__I4);
+    NANOCLR_NATIVE_DECLARE(
+        DrawTextInRect___BOOLEAN__BYREF_STRING__BYREF_I4__BYREF_I4__I4__I4__I4__I4__U4__U4__nanoFrameworkUIFont);
 
     //--//
 };
@@ -263,29 +270,29 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_Pen
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_DrawingContext
 {
-    static const int FIELD__EmptyClipRect = 2;
-    static const int FIELD___bitmap = 3;
-    static const int FIELD___x = 4;
-    static const int FIELD___y = 5;
-    static const int FIELD___clippingRectangles = 6;
+    static const int FIELD___bitmap = 2;
+    static const int FIELD___clippingRectangles = 3;
+    static const int FIELD__EmptyClipRect = 4;
+    static const int FIELD___x = 5;
+    static const int FIELD___y = 6;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Media_MediaContext
 {
-    static const int FIELD___screenW = 2;
-    static const int FIELD___screenH = 3;
-    static const int FIELD___dirtyX0 = 4;
-    static const int FIELD___dirtyY0 = 5;
-    static const int FIELD___dirtyX1 = 6;
-    static const int FIELD___dirtyY1 = 7;
-    static const int FIELD___currentRenderOp = 8;
-    static const int FIELD___renderMessage = 9;
-    static const int FIELD___isRendering = 10;
-    static const int FIELD___invokeOnRenderCallbacks = 11;
-    static const int FIELD___target = 12;
-    static const int FIELD___screen = 13;
+    static const int FIELD___currentRenderOp = 2;
+    static const int FIELD___renderMessage = 3;
+    static const int FIELD___isRendering = 4;
+    static const int FIELD___invokeOnRenderCallbacks = 5;
+    static const int FIELD___target = 6;
+    static const int FIELD___screen = 7;
+    static const int FIELD___screenW = 8;
+    static const int FIELD___screenH = 9;
+    static const int FIELD___dirtyX0 = 10;
+    static const int FIELD___dirtyY0 = 11;
+    static const int FIELD___dirtyX1 = 12;
+    static const int FIELD___dirtyY1 = 13;
 
     //--//
 };
@@ -340,51 +347,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_RouteItem
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_EventRoute
 {
-    static const int FIELD__RoutedEvent = 1;
-    static const int FIELD___routeItemList = 2;
-
-    //--//
-};
-
-struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElement
-{
-    static const int FIELD_STATIC___classEventHandlersStore = 7;
-
-    static const int FIELD__TouchDown = 2;
-    static const int FIELD__TouchUp = 3;
-    static const int FIELD__TouchMove = 4;
-    static const int FIELD__TouchGestureStart = 5;
-    static const int FIELD__TouchGestureChanged = 6;
-    static const int FIELD__TouchGestureEnd = 7;
-    static const int FIELD___parent = 8;
-    static const int FIELD___logicalChildren = 9;
-    static const int FIELD___flags = 10;
-    static const int FIELD___visibility = 11;
-    static const int FIELD___requestedSize = 12;
-    static const int FIELD___anchorInfo = 13;
-    static const int FIELD___marginLeft = 14;
-    static const int FIELD___marginTop = 15;
-    static const int FIELD___marginRight = 16;
-    static const int FIELD___marginBottom = 17;
-    static const int FIELD___horizontalAlignment = 18;
-    static const int FIELD___verticalAlignment = 19;
-    static const int FIELD___finalX = 20;
-    static const int FIELD___finalY = 21;
-    static const int FIELD___finalWidth = 22;
-    static const int FIELD___finalHeight = 23;
-    static const int FIELD___offsetX = 24;
-    static const int FIELD___offsetY = 25;
-    static const int FIELD___renderWidth = 26;
-    static const int FIELD___renderHeight = 27;
-    static const int FIELD___previousAvailableWidth = 28;
-    static const int FIELD___previousAvailableHeight = 29;
-    static const int FIELD___desiredWidth = 30;
-    static const int FIELD___desiredHeight = 31;
-    static const int FIELD___unclippedWidth = 32;
-    static const int FIELD___unclippedHeight = 33;
-    static const int FIELD___instanceEventHandlersStore = 34;
-    static const int FIELD___isEnabledChanged = 35;
-    static const int FIELD___isVisibleChanged = 36;
+    static const int FIELD___routeItemList = 1;
+    static const int FIELD__RoutedEvent = 2;
 
     //--//
 };
@@ -428,8 +392,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_Contro
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_Controls_DockPanel
 {
-    static const int FIELD_STATIC__DockPropertiesKeys = 8;
-    static const int FIELD_STATIC__DockPropertiesValues = 9;
+    static const int FIELD_STATIC__DockPropertiesKeys = 7;
+    static const int FIELD_STATIC__DockPropertiesValues = 8;
 
     static const int FIELD___lastChildFill = 37;
 
@@ -717,7 +681,7 @@ struct Library_nanoFramework_Graphics_nanoFramework_Presentation_UIElementCollec
 
 struct Library_nanoFramework_Graphics_nanoFramework_Presentation_WindowManager
 {
-    static const int FIELD_STATIC__Instance = 10;
+    static const int FIELD_STATIC__Instance = 9;
 
     static const int FIELD___postRenderHandler = 37;
 
@@ -771,8 +735,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputReport
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_InputManager
 {
-    static const int FIELD_STATIC__PreviewInputReportEvent = 11;
-    static const int FIELD_STATIC__InputReportEvent = 12;
+    static const int FIELD_STATIC__PreviewInputReportEvent = 10;
+    static const int FIELD_STATIC__InputReportEvent = 11;
 
     static const int FIELD___continueProcessingStagingAreaCallback = 2;
     static const int FIELD___frameStagingArea = 3;
@@ -836,13 +800,13 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericDevice
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Application
 {
-    static const int FIELD_STATIC___isShuttingDown = 13;
-    static const int FIELD_STATIC___appCreatedInThisAppDomain = 14;
-    static const int FIELD_STATIC___appInstance = 15;
-    static const int FIELD_STATIC___reportInputMethod = 16;
-    static const int FIELD_STATIC___inputManager = 17;
-    static const int FIELD_STATIC___stylusMaxX = 18;
-    static const int FIELD_STATIC___stylusMaxY = 19;
+    static const int FIELD_STATIC___isShuttingDown = 12;
+    static const int FIELD_STATIC___appCreatedInThisAppDomain = 13;
+    static const int FIELD_STATIC___appInstance = 14;
+    static const int FIELD_STATIC___reportInputMethod = 15;
+    static const int FIELD_STATIC___inputManager = 16;
+    static const int FIELD_STATIC___stylusMaxX = 17;
+    static const int FIELD_STATIC___stylusMaxY = 18;
 
     static const int FIELD___appWindowList = 2;
     static const int FIELD___nonAppWindowList = 3;
@@ -917,7 +881,6 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl
     NANOCLR_NATIVE_DECLARE(get_Orientation___STATIC__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(Clear___STATIC__VOID);
     NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_U2);
-    NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__U2__U2__U2__U2__SZARRAY_SystemDrawingColor);
     NANOCLR_NATIVE_DECLARE(Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__U4__U4);
     NANOCLR_NATIVE_DECLARE(NativeChangeOrientation___STATIC__BOOLEAN__nanoFrameworkUIDisplayOrientation);
     NANOCLR_NATIVE_DECLARE(
@@ -984,19 +947,19 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_ButtonDevice
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_Buttons
 {
-    static const int FIELD_STATIC__PreviewButtonDownEvent = 23;
-    static const int FIELD_STATIC__PreviewButtonUpEvent = 24;
-    static const int FIELD_STATIC__ButtonDownEvent = 25;
-    static const int FIELD_STATIC__ButtonUpEvent = 26;
-    static const int FIELD_STATIC__GotFocusEvent = 27;
-    static const int FIELD_STATIC__LostFocusEvent = 28;
+    static const int FIELD_STATIC__PreviewButtonDownEvent = 22;
+    static const int FIELD_STATIC__PreviewButtonUpEvent = 23;
+    static const int FIELD_STATIC__ButtonDownEvent = 24;
+    static const int FIELD_STATIC__ButtonUpEvent = 25;
+    static const int FIELD_STATIC__GotFocusEvent = 26;
+    static const int FIELD_STATIC__LostFocusEvent = 27;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_GenericEvents
 {
-    static const int FIELD_STATIC__GenericStandardEvent = 29;
+    static const int FIELD_STATIC__GenericStandardEvent = 28;
 
     //--//
 };
@@ -1045,16 +1008,16 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchCapture
 {
-    static const int FIELD_STATIC___captureElement = 30;
+    static const int FIELD_STATIC___captureElement = 29;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Input_TouchEvents
 {
-    static const int FIELD_STATIC__TouchDownEvent = 31;
-    static const int FIELD_STATIC__TouchMoveEvent = 32;
-    static const int FIELD_STATIC__TouchUpEvent = 33;
+    static const int FIELD_STATIC__TouchDownEvent = 30;
+    static const int FIELD_STATIC__TouchMoveEvent = 31;
+    static const int FIELD_STATIC__TouchUpEvent = 32;
 
     //--//
 };
@@ -1086,21 +1049,21 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherOpera
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Threading_DispatcherTimer
 {
-    static const int FIELD__Tick = 1;
-    static const int FIELD___instanceLock = 2;
-    static const int FIELD___dispatcher = 3;
-    static const int FIELD___interval = 4;
-    static const int FIELD___tag = 5;
-    static const int FIELD___isEnabled = 6;
-    static const int FIELD___timer = 7;
+    static const int FIELD___instanceLock = 1;
+    static const int FIELD___dispatcher = 2;
+    static const int FIELD___interval = 3;
+    static const int FIELD___tag = 4;
+    static const int FIELD___isEnabled = 5;
+    static const int FIELD___timer = 6;
+    static const int FIELD__Tick = 7;
 
     //--//
 };
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_Touch
 {
-    static const int FIELD_STATIC___initialized = 34;
-    static const int FIELD_STATIC___activeTouchPanel = 35;
+    static const int FIELD_STATIC___initialized = 33;
+    static const int FIELD_STATIC___activeTouchPanel = 34;
 
     //--//
 };
@@ -1115,10 +1078,10 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollector
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollectorConfiguration
 {
-    static const int FIELD_STATIC___collectionMode = 36;
-    static const int FIELD_STATIC___collectionMethod = 37;
-    static const int FIELD_STATIC___touchCollector = 38;
-    static const int FIELD_STATIC___collectionBufferSize = 39;
+    static const int FIELD_STATIC___collectionMode = 35;
+    static const int FIELD_STATIC___collectionMethod = 36;
+    static const int FIELD_STATIC___touchCollector = 37;
+    static const int FIELD_STATIC___collectionBufferSize = 38;
 
     NANOCLR_NATIVE_DECLARE(GetTouchPoints___STATIC__VOID__BYREF_I4__SZARRAY_I2__SZARRAY_I2);
     NANOCLR_NATIVE_DECLARE(
