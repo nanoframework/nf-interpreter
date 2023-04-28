@@ -256,6 +256,10 @@ void lwipDefaultLinkUpCB(void *p)
 #endif
 
 #if SNTP_SERVER_DNS
+    if (sntp_enabled())
+    {
+      sntp_stop();
+    }
     sntp_init();
 #endif
 }
@@ -264,6 +268,13 @@ void lwipDefaultLinkDownCB(void *p)
 {
     struct netif *ifc = (struct netif *)p;
     (void)ifc;
+
+#if SNTP_SERVER_DNS
+    if (sntp_enabled())
+    {
+      sntp_stop();
+    }
+#endif
 
 #if LWIP_AUTOIP
     if (addressMode == NET_ADDRESS_AUTO)
@@ -277,10 +288,6 @@ void lwipDefaultLinkDownCB(void *p)
     {
         dhcp_stop(ifc);
     }
-#endif
-
-#if SNTP_SERVER_DNS
-    sntp_stop();
 #endif
 }
 
@@ -398,7 +405,11 @@ static THD_FUNCTION(lwip_thread, p)
 
 // setup SNTP
 #if SNTP_SERVER_DNS
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    if (sntp_enabled())
+    {
+      sntp_stop();
+    }
+    //sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
     sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
     sntp_init();
@@ -542,6 +553,14 @@ static void do_reconfigure(void *p)
         }
 #endif
     }
+
+#if SNTP_SERVER_DNS
+    if (sntp_enabled())
+    {
+      sntp_stop();
+    }
+    sntp_init();
+#endif
 
     chSemSignal(&reconf->completion);
 }

@@ -140,16 +140,21 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_UpdateInte
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    NANOCLR_NOCLEANUP();
+    // Return current value of update interval
+    int32_t value = SNTP_UPDATE_DELAY;
+    stack.SetResult_I4(value);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_UpdateInterval___STATIC__VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
@@ -160,16 +165,21 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_StartupDel
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    NANOCLR_NOCLEANUP();
+    // Return current value of startup delay
+    int32_t value = SNTP_STARTUP_DELAY;
+    stack.SetResult_I4(value);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDelay___STATIC__VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
@@ -180,16 +190,21 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPerio
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
-    NANOCLR_NOCLEANUP();
+    // Return current value of retry period
+    int32_t value = SNTP_RETRY_TIMEOUT;
+    stack.SetResult_I4(value);
+
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_RetryPeriod___STATIC__VOID__I4(
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
+
+    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 
