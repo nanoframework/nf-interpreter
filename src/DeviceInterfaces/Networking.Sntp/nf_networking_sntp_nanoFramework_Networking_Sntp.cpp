@@ -153,7 +153,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_UpdateInte
 {
     NANOCLR_HEADER();
 
-    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+    // uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
 
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -178,7 +178,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDel
 {
     NANOCLR_HEADER();
 
-    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+    // uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
 
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -186,8 +186,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDel
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -203,7 +202,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_RetryPerio
 {
     NANOCLR_HEADER();
 
-    //uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+    // uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
 
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());

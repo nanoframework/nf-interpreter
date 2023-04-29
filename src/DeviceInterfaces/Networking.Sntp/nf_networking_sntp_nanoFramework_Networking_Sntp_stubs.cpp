@@ -127,8 +127,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDel
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
