@@ -25,14 +25,15 @@
 
 // startup delay (default 5 seconds)
 // (value in milliseconds)
-// According to the RFC, this shall be a random delay between 1 and 5 minutes to prevent load peaks. This can be defined to a random generation function, which must return the delay in milliseconds as u32_t. Turned off by default. 
+// According to the RFC, this shall be a random delay between 1 and 5 minutes to prevent load peaks. This can be defined
+// to a random generation function, which must return the delay in milliseconds as u32_t. Turned off by default.
 #define SNTP_STARTUP_DELAY 5000 // FIXME: we ignore the RFC! and set to 2 seconds
 // But we also could add some randomness!
 // if we were, we need to change SNTP_STARTUP_DELAY to 1
-//#define SNTP_STARTUP_DELAY_FUNC (LWIP_RAND() % 5000)
+// #define SNTP_STARTUP_DELAY_FUNC (LWIP_RAND() % 5000)
 
-// Default retry timeout (15 seconds) if the response received is invalid. This is doubled with each retry until SNTP_RETRY_TIMEOUT_MAX is reached. 
-// (value in milliseconds)
+// Default retry timeout (15 seconds) if the response received is invalid. This is doubled with each retry until
+// SNTP_RETRY_TIMEOUT_MAX is reached. (value in milliseconds)
 #define SNTP_RETRY_TIMEOUT SNTP_RECV_TIMEOUT
 
 // maximum retry timeout (15 minutes) before giving up.
