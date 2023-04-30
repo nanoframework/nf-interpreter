@@ -63,6 +63,7 @@ typedef enum __nfpack TouchCaptureMode
     TouchCaptureMode_Element = 1,
     TouchCaptureMode_SubTree = 2,
 } TouchCaptureMode;
+
 /*
 typedef enum __nfpack RoutedEventArgs_Flags
 {
@@ -1070,8 +1071,8 @@ struct Library_nanoFramework_Graphics_nanoFramework_UI_Touch
 
 struct Library_nanoFramework_Graphics_nanoFramework_UI_TouchCollector
 {
-    static const int FIELD__lastTime = 1;
-    static const int FIELD___nativeBufferSize = 2;
+    static const int FIELD___nativeBufferSize = 1;
+    static const int FIELD__lastTime = 2;
 
     //--//
 };
