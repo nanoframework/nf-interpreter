@@ -13,7 +13,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Start___STATIC
 
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
     sntp_init();
 #endif
@@ -29,7 +28,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::Stop___STATIC_
 
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
     sntp_stop();
 #endif
@@ -45,7 +43,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::UpdateNow___ST
 
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
 
     // this is just a stop and start of the SNTP client
@@ -66,7 +63,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted_
 
 #if defined(AZURE_RTOS_THREADX)
         // FIXME: implementation required!
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_Boolean(sntp_enabled());
 #endif
@@ -83,7 +79,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server1___
 
 #if defined(AZURE_RTOS_THREADX)
         // FIXME: implementation required!
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_String(sntp_getservername(0));
 #endif
@@ -122,7 +117,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server2___
 
 #if defined(AZURE_RTOS_THREADX)
         // FIXME: implementation required!
-        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_String(sntp_getservername(1));
 #endif
@@ -159,7 +153,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_UpdateInte
 
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
     // Return current value of update interval
     int32_t value = SNTP_UPDATE_DELAY;
@@ -189,7 +182,6 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_StartupDel
 
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
     // Return current value of startup delay
     int32_t value = SNTP_STARTUP_DELAY;
