@@ -149,7 +149,11 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_UpdateInte
 {
     NANOCLR_HEADER();
 
-#if defined(AZURE_RTOS_THREADX)
+#if defined(ESP_LWIP)
+    // Return current value of update interval
+    int32_t value = (int32_t)sntp_get_sync_interval();
+    stack.SetResult_I4(value);
+#elif defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
     stack.SetResult_I4(-1);
 #else
@@ -166,10 +170,13 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_UpdateInte
 {
     NANOCLR_HEADER();
 
-    // uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
-
+#if defined(ESP_LWIP)
+    uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+    sntp_set_sync_interval(update_value);
+#else
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+#endif
 
     NANOCLR_NOCLEANUP();
 }
