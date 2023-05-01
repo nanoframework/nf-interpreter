@@ -153,13 +153,13 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_UpdateInte
 {
     NANOCLR_HEADER();
 
-// #ifdef PLATFORM_ESP32
-//     uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
-//     sntp_set_sync_interval(update_value);
-// #else
+    // #ifdef PLATFORM_ESP32
+    //     uint32_t update_value = (int32_t)stack.Arg0().NumericByRef().s4;
+    //     sntp_set_sync_interval(update_value);
+    // #else
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
-// #endif
+    // #endif
 
     NANOCLR_NOCLEANUP();
 }
