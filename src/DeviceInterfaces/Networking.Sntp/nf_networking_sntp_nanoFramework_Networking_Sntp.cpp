@@ -65,8 +65,8 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_IsStarted_
         FAULT_ON_NULL(pThis);
 
 #if defined(AZURE_RTOS_THREADX)
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // FIXME: implementation required!
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_Boolean(sntp_enabled());
 #endif
@@ -82,8 +82,8 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server1___
         FAULT_ON_NULL(pThis);
 
 #if defined(AZURE_RTOS_THREADX)
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // FIXME: implementation required!
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_String(sntp_getservername(0));
 #endif
@@ -104,8 +104,8 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server1___
         FAULT_ON_NULL(serverName);
 
 #if defined(AZURE_RTOS_THREADX)
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // FIXME: implementation required!
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         sntp_setservername(0, serverName);
 #endif
@@ -121,8 +121,8 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_Server2___
         FAULT_ON_NULL(pThis);
 
 #if defined(AZURE_RTOS_THREADX)
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // FIXME: implementation required!
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         stack.SetResult_String(sntp_getservername(1));
 #endif
@@ -143,8 +143,8 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_Server2___
         FAULT_ON_NULL(serverName);
 
 #if defined(AZURE_RTOS_THREADX)
-    // FIXME: implementation required!
-    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+        // FIXME: implementation required!
+        NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #else
         sntp_setservername(1, serverName);
 #endif
@@ -186,7 +186,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_StartupDel
     CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-    
+
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
@@ -215,7 +215,7 @@ HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::set_StartupDel
 HRESULT Library_nf_networking_sntp_nanoFramework_Networking_Sntp::get_RetryPeriod___STATIC__I4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
-  
+
 #if defined(AZURE_RTOS_THREADX)
     // FIXME: implementation required!
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
