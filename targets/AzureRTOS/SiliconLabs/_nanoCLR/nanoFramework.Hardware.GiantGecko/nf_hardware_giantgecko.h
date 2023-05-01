@@ -11,6 +11,26 @@
 #include <nanoPackStruct.h>
 #include <corlib_native.h>
 
+typedef enum __nfpack GpioConfiguration_DriveStrenght
+{
+    GpioConfiguration_DriveStrenght_Strong = 0,
+    GpioConfiguration_DriveStrenght_Weak = 1,
+} GpioConfiguration_DriveStrenght;
+
+struct Library_nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_GpioConfiguration
+{
+    NANOCLR_NATIVE_DECLARE(SetSlewRate___STATIC__VOID__I4__U1);
+    NANOCLR_NATIVE_DECLARE(SetSlewRateAlternate___STATIC__VOID__I4__U1);
+    NANOCLR_NATIVE_DECLARE(
+        SetDriveStrenght___STATIC__VOID__I4__nanoFrameworkHardwareGiantGeckoGpioConfigurationDriveStrenght);
+    NANOCLR_NATIVE_DECLARE(
+        SetDriveStrenghtAlternate___STATIC__VOID__I4__nanoFrameworkHardwareGiantGeckoGpioConfigurationDriveStrenght);
+
+    //--//
+    static HRESULT SetSlewRate(CLR_RT_StackFrame &stack, bool isAlternate);
+    static HRESULT SetDriveStrenght(CLR_RT_StackFrame &stack, bool isAlternate);
+};
+
 struct Library_nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_Power
 {
     NANOCLR_NATIVE_DECLARE(NativeEnterHibernateMode___STATIC__VOID);
