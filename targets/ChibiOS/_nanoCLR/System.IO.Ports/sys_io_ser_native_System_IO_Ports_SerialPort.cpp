@@ -216,8 +216,8 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
 
     // store this into the UART Rx buffer
 
-    // push char to ring buffer
-    // don't care about the success of the operation, if it's full we are droping the char anyway
+    // push char to the ring buffer
+    // ignore the success of the operation, if it's full we are dropping the char anyway.
     palUart->RxRingBuffer.Push((uint8_t)c);
 
     // is there a read operation going on?
@@ -245,11 +245,12 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
         // no read operation ongoing, so fire an event, if the available bytes are above the threshold
         if (palUart->RxRingBuffer.Length() >= palUart->ReceivedBytesThreshold)
         {
-            // post a managed event with the port index and event code (check if this is the watch char or just another
-            // another)
-            // TODO: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother for that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
-            // CLR_RT_HeapBlock (see Gpio handler) check http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
+            // Post a managed event with the port index and event code (check if there is a watch
+            // char in the buffer or just any char)
+            // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
+            // don't bother. 
+            // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
+            // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
             PostManagedEvent(
                 EVENT_SERIAL,
                 0,
