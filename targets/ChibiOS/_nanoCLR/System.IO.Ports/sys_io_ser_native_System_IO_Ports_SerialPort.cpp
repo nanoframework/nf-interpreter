@@ -248,7 +248,7 @@ static void RxChar(UARTDriver *uartp, uint16_t c)
             // Post a managed event with the port index and event code (check if there is a watch
             // char in the buffer or just any char)
             // FIXME: check if callbacks are registered so this is called only if there is anyone listening otherwise
-            // don't bother. 
+            // don't bother.
             // TODO: For that to happen ChibiOS callback has to accept arg which we would passing the GpioPin
             // Notes: CLR_RT_HeapBlock (Gpio handler) See: http://www.chibios.com/forum/viewtopic.php?f=36&t=4798
             PostManagedEvent(
