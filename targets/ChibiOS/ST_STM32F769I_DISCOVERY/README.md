@@ -25,3 +25,8 @@ The following ADC channels (and respective GPIO pins) are available to the manag
 - Temp Sensor ADC1
 - VrefInt ADC1
 - Vbatt ADC1
+
+## Floating point
+
+The current build is set to add support for single-precision floating point.
+Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.
