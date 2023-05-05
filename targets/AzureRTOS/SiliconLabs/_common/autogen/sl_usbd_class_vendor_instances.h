@@ -19,11 +19,11 @@ typedef enum __nfpack UsbEventType
 #define DEVICEINTERFACE_GUID_PROP_NAME L"DeviceInterfaceGUID"
 
 /// Length of GUID Property Name
-#define DEVICEINTERFACE_GUID_PROP_NAME_LEN  sizeof (DEVICEINTERFACE_GUID_PROP_NAME)
+#define DEVICEINTERFACE_GUID_PROP_NAME_LEN sizeof(DEVICEINTERFACE_GUID_PROP_NAME)
 
 // GUID for device class that will be reported to WinUSB (going into DeviceInterfaceGUID extended property)
-#define DEVICE_CLASS_GUID_PROPERTY L"{00000000-0000-0000-0000-000000000000}"
-#define DEVICE_CLASS_GUID_PROPERTY_LEN sizeof(DEVICE_CLASS_GUID_PROPERTY)
+#define DEVICE_CLASS_GUID_PROPERTY_PLACEHOLDER L"{00000000-0000-0000-0000-000000000000}"
+#define DEVICE_CLASS_GUID_PROPERTY_LEN         sizeof(DEVICE_CLASS_GUID_PROPERTY_PLACEHOLDER)
 
 /* class numbers assigned by the USB stack after init */
 
@@ -39,10 +39,11 @@ __WEAK void sl_usbd_vendor_winusb_on_setup_request_event(const sl_usbd_setup_req
 /* init functions for all vendor instances */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-sl_status_t sli_usbd_vendor_winusb_init(void);
+    sl_status_t sli_usbd_vendor_winusb_init(void);
 
 #ifdef __cplusplus
 }
