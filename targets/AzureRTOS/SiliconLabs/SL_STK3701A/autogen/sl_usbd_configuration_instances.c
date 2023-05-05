@@ -8,17 +8,7 @@
 // Includes.
 
 #include <sl_status.h>
-
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#endif
-
 #include <sl_usbd_core.h>
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 /* template headers */
 #include "sl_usbd_configuration_instances.h"
