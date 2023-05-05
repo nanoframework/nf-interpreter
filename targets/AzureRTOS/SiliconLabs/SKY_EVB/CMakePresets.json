@@ -43,8 +43,6 @@
                 "API_Windows.Storage": "OFF",
                 "API_nanoFramework.Graphics": "OFF",
                 "TARGET_SERIAL_BAUDRATE": "921600",
-                "GECKO_FEATURE_USBD_HID": "OFF",
-                "GECKO_FEATURE_USBD_WINUSB": "OFF",
                 "HAL_WP_USE_SERIAL": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.Device.Spi": "OFF",
