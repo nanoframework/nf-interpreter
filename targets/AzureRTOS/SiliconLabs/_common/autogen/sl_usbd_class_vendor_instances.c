@@ -130,18 +130,18 @@ sl_status_t sli_usbd_vendor_winusb_init()
 
     // even if not initialized, check if it's active
     bool classIsEnabled;
-    
-    if(sl_usbd_vendor_is_enabled(class_number, &classIsEnabled) != SL_STATUS_OK)
+
+    if (sl_usbd_vendor_is_enabled(class_number, &classIsEnabled) != SL_STATUS_OK)
     {
         // error getting class enabled status
         return SL_STATUS_FAIL;
     }
 
-    if(classIsEnabled)
+    if (classIsEnabled)
     {
         // already active, disable it to add new configuration
-        //sl_usbd_vendor_disable
-        //usbd_vendor_disable(sl_usbd_configuration_config0_number, void    *p_if_class_arg)
+        // sl_usbd_vendor_disable
+        // usbd_vendor_disable(sl_usbd_configuration_config0_number, void    *p_if_class_arg)
     }
 
     /* tokenize configs by "," and spaces */

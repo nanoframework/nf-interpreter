@@ -92,8 +92,7 @@ static void hid_task(uint32_t p_arg)
         y_is_pos = !y_is_pos;
 
         // Send report.
-        status =
-            sl_usbd_hid_write_sync(class_nbr, usb_hid_report_buffer, USB_HID_REPORT_LEN, 0u, &xfer_len);
+        status = sl_usbd_hid_write_sync(class_nbr, usb_hid_report_buffer, USB_HID_REPORT_LEN, 0u, &xfer_len);
 
         // Delay Task
         tx_thread_sleep(xDelay);
