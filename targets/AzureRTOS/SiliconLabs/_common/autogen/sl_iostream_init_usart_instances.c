@@ -301,37 +301,46 @@ static void events_handler(sl_power_manager_em_t from, sl_power_manager_em_t to)
         ((to == SL_POWER_MANAGER_EM1) || (to == SL_POWER_MANAGER_EM0)))
     {
 
+#if HAL_USE_ONEWIRE == TRUE
         // Wake the USART Tx pin back up
         out = GPIO_PinOutGet(SL_IOSTREAM_USART_ONEWIRE_TX_PORT, SL_IOSTREAM_USART_ONEWIRE_TX_PIN);
         GPIO_PinModeSet(SL_IOSTREAM_USART_ONEWIRE_TX_PORT, SL_IOSTREAM_USART_ONEWIRE_TX_PIN, gpioModePushPull, out);
+#endif // HAL_USE_ONEWIRE
 
+#if HAL_WP_USE_SERIAL == TRUE
         // Wake the USART Tx pin back up
         out = GPIO_PinOutGet(SL_IOSTREAM_USART_VCOM_TX_PORT, SL_IOSTREAM_USART_VCOM_TX_PIN);
         GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT, SL_IOSTREAM_USART_VCOM_TX_PIN, gpioModePushPull, out);
+#endif // HAL_WP_USE_SERIAL
+
     }
     else if (
         ((to == SL_POWER_MANAGER_EM2) || (to == SL_POWER_MANAGER_EM3)) &&
         ((from == SL_POWER_MANAGER_EM1) || (from == SL_POWER_MANAGER_EM0)))
     {
 
+#if HAL_USE_ONEWIRE == TRUE
         // Sleep the USART Tx pin on series 2 devices to save energy
         out = GPIO_PinOutGet(SL_IOSTREAM_USART_ONEWIRE_TX_PORT, SL_IOSTREAM_USART_ONEWIRE_TX_PIN);
         GPIO_PinModeSet(SL_IOSTREAM_USART_ONEWIRE_TX_PORT, SL_IOSTREAM_USART_ONEWIRE_TX_PIN, gpioModeDisabled, out);
+#endif // HAL_USE_ONEWIRE
 
+#if HAL_WP_USE_SERIAL == TRUE
         // Sleep the USART Tx pin on series 2 devices to save energy
         out = GPIO_PinOutGet(SL_IOSTREAM_USART_VCOM_TX_PORT, SL_IOSTREAM_USART_VCOM_TX_PIN);
         GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT, SL_IOSTREAM_USART_VCOM_TX_PIN, gpioModeDisabled, out);
+#endif // HAL_WP_USE_SERIAL
+
     }
 #endif // _SILICON_LABS_32B_SERIES_2
-    // Enable next byte detect to wake from sleep
     if (to < SL_POWER_MANAGER_EM2)
     {
+        // Only prepare for wakeup from EM1 or less, since USART doesn't run in EM2
 
-        // Enable next byte detection to wakeup from sleep on next byte
-        context_onewire.context.set_next_byte_detect(sl_iostream_onewire_handle->context, true);
-
-        // Enable next byte detection to wakeup from sleep on next byte
-        context_vcom.context.set_next_byte_detect(sl_iostream_vcom_handle->context, true);
+        if (sl_iostream_uart_vcom_handle->stream.context != NULL)
+        {
+            sl_iostream_uart_prepare_for_sleep(sl_iostream_uart_vcom_handle);
+        }
     }
 }
 #endif // SL_CATALOG_POWER_MANAGER_PRESENT
