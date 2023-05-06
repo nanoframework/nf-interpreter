@@ -10,24 +10,13 @@
 #include "sl_status.h"
 #include <nanoHAL_v2.h>
 #include <target_platform.h>
-
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#endif
-
 #include <sl_usbd_core.h>
 #include "sl_usbd_class_hid.h"
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 #include "sl_usbd_class_vendor.h"
 
 /* template headers */
-#include "sl_usbd_configuration_instances.h"
-#include "sl_usbd_class_vendor_instances.h"
+#include <sl_usbd_configuration_instances.h>
+#include <sl_usbd_class_vendor_instances.h>
 
 /* include config file for the instances */
 
@@ -138,6 +127,22 @@ sl_status_t sli_usbd_vendor_winusb_init()
 
     /* store class number globally */
     sl_usbd_vendor_winusb_number = class_number;
+
+    // even if not initialized, check if it's active
+    bool classIsEnabled;
+
+    if (sl_usbd_vendor_is_enabled(class_number, &classIsEnabled) != SL_STATUS_OK)
+    {
+        // error getting class enabled status
+        return SL_STATUS_FAIL;
+    }
+
+    if (classIsEnabled)
+    {
+        // already active, disable it to add new configuration
+        // sl_usbd_vendor_disable
+        // usbd_vendor_disable(sl_usbd_configuration_config0_number, void    *p_if_class_arg)
+    }
 
     /* tokenize configs by "," and spaces */
     token = strtok(configs, ", ");

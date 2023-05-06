@@ -7,16 +7,7 @@
 #ifndef SL_USBD_CLASS_CDC_ACM_INSTANCES_INIT
 #define SL_USBD_CLASS_CDC_ACM_INSTANCES_INIT
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#endif
-
 #include <sl_usbd_class_cdc_acm.h>
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 /* class numbers assigned by the USB stack after init */
 
