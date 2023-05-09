@@ -392,7 +392,7 @@ int Library_corlib_native_System_Number::Format_G(
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
             (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
-            (!isIntegerDataType) ? 'f' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+            (!isIntegerDataType) ? 'g' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
 
         ret = DoPrintfOnDataType(buffer, formatStr, value);
         if (ret > 0)
