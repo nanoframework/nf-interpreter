@@ -143,13 +143,11 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
 
 const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(CLR_DataType dataType)
 {
-    const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)
-                          ? "hh"
-                          : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2)
-                                ? "h"
-                                : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4)
-                                      ? ""
-                                      : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll" : "";
+    const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)   ? "hh"
+                      : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2) ? "h"
+                      : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4) ? ""
+                      : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll"
+                                                                             : "";
     return ret;
 }
 
@@ -392,7 +390,9 @@ int Library_corlib_native_System_Number::Format_G(
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
             (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
-            (!isIntegerDataType) ? 'f' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+            (!isIntegerDataType)                  ? 'g'
+            : (IsSignedIntegerDataType(dataType)) ? 'd'
+                                                  : 'u');
 
         ret = DoPrintfOnDataType(buffer, formatStr, value);
         if (ret > 0)
@@ -587,7 +587,9 @@ int Library_corlib_native_System_Number::Format_F(
         "%%0.%d%s%c",
         precision,
         (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
-        (!isIntegerDataType) ? 'f' : (IsSignedIntegerDataType(dataType)) ? 'd' : 'u');
+        (!isIntegerDataType)                  ? 'f'
+        : (IsSignedIntegerDataType(dataType)) ? 'd'
+                                              : 'u');
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
     if (ret > 0)
