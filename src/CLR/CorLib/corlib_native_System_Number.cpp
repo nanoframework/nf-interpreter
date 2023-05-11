@@ -699,11 +699,7 @@ int Library_corlib_native_System_Number::Format_N(
     return ret;
 }
 
-int Library_corlib_native_System_Number::Format_E(
-    char *buffer,
-    CLR_RT_HeapBlock *value,
-    int precision,
-    char formatChar)
+int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock *value, int precision, char formatChar)
 {
     int ret = -1;
 
