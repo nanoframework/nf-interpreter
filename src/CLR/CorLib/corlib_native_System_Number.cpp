@@ -340,37 +340,53 @@ int Library_corlib_native_System_Number::Format_G(
 
     bool isIntegerDataType = IsIntegerDataType(dataType);
 
+    // flag to indicate if we're forcing extra precision for the conversion
+    bool forcedPrecision = true;
+
+    // set default precision for the conversion
+    int defaultPrecision = 0;
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+            defaultPrecision = 3;
+            break;
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+            defaultPrecision = 5;
+            break;
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+            defaultPrecision = 10;
+            break;
+        case DATATYPE_I8:
+            defaultPrecision = 19;
+            break;
+        case DATATYPE_U8:
+            defaultPrecision = 20;
+            break;
+        case DATATYPE_R4:
+            defaultPrecision = 7;
+            break;
+        case DATATYPE_R8:
+            defaultPrecision = 15;
+            break;
+        default:
+            forcedPrecision = false;
+            break;
+    }
+
     if (precision == -1)
     {
-        switch (dataType)
-        {
-            case DATATYPE_I1:
-            case DATATYPE_U1:
-                precision = 3;
-                break;
-            case DATATYPE_I2:
-            case DATATYPE_U2:
-                precision = 5;
-                break;
-            case DATATYPE_I4:
-            case DATATYPE_U4:
-                precision = 10;
-                break;
-            case DATATYPE_I8:
-                precision = 19;
-                break;
-            case DATATYPE_U8:
-                precision = 20;
-                break;
-            case DATATYPE_R4:
-                precision = 7;
-                break;
-            case DATATYPE_R8:
-                precision = 15;
-                break;
-            default:
-                break;
-        }
+        // no precision specified, use default
+        precision = defaultPrecision;
+
+        // set flag to indicate that we're forcing a precision
+        forcedPrecision = true;
+    }
+    else
+    {
+        forcedPrecision = false;
     }
 
     if (precision > 0)
@@ -390,12 +406,14 @@ int Library_corlib_native_System_Number::Format_G(
             "%%%s%s%c",
             (isIntegerDataType) ? "" : nonIntegerPrecStr,
             (isIntegerDataType) ? GetPrintfLengthModifier(dataType) : "",
-            (!isIntegerDataType)                  ? 'g'
+            (!isIntegerDataType)                  ? formatChar
             : (IsSignedIntegerDataType(dataType)) ? 'd'
                                                   : 'u');
 
         ret = DoPrintfOnDataType(buffer, formatStr, value);
-        if (ret > 0)
+
+        // this extra processing is only required for integer types
+        if (isIntegerDataType && ret > 0)
         {
             // printf and ToString differs on precision numbers:
             // printf("%.05d", 123.4567890) returns "123.45679"
@@ -413,29 +431,40 @@ int Library_corlib_native_System_Number::Format_G(
 
                 int numDigits = 0;
 
-                // leave just the required amount of digits
-                for (int i = 0; i < ret; i++)
+                // leave just the required amount of digits, if precision was forced
+                if (forcedPrecision || precision < defaultPrecision)
                 {
-                    if (buffer[i] >= '0' && buffer[i] <= '9')
+                    // find the first digit after the dot
+                    for (int i = 0; i < ret; i++)
                     {
-                        numDigits++;
-                        if (numDigits == precision)
+                        if (buffer[i] >= '0' && buffer[i] <= '9')
                         {
-                            ret = i + 1;
-                            char first_lost_digit = buffer[ret];
-                            if (first_lost_digit == '.' && (ret + 1) < savedResultLength)
+                            numDigits++;
+
+                            if (numDigits == precision)
                             {
-                                first_lost_digit = buffer[ret + 1];
+                                ret = i + 1;
+                                char first_lost_digit = buffer[ret];
+
+                                if (first_lost_digit == '.' && (ret + 1) < savedResultLength)
+                                {
+                                    first_lost_digit = buffer[ret + 1];
+                                }
+
+                                buffer[ret] = 0;
+
+                                if (first_lost_digit >= '5')
+                                {
+                                    int savedRet = ret;
+                                    RoundUpNumStr(buffer, &ret);
+
+                                    if (savedRet < ret)
+                                    {
+                                        dotIndex++;
+                                    }
+                                }
+                                break;
                             }
-                            buffer[ret] = 0;
-                            if (first_lost_digit >= '5')
-                            {
-                                int savedRet = ret;
-                                RoundUpNumStr(buffer, &ret);
-                                if (savedRet < ret)
-                                    dotIndex++;
-                            }
-                            break;
                         }
                     }
                 }
@@ -449,9 +478,11 @@ int Library_corlib_native_System_Number::Format_G(
                         {
                             break;
                         }
+
                         buffer[i] = 0;
                         ret--;
                     }
+
                     // strip trailing dot too
                     if (ret == dotIndex + 1)
                     {
@@ -462,13 +493,18 @@ int Library_corlib_native_System_Number::Format_G(
 
                 if ((dotIndex == -1) || (dotIndex > (precision + offsetBecauseOfNegativeSign)))
                 {
-                    // insert '.'
-                    memmove(
-                        &buffer[2 + offsetBecauseOfNegativeSign],
-                        &buffer[1 + offsetBecauseOfNegativeSign],
-                        ret - 1);
-                    buffer[1 + offsetBecauseOfNegativeSign] = '.';
-                    ret++;
+                    // insert '.', only if request precision requires it
+                    // this is: precision is specified and is more than 1 (taking into account the sign)
+                    if (precision > 0 && (ret - offsetBecauseOfNegativeSign) > 1)
+                    {
+                        memmove(
+                            &buffer[2 + offsetBecauseOfNegativeSign],
+                            &buffer[1 + offsetBecauseOfNegativeSign],
+                            ret - 1);
+                        buffer[1 + offsetBecauseOfNegativeSign] = '.';
+
+                        ret++;
+                    }
 
                     // append 'E+exp'
                     int exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
@@ -592,17 +628,42 @@ int Library_corlib_native_System_Number::Format_F(
                                               : 'u');
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
-    if (ret > 0)
+
+    // this extra processing is only required for integer types
+    if (isIntegerDataType && ret > 0)
     {
+        bool isNegative = (buffer[0] == '-');
+        int offsetBecauseOfNegativeSign = (isNegative ? 1 : 0);
+
+        int dotIndex = GetDotIndex(buffer, ret);
+
+        // if there is no dot, set the index to the end of the string
+        if (dotIndex == -1)
+        {
+            dotIndex = ret;
+        }
+
+        // strip trailing zeros
+        while (buffer[offsetBecauseOfNegativeSign] != '.' && buffer[offsetBecauseOfNegativeSign] == '0' && ret > 1)
+        {
+            memmove(&buffer[offsetBecauseOfNegativeSign], &buffer[offsetBecauseOfNegativeSign + 1], ret);
+
+            ret--;
+        };
+
         if (isIntegerDataType && (precision > 0))
         {
+            // insert '.' and...
             buffer[ret++] = '.';
+
+            // ...fill with zeros
             for (int i = 0; i < precision; i++)
             {
                 buffer[ret++] = '0';
             }
             buffer[ret] = 0;
         }
+
         ret = ReplaceNegativeSign(buffer, ret, negativeSign);
         ret = ReplaceDecimalSeparator(buffer, ret, decimalSeparator);
     }
