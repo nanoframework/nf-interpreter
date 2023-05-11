@@ -714,6 +714,11 @@ struct Library_corlib_native_System_Number
         char *decimalSeparator,
         char *numberGroupSeparator,
         CLR_RT_HeapBlock_Array *numberGroupSizes);
+    static int Format_E(
+        char *buffer,
+        CLR_RT_HeapBlock *value,
+        int precision,
+        char formatChar);
 };
 
 struct Library_corlib_native_System_Random
