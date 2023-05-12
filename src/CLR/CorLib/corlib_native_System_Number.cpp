@@ -52,43 +52,31 @@ bool Library_corlib_native_System_Number::ParseFormat(char *format, char *format
 
 bool Library_corlib_native_System_Number::ValidateFormatChar(char *formatChar, bool isInteger)
 {
-    bool ret = true;
-
     switch (*formatChar)
     {
-        case 'g':
-        case 'G':
-        case 'n':
-        case 'N':
-        case 'f':
-        case 'F':
-            break;
+        // these need to be integers
         case 'x':
         case 'X':
         case 'd':
         case 'D':
-            if (!isInteger)
-            {
-                ret = false;
-            }
-            break;
-        default:
-            ret = false;
-    }
+            return isInteger;
 
-    return ret;
+        // all the others shoudl be OK or will be caught afterwards
+        default:
+            return true;
+    }
 }
 
 bool Library_corlib_native_System_Number::GetFormatSpec(char *format, bool isInteger, char *formatChar, int *precision)
 {
-    bool ret = ParseFormat(format, formatChar, precision);
-
-    if (ret)
+    if (ParseFormat(format, formatChar, precision))
     {
-        ret = ValidateFormatChar(formatChar, isInteger);
+        return ValidateFormatChar(formatChar, isInteger);
     }
-
-    return ret;
+    else
+    {
+        return false;
+    }
 }
 
 int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *formatStr, CLR_RT_HeapBlock *value)
@@ -711,6 +699,108 @@ int Library_corlib_native_System_Number::Format_N(
     return ret;
 }
 
+int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock *value, int precision, char formatChar)
+{
+    int ret = -1;
+
+    if (precision == -1)
+    {
+        // default to 6 digits after the decimal point
+        precision = 6;
+    }
+
+    int requestedPrecision = precision;
+
+    // force extra precision to account for rounding errors
+    precision = requestedPrecision + 4;
+
+    CLR_DataType dataType = value->DataType();
+
+    char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
+    double copyValue = 0.0;
+
+    // need to convert to double
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+            copyValue = (double)value->NumericByRef().s1;
+            break;
+        case DATATYPE_U1:
+            copyValue = (double)value->NumericByRef().u1;
+            break;
+        case DATATYPE_I2:
+            copyValue = (double)value->NumericByRef().s2;
+            break;
+        case DATATYPE_U2:
+            copyValue = (double)value->NumericByRef().u2;
+            break;
+        case DATATYPE_I4:
+            copyValue = (double)value->NumericByRef().s4;
+            break;
+        case DATATYPE_U4:
+            copyValue = (double)value->NumericByRef().u4;
+            break;
+        case DATATYPE_I8:
+            copyValue = (double)value->NumericByRef().s8;
+            break;
+        case DATATYPE_U8:
+            copyValue = (double)value->NumericByRef().u8;
+            break;
+        case DATATYPE_R4:
+            copyValue = (double)value->NumericByRef().r4;
+            break;
+        case DATATYPE_R8:
+            copyValue = (double)value->NumericByRef().r8;
+            break;
+        default:
+            break;
+    }
+
+    snprintf(formatStr, FORMAT_FMTSTR_BUFFER_SIZE, "%%.%d%c", precision, formatChar);
+
+    ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, copyValue);
+
+    if (ret > 0)
+    {
+        int dotIndex = GetDotIndex(buffer, ret);
+
+        // if there is no dot, set the index to the end of the string
+        if (dotIndex == -1)
+        {
+            dotIndex = ret;
+        }
+
+        // remove extra precision
+        memmove(&buffer[dotIndex + requestedPrecision + 1], &buffer[dotIndex + precision + 1], ret);
+
+        // adjust the string length
+        ret -= precision + 1 - requestedPrecision;
+
+        // find the exponent character, start with lower case
+        char *e = strchr(buffer, 'e');
+
+        if (!e)
+        {
+            // try upper case
+            e = strchr(buffer, 'E');
+        }
+
+        if (e)
+        {
+            // move past the exponent character
+            e++;
+
+            // convert exponent to digits
+            int expo = atoi(e);
+
+            // print the exponent with the correct sign and size
+            snprintf(e, FORMAT_RESULT_BUFFER_SIZE, "%+.3d", expo);
+        }
+    }
+
+    return ret;
+}
+
 HRESULT Library_corlib_native_System_Number::
     FormatNative___STATIC__STRING__OBJECT__BOOLEAN__STRING__STRING__STRING__STRING__SZARRAY_I4(CLR_RT_StackFrame &stack)
 {
@@ -747,165 +837,13 @@ HRESULT Library_corlib_native_System_Number::
 
     char formatChar;
     int precision;
+
     if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
-        ret = format;
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
     else
     {
-
-        /*
-          It looks this could be the most appropriate place where everybody looks when wants to track the current
-          implementation. So I put here my toughts how this code could be modified without regression :)
-
-          Create an nf project in VS.
-          Add the following class to it:
-
-          public static class ToStringAsserts
-          {
-              public static void Run()
-              {
-                  //AssertToConsole("(123.456).ToString(\"C\"))","",(123.456).ToString("C"));
-                  //AssertToConsole("(-123.456).ToString(\"C\"))","",(-123.456).ToString("C"));
-                  //AssertToConsole("(123.456).ToString(\"C3\"))","",(123.456).ToString("C3"));
-                  //AssertToConsole("(-123.456).ToString(\"C3\"))","",(-123.456).ToString("C3"));
-                  AssertToConsole("(1).ToString(\"Da1x\")", "Da1x", (1).ToString("Da1x"));
-                  AssertToConsole("(1).ToString(\"D\")", "1", (1).ToString("D"));
-                  AssertToConsole("(-1).ToString(\"D\")", "-1", (-1).ToString("D"));
-                  AssertToConsole("(1234).ToString(\"D\")", "1234", (1234).ToString("D"));
-                  AssertToConsole("(-1234).ToString(\"D\")", "-1234", (-1234).ToString("D"));
-                  AssertToConsole("(1234).ToString(\"D6\")", "001234", (1234).ToString("D6"));
-                  AssertToConsole("(-1234).ToString(\"D6\")", "-001234", (-1234).ToString("D6"));
-                  AssertToConsole("(Int32.MaxValue).ToString(\"D\")", "2147483647", (Int32.MaxValue).ToString("D"));
-                  AssertToConsole("(Int32.MinValue).ToString(\"D\")", "-2147483648", (Int32.MinValue).ToString("D"));
-                  AssertToConsole("(Int32.MaxValue).ToString(\"D21\")", "000000000002147483647",
-          (Int32.MaxValue).ToString("D21")); AssertToConsole("(Int32.MinValue).ToString(\"D21\")",
-          "-000000000002147483648", (Int32.MinValue).ToString("D21"));
-                  AssertToConsole("(Int64.MaxValue).ToString(\"D\")", "9223372036854775807",
-          (Int64.MaxValue).ToString("D")); AssertToConsole("(Int64.MinValue).ToString(\"D\")", "-9223372036854775808",
-          (Int64.MinValue).ToString("D")); AssertToConsole("(Int64.MaxValue).ToString(\"D21\")",
-          "009223372036854775807", (Int64.MaxValue).ToString("D21"));
-                  AssertToConsole("(Int64.MinValue).ToString(\"D21\")", "-009223372036854775808",
-          (Int64.MinValue).ToString("D21")); AssertToConsole("(Int32.MaxValue+100).ToString(\"D\")", "2147483747",
-          ((Int64)Int32.MaxValue + 100).ToString("D")); AssertToConsole("(Int32.MinValue-100).ToString(\"D\")",
-          "-2147483748", ((Int64)Int32.MinValue - 100).ToString("D"));
-                  AssertToConsole("(Int32.MaxValue+100).ToString(\"D21\")", "000000000002147483747",
-          ((Int64)Int32.MaxValue + 100).ToString("D21")); AssertToConsole("(Int32.MinValue-100).ToString(\"D21\")",
-          "-000000000002147483748", ((Int64)Int32.MinValue - 100).ToString("D21"));
-                  //AssertToConsole("(1052.0329112756).ToString(\"E\"))","",(1052.0329112756).ToString("E"));
-                  //AssertToConsole("(-1052.0329112756).ToString(\"E\"))","",(-1052.0329112756).ToString("E"));
-                  //AssertToConsole("(1052.0329112756).ToString(\"E2\"))","",(1052.0329112756).ToString("E2"));
-                  //AssertToConsole("(-1052.0329112756).ToString(\"E2\"))","",(-1052.0329112756).ToString("E2"));
-                  //AssertToConsole("(1052.0329112756).ToString(\"e\"))","",(1052.0329112756).ToString("e"));
-                  //AssertToConsole("(-1052.0329112756).ToString(\"e\"))","",(-1052.0329112756).ToString("e"));
-                  //AssertToConsole("(1052.0329112756).ToString(\"e2\"))","",(1052.0329112756).ToString("e2"));
-                  //AssertToConsole("(-1052.0329112756).ToString(\"e2\"))","",(-1052.0329112756).ToString("e2"));
-                  AssertToConsole("(1234.567).ToString(\"F\"))", "1234.57", (1234.567).ToString("F"));
-                  AssertToConsole("(-1234.567).ToString(\"F\"))", "-1234.57", (-1234.567).ToString("F"));
-                  AssertToConsole("(1234.567).ToString(\"F0\"))", "1235", (1234.567).ToString("F0"));
-                  AssertToConsole("(-1234.567).ToString(\"F0\"))", "-1235", (-1234.567).ToString("F0"));
-                  AssertToConsole("(1234).ToString(\"F1\"))", "1234.0", (1234).ToString("F1"));
-                  AssertToConsole("(-1234).ToString(\"F1\"))", "-1234.0", (-1234).ToString("F1"));
-                  AssertToConsole("(1234.56).ToString(\"F4\"))", "1234.5600", (1234.56).ToString("F4"));
-                  AssertToConsole("(-1234.56).ToString(\"F4\"))", "-1234.5600", (-1234.56).ToString("F4"));
-                  AssertToConsole("(1234.56).ToString(\"F1\"))", "1234.6", (1234.56).ToString("F1"));
-                  AssertToConsole("(-1234.56).ToString(\"F1\"))", "-1234.6", (-1234.56).ToString("F1"));
-                  AssertToConsole("(1234.0056).ToString(\"F1\"))", "1234.0", (1234.0056).ToString("F1"));
-                  AssertToConsole("(-1234.0056).ToString(\"F1\"))", "-1234.0", (-1234.0056).ToString("F1"));
-                  AssertToConsole("(1).ToString()", "1", (1).ToString());
-                  AssertToConsole("(1).ToString(null)", "1", (1).ToString((string)null));
-                  AssertToConsole("(1).ToString(String.Empty)", "1", (1).ToString(String.Empty));
-                  AssertToConsole("(1234.567).ToString())", "1234.567", (1234.567).ToString());
-                  AssertToConsole("(123.456).ToString(\"G\"))", "123.456", (123.456).ToString("G"));
-                  AssertToConsole("(-123.456).ToString(\"G\"))", "-123.456", (-123.456).ToString("G"));
-                  AssertToConsole("(123.4546).ToString(\"G2\"))", "1.2E+02", (123.4546).ToString("G2"));
-                  AssertToConsole("(-123.4546).ToString(\"G2\"))", "-1.2E+02", (-123.4546).ToString("G2"));
-                  AssertToConsole("(123.4546).ToString(\"G4\"))", "123.5", (123.4546).ToString("G4"));
-                  AssertToConsole("(-123.4546).ToString(\"G4\"))", "-123.5", (-123.4546).ToString("G4"));
-                  AssertToConsole("(123.4546).ToString(\"G10\"))", "123.4546", (123.4546).ToString("G10"));
-                  AssertToConsole("(-123.4546).ToString(\"G10\"))", "-123.4546", (-123.4546).ToString("G10"));
-                  AssertToConsole("(99.9999).ToString(\"G4\"))", "100", (99.9999).ToString("G4"));
-                  AssertToConsole("(-99.9999).ToString(\"G4\"))", "-100", (-99.9999).ToString("G4"));
-                  AssertToConsole("(1234567890).ToString(\"G\"))", "1234567890", (1234567890).ToString("G"));
-                  AssertToConsole("(-1234567890).ToString(\"G\"))", "-1234567890", (-1234567890).ToString("G"));
-                  AssertToConsole("(1234567890).ToString(\"G4\"))", "1.235E+09", (1234567890).ToString("G4"));
-                  AssertToConsole("(-1234567890).ToString(\"G4\"))", "-1.235E+09", (-1234567890).ToString("G4"));
-                  AssertToConsole("(9876543210).ToString(\"G4\"))", "9.877E+09", (9876543210).ToString("G4"));
-                  AssertToConsole("(-9876543210).ToString(\"G4\"))", "-9.877E+09", (-9876543210).ToString("G4"));
-                  AssertToConsole("(1234567890).ToString(\"G15\"))", "1234567890", (1234567890).ToString("G15"));
-                  AssertToConsole("(-1234567890).ToString(\"G15\"))", "-1234567890", (-1234567890).ToString("G15"));
-                  AssertToConsole("(1234.567).ToString(\"N\"))", "1,234.57", (1234.567).ToString("N"));
-                  AssertToConsole("(-1234.567).ToString(\"N\"))", "-1,234.57", (-1234.567).ToString("N"));
-                  AssertToConsole("(0).ToString(\"N0\"))", "0", (0).ToString("N0"));
-                  AssertToConsole("(1234).ToString(\"N0\"))", "1,234", (1234).ToString("N0"));
-                  AssertToConsole("(-1234).ToString(\"N0\"))", "-1,234", (-1234).ToString("N0"));
-                  AssertToConsole("(12).ToString(\"N1\"))", "12.0", (12).ToString("N1"));
-                  AssertToConsole("(-12).ToString(\"N1\"))", "-12.0", (-12).ToString("N1"));
-                  AssertToConsole("(1234).ToString(\"N1\"))", "1,234.0", (1234).ToString("N1"));
-                  AssertToConsole("(-1234).ToString(\"N1\"))", "-1,234.0", (-1234).ToString("N1"));
-                  AssertToConsole("(1234.56).ToString(\"N3\"))", "1,234.560", (1234.56).ToString("N3"));
-                  AssertToConsole("(-1234.56).ToString(\"N3\"))", "-1,234.560", (-1234.56).ToString("N3"));
-                  AssertToConsole("(34561234.56).ToString(\"N3\"))", "34,561,234.560", (34561234.56).ToString("N3"));
-                  AssertToConsole("(-34561234.56).ToString(\"N3\"))", "-34,561,234.560", (-34561234.56).ToString("N3"));
-                  //AssertToConsole("(1).ToString(\"P\"))","",(1).ToString("P"));
-                  //AssertToConsole("(-0.39678).ToString(\"P\"))","",(-0.39678).ToString("P"));
-                  //AssertToConsole("(123456789.12345678).ToString(\"R\"))","",(123456789.12345678).ToString("R"));
-                  //AssertToConsole("(-123456789.12345678).ToString(\"R\"))","",(-123456789.12345678).ToString("R"));
-                  AssertToConsole("(255).ToString(\"X\"))", "FF", (255).ToString("X"));
-                  AssertToConsole("((Int32)1).ToString(\"X\"))", "1", ((Int32)1).ToString("X"));
-                  AssertToConsole("((Int32)(-1)).ToString(\"x\"))", "ffffffff", ((Int32)(-1)).ToString("x"));
-                  AssertToConsole("((byte)1).ToString(\"x\"))", "1", (unchecked((byte)1)).ToString("x"));
-                  AssertToConsole("((byte)(-1)).ToString(\"x\"))", "ff", (unchecked((byte)(-1))).ToString("x"));
-                  AssertToConsole("((short)1).ToString(\"x\"))", "1", ((short)1).ToString("x"));
-                  AssertToConsole("((short)1).ToString(\"x2\"))", "01", ((short)1).ToString("x2"));
-                  AssertToConsole("((short)(-1)).ToString(\"x\"))", "ffff", ((short)(-1)).ToString("x"));
-                  AssertToConsole("(255).ToString(\"x4\"))", "00ff", (255).ToString("x4"));
-                  AssertToConsole("((Int32)(-1)).ToString(\"X4\"))", "FFFFFFFF", ((Int32)(-1)).ToString("X4"));
-                  AssertToConsole("(Int64.MaxValue-10).ToString(\"x\"))", "7ffffffffffffff5", (Int64.MaxValue -
-          10).ToString("x")); AssertToConsole("((Int64)10).ToString(\"x\"))", "a", ((Int64)10).ToString("x"));
-                  AssertToConsole("((Int64)10).ToString(\"x5\"))", "0000a", ((Int64)10).ToString("x5"));
-              }
-
-              private static void AssertToConsole(string lbl, string expected, string str)
-              {
-                  if (str != expected)
-                  {
-                      Debug.WriteLine($"BAD: {lbl} expected: {expected} found: {str}");
-                  }
-                  else
-                  {
-                      Debug.WriteLine($" OK: {lbl} expected: {expected}");
-                  }
-              }
-          }
-
-          As you can see all the implemented formatters and some of their interesting deviances have a test case there.
-          Feel free to add others which contain a bug case, etc.
-          DONT FORGET TO MODIFY THIS COMMENT WITH UP-TO-DATE VERSION!
-
-          From you Main() call this class:
-            ToStringAsserts.Run();
-
-          Add a second old-school (running on "official" .net environment, like a Windows Console app) project to your
-          solution. Call from it's main() the test class as above. Execute this second project. You will see how the
-          official implementation formats the various things. Adjust the "expected" strings to reflect the received
-          output. E.g. if you want to check how we format (255).ToString("X") then add the following line:
-
-            AssertToConsole("(255).ToString(\"X\"))", "dunnoyet", (255).ToString("X"));
-
-          Execute the old-school project and you will see this line:
-            BAD: (255).ToString("X")) expected: dunnoyet found: FF
-
-          Now replace the "dunnoyet" with "FF" and the test case ready.
-          AGAIN: DONT FORGET TO MODIFY THIS COMMENT WITH UP-TO-DATE VERSION!
-
-          Now execute the nf project and check what nanoCLR formats for you.
-          Implement, fix, etc.
-          But always check your test project results in OK on all lines!
-
-          Thats all folks :)
-        */
-
         char result[FORMAT_RESULT_BUFFER_SIZE];
 
         int resultLength;
@@ -915,14 +853,17 @@ HRESULT Library_corlib_native_System_Number::
             case 'G':
                 resultLength = Format_G(result, value, formatChar, precision, negativeSign, numberDecimalSeparator);
                 break;
+
             case 'x':
             case 'X':
                 resultLength = Format_X(result, value, formatChar, precision);
                 break;
+
             case 'f':
             case 'F':
                 resultLength = Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
+
             case 'n':
             case 'N':
                 resultLength = Format_N(
@@ -934,10 +875,17 @@ HRESULT Library_corlib_native_System_Number::
                     numberGroupSeparator,
                     numberGroupSizes);
                 break;
+
             case 'd':
             case 'D':
                 resultLength = Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
                 break;
+
+            case 'e':
+            case 'E':
+                resultLength = Format_E(result, value, precision, formatChar);
+                break;
+
             default:
                 NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
         }
