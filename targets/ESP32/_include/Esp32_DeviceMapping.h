@@ -55,11 +55,15 @@ extern int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2];
 extern int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5];
 extern int8_t Esp32_SERIAL_DevicePinMap[UART_NUM_MAX][Esp32SerialPin_Max];
 extern int8_t Esp32_LED_DevicePinMap[16];
-extern int8_t Esp32_DAC_DevicePinMap[2];
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
+extern int8_t Esp32_DAC_DevicePinMap[2];
 extern int8_t Esp32_ADC_DevicePinMap[6];
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+extern int8_t Esp32_DAC_DevicePinMap[0];
+extern int8_t Esp32_ADC_DevicePinMap[20];
 #else
+extern int8_t Esp32_DAC_DevicePinMap[2];
 extern int8_t Esp32_ADC_DevicePinMap[20];
 #endif
 

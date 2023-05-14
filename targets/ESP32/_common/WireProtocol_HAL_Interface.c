@@ -51,7 +51,15 @@ static uart_port_t ESP32_WP_UART = UART_NUM_0;
 
 #elif CONFIG_IDF_TARGET_ESP32S3
 
-#error "NOT IMPLEMENTED (YET)"
+static uart_port_t ESP32_WP_UART = UART_NUM_0;
+
+// UART pins for ESP32-S3
+// U0RXD GPIO44
+// U0TXD GPIO43
+// U1RXD GPIO24
+// U1TXD GPIO23
+#define ESP32_WP_RX_PIN UART_NUM_0_RXD_DIRECT_GPIO_NUM
+#define ESP32_WP_TX_PIN UART_NUM_0_TXD_DIRECT_GPIO_NUM
 
 #elif CONFIG_IDF_TARGET_ESP32C3
 
@@ -184,7 +192,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
     return true;
 }
 
-#elif CONFIG_IDF_TARGET_ESP32S2 && CONFIG_USB_CDC_ENABLED
+#elif (CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3) && CONFIG_USB_CDC_ENABLED
 
 static bool WP_Port_Intitialised = false;
 

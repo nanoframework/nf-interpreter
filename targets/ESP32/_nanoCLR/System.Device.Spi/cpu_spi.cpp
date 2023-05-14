@@ -179,7 +179,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     // First available bus on ESP32 is HSPI_HOST(1)
     // Try with DMA first
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
     esp_err_t ret = spi_bus_initialize((spi_host_device_t)(busIndex), &bus_config, SPI_DMA_CH_AUTO);
 #else
     esp_err_t ret = spi_bus_initialize((spi_host_device_t)(busIndex + HSPI_HOST), &bus_config, SPI_DMA_CH_AUTO);
@@ -187,7 +187,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 
     if (ret != ESP_OK)
     {
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
         ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex, ret);
 #else
         ESP_LOGE(TAG, "Unable to init SPI bus %d esp_err %d", busIndex + HSPI_HOST, ret);
@@ -206,7 +206,7 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &spiDev
 // Uninitialise the bus
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
 {
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
     esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex));
 #else
     esp_err_t ret = spi_bus_free((spi_host_device_t)(busIndex + HSPI_HOST));
@@ -214,7 +214,7 @@ bool CPU_SPI_Uninitialize(uint8_t busIndex)
 
     if (ret != ESP_OK)
     {
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
         ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex, ret);
 #else
         ESP_LOGE(TAG, "spi_bus_free bus %d esp_err %d", busIndex + HSPI_HOST, ret);
@@ -349,7 +349,7 @@ HRESULT CPU_SPI_Add_Device(const SPI_DEVICE_CONFIGURATION &spiDeviceConfig, uint
         spi_device_handle_t deviceHandle;
 
         // First available bus on ESP32 is HSPI_HOST(1)
-#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
         esp_err_t ret = spi_bus_add_device((spi_host_device_t)(spiDeviceConfig.Spi_Bus), &dev_config, &deviceHandle);
 #else
         esp_err_t ret =
