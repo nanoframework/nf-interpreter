@@ -269,7 +269,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "sdkconfig.default_nopsram_rev3.esp32s3",
+                "SDK_CONFIG_FILE": "sdkconfig.default_rev3.esp32s3",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -277,7 +277,7 @@
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },{
-            "name": "ESP32_S3_PSRAM_REV3",
+            "name": "ESP32_S3_BLE_REV3",
             "inherits": [
                 "xtensa-esp32s3-preset",
                 "user-tools-repos",
@@ -286,11 +286,12 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "sdkconfig.default_rev3.esp32s3",
+                "SDK_CONFIG_FILE": "sdkconfig.default_rev3_ble.esp32s3",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
                 "NF_FEATURE_HAS_SDCARD": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },

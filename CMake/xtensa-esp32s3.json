@@ -35,8 +35,6 @@
                 "API_Hardware.Esp32": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
-                "API_nanoFramework.Device.Bluetooth": "ON",
-                "API_nanoFramework.Device.OneWire": "ON",
                 "API_nanoFramework.ResourceManager": "ON",
                 "API_nanoFramework.System.Collections": "ON",
                 "API_nanoFramework.System.Text": "ON",
