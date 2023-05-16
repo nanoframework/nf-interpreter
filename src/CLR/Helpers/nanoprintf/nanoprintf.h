@@ -1,7 +1,6 @@
 //
 // Copyright (c) .NET Foundation and Contributors
-// Portions Copyright (c) 2014-2019 Marco Paland (info@paland.com). All rights reserved.
-// Portions Copyright (c) 2021-2022 Eyal Rozenberg <eyalroz1@gmx.com>. All rights reserved.
+// Portions Copyright (c) 2006 - 2021 Skirrid Systems. All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
 
@@ -9,188 +8,287 @@
 #define NANOPRINTF_H
 
 #include <stdarg.h>
-#include <stddef.h>
 
-#define PRINTF_SUPPORT_DECIMAL_SPECIFIERS            1
-#define PRINTF_SUPPORT_EXPONENTIAL_SPECIFIERS        1
-#define PRINTF_SUPPORT_WRITEBACK_SPECIFIER           1
-#define PRINTF_SUPPORT_MSVC_STYLE_INTEGER_SPECIFIERS 0
-#define PRINTF_SUPPORT_LONG_LONG                     1
-#define PRINTF_MAX_INTEGRAL_DIGITS_FOR_DECIMAL       15
-#define PRINTF_CHECK_FOR_NUL_IN_FORMAT_SPECIFIER     0
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES         1
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT    1
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD    0
+// clang-format off
+
+/*************************************************************************
+Number of chars output
+
+Traditionally printf returns the number of chars output. If you are not
+interested in that value you can leave PRINTF_T undefined.
+On a small micro you can define the return type as unsigned char if you
+are sure the total output width will never exceed 255, or unsigned short.
+*************************************************************************/
+
+#define PRINTF_T size_t
+
+/*************************************************************************
+Memory access definitions
+
+Some micros such as the AVR can only support storing strings in flash
+memory by wrapping the string in a macro. To make this transparent we can
+define the printf function itself as a macro which performs the wrap and
+calls a renamed version of printf with an _ suffix and no i.
+*************************************************************************/
+
+/*
+Example for AVR micros using GCC toolchain from WinAVR or Atmel Studio
+
+#define sprintf(buf, format, args...)   _sprntf(buf, PSTR(format), ## args)
+#define printf(format, args...)         _prntf(PSTR(format), ## args)
+
+extern printf_t _sprntf(char *, const char *, ...);
+extern printf_t _prntf(const char *, ...);
+*/
+
+/*************************************************************************
+End of customisations - Stop Editing!
+
+The remainder of this file contains the function declarations.
+*************************************************************************/
+
+// Create a type definition for the return value
+#ifndef PRINTF_T
+typedef void printf_t;
+#else
+typedef PRINTF_T printf_t;
+#endif
 
 #ifdef __cplusplus
-#include <cstdarg>
-#include <cstddef>
 extern "C"
 {
-#else
-#include <stdarg.h>
-#include <stddef.h>
 #endif
 
-#ifdef __GNUC__
-#if ((__GNUC__ == 4 && __GNUC_MINOR__ >= 4) || __GNUC__ > 4)
-#define ATTR_PRINTF(one_based_format_index, first_arg)                                                                 \
-    __attribute__((format(gnu_printf, (one_based_format_index), (first_arg))))
-#else
-#define ATTR_PRINTF(one_based_format_index, first_arg)                                                                 \
-    __attribute__((format(printf, (one_based_format_index), (first_arg))))
-#endif
-#define ATTR_VPRINTF(one_based_format_index) ATTR_PRINTF((one_based_format_index), 0)
-#else
-#define ATTR_PRINTF(one_based_format_index, first_arg)
-#define ATTR_VPRINTF(one_based_format_index)
-#endif
-
-#ifndef PRINTF_ALIAS_STANDARD_FUNCTION_NAMES
-#define PRINTF_ALIAS_STANDARD_FUNCTION_NAMES 0
-#endif
-
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
-#define printf_    printf
-#define sprintf_   sprintf
-#define vsprintf_  vsprintf
-#define snprintf_  snprintf
-#define vsnprintf_ vsnprintf
-#define vprintf_   vprintf
-#endif
-
-// If you want to include this implementation file directly rather than
-// link against, this will let you control the functions' visibility,
-// e.g. make them static so as not to clash with other objects also
-// using them.
-#ifndef PRINTF_VISIBILITY
-#define PRINTF_VISIBILITY
-#endif
-
-    /**
-     * Prints/send a single character to some opaque output entity
-     *
-     * @note This function is not implemented by the library, only declared; you must provide an
-     * implementation if you wish to use the @ref printf / @ref vprintf function (and possibly
-     * for linking against the library, if your toolchain does not support discarding unused functions)
-     *
-     * @note The output could be as simple as a wrapper for the `write()` system call on a Unix-like
-     * system, or even libc's @ref putchar , for replicating actual functionality of libc's @ref printf
-     * function; but on an embedded system it may involve interaction with a special output device,
-     * like a UART, etc.
-     *
-     * @note in libc's @ref putchar, the parameter type is an int; this was intended to support the
-     * representation of either a proper character or EOF in a variable - but this is really not
-     * meaningful to pass into @ref putchar and is discouraged today. See further discussion in:
-     * @link https://stackoverflow.com/q/17452847/1593077
-     *
-     * @param c the single character to print
-     */
-    PRINTF_VISIBILITY
-    void putchar_(char c);
-
-    /**
-     * An implementation of the C standard's printf/vprintf
-     *
-     * @note you must implement a @ref putchar_ function for using this function - it invokes @ref putchar_
-     * rather than directly performing any I/O (which insulates it from any dependence on the operating system
-     * and external libraries).
-     *
-     * @param format A string specifying the format of the output, with %-marked specifiers of how to interpret
-     * additional arguments.
-     * @param arg Additional arguments to the function, one for each %-specifier in @p format string
-     * @return The number of characters written into @p s, not counting the terminating null character
-     */
-    ///@{
-    PRINTF_VISIBILITY
-    int printf_(const char *format, ...) ATTR_PRINTF(1, 2);
-    PRINTF_VISIBILITY
-    int vprintf_(const char *format, va_list arg) ATTR_VPRINTF(1);
-    ///@}
-
-    /**
-     * An implementation of the C standard's sprintf/vsprintf
-     *
-     * @note For security considerations (the potential for exceeding the buffer bounds), please consider using
-     * the size-constrained variant, @ref snprintf / @ref vsnprintf , instead.
-     *
-     * @param s An array in which to store the formatted string. It must be large enough to fit the formatted
-     * output!
-     * @param format A string specifying the format of the output, with %-marked specifiers of how to interpret
-     * additional arguments.
-     * @param arg Additional arguments to the function, one for each specifier in @p format
-     * @return The number of characters written into @p s, not counting the terminating null character
-     */
-    ///@{
-    PRINTF_VISIBILITY
-    int sprintf_(char *s, const char *format, ...) ATTR_PRINTF(2, 3);
-    PRINTF_VISIBILITY
-    int vsprintf_(char *s, const char *format, va_list arg) ATTR_VPRINTF(2);
-    ///@}
-
-    /**
-     * An implementation of the C standard's snprintf/vsnprintf
-     *
-     * @param s An array in which to store the formatted string. It must be large enough to fit either the
-     * entire formatted output, or at least @p n characters. Alternatively, it can be NULL, in which case
-     * nothing will be printed, and only the number of characters which _could_ have been printed is
-     * tallied and returned.
-     * @param n The maximum number of characters to write to the array, including a terminating null character
-     * @param format A string specifying the format of the output, with %-marked specifiers of how to interpret
-     * additional arguments.
-     * @param arg Additional arguments to the function, one for each specifier in @p format
-     * @return The number of characters that COULD have been written into @p s, not counting the terminating
-     *         null character. A value equal or larger than @p n indicates truncation. Only when the returned value
-     *         is non-negative and less than @p n, the null-terminated string has been fully and successfully printed.
-     */
-    ///@{
-    PRINTF_VISIBILITY
-    int snprintf_(char *s, size_t count, const char *format, ...) ATTR_PRINTF(3, 4);
-    PRINTF_VISIBILITY
-    int vsnprintf_(char *s, size_t count, const char *format, va_list arg) ATTR_VPRINTF(3);
-    ///@}
-
-    /**
-     * printf/vprintf with user-specified output function
-     *
-     * An alternative to @ref printf_, in which the output function is specified dynamically
-     * (rather than @ref putchar_ being used)
-     *
-     * @param out An output function which takes one character and a type-erased additional parameters
-     * @param extra_arg The type-erased argument to pass to the output function @p out with each call
-     * @param format A string specifying the format of the output, with %-marked specifiers of how to interpret
-     * additional arguments.
-     * @param arg Additional arguments to the function, one for each specifier in @p format
-     * @return The number of characters for which the output f unction was invoked, not counting the terminating null
-     * character
-     *
-     */
-    PRINTF_VISIBILITY
-    int fctprintf(void (*out)(char c, void *extra_arg), void *extra_arg, const char *format, ...) ATTR_PRINTF(3, 4);
-    PRINTF_VISIBILITY
-    int vfctprintf(void (*out)(char c, void *extra_arg), void *extra_arg, const char *format, va_list arg)
-        ATTR_VPRINTF(3);
+// Function declarations, unless macros have been defined above
+printf_t printf_(const char *, ...);
+printf_t sprintf_(char *, const char *, ...);
+printf_t snprintf_(char *, size_t n, const char *, ...);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_HARD
-#undef printf_
-#undef sprintf_
-#undef vsprintf_
-#undef snprintf_
-#undef vsnprintf_
-#undef vprintf_
-#else
-#if PRINTF_ALIAS_STANDARD_FUNCTION_NAMES_SOFT
-#define printf    printf_
-#define sprintf   sprintf_
-#define vsprintf  vsprintf_
-#define snprintf  snprintf_
-#define vsnprintf vsnprintf_
-#define vprintf   vprintf_
-#endif
-#endif
+    // from config
+
+/*************************************************************************
+Basic printf only
+
+The code is designed to support a variety of printf-related functions.
+If simple serial output is all you want then you can save some space by
+defining BASIC_PRINTF_ONLY which allows the internal API to be simplified.
+Note that sprintf will not be supported in this case.
+*************************************************************************/
+
+// #define BASIC_PRINTF_ONLY
+
+/*************************************************************************
+Memory access definitions
+
+Some micros such as the AVR can only support storing and accessing strings
+in flash memory using special macros and functions. This section can be
+used to specify those methods. You may also need to modify printf.h
+to get the compiler to place the format strings in flash memory.
+
+The GET_FORMAT(ptr) macro is used to access a character in the printf
+format string. By default this does a normal memory pointer access, but
+you can configure it to access flash memory if needed.
+*************************************************************************/
+
+/*
+Example for AVR micros using GCC toolchain from WinAVR or Atmel Studio
+
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#define GET_FORMAT(p)   pgm_read_byte(p)
+*/
+
+/*************************************************************************
+Output configuration
+
+By default printf will use the putchar function. If this is not defined
+in your system you can set your own function here by defining
+PUTCHAR_FUNC to be the name of that function.
+*************************************************************************/
+
+void putchar_(char character);
+#define PUTCHAR_FUNC putchar_
+
+/*************************************************************************
+Compiler capability configuration
+
+Set some options that the C pre-processor will not tell us about.
+*************************************************************************/
+
+// Does the compiler support double precision or silently degrade to single?
+//#define NO_DOUBLE_PRECISION
+
+// Does the compiler support isnan and isinf floating point functions?
+// #define NO_ISNAN_ISINF
+
+/*************************************************************************
+Formatted item width
+
+Since it is extremely unlikely that you will ever want to use a formatted
+width for a single item of more than 127 chars (i.e. the expanded and
+padded size of a single % expression), the width variables can normally
+be restricted to 8 bits. On small micros this saves a lot of code and
+variable space. On a 32-bit RISC it may increase code size due to type
+conversions. Choose the variable type to suit your CPU.
+Note that a signed type is required.
+*************************************************************************/
+
+typedef signed char width_t;
+
+/*************************************************************************
+Feature configuration
+
+This section defines the individual feature flags.
+These are combined as needed to produce the FEATURE_FLAGS macro.
+*************************************************************************/
+
+// Include floating point number support
+#define USE_FLOAT (1 << 0)
+
+// Include support for long integers
+#define USE_LONG (1 << 1)
+
+// Include support for octal formatting
+#define USE_OCTAL (1 << 2)
+
+// Include support for %d decimal formatting
+#define USE_SIGNED (1 << 3)
+
+// Include support for the %i synonym for %d
+#define USE_SIGNED_I (1 << 4)
+
+// Include support for the %u unsigned decimal specifier
+#define USE_UNSIGNED (1 << 5)
+
+// Include support for the %x hex specifier (lowercase output)
+#define USE_HEX_LOWER (1 << 6)
+
+// Include support for the %X hex specifier (uppercase output)
+#define USE_HEX_UPPER (1 << 7)
+
+// Force uppercase output with %x.
+// Used in conjunction with USE_HEX_LOWER.
+// Ignored if USE_HEX_UPPER is also set.
+#define USE_HEX_UPPER_L (1 << 8)
+
+// Include support for %c single character
+#define USE_CHAR (1 << 9)
+
+// Include support for %s string
+#define USE_STRING (1 << 10)
+
+// Include support for %S string in flash memory
+// Only needed for architectures which cannot access program memory using normal pointers.
+// If you have not defined the GET_FORMAT() macro above then you don't need this option.
+#define USE_FSTRING (1 << 11)
+
+// Include support for %b binary specifier
+#define USE_BINARY (1 << 12)
+
+// Include precision support when floating point is not present.
+// Precision is automatically enabled when floating point support is used.
+#define USE_PRECISION (1UL << 16)
+
+// Allow use of leading zero padding e.g. "%03d"
+#define USE_ZERO_PAD (1UL << 17)
+
+// Allow use of space padding e.g. "%3d" or "%12s"
+#define USE_SPACE_PAD (1UL << 18)
+
+// Include indirect width/precision support e.g. "%*d"
+#define USE_INDIRECT (1UL << 19)
+
+// Allow forcing a leading plus sign e.g. "%+3d"
+#define USE_PLUS_SIGN (1UL << 20)
+
+// Allow forcing a leading space (instead of + or -) in front of zero e.g. "% 3d"
+#define USE_SPACE_SIGN (1UL << 21)
+
+// Include support for the left-justify '-' flag.
+#define USE_LEFT_JUST (1UL << 22)
+
+// Include support for the special '#' flag.
+#define USE_SPECIAL (1UL << 23)
+
+// Use smaller but less efficient floating point normalisation.
+// This is not recommended unless code space is critically low.
+#define USE_SMALL_FLOAT (1UL << 24)
+
+// Include support for 64-bit integers e.g. "%lld"
+#define USE_LONG_LONG (1UL << 25)
+
+/*************************************************************************
+Pre-defined feature sets
+
+This section provides some commonly used combinations of features.
+*************************************************************************/
+
+// Lowercase hex integers only. This really is the bare minimum.
+#define HEX_INT (USE_HEX_LOWER)
+
+// Decimal and lowercase hex only.
+#define MINIMAL_INT (USE_SIGNED | USE_HEX_LOWER)
+
+// Signed and unsigned decimal, lower case hex, zero & space padding, plus char and string
+#define BASIC_INT (USE_CHAR | USE_STRING | USE_SIGNED | USE_UNSIGNED | USE_HEX_LOWER | USE_ZERO_PAD | USE_SPACE_PAD)
+
+// All short integer features except octal, binary, %i, indirection and specials.
+#define SHORT_INT                                                                                                      \
+    (USE_CHAR | USE_STRING | USE_SIGNED | USE_UNSIGNED | USE_HEX_LOWER | USE_HEX_UPPER | USE_PRECISION |               \
+     USE_ZERO_PAD | USE_SPACE_PAD | USE_PLUS_SIGN | USE_SPACE_SIGN | USE_LEFT_JUST)
+
+// As above, but also supports long integers.
+#define LONG_INT (USE_LONG | SHORT_INT)
+
+// As above, but also supports long-long integers.
+#define LONG_LONG_INT (USE_LONG_LONG | LONG_INT)
+
+// All possible integer features.
+#define FULL_INT (USE_BINARY | USE_OCTAL | USE_SIGNED_I | USE_INDIRECT | USE_SPECIAL | LONG_LONG_INT)
+
+// All available features including floating point.
+#define FULL_FLOAT (USE_FLOAT | FULL_INT)
+
+/*************************************************************************
+Features included in your build of printf. Use only the features you need
+to keep code size and execution time to a minimum.
+
+You can use the custom set, with anything you don't want commented out,
+or you can use one of the pre-defined sets.
+
+Examples:
+
+#define FEATURE_FLAGS   CUSTOM_SET
+#define FEATURE_FLAGS   SHORT_INT
+
+Features and pre-defined sets are set out in the following sections.
+*************************************************************************/
+
+// Custom feature set. Comment out features you don't want.
+#define CUSTOM_SET                                                                                                     \
+    (0 | USE_FLOAT | USE_LONG | USE_BINARY | USE_OCTAL | USE_SIGNED | USE_SIGNED_I | USE_UNSIGNED | USE_HEX_LOWER |    \
+     USE_HEX_UPPER | USE_HEX_UPPER_L | USE_CHAR | USE_STRING | USE_FSTRING | USE_PRECISION | USE_ZERO_PAD |            \
+     USE_SPACE_PAD | USE_INDIRECT | USE_PLUS_SIGN | USE_SPACE_SIGN | USE_LEFT_JUST | USE_SPECIAL | USE_SMALL_FLOAT |   \
+     USE_LONG_LONG)
+
+#define FEATURE_FLAGS                                                                                                  \
+    (0 | USE_FLOAT | USE_LONG | USE_SIGNED | USE_UNSIGNED | USE_HEX_LOWER |    \
+     USE_HEX_UPPER | USE_HEX_UPPER_L | USE_CHAR | USE_STRING | USE_PRECISION | USE_ZERO_PAD |            \
+     USE_SPACE_PAD | USE_INDIRECT | USE_PLUS_SIGN | \
+     USE_LONG_LONG)
+
+/*************************************************************************
+End of customisations - Stop Editing!
+*************************************************************************/
+
+#define printf      printf_
+#define sprintf     sprintf_
+#define snprintf    snprintf_
 
 #endif // NANOPRINTF_H
+
+// clang-format on
