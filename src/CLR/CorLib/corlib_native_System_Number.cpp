@@ -106,10 +106,10 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
             ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u4);
             break;
         case DATATYPE_I8:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().s8);
             break;
         case DATATYPE_U8:
-            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, (CLR_INT64_TEMP_CAST)value->NumericByRef().s8);
+            ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().u8);
             break;
         case DATATYPE_R4:
             ret = snprintf(buffer, FORMAT_RESULT_BUFFER_SIZE, formatStr, value->NumericByRef().r4);
@@ -472,12 +472,16 @@ int Library_corlib_native_System_Number::Format_G(
                                     buffer[ret] = 0;
                                 }
 
-                                if (!isIntegerDataType && buffer[ret - 1] == '0')
+                                // drop last digit in case it's a rounding digit
+                                // conditions are:
+                                // - not an integer type
+                                // - number of digits is at least 2
+                                // - number of digits is greater than the default precision (otherwise we could be
+                                // mistaking a valid last fraction digit for a rounding digit)
+                                if (!isIntegerDataType && numDigits >= 2 && numDigits >= defaultPrecision &&
+                                    buffer[ret - 2] == '0')
                                 {
-                                    // drop last digit in case it's a rounding digit
-                                    memmove(&buffer[ret], &buffer[ret + 1], savedResultLength - ret);
-
-                                    buffer[ret] = 0;
+                                    buffer[ret - 1] = 0;
                                     ret--;
 
                                     break;
@@ -521,7 +525,7 @@ int Library_corlib_native_System_Number::Format_G(
                     }
                 }
 
-                if ((dotIndex == -1) || (dotIndex > (requestedPrecision + offsetBecauseOfNegativeSign)))
+                if ((dotIndex == -1) || exponent != 0 || (dotIndex > (precision + offsetBecauseOfNegativeSign)))
                 {
                     // insert '.', only if request precision requires it
                     // this is: requestedPrecision is specified and is more than 1 (taking into account the sign)
@@ -612,8 +616,35 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
 {
     int ret = -1;
 
+    CLR_DataType dataType = value->DataType();
+
+    // set max width for the conversion
+    int maxWidth = 0;
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+            maxWidth = 2;
+            break;
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+            maxWidth = 4;
+            break;
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+            maxWidth = 8;
+            break;
+        case DATATYPE_I8:
+        case DATATYPE_U8:
+            maxWidth = 16;
+            break;
+        default:
+            break;
+    }
+
     if (precision == -1)
     {
+        // no precision specified
         precision = 0;
     }
 
@@ -627,6 +658,15 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
         formatChar); // x or X should return different results
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
+
+    if (ret > maxWidth)
+    {
+        // we have more digits than the max width, so we need to strip the leading ones
+        memmove(&buffer[0], &buffer[ret - maxWidth], maxWidth);
+
+        buffer[maxWidth] = 0;
+        ret = maxWidth;
+    }
 
     return ret;
 }
@@ -930,7 +970,7 @@ HRESULT Library_corlib_native_System_Number::
 
     if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        ret = format;
     }
     else
     {
