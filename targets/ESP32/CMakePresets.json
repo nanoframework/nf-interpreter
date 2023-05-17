@@ -260,7 +260,7 @@
             }
         },
         {
-            "name": "ESP32_S3_REV3",
+            "name": "ESP32_S3",
             "inherits": [
                 "xtensa-esp32s3-preset",
                 "user-tools-repos",
@@ -276,7 +276,8 @@
                 "NF_FEATURE_HAS_SDCARD": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
-        },{
+        },
+        {
             "name": "ESP32_S3_BLE_REV3",
             "inherits": [
                 "xtensa-esp32s3-preset",
@@ -783,6 +784,18 @@
             "name": "ESP32_C3_REV3",
             "displayName": "ESP32_C3_REV3",
             "configurePreset": "ESP32_C3_REV3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3",
+            "displayName": "ESP32_S3",
+            "configurePreset": "ESP32_S3"
+        },
+        {
+            "inherits": "base-user",
+            "name": "ESP32_S3_BLE_REV3",
+            "displayName": "ESP32_S3_BLE_REV3",
+            "configurePreset": "ESP32_S3_BLE_REV3"
         },
         {
             "inherits": "base-user",
