@@ -40,7 +40,7 @@ int8_t Esp32_I2C_DevicePinMap[I2C_NUM_MAX][2] = {{-1, -1}, {-1, -1}};
 //  LED PWM
 //  16 channels LED1 to LED16  or PWM1 to PWM16
 //  Map pins Data & Clock
-int8_t Esp32_LED_DevicePinMap[16] = {
+int8_t Esp32_LED_DevicePinMap[8] = {
     // Channels ( non assigned )
     -1, // 1
     -1, // 2
@@ -50,14 +50,6 @@ int8_t Esp32_LED_DevicePinMap[16] = {
     -1, // 6
     -1, // 7
     -1, // 8
-    -1, // 9
-    -1, // 10
-    -1, // 11
-    -1, // 12
-    -1, // 13
-    -1, // 14
-    -1, // 15
-    -1, // 16
 };
 
 // Mapped to ESP32 controllers
@@ -77,6 +69,3 @@ int8_t Esp32_ADC_DevicePinMap[20] = {
 int8_t Esp32_I2S_DevicePinMap[I2S_NUM_MAX][5] = {
     {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE},
     {I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE, I2S_PIN_NO_CHANGE}};
-
-// No DAC on S3
-int8_t Esp32_DAC_DevicePinMap[0];
