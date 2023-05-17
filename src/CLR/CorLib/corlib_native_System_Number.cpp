@@ -131,8 +131,8 @@ int Library_corlib_native_System_Number::DoPrintfOnDataType(char *buffer, char *
 
 const char *Library_corlib_native_System_Number::GetPrintfLengthModifier(CLR_DataType dataType)
 {
-    const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)   ? "hh"
-                      : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2) ? "h"
+    const char *ret = (dataType == DATATYPE_I1 || dataType == DATATYPE_U1)   ? ""
+                      : (dataType == DATATYPE_I2 || dataType == DATATYPE_U2) ? ""
                       : (dataType == DATATYPE_I4 || dataType == DATATYPE_U4) ? ""
                       : (dataType == DATATYPE_I8 || dataType == DATATYPE_U8) ? "ll"
                                                                              : "";
@@ -328,9 +328,6 @@ int Library_corlib_native_System_Number::Format_G(
 
     bool isIntegerDataType = IsIntegerDataType(dataType);
 
-    // flag to indicate if we're forcing extra precision for the conversion
-    bool forcedPrecision = true;
-
     // set default precision for the conversion
     int defaultPrecision = 0;
     switch (dataType)
@@ -354,37 +351,43 @@ int Library_corlib_native_System_Number::Format_G(
             defaultPrecision = 20;
             break;
         case DATATYPE_R4:
-            defaultPrecision = 7;
+            // from .NET documentation:
+            // When used with a Single value, the "G9" format specifier ensures that the original Single value
+            // successfully round-trips.
+            defaultPrecision = 9;
             break;
         case DATATYPE_R8:
-            defaultPrecision = 15;
+            // from .NET documentation:
+            // When used with a Double value, the "G17" format specifier ensures that the original Double value
+            // successfully round-trips.
+            defaultPrecision = 17;
             break;
         default:
-            forcedPrecision = false;
             break;
     }
+
+    int requestedPrecision = precision;
 
     if (precision == -1)
     {
         // no precision specified, use default
         precision = defaultPrecision;
-
-        // set flag to indicate that we're forcing a precision
-        forcedPrecision = true;
     }
-    else
+
+    int precisionForConversion = precision;
+
+    if (!isIntegerDataType)
     {
-        forcedPrecision = false;
+        precisionForConversion += 2;
     }
 
     if (precision > 0)
     {
+        // compose format string
         char nonIntegerPrecStr[FORMAT_FMTSTR_BUFFER_SIZE];
         if (!isIntegerDataType)
         {
-            // value of incoming precision would be more than enough
-            // see diff between printf and ToString precision meaning below
-            snprintf(nonIntegerPrecStr, FORMAT_FMTSTR_BUFFER_SIZE, "0.%d", precision);
+            snprintf(nonIntegerPrecStr, FORMAT_FMTSTR_BUFFER_SIZE, "0.%d", precisionForConversion);
         }
 
         char formatStr[FORMAT_FMTSTR_BUFFER_SIZE];
@@ -400,8 +403,7 @@ int Library_corlib_native_System_Number::Format_G(
 
         ret = DoPrintfOnDataType(buffer, formatStr, value);
 
-        // this extra processing is only required for integer types
-        if (isIntegerDataType && ret > 0)
+        if (ret > 0)
         {
             // printf and ToString differs on precision numbers:
             // printf("%.05d", 123.4567890) returns "123.45679"
@@ -412,6 +414,25 @@ int Library_corlib_native_System_Number::Format_G(
             bool isNegative = (buffer[0] == '-');
             int offsetBecauseOfNegativeSign = (isNegative ? 1 : 0);
             int savedResultLength = ret;
+            int exponent = 0;
+
+            // find the exponent character, start with lower case
+            char *e = strchr(buffer, 'e');
+
+            if (!e)
+            {
+                // try upper case
+                e = strchr(buffer, 'E');
+            }
+
+            if (e)
+            {
+                // move past the exponent character
+                e++;
+
+                // convert exponent to digits
+                exponent = atoi(e);
+            }
 
             if (ret > (precision + offsetBecauseOfNegativeSign))
             {
@@ -419,8 +440,8 @@ int Library_corlib_native_System_Number::Format_G(
 
                 int numDigits = 0;
 
-                // leave just the required amount of digits, if precision was forced
-                if (forcedPrecision || precision < defaultPrecision)
+                // leave just the required amount of digits
+                if (requestedPrecision <= defaultPrecision)
                 {
                     // find the first digit after the dot
                     for (int i = 0; i < ret; i++)
@@ -434,12 +455,33 @@ int Library_corlib_native_System_Number::Format_G(
                                 ret = i + 1;
                                 char first_lost_digit = buffer[ret];
 
+                                // handle various situation, like rounding, exponent, rounding errors
                                 if (first_lost_digit == '.' && (ret + 1) < savedResultLength)
                                 {
                                     first_lost_digit = buffer[ret + 1];
+                                    buffer[ret] = 0;
+                                }
+                                else if (first_lost_digit == 'E' || first_lost_digit == 'e')
+                                {
+                                    first_lost_digit = buffer[ret - 1];
+                                    buffer[ret] = 0;
+                                    ret--;
+                                }
+                                else
+                                {
+                                    buffer[ret] = 0;
                                 }
 
-                                buffer[ret] = 0;
+                                if (!isIntegerDataType && buffer[ret - 1] == '0')
+                                {
+                                    // drop last digit in case it's a rounding digit
+                                    memmove(&buffer[ret], &buffer[ret + 1], savedResultLength - ret);
+
+                                    buffer[ret] = 0;
+                                    ret--;
+
+                                    break;
+                                }
 
                                 if (first_lost_digit >= '5')
                                 {
@@ -479,11 +521,11 @@ int Library_corlib_native_System_Number::Format_G(
                     }
                 }
 
-                if ((dotIndex == -1) || (dotIndex > (precision + offsetBecauseOfNegativeSign)))
+                if ((dotIndex == -1) || (dotIndex > (requestedPrecision + offsetBecauseOfNegativeSign)))
                 {
                     // insert '.', only if request precision requires it
-                    // this is: precision is specified and is more than 1 (taking into account the sign)
-                    if (precision > 0 && (ret - offsetBecauseOfNegativeSign) > 1)
+                    // this is: requestedPrecision is specified and is more than 1 (taking into account the sign)
+                    if (requestedPrecision > 0 && (ret - offsetBecauseOfNegativeSign) > 1)
                     {
                         memmove(
                             &buffer[2 + offsetBecauseOfNegativeSign],
@@ -494,16 +536,20 @@ int Library_corlib_native_System_Number::Format_G(
                         ret++;
                     }
 
-                    // append 'E+exp'
-                    int exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
-                    exponent -= offsetBecauseOfNegativeSign;
+                    // deal with 'E+exp'
+                    if (exponent == 0)
+                    {
+                        exponent = (dotIndex == -1) ? savedResultLength - 1 : dotIndex - 1;
+                        exponent -= offsetBecauseOfNegativeSign;
+                    }
+
                     if (formatChar == 'g')
                     {
-                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e+%02d", exponent);
+                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "e%+.2d", exponent);
                     }
                     else
                     {
-                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E+%02d", exponent);
+                        ret += snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE - ret, "E%+.2d", exponent);
                     }
                 }
             }
@@ -712,7 +758,7 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
     int requestedPrecision = precision;
 
     // force extra precision to account for rounding errors
-    precision = requestedPrecision + 4;
+    precision = requestedPrecision + 1;
 
     CLR_DataType dataType = value->DataType();
 
@@ -762,19 +808,7 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
 
     if (ret > 0)
     {
-        int dotIndex = GetDotIndex(buffer, ret);
-
-        // if there is no dot, set the index to the end of the string
-        if (dotIndex == -1)
-        {
-            dotIndex = ret;
-        }
-
-        // remove extra precision
-        memmove(&buffer[dotIndex + requestedPrecision + 1], &buffer[dotIndex + precision + 1], ret);
-
-        // adjust the string length
-        ret -= precision + 1 - requestedPrecision;
+        int exponent = 0;
 
         // find the exponent character, start with lower case
         char *e = strchr(buffer, 'e');
@@ -791,10 +825,66 @@ int Library_corlib_native_System_Number::Format_E(char *buffer, CLR_RT_HeapBlock
             e++;
 
             // convert exponent to digits
-            int expo = atoi(e);
+            exponent = atoi(e);
+        }
 
-            // print the exponent with the correct sign and size
-            snprintf(e, FORMAT_RESULT_BUFFER_SIZE, "%+.3d", expo);
+        int numDigits = 0;
+        int savedResultLength = ret;
+
+        int dotIndex = GetDotIndex(buffer, ret);
+
+        // if there is no dot, set the index to the end of the string
+        if (dotIndex == -1)
+        {
+            dotIndex = ret;
+        }
+
+        // leave just the required amount of digits
+        if (requestedPrecision <= precision)
+        {
+            // find the first digit after the dot
+            for (int i = 0; i < ret; i++)
+            {
+                if (buffer[i] >= '0' && buffer[i] <= '9')
+                {
+                    numDigits++;
+
+                    if (numDigits == precision)
+                    {
+                        ret = i + 1;
+                        char first_lost_digit = buffer[ret];
+
+                        if (first_lost_digit == '.' && (ret + 1) < savedResultLength)
+                        {
+                            first_lost_digit = buffer[ret + 1];
+                        }
+
+                        buffer[ret] = 0;
+
+                        if (first_lost_digit >= '5')
+                        {
+                            int savedRet = ret;
+                            RoundUpNumStr(buffer, &ret);
+
+                            if (savedRet < ret)
+                            {
+                                dotIndex++;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // now the exponent
+        if (formatChar == 'e')
+        {
+            snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE, "e%+.3d", exponent);
+        }
+        else
+        {
+            snprintf(&buffer[ret], FORMAT_RESULT_BUFFER_SIZE, "E%+.3d", exponent);
         }
     }
 
