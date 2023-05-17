@@ -479,7 +479,7 @@ int Library_corlib_native_System_Number::Format_G(
                                 // - number of digits is greater than the default precision (otherwise we could be
                                 // mistaking a valid last fraction digit for a rounding digit)
                                 if (!isIntegerDataType && numDigits >= 2 && numDigits >= defaultPrecision &&
-                                    buffer[strlen(buffer) - 2] == '0')
+                                    buffer[ret - 2] == '0')
                                 {
                                     buffer[ret - 1] = 0;
                                     ret--;
