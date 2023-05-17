@@ -476,7 +476,8 @@ int Library_corlib_native_System_Number::Format_G(
                                 // conditions are:
                                 // - not an integer type
                                 // - number of digits is at least 2
-                                // - number of digits is greater than the default precision (otherwise we could be mistaking a valid last fraction digit for a rounding digit)
+                                // - number of digits is greater than the default precision (otherwise we could be
+                                // mistaking a valid last fraction digit for a rounding digit)
                                 if (!isIntegerDataType && numDigits >= 2 && numDigits >= defaultPrecision &&
                                     buffer[strlen(buffer) - 2] == '0')
                                 {
@@ -616,7 +617,7 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
     int ret = -1;
 
     CLR_DataType dataType = value->DataType();
-    
+
     // set max width for the conversion
     int maxWidth = 0;
     switch (dataType)
@@ -662,12 +663,12 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
 
     if (ret > maxWidth)
     {
-		// we have more digits than the max width, so we need to strip the leading ones
-		memmove(&buffer[0], &buffer[ret - maxWidth], maxWidth);
+        // we have more digits than the max width, so we need to strip the leading ones
+        memmove(&buffer[0], &buffer[ret - maxWidth], maxWidth);
 
-		buffer[maxWidth] = 0;
-		ret = maxWidth;
-	}
+        buffer[maxWidth] = 0;
+        ret = maxWidth;
+    }
 
     return ret;
 }
