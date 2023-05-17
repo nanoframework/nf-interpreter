@@ -612,8 +612,37 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
 {
     int ret = -1;
 
+    CLR_DataType dataType = value->DataType();
+    
+    // set max width for the conversion
+    int maxWidth = 0;
+    switch (dataType)
+    {
+        case DATATYPE_I1:
+        case DATATYPE_U1:
+            maxWidth = 2;
+            break;
+        case DATATYPE_I2:
+        case DATATYPE_U2:
+            maxWidth = 4;
+            break;
+        case DATATYPE_I4:
+        case DATATYPE_U4:
+            maxWidth = 8;
+            break;
+        case DATATYPE_I8:
+        case DATATYPE_U8:
+            maxWidth = 16;
+            break;
+        default:
+            break;
+    }
+
+    int requestedPrecision = precision;
+
     if (precision == -1)
     {
+        // no precision specified
         precision = 0;
     }
 
