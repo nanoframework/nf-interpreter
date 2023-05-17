@@ -939,7 +939,7 @@ HRESULT Library_corlib_native_System_Number::
 
     if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        ret = format;
     }
     else
     {
