@@ -642,8 +642,6 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
             break;
     }
 
-    int requestedPrecision = precision;
-
     if (precision == -1)
     {
         // no precision specified
