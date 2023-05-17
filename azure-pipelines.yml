@@ -464,6 +464,15 @@ jobs:
         PackageName: ESP32_C3
         CMakePreset: ESP32_C3
 
+      ESP32_S3:
+        TargetBoard: ESP32_S3
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: ESP32_S3
+        PackageName: ESP32_S3
+        CMakePreset: ESP32_S3
+  
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
