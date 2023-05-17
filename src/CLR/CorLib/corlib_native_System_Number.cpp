@@ -628,6 +628,15 @@ int Library_corlib_native_System_Number::Format_X(char *buffer, CLR_RT_HeapBlock
 
     ret = DoPrintfOnDataType(buffer, formatStr, value);
 
+    if (ret > maxWidth)
+    {
+		// we have more digits than the max width, so we need to strip the leading ones
+		memmove(&buffer[0], &buffer[ret - maxWidth], maxWidth);
+
+		buffer[maxWidth] = 0;
+		ret = maxWidth;
+	}
+
     return ret;
 }
 
