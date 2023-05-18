@@ -815,7 +815,7 @@ jobs:
     displayName: Pack nanoCLR WIN32 (stable)
     inputs:
       command: 'custom' 
-      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_SimpleVersion).$(TARGET_BUILD_COUNTER)'
+      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion).$(TARGET_BUILD_COUNTER)'
 
   - task: NuGetCommand@2
     condition: >-
