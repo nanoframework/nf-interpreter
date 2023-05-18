@@ -336,18 +336,14 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConn
 {
     NANOCLR_HEADER();
 
-    bool conn;
+    // default to false
+    bool conn = false;
 
-    if (sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
-    {
-        stack.SetResult_Boolean(conn);
-    }
-    else
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
+    // don't care about return value as we'll just return false if the connection state can't be determined
+    sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
+    stack.SetResult_Boolean(conn);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
