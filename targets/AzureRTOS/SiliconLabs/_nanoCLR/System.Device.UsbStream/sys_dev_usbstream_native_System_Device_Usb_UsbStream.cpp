@@ -25,10 +25,14 @@ static void UsbAsyncWriteCompleted(
 
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
-    // store TX count
-    usbPal->TxBytesSent = xfer_len;
+    // process this only IF the operation wasn't aborted
+    if (status != SL_STATUS_ABORT)
+    {
+        // store TX count
+        usbPal->TxBytesSent = xfer_len;
 
-    Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+        Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+    }
 
     NATIVE_INTERRUPT_END
 }
@@ -44,16 +48,19 @@ static void UsbAsyncReadCompleted(
     (void)class_nbr;
     (void)p_buf;
     (void)buf_len;
-    (void)status;
 
     NATIVE_INTERRUPT_START
 
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
-    // store RX count
-    usbPal->RxBytesReceived = xfer_len;
+    // process this only IF the operation wasn't aborted
+    if (status != SL_STATUS_ABORT)
+    {
+        // store RX count
+        usbPal->RxBytesReceived = xfer_len;
 
-    Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+        Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+    }
 
     NATIVE_INTERRUPT_END
 }
@@ -172,6 +179,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
 
     // pop timeout heap block from stack
     stack.PopValue();
+
     // set result with count of bytes received
     stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
 
@@ -251,6 +259,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
 
         // bump custom state
         stack.m_customState = 2;
+
+        // clear TX counter
+        UsbStream_PAL.TxBytesSent = 0;
 
         // start write operation with async API
         // requesting handling of "End-of-transfer"
