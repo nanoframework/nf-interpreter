@@ -470,7 +470,7 @@ macro(nf_setup_partition_tables_generator)
     # create command line for partition table generator
     set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -481,7 +481,7 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -590,12 +590,12 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
     endif()
 
-    # handle specifics for ESP32S2 series
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    # handle specifics for ESP32S2/S3 series
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         if(ESP32_USB_CDC)
 
-            # add IDF components specific to ESP32S2 series
+            # add IDF components specific to ESP32S2/S3 series
             list(APPEND IDF_COMPONENTS_TO_ADD tinyusb)
             list(APPEND IDF_LIBRARIES_TO_ADD idf::tinyusb)
 
@@ -818,10 +818,12 @@ macro(nf_add_idf_as_library)
 
     # find out if there is support for PSRAM
     set(SPIRAM_SUPPORT_PRESENT -1)
-    if(TARGET_SERIES_SHORT STREQUAL "esp32" OR TARGET_SERIES_SHORT STREQUAL "esp32s2")
+    if(TARGET_SERIES_SHORT STREQUAL "esp32")
         string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
     elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
         string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s3")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S3_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
     endif()
 
     # set variable

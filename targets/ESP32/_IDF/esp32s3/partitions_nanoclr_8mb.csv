@@ -1,0 +1,17 @@
+################################################
+# ESP-IDF Partition Table for .NET nanoFramework
+# Name,   Type, SubType, Offset,  Size, 
+###############################################################################################################################
+# if you change the partitions here, make sure to update the BlockRegions array in the device BlockStorage configuration file #
+###############################################################################################################################
+nvs,      data, nvs,     0x9000,   0x6000,
+phy_init, data, phy,     0xf000,   0x1000,
+# Factory area for NanoCLR - 1664k
+factory,  app, factory,  0x10000,  0x1A0000,
+# Deployment area for Managed code 2944k, Mapping issues with deployment areas over 3.5Mb, see issue #691
+deploy,   data, 0x84,    0x1B0000, 0x2E0000, 
+# Config data for Network, Wireless, certificates, user data  2Mb
+config,   data, spiffs,  0x490000, 0x200000,  
+##########################################
+# total size has to be 0x800000 or less  #
+##########################################
