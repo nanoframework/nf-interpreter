@@ -1,0 +1,106 @@
+name: Build SKY_EEVB_STD_SIF_Debug
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_EEVB_STD_SIF:
+    runs-on: windows-latest
+
+    env:
+      TARGET_NAME: 'SKY_EEVB_STD_SIF_Debug'
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: 'skyworks-evb'
+        submodules: true
+
+    - uses: lukka/get-cmake@latest
+
+    - name: Install SRecord
+      run: |
+        $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/srecord-win32/versions/latest/srecord-1.64-win32.zip"
+        $output = "${{ runner.temp }}\srecord.zip"
+
+        "Downloading SRecord..." | Write-Host -ForegroundColor White -NoNewline
+
+        # Stop security tripping us up
+        [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+
+        # download zip with Ninja tool
+        (New-Object Net.WebClient).DownloadFile($url, $output)
+
+        "OK" | Write-Host -ForegroundColor Green
+
+        "Installing SRecord..." | Write-Host -ForegroundColor White -NoNewline
+
+        # unzip tool
+        Expand-Archive $output -DestinationPath ${{ runner.temp }}\srecord > $null
+
+        "OK" | Write-Host -ForegroundColor Green
+
+        $srecPath = "${{ runner.temp }}\srecord".Replace('\', '/')
+
+        echo "SRECORD_PATH=$srecPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+
+    - name: Install arm-none-eabi-gcc
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '12.2.Rel1'
+
+    - name: Tweak GCC path
+      run: |
+        $currentPath = "$env:ARM_NONE_EABI_GCC_PATH"
+        if($currentPath.EndsWith("bin"))
+        {
+          $fixedPath = $currentPath.Replace("\bin", "")
+          
+          echo "ARM_NONE_EABI_GCC_PATH=$fixedPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
+
+    - name: Rename CMake presets
+      working-directory: ${{ github.workspace }}/config
+      run: |
+        $file = "user-tools-repos.json"
+        Rename-Item -Path "user-tools-repos.TEMPLATE.json" -NewName $file
+
+        [regex]$pattern='user-tools-repos-cloud'
+        $pattern.replace([IO.File]::ReadAllText($file), 'user-tools-repos', 1) | Out-File $file -Encoding UTF8
+        
+        $file = "user-prefs.json"
+        Rename-Item -Path "user-prefs.TEMPLATE.json" -NewName $file
+        
+        $filecontent = Get-Content($file)
+        attrib $file -r
+        $filecontent -replace  'Debug', 'MinSizeRel' | Out-File $file -Encoding UTF8
+
+    - run: nbgv cloud -a -c
+
+    - uses: lukka/run-cmake@v10
+      with:
+        configurePreset: '${{ env.TARGET_NAME }}'
+        configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
+        buildPreset: '${{ env.TARGET_NAME }}'
+        buildPresetAdditionalArgs: "['--config MinSizeRel']"
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: '${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        path: |
+          ${{ github.workspace }}/build/*.bin
+          ${{ github.workspace }}/build/*.hex
+
+    - name: Tag the build
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const {DIST_VERSION} = process.env          
+          github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
+              sha: context.sha
+          })

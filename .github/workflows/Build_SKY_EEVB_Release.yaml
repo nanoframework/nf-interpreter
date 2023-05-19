@@ -1,14 +1,14 @@
-name: Build SKY_EEVB_STD_SIF
+name: Build SKY_EEVB_Release
 
 on:
   workflow_dispatch
 
 jobs:
-  build_SKY_EEVB_STD_SIF:
+  build_SKY_EEVB:
     runs-on: windows-latest
 
     env:
-      TARGET_NAME: 'SKY_EEVB_STD_SIF'
+      TARGET_NAME: 'SKY_EEVB_Release'
 
     steps:
     - uses: actions/checkout@v3
@@ -88,7 +88,7 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: ${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+        name: '${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
