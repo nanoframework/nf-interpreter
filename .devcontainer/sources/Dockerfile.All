@@ -129,6 +129,7 @@ $IDF_PATH/tools/:\
 $IDF_PATH/components/app_update:\
 /root/.espressif/tools/xtensa-esp32-elf/$ESP_PATCH_VER/xtensa-esp32-elf/bin:\
 /root/.espressif/tools/xtensa-esp32s2-elf/$ESP_PATCH_VER/xtensa-esp32s2-elf/bin:\
+/root/.espressif/tools/xtensa-esp32s3-elf/$ESP_PATCH_VER/xtensa-esp32s3-elf/bin:\
 /root/.espressif/tools/riscv32-esp-elf/$ESP_PATCH_VER/riscv32-esp-elf/bin
 
 # Clean up downloaded files

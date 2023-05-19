@@ -49,7 +49,7 @@ int Esp32_GetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int 
             case DEV_TYPE_ADC:
                 return (int)Esp32_ADC_DevicePinMap[pinIndex];
 
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if !(defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3))
             case DEV_TYPE_DAC:
                 return (int)Esp32_DAC_DevicePinMap[pinIndex];
 #endif
@@ -90,7 +90,7 @@ void Esp32_SetMappedDevicePins(Esp32_MapDeviceType deviceType, int busIndex, int
                 Esp32_ADC_DevicePinMap[pinIndex] = ioPinNumber;
                 break;
 
-#if !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if !(defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3))
             case DEV_TYPE_DAC:
                 Esp32_DAC_DevicePinMap[pinIndex] = ioPinNumber;
                 break;
