@@ -206,8 +206,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
 }
 
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_DisplayControl::
-    Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__nanoFrameworkPresentationMediaColor__nanoFrameworkPresentationMediaColor(
-        CLR_RT_StackFrame &stack)
+    Write___STATIC__VOID__STRING__U2__U2__U2__U2__nanoFrameworkUIFont__U4__U4(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
     {
