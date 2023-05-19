@@ -727,7 +727,9 @@ Ecode_t NF_SpiDriver_Transfer(
 {
     Ecode_t retVal;
 
-    if ((retVal = TransferApiPrologue(handle, (void *)txBuffer, count)) != ECODE_EMDRV_SPIDRV_OK)
+    retVal = TransferApiPrologue(handle, (void *)txBuffer, count);
+
+    if (retVal != ECODE_EMDRV_SPIDRV_OK)
     {
         return retVal;
     }
@@ -767,7 +769,9 @@ Ecode_t NF_SpiDriver_TransferBlocking(NF_SpiDriver_Handle_t handle, const void *
 {
     Ecode_t retVal;
 
-    if ((retVal = TransferApiBlockingPrologue(handle, (void *)txBuffer, count)) != ECODE_EMDRV_SPIDRV_OK)
+    retVal = TransferApiBlockingPrologue(handle, (void *)txBuffer, count);
+
+    if (retVal != ECODE_EMDRV_SPIDRV_OK)
     {
         return retVal;
     }
@@ -811,7 +815,9 @@ Ecode_t NF_SpiDriver_Transmit(
 {
     Ecode_t retVal;
 
-    if ((retVal = TransferApiPrologue(handle, (void *)buffer, count)) != ECODE_EMDRV_SPIDRV_OK)
+    retVal = TransferApiPrologue(handle, (void *)buffer, count);
+
+    if (retVal != ECODE_EMDRV_SPIDRV_OK)
     {
         return retVal;
     }
@@ -844,7 +850,9 @@ Ecode_t NF_SpiDriver_TransmitBlocking(NF_SpiDriver_Handle_t handle, const void *
 {
     Ecode_t retVal;
 
-    if ((retVal = TransferApiBlockingPrologue(handle, (void *)buffer, count)) != ECODE_EMDRV_SPIDRV_OK)
+    retVal = TransferApiBlockingPrologue(handle, (void *)buffer, count);
+
+    if (retVal != ECODE_EMDRV_SPIDRV_OK)
     {
         return retVal;
     }
