@@ -96,9 +96,21 @@
         },
         {
             "inherits": "base-user",
+            "name": "SKY_EEVB_Release",
+            "displayName": "SKY_EEVB_Release",
+            "configurePreset": "SKY_EEVB_Release"
+        },
+        {
+            "inherits": "base-user",
             "name": "SKY_EEVB_STD_SIF_Debug",
             "displayName": "SKY_EEVB_STD_SIF_Debug",
             "configurePreset": "SKY_EEVB_STD_SIF_Debug"
+        },
+        {
+            "inherits": "base-user",
+            "name": "SKY_EEVB_STD_SIF_Release",
+            "displayName": "SKY_EEVB_STD_SIF_Release",
+            "configurePreset": "SKY_EEVB_STD_SIF_Release"
         }
     ]
 }
