@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_EEVB",
+            "name": "SKY_EEVB_Debug",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,7 +16,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "SKY_EVB",
-                "TARGET_NAME": "SKY_EEVB",
+                "TARGET_NAME": "SKY_EEVB_Debug",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -53,33 +53,52 @@
             }
         },
         {
-            "name": "SKY_EEVB_STD_SIF",
+            "name": "SKY_EEVB_Release",
             "inherits": [
-                "SKY_EEVB"
+                "SKY_EEVB_Debug"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "NF_BUILD_RTM": "ON"
+            }
+        },
+        {
+            "name": "SKY_EEVB_STD_SIF_Debug",
+            "inherits": [
+                "SKY_EEVB_Debug"
             ],
             "cacheVariables": {
                 "TARGET_BOARD": "SKY_EVB",
-                "TARGET_NAME": "SKY_EEVB_STD_SIF",
+                "TARGET_NAME": "SKY_EEVB_STD_SIF_Debug",
                 "API_System.Device.Spi": "ON",
                 "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "OFF",
                 "API_System.Device.I2c": "ON",
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "OFF",
                 "API_System.Device.UsbStream": "ON"
             }
+        },
+        {
+            "name": "SKY_EEVB_STD_SIF_Release",
+            "inherits": [
+                "SKY_EEVB_STD_SIF_Debug"
+            ],
+            "cacheVariables": {
+                "NF_BUILD_RTM": "ON"
+            }
         }
     ],
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB",
-            "displayName": "SKY_EEVB",
-            "configurePreset": "SKY_EEVB"
+            "name": "SKY_EEVB_Debug",
+            "displayName": "SKY_EEVB_Debug",
+            "configurePreset": "SKY_EEVB_Debug"
         },
         {
             "inherits": "base-user",
-            "name": "SKY_EEVB_STD_SIF",
-            "displayName": "SKY_EEVB_STD_SIF",
-            "configurePreset": "SKY_EEVB_STD_SIF"
+            "name": "SKY_EEVB_STD_SIF_Debug",
+            "displayName": "SKY_EEVB_STD_SIF_Debug",
+            "configurePreset": "SKY_EEVB_STD_SIF_Debug"
         }
     ]
 }
