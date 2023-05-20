@@ -8,6 +8,7 @@
 #include <ssl.h>
 #include "mbedtls.h"
 #include "mbedtls/debug.h"
+#include <mbedtls/pk_internal.h>
 
 bool ssl_generic_init_internal(
     int sslMode,
@@ -22,8 +23,6 @@ bool ssl_generic_init_internal(
     bool useDeviceCertificate,
     bool isServer)
 {
-    (void)sslMode;
-
     int minVersion = MBEDTLS_SSL_MINOR_VERSION_3;
     int maxVersion = MBEDTLS_SSL_MINOR_VERSION_1;
     int sslContexIndex = -1;
@@ -58,12 +57,16 @@ bool ssl_generic_init_internal(
         goto error;
     }
 
+    memset(context, 0, sizeof(mbedTLS_NFContext));
+
     // allocate memory for net context
     context->server_fd = (mbedtls_net_context *)platform_malloc(sizeof(mbedtls_net_context));
     if (context->server_fd == NULL)
     {
         goto error;
     }
+
+    memset(context->server_fd, 0, sizeof(mbedtls_net_context));
 
     if (isServer)
     {
@@ -73,6 +76,16 @@ bool ssl_generic_init_internal(
     {
         endpoint = MBEDTLS_SSL_IS_CLIENT;
     }
+
+    // create and init private key context
+    // this needs to be freed in ssl_exit_context_internal
+    context->pk = (mbedtls_pk_context *)platform_malloc(sizeof(mbedtls_pk_context));
+    if (context->pk == NULL)
+    {
+        goto error;
+    }
+
+    mbedtls_pk_init(context->pk);
 
     // create and init CTR_DRBG
     // this needs to be freed in ssl_exit_context_internal
@@ -220,16 +233,6 @@ bool ssl_generic_init_internal(
     // parse "own" certificate if passed
     if (certificate != NULL && certLength > 0)
     {
-        // create and init private key context
-        // this needs to be freed in ssl_exit_context_internal
-        context->pk = (mbedtls_pk_context *)platform_malloc(sizeof(mbedtls_pk_context));
-        if (context->pk == NULL)
-        {
-            goto error;
-        }
-
-        mbedtls_pk_init(context->pk);
-
         // is there a private key?
         if (privateKey != NULL && privateKeyLength > 0)
         {
@@ -313,8 +316,17 @@ bool ssl_generic_init_internal(
     return true;
 
 error:
-    mbedtls_pk_free(context->pk);
-    mbedtls_net_free(context->server_fd);
+
+    if (context->pk)
+    {
+        mbedtls_pk_free(context->pk);
+    }
+
+    if (context->server_fd)
+    {
+        mbedtls_net_free(context->server_fd);
+    }
+
     mbedtls_ctr_drbg_free(context->ctr_drbg);
     mbedtls_entropy_free(context->entropy);
     mbedtls_x509_crt_free(context->x509_crt);
@@ -362,7 +374,7 @@ error:
         mbedtls_x509_crt_free(ownCertificate);
         platform_free(ownCertificate);
     }
-    if (context->pk)
+    if (context)
     {
         platform_free(context);
     }
