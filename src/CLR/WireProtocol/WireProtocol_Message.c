@@ -279,7 +279,7 @@ void WP_Message_Process()
                         break;
                     }
 
-                    size_t lenCmp = min(len, sizeof(_inboundMessage.m_header.m_signature));
+                    size_t lenCmp = min(len, sizeof(((WP_Packet *)0)->m_signature));
 
                     if (memcmp(&_inboundMessage.m_header, MARKER_DEBUGGER_V1, lenCmp) == 0)
                     {
@@ -290,11 +290,8 @@ void WP_Message_Process()
                         break;
                     }
 
-                    // move buffer 1 position down
-                    memmove(
-                        (uint8_t *)&(_inboundMessage.m_header),
-                        ((uint8_t *)&(_inboundMessage.m_header) + 1),
-                        len - 1);
+                    // move buffer one position to the left
+                    memmove((uint8_t *)&(_inboundMessage.m_header), ((uint8_t *)&(_inboundMessage.m_header) + 1), len);
 
                     _pos--;
                     _size++;
