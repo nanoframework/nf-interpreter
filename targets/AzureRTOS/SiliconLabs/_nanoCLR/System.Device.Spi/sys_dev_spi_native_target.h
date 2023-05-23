@@ -63,6 +63,12 @@
 #define GECKO_USE_SPI5 FALSE
 #endif
 
+// adjust number of buses
+#if defined(NUM_SPI_BUSES)
+#undef NUM_SPI_BUSES
+#endif
+#define NUM_SPI_BUSES 6
+
 // struct representing the SPI bus
 struct NF_PAL_SPI
 {
@@ -84,6 +90,7 @@ struct NF_PAL_SPI
     int32_t ChipSelect;
 
     NF_SpiDriver_Handle_t Handle;
+    NF_SpiDriver_Init_t *InitSpiData;
 };
 
 ////////////////////////////////////////////
