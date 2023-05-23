@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_EEVB",
+            "name": "SKY_EEVB_Debug",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -16,10 +16,12 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_BOARD": "SKY_EVB",
+                "TARGET_NAME": "SKY_EEVB_Debug",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
                 "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_DEBUGGER": "ON",                
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
                 "API_System.Math": "ON",
@@ -49,31 +51,20 @@
             }
         },
         {
-            "name": "SKY_EEVB_Debug",
+            "name": "SKY_EEVB_Release",
             "inherits": [
                 "SKY_EEVB_Debug"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_EEVB_Debug",
-                "NF_FEATURE_DEBUGGER": "ON"
-            }
-        },
-        {
-            "name": "SKY_EEVB_Release",
-            "inherits": [
-                "SKY_EEVB"
-            ],
-            "hidden": false,
-            "cacheVariables": {
-                "NF_FEATURE_DEBUGGER": "OFF",
+                "TARGET_NAME": "SKY_EEVB",
                 "NF_BUILD_RTM": "ON"
             }
         },
         {
             "name": "SKY_EEVB_STD_SIF_Debug",
             "inherits": [
-                "SKY_EEVB"
+                "SKY_EEVB_Debug"
             ],
             "cacheVariables": {
                 "TARGET_NAME": "SKY_EEVB_STD_SIF_Debug",
@@ -90,7 +81,7 @@
                 "SKY_EEVB_STD_SIF_Debug"
             ],
             "cacheVariables": {
-                "NF_FEATURE_DEBUGGER": "OFF",
+                "TARGET_NAME": "SKY_EEVB_STD_SIF",
                 "NF_BUILD_RTM": "ON"
             }
         }
