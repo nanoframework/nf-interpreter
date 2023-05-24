@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Info.cpp" />
+    <ClCompile Include="Info_Safeprintf.cpp" />
     <ClCompile Include="Profile.cpp" />
     <ClCompile Include="Profiler.cpp" />
   </ItemGroup>

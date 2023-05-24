@@ -612,10 +612,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             hasPermission = true;
             break;
         case AccessMemory_Read:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 // fall through
@@ -634,10 +630,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Write:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             if (BlockRange_IsDeployment(range) || BlockRange_IsConfig(range))
             {
                 hasPermission = true;
@@ -648,10 +640,6 @@ bool CLR_DBG_Debugger::CheckPermission(ByteAddress address, int mode)
             }
             break;
         case AccessMemory_Erase:
-#if defined(BUILD_RTM)
-            if (!DebuggerPort_IsUsingSsl(HalSystemConfig.DebuggerPort))
-                break;
-#endif
             switch (range.RangeType)
             {
                 case BlockRange_BLOCKTYPE_DEPLOYMENT:

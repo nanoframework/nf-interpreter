@@ -480,10 +480,13 @@ HRESULT CPU_SPI_nWrite_nRead(
 // this is exposing the extended call that allow for re-configuration of SPI
 bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busConfiguration, bool reconfigure)
 {
-    NF_PAL_SPI *palSpi = NULL;
+#if !defined(BUILD_RTM)
     Ecode_t configResult;
+#endif
+
     GPIO_Port_TypeDef port;
     uint32_t portPin;
+    NF_PAL_SPI *palSpi = NULL;
     void (*initSpiConfig)(NF_SpiDriver_Init_t &, bool) = NULL;
 
     // init the PAL struct for this SPI bus and assign the respective driver
@@ -573,7 +576,10 @@ bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATIO
         // get the SPI configuration
         GetSpiConfig(busConfiguration, *palSpi->InitSpiData);
 
-        configResult = NF_SpiDriver_Init(palSpi->Handle, palSpi->InitSpiData);
+#if !defined(BUILD_RTM)
+        configResult =
+#endif
+            NF_SpiDriver_Init(palSpi->Handle, palSpi->InitSpiData);
         _ASSERTE(configResult == ECODE_OK);
 
         palSpi->ChipSelect = busConfiguration.DeviceChipSelect;

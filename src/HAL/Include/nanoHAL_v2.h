@@ -332,7 +332,7 @@ extern "C"
 #endif
 
 #ifndef _SIDE_ASSERTE
-#define _SIDE_ASSERTE(expr) (expr)
+#define _SIDE_ASSERTE(expr) (void)(expr)
 #endif
 
 #ifdef STATIC_ASSERT_SUPPORTED
@@ -372,6 +372,7 @@ extern "C"
 
 __inline void debug_printf(const char *format, ...)
 {
+    (void)format;
 }
 
 #endif // !defined(BUILD_RTM)
