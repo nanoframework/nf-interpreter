@@ -1771,7 +1771,7 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             }
             else
             {
-#if !defined(BUILD_RTM)                
+#if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\nRUNTIME ERROR: comparing two values of different size: %d vs. %d!!!\r\n\r\n\r\n",
                     leftDataType,
