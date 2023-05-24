@@ -45,7 +45,7 @@ static void CompleteTransfer(NF_SpiDriver_Handle_t handle)
 }
 
 // Callback used when a async transfer operation completes
-static void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferStatus, int itemsTransferred)
+void SpiTransferCompleteCallback(NF_SpiDriver_Handle_t handle, Ecode_t transferStatus, int itemsTransferred)
 {
     (void)transferStatus;
     (void)itemsTransferred;
@@ -477,10 +477,10 @@ HRESULT CPU_SPI_nWrite_nRead(
     NANOCLR_NOCLEANUP();
 }
 
-bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busConfiguration)
+// this is exposing the extended call that allow for re-configuration of SPI
+bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busConfiguration, bool reconfigure)
 {
     NF_PAL_SPI *palSpi = NULL;
-    NF_SpiDriver_Init_t *initSpiData = NULL;
     Ecode_t configResult;
     GPIO_Port_TypeDef port;
     uint32_t portPin;
@@ -541,7 +541,6 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
 
     if (palSpi->Handle == NULL)
     {
-
         // allocate memory for the USART_InitSync_TypeDef
         palSpi->Handle = (NF_SpiDriver_Handle_t)platform_malloc(sizeof(NF_SpiDriver_HandleData_t));
 
@@ -554,25 +553,27 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
         memset(palSpi->Handle, 0, sizeof(NF_SpiDriver_HandleData_t));
 
         // allocate memory for the NF_SpiDriver_Init_t
-        initSpiData = (NF_SpiDriver_Init_t *)platform_malloc(sizeof(NF_SpiDriver_Init_t));
+        palSpi->InitSpiData = (NF_SpiDriver_Init_t *)platform_malloc(sizeof(NF_SpiDriver_Init_t));
 
         // sanity check allocation
-        if (initSpiData == NULL)
+        if (palSpi->InitSpiData == NULL)
         {
             platform_free(palSpi->Handle);
 
             return false;
         }
 
-        memset(initSpiData, 0, sizeof(NF_SpiDriver_Init_t));
+        memset(palSpi->InitSpiData, 0, sizeof(NF_SpiDriver_Init_t));
 
         // call handler to configure pins
-        initSpiConfig(*initSpiData, busConfiguration.BusConfiguration == SpiBusConfiguration_HalfDuplex);
+        initSpiConfig(*palSpi->InitSpiData, busConfiguration.BusConfiguration == SpiBusConfiguration_HalfDuplex);
+
+    jump_to_init:
 
         // get the SPI configuration
-        GetSpiConfig(busConfiguration, *initSpiData);
+        GetSpiConfig(busConfiguration, *palSpi->InitSpiData);
 
-        configResult = NF_SpiDriver_Init(palSpi->Handle, initSpiData);
+        configResult = NF_SpiDriver_Init(palSpi->Handle, palSpi->InitSpiData);
         _ASSERTE(configResult == ECODE_OK);
 
         palSpi->ChipSelect = busConfiguration.DeviceChipSelect;
@@ -584,8 +585,26 @@ bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busCon
             GPIO_PinModeSet(port, portPin, gpioModePushPull, busConfiguration.ChipSelectActiveState ? 0 : 1);
         }
     }
+    else
+    {
+        // there's already a handle, check if we need to re-configure the SPI bus
+        if (reconfigure)
+        {
+            // deinitalize the SPI bus
+            NF_SpiDriver_DeInit(palSpi->Handle);
+
+            // jump straight to init
+            goto jump_to_init;
+        }
+    }
 
     return true;
+}
+
+// this is exposing the "standard" call
+bool CPU_SPI_Initialize(uint8_t busIndex, const SPI_DEVICE_CONFIGURATION &busConfiguration)
+{
+    return CPU_SPI_Initialize_Extended(busIndex, busConfiguration, false);
 }
 
 bool CPU_SPI_Uninitialize(uint8_t busIndex)
