@@ -139,6 +139,7 @@ void tx_application_define(void *first_unused_memory)
     clrSettings.MaxContextSwitches = 50;
     clrSettings.WaitForDebugger = false;
     clrSettings.EnterDebuggerLoopAfterExit = true;
+    clrSettings.RevertToBooterOnFault = true;
 
     // Create CLR startup thread
     status = tx_thread_create(
