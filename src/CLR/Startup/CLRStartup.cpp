@@ -426,7 +426,21 @@ void ClrStartup(CLR_SETTINGS params)
             CLR_EE_DBG_EVENT_BROADCAST(CLR_DBG_Commands_c_Monitor_ProgramExit, 0, NULL, WP_Flags_c_NonCritical);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
-#if !defined(BUILD_RTM)
+#if defined(BUILD_RTM)
+            if (params.RevertToBooterOnFault)
+            {
+                // launch proprietary bootloader, if available
+                if (!RequestToLaunchProprietaryBootloader())
+                {
+                    // no proprietary bootloader available, launch nanoBooter
+
+#if (TARGET_HAS_NANOBOOTER == TRUE)
+                    RequestToLaunchNanoBooter();
+                    CPU_Reset();
+#endif // TARGET_HAS_NANOBOOTER
+                }
+            }
+#else
             if (params.EnterDebuggerLoopAfterExit)
             {
                 CLR_DBG_Debugger::Debugger_WaitForCommands();
