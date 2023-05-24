@@ -82,6 +82,7 @@ struct Settings
             // First verify that check sum in assembly object matches hardcoded check sum.
             if (assm->m_header->nativeMethodsChecksum != pNativeAssmData->m_checkSum)
             {
+#if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\n***********************************************************************\r\n");
                 CLR_Debug::Printf("*                                                                     *\r\n");
@@ -95,6 +96,7 @@ struct Settings
                     pNativeAssmData->m_checkSum);
                 CLR_Debug::Printf("*                                                                     *\r\n");
                 CLR_Debug::Printf("***********************************************************************\r\n");
+#endif
 
                 NANOCLR_SET_AND_LEAVE(CLR_E_ASSM_WRONG_CHECKSUM);
             }
