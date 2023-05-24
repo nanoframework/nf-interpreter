@@ -29,6 +29,10 @@ static const CLR_Messaging_CommandHandlerLookup c_Messaging_Lookup_Reply[] = {
 
 //--//
 
+CLR_Messaging *g_CLR_Messaging;
+
+CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
+
 bool CLR_Messaging::AllocateAndQueueMessage(
     CLR_UINT32 cmd,
     unsigned int length,
