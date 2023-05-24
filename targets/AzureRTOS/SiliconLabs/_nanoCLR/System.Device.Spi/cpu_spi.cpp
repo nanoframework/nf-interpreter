@@ -568,7 +568,7 @@ bool CPU_SPI_Initialize_Extended(uint8_t busIndex, const SPI_DEVICE_CONFIGURATIO
         // call handler to configure pins
         initSpiConfig(*palSpi->InitSpiData, busConfiguration.BusConfiguration == SpiBusConfiguration_HalfDuplex);
 
-jump_to_init:
+    jump_to_init:
 
         // get the SPI configuration
         GetSpiConfig(busConfiguration, *palSpi->InitSpiData);
@@ -588,7 +588,7 @@ jump_to_init:
     else
     {
         // there's already a handle, check if we need to re-configure the SPI bus
-        if(reconfigure)
+        if (reconfigure)
         {
             // deinitalize the SPI bus
             NF_SpiDriver_DeInit(palSpi->Handle);
