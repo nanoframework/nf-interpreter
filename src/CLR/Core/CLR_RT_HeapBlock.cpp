@@ -307,6 +307,7 @@ HRESULT CLR_RT_HeapBlock::SetObjectCls(const CLR_RT_TypeDef_Index &cls)
     }
 
     m_data.objectHeader.cls = cls;
+
     m_data.objectHeader.lock = NULL;
 
     NANOCLR_NOCLEANUP();
