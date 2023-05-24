@@ -9,7 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-CLR_Messaging g_CLR_Messaging;
+extern CLR_Messaging g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
