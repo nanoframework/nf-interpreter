@@ -18,9 +18,9 @@ set(NF_Debugger_SRCS
 
 # add the debugger source file according to the build flavor
 if(NF_BUILD_RTM)
-    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_minimal.cpp)
+    list(APPEND NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_minimal.cpp)
 else()
-    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_full.cpp)
+    list(APPEND NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_full.cpp)
 endif()
 
 

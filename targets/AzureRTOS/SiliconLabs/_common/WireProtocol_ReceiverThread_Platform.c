@@ -22,7 +22,11 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
     (void)parameter;
 
 #if HAL_WP_USE_USB_CDC == TRUE
+
+#if !defined(BUILD_RTM)
     sl_status_t status = SL_STATUS_OK;
+#endif
+
     bool conn = false;
 
     const uint32_t xDelay = TX_TICKS_PER_MILLISEC(TASK_DELAY_MS);
@@ -37,8 +41,12 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
     {
 
 #if HAL_WP_USE_USB_CDC == TRUE
+
         // Wait until device is in configured state
-        status = sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
+#if !defined(BUILD_RTM)
+        status =
+#endif
+            sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
         _ASSERTE(status == SL_STATUS_OK);
 
         // while ((conn != true) || ((line_state & SL_USBD_CDC_ACM_CTRL_DTR) == 0))
@@ -47,7 +55,10 @@ __attribute__((noreturn)) void ReceiverThread_entry(uint32_t parameter)
             // Delay Task
             tx_thread_sleep(xDelay);
 
-            status = sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
+#if !defined(BUILD_RTM)
+            status =
+#endif
+                sl_usbd_cdc_acm_is_enabled(sl_usbd_cdc_acm_acm0_number, &conn);
             _ASSERTE(status == SL_STATUS_OK);
         }
 #endif

@@ -455,12 +455,14 @@ void WP_PrepareAndSendProtocolMessage(uint32_t cmd, uint32_t payloadSize, uint8_
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // weak implementations of the functions (to be replaced with _strong_ implementations if and when required) //
 
+#if !defined(BUILD_RTM)
 __nfweak void debug_printf(const char *format, ...)
 {
     (void)format;
 
     return;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
