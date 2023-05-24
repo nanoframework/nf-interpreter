@@ -139,10 +139,12 @@ set(NF_CoreCLR_SRCS
 
     # CLR stubs
     Debugger_stub.cpp
-    
+    Messaging_stub.cpp
+
     # Helpers
     nanoprintf.c
     nanoRingBuffer.c
+    Info_Safeprintf.cpp
 
     # HAL
     nanoHAL_Time.cpp
@@ -255,6 +257,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
+            ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
 
             # HAL
             ${CMAKE_SOURCE_DIR}/src/HAL

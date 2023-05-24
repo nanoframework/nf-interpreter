@@ -7,14 +7,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-__nfweak CLR_Messaging *g_CLR_Messaging;
-
-__nfweak CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
-
 __nfweak HRESULT CLR_Messaging::CreateInstance()
 {
     NATIVE_PROFILE_CLR_MESSAGING();
-    g_CLR_Messaging = (CLR_Messaging *)&g_scratchMessaging[0];
     NANOCLR_SYSTEM_STUB_RETURN();
 }
 
