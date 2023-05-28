@@ -18,6 +18,9 @@ typedef struct
 
     uint16_t TxBytesSent;
 
+    bool WaitingForRxEvent;
+    bool WaitingForTxEvent;
+
 } NF_PAL_USB;
 
 extern NF_PAL_USB UsbStream_PAL;
