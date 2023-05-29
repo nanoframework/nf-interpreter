@@ -25,10 +25,18 @@ static void UsbAsyncWriteCompleted(
 
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
-    // store TX count
-    usbPal->TxBytesSent = xfer_len;
+    // process this only IF the operation wasn't aborted
+    // AND we're expecting an event
+    if (status != SL_STATUS_ABORT && usbPal->WaitingForTxEvent)
+    {
+        // store TX count
+        usbPal->TxBytesSent = xfer_len;
 
-    Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+        Events_Set(SYSTEM_EVENT_FLAG_USB_OUT);
+    }
+
+    // clear the flag
+    usbPal->WaitingForTxEvent = false;
 
     NATIVE_INTERRUPT_END
 }
@@ -44,16 +52,23 @@ static void UsbAsyncReadCompleted(
     (void)class_nbr;
     (void)p_buf;
     (void)buf_len;
-    (void)status;
 
     NATIVE_INTERRUPT_START
 
     NF_PAL_USB *usbPal = (NF_PAL_USB *)p_callback_arg;
 
-    // store RX count
-    usbPal->RxBytesReceived = xfer_len;
+    // process this only IF the operation wasn't aborted
+    // AND we're expecting an event
+    if (status != SL_STATUS_ABORT && usbPal->WaitingForRxEvent)
+    {
+        // store RX count
+        usbPal->RxBytesReceived = xfer_len;
 
-    Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+        Events_Set(SYSTEM_EVENT_FLAG_USB_IN);
+    }
+
+    // clear the flag
+    usbPal->WaitingForRxEvent = false;
 
     NATIVE_INTERRUPT_END
 }
@@ -98,8 +113,6 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
     length = dataBuffer->m_numOfElements;
 
     // check parameters
-    FAULT_ON_NULL_ARG(dataBuffer);
-
     if ((offset > length) || (count > length))
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_OUT_OF_RANGE);
@@ -127,6 +140,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
 
         // clear RX counter
         UsbStream_PAL.RxBytesReceived = 0;
+
+        // set event flag
+        UsbStream_PAL.WaitingForRxEvent = true;
 
         // start read operation with async API
         reqStatus = sl_usbd_vendor_read_bulk_async(
@@ -156,6 +172,13 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
 
         if (eventResult)
         {
+            // if different than expected, abort anyway
+            if (UsbStream_PAL.RxBytesReceived != count)
+            {
+                // cancel the async operation...
+                sl_usbd_vendor_abort_read_bulk(sl_usbd_vendor_winusb_number);
+            }
+
             // done here
             break;
         }
@@ -172,6 +195,7 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Read___I4_
 
     // pop timeout heap block from stack
     stack.PopValue();
+
     // set result with count of bytes received
     stack.SetResult_I4(UsbStream_PAL.RxBytesReceived);
 
@@ -252,6 +276,12 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::Write___VO
         // bump custom state
         stack.m_customState = 2;
 
+        // clear TX counter
+        UsbStream_PAL.TxBytesSent = 0;
+
+        // set event flag
+        UsbStream_PAL.WaitingForTxEvent = true;
+
         // start write operation with async API
         // requesting handling of "End-of-transfer"
         reqStatus = sl_usbd_vendor_write_bulk_async(
@@ -325,18 +355,14 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::get_IsConn
 {
     NANOCLR_HEADER();
 
-    bool conn;
+    // default to false
+    bool conn = false;
 
-    if (sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn) == SL_STATUS_OK)
-    {
-        stack.SetResult_Boolean(conn);
-    }
-    else
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
-    }
+    // don't care about return value as we'll just return false if the connection state can't be determined
+    sl_usbd_vendor_is_enabled(sl_usbd_vendor_winusb_number, &conn);
+    stack.SetResult_Boolean(conn);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeClose___VOID(CLR_RT_StackFrame &stack)
