@@ -49,7 +49,7 @@ macro(nf_common_compiler_definitions)
     endif()
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
+    if((NOT NF_BUILD_RTM) AND NF_FEATURE_DEBUGGER)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     endif()
 
@@ -221,11 +221,18 @@ macro(nf_add_common_sources)
         target_link_libraries(${NFACS_TARGET}.elf
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
-            nano::NF_Debugger
             nano::WireProtocol
             
             ${NFACS_EXTRA_LIBRARIES}
         )
+
+        if(NF_FEATURE_DEBUGGER)
+
+            target_link_libraries(${NFACS_TARGET}.elf
+                nano::NF_Debugger
+            )
+
+        endif()  
 
         target_sources(${NFACS_TARGET}.elf PUBLIC
 
