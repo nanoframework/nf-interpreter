@@ -9,8 +9,6 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-extern CLR_Messaging *g_CLR_Messaging;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //--//
@@ -30,8 +28,6 @@ static const CLR_Messaging_CommandHandlerLookup c_Messaging_Lookup_Reply[] = {
 //--//
 
 CLR_Messaging *g_CLR_Messaging;
-
-CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
 
 bool CLR_Messaging::AllocateAndQueueMessage(
     CLR_UINT32 cmd,
@@ -258,11 +254,18 @@ HRESULT CLR_Messaging::CreateInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    NANOCLR_CLEAR(g_CLR_Messaging);
+    // alloc memory for Messaging
+    g_CLR_Messaging = (CLR_Messaging *)platform_malloc(sizeof(CLR_Messaging));
+
+    // sanity check...
+    FAULT_ON_NULL(g_CLR_Messaging);
+
+    //... and clear memory
+    memset(g_CLR_Messaging, 0, sizeof(CLR_Messaging));
 
     g_CLR_Messaging->Initialize(nullptr, 0, nullptr, 0);
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 //--//
@@ -301,6 +304,11 @@ HRESULT CLR_Messaging::DeleteInstance()
     NANOCLR_HEADER();
 
     g_CLR_Messaging->Cleanup();
+
+    // free messaging
+    platform_free(g_CLR_Messaging);
+
+    g_CLR_Messaging = NULL;
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
