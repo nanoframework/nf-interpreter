@@ -1790,10 +1790,12 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
             }
             else
             {
+#if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
                     "\r\n\r\nRUNTIME ERROR: comparing two values of different size: %d vs. %d!!!\r\n\r\n\r\n",
                     leftDataType,
                     rightDataType);
+#endif // BUILD_RTM
 #if defined(NANOCLR_PROFILE_NEW)
                 g_CLR_PRF_Profiler.DumpHeap();
 #endif

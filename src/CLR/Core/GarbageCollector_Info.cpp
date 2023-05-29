@@ -244,8 +244,9 @@ void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
 
 void CLR_RT_GarbageCollector::Relocation_UpdatePointer(void** ref)
 {
+    (void)ref;
+
     NATIVE_PROFILE_CLR_CORE();
-    
 }
 
 //--//

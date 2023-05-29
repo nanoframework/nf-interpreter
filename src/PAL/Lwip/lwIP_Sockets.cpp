@@ -144,6 +144,10 @@ void LWIP_SOCKETS_Driver::Link_callback(struct netif *netif)
 #if LWIP_NETIF_STATUS_CALLBACK == 1
 void LWIP_SOCKETS_Driver::Status_callback(struct netif *netif)
 {
+#ifdef BUILD_RTM
+    (void)netif;
+#endif
+
     if (!PostAddressChangedContinuation.IsLinked())
         PostAddressChangedContinuation.Enqueue();
 

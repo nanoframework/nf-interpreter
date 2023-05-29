@@ -2515,6 +2515,10 @@ HRESULT CLR_RT_Assembly::CreateInstance(
 
 bool CLR_RT_Assembly::ResolveAssemblyRef(bool fOutput)
 {
+#ifdef BUILD_RTM
+    (void)fOutput;
+#endif
+
     NATIVE_PROFILE_CLR_CORE();
     bool fGot = true;
     int i;

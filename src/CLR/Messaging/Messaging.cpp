@@ -9,7 +9,7 @@
 #include <WireProtocol.h>
 #include <WireProtocol_Message.h>
 
-CLR_Messaging g_CLR_Messaging;
+extern CLR_Messaging *g_CLR_Messaging;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,6 +28,10 @@ static const CLR_Messaging_CommandHandlerLookup c_Messaging_Lookup_Reply[] = {
 };
 
 //--//
+
+CLR_Messaging *g_CLR_Messaging;
+
+CLR_UINT32 g_scratchMessaging[sizeof(CLR_Messaging)];
 
 bool CLR_Messaging::AllocateAndQueueMessage(
     CLR_UINT32 cmd,
@@ -92,7 +96,7 @@ bool CLR_Messaging::Messaging_Query__Reply(WP_Message *msg)
     auto *cmd =
         (CLR_Messaging_Commands::Messaging_Query::Reply *)msg->m_payload;
 
-    g_CLR_Messaging.AllocateAndQueueMessage(
+    g_CLR_Messaging->AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Query,
         0,
         nullptr,
@@ -115,7 +119,7 @@ bool CLR_Messaging::Messaging_Send(WP_Message *msg)
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
 
-    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Send,
         len,
         cmd->m_data,
@@ -154,7 +158,7 @@ bool CLR_Messaging::Messaging_Reply(WP_Message *msg)
     CLR_UINT32 len;
 
     len = msg->m_header.m_size - sizeof(cmd->m_addr);
-    fRes = g_CLR_Messaging.AllocateAndQueueMessage(
+    fRes = g_CLR_Messaging->AllocateAndQueueMessage(
         CLR_Messaging_Commands::c_Messaging_Reply,
         len,
         cmd->m_data,
@@ -256,7 +260,7 @@ HRESULT CLR_Messaging::CreateInstance()
 
     NANOCLR_CLEAR(g_CLR_Messaging);
 
-    g_CLR_Messaging.Initialize(nullptr, 0, nullptr, 0);
+    g_CLR_Messaging->Initialize(nullptr, 0, nullptr, 0);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -296,7 +300,7 @@ HRESULT CLR_Messaging::DeleteInstance()
     NATIVE_PROFILE_CLR_MESSAGING();
     NANOCLR_HEADER();
 
-    g_CLR_Messaging.Cleanup();
+    g_CLR_Messaging->Cleanup();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }

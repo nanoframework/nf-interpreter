@@ -463,6 +463,24 @@ jobs:
         PackageName: ESP32_PSRAM_BLE_GenericGraphic_REV3
         CMakePreset: ESP32_PSRAM_BLE_GenericGraphic_REV3
 
+      XIAO_ESP32C3:
+        TargetBoard: ESP32_C3
+        TargetSeries: 'esp32c3'
+        BuildOptions: 
+        IDF_Target: esp32c3
+        TargetName: XIAO_ESP32C3
+        PackageName: XIAO_ESP32C3
+        CMakePreset: XIAO_ESP32C3
+
+      ESP32_S3_BLE_REV3:
+        TargetBoard: ESP32_S3
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: ESP32_S3_BLE_REV3
+        PackageName: ESP32_S3_BLE_REV3
+        CMakePreset: ESP32_S3_BLE_REV3
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable

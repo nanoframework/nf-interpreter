@@ -6,23 +6,29 @@
 
 #include "CorLib.h"
 
-
-HRESULT Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN( CLR_RT_StackFrame& stack )
+HRESULT Library_corlib_native_System_Diagnostics_Debug::WriteLineNative___STATIC__VOID__STRING__BOOLEAN(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    const char * szText0 = stack.Arg0().RecoverString();
+#ifdef BUILD_RTM
+    stack.NotImplementedStub();
+#else
+
+    const char *szText0 = stack.Arg0().RecoverString();
     bool addLineFeed = (bool)stack.Arg1().NumericByRef().u1;
 
-    if(!szText0) szText0 = "<null>";
+    if (!szText0)
+        szText0 = "<null>";
 
-    CLR_Debug::Emit( szText0, -1 );
+    CLR_Debug::Emit(szText0, -1);
 
-    if(addLineFeed)
+    if (addLineFeed)
     {
-        CLR_Debug::Emit( "\r\n" , -1 );
+        CLR_Debug::Emit("\r\n", -1);
     }
-    
+
+#endif
+
     NANOCLR_NOCLEANUP_NOLABEL();
 }
-

@@ -17,20 +17,10 @@
 #include <sl_iostream_handles.h>
 #elif HAL_WP_USE_USB_CDC == TRUE
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wundef"
-#endif
-
-#include "sl_usbd_core.h"
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
-#include "sl_usbd_class_cdc.h"
-#include "sl_usbd_class_cdc_acm.h"
-#include "sl_usbd_class_cdc_acm_instances.h"
+#include <sl_usbd_core.h>
+#include <sl_usbd_class_cdc.h>
+#include <sl_usbd_class_cdc_acm.h>
+#include <sl_usbd_class_cdc_acm_instances.h>
 #endif
 
 #if defined(TRACE_MASK) && (TRACE_MASK & TRACE_VERBOSE) != 0
@@ -48,7 +38,7 @@ void WP_ReceiveBytes(uint8_t **ptr, uint32_t *size)
     size_t bytesRead;
 #elif HAL_WP_USE_USB_CDC == TRUE
     uint32_t bytesRead;
-#endif    
+#endif
 
     // check for requests with 0 size
     if (*size)
