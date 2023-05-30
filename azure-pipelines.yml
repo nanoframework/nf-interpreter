@@ -46,6 +46,10 @@ resources:
       name: espressif/esp-idf
       endpoint: nanoframework
       ref: refs/tags/v4.4.4
+    - repository: mscorlib
+      type: github
+      name: nanoframework/CoreLibrary
+      endpoint: nanoframework
       
 jobs:
 
@@ -63,6 +67,9 @@ jobs:
 
   # get commit message
   - powershell: |
+
+      # set default values
+      echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]false"
 
       if($env:StartReleaseCandidate -like "true")
       {
@@ -88,6 +95,13 @@ jobs:
           {
             echo "##vso[task.setvariable variable=SKIP_BUILD;isOutput=true]false"  
           }
+
+          # check if Unit Tests for mscorlib should be run
+          if($commit.commit.message -like "*[run mscorlib tests]*")
+          {
+            echo "##vso[task.setvariable variable=RUN_MSCORLIB_TESTS;isOutput=true]true"  
+          }
+
         }
         else
         {
@@ -1058,6 +1072,22 @@ jobs:
       ArtifactName: deployables
       ArtifactType: Container
 
+  - task: CopyFiles@2
+    condition: succeeded()
+    displayName: Copy nanoclr
+    inputs:
+      SourceFolder: '$(Build.Repository.LocalPath)\build\bin\Release'
+      Contents: 'nanoFramework.nanoCLR.dll'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
+
+  - task: PublishBuildArtifacts@1
+    condition: succeeded()
+    displayName: Publish nanoclr
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/nanoclr'
+      ArtifactName: nanoclr
+      ArtifactType: Container
+
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
     condition: >-
@@ -1097,6 +1127,84 @@ jobs:
       allowPackageConflicts: true
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       publishFeedCredentials: 'NuGet-nf-interpreter'
+
+#########################
+# Run mscorlib Unit Tests
+
+- job: Run_UnitTests_mscorlib
+  condition: >-
+    and(
+      succeeded('Check_Code_Style'),
+      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+      or(
+        eq(variables['BUILD_NANOCLR_CLI__'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+      ),
+      eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+    )
+
+  dependsOn:
+  - Build_nanoCLR_CLI
+
+  pool:
+    vmImage: 'windows-latest'
+
+  variables:
+    DOTNET_NOLOGO: true
+    solution: 'nanoFramework.CoreLibrary.sln'
+    buildPlatform: 'Any CPU'
+    buildConfiguration: 'Release'
+
+  steps:
+
+    - checkout: self
+      fetchDepth: 1
+    - checkout: mscorlib
+      fetchDepth: 100
+      submodules: true
+
+    # Download nanoclr from build artifacts 
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'nanoclr' 
+        downloadPath: '$(Agent.TempDirectory)'
+
+    # build mscorlib 
+
+    - task: InstallNanoMSBuildComponents@1
+      condition: succeeded()
+      displayName: Install .NET nanoFramework MSBuild components
+      inputs:
+        GitHubToken: $(GitHubToken)
+  
+    - template: azure-pipelines-templates/install-nuget.yml@templates
+
+    - task: NuGetCommand@2
+      condition: succeeded()
+      displayName: NuGet restore
+      retryCountOnTaskFailure: 5
+      inputs:
+        restoreSolution: '**/nanoFramework.CoreLibrary.sln'
+        feedsToUse: select
+      
+    - task: VSBuild@1
+      condition: succeeded()
+      inputs:
+        solution: '**/nanoFramework.CoreLibrary.sln'
+        platform: 'Any CPU'
+        msbuildArgs: '/p:PublicRelease=true'
+        configuration: 'Release'
+        msbuildArchitecture: 'x64'
+        maximumCpuCount: true
+
+    #and run tests
+    - template: azure-pipelines-templates/run-unit-tests.yml@templates  
+      parameters:
+        runUnitTests: true
+        unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
 
 ######################
 # generate change log
