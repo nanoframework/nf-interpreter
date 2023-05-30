@@ -27,17 +27,15 @@ extern char *UsbSerialNumber[];
 #define SL_USBD_DEVICE_RELEASE_NUMBER           0x0100
 
 // <s SL_USBD_DEVICE_MANUFACTURER_STRING> Device Manufacturer Name
-// <i> Default: "Silicon Labs"
 // <i> Device manufacturer string.
 #define SL_USBD_DEVICE_MANUFACTURER_STRING      "Skyworks"
 
 // <s SL_USBD_DEVICE_PRODUCT_STRING> Device Product Name
-// <i> Default: "Product"
 // <i> Device product string.
-#define SL_USBD_DEVICE_PRODUCT_STRING           "Skyworks EEVB"
+// OK to have this one empty as it will be updated by the managed application when calling UsbStream::NativeOpen
+#define SL_USBD_DEVICE_PRODUCT_STRING           ""
 
 // <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
-// <i> Default: "1234567890ABCDEF"
 // <i> Device serial number string.
 #define SL_USBD_DEVICE_SERIAL_NUMBER_STRING     (const char *)&UsbSerialNumber
 
