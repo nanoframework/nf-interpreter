@@ -410,6 +410,9 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
     // store device description
     hal_strcpy_s(UsbClassVendorDescription, sizeof(UsbClassVendorDescription), deviceDescription);
 
+    // also update USB device product string
+    sl_usbd_vendor_update_device_product_string((const char *)UsbClassVendorDescription);
+
     if (sli_usbd_vendor_winusb_init() != SL_STATUS_OK)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
