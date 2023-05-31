@@ -16,29 +16,29 @@
 // } DataFlow;
 
 // defined src\System.Device.Spi\sys_dev_spi_native.h
-// typedef enum __nfpack SpiBusConfiguration
-// {
-//     SpiBusConfiguration_FullDuplex = 0,
-//     SpiBusConfiguration_HalfDuplex = 1,
-//     SpiBusConfiguration_Simplex = 2,
-// } SpiBusConfiguration;
+typedef enum __nfpack SpiPhasePolarityMode
+{
+    SpiPhasePolarityMode_Mode0 = 0,
+    SpiPhasePolarityMode_Mode1 = 1,
+    SpiPhasePolarityMode_Mode2 = 2,
+    SpiPhasePolarityMode_Mode3 = 3,
+} SpiPhasePolarityMode;
 
 // defined src\System.Device.Spi\sys_dev_spi_native.h
-// typedef enum __nfpack SpiMode
-// {
-//     SpiMode_Mode0 = 0,
-//     SpiMode_Mode1 = 1,
-//     SpiMode_Mode2 = 2,
-//     SpiMode_Mode3 = 3,
-// } SpiMode;
+typedef enum __nfpack SpiWireMode
+{
+    SpiWireMode_FullDuplex = 0,
+    SpiWireMode_HalfDuplex = 1,
+    SpiWireMode_Simplex = 2,
+} SpiWireMode;
 
 struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBaseConfiguration
 {
     static const int FIELD___clockFrequency = 1;
     static const int FIELD___databitLength = 2;
-    static const int FIELD___spiMode = 3;
+    static const int FIELD___spiPhasePolarityMode = 3;
     static const int FIELD___dataFlow = 4;
-    static const int FIELD___busConfiguration = 5;
+    static const int FIELD___spiWireMode = 5;
 
     //--//
 };
@@ -50,8 +50,7 @@ struct Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_S
     static const int FIELD___syncLock = 1;
     static const int FIELD___bufferSingleOperation = 2;
 
-    NANOCLR_NATIVE_DECLARE(
-        NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration);
+    NANOCLR_NATIVE_DECLARE(NativeTransfer___VOID__I4__SystemSpanByte__SystemSpanByte__BOOLEAN__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration);
     NANOCLR_NATIVE_DECLARE(NativeReportBusSettingsChanged___VOID__I4);
     NANOCLR_NATIVE_DECLARE(NativeGetBusSpeed___I4__I4);
 

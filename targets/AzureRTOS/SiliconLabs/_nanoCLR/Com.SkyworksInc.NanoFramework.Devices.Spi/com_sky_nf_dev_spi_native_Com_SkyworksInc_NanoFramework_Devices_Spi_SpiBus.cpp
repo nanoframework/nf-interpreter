@@ -137,13 +137,13 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
             // SPI bus index is 1 based, but the array is 0 based
             spiDeviceConfig->Spi_Bus = busIndex + 1;
 
-            spiDeviceConfig->Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiMode].NumericByRef().s4;
+            spiDeviceConfig->Spi_Mode = (SpiMode)config[SpiBaseConfiguration::FIELD___spiWireMode].NumericByRef().s4;
             spiDeviceConfig->DataOrder16 =
                 (DataBitOrder)config[SpiBaseConfiguration::FIELD___dataFlow].NumericByRef().s4;
             spiDeviceConfig->Clock_RateHz = config[SpiBaseConfiguration::FIELD___clockFrequency].NumericByRef().s4;
             spiDeviceConfig->ByteTime = (1.0 / spiDeviceConfig->Clock_RateHz) * 1000 * 8;
             spiDeviceConfig->BusConfiguration =
-                (SpiBusConfiguration)config[SpiBaseConfiguration::FIELD___busConfiguration].NumericByRef().s4;
+                (SpiBusConfiguration)config[SpiBaseConfiguration::FIELD___spiPhasePolarityMode].NumericByRef().s4;
             spiDeviceConfig->DataIs16bits =
                 config[SpiBaseConfiguration::FIELD___databitLength].NumericByRef().s4 == 16 ? true : false;
             // store this here too
