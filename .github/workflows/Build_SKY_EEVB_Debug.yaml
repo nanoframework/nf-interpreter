@@ -105,7 +105,7 @@ jobs:
           ${{ github.workspace }}/build-metadata.txt
 
     - name: Tag the build
-      if: needs.pr-check.outputs.number != 'null'
+      if: ${{ github.event.pull_request.number == 'null' }}
       uses: actions/github-script@v6
       with:
         script: |
