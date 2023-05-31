@@ -79,13 +79,6 @@ jobs:
 
     - run: nbgv cloud -a -c
 
-    - uses: lukka/run-cmake@v10
-      with:
-        configurePreset: '${{ env.TARGET_NAME }}'
-        configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
-        buildPreset: '${{ env.TARGET_NAME }}'
-        buildPresetAdditionalArgs: "['--config MinSizeRel']"
-
     - name: Collect metadata
       run: |
         $file = "${{ github.workspace }}/build-metadata.txt"
@@ -112,6 +105,7 @@ jobs:
           ${{ github.workspace }}/build-metadata.txt
 
     - name: Tag the build
+      if: needs.pr-check.outputs.number != 'null'
       uses: actions/github-script@v6
       with:
         script: |
