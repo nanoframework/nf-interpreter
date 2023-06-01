@@ -99,7 +99,7 @@ jobs:
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
-          ${{ github.workspace }}/build-metadata.txt
+          ${{ github.workspace }}/build-info.txt
 
     - name: Tag the build
       if: ${{ github.event.pull_request.number == 'null' }}
