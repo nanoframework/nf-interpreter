@@ -86,14 +86,30 @@ jobs:
         buildPreset: '${{ env.TARGET_NAME }}'
         buildPresetAdditionalArgs: "['--config MinSizeRel']"
 
+    - name: Collect metadata
+      run: |
+        $file = "${{ github.workspace }}/build-info.txt"
+
+        $metadata += "Target: ${{ env.TARGET_NAME }}" + [Environment]::NewLine
+        $metadata += "Version: ${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}" + [Environment]::NewLine
+        $metadata += "Build date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" + [Environment]::NewLine
+        $metadata += "Commit: ${{ github.sha }}" + [Environment]::NewLine
+        $metadata += "Branch: ${{ github.ref }}" + [Environment]::NewLine
+        $metadata += "Workflow: ${{ github.workflow }}" + [Environment]::NewLine
+        $metadata += "Repository: ${{ github.repository }}" + [Environment]::NewLine
+
+        $metadata | Out-File -FilePath $file -Encoding utf-8 -Append
+
     - uses: actions/upload-artifact@v3
       with:
         name: '${{ env.TARGET_NAME }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
+          ${{ github.workspace }}/build-info.txt
 
     - name: Tag the build
+      if: ${{ github.event.pull_request.number == 'null' }}
       uses: actions/github-script@v6
       with:
         script: |
