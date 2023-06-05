@@ -195,14 +195,14 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
         {
             // stack trace is DISABLED
 
+            (void)dst;
+            (void)array;
+
             // create an empty array for the stack trace
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 obj[FIELD___stackTrace],
                 depth,
                 g_CLR_RT_WellKnownTypes.m_UInt8));
-
-            //.. and assign it to the field
-            array = obj[FIELD___stackTrace].DereferenceArray();
         }
         else
         {
@@ -245,14 +245,12 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
         }
 
 #else
+        (void)dst;
+        (void)array;
 
         // create an empty array for the stack trace
         NANOCLR_CHECK_HRESULT(
             CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.m_UInt8));
-
-        //.. and assign it to the field
-        array = obj[FIELD___stackTrace].DereferenceArray();
-        dst = (StackTrace *)array->GetFirstElement();
 
 #endif
     }
