@@ -3453,13 +3453,16 @@ struct CLR_RT_ExecutionEngine
         c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited + c_fDebugger_StateResolutionFailed;
     //
     static const int c_fDebugger_BreakpointsDisabled = 0x00001000;
-    //
-    static const int c_fDebugger_Quiet = 0x00010000; // Do not spew debug text to the debugger
+    // Do not spew debug text to the debugger
+    static const int c_fDebugger_Quiet = 0x00010000;
     static const int c_fDebugger_ExitPending = 0x00020000;
-    //
-    static const int c_fDebugger_PauseTimers =
-        0x04000000; // Threads associated with timers are created in "suspended" mode.
-    static const int c_fDebugger_NoCompaction = 0x08000000; // Don't perform compaction during execution.
+
+    // Execution engine won't process stack trace when an exception occurs.
+    static const int c_fDebugger_NoStackTraceInExceptions = 0x02000000;
+    // Threads associated with timers are created in "suspended" mode.
+    static const int c_fDebugger_PauseTimers = 0x04000000;
+    // Don't perform compaction during execution.
+    static const int c_fDebugger_NoCompaction = 0x08000000;
     //
     static const int c_fDebugger_SourceLevelDebugging = 0x10000000;
     static const int c_fDebugger_RebootPending = 0x20000000;
