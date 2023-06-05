@@ -877,7 +877,7 @@ struct CLR_RT_MethodDef_DebuggingInfo
     }
 };
 
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1133,7 +1133,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t iDebuggingInfoMethods;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     };
 
     //--//
@@ -1188,7 +1188,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_MethodDef_DebuggingInfo
         *m_pDebuggingInfo_MethodDef; // EVENT HEAP - NO RELOCATION - (but the data they point to has to be relocated)
-#endif                               //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                               // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_STACK_HEAVY) && defined(VIRTUAL_DEVICE)
     int m_maxOpcodes;
@@ -1965,7 +1965,7 @@ struct CLR_RT_MethodDef_Instance : public CLR_RT_MethodDef_Index
     {
         return m_assm->m_pDebuggingInfo_MethodDef[Method()];
     }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2242,7 +2242,7 @@ struct CLR_RT_StackFrame : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOC
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_UINT32 m_depth;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_PROFILE_NEW_CALLS)
     CLR_PROF_CounterCallChain m_callchain;
@@ -3017,7 +3017,7 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
                                  // However, if this thread was spawned on behalf of the debugger to evaluate
                                  // a property or function call, it points to the object coresponding to the
                                  // thread that is currently selected in the debugger.
-#endif                           //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif                           // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(ENABLE_NATIVE_PROFILER)
     bool m_fNativeProfiled;
@@ -3388,7 +3388,7 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
-//#include <nanoCLR_Messaging.h>
+// #include <nanoCLR_Messaging.h>
 
 //--//
 
@@ -3441,10 +3441,9 @@ struct CLR_RT_ExecutionEngine
     static const int c_HeapState_Normal = 0x00000000;
     static const int c_HeapState_UnderGC = 0x00000001;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.Debugging_Execution_ChangeConditions...' on debugger library code
-    // //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum Commands.Debugging_Execution_ChangeConditions.. on debugger library code //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static const int c_fDebugger_StateInitialize = 0x00000000;
     static const int c_fDebugger_StateResolutionFailed = 0x00000001;
@@ -3509,7 +3508,7 @@ struct CLR_RT_ExecutionEngine
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef *m_breakpoints;
     CLR_DBG_Commands::Debugging_Execution_BreakpointDef m_breakpointsActive[c_MaxBreakpointsActive];
     size_t m_breakpointsActiveNum;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     bool m_fPerformGarbageCollection; // Should the EE do a GC every context switch
@@ -3803,7 +3802,7 @@ struct CLR_RT_ExecutionEngine
     void Breakpoint_Exception(CLR_RT_StackFrame *stack, CLR_UINT32 reason, CLR_PMETADATA ip);
     void Breakpoint_Exception_Intercepted(CLR_RT_StackFrame *stack);
     void Breakpoint_Exception_Uncaught(CLR_RT_Thread *th);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     //--//
 
