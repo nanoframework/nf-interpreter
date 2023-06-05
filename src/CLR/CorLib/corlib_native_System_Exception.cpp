@@ -255,7 +255,6 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
         dst = (StackTrace *)array->GetFirstElement();
 
 #endif
-
     }
 
     NANOCLR_NOCLEANUP();
