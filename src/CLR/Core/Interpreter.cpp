@@ -629,7 +629,7 @@ HRESULT CLR_RT_Thread::Execute()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     _ASSERTE(!CLR_EE_DBG_IS(Stopped));
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     ::Events_SetBoolTimer((bool *)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds);
 
@@ -690,14 +690,14 @@ HRESULT CLR_RT_Thread::Execute()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (CLR_EE_DBG_IS(Stopped))
             break;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         NANOCLR_CHECK_HRESULT(ProcessException());
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (CLR_EE_DBG_IS(Stopped))
             break;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_currentException.Dereference() != NULL)
         {
@@ -750,7 +750,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             //
             // Thread cannot run if a lock request is still pending...
@@ -1002,7 +1002,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
         if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
@@ -3424,7 +3424,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             continue;
 
@@ -3506,7 +3506,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             continue;
 
             //--//
@@ -3532,7 +3532,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if (th->m_timeQuantumExpired)
             {
