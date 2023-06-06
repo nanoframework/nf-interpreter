@@ -678,6 +678,7 @@ void CLR_DBG_Debugger::AccessMemory(
 
     //--//
     unsigned int iRegion, iRange;
+    uint32_t crc32 = 0;
 
     if (BlockStorageDevice_FindRegionFromAddress(m_deploymentStorageDevice, location, &iRegion, &iRange))
     {
@@ -747,8 +748,8 @@ void CLR_DBG_Debugger::AccessMemory(
                             if (mode == AccessMemory_Check)
                             {
                                 // compute CRC32 of the memory segment
-                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                    SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, 0);
+                                crc32 = SUPPORT_ComputeCRC((const void *)accessAddress, NumOfBytes, crc32);
+                                *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
                             }
                             else
                             {
@@ -815,8 +816,8 @@ void CLR_DBG_Debugger::AccessMemory(
                             }
 
                             // compute CRC32 of the memory segment
-                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf =
-                                SUPPORT_ComputeCRC(bufPtr, NumOfBytes, 0);
+                            crc32 = SUPPORT_ComputeCRC((const void *)bufPtr, NumOfBytes, crc32);
+                            *(CLR_DBG_Commands_Monitor_CheckMemory_Reply *)buf = crc32;
 
                             // free buffer if allocated
                             if (!isMemoryMapped)
