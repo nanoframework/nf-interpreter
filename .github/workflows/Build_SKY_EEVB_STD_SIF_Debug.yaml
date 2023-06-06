@@ -88,7 +88,7 @@ jobs:
 
     - name: Collect metadata
       run: |
-        $file = "${{ github.workspace }}/build-info.txt"
+        $file = "${{ github.workspace }}/build/build-info.txt"
 
         $metadata += "Target: ${{ env.TARGET_NAME }}" + [Environment]::NewLine
         $metadata += "Version: ${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}" + [Environment]::NewLine
@@ -106,7 +106,7 @@ jobs:
         path: |
           ${{ github.workspace }}/build/*.bin
           ${{ github.workspace }}/build/*.hex
-          ${{ github.workspace }}/build-info.txt
+          ${{ github.workspace }}/build/build-info.txt
 
     - name: Tag the build
       if: ${{ github.event.pull_request.number == 'null' }}
