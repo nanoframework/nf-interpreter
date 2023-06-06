@@ -175,32 +175,34 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    CLR_RT_HeapBlock *obj;
+    CLR_RT_HeapBlock_Array *array;
+    StackTrace *dst;
+    CLR_UINT32 depth = 0;
+
+    obj = ref.Dereference();
+
     if (stack)
     {
-        CLR_RT_HeapBlock *obj;
-        CLR_RT_HeapBlock_Array *array;
-        StackTrace *dst;
-        CLR_UINT32 depth = 0;
-
-        obj = ref.Dereference();
-
         if (CLR_RT_ExecutionEngine::IsInstanceOf(ref, g_CLR_RT_WellKnownTypes.m_Exception) == false)
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
         }
 
+#if defined(NANOCLR_TRACE_EXCEPTIONS)
+
         if (CLR_EE_DBG_IS(NoStackTraceInExceptions))
         {
             // stack trace is DISABLED
+
+            (void)dst;
+            (void)array;
 
             // create an empty array for the stack trace
             NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
                 obj[FIELD___stackTrace],
                 depth,
                 g_CLR_RT_WellKnownTypes.m_UInt8));
-
-            //.. and assign it to the field
-            array = obj[FIELD___stackTrace].DereferenceArray();
         }
         else
         {
@@ -241,6 +243,16 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
                 CLR_RT_DUMP::EXCEPTION(*stack, ref);
             }
         }
+
+#else
+        (void)dst;
+        (void)array;
+
+        // create an empty array for the stack trace
+        NANOCLR_CHECK_HRESULT(
+            CLR_RT_HeapBlock_Array::CreateInstance(obj[FIELD___stackTrace], depth, g_CLR_RT_WellKnownTypes.m_UInt8));
+
+#endif
     }
 
     NANOCLR_NOCLEANUP();
