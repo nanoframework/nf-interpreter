@@ -1305,7 +1305,7 @@ struct CLR_RT_Assembly : public CLR_RT_HeapBlock_Node // EVENT HEAP - NO RELOCAT
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         size_t debuggingInfoMethods;
-#endif
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     };
 
     //--//
@@ -3708,10 +3708,9 @@ struct CLR_RT_ExecutionEngine
     static const int c_HeapState_Normal = 0x00000000;
     static const int c_HeapState_UnderGC = 0x00000001;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // NEED TO KEEP THESE IN SYNC WITH Enum 'Commands.Debugging_Execution_ChangeConditions...' on debugger library code
-    // //
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NEED TO KEEP THESE IN SYNC WITH Enum Commands.Debugging_Execution_ChangeConditions.. on debugger library code //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     static const int c_fDebugger_StateInitialize = 0x00000000;
     static const int c_fDebugger_StateResolutionFailed = 0x00000001;
@@ -3720,13 +3719,16 @@ struct CLR_RT_ExecutionEngine
     static const int c_fDebugger_StateMask = c_fDebugger_StateProgramRunning + c_fDebugger_StateProgramExited;
     //
     static const int c_fDebugger_BreakpointsDisabled = 0x00001000;
-    //
-    static const int c_fDebugger_Quiet = 0x00010000; // Do not spew debug text to the debugger
+    // Do not spew debug text to the debugger
+    static const int c_fDebugger_Quiet = 0x00010000;
     static const int c_fDebugger_ExitPending = 0x00020000;
-    //
-    static const int c_fDebugger_PauseTimers =
-        0x04000000; // Threads associated with timers are created in "suspended" mode.
-    static const int c_fDebugger_NoCompaction = 0x08000000; // Don't perform compaction during execution.
+
+    // Execution engine won't process stack trace when an exception occurs.
+    static const int c_fDebugger_NoStackTraceInExceptions = 0x02000000;
+    // Threads associated with timers are created in "suspended" mode.
+    static const int c_fDebugger_PauseTimers = 0x04000000;
+    // Don't perform compaction during execution.
+    static const int c_fDebugger_NoCompaction = 0x08000000;
     //
     static const int c_fDebugger_SourceLevelDebugging = 0x10000000;
     static const int c_fDebugger_RebootPending = 0x20000000;

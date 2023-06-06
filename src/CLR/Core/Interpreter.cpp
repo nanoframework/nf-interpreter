@@ -438,7 +438,7 @@ bool CLR_RT_Thread::FindEhBlock(
     // processed.
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-    if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+    if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
         if (!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
@@ -497,7 +497,7 @@ bool CLR_RT_Thread::FindEhBlock(
             }
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-            if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+            if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
             {
                 if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                 {
@@ -534,7 +534,8 @@ bool CLR_RT_Thread::FindEhBlock(
                     if (ptrEhExt->IsFinally() && (!to || (to < ptrEhExt->m_tryStart || to >= ptrEhExt->m_tryEnd)))
                     {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+                        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                            s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                         {
                             CLR_Debug::Printf("Found match for a 'finally'\r\n");
                         }
@@ -549,7 +550,8 @@ bool CLR_RT_Thread::FindEhBlock(
                     if (ptrEhExt->IsCatchAll())
                     {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+                        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                            s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                         {
                             CLR_Debug::Printf("Found match for a 'catch all'\r\n");
                         }
@@ -564,7 +566,8 @@ bool CLR_RT_Thread::FindEhBlock(
                             CLR_RT_ExecutionEngine::IsInstanceOf(m_currentException, ptrEhExt->m_typeFilter))
                         {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                            if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+                            if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                                s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                             {
                                 if (ptrEhExt->IsFilter())
                                 {
@@ -589,7 +592,7 @@ bool CLR_RT_Thread::FindEhBlock(
     }
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-    if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+    if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
         if (to == nullptr || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
@@ -1016,7 +1019,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
-        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
         {
             CLR_PROF_HANDLER_SUSPEND_TIME();
 

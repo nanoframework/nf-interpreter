@@ -1258,154 +1258,152 @@ bool CLR_RT_HeapBlock::ObjectsEqual(
     NanoCLRDataType leftDataType = pArgLeft.DataType();
     NanoCLRDataType rightDataType = pArgRight.DataType();
 
-    if (leftDataType == rightDataType)
+    switch (leftDataType)
     {
-        switch (leftDataType)
-        {
-            case DATATYPE_VALUETYPE:
-                if (pArgLeft.ObjectCls().data == pArgRight.ObjectCls().data)
-                {
-                    const CLR_RT_HeapBlock *objLeft = &pArgLeft;
-                    const CLR_RT_HeapBlock *objRight = &pArgRight;
-                    CLR_UINT32 num = pArgLeft.DataSize();
-
-                    while (--num)
-                    {
-                        if (ObjectsEqual(*++objLeft, *++objRight, false) == false)
-                            return false;
-                    }
-
-                    return true;
-                }
-                break;
-
-#if defined(NANOCLR_APPDOMAINS)
-            case DATATYPE_TRANSPARENT_PROXY:
-#endif
-            case DATATYPE_OBJECT:
+        case DATATYPE_VALUETYPE:
+            if (pArgLeft.ObjectCls().data == pArgRight.ObjectCls().data)
             {
-                CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
-                CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+                const CLR_RT_HeapBlock *objLeft = &pArgLeft;
+                const CLR_RT_HeapBlock *objRight = &pArgRight;
+                CLR_UINT32 num = pArgLeft.DataSize();
 
-                if (objLeft == objRight)
+                while (--num)
                 {
-                    return true;
+                    if (ObjectsEqual(*++objLeft, *++objRight, false) == false)
+                        return false;
                 }
 
-                if (objLeft && objRight)
-                {
-                    if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
-                    {
-                        return ObjectsEqual(*objLeft, *objRight, false);
-                    }
-                }
+                return true;
             }
             break;
 
-            case DATATYPE_SZARRAY:
-                if (fSameReference == false)
+#if defined(NANOCLR_APPDOMAINS)
+        case DATATYPE_TRANSPARENT_PROXY:
+#endif
+        case DATATYPE_OBJECT:
+        {
+            CLR_RT_HeapBlock *objLeft = pArgLeft.Dereference();
+            CLR_RT_HeapBlock *objRight = pArgRight.Dereference();
+
+            if (objLeft == objRight)
+            {
+                return true;
+            }
+
+            if (objLeft && objRight)
+            {
+                if (!fSameReference || (objLeft->DataType() == DATATYPE_REFLECTION))
                 {
-                    _ASSERTE(false); // can this code path ever be executed?
-
-                    CLR_RT_HeapBlock_Array *objLeft = (CLR_RT_HeapBlock_Array *)&pArgLeft;
-                    CLR_RT_HeapBlock_Array *objRight = (CLR_RT_HeapBlock_Array *)&pArgRight;
-
-                    if (objLeft->m_numOfElements == objRight->m_numOfElements &&
-                        objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
-                        objLeft->m_typeOfElement == objRight->m_typeOfElement)
-                    {
-                        if (!objLeft->m_fReference)
-                        {
-                            if (memcmp(
-                                    objLeft->GetFirstElement(),
-                                    objRight->GetFirstElement(),
-                                    objLeft->m_numOfElements * objLeft->m_sizeOfElement) == 0)
-                            {
-                                return true;
-                            }
-                        }
-                    }
+                    return ObjectsEqual(*objLeft, *objRight, false);
                 }
-                break;
+            }
+        }
+        break;
 
-            case DATATYPE_REFLECTION:
-                if (pArgLeft.SameHeader(pArgRight))
+        case DATATYPE_SZARRAY:
+            if (fSameReference == false)
+            {
+                _ASSERTE(false); // can this code path ever be executed?
+
+                CLR_RT_HeapBlock_Array *objLeft = (CLR_RT_HeapBlock_Array *)&pArgLeft;
+                CLR_RT_HeapBlock_Array *objRight = (CLR_RT_HeapBlock_Array *)&pArgRight;
+
+                if (objLeft->m_numOfElements == objRight->m_numOfElements &&
+                    objLeft->m_sizeOfElement == objRight->m_sizeOfElement &&
+                    objLeft->m_typeOfElement == objRight->m_typeOfElement)
                 {
-                    return true;
-                }
-                break;
-
-            case DATATYPE_STRING:
-                return Compare_Values(pArgLeft, pArgRight, false) == 0;
-                break;
-
-            default:
-                if (fSameReference == false)
-                {
-                    const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[pArgLeft.DataType()];
-
-                    if ((dtl.m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
+                    if (!objLeft->m_fReference)
                     {
-                        CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
-
-                        if (memcmp(&pArgLeft.DataByRefConst(), &pArgRight.DataByRefConst(), size) == 0)
+                        if (memcmp(
+                                objLeft->GetFirstElement(),
+                                objRight->GetFirstElement(),
+                                objLeft->m_numOfElements * objLeft->m_sizeOfElement) == 0)
                         {
                             return true;
                         }
                     }
                 }
-                break;
-        }
-    }
-    else
-    {
-        if ((leftDataType == DATATYPE_BYREF && rightDataType == DATATYPE_OBJECT))
-        {
-            // this is to handle the special case for calls to callvirt with constrained type
-            // namely with Objects, ValueType and Enum.
-            // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+            }
+            break;
 
-            CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
-            CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
-
-            if (rightObj->DataType() == DATATYPE_VALUETYPE)
+        case DATATYPE_REFLECTION:
+            if (pArgLeft.SameHeader(pArgRight))
             {
-                CLR_RT_TypeDef_Instance inst;
-                CLR_RT_HeapBlock *obj = nullptr;
+                return true;
+            }
+            break;
 
-                if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
-                {
-                }
+        case DATATYPE_STRING:
+            return Compare_Values(pArgLeft, pArgRight, false) == 0;
+            break;
 
-                if (inst.target->dataType != DATATYPE_VALUETYPE)
+        case DATATYPE_BYREF:
+            if (rightDataType == DATATYPE_OBJECT)
+            {
+                // this is to handle the special case for calls to callvirt with constrained type
+                // namely with Objects, ValueType and Enum.
+                // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-6.0
+
+                CLR_RT_HeapBlock *leftObj = pArgLeft.Dereference();
+                CLR_RT_HeapBlock *rightObj = pArgRight.Dereference();
+
+                if (rightObj->DataType() == DATATYPE_VALUETYPE)
                 {
-                    // boxed primitive or enum type
-                    obj = &rightObj[1];
+                    CLR_RT_TypeDef_Instance inst;
+                    CLR_RT_HeapBlock *obj = NULL;
+
+                    if (!inst.InitializeFromIndex(rightObj->ObjectCls()))
+                    {
+                    }
+
+                    if (inst.target->dataType != DATATYPE_VALUETYPE)
+                    {
+                        // boxed primitive or enum type
+                        obj = &rightObj[1];
+                    }
+                    else
+                    {
+                        // boxed value type
+                        obj = rightObj;
+                    }
+
+                    return ObjectsEqual(*leftObj, *obj, false);
                 }
                 else
                 {
-                    // boxed value type
-                    obj = rightObj;
+                    if (rightObj == NULL)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return ObjectsEqual(*leftObj, *rightObj, false);
+                    }
                 }
+            }
+            break;
 
-                return ObjectsEqual(*leftObj, *obj, false);
+        default:
+
+            if ((leftDataType == rightDataType) && fSameReference == false)
+            {
+                const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[pArgLeft.DataType()];
+
+                if ((dtl.m_flags & CLR_RT_DataTypeLookup::c_Reference) == 0)
+                {
+                    CLR_UINT32 size = (dtl.m_sizeInBits + 7) / 8;
+
+                    if (memcmp(&pArgLeft.DataByRefConst(), &pArgRight.DataByRefConst(), size) == 0)
+                    {
+                        return true;
+                    }
+                }
             }
             else
             {
-                if (rightObj == nullptr)
-                {
-                    return false;
-                }
-                else
-                {
-                    return ObjectsEqual(*leftObj, *rightObj, false);
-                }
+                _ASSERTE(false);
             }
-        }
-        else
-        {
-            _ASSERTE(false);
-        }
+            break;
     }
 
     return false;
