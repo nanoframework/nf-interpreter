@@ -1,0 +1,126 @@
+name: Skyworks .NET nanoFramework target build
+run-name: Workflow for Skyworks .NET nanoFramework target build
+
+on:
+  workflow_call:
+    inputs:
+      targetName:
+        required: true
+        type: string
+
+jobs:
+  build-skyworks-target:
+    name: Build Skyworks target
+    timeout-minutes: 15
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: 'skyworks-evb'
+          submodules: true
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Install SRecord
+        run: |
+          $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/srecord-win32/versions/latest/srecord-1.64-win32.zip"
+          $output = "${{ runner.temp }}\srecord.zip"
+
+          "Downloading SRecord..." | Write-Host -ForegroundColor White -NoNewline
+
+          # Stop security tripping us up
+          [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
+
+          # download zip with Ninja tool
+          (New-Object Net.WebClient).DownloadFile($url, $output)
+
+          "OK" | Write-Host -ForegroundColor Green
+
+          "Installing SRecord..." | Write-Host -ForegroundColor White -NoNewline
+
+          # unzip tool
+          Expand-Archive $output -DestinationPath ${{ runner.temp }}\srecord > $null
+
+          "OK" | Write-Host -ForegroundColor Green
+
+          $srecPath = "${{ runner.temp }}\srecord".Replace('\', '/')
+
+          echo "SRECORD_PATH=$srecPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+
+      - name: Install arm-none-eabi-gcc
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '12.2.Rel1'
+
+      - name: Tweak GCC path
+        run: |
+          $currentPath = "$env:ARM_NONE_EABI_GCC_PATH"
+          if($currentPath.EndsWith("bin"))
+          {
+            $fixedPath = $currentPath.Replace("\bin", "")
+            
+            echo "ARM_NONE_EABI_GCC_PATH=$fixedPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          }
+
+      - name: Rename CMake presets
+        working-directory: ${{ github.workspace }}/config
+        run: |
+          $file = "user-tools-repos.json"
+          Rename-Item -Path "user-tools-repos.TEMPLATE.json" -NewName $file
+
+          [regex]$pattern='user-tools-repos-cloud'
+          $pattern.replace([IO.File]::ReadAllText($file), 'user-tools-repos', 1) | Out-File $file -Encoding UTF8
+          
+          $file = "user-prefs.json"
+          Rename-Item -Path "user-prefs.TEMPLATE.json" -NewName $file
+          
+          $filecontent = Get-Content($file)
+          attrib $file -r
+          $filecontent -replace  'Debug', 'MinSizeRel' | Out-File $file -Encoding UTF8
+
+      - run: nbgv cloud -a -c
+
+      - uses: lukka/run-cmake@v10
+        with:
+          configurePreset: '${{ inputs.targetName }}'
+          configurePresetAdditionalArgs: "['-DBUILD_VERSION=${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}','-DCMAKE_BUILD_TYPE=MinSizeRel','-DTOOL_SRECORD_PREFIX=${{ env.SRECORD_PATH }}']"
+          buildPreset: '${{ inputs.targetName }}'
+          buildPresetAdditionalArgs: "['--config MinSizeRel']"
+
+      - name: Collect metadata
+        run: |
+          $file = "${{ github.workspace }}/build/build-info.txt"
+
+          $metadata += "Target: ${{ inputs.targetName }}" + [Environment]::NewLine
+          $metadata += "Version: ${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}" + [Environment]::NewLine
+          $metadata += "Build date: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" + [Environment]::NewLine
+          $metadata += "Commit: ${{ github.sha }}" + [Environment]::NewLine
+          $metadata += "Branch: ${{ github.ref }}" + [Environment]::NewLine
+          $metadata += "Workflow: ${{ github.workflow }}" + [Environment]::NewLine
+          $metadata += "Repository: ${{ github.repository }}" + [Environment]::NewLine
+
+          $metadata | Out-File -FilePath $file -Encoding utf-8 -Append
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: '${{ inputs.targetName }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}'
+          path: |
+            ${{ github.workspace }}/build/*.bin
+            ${{ github.workspace }}/build/*.hex
+            ${{ github.workspace }}/build/build-info.txt
+
+      - name: Tag the build
+        if: ${{ github.event.pull_request.number == 'null' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const {DIST_VERSION} = process.env          
+            github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/${{ inputs.targetName }}-v${{env.NBGV_VersionMajor}}.${{env.NBGV_VersionMinor}}.${{env.NBGV_BuildNumber}}.${{env.NBGV_VersionHeight}}',
+                sha: context.sha
+            })
