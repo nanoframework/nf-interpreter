@@ -2531,7 +2531,15 @@ static bool IsBlockEnumMaybe(CLR_RT_HeapBlock *blk)
     CLR_RT_TypeDescriptor desc;
 
     if (FAILED(desc.InitializeFromObject(*blk)))
+    {
         return false;
+    }
+
+    // can only check for data type if the class handler is not null
+    if (desc.m_handlerCls.target == nullptr)
+    {
+        return false;
+    }
 
     const CLR_RT_DataTypeLookup &dtl = c_CLR_RT_DataTypeLookup[desc.m_handlerCls.target->dataType];
 
