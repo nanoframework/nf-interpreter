@@ -555,7 +555,9 @@ struct CLR_DBG_Commands
 
     struct Debugging_Value
     {
-        CLR_RT_HeapBlock *      m_referenceID;
+        // this is a CLR_RT_HeapBlock *
+        // has to be stored as CLR_UINT32 because CLR_RT_HeapBlock has different size on 32 and 64 bit platforms
+        CLR_UINT32              m_referenceID;
         CLR_UINT32              m_dt;                // CLR_RT_HeapBlock::DataType ()
         CLR_UINT32              m_flags;             // CLR_RT_HeapBlock::DataFlags()
         CLR_UINT32              m_size;              // CLR_RT_HeapBlock::DataSize ()
@@ -569,7 +571,9 @@ struct CLR_DBG_Commands
         // For DATATYPE_STRING
         //
         CLR_UINT32              m_bytesInString;
-        const char *                 m_charsInString;
+        // this is a const char *
+        // has to be stored as CLR_UINT32 because const char * has different size on 32 and 64 bit platforms
+        CLR_UINT32 		        m_charsInString;
 
         //
         // For DATATYPE_VALUETYPE or DATATYPE_CLASSTYPE
@@ -591,7 +595,10 @@ struct CLR_DBG_Commands
         //
         // For values from an array.
         //
-        CLR_RT_HeapBlock_Array *m_arrayref_referenceID;
+        
+        // this is a CLR_RT_HeapBlock_Array *
+        // has to be stored as CLR_UINT32 because CLR_RT_HeapBlock_Array has different size on 32 and 64 bit platforms
+        CLR_UINT32              m_arrayref_referenceID;
         CLR_UINT32              m_arrayref_index;
     };
 

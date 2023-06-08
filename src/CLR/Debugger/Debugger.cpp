@@ -1776,7 +1776,7 @@ static bool FillValues(
 
     memset(dst, 0, sizeof(*dst));
 
-    dst->m_referenceID = (reference != nullptr) ? reference : ptr;
+    dst->m_referenceID = (CLR_UINT32)((reference != nullptr) ? reference : ptr);
     dst->m_dt = ptr->DataType();
     dst->m_flags = ptr->DataFlags();
     dst->m_size = ptr->DataSize();
@@ -1822,7 +1822,7 @@ static bool FillValues(
 
             if (text != nullptr)
             {
-                dst->m_charsInString = text;
+                dst->m_charsInString = (CLR_UINT32)text;
                 dst->m_bytesInString = (CLR_UINT32)hal_strlen_s(text);
 
                 hal_strncpy_s(
@@ -1833,7 +1833,8 @@ static bool FillValues(
             }
             else
             {
-                dst->m_charsInString = nullptr;
+                // equivalent to a null string
+                dst->m_charsInString = 0;
                 dst->m_bytesInString = 0;
                 dst->m_builtinValue[0] = 0;
             }
@@ -1869,7 +1870,7 @@ static bool FillValues(
             break;
 
         case DATATYPE_ARRAY_BYREF:
-            dst->m_arrayref_referenceID = ptr->Array();
+            dst->m_arrayref_referenceID = (CLR_UINT32)ptr->Array();
             dst->m_arrayref_index = ptr->ArrayIndex();
 
             break;

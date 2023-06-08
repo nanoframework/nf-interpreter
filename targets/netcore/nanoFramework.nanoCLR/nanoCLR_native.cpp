@@ -84,6 +84,13 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
 
 void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
 {
+
+#if _DEBUG
+    // only show this in debug build
+    DWORD pid = GetCurrentProcessId();
+    CLR_Debug::Printf("Process ID: %d\r\n", pid);
+#endif
+
     CLR_Debug::Printf(
         "\r\nLoading nanoCLR v%d.%d.%d.%d\r\n...",
         VERSION_MAJOR,
