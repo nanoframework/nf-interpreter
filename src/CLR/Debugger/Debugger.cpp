@@ -1354,8 +1354,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_ChangeConditions(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Execution_ChangeConditions *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Execution_ChangeConditions *)msg->m_payload;
 
     // save current value
     int32_t newConditions = g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions;
@@ -1498,8 +1497,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_QueryCLRCapabilities(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities *)msg->m_payload;
 
     CLR_DBG_Commands::Debugging_Execution_QueryCLRCapabilities::ReplyUnion reply;
     reply.u_capsFlags = 0;
@@ -1972,8 +1970,7 @@ bool CLR_DBG_Debugger::Debugging_Execution_Breakpoints(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Execution_Breakpoints *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Execution_Breakpoints *)msg->m_payload;
 
     g_CLR_RT_ExecutionEngine.InstallBreakpoints(
         cmd->m_data,
@@ -2401,8 +2398,7 @@ bool CLR_DBG_Debugger::Debugging_Thread_GetException(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Thread_GetException *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Thread_GetException *)msg->m_payload;
     CLR_RT_Thread *th = g_CLR_DBG_Debugger->GetThreadFromPid(cmd->m_pid);
     CLR_RT_HeapBlock *blk = nullptr;
 
@@ -2621,8 +2617,7 @@ bool CLR_DBG_Debugger::Debugging_Value_ResizeScratchPad(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_ResizeScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock ref;
 
     if (cmd->m_size == 0)
@@ -3012,8 +3007,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetScratchPad(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_GetScratchPad *)msg->m_payload;
     CLR_RT_HeapBlock *blk = GetScratchPad_Helper(cmd->m_index);
 
     WP_ReplyToCommand(msg, g_CLR_DBG_Debugger->GetValue(msg, blk, nullptr, nullptr), false, nullptr, 0);
@@ -3075,8 +3069,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateObject(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Value_AllocateObject *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_AllocateObject *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
@@ -3098,8 +3091,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateString(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Value_AllocateString *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_AllocateString *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
@@ -3131,8 +3123,7 @@ bool CLR_DBG_Debugger::Debugging_Value_AllocateArray(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Value_AllocateArray *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Value_AllocateArray *)msg->m_payload;
     CLR_RT_HeapBlock *blk = nullptr;
     CLR_RT_HeapBlock *ptr = GetScratchPad_Helper(cmd->m_index);
 
@@ -3675,8 +3666,7 @@ bool CLR_DBG_Debugger::Debugging_Resolve_VirtualMethod(WP_Message *msg)
 {
     NATIVE_PROFILE_CLR_DEBUGGER();
 
-    auto *cmd =
-        (CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *)msg->m_payload;
+    auto *cmd = (CLR_DBG_Commands::Debugging_Resolve_VirtualMethod *)msg->m_payload;
     CLR_DBG_Commands::Debugging_Resolve_VirtualMethod::Reply cmdReply;
     CLR_RT_TypeDef_Index cls;
     CLR_RT_MethodDef_Index md;
