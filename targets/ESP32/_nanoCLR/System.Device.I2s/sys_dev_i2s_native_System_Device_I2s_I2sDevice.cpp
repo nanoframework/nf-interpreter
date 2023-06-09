@@ -54,12 +54,12 @@ void Esp32_I2s_UnitializeAll()
         {
             // Delete bus driver
 
-#if SOC_I2S_SUPPORTS_ADC 
-            if (Adc_Mode_Enabled)       
+#if SOC_I2S_SUPPORTS_ADC
+            if (Adc_Mode_Enabled)
             {
                 i2s_adc_disable((i2s_port_t)c);
             }
-#endif            
+#endif
             i2s_driver_uninstall((i2s_port_t)c);
             Esp_I2S_Initialised_Flag[c] = 0;
             Adc_Mode_Enabled = 0;
@@ -69,7 +69,7 @@ void Esp32_I2s_UnitializeAll()
 
 i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits)
 {
-#if SOC_I2S_SUPPORTS_ADC    
+#if SOC_I2S_SUPPORTS_ADC
     if (mode & I2S_MODE_ADC_BUILT_IN)
     {
         return bits;
@@ -225,7 +225,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         }
 
 #if SOC_I2S_SUPPORTS_ADC
-                
+
         // Configure ADC Mode
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
@@ -558,7 +558,7 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
 
         if (bus != I2S_NUM_0 
 #if (I2S_NUM_MAX > 1)
-            && bus != I2S_NUM_1
+                                                                     && bus != I2S_NUM_1
 #endif
         )
         {
@@ -596,7 +596,9 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
         // get bus index
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
-        
+
+        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
+
         Esp_I2S_Initialised_Flag[bus]--;
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
