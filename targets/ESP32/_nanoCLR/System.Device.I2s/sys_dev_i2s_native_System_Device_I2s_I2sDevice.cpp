@@ -302,11 +302,13 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         HAL_AddSoftRebootHandler(Esp32_I2s_UnitializeAll);
 
         Esp_I2S_Initialised_Flag[bus]++;
-
+#if SOC_I2S_SUPPORTS_ADC
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
             Adc_Mode_Enabled |= true;
         }
+#endif
+
     }
 
 // apply low-level workaround for bug in some ESP-IDF versions that swap
@@ -554,18 +556,23 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
-
-
-        if (((mode & I2S_MODE_ADC_BUILT_IN) && bus != I2S_NUM_0) || 
-        (bus != I2S_NUM_0 
+        if (bus != I2S_NUM_0 
 #if (I2S_NUM_MAX > 1)
             && bus != I2S_NUM_1
 #endif
-        ))
+        )
         {
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+
+#if SOC_I2S_SUPPORTS_ADC
+        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
+
+        if (mode & I2S_MODE_ADC_BUILT_IN && bus != I2S_NUM_0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+#endif
 
         // Set the Bus parameters
         NANOCLR_CHECK_HRESULT(SetI2sConfig(bus, pConfig));
@@ -590,13 +597,12 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
         
-        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
-
         Esp_I2S_Initialised_Flag[bus]--;
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
         {
 #if SOC_I2S_SUPPORTS_ADC
+            i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
             if (mode & I2S_MODE_ADC_BUILT_IN)
             {
                 i2s_adc_disable(bus);
