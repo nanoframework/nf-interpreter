@@ -597,8 +597,6 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
-
         Esp_I2S_Initialised_Flag[bus]--;
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
