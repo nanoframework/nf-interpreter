@@ -308,7 +308,6 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             Adc_Mode_Enabled |= true;
         }
 #endif
-
     }
 
 // apply low-level workaround for bug in some ESP-IDF versions that swap
@@ -556,9 +555,9 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
         // subtract 1 to get ESP32 bus number
         i2s_port_t bus = (i2s_port_t)(pConfig[I2sConnectionSettings::FIELD___busId].NumericByRef().s4 - 1);
 
-        if (bus != I2S_NUM_0 
+        if (bus != I2S_NUM_0
 #if (I2S_NUM_MAX > 1)
-                                                                     && bus != I2S_NUM_1
+            && bus != I2S_NUM_1
 #endif
         )
         {
