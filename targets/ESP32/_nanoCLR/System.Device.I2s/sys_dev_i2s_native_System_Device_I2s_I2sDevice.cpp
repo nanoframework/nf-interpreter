@@ -30,7 +30,7 @@ static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
 #endif
 };
 
-static char Adc_Mode_Enabled = 0;
+static bool Adc_Mode_Enabled = false;
 
 void swap_32_bit_stereo_channels(unsigned char *buffer, int length)
 {
@@ -55,14 +55,14 @@ void Esp32_I2s_UnitializeAll()
             // Delete bus driver
 
 #if SOC_I2S_SUPPORTS_ADC
-            if (Adc_Mode_Enabled)
+            if (Adc_Mode_Enabled && c == I2S_NUM_0)
             {
                 i2s_adc_disable((i2s_port_t)c);
+                Adc_Mode_Enabled = false;
             }
 #endif
             i2s_driver_uninstall((i2s_port_t)c);
             Esp_I2S_Initialised_Flag[c] = 0;
-            Adc_Mode_Enabled = 0;
         }
     }
 }
@@ -198,6 +198,9 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
     int bufferSize = config[I2sConnectionSettings::FIELD___bufferSize].NumericByRef().s4;
 
+
+
+
     conf.communication_format = get_i2s_commformat(commformat);
     conf.mode = mode;
     conf.bits_per_sample = get_dma_bits(mode, bits);
@@ -212,6 +215,13 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
     conf.mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT;
     conf.bits_per_chan = (i2s_bits_per_chan_t)0;
+#endif
+
+#if !(SOC_I2S_SUPPORTS_ADC)
+    if(mode & I2sMode_AdcBuiltIn)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
 #endif
 
     // If this is first device on Bus then init driver
@@ -305,7 +315,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #if SOC_I2S_SUPPORTS_ADC
         if (mode & I2S_MODE_ADC_BUILT_IN)
         {
-            Adc_Mode_Enabled |= true;
+            Adc_Mode_Enabled = true;
         }
 #endif
     }
