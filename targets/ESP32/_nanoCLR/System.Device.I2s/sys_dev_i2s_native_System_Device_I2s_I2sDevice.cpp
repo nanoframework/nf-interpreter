@@ -30,7 +30,9 @@ static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
 #endif
 };
 
+#if SOC_I2S_SUPPORTS_ADC
 static bool Adc_Mode_Enabled = false;
+#endif
 
 void swap_32_bit_stereo_channels(unsigned char *buffer, int length)
 {
