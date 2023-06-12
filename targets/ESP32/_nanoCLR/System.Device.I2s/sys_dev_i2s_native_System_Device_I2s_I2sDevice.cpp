@@ -199,7 +199,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
     int bufferSize = config[I2sConnectionSettings::FIELD___bufferSize].NumericByRef().s4;
 
 #if !(SOC_I2S_SUPPORTS_ADC)
-    if(mode & I2sMode_AdcBuiltIn)
+    if (mode & I2sMode_AdcBuiltIn)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
