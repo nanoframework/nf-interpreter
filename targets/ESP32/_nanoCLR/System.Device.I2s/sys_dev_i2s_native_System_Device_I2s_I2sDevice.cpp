@@ -198,8 +198,12 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
     int bufferSize = config[I2sConnectionSettings::FIELD___bufferSize].NumericByRef().s4;
 
-
-
+#if !(SOC_I2S_SUPPORTS_ADC)
+    if(mode & I2sMode_AdcBuiltIn)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+#endif
 
     conf.communication_format = get_i2s_commformat(commformat);
     conf.mode = mode;
@@ -215,13 +219,6 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
 #if (ESP_IDF_VERSION_MAJOR == 4) && (ESP_IDF_VERSION_MINOR >= 4)
     conf.mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT;
     conf.bits_per_chan = (i2s_bits_per_chan_t)0;
-#endif
-
-#if !(SOC_I2S_SUPPORTS_ADC)
-    if(mode & I2sMode_AdcBuiltIn)
-    {
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-    }
 #endif
 
     // If this is first device on Bus then init driver
