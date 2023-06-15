@@ -244,7 +244,7 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             // TODO Re-use logic in ADC?
             int channelNumber = -1;
 
-            // Find out ADC Channel for pin confiured as I2S_DATAIN
+            // Find out ADC Channel for pin configured as I2S_DATAIN
             for (unsigned int i = 0; i < sizeof(Esp32_ADC_DevicePinMap) / sizeof(int8_t); i++)
             {
                 if (Esp32_ADC_DevicePinMap[i] == pin_config.data_in_num)
