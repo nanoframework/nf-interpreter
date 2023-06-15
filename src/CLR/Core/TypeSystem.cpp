@@ -1446,6 +1446,32 @@ void CLR_RT_GenericParam_Instance::ClearInstance()
     target = nullptr;
 }
 
+bool CLR_RT_GenericParam_Instance::ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    if (assm)
+    {
+        CLR_UINT32 index = CLR_DataFromTk(tk);
+
+        CLR_RT_GenericParam_Index genericParamIndex;
+        genericParamIndex.Set(assm->assemblyIndex, index);
+
+        // get generic type
+        data = genericParamIndex.data;
+        assembly = assm;
+        target = assembly->GetGenericParam(index);
+
+#if defined(NANOCLR_INSTANCE_NAMES)
+        name = assembly->GetString(target->name);
+#endif
+        return true;
+    }
+
+    ClearInstance();
+
+    return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool CLR_RT_MethodSpec_Instance::InitializeFromIndex(const CLR_RT_MethodSpec_Index &index)

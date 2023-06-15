@@ -2199,6 +2199,8 @@ struct CLR_RT_GenericParam_Instance : public CLR_RT_GenericParam_Index
 
     void ClearInstance();
 
+    bool ResolveToken(CLR_UINT32 tk, CLR_RT_Assembly *assm);
+
     //--//
 
     CLR_RT_GenericParam_CrossReference &CrossReference() const
