@@ -3155,6 +3155,18 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         }
                         break;
 
+                        case TBL_GenericParam:
+                        {
+                            CLR_RT_GenericParam_Instance param;
+                            if (param.ResolveToken(arg, assm) == false)
+                            {
+                                NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
+                            }
+
+                            evalPos[0].SetReflection(param);
+                        }
+                        break;
+
                         default:
                             NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
                             break;
