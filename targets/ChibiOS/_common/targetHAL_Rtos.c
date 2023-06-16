@@ -4,7 +4,7 @@
 //
 
 #include <targetHAL.h>
-#include <hal.h>
+#include <cmsis_os.h>
 
 void RtosYield()
 {

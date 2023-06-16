@@ -4,7 +4,7 @@
 //
 
 #include <targetHAL.h>
-#include <FreeRTOS.h>
+#include <task.h>
 
 void RtosYield()
 {
