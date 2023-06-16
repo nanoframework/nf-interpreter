@@ -2406,6 +2406,7 @@ void CLR_RT_ExecutionEngine::ProcessHardware()
 {
     NATIVE_PROFILE_CLR_CORE();
     Watchdog_Reset();
+    RtosYield();
 
     g_CLR_HW_Hardware.ProcessActivity();
 }
