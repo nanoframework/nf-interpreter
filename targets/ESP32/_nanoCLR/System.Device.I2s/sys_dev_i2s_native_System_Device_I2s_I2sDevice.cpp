@@ -30,6 +30,10 @@ static char Esp_I2S_Initialised_Flag[I2S_NUM_MAX] = {
 #endif
 };
 
+#if SOC_I2S_SUPPORTS_ADC
+static bool Adc_Mode_Enabled = false;
+#endif
+
 void swap_32_bit_stereo_channels(unsigned char *buffer, int length)
 {
     uint32_t swap_sample;
@@ -51,6 +55,14 @@ void Esp32_I2s_UnitializeAll()
         if (Esp_I2S_Initialised_Flag[c])
         {
             // Delete bus driver
+
+#if SOC_I2S_SUPPORTS_ADC
+            if (Adc_Mode_Enabled && c == I2S_NUM_0)
+            {
+                i2s_adc_disable((i2s_port_t)c);
+                Adc_Mode_Enabled = false;
+            }
+#endif
             i2s_driver_uninstall((i2s_port_t)c);
             Esp_I2S_Initialised_Flag[c] = 0;
         }
@@ -59,6 +71,13 @@ void Esp32_I2s_UnitializeAll()
 
 i2s_bits_per_sample_t get_dma_bits(uint8_t mode, i2s_bits_per_sample_t bits)
 {
+#if SOC_I2S_SUPPORTS_ADC
+    if (mode & I2S_MODE_ADC_BUILT_IN)
+    {
+        return bits;
+    }
+#endif
+
     if (mode == (I2S_MODE_MASTER | I2S_MODE_TX))
     {
         return bits;
@@ -181,6 +200,13 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
         (i2s_bits_per_sample_t)config[I2sConnectionSettings::FIELD___sampleRate].NumericByRef().s4;
     int bufferSize = config[I2sConnectionSettings::FIELD___bufferSize].NumericByRef().s4;
 
+#if !(SOC_I2S_SUPPORTS_ADC)
+    if (mode & I2sMode_AdcBuiltIn)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+#endif
+
     conf.communication_format = get_i2s_commformat(commformat);
     conf.mode = mode;
     conf.bits_per_sample = get_dma_bits(mode, bits);
@@ -207,10 +233,90 @@ HRESULT SetI2sConfig(i2s_port_t bus, CLR_RT_HeapBlock *config)
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
+#if SOC_I2S_SUPPORTS_ADC
+
+        // Configure ADC Mode
+        if (mode & I2S_MODE_ADC_BUILT_IN)
+        {
+            // TODO - make attenuation configurable?
+            adc_atten_t atten = ADC_ATTEN_DB_11;
+
+            // TODO Re-use logic in ADC?
+            int channelNumber = -1;
+
+            // Find out ADC Channel for pin configured as I2S_DATAIN
+            for (unsigned int i = 0; i < sizeof(Esp32_ADC_DevicePinMap) / sizeof(int8_t); i++)
+            {
+                if (Esp32_ADC_DevicePinMap[i] == pin_config.data_in_num)
+                {
+                    channelNumber = i;
+                    break;
+                }
+            }
+            if (channelNumber < 0)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+            }
+
+            int adcUnit = channelNumber <= 9 ? 1 : 2;
+            switch (adcUnit)
+            {
+                case 1:
+                    // Normal channel 0-7 ?
+                    if (channelNumber <= 7)
+                    {
+                        // TODO - Make ADC Resolution configurable?
+                        // adc1_config_width(width_bit);
+
+                        if (adc1_config_channel_atten((adc1_channel_t)channelNumber, atten) != ESP_OK)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+                        }
+
+                        if (i2s_set_adc_mode(ADC_UNIT_1, (adc1_channel_t)channelNumber) != ESP_OK)
+                        {
+                            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    // Adjust for ADC2
+                    channelNumber -= 10;
+
+                    // TODO - Make ADC Resolution configurable?
+                    // adc2_config_width(width_bit);
+
+                    if (adc2_config_channel_atten((adc2_channel_t)channelNumber, atten) != ESP_OK)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_PIN_UNAVAILABLE);
+                    }
+
+                    if (i2s_set_adc_mode(ADC_UNIT_2, (adc1_channel_t)channelNumber) != ESP_OK)
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+                    }
+
+                    break;
+            }
+
+            if (i2s_adc_enable(bus) != ESP_OK)
+            {
+                NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+            }
+        }
+#endif
+
         // Ensure driver gets unitialized during soft reboot
         HAL_AddSoftRebootHandler(Esp32_I2s_UnitializeAll);
 
         Esp_I2S_Initialised_Flag[bus]++;
+#if SOC_I2S_SUPPORTS_ADC
+        if (mode & I2S_MODE_ADC_BUILT_IN)
+        {
+            Adc_Mode_Enabled = true;
+        }
+#endif
     }
 
 // apply low-level workaround for bug in some ESP-IDF versions that swap
@@ -467,6 +573,15 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeInit___VOI
             NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
+#if SOC_I2S_SUPPORTS_ADC
+        i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
+
+        if (mode & I2S_MODE_ADC_BUILT_IN && bus != I2S_NUM_0)
+        {
+            NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+        }
+#endif
+
         // Set the Bus parameters
         NANOCLR_CHECK_HRESULT(SetI2sConfig(bus, pConfig));
     }
@@ -494,6 +609,14 @@ HRESULT Library_sys_dev_i2s_native_System_Device_I2s_I2sDevice::NativeDispose___
 
         if (Esp_I2S_Initialised_Flag[bus] <= 0)
         {
+#if SOC_I2S_SUPPORTS_ADC
+            i2s_mode_t mode = (i2s_mode_t)(pConfig[I2sConnectionSettings::FIELD___i2sMode].NumericByRef().s4);
+            if (mode & I2S_MODE_ADC_BUILT_IN)
+            {
+                i2s_adc_disable(bus);
+            }
+#endif
+
             i2s_driver_uninstall(bus);
 
             Esp_I2S_Initialised_Flag[bus] = 0;

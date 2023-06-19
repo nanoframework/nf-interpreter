@@ -453,3 +453,7 @@ void WP_Message_PrepareReception_Platform()
 {
     // empty on purpose, nothing to configure
 }
+
+void RtosYield()
+{
+}
