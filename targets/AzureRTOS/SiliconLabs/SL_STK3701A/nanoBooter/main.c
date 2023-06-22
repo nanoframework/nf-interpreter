@@ -207,7 +207,7 @@ int main(void)
                 // there seems to be a valid CLR image
 
                 // need to change HF clock to internal RCO so the CLR can boot smoothly
-                CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+                CMU_CLOCK_SELECT_SET(HF, HFRCO);
 
                 // launch nanoCLR
                 LaunchCLR((uint32_t)&__deployment_start__);
