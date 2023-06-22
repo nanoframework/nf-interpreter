@@ -10,18 +10,18 @@
 
 sl_status_t sl_device_init_clocks(void)
 {
-    CMU_ClockSelectSet(cmuClock_HF, cmuSelect_USHFRCO);
+    CMU_CLOCK_SELECT_SET(HF, USHFRCO);
 
     CMU_ClockEnable(cmuClock_HFLE, true);
     CMU_ClockEnable(cmuClock_HFPER, true);
     CMU_ClockEnable(cmuClock_GPIO, true);
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFRCO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFA, LFRCO);
+    CMU_CLOCK_SELECT_SET(LFB, LFRCO);
 #if defined(_CMU_LFCCLKSEL_MASK)
-    CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFC, LFRCO);
 #endif
 #if defined(_CMU_LFECLKSEL_MASK)
-    CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFRCO);
+    CMU_CLOCK_SELECT_SET(LFE, LFRCO);
 #endif
 
     return SL_STATUS_OK;
