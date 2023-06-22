@@ -109,6 +109,8 @@ set(gecko_sdk_srcs
     sl_sleeptimer_hal_rtc.c
     sl_sleeptimer_hal_rtcc.c
 
+    sl_sleeptimer_.c
+
     sl_slist.c
     sl_system_init.c
     sl_system_kernel.c

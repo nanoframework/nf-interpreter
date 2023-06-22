@@ -17,13 +17,13 @@ __nfweak sl_status_t sl_device_init_clocks(void)
     CMU_ClockEnable(cmuClock_HFLE, true);
     CMU_ClockEnable(cmuClock_HFPER, true);
     CMU_ClockEnable(cmuClock_GPIO, true);
-    CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+    CMU_CLOCK_SELECT_SET(LFA, LFXO);
+    CMU_CLOCK_SELECT_SET(LFB, LFXO);
 #if defined(_CMU_LFCCLKSEL_MASK)
-    CMU_ClockSelectSet(cmuClock_LFC, cmuSelect_LFXO);
+    CMU_CLOCK_SELECT_SET(LFC, LFXO);
 #endif
 #if defined(_CMU_LFECLKSEL_MASK)
-    CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFXO);
+    CMU_CLOCK_SELECT_SET(LFE, LFXO);
 #endif
 
     return SL_STATUS_OK;
