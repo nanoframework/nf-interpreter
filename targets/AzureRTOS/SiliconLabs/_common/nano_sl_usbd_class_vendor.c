@@ -524,7 +524,7 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t        class_nbr,
   CORE_ENTER_ATOMIC();
   ext_property_nbr = p_ctrl->microsoft_ext_property_next;
 
-#if (RTOS_ARG_CHK_EXT_EN == 1)
+#if defined(RTOS_ARG_CHK_EXT_EN) && RTOS_ARG_CHK_EXT_EN == 1
   if (ext_property_nbr >= SL_USBD_VENDOR_MS_EXTENDED_PROPERTIES_QUANTITY) {
     CORE_EXIT_ATOMIC();
 
