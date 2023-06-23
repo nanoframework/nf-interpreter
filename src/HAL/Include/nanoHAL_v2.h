@@ -224,6 +224,7 @@ extern "C"
     void CPU_SetPowerModePlatform(PowerLevel_type powerLevel);
     // target specific handler for power mode changes (may be empty)
     void CPU_SetPowerModeTarget(PowerLevel_type powerLevel);
+    bool DebuggerIsConnected();
 
 #ifdef __cplusplus
 }
