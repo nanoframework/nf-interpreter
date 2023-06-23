@@ -6,6 +6,9 @@
 
 #include <nanoHAL.h>
 #include <targetHAL.h>
+#include <nanoCLR_Runtime.h>
+
+extern CLR_RT_ExecutionEngine g_CLR_RT_ExecutionEngine;
 
 bool GetHalSystemInfo(HalSystemInfo &systemInfo)
 {
@@ -58,4 +61,9 @@ bool Target_GetReleaseInfo(NFReleaseInfo &releaseInfo)
         PLATFORMNAMESTRING,
         hal_strlen_s(PLATFORMNAMESTRING));
     return TRUE; // alternatively, return false if you didn't initialize the releaseInfo structure.
+}
+
+bool DebuggerIsConnected()
+{
+    return ((g_CLR_RT_ExecutionEngine.m_iDebugger_Conditions & CLR_RT_ExecutionEngine::c_fDebugger_Enabled) != 0);
 }
