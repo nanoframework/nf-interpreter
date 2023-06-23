@@ -7,18 +7,19 @@
 //****************************************************************************
 // Includes.
 
-#include "sl_status.h"
+#include <sl_status.h>
 #include <nanoHAL_v2.h>
 #include <target_platform.h>
 #include <sl_usbd_core.h>
-#include "sl_usbd_class_hid.h"
-#include "sl_usbd_class_vendor.h"
+#include <sl_usbd_class_hid.h>
+#include <sl_usbd_class_vendor.h>
 
-/* template headers */
+// template headers
 #include <sl_usbd_configuration_instances.h>
 #include <sl_usbd_class_vendor_instances.h>
+#include <nano_sl_usbd_class_vendor.h>
 
-/* include config file for the instances */
+// include config file for the instances
 
 #include <sl_usbd_class_winusb_config.h>
 
@@ -98,6 +99,9 @@ sl_status_t sli_usbd_vendor_winusb_init()
 
     uint8_t class_number = 0;
     uint8_t config_number = 0;
+    sl_usbd_device_state_t deviceState;
+    bool needToReinit = false;
+    sl_status_t returnStatus = SL_STATUS_OK;
 
     char *configs = NULL;
     char *token = NULL;
@@ -106,6 +110,21 @@ sl_status_t sli_usbd_vendor_winusb_init()
     if (usbdVendorWinusbInited)
     {
         return SL_STATUS_OK;
+    }
+
+    // get current device state
+    sl_usbd_core_get_device_state(&deviceState);
+
+    if (deviceState > SL_USBD_DEVICE_STATE_INIT)
+    {
+        // device is already initialized, stop USB core, **ONLY** if there isn't a debugger connected
+        if (!DebuggerIsConnected())
+        {
+            sl_usbd_core_stop_device();
+
+            // flag to reinit
+            needToReinit = true;
+        }
     }
 
     /* configs to attach the class instance to */
@@ -122,7 +141,10 @@ sl_status_t sli_usbd_vendor_winusb_init()
         SL_STATUS_OK)
     {
         // error creating instance
-        return SL_STATUS_FAIL;
+        returnStatus = SL_STATUS_FAIL;
+
+        // done here
+        goto exit;
     }
 
     /* store class number globally */
@@ -134,7 +156,10 @@ sl_status_t sli_usbd_vendor_winusb_init()
     if (sl_usbd_vendor_is_enabled(class_number, &classIsEnabled) != SL_STATUS_OK)
     {
         // error getting class enabled status
-        return SL_STATUS_FAIL;
+        returnStatus = SL_STATUS_FAIL;
+
+        // done here
+        goto exit;
     }
 
     if (classIsEnabled)
@@ -144,10 +169,10 @@ sl_status_t sli_usbd_vendor_winusb_init()
         // usbd_vendor_disable(sl_usbd_configuration_config0_number, void    *p_if_class_arg)
     }
 
-    /* tokenize configs by "," and spaces */
+    // tokenize configs by "," and spaces
     token = strtok(configs, ", ");
 
-    /* loop over tokens */
+    // loop over tokens
     while (token != NULL)
     {
 
@@ -158,7 +183,10 @@ sl_status_t sli_usbd_vendor_winusb_init()
             if (sl_usbd_vendor_add_to_configuration(class_number, config_number) != SL_STATUS_OK)
             {
                 // error adding class to configuration
-                return SL_STATUS_FAIL;
+                returnStatus = SL_STATUS_FAIL;
+
+                // done here
+                goto exit;
             }
         }
 
@@ -176,18 +204,35 @@ sl_status_t sli_usbd_vendor_winusb_init()
 #endif
 
     // add device class GUID to WinUSB properties
-    sl_usbd_vendor_add_microsoft_ext_property(
-        class_number,
-        SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_SZ,
-        (const uint8_t *)DEVICEINTERFACE_GUID_PROP_NAME,
-        DEVICEINTERFACE_GUID_PROP_NAME_LEN,
-        (const uint8_t *)UsbClassVendorDeviceInterfaceGuid,
-        sizeof(UsbClassVendorDeviceInterfaceGuid));
+    if (sl_usbd_vendor_add_microsoft_ext_property(
+            class_number,
+            SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_SZ,
+            (const uint8_t *)DEVICEINTERFACE_GUID_PROP_NAME,
+            DEVICEINTERFACE_GUID_PROP_NAME_LEN,
+            (const uint8_t *)UsbClassVendorDeviceInterfaceGuid,
+            sizeof(UsbClassVendorDeviceInterfaceGuid)) != SL_STATUS_OK)
+    {
+        // error adding GUID property
+        returnStatus = SL_STATUS_FAIL;
 
-    // all good here, update flag
-    usbdVendorWinusbInited = true;
+        // done here
+        goto exit;
+    }
+    else
+    {
+        // all good here, update flag
+        usbdVendorWinusbInited = true;
+    }
 
-    return SL_STATUS_OK;
+exit:
+
+    // reinit USB core if needed
+    if (needToReinit)
+    {
+        sl_usbd_core_start_device();
+    }
+
+    return returnStatus;
 }
 
 void sl_usbd_vendor_winusb_on_enable_event(void)
