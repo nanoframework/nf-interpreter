@@ -40,9 +40,9 @@ foreach(SRC_FILE ${Com.SkyworksInc.NanoFramework.Devices.Spi_SRCS})
         CMAKE_FIND_ROOT_PATH_BOTH
     )
 
-    #if (BUILD_VERBOSE)
+    if (BUILD_VERBOSE)
         message("${SRC_FILE} >> ${Com.SkyworksInc.NanoFramework.Devices.Spi_SRC_FILE}")
-    #endif()
+    endif()
 
     list(APPEND Com.SkyworksInc.NanoFramework.Devices.Spi_SOURCES ${Com.SkyworksInc.NanoFramework.Devices.Spi_SRC_FILE})
 
