@@ -472,14 +472,14 @@ jobs:
         PackageName: XIAO_ESP32C3
         CMakePreset: XIAO_ESP32C3
 
-      ESP32_S3_BLE_REV3:
+      ESP32_S3_BLE:
         TargetBoard: ESP32_S3
         TargetSeries: 'esp32s3'
         BuildOptions: 
         IDF_Target: esp32s3
-        TargetName: ESP32_S3_BLE_REV3
-        PackageName: ESP32_S3_BLE_REV3
-        CMakePreset: ESP32_S3_BLE_REV3
+        TargetName: ESP32_S3_BLE
+        PackageName: ESP32_S3_BLE
+        CMakePreset: ESP32_S3_BLE
 
   variables:
     DOTNET_NOLOGO: true
