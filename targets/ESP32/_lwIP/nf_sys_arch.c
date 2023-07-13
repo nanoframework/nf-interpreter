@@ -15,6 +15,8 @@
 #include "esp_log.h"
 #include "esp_compiler.h"
 
+// clang-format off
+
 static const char* TAG = "lwip_arch";
 
 static sys_mutex_t g_lwip_protect_mutex = NULL;
@@ -53,6 +55,7 @@ void
 sys_mutex_lock(sys_mutex_t *pxMutex)
 {
   BaseType_t ret = xSemaphoreTake(*pxMutex, portMAX_DELAY);
+  (void)ret;
 
   LWIP_ASSERT("failed to take the mutex", ret == pdTRUE);
 }
@@ -66,6 +69,7 @@ void
 sys_mutex_unlock(sys_mutex_t *pxMutex)
 {
   BaseType_t ret = xSemaphoreGive(*pxMutex);
+  (void)ret;
 
   LWIP_ASSERT("failed to give the mutex", ret == pdTRUE);
 }
@@ -106,6 +110,8 @@ sys_sem_new(sys_sem_t *sem, u8_t count)
 
   if (count == 1) {
       BaseType_t ret = xSemaphoreGive(*sem);
+      (void)ret;
+
       LWIP_ASSERT("sys_sem_new: initial give failed", ret == pdTRUE);
   }
 
@@ -121,6 +127,8 @@ void
 sys_sem_signal(sys_sem_t *sem)
 {
   BaseType_t ret = xSemaphoreGive(*sem);
+  (void)ret;
+
   /* queue full is OK, this is a signal only... */
   LWIP_ASSERT("sys_sem_signal: sane return value",
              (ret == pdTRUE) || (ret == errQUEUE_FULL));
@@ -219,6 +227,8 @@ void
 sys_mbox_post(sys_mbox_t *mbox, void *msg)
 {
   BaseType_t ret = xQueueSendToBack((*mbox)->os_mbox, &msg, portMAX_DELAY);
+  (void)ret;
+
   LWIP_ASSERT("mbox post failed", ret == pdTRUE);
 }
 
@@ -354,6 +364,8 @@ sys_mbox_free(sys_mbox_t *mbox)
     return;
   }
   UBaseType_t msgs_waiting = uxQueueMessagesWaiting((*mbox)->os_mbox);
+  (void)msgs_waiting;
+
   LWIP_ASSERT("mbox quence not empty", msgs_waiting == 0);
 
   vQueueDelete((*mbox)->os_mbox);
@@ -527,6 +539,39 @@ sys_delay_ms(uint32_t ms)
   vTaskDelay(ms / portTICK_PERIOD_MS);
 }
 
+bool
+sys_thread_tcpip(sys_thread_core_lock_t type)
+{
+    static sys_thread_t lwip_task = NULL;
+#if LWIP_TCPIP_CORE_LOCKING
+    static sys_thread_t core_lock_holder = NULL;
+#endif
+    switch (type) {
+        default:
+            return false;
+        case LWIP_CORE_IS_TCPIP_INITIALIZED:
+            return lwip_task != NULL;
+        case LWIP_CORE_MARK_TCPIP_TASK:
+            LWIP_ASSERT("LWIP_CORE_MARK_TCPIP_TASK: lwip_task == NULL", (lwip_task == NULL));
+            lwip_task = (sys_thread_t) xTaskGetCurrentTaskHandle();
+            return true;
+#if LWIP_TCPIP_CORE_LOCKING
+        case LWIP_CORE_LOCK_QUERY_HOLDER:
+            return lwip_task ? core_lock_holder == (sys_thread_t) xTaskGetCurrentTaskHandle() : true;
+        case LWIP_CORE_LOCK_MARK_HOLDER:
+            core_lock_holder = (sys_thread_t) xTaskGetCurrentTaskHandle();
+            return true;
+        case LWIP_CORE_LOCK_UNMARK_HOLDER:
+            core_lock_holder = NULL;
+            return true;
+#else
+        case LWIP_CORE_LOCK_QUERY_HOLDER:
+            return lwip_task == NULL || lwip_task == (sys_thread_t) xTaskGetCurrentTaskHandle();
+#endif /* LWIP_TCPIP_CORE_LOCKING */
+    }
+    return true;
+}
+
 // [NF_CHANGE]
 ////////////////////////////////////////////////////
 // nanoFramework "hack" extending LwIP original code
@@ -546,3 +591,5 @@ void sys_signal_sock_event()
     }
 }
 // [END_NF_CHANGE]
+
+// clang-format on
