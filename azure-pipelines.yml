@@ -898,13 +898,13 @@ jobs:
       )
     
   # publish artifacts
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: deployables
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: deployables
+      artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
@@ -1064,13 +1064,13 @@ jobs:
       )
     
   # publish artifacts
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: deployables
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: deployables
+      artifactType: pipeline
 
   - task: CopyFiles@2
     condition: succeeded()
@@ -1080,13 +1080,13 @@ jobs:
       Contents: 'nanoFramework.nanoCLR.dll'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish nanoclr
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/nanoclr'
-      ArtifactName: nanoclr
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)/nanoclr'
+      artifactName: nanoclr
+      artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
