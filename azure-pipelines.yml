@@ -125,8 +125,19 @@ jobs:
       {
           # this is a release prep so NO build
       }
+      elseif($env:Build_Reason -eq "Manual")
+      {
+          # this is a manual build, no need to check anything 
+          Write-host "Manual build"
+      }      
       else
       {
+          # check if this build was triggered by the pipeline itself
+          if($env:Build_Reason -eq "Manual")
+          {
+              # this is a manual build, no need to check anything 
+              Write-host "Manual build"
+          }
           if($env:System_PullRequest_PullRequestId -ne $null)
           {
               # get files changed in PR, if this is a PR
