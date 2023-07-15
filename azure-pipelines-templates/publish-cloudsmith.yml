@@ -82,13 +82,13 @@ steps:
       flattenFolders: true
       ignoreMakeDirErrors: true
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
-      ArtifactName: $(TargetPublishName)
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)\$(TargetPublishName)'
+      artifactName: $(TargetPublishName)
+      artifactType: pipeline
 
   # execute on 'ForceUpload' parameter
   - task: PowerShell@2

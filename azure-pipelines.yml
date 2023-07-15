@@ -125,8 +125,19 @@ jobs:
       {
           # this is a release prep so NO build
       }
+      elseif($env:Build_Reason -eq "Manual")
+      {
+          # this is a manual build, no need to check anything 
+          Write-host "Manual build"
+      }      
       else
       {
+          # check if this build was triggered by the pipeline itself
+          if($env:Build_Reason -eq "Manual")
+          {
+              # this is a manual build, no need to check anything 
+              Write-host "Manual build"
+          }
           if($env:System_PullRequest_PullRequestId -ne $null)
           {
               # get files changed in PR, if this is a PR
@@ -347,12 +358,21 @@ jobs:
 # STM32
 - job: Build_STM32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_CHIBIOS'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_CHIBIOS__'], 'true')
+        )
       )
     )
 
@@ -405,12 +425,21 @@ jobs:
 # ESP32 targets
 - job: Build_ESP32_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ESP32'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_ESP32__'], 'true')
+        )
       )
     )
 
@@ -534,12 +563,21 @@ jobs:
 # NXP
 - job: Build_NXP_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_FREERTOS'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_NXP__'], 'true')
+        )
       )
     )
 
@@ -582,13 +620,22 @@ jobs:
 # TI SimpleLink
 - job: Build_TI_SimpleLink_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
-      )
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_TI'], true)
+        )
+      ),
+      and(
+          eq(variables['Build.Reason'], 'Manual'),
+          or(
+            eq(variables['BUILD_ALL__'], 'true'),
+            eq(variables['BUILD_TI__'], 'true')
+          )
+      )    
     )
 
   dependsOn:
@@ -652,12 +699,21 @@ jobs:
 # Azure RTOS
 - job: Build_Azure_RTOS_targets
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_AZURERTOS'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_AZURERTOS__'], 'true')
+        )
       )
     )
 
@@ -719,13 +775,21 @@ jobs:
 # WIN32 executable 
 - job: Build_WIN32_nanoCLR
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
-      or(
-        eq(variables['BUILD_WINDOWS_NANOCLR__'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne( dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true ),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_WIN32'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_WINDOWS_NANOCLR__'], 'true')
+        )
       )
     )
 
@@ -898,13 +962,13 @@ jobs:
       )
     
   # publish artifacts
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: deployables
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: deployables
+      artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2
@@ -952,13 +1016,21 @@ jobs:
 # nanoCLR CLI tool
 - job: Build_nanoCLR_CLI
   condition: >-
-    and(
-      succeeded('Check_Code_Style'),
-      ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
-      or(
-        eq(variables['BUILD_NANOCLR_CLI__'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+    or(
+      and(
+        succeeded('Check_Code_Style'),
+        ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
+        or(
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
+          eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
+        )
+      ),
+      and(
+        eq(variables['Build.Reason'], 'Manual'),
+        or(
+          eq(variables['BUILD_ALL__'], 'true'),
+          eq(variables['BUILD_NANOCLR_CLI__'], 'true')
+        )
       )
     )
 
@@ -1064,13 +1136,13 @@ jobs:
       )
     
   # publish artifacts
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish deployables artifacts
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: deployables
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      artifactName: deployables
+      artifactType: pipeline
 
   - task: CopyFiles@2
     condition: succeeded()
@@ -1080,13 +1152,13 @@ jobs:
       Contents: 'nanoFramework.nanoCLR.dll'
       TargetFolder: '$(Build.ArtifactStagingDirectory)/nanoclr'
 
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     condition: succeeded()
     displayName: Publish nanoclr
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)/nanoclr'
-      ArtifactName: nanoclr
-      ArtifactType: Container
+      targetPath: '$(Build.ArtifactStagingDirectory)/nanoclr'
+      artifactName: nanoclr
+      artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
   - task: NuGetCommand@2

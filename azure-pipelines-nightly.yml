@@ -434,6 +434,16 @@ jobs:
         PackageName: M5Core2
         CMakePreset: M5Core2
 
+      AtomS3:
+        TargetBoard: ESP32
+        TargetPlatform: 'esp32'
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: AtomS3
+        PackageName: AtomS3
+        CMakePreset: AtomS3
+
       ESP32_C3_REV3:
         TargetBoard: ESP32_C3
         TargetSeries: 'esp32c3'
