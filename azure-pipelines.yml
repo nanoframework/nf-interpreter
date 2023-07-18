@@ -1202,9 +1202,9 @@ jobs:
       or(
         eq(variables['BUILD_NANOCLR_CLI__'], true),
         eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_ALL'], true),
-        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true)
-      ),
-      eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+        eq(dependencies.Check_Build_Options.outputs['TargetsToBuild.BUILD_NANOCLR_CLI'], true),
+        eq(dependencies.Check_Build_Options.outputs['BuildOptions.RUN_MSCORLIB_TESTS'], true)
+      )
     )
 
   dependsOn:
@@ -1232,7 +1232,7 @@ jobs:
       inputs:
         buildType: 'current'
         downloadType: 'single'
-        artifactName: 'nanoclr' 
+        artifactName: 'nanoclr_cli' 
         downloadPath: '$(Agent.TempDirectory)'
 
     # build mscorlib 
