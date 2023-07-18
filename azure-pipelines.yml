@@ -967,7 +967,7 @@ jobs:
     displayName: Publish deployables artifacts
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)'
-      artifactName: deployables
+      artifactName: nanoclr_win32
       artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
@@ -1134,15 +1134,6 @@ jobs:
         succeeded(),
         eq(variables['System.PullRequest.PullRequestId'], '')
       )
-    
-  # publish artifacts
-  - task: PublishPipelineArtifact@1
-    condition: succeeded()
-    displayName: Publish deployables artifacts
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)'
-      artifactName: deployables
-      artifactType: pipeline
 
   - task: CopyFiles@2
     condition: succeeded()
@@ -1157,7 +1148,7 @@ jobs:
     displayName: Publish nanoclr
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/nanoclr'
-      artifactName: nanoclr
+      artifactName: nanoclr_cli
       artifactType: pipeline
 
   # push NuGet packages to Azure Artifacts feed (always happens when building from main, except on PR builds)
