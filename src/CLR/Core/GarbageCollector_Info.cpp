@@ -187,7 +187,12 @@ CLR_RT_GarbageCollector::Rel_Map  CLR_RT_GarbageCollector::s_mapNewToRecord;
 bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker( void** ref )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32* dst = (CLR_UINT32*)*ref;
+
+#ifdef VIRTUAL_DEVICE
+    CLR_UINT64 *dst = (CLR_UINT64 *)*ref;
+#else
+    CLR_UINT32 *dst = (CLR_UINT32 *)*ref;
+#endif
 
     if(dst)
     {
@@ -279,7 +284,12 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
 bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker( void** ref )
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_UINT32* dst = (CLR_UINT32*)*ref;
+
+ #ifdef VIRTUAL_DEVICE
+    CLR_UINT64 *dst = (CLR_UINT64 *)*ref;
+#else
+    CLR_UINT32 *dst = (CLR_UINT32 *)*ref;
+#endif
 
     if(dst)
     {

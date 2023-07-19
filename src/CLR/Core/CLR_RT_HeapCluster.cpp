@@ -68,7 +68,11 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
             }
         }
 
+#if defined(VIRTUAL_DEVICE)
+        if ((uint64_t)(ptr + blockSize) > (uint64_t)end)
+#else
         if ((unsigned int)(ptr + blockSize) > (unsigned int)end)
+#endif
         {
             blockSize = (CLR_UINT32)(end - ptr);
         }
@@ -79,7 +83,11 @@ void CLR_RT_HeapCluster::HeapCluster_Initialize(CLR_UINT32 size, CLR_UINT32 bloc
 
     while (ptr < m_payloadEnd)
     {
+#if defined(VIRTUAL_DEVICE)
+        if ((uint64_t)(ptr + blockSize) > (uint64_t)m_payloadEnd)
+#else
         if ((unsigned int)(ptr + blockSize) > (unsigned int)m_payloadEnd)
+#endif
         {
             blockSize = (CLR_UINT32)(m_payloadEnd - ptr);
         }

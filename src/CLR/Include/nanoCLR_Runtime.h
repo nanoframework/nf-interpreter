@@ -2721,11 +2721,21 @@ struct CLR_RT_GarbageCollector
     struct RelocationRecord
     {
         void **oldRef;
+
+#ifdef VIRTUAL_DEVICE
+        CLR_UINT64 *oldPtr;
+#else
         CLR_UINT32 *oldPtr;
+#endif
 
         void **newRef;
-        CLR_UINT32 *newPtr;
 
+#ifdef VIRTUAL_DEVICE
+        CLR_UINT64 *newPtr;
+#else
+        CLR_UINT32 *newPtr;
+#endif
+        
         CLR_UINT32 data;
     };
 
