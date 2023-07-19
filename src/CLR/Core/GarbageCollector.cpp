@@ -195,7 +195,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
             CLR_RT_HeapBlock_Node *ptr = hc->m_payloadStart;
             CLR_RT_HeapBlock_Node *end = hc->m_payloadEnd;
 
-            while (ptr < end)
+            while (ptr != NULL && ptr < end)
             {
                 dt = ptr->DataType();
                 if (dt < DATATYPE_FIRST_INVALID)
