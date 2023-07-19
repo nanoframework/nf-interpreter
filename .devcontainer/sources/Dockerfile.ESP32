@@ -72,7 +72,7 @@ ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
 # RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=$PATH:\
+ENV PATH=/root/.espressif/python_env/idf4.4_py3.10_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\
