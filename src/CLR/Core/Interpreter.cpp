@@ -2766,7 +2766,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
 
                 OPDEF(CEE_NEWARR, "newarr", PopI, PushRef, InlineType, IObjModel, 1, 0xFF, 0x8D, NEXT)
                 {
-
+                    // Stack: ... obj, num of elements, element type token
                     FETCH_ARG_COMPRESSED_TYPETOKEN(arg, ip);
 
                     CLR_UINT32 size = evalPos[0].NumericByRef().u4;
