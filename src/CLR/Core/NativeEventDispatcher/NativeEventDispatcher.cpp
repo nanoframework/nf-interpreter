@@ -141,7 +141,7 @@ void CLR_RT_HeapBlock_NativeEventDispatcher::RemoveFromHALQueue()
 {
     // Since we are going to analyze and update the queue we need to disable interrupts.
     // Interrupt service routines add records to this queue.
-	CLR_UINT32 elemCount = 0;
+	size_t elemCount = 0;
 	GLOBAL_LOCK();
     elemCount = g_CLR_HW_Hardware.m_interruptData.m_HalQueue.NumberOfElements();
     GLOBAL_UNLOCK();
