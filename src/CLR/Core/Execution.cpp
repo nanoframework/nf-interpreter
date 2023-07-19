@@ -369,7 +369,9 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (m_fPerformHeapCompaction)
+    {
         CLR_EE_SET(Compaction_Pending);
+    }
 #endif
 
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();
