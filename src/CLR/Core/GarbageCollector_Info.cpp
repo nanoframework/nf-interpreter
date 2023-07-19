@@ -125,7 +125,7 @@ void CLR_RT_GarbageCollector::ValidateBlockNotInFreeList( CLR_RT_DblLinkedList& 
 
             if(ptr <= dst && dst < ptrEnd)
             {
-                CLR_Debug::Printf( "Pointer into free list!! %08x %08x %08x\r\n", dst, ptr, ptrEnd );
+                CLR_Debug::Printf( "Pointer into free list!! destination: 0x%I64X pointer: 0x%I64X end of list: 0x%I64X\r\n", dst, ptr, ptrEnd );
 
                 NANOCLR_DEBUG_STOP();
             }
@@ -210,14 +210,14 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker( void** ref )
 
         if(s_mapOldToRecord.find( ref ) != s_mapOldToRecord.end())
         {
-            CLR_Debug::Printf( "Duplicate base OLD: %08x\r\n", ref );
+            CLR_Debug::Printf( "Duplicate base OLD: 0x%I64\r\n", ref );
         }
 
         s_mapOldToRecord[ ref ] = ptr;
 
         if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node*)dst, false ))
         {
-            CLR_Debug::Printf( "Some data points into a free list: %08x\r\n", dst );
+            CLR_Debug::Printf( "Some data points into a free list: 0x%I64\r\n", dst );
 
             NANOCLR_DEBUG_STOP();
         }
@@ -265,11 +265,11 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
     {
         RelocationRecord* ptr = it->second;
         void**            ref = it->first  ; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&ref );
-        CLR_UINT32*       dst = ptr->oldPtr; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&dst );
+        CLR_UINT64*       dst = ptr->oldPtr; CLR_RT_GarbageCollector::Relocation_UpdatePointer( (void**)&dst );
 
         if(s_mapNewToRecord.find( ref ) != s_mapNewToRecord.end())
         {
-            CLR_Debug::Printf( "Duplicate base NEW: %08x\r\n", ref );
+            CLR_Debug::Printf( "Duplicate base NEW: 0x%I64\r\n", ref );
         }
 
         s_mapNewToRecord[ ref ] = ptr;
@@ -295,29 +295,29 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker( void** ref )
     {
         Rel_Map_Iter it = s_mapNewToRecord.find( ref );
 
-        if(it != s_mapNewToRecord.end())
+        if (it != s_mapNewToRecord.end())
         {
             RelocationRecord* ptr = it->second;
 
             if(ptr->newPtr != dst)
             {
-                CLR_Debug::Printf( "Bad pointer: %08x %08x\r\n", ptr->newPtr, dst );
+                CLR_Debug::Printf( "Bad pointer: 0x%I64 0x%I64\r\n", ptr->newPtr, dst );
             }
             else if(ptr->data != *dst)
             {
-                CLR_Debug::Printf( "Bad data: %08x %08x\r\n", ptr->data, *dst );
+                CLR_Debug::Printf( "Bad data: 0x%I64 0x%I64\r\n", ptr->data, *dst );
             }
 
             if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node*)dst, false ))
             {
-                CLR_Debug::Printf( "Some data points into a free list: %08x\r\n", dst );
+                CLR_Debug::Printf( "Some data points into a free list: 0x%I64\r\n", dst );
 
                 NANOCLR_DEBUG_STOP();
             }
         }
         else
         {
-            CLR_Debug::Printf( "Bad base: %08x\r\n", ref );
+            CLR_Debug::Printf( "Bad base: 0x%I64\r\n", ref );
         }
     }
 
