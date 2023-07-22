@@ -117,7 +117,10 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
                         // If there was no space for GC last time, don't bother trying to allocate again
                         if (!g_CLR_RT_GarbageCollector.m_fOutOfStackSpaceForGC)
                         {
-                            for (int cElement = g_CLR_RT_GarbageCollector.c_minimumSpaceForGC; cElement >= 1;
+                            // Try to allocate next stack for HeapBlock temporary storing.
+                            // Allocate at least 2 elements. The first one will be used as a sentinel. HeapBlocks
+                            // will be stored starting from the second element.
+                            for (int cElement = g_CLR_RT_GarbageCollector.c_minimumSpaceForGC; cElement >= 2;
                                  cElement /= 2)
                             {
                                 CLR_UINT32 size = sizeof(MarkStack) + sizeof(MarkStackElement) * cElement;
