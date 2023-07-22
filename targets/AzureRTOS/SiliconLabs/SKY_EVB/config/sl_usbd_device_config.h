@@ -33,7 +33,7 @@ extern char *UsbSerialNumber[];
 // <s SL_USBD_DEVICE_PRODUCT_STRING> Device Product Name
 // <i> Device product string.
 // OK to have this one empty as it will be updated by the managed application when calling UsbStream::NativeOpen
-#define SL_USBD_DEVICE_PRODUCT_STRING           ""
+#define SL_USBD_DEVICE_PRODUCT_STRING           "Skyworks EVB"
 
 // <s SL_USBD_DEVICE_SERIAL_NUMBER_STRING> Device Serial Number
 // <i> Device serial number string.
