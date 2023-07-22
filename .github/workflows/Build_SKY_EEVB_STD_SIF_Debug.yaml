@@ -4,7 +4,7 @@ on:
   workflow_dispatch
 
 jobs:
-  build_SKY_EEVB:
+  build_SKY_EEVB_STD_SIF_Debug:
     name: Build SKY_EEVB_STD_SIF_Debug
     uses: ./.github/workflows/skyworks_evb_build.yaml
     with:

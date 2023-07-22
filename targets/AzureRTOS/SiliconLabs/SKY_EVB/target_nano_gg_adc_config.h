@@ -4,3 +4,4 @@
 //
 
 #define GECKO_USE_ADC0 TRUE
+#define GECKO_USE_ADC1 FALSE
