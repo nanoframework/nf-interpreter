@@ -4,10 +4,10 @@
 //
 
 // No ADC on Si5575 CEVB" CMakePresets.json sets API_nanoFramework.GiantGecko.Adc=OFF
-// Rather than delete this file, comment out C code
+
+#include <nano_gg_adc_native_target.h>
 
 /*
-#include <nano_gg_adc_native_target.h>
 
 
 // PA6 (Gecko APORT1X CH6) ADC IMON0 Channel

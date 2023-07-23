@@ -4,7 +4,6 @@
 //
 
 // No ADC on Si5575 CEVB" CMakePresets.json sets API_nanoFramework.GiantGecko.Adc=OFF
-// Rather than delete this file, comment out C code
 
 /*
 #define GECKO_USE_ADC0 TRUE
