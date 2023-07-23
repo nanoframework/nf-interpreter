@@ -23,7 +23,8 @@ my @lines = split /\r\n|\n|\r/, $buff;
 foreach my $line (@lines)
 {
    # warn $line;
-   next if ($line =~ /^#/);
+   next if ($line =~ /^\s*#/);
+   next if ($line =~ /^\s*$/);
    my($target,$preset) = split(/,/,$line);
    
    # Don't allow a preset name to be used more than once
