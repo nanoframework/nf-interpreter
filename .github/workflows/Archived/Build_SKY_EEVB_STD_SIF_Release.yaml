@@ -1,0 +1,11 @@
+name: Build SKY_EEVB_STD_SIF_Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_EEVB_STD_SIF_Release:
+    name: Build SKY_EEVB_STD_SIF_Release
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_EEVB_STD_SIF_Release'
