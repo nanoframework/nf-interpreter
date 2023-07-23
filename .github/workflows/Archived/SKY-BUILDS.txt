@@ -1,0 +1,9 @@
+# Format is:
+# Target,Preset
+SKY_EEVB,SKY_EEVB_Debug
+Si5575_CEVB,Si5575_CEVB_Debug
+
+# No longer used
+# SKY_EEVB,SKY_EEVB_Release
+# SKY_EEVB,SKY_EEVB_STD_SIF_Release
+# SKY_EEVB,SKY_EEVB_STD_SIF_Debug
