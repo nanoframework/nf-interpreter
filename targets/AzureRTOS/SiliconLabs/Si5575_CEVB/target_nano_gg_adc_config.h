@@ -3,5 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#define GECKO_USE_ADC0 FALSE
+// No ADC on Si5575 CEVB; this file is ignored because CMakePresets.json
+// sets API_nanoFramework.GiantGecko.Adc=OFF
+
+#define GECKO_USE_ADC0 TRUE
 #define GECKO_USE_ADC1 FALSE
