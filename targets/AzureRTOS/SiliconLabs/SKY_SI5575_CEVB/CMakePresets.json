@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "SKY_SI5575_CEVB_Debug",
+            "name": "SKY_Si5575_CEVB_Debug",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -15,8 +15,8 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_BOARD": "SKY_SI5575_CEVB",
-                "TARGET_NAME": "SKY_SI5575_CEVB_Debug",
+                "TARGET_BOARD": "SKY_Si5575_CEVB",
+                "TARGET_NAME": "SKY_Si5575_CEVB_Debug",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -51,13 +51,13 @@
             }
         },
         {
-            "name": "SKY_SI5575_CEVB_Release",
+            "name": "SKY_Si5575_CEVB_Release",
             "inherits": [
-                "SKY_SI5575_CEVB_Debug"
+                "SKY_Si5575_CEVB_Debug"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_SI5575_CEVB",
+                "TARGET_NAME": "SKY_Si5575_CEVB",
                 "NF_BUILD_RTM": "ON"
             }
         }
@@ -65,15 +65,15 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "SKY_SI5575_CEVB_Debug",
-            "displayName": "SKY_SI5575_CEVB_Debug",
-            "configurePreset": "SKY_SI5575_CEVB_Debug"
+            "name": "SKY_Si5575_CEVB_Debug",
+            "displayName": "SKY_Si5575_CEVB_Debug",
+            "configurePreset": "SKY_Si5575_CEVB_Debug"
         },
         {
             "inherits": "base-user",
-            "name": "SKY_SI5575_CEVB_Release",
-            "displayName": "SKY_SI5575_CEVB_Release",
-            "configurePreset": "SKY_SI5575_CEVB_Release"
+            "name": "SKY_Si5575_CEVB_Release",
+            "displayName": "SKY_Si5575_CEVB_Release",
+            "configurePreset": "SKY_Si5575_CEVB_Release"
         }
     ]
 }
