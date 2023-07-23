@@ -3,10 +3,12 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// No ADC on Si5575 CEVB" CMakePresets.json sets API_nanoFramework.GiantGecko.Adc=OFF
+// Rather than delete this file, comment out C code
+
+/*
 #include <nano_gg_adc_native_target.h>
 
-// No ADC on Si5575 CEVB; this file is ignored because CMakePresets.json
-// sets API_nanoFramework.GiantGecko.Adc=OFF
 
 // PA6 (Gecko APORT1X CH6) ADC IMON0 Channel
 // PA7 (Gecko APORT2X CH7) ADC IMON1 Channel
@@ -47,3 +49,5 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 };
 
 const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+
+*/
