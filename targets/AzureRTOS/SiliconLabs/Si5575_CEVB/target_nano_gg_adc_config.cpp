@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+/*
 #include <nano_gg_adc_native_target.h>
 
 // PA6 (Gecko APORT1X CH6) ADC IMON0 Channel
@@ -44,3 +45,4 @@ const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 };
 
 const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+*/
