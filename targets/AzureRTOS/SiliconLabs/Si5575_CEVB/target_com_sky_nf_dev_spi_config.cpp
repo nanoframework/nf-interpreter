@@ -42,4 +42,4 @@ INIT_SPI_CONFIG(2, 1, 1, 1, 1)
 // CS: PE13
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
-INIT_SPI_CONFIG(3, 0, 0, 0, 0)
+INIT_SPI_CONFIG(0, 0, 0, 0, 0)
