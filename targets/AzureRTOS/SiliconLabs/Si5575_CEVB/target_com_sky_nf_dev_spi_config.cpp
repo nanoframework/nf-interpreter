@@ -6,6 +6,19 @@
 #include <com_sky_nf_dev_spi_native_target.h>
 
 //////////
+// SPI0 //
+//////////
+
+// USART0
+// SCK: PE12
+// MOSI: PE10
+// MISO: PE11
+// CS: PE13
+// EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
+
+INIT_SPI_CONFIG(0, 0, 0, 0, 0)
+
+//////////
 // SPI1 //
 //////////
 
@@ -30,16 +43,3 @@ INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
 INIT_SPI_CONFIG(2, 1, 1, 1, 1)
-
-//////////
-// SPI0 //
-//////////
-
-// USART0
-// SCK: PE12
-// MOSI: PE10
-// MISO: PE11
-// CS: PE13
-// EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
-
-INIT_SPI_CONFIG(0, 0, 0, 0, 0)
