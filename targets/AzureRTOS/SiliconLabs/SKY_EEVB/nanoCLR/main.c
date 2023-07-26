@@ -87,7 +87,7 @@ void tx_application_define(void *first_unused_memory)
     tx_byte_pool_create(&byte_pool_0, "byte pool 0", memory_area, DEFAULT_BYTE_POOL_SIZE);
 
     // start watchdog
-    // Watchdog_Init();
+    Watchdog_Init();
 
 #if (TRACE_TO_STDIO == TRUE)
     StdioPort_Init();
