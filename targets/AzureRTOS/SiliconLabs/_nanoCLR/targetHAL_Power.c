@@ -8,6 +8,7 @@
 #include <target_platform.h>
 #include <target_common.h>
 #include <em_device.h>
+#include <em_wdog.h>
 
 #ifdef HAL_RTC_MODULE_ENABLED
 extern RTC_HandleTypeDef RtcHandle;
@@ -41,7 +42,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
     {
         case PowerLevel__Off:
             // stop watchdog
-            // wdgStop(&WDGD1);
+            WDOGn_Enable(DEFAULT_WDOG, false);
 
             // gracefully shutdown everything
             nanoHAL_Uninitialize_C(true);

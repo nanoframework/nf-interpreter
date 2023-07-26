@@ -90,6 +90,7 @@ set(gecko_sdk_srcs
     em_timer.c
     em_usart.c
     em_vdac.c 
+    em_wdog.c
 
     # emdrv
     dmactrl.c
