@@ -398,7 +398,7 @@ void CLR_RT_GarbageCollector::Mark()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_fOutOfStackSpaceForGC)
         {
