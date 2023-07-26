@@ -239,8 +239,15 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
 
                             if (array->m_fReference)
                             {
-                                lst = (CLR_RT_HeapBlock *)array->GetFirstElement();
-                                num = array->m_numOfElements;
+                                for (uint32_t i = 0; i < array->m_numOfElements; i++)
+                                {
+                                    sub = (CLR_RT_HeapBlock *)array->GetElement(i);
+
+                                    if (sub)
+                                    {
+                                        sub->MarkAlive();
+                                    }
+                                }
                             }
                         }
                         break;
