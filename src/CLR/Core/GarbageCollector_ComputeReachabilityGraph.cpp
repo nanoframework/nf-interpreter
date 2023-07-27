@@ -241,6 +241,7 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
                             {
                                 lst = (CLR_RT_HeapBlock *)array->GetFirstElement();
                                 num = array->m_numOfElements;
+
                             }
                         }
                         break;
