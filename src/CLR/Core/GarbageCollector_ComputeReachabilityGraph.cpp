@@ -3,6 +3,7 @@
 // Portions Copyright (c) Microsoft Corporation.  All rights reserved.
 // See LICENSE file in the project root for full license information.
 //
+
 #include "Core.h"
 
 //--//
@@ -239,9 +240,8 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
 
                             if (array->m_fReference)
                             {
-                                ComputeReachabilityGraphForMultipleBlocks(
-                                    (CLR_RT_HeapBlock *)array->GetFirstElement(),
-                                    array->m_numOfElements);
+                                lst = (CLR_RT_HeapBlock *)array->GetFirstElement();
+                                num = array->m_numOfElements;
                             }
                         }
                         break;
