@@ -153,9 +153,16 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_1_HeapBlocksAndUnlink
 
         CLR_Debug::Printf("Heap Cluster information\r\n");
+
+#if _WIN64
+        CLR_Debug::Printf("Start:       0x%I64X\r\n", (size_t)heapFirstFree);
+        CLR_Debug::Printf("Free:        0x%I64X\r\n", (size_t)heapFree);
+        CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+#else
         CLR_Debug::Printf("Start:       %08x\r\n", (size_t)heapFirstFree);
         CLR_Debug::Printf("Free:        %08x\r\n", (size_t)heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));
+#endif
 
 #endif
         ///
@@ -369,7 +376,9 @@ CLR_UINT32 CLR_RT_ExecutionEngine::PerformGarbageCollection()
 
 #if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (m_fPerformHeapCompaction)
+    {
         CLR_EE_SET(Compaction_Pending);
+    }
 #endif
 
     g_CLR_RT_ExecutionEngine.SpawnFinalizer();

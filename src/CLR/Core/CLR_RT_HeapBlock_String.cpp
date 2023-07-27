@@ -75,11 +75,9 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance( CLR_RT_HeapBlock& reference, co
     reference.SetObjectReference( str );
 
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-    (void)szText;
-    (void)assm;
 
-    NANOCLR_CHECK_HRESULT( CLR_RT_HeapBlock_String::CreateInstance( reference, szText ) );    
-#else
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(reference, szText));
+#else    
     str->SetStringText( szText, assm );
 #endif
 

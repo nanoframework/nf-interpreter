@@ -154,7 +154,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 
-    CLR_UINT32 stats_start = HAL_Time_CurrentSysTicks();
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
 
 #endif
 
@@ -398,7 +398,7 @@ void CLR_RT_GarbageCollector::Mark()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_fOutOfStackSpaceForGC)
         {

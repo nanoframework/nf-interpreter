@@ -1231,9 +1231,8 @@ jobs:
     - task: DownloadBuildArtifacts@1
       inputs:
         buildType: 'current'
-        downloadType: 'single'
         artifactName: 'nanoclr_cli' 
-        downloadPath: '$(Agent.TempDirectory)'
+        downloadPath: '$(Agent.TempDirectory)/nanoclr_cli'
 
     # build mscorlib 
 

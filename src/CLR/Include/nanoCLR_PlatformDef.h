@@ -201,8 +201,6 @@
 // INCLUDES
 #if defined(_WIN32)
 
-#define _WIN32_WINNT 0x0501
-
 // Unsafe string functions be avoided, but there isn't a safe crt for the arm, so
 // a bunch of macros, cleanup code needs to be done first
 
