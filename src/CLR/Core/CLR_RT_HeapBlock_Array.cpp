@@ -169,17 +169,7 @@ void CLR_RT_HeapBlock_Array::Relocate()
     //
     if (m_fReference)
     {
-        CLR_RT_HeapBlock *ptr;
-
-        for (uint32_t i = 0; i < m_numOfElements; i++)
-        {
-            ptr = (CLR_RT_HeapBlock *)GetElement(i);
-
-            if (ptr)
-            {
-                CLR_RT_GarbageCollector::Heap_Relocate((void **)&ptr);
-            }
-        }
+        CLR_RT_GarbageCollector::Heap_Relocate((CLR_RT_HeapBlock *)GetFirstElement(), m_numOfElements);
     }
 }
 
