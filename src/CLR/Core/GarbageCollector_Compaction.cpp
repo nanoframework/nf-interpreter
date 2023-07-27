@@ -261,17 +261,30 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                     freeRegion    =                      NULL;
                     freeRegion_hc = (CLR_RT_HeapCluster*)freeRegion_hc->Next();
+
                     while(true)
                     {
-                        CLR_RT_HeapCluster* freeRegion_hcNext = (CLR_RT_HeapCluster*)freeRegion_hc->Next(); if(!freeRegion_hcNext) break;
+                        CLR_RT_HeapCluster* freeRegion_hcNext = (CLR_RT_HeapCluster*)freeRegion_hc->Next(); 
+                        if (!freeRegion_hcNext)
+                        {
+                            break;
+                        }
 
-                        freeRegion = freeRegion_hc->m_freeList.FirstNode(); if(freeRegion->Next()) break;
+                        freeRegion = freeRegion_hc->m_freeList.FirstNode();
+                        
+                        if (freeRegion != NULL && freeRegion->Next())
+                        {
+                            break;
+                        }
 
                         freeRegion    = NULL;
                         freeRegion_hc = freeRegion_hcNext;
                     }
-                    if(!freeRegion) break;
 
+                    if (!freeRegion)
+                    {
+                        break;
+                    }
                 }
             }
         }

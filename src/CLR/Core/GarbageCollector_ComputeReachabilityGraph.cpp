@@ -239,8 +239,9 @@ bool CLR_RT_GarbageCollector::ComputeReachabilityGraphForMultipleBlocks(CLR_RT_H
 
                             if (array->m_fReference)
                             {
-                                lst = (CLR_RT_HeapBlock *)array->GetFirstElement();
-                                num = array->m_numOfElements;
+                                ComputeReachabilityGraphForMultipleBlocks(
+                                    (CLR_RT_HeapBlock *)array->GetFirstElement(),
+                                    array->m_numOfElements);
                             }
                         }
                         break;
