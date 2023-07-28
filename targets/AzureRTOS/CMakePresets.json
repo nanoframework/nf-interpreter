@@ -4,6 +4,7 @@
         "SiliconLabs/SL_STK3701A/CMakePresets.json",
         "SiliconLabs/SKY_EEVB/CMakePresets.json",        
         "SiliconLabs/Si5575_CEVB/CMakePresets.json",        
+        "SiliconLabs/STB_Interposer/CMakePresets.json",
         "ST/ORGPAL_PALTHREE/CMakePresets.json",
         "ST/ST_B_L475E_IOT01A/CMakePresets.json"
     ]
