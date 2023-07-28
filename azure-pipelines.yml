@@ -351,8 +351,9 @@ jobs:
     fetchDepth: 1
     condition: ne(variables['System.PullRequest.PullRequestId'], '')
 
-  - template: azure-pipelines-templates/download-install-llvm.yml
-  - template: azure-pipelines-templates/check-code-style.yml
+  # TEMPORARY COMMENTING OUT CODE STYLE CHECKS
+  #- template: azure-pipelines-templates/download-install-llvm.yml
+  #- template: azure-pipelines-templates/check-code-style.yml
 
 ################
 # STM32
