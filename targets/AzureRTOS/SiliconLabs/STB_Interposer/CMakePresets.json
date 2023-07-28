@@ -1,0 +1,79 @@
+{
+    "version": 4,
+    "include": [
+        "../../../../CMake/arm-gcc.json",
+        "../../../../config/user-tools-repos.json",
+        "../../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "STB_Interposer_Debug",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "STB_Interposer",
+                "TARGET_NAME": "STB_Interposer_Debug",
+                "RTOS": "AzureRTOS",
+                "TARGET_SERIES": "EFM32GG11",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_DEBUGGER": "ON",                
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
+                "API_System.Math": "ON",
+                "API_Hardware.GiantGecko": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "OFF",
+                "API_System.Device.Adc": "OFF",
+                "API_System.Device.Dac": "OFF",
+                "API_System.Net": "OFF",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Devices.Can": "OFF",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.GiantGecko.Adc": "OFF",
+                "API_Windows.Storage": "OFF",
+                "API_nanoFramework.Graphics": "OFF",
+                "TARGET_SERIAL_BAUDRATE": "921600",
+                "HAL_WP_USE_SERIAL": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "API_System.Device.Spi": "OFF",
+                "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "OFF",
+                "API_System.Device.I2c": "OFF",
+                "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
+                "API_System.Device.UsbStream": "ON"
+            }
+        },
+        {
+            "name": "STB_Interposer_Release",
+            "inherits": [
+                "STB_Interposer_Debug"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "STB_Interposer",
+                "NF_BUILD_RTM": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "STB_Interposer_Debug",
+            "displayName": "STB_Interposer_Debug",
+            "configurePreset": "STB_Interposer_Debug"
+        },
+        {
+            "inherits": "base-user",
+            "name": "STB_Interposer_Release",
+            "displayName": "STB_Interposer_Release",
+            "configurePreset": "STB_Interposer_Release"
+        }
+    ]
+}
