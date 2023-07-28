@@ -1,0 +1,11 @@
+name: Build STB_Interposer_Debug
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_STB_Interposer_Debug:
+    name: Build STB_Interposer_Debug
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'STB_Interposer_Debug'
