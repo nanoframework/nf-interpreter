@@ -1198,6 +1198,7 @@ jobs:
   condition: >-
     and(
       succeeded('Check_Code_Style'),
+      succeeded('Build_nanoCLR_CLI'),
       ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
       or(
         eq(variables['BUILD_NANOCLR_CLI__'], true),
