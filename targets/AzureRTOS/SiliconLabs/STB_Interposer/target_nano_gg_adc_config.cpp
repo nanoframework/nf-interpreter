@@ -3,6 +3,10 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// No ADC on STB Interposer" CMakePresets.json sets API_nanoFramework.GiantGecko.Adc=OFF
+
+/*
+
 #include <nano_gg_adc_native_target.h>
 
 // PA6 (Gecko APORT1X CH6) ADC IMON0 Channel
@@ -17,4 +21,32 @@
 // PA15 (Gecko APORT2X CH15) 16 analog channel ADC mux (see docs)
 // PE6 (Gecko APORT3X CH6) ADC Cal Channel
 
+const NF_PAL_ADC_PORT_PIN_CHANNEL AdcPortPinConfig[] = {
 
+    // IMON0
+    {0, adcPosSelAPORT1XCH6},
+    //
+    {0, adcPosSelAPORT2XCH7},
+    //
+    {0, adcPosSelAPORT1XCH8},
+    //
+    {0, adcPosSelAPORT2XCH9},
+    //
+    {0, adcPosSelAPORT1XCH10},
+    //
+    {0, adcPosSelAPORT2XCH11},
+    //
+    {0, adcPosSelAPORT1XCH12},
+    //
+    {0, adcPosSelAPORT2XCH13},
+    //
+    {0, adcPosSelAPORT1XCH14},
+    //
+    {0, adcPosSelAPORT2XCH15},
+    //
+    {0, adcPosSelAPORT3XCH6},
+};
+
+const int AdcChannelCount = ARRAYSIZE(AdcPortPinConfig);
+
+*/

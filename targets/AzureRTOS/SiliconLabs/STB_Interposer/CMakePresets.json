@@ -45,7 +45,7 @@
                 "HAL_WP_USE_SERIAL": "OFF",
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.Device.Spi": "OFF",
-                "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "ON",
+                "API_Com.SkyworksInc.NanoFramework.Devices.Spi": "OFF",
                 "API_System.Device.I2c": "OFF",
                 "API_Com.SkyworksInc.NanoFramework.Devices.I2c": "ON",
                 "API_System.Device.UsbStream": "ON"

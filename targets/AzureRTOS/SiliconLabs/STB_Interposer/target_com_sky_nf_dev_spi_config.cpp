@@ -4,7 +4,7 @@
 //
 
 #include <com_sky_nf_dev_spi_native_target.h>
-
+/*
 //////////
 // SPI0 //
 //////////
@@ -43,3 +43,4 @@ INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 // EMC encoded "port location", see Alternate Functionality Overview table in MCU datasheet
 
 INIT_SPI_CONFIG(2, 1, 1, 1, 1)
+*/
