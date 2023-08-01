@@ -429,7 +429,7 @@ bool Esp32BleStartAdvertise(bleServicesContext *context)
         BLE_DEBUG_PRINTF("ble_gap_adv_set_data; rc=%d\n", rc);
     }
 
-    if(context->scanResponseLen>0)
+    if (context->scanResponseLen > 0)
     {
         rc = ble_gap_adv_rsp_set_data((const uint8_t *)context->scanResponse, context->scanResponseLen);
         if (rc != 0)
@@ -441,8 +441,8 @@ bool Esp32BleStartAdvertise(bleServicesContext *context)
     // Begin advertising
     memset(&adv_params, 0, sizeof(adv_params));
 
-    adv_params.conn_mode = bleContext.isConnectable? BLE_GAP_CONN_MODE_UND: BLE_GAP_CONN_MODE_NON;
-    adv_params.disc_mode = bleContext.isDiscoverable? BLE_GAP_DISC_MODE_GEN: BLE_GAP_DISC_MODE_NON;
+    adv_params.conn_mode = bleContext.isConnectable ? BLE_GAP_CONN_MODE_UND : BLE_GAP_CONN_MODE_NON;
+    adv_params.disc_mode = bleContext.isDiscoverable ? BLE_GAP_DISC_MODE_GEN : BLE_GAP_DISC_MODE_NON;
 
     rc = ble_gap_adv_start(BLE_OWN_ADDR_PUBLIC, NULL, BLE_HS_FOREVER, &adv_params, Esp32GapEvent, (void *)&bleContext);
     if (rc != 0)

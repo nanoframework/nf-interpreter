@@ -75,12 +75,12 @@ struct bleServicesContext
     bool useExtendedAdvert;
 
     // Ptr & length of advertisement packet
-    int  advertDataLen;
-    uint8_t * advertData;
+    int advertDataLen;
+    uint8_t *advertData;
 
     // Ptr & length of scanresponse packet (Legacy)
     int scanResponseLen;
-    uint8_t * scanResponse;
+    uint8_t *scanResponse;
 
     // Number of services in service definition
     int serviceCount;

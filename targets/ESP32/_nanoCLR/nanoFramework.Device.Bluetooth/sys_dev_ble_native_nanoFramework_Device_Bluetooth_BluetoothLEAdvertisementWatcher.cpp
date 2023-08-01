@@ -17,10 +17,10 @@ bool bleScanActive = false;
 void BleCentralStartScan()
 {
     uint8_t own_addr_type;
-    struct ble_gap_disc_params  disc_params;
+    struct ble_gap_disc_params disc_params;
     int rc;
 
-    // Figure out address to use while advertising (no privacy for now) 
+    // Figure out address to use while advertising (no privacy for now)
     rc = ble_hs_id_infer_auto(0, &own_addr_type);
     if (rc != 0)
     {
@@ -133,9 +133,9 @@ Library_sys_dev_ble_native_nanoFramework_Device_Bluetooth_Advertisement_Bluetoot
 
                 // Return raw advert data bytes in _rawAdvertData field
                 NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
-                         pThis[FIELD___rawAdvertData],
-                         gEvent->disc.length_data,
-                         g_CLR_RT_WellKnownTypes.m_UInt8));
+                    pThis[FIELD___rawAdvertData],
+                    gEvent->disc.length_data,
+                    g_CLR_RT_WellKnownTypes.m_UInt8));
 
                 buffer = pThis[FIELD___rawAdvertData].DereferenceArray()->GetFirstElement();
                 memcpy(buffer, gEvent->disc.data, gEvent->disc.length_data);
