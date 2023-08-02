@@ -7,7 +7,7 @@
 #ifndef SL_USBD_CONFIG_H
 #define SL_USBD_CONFIG_H
 
-extern char UsbClassVendorDescription[32 + 1];
+extern char UsbClassVendorDescription[GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_PROPERTY_LEN + 1];
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
