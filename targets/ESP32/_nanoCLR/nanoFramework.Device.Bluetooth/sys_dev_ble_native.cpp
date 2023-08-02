@@ -825,7 +825,7 @@ const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_nanoFramework_Device_Blueto
     "nanoFramework.Device.Bluetooth",
     0xD163A9D5,
     method_lookup,
-    { 100, 0, 4, 0 }
+    { 100, 0, 5, 0 }
 };
 
 // clang-format on
