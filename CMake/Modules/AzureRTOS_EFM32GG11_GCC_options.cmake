@@ -40,6 +40,12 @@ macro(nf_set_compile_options)
         target_compile_definitions(${NFSCO_TARGET} PUBLIC -DDEBUG_EFM=1)
     endif()
 
+    if(GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_LENGTH)
+        target_compile_definitions(${NFSCO_TARGET} PUBLIC -DDEVICE_CLASS_VENDOR_DESCRIPTION_PROPERTY_LEN=${GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_LENGTH} )
+    else()
+        target_compile_definitions(${NFSCO_TARGET} PUBLIC -DDEVICE_CLASS_VENDOR_DESCRIPTION_PROPERTY_LEN=64 )
+    endif()
+
 endmacro()
 
 
