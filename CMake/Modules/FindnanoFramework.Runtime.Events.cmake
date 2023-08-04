@@ -25,7 +25,6 @@ set(nanoFramework.Runtime.Events_SRCS
     nf_rt_events_native.cpp
 
     # source files
-    AsyncCompletions.cpp
     AsyncContinuations.cpp
     nanoPAL_Events_functions.cpp
 

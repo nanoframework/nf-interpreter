@@ -10,6 +10,7 @@ set(SILABS_GECKO_SDK_REQUIRED TRUE PARENT_SCOPE)
 
 option(GECKO_FEATURE_USBD_HID "option to use Gecko SDK HID class")
 option(GECKO_FEATURE_USBD_WINUSB "option to use Gecko SDK USB vendor class for WinUSB")
+option(GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_LENGTH "option to override Device Class Vendor description")
 
 #################################################################
 # Options for Wire Protocol channel
