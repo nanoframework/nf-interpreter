@@ -1198,6 +1198,7 @@ jobs:
   condition: >-
     and(
       succeeded('Check_Code_Style'),
+      succeeded('Build_nanoCLR_CLI'),
       ne(dependencies.Check_Build_Options.outputs['BuildOptions.SKIP_BUILD'], true),
       or(
         eq(variables['BUILD_NANOCLR_CLI__'], true),
@@ -1231,9 +1232,8 @@ jobs:
     - task: DownloadBuildArtifacts@1
       inputs:
         buildType: 'current'
-        downloadType: 'single'
         artifactName: 'nanoclr_cli' 
-        downloadPath: '$(Agent.TempDirectory)'
+        downloadPath: '$(Agent.TempDirectory)/nanoclr_cli'
 
     # build mscorlib 
 
@@ -1263,11 +1263,12 @@ jobs:
         msbuildArchitecture: 'x64'
         maximumCpuCount: true
 
-    #and run tests
+    # run tests
     - template: azure-pipelines-templates/run-unit-tests.yml@templates  
       parameters:
         runUnitTests: true
         unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
+        packagesDirectory: '$(Build.SourcesDirectory)/CoreLibrary/packages'
 
 ######################
 # generate change log
