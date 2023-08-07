@@ -9,8 +9,7 @@
 #include "lzwread.h"
 
 // Reverse 32bit RGB Color to 24bit BGR Color
-#define REVERSECOLOR(n) ( (n << 24) | (((n>>16)<<24)>>16) |  (((n<<16)>>24)<<16) ) >> 8
-
+#define REVERSECOLOR(n) ((n << 24) | (((n >> 16) << 24) >> 16) | (((n << 16) >> 24) << 16)) >> 8
 
 // Initialization routine for GifDecoder struct. When it's finished,
 // the header field would be loaded already.
