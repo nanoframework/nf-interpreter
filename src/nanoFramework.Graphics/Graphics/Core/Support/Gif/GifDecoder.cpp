@@ -8,6 +8,10 @@
 #include "gif.h"
 #include "lzwread.h"
 
+// Reverse 32bit RGB Color to 24bit BGR Color
+#define REVERSECOLOR(n) ( (n << 24) | (((n>>16)<<24)>>16) |  (((n<<16)>>24)<<16) ) >> 8
+
+
 // Initialization routine for GifDecoder struct. When it's finished,
 // the header field would be loaded already.
 HRESULT GifDecoder::GifInitDecompress(const CLR_UINT8 *src, CLR_UINT32 srcSize)
@@ -328,7 +332,7 @@ CLR_UINT32 GifDecoder::ProcessImageChunkHelper(int x, int y, CLR_UINT32 flags, C
         myParam->flushing = false;
     }
 
-    return color;
+    return REVERSECOLOR(color);
 }
 
 #pragma GCC diagnostic pop

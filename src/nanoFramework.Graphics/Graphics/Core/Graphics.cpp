@@ -420,7 +420,8 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y, CLR_UINT32 f
         b |= 0x7; // Copy LSB
     myParam->srcCur16BppPixel++;
     opacity = PAL_GFX_Bitmap::c_OpacityOpaque;
-    return (r | g << 8 | b << 16);
+    
+    return (r << 16 | g << 8 | b);
 }
 
 CLR_UINT32 CLR_GFX_Bitmap::GetPixel(int xPos, int yPos) const

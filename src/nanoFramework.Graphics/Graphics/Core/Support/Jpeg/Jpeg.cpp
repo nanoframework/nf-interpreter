@@ -136,6 +136,6 @@ CLR_UINT32 CLR_GFX_Bitmap::CreateInstanceJpegHelper(int x, int y, CLR_UINT32 fla
 
     myParam->index += 3;
 
-    return r | (g << 8) | (b << 16);
+    return (r << 16) | (g << 8) | b;
 }
 #pragma GCC diagnostic pop
