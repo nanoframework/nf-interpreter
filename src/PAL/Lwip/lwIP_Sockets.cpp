@@ -431,6 +431,7 @@ SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char
     SOCK_sockaddr_in *sa = NULL;
     int total_size = sizeof(SOCK_addrinfo) + sizeof(SOCK_sockaddr_in);
     int canonNameSize;
+    void *dummyPtr;
 
     // Allow for canon name if available
     if (canonname != NULL)
@@ -472,8 +473,12 @@ SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char
         memcpy(ai->ai_canonname, canonname, canonNameSize);
     }
 
+    // need this to keep the compiler happy about the cast to SOCK_sockaddr
+    // which is intended and perfectly safe
+    dummyPtr = sa;
+    
     ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
-    ai->ai_addr = (SOCK_sockaddr *)sa;
+    ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
 
     return ai;
 }
@@ -487,9 +492,8 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
 #if LWIP_DNS
     NATIVE_PROFILE_PAL_NETWORK();
 
-    SOCK_addrinfo *ai;
+    SOCK_addrinfo *ai = NULL;
     SOCK_addrinfo *nextAi = NULL;
-    SOCK_sockaddr_in *sa = NULL;
     struct addrinfo *lwipAddrinfo = {0};
 
     if (res == NULL || nodename == NULL)
