@@ -55,7 +55,7 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
 
 #ifdef ETH_PHY_RST_GPIO
     phy_config.reset_gpio_num = ETH_PHY_RST_GPIO;
-    CPU_GPIO_ReservePin(ETH_PHY_RST_GPIO, true);   // Reset_N
+    CPU_GPIO_ReservePin(ETH_PHY_RST_GPIO, true); // Reset_N
 #else
     phy_config.reset_gpio_num = -1;
 #endif
@@ -78,15 +78,15 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     mac_config.clock_config.rmii.clock_gpio = (emac_rmii_clock_gpio_t)ETH_RMII_CLK_OUT_GPIO; // always 16 or 17
     ESP_LOGI(TAG, "Ethernet clock_config OUT gpio %d\n", ETH_RMII_CLK_OUT_GPIO);
 
-    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);   // REF_CLK OUT
-    CPU_GPIO_ReservePin(ETH_RMII_CLK_OUT_GPIO, true);  // REF_CLK OUT
+    CPU_GPIO_ReservePin(EMAC_CLK_OUT, true);          // REF_CLK OUT
+    CPU_GPIO_ReservePin(ETH_RMII_CLK_OUT_GPIO, true); // REF_CLK OUT
 #else
     mac_config.clock_config.rmii.clock_mode = EMAC_CLK_EXT_IN;
     mac_config.clock_config.rmii.clock_gpio = EMAC_CLK_IN_GPIO; // always 0
     ESP_LOGI(TAG, "Ethernet clock_config IN gpio 0\n");
 
-    CPU_GPIO_ReservePin(EMAC_CLK_EXT_IN, true);   // REF_CLK EXT
-    CPU_GPIO_ReservePin(EMAC_CLK_IN_GPIO, true);  // REF_CLK IN
+    CPU_GPIO_ReservePin(EMAC_CLK_EXT_IN, true);  // REF_CLK EXT
+    CPU_GPIO_ReservePin(EMAC_CLK_IN_GPIO, true); // REF_CLK IN
 #endif
 
     mac_config.smi_mdc_gpio_num = ETH_MDC_GPIO;
@@ -96,14 +96,14 @@ esp_err_t NF_ESP32_InitialiseEthernet(uint8_t *pMacAdr)
     ESP_LOGI(TAG, "Ethernet mdio %d mdc %d\n", ETH_MDIO_GPIO, ETH_MDC_GPIO);
 
     // Reserve all pins used by ethernet interface
-    CPU_GPIO_ReservePin(ETH_MDIO_GPIO, true);  // MDIO (18)
-    CPU_GPIO_ReservePin(19, true);  // TXD0
-    CPU_GPIO_ReservePin(21, true);  // TX_EN
-    CPU_GPIO_ReservePin(22, true);  // TXD1
+    CPU_GPIO_ReservePin(ETH_MDIO_GPIO, true); // MDIO (18)
+    CPU_GPIO_ReservePin(19, true);            // TXD0
+    CPU_GPIO_ReservePin(21, true);            // TX_EN
+    CPU_GPIO_ReservePin(22, true);            // TXD1
     CPU_GPIO_ReservePin(ETH_MDC_GPIO, true);  // MDC (23)
-    CPU_GPIO_ReservePin(25, true);  // RXD0
-    CPU_GPIO_ReservePin(26, true);  // RXD1
-    CPU_GPIO_ReservePin(27, true);  // CRS_DV
+    CPU_GPIO_ReservePin(25, true);            // RXD0
+    CPU_GPIO_ReservePin(26, true);            // RXD1
+    CPU_GPIO_ReservePin(27, true);            // CRS_DV
 
     // Define PHY to use with internal Ethernet
 #ifdef ESP32_ETHERNET_PHY_IP101

@@ -425,7 +425,7 @@ int LWIP_SOCKETS_Driver::Shutdown(SOCK_SOCKET socket, int how)
     return lwip_shutdown(socket, how);
 }
 
-SOCK_addrinfo * CreateAddressRecord(u_long addr, short family, u_short port, char * canonname, const SOCK_addrinfo *hints)
+SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char *canonname, const SOCK_addrinfo *hints)
 {
     SOCK_addrinfo *ai;
     SOCK_sockaddr_in *sa = NULL;
@@ -450,17 +450,17 @@ SOCK_addrinfo * CreateAddressRecord(u_long addr, short family, u_short port, cha
     memset(ai, 0, total_size);
     sa = (SOCK_sockaddr_in *)((u8_t *)ai + sizeof(SOCK_addrinfo));
 
-    // set up sockaddr 
+    // set up sockaddr
     sa->sin_addr.S_un.S_addr = addr;
     sa->sin_family = family;
     sa->sin_port = port;
 
     // set up addrinfo
     ai->ai_family = family;
-    
+
     if (hints != NULL)
     {
-        // copy socktype & protocol from hints if specified 
+        // copy socktype & protocol from hints if specified
         ai->ai_socktype = hints->ai_socktype;
         ai->ai_protocol = hints->ai_protocol;
     }
@@ -474,7 +474,7 @@ SOCK_addrinfo * CreateAddressRecord(u_long addr, short family, u_short port, cha
 
     ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
     ai->ai_addr = (SOCK_sockaddr *)sa;
-    
+
     return ai;
 }
 
@@ -505,10 +505,11 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
         // Work through all available Network Interfaces in reverse so link list ends up with lowest index first.
         for (int i = g_TargetConfiguration.NetworkInterfaceConfigs->Count - 1; i >= 0; i--)
         {
-            struct netif *networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber);
+            struct netif *networkInterface =
+                netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber);
 
             if (networkInterface == NULL)
-            {    
+            {
                 continue;
             }
 
@@ -527,7 +528,6 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
             // Link SOCK_addrinfo +  records together
             ai->ai_next = nextAi;
             nextAi = ai;
-
         }
 
         if (ai == NULL)
@@ -550,9 +550,9 @@ int LWIP_SOCKETS_Driver::GetAddrInfo(
         struct sockaddr_in *lwip_sockaddr_in = ((struct sockaddr_in *)lwipAddrinfo->ai_addr);
 
         ai = CreateAddressRecord(
-            lwip_sockaddr_in->sin_addr.s_addr,  
-            lwip_sockaddr_in->sin_family,       
-            lwip_sockaddr_in->sin_port,      
+            lwip_sockaddr_in->sin_addr.s_addr,
+            lwip_sockaddr_in->sin_family,
+            lwip_sockaddr_in->sin_port,
             lwipAddrinfo->ai_canonname,
             hints);
 
@@ -690,7 +690,8 @@ int LWIP_SOCKETS_Driver::Select(
         // Check all network interfaces for a working connection
         for (int i = 0; i < g_TargetConfiguration.NetworkInterfaceConfigs->Count; i++)
         {
-            struct netif *networkInterface = netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber);
+            struct netif *networkInterface =
+                netif_find_interface(g_LWIP_SOCKETS_Driver.m_interfaces[i].m_interfaceNumber);
             if (networkInterface != NULL)
             {
                 if (netif_is_up(networkInterface))
