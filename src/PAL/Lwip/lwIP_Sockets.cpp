@@ -476,7 +476,7 @@ SOCK_addrinfo *CreateAddressRecord(u_long addr, short family, u_short port, char
     // need this to keep the compiler happy about the cast to SOCK_sockaddr
     // which is intended and perfectly safe
     dummyPtr = sa;
-    
+
     ai->ai_addrlen = sizeof(SOCK_sockaddr_in);
     ai->ai_addr = (SOCK_sockaddr *)dummyPtr;
 
