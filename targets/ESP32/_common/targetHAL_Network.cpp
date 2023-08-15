@@ -15,7 +15,7 @@ extern "C" void set_signal_sock_function(void (*funcPtr)());
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
-//#define 	PRINT_NET_EVENT 	1
+// #define 	PRINT_NET_EVENT 	1
 
 // buffer with host name
 char hostName[18] = "nanodevice_";
