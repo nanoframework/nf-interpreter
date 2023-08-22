@@ -1263,11 +1263,12 @@ jobs:
         msbuildArchitecture: 'x64'
         maximumCpuCount: true
 
-    #and run tests
+    # run tests
     - template: azure-pipelines-templates/run-unit-tests.yml@templates  
       parameters:
         runUnitTests: true
         unitTestRunsettings: '$(System.DefaultWorkingDirectory)\nf-interpreter\targets\netcore\pipeline_tests.runsettings'
+        packagesDirectory: '$(Build.SourcesDirectory)/CoreLibrary/packages'
 
 ######################
 # generate change log
