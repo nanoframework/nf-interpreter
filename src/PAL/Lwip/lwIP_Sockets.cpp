@@ -415,7 +415,6 @@ sockaddr *Sock_SockaddrToSockaddrV6(const SOCK_sockaddr *ssa, sockaddr_in6 *sai,
     }
 
     sai->sin6_scope_id = ((SOCK_sockaddr_in6 *)ssa)->scopeId;
-
     *addrLen = sizeof(sockaddr_in6);
     return (sockaddr *)sai;
 }

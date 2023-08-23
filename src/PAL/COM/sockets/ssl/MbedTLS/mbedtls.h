@@ -28,7 +28,9 @@ extern "C"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/error.h"
+#if MBEDTLS_VERSION_MAJOR < 3
 #include "mbedtls/certs.h"
+#endif
 
     typedef struct mbedTLS_NFContext
     {
