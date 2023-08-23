@@ -118,6 +118,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
 {
     int32_t timerId;
     int32_t pinNumber;
+    uint32_t rawDutyCycle;
     uint32_t dutyCycle;
 
     PwmPulsePolarity polarity;
@@ -132,7 +133,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     // Retrieves the needed parameters from private class properties or method parameters
     timerId = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pwmTimer].NumericByRef().s4;
     pinNumber = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___pinNumber].NumericByRef().s4;
-    dutyCycle = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4;
+    rawDutyCycle = pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___dutyCycle].NumericByRef().u4;
     polarity = (PwmPulsePolarity)(pThis[Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::FIELD___polarity]
                                       .NumericByRef()
                                       .u4);
@@ -150,7 +151,7 @@ HRESULT sys_dev_pwm_native_System_Device_Pwm_PwmChannelHelpers::ConfigureAndStar
     timer_sel = (ledc_timer_t)(timerId & 0x03);
 
     // Work out the duty Cycle for the current duty resolution
-    dutyCycle = CalculateDuty(timerId, dutyCycle, polarity);
+    dutyCycle = CalculateDuty(timerId, rawDutyCycle, polarity);
 
     ledc_conf = {pinNumber, mode, channel, LEDC_INTR_DISABLE, timer_sel, dutyCycle, 0, 0};
 
@@ -233,11 +234,11 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     // Working from 15 bit duty resolution down until we have a valid divisor
     optimumDutyResolution = 1;
 
-    for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDE_NUM - 1; dutyResolution > 0; dutyResolution--)
+    for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDTH - 1; dutyResolution > 0; dutyResolution--)
     {
         precision = (0x1 << dutyResolution); // 2**depth
 
-        divParam = ((uint64_t)LEDC_APB_CLK_HZ << 8) / desiredFrequency / precision;
+        divParam = ((uint64_t)APB_CLK_FREQ << 8) / desiredFrequency / precision;
 
         if (divParam > 256)
         {
@@ -296,7 +297,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetActive
 
     // retrieve percentage as 0 to 10000 (0% to 100%)
     dutyCycle = (uint32_t)(stack.Arg1().NumericByRef().r8 * CONST_DutyCycleFactor);
-
+ 
     // Get channel number used for this pinNumber
     // FIXME check result
     channel = (ledc_channel_t)GetChannel(pinNumber, timerId, false);

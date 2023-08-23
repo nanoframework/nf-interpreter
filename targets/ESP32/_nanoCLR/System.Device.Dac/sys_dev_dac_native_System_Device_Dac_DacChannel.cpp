@@ -6,6 +6,8 @@
 
 #include "sys_dev_dac_native_target.h"
 
+extern dac_oneshot_handle_t dacChannelHandle[DacChannelCount];
+
 HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValue___VOID__U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -13,7 +15,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
         CLR_RT_HeapBlock *dacController = NULL;
         int channelNumber;
         int controllerId;
-        dac_channel_t dacChannel = DAC_CHANNEL_1;
+        dac_channel_t dacChannel = DAC_CHAN_0;
 
         // Get value argumant and mask to 0 - 255 range
         uint16_t value = (stack.Arg1().NumericByRefConst().u2 & 0xff);
@@ -43,18 +45,18 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeWriteValu
         switch (channelNumber)
         {
             case 0:
-                dacChannel = DAC_CHANNEL_1;
+                dacChannel = DAC_CHAN_0;
                 break;
 
             case 1:
-                dacChannel = DAC_CHANNEL_2;
+                dacChannel = DAC_CHAN_1;
                 break;
 
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
 
-        dac_output_voltage(dacChannel, value);
+        dac_oneshot_output_voltage(dacChannelHandle[dacChannel], value);
     }
     NANOCLR_NOCLEANUP();
 }
@@ -64,6 +66,7 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeDispose__
     NANOCLR_HEADER();
 
     int channelNumber;
+    int dacChannel;
     bool disposeController = false;
 
     // get a pointer to the managed object instance and check that it's not NULL
@@ -81,16 +84,17 @@ HRESULT Library_sys_dev_dac_native_System_Device_Dac_DacChannel::NativeDispose__
         switch (channelNumber)
         {
             case 1:
-                dac_output_disable(DAC_CHANNEL_1);
+                dacChannel = DAC_CHAN_0;
                 break;
 
             case 2:
-                dac_output_disable(DAC_CHANNEL_2);
+                dacChannel =DAC_CHAN_1;
                 break;
 
             default:
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
         }
+        dac_oneshot_del_channel(dacChannelHandle[dacChannel]);
     }
 
     NANOCLR_NOCLEANUP();

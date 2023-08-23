@@ -37,9 +37,9 @@ option(API_nanoFramework.System.IO.Hashing              "option for nanoFramewor
 option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramework.System.Security.Cryptography API")
 
 # Esp32 only
-option(API_Hardware.Esp32                               "option for Hardware.Esp32")
-option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
-
+option(API_Hardware.Esp32                       "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_nanoFramework.Networking.Thread      "option for nanoFramework.Networking.Thread API")
 
 # Stm32 only
 option(API_Hardware.Stm32                               "option for Hardware.Stm32")

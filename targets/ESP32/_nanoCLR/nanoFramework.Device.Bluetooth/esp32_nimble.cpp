@@ -526,12 +526,6 @@ void Device_ble_dispose()
     if (rc == 0 || rc == 2)
     {
         nimble_port_deinit();
-
-        rc = esp_nimble_hci_and_controller_deinit();
-        if (rc != ESP_OK)
-        {
-            ESP_LOGE(tag, "esp_nimble_hci_and_controller_deinit() failed with error: %d", rc);
-        }
     }
     else
     {
@@ -603,8 +597,6 @@ void SetSecuritySettings(
 
 bool DeviceBleInit()
 {
-    esp_err_t err;
-
     BLE_DEBUG_PRINTF("DeviceBleInit %d\n", ble_initialized);
 
     // If already initialized then dispose first
@@ -613,14 +605,6 @@ bool DeviceBleInit()
     {
         BLE_DEBUG_PRINTF("ble_initialized true\n");
         Device_ble_dispose();
-    }
-
-    //    ESP_ERROR_CHECK(esp_nimble_hci_and_controller_init());
-    err = esp_nimble_hci_and_controller_init();
-    if (err != ESP_OK)
-    {
-        BLE_DEBUG_PRINTF("esp_nimble_hci_and_controller_init failed %d\n", err);
-        return false;
     }
 
     ble_event_waitgroup = xEventGroupCreate();

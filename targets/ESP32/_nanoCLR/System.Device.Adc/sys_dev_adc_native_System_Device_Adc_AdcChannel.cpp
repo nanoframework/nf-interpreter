@@ -53,7 +53,7 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcChannel::NativeReadValue
     {
         // Adjust channel number for ADC2
         channelNumber -= 10;
-        result = adc2_get_raw((adc2_channel_t)channelNumber, (adc_bits_width_t)SOC_ADC_MAX_BITWIDTH, &reading);
+        result = adc2_get_raw((adc2_channel_t)channelNumber, (adc_bits_width_t)SOC_ADC_RTC_MAX_BITWIDTH, &reading);
 
         if (result != ESP_OK)
         {

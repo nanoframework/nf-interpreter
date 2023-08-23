@@ -6,10 +6,9 @@
 
 #include "sys_net_native.h"
 
-
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfigurationCount___STATIC__I4( CLR_RT_StackFrame& stack )
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -28,7 +27,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::GetWirelessAPConfiguration___STATIC__SystemNetNetworkInformationWirelessAPConfiguration__I4( CLR_RT_StackFrame& stack )
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -79,7 +78,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::UpdateConfiguration___STATIC__VOID( CLR_RT_StackFrame& stack )
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 	NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
 
@@ -134,7 +133,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeGetConnectedClients___STATIC__SZARRAY_SystemNetNetworkInformationWirelessAPStation__I4(CLR_RT_StackFrame& stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 	NANOCLR_HEADER();
 
 	CLR_RT_TypeDef_Index    apStationTypeDef;
@@ -217,7 +216,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfigura
 
 HRESULT Library_sys_net_native_System_Net_NetworkInformation_WirelessAPConfiguration::NativeDeauthStation___STATIC__STRING__I4(CLR_RT_StackFrame& stack)
 {
-#ifdef PLATFORM_ESP32
+#if defined(PLATFORM_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 	NANOCLR_HEADER();
 
 	uint16_t index = (uint16_t)stack.Arg0().NumericByRef().u4;

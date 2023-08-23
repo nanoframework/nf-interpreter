@@ -3,6 +3,8 @@
     "include": [
         "../../CMake/xtensa-esp32.json",
         "../../CMake/xtensa-esp32c3.json",
+        "../../CMake/xtensa-esp32c6.json",
+        "../../CMake/xtensa-esp32h2.json",
         "../../CMake/xtensa-esp32s2.json",
         "../../CMake/xtensa-esp32s3.json",
         "../../config/user-tools-repos.json",
@@ -228,7 +230,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "${presetName}",
-                "SDK_CONFIG_FILE": "",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32c3",
                 "NF_BUILD_RTM": "OFF",
                 "NF_FEATURE_DEBUGGER": "ON",
                 "NF_FEATURE_RTC": "ON",
@@ -236,7 +238,6 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }
         },
@@ -258,8 +259,60 @@
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
-                "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
+                "API_nanoFramework.Device.Bluetooth": "ON",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
+            }
+        },
+        {
+            "name": "ESP32_C6_THREAD",
+            "inherits": [
+                "xtensa-esp32c6-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32c6",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "150",
+                "API_nanoFramework.Networking.Thread": "ON",
+                "THREAD_NODE_ROLE": "FTD",
+                "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
+            }
+        },
+        {
+            "name": "ESP32_H2_Thread",
+            "inherits": [
+                "xtensa-esp32h2-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "${presetName}",
+                "SDK_CONFIG_FILE": "sdkconfig.default.esp32h2",
+                "NF_BUILD_RTM": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "HAL_WP_USE_USB_CDC": "ON",
+                "API_System.IO.FileSystem": "ON",
+                "API_Windows.Storage": "ON",
+                "API_nanoFramework.Device.OneWire": "OFF",
+                "API_nanoFramework.Device.Bluetooth": "ON",
+                "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "70",
+                "API_nanoFramework.Networking.Thread": "ON",
+                "THREAD_NODE_ROLE": "MED",
+                "THREAD_DATASETTLVS": "0e080000000000000000000300001435060004001fffe00208473b6d471ac9b62d0708fd881c8e81b2f28c0510b933f687d1537c252ee7e680d41e1483030d6e616e6f6672616d65776f726b010256190410fd62447741af00be7f8139d6489127ef0c0402a0f7f8"
             }
         },
         {
@@ -321,6 +374,7 @@
                 "HAL_WP_USE_USB_CDC": "ON",
                 "API_System.IO.FileSystem": "ON",
                 "API_Windows.Storage": "ON",
+                "API_nanoFramework.Hardware.Esp32.Rmt": "ON",
                 "API_nanoFramework.Device.OneWire": "OFF",
                 "ESP32_RESERVED_RAM_FOR_IDF_ALLOCATION": "100"
             }

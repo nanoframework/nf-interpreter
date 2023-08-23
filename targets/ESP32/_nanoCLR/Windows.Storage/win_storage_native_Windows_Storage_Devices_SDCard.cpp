@@ -70,7 +70,7 @@ HRESULT Library_win_storage_native_Windows_Storage_Devices_SDCard::UnmountNative
 #if (HAL_USE_SDC == TRUE)
 
     // Unmount SPI device
-    if (!Storage_UnMountSDCard())
+    if (!Storage_UnMountSDCard(0))
     {
         // SDcard not mounted
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);

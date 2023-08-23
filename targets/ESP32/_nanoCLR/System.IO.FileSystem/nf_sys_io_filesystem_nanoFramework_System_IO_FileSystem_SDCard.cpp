@@ -304,7 +304,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
         case SDCard_SDInterfaceType_Spi:
 
             // Unmount SPI device
-            if (!Storage_UnMountSDCard())
+            if (!Storage_UnMountSDCard(0))
             {
                 // SDcard not mounted
                 NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
