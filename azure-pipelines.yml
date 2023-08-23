@@ -506,6 +506,24 @@ jobs:
         PackageName: ESP32_C3
         CMakePreset: ESP32_C3
 
+      ESP32_C6_THREAD:
+        TargetBoard: ESP32_C6
+        TargetSeries: 'esp32c6'
+        BuildOptions: 
+        IDF_Target: esp32c6
+        TargetName: ESP32_C6_THREAD
+        PackageName: ESP32_C6_THREAD
+        CMakePreset: ESP32_C6_THREAD
+
+      ESP32_H2_THREAD:
+        TargetBoard: ESP32_H2
+        TargetSeries: 'esp32h2'
+        BuildOptions: 
+        IDF_Target: esp32h2
+        TargetName: ESP32_H2_THREAD
+        PackageName: ESP32_H2_THREAD
+        CMakePreset: ESP32_H2_THREAD
+
       ESP32_S3:
         TargetBoard: ESP32_S3
         TargetSeries: 'esp32s3'
@@ -514,6 +532,15 @@ jobs:
         TargetName: ESP32_S3
         PackageName: ESP32_S3
         CMakePreset: ESP32_S3
+
+      ESP32_ETHERNET_KIT_1.2:
+        TargetBoard: ESP32
+        TargetSeries: 'esp32'
+        BuildOptions: 
+        IDF_Target: esp32
+        TargetName: ESP32_ETHERNET_KIT_1.2
+        PackageName: ESP32_ETHERNET_KIT_1.2
+        CMakePreset: ESP32_ETHERNET_KIT_1.2     
   
   variables:
     DOTNET_NOLOGO: true

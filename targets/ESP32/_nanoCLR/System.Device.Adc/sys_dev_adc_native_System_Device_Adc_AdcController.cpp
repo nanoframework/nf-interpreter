@@ -5,6 +5,7 @@
 //
 
 #include <sys_dev_adc_native_target.h>
+#include <Esp32_DeviceMapping.h>
 
 // ESP32 ADC controller
 //
@@ -48,15 +49,13 @@ HRESULT Library_sys_dev_adc_native_System_Device_Adc_AdcController::NativeOpenCh
     // Get channel from argument
     channelNumber = stack.Arg1().NumericByRef().s4;
 
-    if (channelNumber < ADC_CHANNEL_0 || channelNumber > 19)
+    if (channelNumber < ADC_CHANNEL_0 || channelNumber > TARGET_ADC_NUM_PINS)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
     }
 
     // Get ADC device number from channel
     adcUnit = channelNumber <= 9 ? 1 : 2;
-
-    adc_power_acquire(); // Make sure powered on
 
     switch (adcUnit)
     {

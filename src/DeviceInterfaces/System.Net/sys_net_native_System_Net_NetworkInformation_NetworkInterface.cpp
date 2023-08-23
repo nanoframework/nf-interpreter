@@ -172,7 +172,7 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::U
     config.IPv4DNSAddress2 = pConfig[FIELD___ipv4dnsAddress2].NumericByRef().u4;
 
     // FIXME IPV6
-    // config.IPv6Address           = pConfig[ FIELD___ipv6Address        ].NumericByRef().u4;
+    // config.IPv6Address           = pConfig[FIELD___ipv6Address].NumericByRef().u4;
     // config.IPv6GatewayAddress    = pConfig[ FIELD___ipv6GatewayAddress ].NumericByRef().u4;
     // config.IPv6NetMask           = pConfig[ FIELD___ipv6NetMask        ].NumericByRef().u4;
     // config.IPv6DNSAddress1       = pConfig[ FIELD___ipv6dnsAddress1    ].NumericByRef().u4;
