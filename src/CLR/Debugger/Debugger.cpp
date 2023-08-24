@@ -3108,6 +3108,8 @@ bool CLR_DBG_Debugger::Profiling_Command(WP_Message *msg)
         default:
             return false;
     }
+
+    return true;
 }
 
 bool CLR_DBG_Debugger::Profiling_ChangeConditions(WP_Message *msg)
