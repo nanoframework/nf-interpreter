@@ -178,11 +178,19 @@ void CLR_PRF_Profiler::DumpRoot(
     CLR_RT_MethodDef_Index *source)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
+#if defined(BUILD_RTM)
+    (void)flags;
+#endif
+
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_HeapDump_Root, CLR_PRF_CMDS::Bits::CommandHeader);
+
     DumpPointer(root);
+
     m_stream->WriteBits(type, CLR_PRF_CMDS::Bits::RootTypes);
 
     _ASSERTE(!flags);
+
     if (type == CLR_PRF_CMDS::RootTypes::Root_Stack)
     {
         PackAndWriteBits(*source);
@@ -448,26 +456,33 @@ void CLR_PRF_Profiler::DumpObject(CLR_RT_HeapBlock *ptr)
 CLR_RT_HeapBlock *CLR_PRF_Profiler::FindReferencedObject(CLR_RT_HeapBlock *ref)
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
     while (ref)
     {
         CLR_DataType dt = ref->DataType();
+
         switch (dt)
         {
             case DATATYPE_BYREF:
             case DATATYPE_OBJECT:
                 ref = ref->Dereference();
                 break;
+
 #if defined(NANOCLR_APPDOMAINS)
             case DATATYPE_TRANSPARENT_PROXY:
                 ref = ref->TransparentProxyDereference();
                 break;
 #endif
+
             case DATATYPE_ARRAY_BYREF:
                 ref = ref->Array();
+                return ref;
+
             default:
                 return ref;
         }
     }
+
     return NULL;
 }
 
