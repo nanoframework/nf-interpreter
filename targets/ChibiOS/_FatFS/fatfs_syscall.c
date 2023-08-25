@@ -19,8 +19,8 @@ void* ff_memalloc (	/* Returns pointer to the allocated memory block (null if no
 	UINT msize		/* Number of bytes to allocate */
 )
 {
-    return chHeapAlloc(NULL, msize); /* Allocate a new memory block */
-	//return platform_malloc(msize);
+    //return chHeapAlloc(NULL, msize); /* Allocate a new memory block */
+	return platform_malloc(msize);
 }
 
 
@@ -28,8 +28,8 @@ void ff_memfree (
 	void* mblock	/* Pointer to the memory block to free (no effect if null) */
 )
 {
-    chHeapFree(mblock);	/* Free the memory block */
-	//platform_free(mblock);
+    //chHeapFree(mblock);	/* Free the memory block */
+	platform_free(mblock);
 }
 
 #endif
@@ -41,7 +41,7 @@ void ff_memfree (
 /* Definitions of Mutex                                                   */
 /*------------------------------------------------------------------------*/
 
-static semaphore_t Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
+static mutex_t Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
 
 
 /*------------------------------------------------------------------------*/
@@ -56,7 +56,7 @@ int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the 
 	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-	chSemObjectInit(Mutex[vol],1);
+	osalMutexObjectInit(&Mutex[vol]);
 	return TRUE;
 }
 
@@ -72,7 +72,7 @@ void ff_mutex_delete (	/* Returns 1:Function succeeded or 0:Could not delete due
 	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-    chSemReset(Mutex[vol], 0);
+    //chSemReset(Mutex[vol], 0);
     return TRUE;
 }
 
@@ -88,8 +88,7 @@ int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
 	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-    msg_t msg = chSemWaitTimeout(Mutex[vol], (systime_t)FF_FS_TIMEOUT);
-    return msg == MSG_OK;
+    return osalMutexLock(&Mutex[vol]);
 }
 
 
@@ -104,7 +103,7 @@ void ff_mutex_give (
 	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-	chSemSignal(Mutex[vol]);
+	osalMutexUnlock(&Mutex[vol]);
 }
 
 #endif	/* FF_FS_REENTRANT */
