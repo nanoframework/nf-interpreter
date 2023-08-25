@@ -1,6 +1,6 @@
-// chibios version can be found at: https://github.com/ArduPilot/ChibiOS.svn/blob/master/os/various/fatfs_bindings/fatfs_syscall.c
-// but currently locked to R0.14b.
-// This file aims for comaptibility with R0.15x
+// chibios version can be found at:
+// https://github.com/ArduPilot/ChibiOS.svn/blob/master/os/various/fatfs_bindings/fatfs_syscall.c but currently locked
+// to R0.14b. This file aims for comaptibility with R0.15x
 
 /*------------------------------------------------------------------------*/
 /* A Sample Code of User Provided OS Dependent Functions for FatFs        */
@@ -9,40 +9,35 @@
 #include "hal.h"
 #include "ff.h"
 
-#if FF_USE_LFN == 3	/* Use dynamic memory allocation */
+#if FF_USE_LFN == 3 /* Use dynamic memory allocation */
 
 /*------------------------------------------------------------------------*/
 /* Allocate/Free a Memory Block                                           */
 /*------------------------------------------------------------------------*/
 
-void* ff_memalloc (	/* Returns pointer to the allocated memory block (null if not enough core) */
-	UINT msize		/* Number of bytes to allocate */
+void *ff_memalloc(           /* Returns pointer to the allocated memory block (null if not enough core) */
+                  UINT msize /* Number of bytes to allocate */
 )
 {
     return chHeapAlloc(NULL, msize); /* Allocate a new memory block */
-	//return platform_malloc(msize);
+                                     // return platform_malloc(msize);
 }
 
-
-void ff_memfree (
-	void* mblock	/* Pointer to the memory block to free (no effect if null) */
+void ff_memfree(void *mblock /* Pointer to the memory block to free (no effect if null) */
 )
 {
-    chHeapFree(mblock);	/* Free the memory block */
-	//platform_free(mblock);
+    chHeapFree(mblock); /* Free the memory block */
+                        // platform_free(mblock);
 }
 
 #endif
 
-
-
-#if FF_FS_REENTRANT	/* Mutal exclusion */
+#if FF_FS_REENTRANT /* Mutal exclusion */
 /*------------------------------------------------------------------------*/
 /* Definitions of Mutex                                                   */
 /*------------------------------------------------------------------------*/
 
-static semaphore_t Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
-
+static semaphore_t Mutex[FF_VOLUMES + 1]; /* Table of mutex handle */
 
 /*------------------------------------------------------------------------*/
 /* Create a Mutex                                                         */
@@ -52,14 +47,13 @@ static semaphore_t Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
 /  fails with FR_INT_ERR.
 */
 
-int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the mutex */
-	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
+int ff_mutex_create(        /* Returns 1:Function succeeded or 0:Could not create the mutex */
+                    int vol /* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-	chSemObjectInit(Mutex[vol],1);
-	return TRUE;
+    chSemObjectInit(Mutex[vol], 1);
+    return TRUE;
 }
-
 
 /*------------------------------------------------------------------------*/
 /* Delete a Mutex                                                         */
@@ -68,14 +62,13 @@ int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the 
 /  semaphore of the volume created with ff_mutex_create function.
 */
 
-void ff_mutex_delete (	/* Returns 1:Function succeeded or 0:Could not delete due to an error */
-	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
+void ff_mutex_delete(        /* Returns 1:Function succeeded or 0:Could not delete due to an error */
+                     int vol /* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
     chSemReset(Mutex[vol], 0);
     return TRUE;
 }
-
 
 /*------------------------------------------------------------------------*/
 /* Request a Grant to Access the Volume                                   */
@@ -84,27 +77,24 @@ void ff_mutex_delete (	/* Returns 1:Function succeeded or 0:Could not delete due
 /  When a 0 is returned, the file function fails with FR_TIMEOUT.
 */
 
-int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
-	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
+int ff_mutex_take(        /* Returns 1:Succeeded or 0:Timeout */
+                  int vol /* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
     msg_t msg = chSemWaitTimeout(Mutex[vol], (systime_t)FF_FS_TIMEOUT);
     return msg == MSG_OK;
 }
 
-
-
 /*------------------------------------------------------------------------*/
 /* Release a Grant to Access the Volume                                   */
 /*------------------------------------------------------------------------*/
 /* This function is called on leave file functions to unlock the volume.
-*/
+ */
 
-void ff_mutex_give (
-	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
+void ff_mutex_give(int vol /* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
-	chSemSignal(Mutex[vol]);
+    chSemSignal(Mutex[vol]);
 }
 
-#endif	/* FF_FS_REENTRANT */
+#endif /* FF_FS_REENTRANT */
