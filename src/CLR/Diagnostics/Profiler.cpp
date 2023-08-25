@@ -184,13 +184,13 @@ void CLR_PRF_Profiler::DumpRoot(
 #endif
 
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_HeapDump_Root, CLR_PRF_CMDS::Bits::CommandHeader);
-    
+
     DumpPointer(root);
-    
+
     m_stream->WriteBits(type, CLR_PRF_CMDS::Bits::RootTypes);
 
     _ASSERTE(!flags);
-    
+
     if (type == CLR_PRF_CMDS::RootTypes::Root_Stack)
     {
         PackAndWriteBits(*source);
