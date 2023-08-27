@@ -33,27 +33,26 @@ extern RTCDriver RTCD1;
 /*-----------------------------------------------------------------------*/
 /* Correspondence between physical drive number and physical drive.      */
 
-
 /*-----------------------------------------------------------------------*/
-/* Inidialize a Drive                                                    */
+/* Initialize a Drive                                                    */
 
 DSTATUS disk_initialize(BYTE pdrv /* Physical drive number (0..) */
 )
 {
-  DSTATUS stat;
+    DSTATUS stat;
 
-  switch (pdrv)
-  {
-  case 0:
-    stat = 0;
-    /* It is initialized externally, just reads the status.*/
-    if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-      stat |= STA_NOINIT;
-    if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
-      stat |= STA_PROTECT;
-    return stat;
-  }
-  return STA_NOINIT;
+    switch (pdrv)
+    {
+        case 0:
+            stat = 0;
+            /* It is initialized externally, just reads the status.*/
+            if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+                stat |= STA_NOINIT;
+            if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
+                stat |= STA_PROTECT;
+            return stat;
+    }
+    return STA_NOINIT;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -62,20 +61,20 @@ DSTATUS disk_initialize(BYTE pdrv /* Physical drive number (0..) */
 DSTATUS disk_status(BYTE pdrv /* Physical drive number (0..) */
 )
 {
-  DSTATUS stat;
+    DSTATUS stat;
 
-  switch (pdrv)
-  {
-  case 0:
-    stat = 0;
-    /* It is initialized externally, just reads the status.*/
-    if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-      stat |= STA_NOINIT;
-    if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
-      stat |= STA_PROTECT;
-    return stat;
-  }
-  return STA_NOINIT;
+    switch (pdrv)
+    {
+    case 0:
+        stat = 0;
+        /* It is initialized externally, just reads the status.*/
+        if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+        stat |= STA_NOINIT;
+        if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
+        stat |= STA_PROTECT;
+        return stat;
+    }
+    return STA_NOINIT;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -88,16 +87,16 @@ DRESULT disk_read(
     UINT count    /* Number of sectors to read (1..255) */
 )
 {
-  switch (pdrv)
-  {
-  case 0:
-    if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-      return RES_NOTRDY;
-    if (blkRead(&FATFS_HAL_DEVICE, sector, buff, count))
-      return RES_ERROR;
-    return RES_OK;
-  }
-  return RES_PARERR;
+    switch (pdrv)
+    {
+    case 0:
+        if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+            return RES_NOTRDY;
+        if (blkRead(&FATFS_HAL_DEVICE, sector, buff, count))
+            return RES_ERROR;
+        return RES_OK;
+    }
+    return RES_PARERR;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -111,16 +110,16 @@ DRESULT disk_write(
     UINT count        /* Number of sectors to write (1..255) */
 )
 {
-  switch (pdrv)
-  {
-  case 0:
-    if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-      return RES_NOTRDY;
-    if (blkWrite(&FATFS_HAL_DEVICE, sector, buff, count))
-      return RES_ERROR;
-    return RES_OK;
-  }
-  return RES_PARERR;
+    switch (pdrv)
+    {
+        case 0:
+            if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+                return RES_NOTRDY;
+            if (blkWrite(&FATFS_HAL_DEVICE, sector, buff, count))
+                return RES_ERROR;
+            return RES_OK;
+    }
+    return RES_PARERR;
 }
 #endif // FS_READONLY
 
@@ -133,56 +132,56 @@ DRESULT disk_ioctl(
     void *buff /* Buffer to send/receive control data */
 )
 {
-  BlockDeviceInfo bdi;
+    BlockDeviceInfo bdi;
 
-  (void)buff;
+    (void)buff;
 
-  switch (pdrv)
-  {
-  case 0:
-    switch (cmd)
+    switch (pdrv)
     {
-    case CTRL_SYNC:
-      return RES_OK;
-    case GET_SECTOR_COUNT:
-      if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
-      {
-        return RES_ERROR;
-      }
-      *((DWORD *)buff) = bdi.blk_num;
-      return RES_OK;
+    case 0:
+        switch (cmd)
+        {
+            case CTRL_SYNC:
+                return RES_OK;
+            case GET_SECTOR_COUNT:
+                if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
+                {
+                    return RES_ERROR;
+                }
+                *((DWORD *)buff) = bdi.blk_num;
+                return RES_OK;
 #if FF_MAX_SS > FF_MIN_SS
-    case GET_SECTOR_SIZE:
-      if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
-      {
-        return RES_ERROR;
-      }
-      *((WORD *)buff) = bdi.blk_size;
-      return RES_OK;
+            case GET_SECTOR_SIZE:
+                if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
+                {
+                    return RES_ERROR;
+                }
+                *((WORD *)buff) = bdi.blk_size;
+                return RES_OK;
 #endif
 #if FF_USE_TRIM
-    case GET_BLOCK_SIZE:
-      /* unsupported */
-      break;
-    case CTRL_TRIM:
-      /* unsupported */
-      break;
+            case GET_BLOCK_SIZE:
+                /* unsupported */
+                break;
+            case CTRL_TRIM:
+                /* unsupported */
+                break;
 #endif
-    default:
-      return RES_PARERR;
+            default:
+                return RES_PARERR;
+        }
     }
-  }
-  return RES_PARERR;
+    return RES_PARERR;
 }
 
 DWORD get_fattime(void)
 {
 #if HAL_USE_RTC
-  RTCDateTime timespec;
+    RTCDateTime timespec;
 
-  rtcGetTime(&RTCD1, &timespec);
-  return rtcConvertDateTimeToFAT(&timespec);
+    rtcGetTime(&RTCD1, &timespec);
+    return rtcConvertDateTimeToFAT(&timespec);
 #else
-  return ((uint32_t)0 | (1 << 16)) | (1 << 21); /* wrong but valid time */
+    return ((uint32_t)0 | (1 << 16)) | (1 << 21); /* wrong but valid time */
 #endif
 }
