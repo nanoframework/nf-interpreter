@@ -65,14 +65,14 @@ DSTATUS disk_status(BYTE pdrv /* Physical drive number (0..) */
 
     switch (pdrv)
     {
-    case 0:
-        stat = 0;
-        /* It is initialized externally, just reads the status.*/
-        if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-        stat |= STA_NOINIT;
-        if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
-        stat |= STA_PROTECT;
-        return stat;
+        case 0:
+            stat = 0;
+            /* It is initialized externally, just reads the status.*/
+            if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+                stat |= STA_NOINIT;
+            if (blkIsWriteProtected(&FATFS_HAL_DEVICE))
+                stat |= STA_PROTECT;
+            return stat;
     }
     return STA_NOINIT;
 }
@@ -89,12 +89,12 @@ DRESULT disk_read(
 {
     switch (pdrv)
     {
-    case 0:
-        if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
-            return RES_NOTRDY;
-        if (blkRead(&FATFS_HAL_DEVICE, sector, buff, count))
-            return RES_ERROR;
-        return RES_OK;
+        case 0:
+            if (blkGetDriverState(&FATFS_HAL_DEVICE) != BLK_READY)
+                return RES_NOTRDY;
+            if (blkRead(&FATFS_HAL_DEVICE, sector, buff, count))
+                return RES_ERROR;
+            return RES_OK;
     }
     return RES_PARERR;
 }
@@ -138,38 +138,38 @@ DRESULT disk_ioctl(
 
     switch (pdrv)
     {
-    case 0:
-        switch (cmd)
-        {
-            case CTRL_SYNC:
-                return RES_OK;
-            case GET_SECTOR_COUNT:
-                if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
-                {
-                    return RES_ERROR;
-                }
-                *((DWORD *)buff) = bdi.blk_num;
-                return RES_OK;
+        case 0:
+            switch (cmd)
+            {
+                case CTRL_SYNC:
+                    return RES_OK;
+                case GET_SECTOR_COUNT:
+                    if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
+                    {
+                        return RES_ERROR;
+                    }
+                    *((DWORD *)buff) = bdi.blk_num;
+                    return RES_OK;
 #if FF_MAX_SS > FF_MIN_SS
-            case GET_SECTOR_SIZE:
-                if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
-                {
-                    return RES_ERROR;
-                }
-                *((WORD *)buff) = bdi.blk_size;
-                return RES_OK;
+                case GET_SECTOR_SIZE:
+                    if (blkGetInfo(&FATFS_HAL_DEVICE, &bdi))
+                    {
+                        return RES_ERROR;
+                    }
+                    *((WORD *)buff) = bdi.blk_size;
+                    return RES_OK;
 #endif
 #if FF_USE_TRIM
-            case GET_BLOCK_SIZE:
-                /* unsupported */
-                break;
-            case CTRL_TRIM:
-                /* unsupported */
-                break;
+                case GET_BLOCK_SIZE:
+                    /* unsupported */
+                    break;
+                case CTRL_TRIM:
+                    /* unsupported */
+                    break;
 #endif
-            default:
-                return RES_PARERR;
-        }
+                default:
+                    return RES_PARERR;
+            }
     }
     return RES_PARERR;
 }
