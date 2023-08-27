@@ -32,7 +32,7 @@ FATFS *sdCard_FS(void)
 {
     static __attribute__((aligned(CACHE_LINE_SIZE))) uint8_t _fatfs_buf[sizeof(FATFS) + CACHE_LINE_SIZE];
     const size_t offset = offsetof(FATFS, win) % CACHE_LINE_SIZE;
-    return (FATFS*)(_fatfs_buf + (offset ? CACHE_LINE_SIZE - offset : 0));
+    return (FATFS *)(_fatfs_buf + (offset ? CACHE_LINE_SIZE - offset : 0));
 }
 
 static SDCConfig SDC_CFG;
