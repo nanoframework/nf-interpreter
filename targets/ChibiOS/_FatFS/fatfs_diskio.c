@@ -95,6 +95,9 @@ DRESULT disk_read(
     UINT count    /* Number of sectors to read (1..255) */
 )
 {
+    // invalidate cache over read buffer to ensure that content from DMA is read
+    cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
+
     switch (pdrv)
     {
         case 0:
@@ -102,8 +105,6 @@ DRESULT disk_read(
             {
                 return RES_NOTRDY;
             }
-            // invalidate cache over read buffer to ensure that content from DMA is read
-            cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
             if (blkRead(&FATFS_HAL_DEVICE, sector, buff, count))
             {
                 return RES_ERROR;
@@ -124,6 +125,8 @@ DRESULT disk_write(
     UINT count        /* Number of sectors to write (1..255) */
 )
 {
+    // invalidate cache on buffer
+    cacheBufferFlush(buff, count);
     switch (pdrv)
     {
         case 0:
@@ -131,8 +134,6 @@ DRESULT disk_write(
             {
                 return RES_NOTRDY;
             }
-            // invalidate cache on buffer
-            cacheBufferFlush(buff, count);
             if (blkWrite(&FATFS_HAL_DEVICE, sector, buff, count))
             {
                 return RES_ERROR;

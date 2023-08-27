@@ -26,7 +26,15 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 // FS for SD Card mounted and ready
 bool sdCardFileSystemReady;
 
-static FATFS sdCard_FS;
+//static FATFS sdCard_FS;
+// F7 alignment fix?
+FATFS *sdCard_FS(void)
+{
+  static __attribute__((aligned(CACHE_LINE_SIZE))) uint8_t _fatfs_buf[sizeof(FATFS) + CACHE_LINE_SIZE];
+  const size_t offset = offsetof(FATFS, win) % CACHE_LINE_SIZE;
+  return (FATFS*)(_fatfs_buf + (offset ? CACHE_LINE_SIZE - offset : 0));
+}
+
 static SDCConfig SDC_CFG;
 
 // SD Card event sources
@@ -107,7 +115,9 @@ void SdcardInsertHandler(eventid_t id)
         return;
     }
 
-    err = f_mount(&sdCard_FS, SD_CARD_DRIVE_INDEX, 1);
+    // F7 alignment fix
+    err = f_mount(sdCard_FS(), SD_CARD_DRIVE_INDEX, 1);
+    //err = f_mount(&sdCard_FS, SD_CARD_DRIVE_INDEX, 1);
 
     if (err != FR_OK)
     {
