@@ -41,10 +41,12 @@ HRESULT CLR_PRF_Profiler::Profiler_Cleanup()
 void CLR_PRF_Profiler::SendMemoryLayout()
 {
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
+
     // Send Memory Layout
     m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Memory_Layout, CLR_PRF_CMDS::Bits::CommandHeader);
-    PackAndWriteBits(0);
+    PackAndWriteBits((CLR_UINT32)s_CLR_RT_Heap.m_location);
     PackAndWriteBits(s_CLR_RT_Heap.m_size);
+
     Stream_Send();
 }
 
