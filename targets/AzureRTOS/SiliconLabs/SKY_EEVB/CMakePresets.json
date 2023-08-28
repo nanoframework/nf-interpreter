@@ -59,7 +59,7 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "SKY_EEVB",
+                "TARGET_NAME": "SKY_EEVB_Debug",
                 "NF_BUILD_RTM": "ON"
             }
         }

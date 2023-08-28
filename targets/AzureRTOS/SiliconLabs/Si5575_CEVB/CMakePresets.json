@@ -58,7 +58,7 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "Si5575_CEVB",
+                "TARGET_NAME": "Si5575_CEVB_Release",
                 "NF_BUILD_RTM": "ON"
             }
         }
