@@ -36,7 +36,7 @@ uint8_t WP_TransmitMessage(WP_Message *message)
         WireProtocolTransmitCallback(&data.front(), data.size());
     }
 
-    return data.size();
+    return true;
 }
 
 void WP_CheckAvailableIncomingData()
