@@ -125,7 +125,11 @@ void CLR_RT_GarbageCollector::ValidateBlockNotInFreeList( CLR_RT_DblLinkedList& 
 
             if(ptr <= dst && dst < ptrEnd)
             {
-                CLR_Debug::Printf( "Pointer into free list!! %08x %08x %08x\r\n", dst, ptr, ptrEnd );
+#if _WIN64
+                CLR_Debug::Printf("Pointer into free list!! %I64X %I64X %I64X\r\n", dst, ptr, ptrEnd);
+#else
+                CLR_Debug::Printf("Pointer into free list!! %08x %08x %08x\r\n", dst, ptr, ptrEnd);
+#endif
 
                 NANOCLR_DEBUG_STOP();
             }
@@ -205,20 +209,30 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateOld_Worker( void** ref )
 
         if(s_mapOldToRecord.find( ref ) != s_mapOldToRecord.end())
         {
-            CLR_Debug::Printf( "Duplicate base OLD: %08x\r\n", ref );
+#if _WIN64
+            CLR_Debug::Printf("Duplicate base OLD: %I64X\r\n", ref);
+#else
+            CLR_Debug::Printf("Duplicate base OLD: %08x\r\n", ref);
+#endif
+
+            NANOCLR_DEBUG_STOP();
         }
 
         s_mapOldToRecord[ ref ] = ptr;
 
         if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node*)dst, false ))
         {
-            CLR_Debug::Printf( "Some data points into a free list: %08x\r\n", dst );
+#if _WIN64
+            CLR_Debug::Printf("Some data points into a free list: %I64X\r\n", dst);
+#else
+            CLR_Debug::Printf("Some data points into a free list: %08x\r\n", dst);
+#endif
 
             NANOCLR_DEBUG_STOP();
         }
     }
 
-    return false;
+    return true;
 }
 
 void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
@@ -264,7 +278,12 @@ void CLR_RT_GarbageCollector::TestPointers_Remap()
 
         if(s_mapNewToRecord.find( ref ) != s_mapNewToRecord.end())
         {
-            CLR_Debug::Printf( "Duplicate base NEW: %08x\r\n", ref );
+#if _WIN64
+            CLR_Debug::Printf("Duplicate base NEW: %I64X\r\n", ref);
+#else
+            CLR_Debug::Printf("Duplicate base NEW: %08x\r\n", ref);
+#endif
+            NANOCLR_DEBUG_STOP();
         }
 
         s_mapNewToRecord[ ref ] = ptr;
@@ -291,23 +310,46 @@ bool CLR_RT_GarbageCollector::TestPointers_PopulateNew_Worker( void** ref )
 
             if(ptr->newPtr != dst)
             {
-                CLR_Debug::Printf( "Bad pointer: %08x %08x\r\n", ptr->newPtr, dst );
+#if _WIN64
+                CLR_Debug::Printf("Bad pointer: %I64X %I64X\r\n", ptr->newPtr, dst);
+#else
+                CLR_Debug::Printf("Bad pointer: %08x %08x\r\n", ptr->newPtr, dst);
+#endif
+                NANOCLR_DEBUG_STOP();
             }
             else if(ptr->data != *dst)
             {
-                CLR_Debug::Printf( "Bad data: %08x %08x\r\n", ptr->data, *dst );
+#if _WIN64
+                CLR_Debug::Printf("Bad data: %I64X %I64X\r\n", ptr->data, *dst);
+#else
+                CLR_Debug::Printf("Bad data: %08x %08x\r\n", ptr->data, *dst);
+#endif
+
+                NANOCLR_DEBUG_STOP();
             }
 
             if(IsBlockInFreeList( g_CLR_RT_ExecutionEngine.m_heap, (CLR_RT_HeapBlock_Node*)dst, false ))
             {
-                CLR_Debug::Printf( "Some data points into a free list: %08x\r\n", dst );
+#if _WIN64
+                CLR_Debug::Printf("Some data points into a free list: %I64X\r\n", dst);
+#else
+                CLR_Debug::Printf("Some data points into a free list: %08x\r\n", dst);
+#endif
 
                 NANOCLR_DEBUG_STOP();
             }
+
+            return true;
         }
         else
         {
-            CLR_Debug::Printf( "Bad base: %08x\r\n", ref );
+#if _WIN64
+            CLR_Debug::Printf("Bad base: 0x%0I64X\r\n", ref);
+#else
+            CLR_Debug::Printf("Bad base: 0x%08x\r\n", ref);
+#endif
+
+            NANOCLR_DEBUG_STOP();
         }
     }
 
