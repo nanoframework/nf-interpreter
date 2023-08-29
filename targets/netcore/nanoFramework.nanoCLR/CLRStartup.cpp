@@ -30,9 +30,10 @@ struct Settings
 
         m_clrOptions = params;
 
-#if defined(PLATFORM_WINDOWS_EMULATOR)
         g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
         g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+#if defined(PLATFORM_WINDOWS_EMULATOR)
 
         CLR_UINT32 clockFrequencyBaseline = 27000000;
         CLR_UINT32 clockFrequency = CPU_SystemClock();
