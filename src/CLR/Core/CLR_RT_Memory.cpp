@@ -13,7 +13,7 @@ static CLR_UINT32 s_TotalAllocated;
 
 CLR_RT_MemoryRange s_CLR_RT_Heap = {0, 0};
 
-static int s_PreHeapInitIndex = 0;
+static size_t s_PreHeapInitIndex = 0;
 
 ////////////////////////////////////////////////////////////
 
