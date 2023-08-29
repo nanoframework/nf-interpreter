@@ -3388,6 +3388,7 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
+#include <nanoCLR_Application.h>
 // #include <nanoCLR_Messaging.h>
 
 //--//
@@ -3666,7 +3667,11 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
+#if defined(VIRTUAL_DEVICE)
+    static HRESULT CreateInstance(CLR_SETTINGS params);
+#else
     static HRESULT CreateInstance();
+#endif
 
     HRESULT ExecutionEngine_Initialize();
 

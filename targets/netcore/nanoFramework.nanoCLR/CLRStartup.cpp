@@ -31,8 +31,6 @@ struct Settings
         m_clrOptions = params;
 
 #if defined(PLATFORM_WINDOWS_EMULATOR)
-        g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
-        g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
 
         CLR_UINT32 clockFrequencyBaseline = 27000000;
         CLR_UINT32 clockFrequency = CPU_SystemClock();
@@ -50,7 +48,7 @@ struct Settings
         g_HAL_Configuration_Windows.GraphHeapEnabled = false;
 #endif
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance(params));
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Created EE.\r\n");
 #endif
@@ -437,7 +435,8 @@ struct Settings
 
         if (!m_fInitialized)
         {
-            CLR_RT_ExecutionEngine::CreateInstance();
+            // TODO: all this LoadAssembliesSet is to be removed in another PR
+            // CLR_RT_ExecutionEngine::CreateInstance();
         }
 
         {

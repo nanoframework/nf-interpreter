@@ -25,6 +25,13 @@ typedef struct NANO_CLR_SETTINGS
     // this is required for launching a debug session in Visual Studio
     // when building is set for RTM this configuration is ignored
     BOOL EnterDebuggerLoopAfterExit;
+    
+    // set this to TRUE if execution engine is to performa GC before each allocation
+    BOOL PerformGarbageCollection;
+    
+    // set this to TRUE if execution engine is to performa heap compaction after each GC run
+    BOOL PerformHeapCompaction;
+
 } NANO_CLR_SETTINGS;
 
 typedef HRESULT(__stdcall *ConfigureRuntimeCallback)();

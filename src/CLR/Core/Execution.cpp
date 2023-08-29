@@ -17,6 +17,26 @@ CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::
 
 //--//
 
+#if defined(VIRTUAL_DEVICE)
+
+HRESULT CLR_RT_ExecutionEngine::CreateInstance(CLR_SETTINGS params)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+
+    // config from CLR settings
+    g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
+    g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+
+    NANOCLR_NOCLEANUP();
+}
+
+#else
+
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -28,6 +48,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif
 
 //--//
 
@@ -1582,6 +1604,12 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
 #if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
     if (m_heapState != c_HeapState_UnderGC)
+    {
+        g_CLR_RT_EventCache.EventCache_Cleanup();
+        PerformGarbageCollection();
+    }
+#else
+    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
     {
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
