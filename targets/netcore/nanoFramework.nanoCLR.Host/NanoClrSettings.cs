@@ -16,11 +16,20 @@ namespace nanoFramework.nanoCLR.Host
 
         public bool EnterDebuggerLoopAfterExit { get; set; }
 
+        // this is here for compatibility with native structure, doesn't have any usage in virtual device
+        public bool RevertToBooterOnFault { get; }
+
+        public bool PerformGarbageCollection { get; set; }
+
+        public bool PerformHeapCompaction { get; set; }
+
         public static nanoCLRSettings Default = new()
         {
             MaxContextSwitches = 50,
             WaitForDebugger = false,
             EnterDebuggerLoopAfterExit = false,
+            PerformGarbageCollection = false,
+            PerformHeapCompaction = false,
         };
     }
 }
