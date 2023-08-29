@@ -1626,7 +1626,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                         {
                             if (phase != 0)
                             {
-                                CLR_Debug::Printf("ExtractHeapBlocks succeeded at phase %d\r\n", phase);
+                                CLR_Debug::Printf("\r\n\r\nExtractHeapBlocks succeeded at phase %d\r\n", phase);
                             }
                         }
 #endif
@@ -1652,7 +1652,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                 if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                 {
                     CLR_Debug::Printf(
-                        "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
+                        "\r\n\r\n    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
                         length * sizeof(CLR_RT_HeapBlock));
                 }
 #endif
@@ -1664,7 +1664,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
             default: // Total failure...
 #if !defined(BUILD_RTM)
                 CLR_Debug::Printf(
-                    "Failed allocation for %d blocks, %d bytes\r\n\r\n",
+                    "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
                     length,
                     length * sizeof(CLR_RT_HeapBlock));
 #endif
