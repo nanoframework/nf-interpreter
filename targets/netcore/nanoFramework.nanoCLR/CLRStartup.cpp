@@ -30,8 +30,7 @@ struct Settings
 
         m_clrOptions = params;
 
-        g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
-        g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
 
 #if defined(PLATFORM_WINDOWS_EMULATOR)
 
@@ -51,7 +50,7 @@ struct Settings
         g_HAL_Configuration_Windows.GraphHeapEnabled = false;
 #endif
 
-        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance());
+        NANOCLR_CHECK_HRESULT(CLR_RT_ExecutionEngine::CreateInstance(params));
 #if !defined(BUILD_RTM)
         CLR_Debug::Printf("Created EE.\r\n");
 #endif
@@ -438,7 +437,8 @@ struct Settings
 
         if (!m_fInitialized)
         {
-            CLR_RT_ExecutionEngine::CreateInstance();
+            // TODO: all this LoadAssembliesSet is to be removed in another PR
+            // CLR_RT_ExecutionEngine::CreateInstance();
         }
 
         {
