@@ -435,8 +435,7 @@ struct Settings
 
         if (!m_fInitialized)
         {
-            // TODO: all this LoadAssembliesSet is to be removed in another PR
-            // CLR_RT_ExecutionEngine::CreateInstance();
+            CLR_RT_ExecutionEngine::CreateInstance(m_clrOptions);
         }
 
         {

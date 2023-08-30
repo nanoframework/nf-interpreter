@@ -604,7 +604,7 @@ HRESULT Library_corlib_native_System_Convert::ToBase64String___STATIC__STRING__S
     char *outArray = NULL;
     char *outArrayWitLineBreak = NULL;
     uint8_t *inArrayPointer = NULL;
-    size_t lineBreakCount;
+    int32_t lineBreakCount;
     uint16_t offsetIndex = 0;
     uint8_t count = 0;
     uint16_t result;
