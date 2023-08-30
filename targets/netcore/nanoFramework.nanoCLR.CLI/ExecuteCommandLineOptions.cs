@@ -94,6 +94,20 @@ namespace nanoFramework.nanoCLR.CLI
         public bool EnterDebuggerLoopAfterExit { get; set; }
 
         [Option(
+            "forcegc",
+            Required = false,
+            Default = false,
+            HelpText = "Option to force GC before each allocation.")]
+        public bool PerformGarbageCollection { get; set; }
+
+        [Option(
+            "compactionaftergc",
+            Required = false,
+            Default = false,
+            HelpText = "Option to force heap compaction after each GC run.")]
+        public bool PerformHeapCompaction { get; set; }
+
+        [Option(
             "localinstance",
             Required = false,
             Default = null,
