@@ -212,6 +212,7 @@ struct CLR_PRF_Profiler
     CLR_UINT32 m_lastTimestamp;
     CLR_IDX m_currentAssembly;
     int m_currentThreadPID;
+    bool m_initialized;
 };
 
 extern CLR_PRF_Profiler g_CLR_PRF_Profiler;

@@ -34,8 +34,10 @@
 #if defined(DEBUG) || defined(_DEBUG)
 #define NANOCLR_TRACE_STACK // enables rich eval stack tracing
 #endif
-//#define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
-//#define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+// #define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
+// #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
+#define NANOCLR_TRACE_PROFILER_MESSAGES  // enable tracing of profiler messages
+#define NANOCLR_FORCE_PROFILER_EXECUTION // force Profiler execution
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // PLATFORMS
@@ -135,6 +137,10 @@
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS) && !defined(NANOCLR_PROFILE_NEW)
 #define NANOCLR_PROFILE_NEW
+#endif
+
+#if defined(NANOCLR_FORCE_PROFILER_EXECUTION) && !defined(NANOCLR_PROFILE_NEW)
+#undef NANOCLR_FORCE_PROFILER_EXECUTION
 #endif
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
