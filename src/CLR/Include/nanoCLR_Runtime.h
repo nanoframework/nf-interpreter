@@ -3161,12 +3161,12 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern size_t LinkArraySize();
-extern size_t LinkMRUArraySize();
-extern size_t PayloadArraySize();
-extern size_t InterruptRecords();
+extern uint32_t LinkArraySize();
+extern uint32_t LinkMRUArraySize();
+extern uint32_t PayloadArraySize();
+extern uint32_t InterruptRecords();
 #ifndef NANOCLR_NO_IL_INLINE
-extern size_t InlineBufferCount();
+extern uint32_t InlineBufferCount();
 #endif
 
 extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
