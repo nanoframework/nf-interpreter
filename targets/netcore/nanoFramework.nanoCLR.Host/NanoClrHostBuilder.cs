@@ -26,6 +26,10 @@ namespace nanoFramework.nanoCLR.Host
         public bool WaitForDebugger { get; set; } = false;
         public bool EnterDebuggerLoopAfterExit { get; set; } = false;
 
+        public bool PerformGarbageCollection { get; set; } = false;
+
+        public bool PerformHeapCompaction { get; set; } = false;
+
         public nanoCLRHostBuilder()
         {
             Interop.nanoCLR.DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
@@ -118,7 +122,9 @@ namespace nanoFramework.nanoCLR.Host
             {
                 MaxContextSwitches = (ushort)MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,
-                EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit
+                EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit,
+                PerformGarbageCollection = PerformGarbageCollection,
+                PerformHeapCompaction = PerformHeapCompaction
             };
 
             return s_nanoClrHost;
