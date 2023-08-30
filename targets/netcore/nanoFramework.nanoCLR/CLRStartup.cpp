@@ -30,8 +30,6 @@ struct Settings
 
         m_clrOptions = params;
 
-
-
 #if defined(PLATFORM_WINDOWS_EMULATOR)
 
         CLR_UINT32 clockFrequencyBaseline = 27000000;
