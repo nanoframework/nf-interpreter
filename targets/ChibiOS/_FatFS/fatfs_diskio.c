@@ -96,7 +96,6 @@ DRESULT disk_read(
 )
 {
 
-
     switch (pdrv)
     {
         case 0:
