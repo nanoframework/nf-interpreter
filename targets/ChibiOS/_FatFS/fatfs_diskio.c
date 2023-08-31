@@ -96,7 +96,6 @@ DRESULT disk_read(
 )
 {
 
-
     switch (pdrv)
     {
         case 0:
@@ -108,7 +107,7 @@ DRESULT disk_read(
             {
                 return RES_ERROR;
             }
-            // // invalidate cache over read buffer to ensure that content from DMA is read
+            // invalidate cache over read buffer to ensure that content from DMA is read
             // cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
             dmaCacheInvalidate(buff, MMCSD_BLOCK_SIZE * count);
             return RES_OK;
