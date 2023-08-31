@@ -575,11 +575,14 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node(CLR_UINT32 dataType, CLR_UINT3
 #if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
     return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
 #else
+
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
     if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
     {
         return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
     }
     else
+#endif
     {
         if (blocks > 0 && blocks < c_maxFastLists)
         {
