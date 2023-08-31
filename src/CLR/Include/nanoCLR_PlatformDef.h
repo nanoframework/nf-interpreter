@@ -36,8 +36,8 @@
 #endif
 // #define TINYCLR_TRACE_INSTRUCTIONS 1    // enables tracing of instructions execution
 // #define NANOCLR_TRACE_HRESULT        // enable tracing of HRESULTS from interop libraries
-#define NANOCLR_TRACE_PROFILER_MESSAGES  // enable tracing of profiler messages
-#define NANOCLR_FORCE_PROFILER_EXECUTION // force Profiler execution
+// #define NANOCLR_TRACE_PROFILER_MESSAGES  // enable tracing of profiler messages
+// #define NANOCLR_FORCE_PROFILER_EXECUTION // force Profiler execution
 
 //-o-//-o-//-o-//-o-//-o-//-o-//
 // PLATFORMS
