@@ -138,8 +138,15 @@ void tx_application_define(void *first_unused_memory)
 
     clrSettings.MaxContextSwitches = 50;
     clrSettings.WaitForDebugger = false;
+    clrSettings.RevertToBooterOnFault = false;
+
+    // do NOT enter debugger loop on RTM builds
+    // this will cause the board to keep rebooting until there is an application deployed
+#if defined(BUILD_RTM)
+    clrSettings.EnterDebuggerLoopAfterExit = false;
+#else
     clrSettings.EnterDebuggerLoopAfterExit = true;
-    clrSettings.RevertToBooterOnFault = true;
+#endif
 
     // Create CLR startup thread
     status = tx_thread_create(
