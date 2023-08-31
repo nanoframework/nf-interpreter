@@ -227,6 +227,8 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
         }
         NANOCLR_FOREACH_NODE_END();
 
+#if defined(NANOCLR_GC_VERBOSE)
+
         for (dt = DATATYPE_VOID; dt < DATATYPE_FIRST_INVALID; dt++)
         {
             if (countBlocks[dt])
@@ -253,6 +255,8 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                 }
             }
         }
+
+#endif
     }
 #endif
 

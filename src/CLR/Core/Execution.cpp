@@ -1675,7 +1675,9 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
         switch (phase)
         {
+            // perform garbage collection to try to free up some memory
             case 0:
+
 #if defined(NANOCLR_GC_VERBOSE)
                 if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                 {
@@ -1689,22 +1691,35 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
                 break;
 
-            default: // Total failure...
-#if !defined(BUILD_RTM)
-                CLR_Debug::Printf(
-                    "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
-                    length,
-                    length * sizeof(CLR_RT_HeapBlock));
-#endif
+            // total failure on reclaiming enough memory
+            default:
+
                 if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))
                 {
-
                     // A compaction probably would have saved this OOM
                     // Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
                     // through an assert here
 
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                        "compaction scheduled.\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
+                }
+                else
+                {
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
                 }
 
                 return NULL;
