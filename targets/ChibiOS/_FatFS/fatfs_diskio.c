@@ -95,8 +95,7 @@ DRESULT disk_read(
     UINT count    /* Number of sectors to read (1..255) */
 )
 {
-    // invalidate cache over read buffer to ensure that content from DMA is read
-    cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
+
 
     switch (pdrv)
     {
@@ -109,6 +108,9 @@ DRESULT disk_read(
             {
                 return RES_ERROR;
             }
+            // // invalidate cache over read buffer to ensure that content from DMA is read
+            // cacheBufferInvalidate(buff, MMCSD_BLOCK_SIZE * count);
+            dmaCacheInvalidate(buff, MMCSD_BLOCK_SIZE * count);
             return RES_OK;
     }
     return RES_PARERR;
@@ -125,8 +127,6 @@ DRESULT disk_write(
     UINT count        /* Number of sectors to write (1..255) */
 )
 {
-    // invalidate cache on buffer
-    cacheBufferFlush(buff, count);
     switch (pdrv)
     {
         case 0:
@@ -138,6 +138,9 @@ DRESULT disk_write(
             {
                 return RES_ERROR;
             }
+            // invalidate cache on buffer
+            // cacheBufferFlush(buff, count);
+            dmaBufferFlush(buff, count);
             return RES_OK;
     }
     return RES_PARERR;
