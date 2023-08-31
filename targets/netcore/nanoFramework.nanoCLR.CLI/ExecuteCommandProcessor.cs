@@ -129,6 +129,8 @@ namespace nanoFramework.nanoCLR.CLI
 
             hostBuilder.WaitForDebugger = options.WaitForDebugger;
             hostBuilder.EnterDebuggerLoopAfterExit = options.EnterDebuggerLoopAfterExit;
+            hostBuilder.PerformGarbageCollection = options.PerformGarbageCollection;
+            hostBuilder.PerformHeapCompaction = options.PerformHeapCompaction;
 
             if (options.MonitorParentPid != null)
             {
