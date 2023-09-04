@@ -22,7 +22,7 @@ jobs:
     steps:
 
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Get container version
       run: |
@@ -43,10 +43,10 @@ jobs:
         password: ${{ secrets.CONTAINER_BUILD_TOKEN }}
 
     - name: Build and Push Docker Image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         file: ${{ env.GCR_FILE }}
-        push: true # Will only build if this is not here
+        push: ${{ github.repository_owner == 'nanoframework' && 'filter' || 'never' }}
         tags: |
           ${{ env.GCR_IMAGE }}:${{ env.GCR_VERSION }}
           ${{ env.GCR_IMAGE }}:latest
