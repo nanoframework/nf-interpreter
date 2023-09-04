@@ -112,6 +112,8 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
+    clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
+    clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
     ClrStartup(clrSettings);
 

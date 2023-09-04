@@ -30,6 +30,8 @@ typedef struct CLR_SETTINGS
     bool RevertToBooterOnFault;
 
 #if defined(VIRTUAL_DEVICE)
+    bool PerformGarbageCollection;
+    bool PerformHeapCompaction;
     CLR_RT_StringVector StartArgs;
 #endif
 

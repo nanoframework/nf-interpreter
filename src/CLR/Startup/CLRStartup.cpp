@@ -440,12 +440,12 @@ void ClrStartup(CLR_SETTINGS params)
 #endif // TARGET_HAS_NANOBOOTER
                 }
             }
-#else
+#endif
+
             if (params.EnterDebuggerLoopAfterExit)
             {
                 CLR_DBG_Debugger::Debugger_WaitForCommands();
             }
-#endif
         }
 
         // DO NOT USE 'ELSE IF' here because the state can change in Debugger_WaitForCommands() call

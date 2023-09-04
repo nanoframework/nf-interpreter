@@ -17,6 +17,26 @@ CLR_RT_ExecutionEngine::ExecutionConstraintCompensation CLR_RT_ExecutionEngine::
 
 //--//
 
+#if defined(VIRTUAL_DEVICE)
+
+HRESULT CLR_RT_ExecutionEngine::CreateInstance(CLR_SETTINGS params)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_CLEAR(g_CLR_RT_ExecutionEngine);
+
+    // config from CLR settings
+    g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection = params.PerformGarbageCollection;
+    g_CLR_RT_ExecutionEngine.m_fPerformHeapCompaction = params.PerformHeapCompaction;
+
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.ExecutionEngine_Initialize());
+
+    NANOCLR_NOCLEANUP();
+}
+
+#else
+
 HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -28,6 +48,8 @@ HRESULT CLR_RT_ExecutionEngine::CreateInstance()
 
     NANOCLR_NOCLEANUP();
 }
+
+#endif
 
 //--//
 
@@ -1586,6 +1608,16 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
         g_CLR_RT_EventCache.EventCache_Cleanup();
         PerformGarbageCollection();
     }
+#else
+
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
+    {
+        g_CLR_RT_EventCache.EventCache_Cleanup();
+        PerformGarbageCollection();
+    }
+#endif
+
 #endif
 
     for (int phase = 0;; phase++)
@@ -1626,7 +1658,7 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
                         {
                             if (phase != 0)
                             {
-                                CLR_Debug::Printf("ExtractHeapBlocks succeeded at phase %d\r\n", phase);
+                                CLR_Debug::Printf("\r\n\r\nExtractHeapBlocks succeeded at phase %d\r\n", phase);
                             }
                         }
 #endif
@@ -1647,12 +1679,14 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
         switch (phase)
         {
+            // perform garbage collection to try to free up some memory
             case 0:
+
 #if defined(NANOCLR_GC_VERBOSE)
                 if (s_CLR_RT_fTrace_Memory >= c_CLR_RT_Trace_Info)
                 {
                     CLR_Debug::Printf(
-                        "    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
+                        "\r\n\r\n    Memory: ExtractHeapBlocks: %d bytes needed.\r\n",
                         length * sizeof(CLR_RT_HeapBlock));
                 }
 #endif
@@ -1661,22 +1695,35 @@ CLR_RT_HeapBlock *CLR_RT_ExecutionEngine::ExtractHeapBlocks(
 
                 break;
 
-            default: // Total failure...
-#if !defined(BUILD_RTM)
-                CLR_Debug::Printf(
-                    "Failed allocation for %d blocks, %d bytes\r\n\r\n",
-                    length,
-                    length * sizeof(CLR_RT_HeapBlock));
-#endif
+            // total failure on reclaiming enough memory
+            default:
+
                 if (g_CLR_RT_GarbageCollector.m_freeBytes >= (length * sizeof(CLR_RT_HeapBlock)))
                 {
-
                     // A compaction probably would have saved this OOM
                     // Compaction will occur for Bitmaps, Arrays, etc. if this function returns NULL, so lets not
                     // through an assert here
 
                     // Throw the OOM, and schedule a compaction at a safe point
                     CLR_EE_SET(Compaction_Pending);
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes.\r\nThere's enough free memory, heap "
+                        "compaction scheduled.\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
+                }
+                else
+                {
+
+#if !defined(BUILD_RTM)
+                    CLR_Debug::Printf(
+                        "\r\n\r\nFailed allocation for %d blocks, %d bytes\r\n\r\n",
+                        length,
+                        length * sizeof(CLR_RT_HeapBlock));
+#endif
                 }
 
                 return NULL;
