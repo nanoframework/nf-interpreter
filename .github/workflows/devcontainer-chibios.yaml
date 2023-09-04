@@ -43,7 +43,7 @@ jobs:
         password: ${{ secrets.CONTAINER_BUILD_TOKEN }}
 
     - name: Build and Push Docker Image
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         file: ${{ env.GCR_FILE }}
         push: true # Will only build if this is not here
