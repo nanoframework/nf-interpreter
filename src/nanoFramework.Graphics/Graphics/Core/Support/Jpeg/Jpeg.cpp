@@ -22,7 +22,7 @@ extern "C"
 struct JPEGErrorManager
 {
     jpeg_error_mgr pub;
-    int setjmpBuffer[32];
+    jmp_buf setjmpBuffer[32];
 };
 
 void JPEGErrorHandler(j_common_ptr cinfo)
