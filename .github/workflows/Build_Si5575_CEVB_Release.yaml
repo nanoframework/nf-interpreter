@@ -1,0 +1,11 @@
+name: Build Si5575_CEVB_Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_Si5575_CEVB_Release:
+    name: Build Si5575_CEVB_Release
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'Si5575_CEVB_Release'
