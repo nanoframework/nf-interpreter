@@ -6,7 +6,7 @@ name: Build Dev Container for TI
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-ti
   GCR_FILE: .devcontainer/sources/Dockerfile.TI
-  PUBLISH_IMAGE: 'never' # change to 'true' to publish.
+  PUBLISH_IMAGE: 'never' # change to 'true' to build and publish.
 
 on:
   push:
@@ -19,6 +19,7 @@ on:
 
 jobs:
   build:
+    if: ${{ env.PUBLISH_IMAGE }}
     runs-on: ubuntu-latest
     steps:
 
@@ -47,7 +48,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         file: ${{ env.GCR_FILE }}
-        push: ${{ env.PUBLISH_IMAGE }} # Will only publish image if required.
+        push: true # Will only build if this is not here.
         tags: |
           ${{ env.GCR_IMAGE }}:${{ env.GCR_VERSION }}
           ${{ env.GCR_IMAGE }}:latest
