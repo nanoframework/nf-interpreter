@@ -26,7 +26,7 @@ To choose the dev container you want to use, adjust `devcontainer.json` and chan
 
 ## Building and releasing Docker images in a fork
 
-Add an environment variable called `PUBLISH_DOCKER_IMAGE` with the value `true` to your repo "Repository Variables"
-See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-an-environment for details on how to do it.
+Add a "repository variable" called `PUBLISH_DOCKER_IMAGE` with the value `true` in your forked repository
+See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository for further help.
 
-Note that by default, build and publish will still only happen when the docker source files change and are "pushed" to the `main` branch.
+**Note:** by default, the build and publish of the devcontainer docker images will still only happen when the docker source files change and are "pushed" to the `main` branch.

@@ -18,7 +18,7 @@ on:
 
 jobs:
   build:
-    if: ${{ github.env.PUBLISH_DOCKER_IMAGE }}
+    if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
