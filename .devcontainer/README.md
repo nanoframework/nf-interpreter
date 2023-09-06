@@ -28,3 +28,5 @@ To choose the dev container you want to use, adjust `devcontainer.json` and chan
 
 add `PUBLISH_IMAGE` with the value `true` to your repo "Repository Variables"
 See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-an-environment for details on how to do it.
+
+Note that by default, this will only happen when the docker source files change and are "pushed" to the `main` branch.
