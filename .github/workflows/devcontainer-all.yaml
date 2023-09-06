@@ -6,11 +6,6 @@ name: Build Dev Container for all platforms
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-all
   GCR_FILE: .devcontainer/sources/Dockerfile.All
-# NOTE: TO ENABLE THIS JOB
-# add PUBLISH_IMAGE to your repo "Repository Variables"
-# See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-an-environment
-# OR uncomment the following line: 
-  # PUBLISH_IMAGE: true # change to 'true' to build and publish.
 
 on:
   push:
