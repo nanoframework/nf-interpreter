@@ -6,6 +6,7 @@ name: Build Dev Container for Azure RTOS
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-azure-rtos
   GCR_FILE: .devcontainer/sources/Dockerfile.AzureRTOS
+  PUBLISH_IMAGE: 'never' # change to 'true' to publish.
 
 on:
   push:
@@ -46,7 +47,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         file: ${{ env.GCR_FILE }}
-        push: ${{ github.repository_owner == 'nanoframework' && 'filter' || 'never' }}
+        push: ${{ env.PUBLISH_IMAGE }} # Will only publish image if required.
         tags: |
           ${{ env.GCR_IMAGE }}:${{ env.GCR_VERSION }}
           ${{ env.GCR_IMAGE }}:latest
