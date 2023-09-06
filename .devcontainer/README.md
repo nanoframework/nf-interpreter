@@ -22,3 +22,9 @@ To choose the dev container you want to use, adjust `devcontainer.json` and chan
 * `./sources/Dockerfile.ChibiOS` to build the container image from the source with all the elements to build ChibiOS based devices
 * `./sources/Dockerfile.ESP32` to build the container image from the source with all the elements to build ESP32 based devices
 * `./sources/Dockerfile.TI` to build the container image from the source with all the elements to build TI SimpleLink based devices
+
+
+## Building and releasing Docker images in a fork
+
+add `PUBLISH_IMAGE` with the value `true` to your repo "Repository Variables"
+See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-an-environment for details on how to do it.
