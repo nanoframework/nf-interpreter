@@ -676,35 +676,100 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
         CLR_UINT8 dt = ptr->DataType();
+
         if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD)
         {
             Timestamp();
+
             m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Allocs_Alloc, CLR_PRF_CMDS::Bits::CommandHeader);
+
             DumpPointer(ptr);
-            PackAndWriteBits(ptr->DataSize());
+
+            CLR_UINT16 dataSize = ptr->DataSize();
+            PackAndWriteBits(dataSize);
+
             m_stream->WriteBits((CLR_UINT32)dt, CLR_PRF_CMDS::Bits::DataType);
+
             if (dt == DATATYPE_CLASS || dt == DATATYPE_VALUETYPE)
             {
-                PackAndWriteBits(ptr->ObjectCls());
+                CLR_RT_TypeDef_Index idx = ptr->ObjectCls();
+                PackAndWriteBits(idx);
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    idx.m_data);
+
+#else
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d %d bytes idx: %08x\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)),
+                    idx.m_data);
+#endif
+
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
             }
             else if (dt == DATATYPE_SZARRAY)
             {
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
                 PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
                 PackAndWriteBits(array->ReflectionDataConst().m_levels);
-            }
-            Stream_Send();
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
-            CLR_Debug::Printf("\r\n    Profiler msg: ! %d 0x%I64X\r\n", m_currentThreadPID, (size_t)(CLR_UINT8 *)ptr);
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d [%08x] %d bytes\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    elementIdx.m_data,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
 
 #else
-            CLR_Debug::Printf("\r\n    Profiler msg: ! %d 0x%08x\r\n", m_currentThreadPID, (size_t)(CLR_UINT8 *)ptr);
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d [%08x] %d bytes\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    elementIdx.m_data,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
 #endif
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
+            }
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+            else
+            {
+#ifdef _WIN64
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x0x%I64X | %d) DT: %d %d bytes\r\n",
+                    (size_t)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
 
-#endif //  NANOCLR_TRACE_PROFILER_MESSAGES
+#else
+                CLR_Debug::Printf(
+                    "\r\n    Profiler info: ! (0x%08X | %d) DT: %d %d bytes\r\n",
+                    (CLR_UINT32)((CLR_UINT8 *)ptr),
+                    (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+                    (CLR_UINT32)dt,
+                    (dataSize * sizeof(CLR_RT_HeapBlock)));
+#endif
+            }
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
+
+            Stream_Send();
         }
     }
 }
