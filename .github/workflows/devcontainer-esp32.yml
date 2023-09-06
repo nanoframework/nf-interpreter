@@ -6,7 +6,7 @@ name: Build Dev Container for ESP32
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-esp32
   GCR_FILE: .devcontainer/sources/Dockerfile.ESP32
-  PUBLISH_IMAGE: 'never' # change to 'true' to build and publish.
+  PUBLISH_IMAGE: false # change to 'true' to build and publish.
 
 on:
   push:

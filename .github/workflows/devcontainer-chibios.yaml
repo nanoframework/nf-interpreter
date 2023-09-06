@@ -6,7 +6,7 @@ name: Build Dev Container for ChibiOS
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-chibios
   GCR_FILE: .devcontainer/sources/Dockerfile.ChibiOS
-  PUBLISH_IMAGE: 'never' # change to 'true' to build and publish.
+  PUBLISH_IMAGE: false # change to 'true' to build and publish.
 
 on:
   push:

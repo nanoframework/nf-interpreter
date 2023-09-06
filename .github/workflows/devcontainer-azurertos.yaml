@@ -6,7 +6,7 @@ name: Build Dev Container for Azure RTOS
 env:
   GCR_IMAGE: ghcr.io/nanoframework/dev-container-azure-rtos
   GCR_FILE: .devcontainer/sources/Dockerfile.AzureRTOS
-  PUBLISH_IMAGE: 'never' # change to 'true' to build and publish.
+  PUBLISH_IMAGE: false # change to 'true' to build and publish.
 
 on:
   push:
