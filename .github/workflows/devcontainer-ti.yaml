@@ -47,7 +47,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         file: ${{ env.GCR_FILE }}
-        push: true # Will only build if this is not here.
+        push: true # Will only build if this is not here
         tags: |
           ${{ env.GCR_IMAGE }}:${{ env.GCR_VERSION }}
           ${{ env.GCR_IMAGE }}:latest
