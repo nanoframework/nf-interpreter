@@ -7,21 +7,21 @@
 // // UART1 //
 // ///////////
 
-// // enable UART1
-// #define NF_SERIAL_COMM_STM32_UART_USE_UART1     TRUE
+// enable UART1
+#define NF_SERIAL_COMM_STM32_UART_USE_UART1     TRUE
 
 // ///////////
 // // UART2 //
 // ///////////
 
-// // enable UART2
-// #define NF_SERIAL_COMM_STM32_UART_USE_UART2     TRUE
+// enable UART2
+#define NF_SERIAL_COMM_STM32_UART_USE_UART2     TRUE
 
 // ///////////
 // // UART3 //
 // ///////////
 
-// // enable UART5
+// // enable UART3
 // #define NF_SERIAL_COMM_STM32_UART_USE_UART3     TRUE
 
 // ///////////
@@ -36,14 +36,14 @@
 ///////////
 
 // enable UART5
-// #define NF_SERIAL_COMM_STM32_UART_USE_UART5 TRUE
+// #define NF_SERIAL_COMM_STM32_UART_USE_UART5     TRUE
 
 ///////////
 // UART6 //
 ///////////
 
 // enable USART6
-// #define NF_SERIAL_COMM_STM32_UART_USE_USART6 TRUE
+#define NF_SERIAL_COMM_STM32_UART_USE_USART6     TRUE
 
 // ///////////
 // // UART7 //

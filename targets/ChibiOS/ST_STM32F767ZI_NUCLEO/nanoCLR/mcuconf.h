@@ -24,11 +24,7 @@
  */
 
 #define STM32F7xx_MCUCONF
-#define STM32F765_MCUCONF
 #define STM32F767_MCUCONF
-#define STM32F777_MCUCONF
-#define STM32F769_MCUCONF
-#define STM32F779_MCUCONF
 
 /*
  * General settings.
@@ -436,6 +432,9 @@
 #define STM32_WSPI_QUADSPI1_DMA_STREAM      STM32_DMA_STREAM_ID(2, 7)
 #define STM32_WSPI_QUADSPI1_PRESCALER_VALUE 1
 
-// clang-format on
+// header for nanoFramework overlay drivers
+#include "mcuconf_nf.h"
 
 #endif /* MCUCONF_H */
+
+// clang-format on

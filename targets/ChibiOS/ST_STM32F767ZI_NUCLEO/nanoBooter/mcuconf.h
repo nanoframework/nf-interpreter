@@ -24,11 +24,7 @@
  */
 
 #define STM32F7xx_MCUCONF
-#define STM32F765_MCUCONF
 #define STM32F767_MCUCONF
-#define STM32F777_MCUCONF
-#define STM32F769_MCUCONF
-#define STM32F779_MCUCONF
 
 /*
  * General settings.
