@@ -109,9 +109,9 @@ jobs:
             # Move into the .devcontainer directory
             pushd .devcontainer
             # We could target the chibios container for a quicker build
-            # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "Dockerfile.ChibiOS"|g' devcontainer.json
+            sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "Dockerfile.ChibiOS"|g' devcontainer.json
             # But we actually require a change to the available devcontainer image, so we target the source instead (which takes a little longer to build).
-            sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.ChibiOS"|g' devcontainer.json
+            # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.ChibiOS"|g' devcontainer.json
             # For the CI, we need to remove the unsupported (azure cli) mount directive.
             sed -i -- 's|"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"|//"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind",|g' devcontainer.json
             # Move out of the .devcontainer directory
