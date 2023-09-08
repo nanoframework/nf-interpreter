@@ -24,7 +24,11 @@
  */
 
 #define STM32F7xx_MCUCONF
+#define STM32F765_MCUCONF
 #define STM32F767_MCUCONF
+#define STM32F777_MCUCONF
+#define STM32F769_MCUCONF
+#define STM32F779_MCUCONF
 
 /*
  * General settings.
@@ -34,7 +38,7 @@
 /*
  * Memory attributes settings.
  */
-#define STM32_NOCACHE_ENABLE                FALSE
+#define STM32_NOCACHE_ENABLE                TRUE
 #define STM32_NOCACHE_MPU_REGION            MPU_REGION_6
 #define STM32_NOCACHE_RBAR                  0x2004C000U
 #define STM32_NOCACHE_RASR                  MPU_RASR_SIZE_16K
