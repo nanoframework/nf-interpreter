@@ -1,0 +1,147 @@
+name: Devcontainer build for ChibiOS targets
+# run-name: ${{ github.actor }}-test
+
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - created
+  workflow_dispatch:
+
+jobs:
+  build-target:
+    strategy:
+      fail-fast: false # Continues to build other targets in the matrix, even if one fails.
+
+      matrix: # Add the target and build type you wish to generate firmware for:
+        include: [
+          { target: ST_STM32F767ZI_NUCLEO, build-type: MinSizeRel },
+          { target: ST_STM32F767ZI_NUCLEO, build-type: Debug },
+
+          # { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel },
+          # { target: ST_STM32F769I_DISCOVERY, build-type: Debug },
+
+          # { target: ORGPAL_PALTHREE, build-type: MinSizeRel },
+          # { target: ORGPAL_PALTHREE, build-type: Debug },
+
+          # { target: ST_STM32F429I_DISCOVERY, build-type: MinSizeRel },
+          # { target: ST_STM32F429I_DISCOVERY, build-type: Debug },
+
+          # { target: ST_NUCLEO64_F091RC, build-type: MinSizeRel },
+          # Note: The F091RC debug build is currently broken, so is expected to fail.
+          # { target: ST_NUCLEO64_F091RC, build-type: Debug },
+
+
+          # Community targets:
+                
+          # { target: ST_NUCLEO64_F411RE_NF, build-type: MinSizeRel },
+          # { target: ST_NUCLEO64_F411RE_NF, build-type: Debug },
+
+          # { target: ST_STM32F411_DISCOVERY, build-type: MinSizeRel },
+          # { target: ST_STM32F411_DISCOVERY, build-type: Debug },
+
+          # { target: BrainPad2, build-type: MinSizeRel },
+          # { target: BrainPad2, build-type: Debug },
+
+          # { target: GHI_FEZ_CERB40_NF, build-type: MinSizeRel },
+          # { target: GHI_FEZ_CERB40_NF, build-type: Debug },
+
+          # { target: I2M_ELECTRON_NF, build-type: MinSizeRel },
+          # { target: I2M_ELECTRON_NF, build-type: Debug },
+
+          # { target: I2M_OXYGEN_NF, build-type: MinSizeRel },
+          # { target: I2M_OXYGEN_NF, build-type: Debug },
+
+          # { target: MBN_QUAIL, build-type: MinSizeRel },
+          # { target: MBN_QUAIL, build-type: Debug },
+
+          # { target: NESHTEC_NESHNODE_V1, build-type: MinSizeRel },
+          # { target: NESHTEC_NESHNODE_V1, build-type: Debug },
+
+          # { target: NETDUINO3_WIFI, build-type: MinSizeRel },
+          # { target: NETDUINO3_WIFI, build-type: Debug },
+          
+          # { target: PybStick2x, build-type: MinSizeRel },
+          # { target: PybStick2x, build-type: Debug },
+
+          # { target: ST_NUCLEO144_F412ZG_NF, build-type: MinSizeRel },
+          # { target: ST_NUCLEO144_F412ZG_NF, build-type: Debug },
+
+          # { target: ST_NUCLEO144_F439ZI, build-type: MinSizeRel },
+          # { target: ST_NUCLEO144_F439ZI, build-type: Debug },
+
+          # { target: ST_NUCLEO144_F746ZG, build-type: MinSizeRel },
+          # { target: ST_NUCLEO144_F746ZG, build-type: Debug },
+
+          # { target: ST_NUCLEO64_F401RE_NF, build-type: MinSizeRel },
+          # { target: ST_NUCLEO64_F401RE_NF, build-type: Debug },
+
+          # { target: ST_STM32F4_DISCOVERY, build-type: MinSizeRel },
+          # { target: ST_STM32F4_DISCOVERY, build-type: Debug },
+
+          # { target: WEACT_F411CE, build-type: MinSizeRel },
+          # { target: WEACT_F411CE, build-type: Debug },
+        ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Adjust config templates for devcontainer
+        run: |
+            # Move into the config directory
+            pushd config
+            # Rename the templates
+            mv user-prefs.TEMPLATE.json user-prefs.json
+            mv user-tools-repos.TEMPLATE.json user-tools-repos.json
+            # Adjust the file content for a devcontainer
+            sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
+            # Move out of the config directory
+            popd
+
+      - name: Adjust devcontainer.json (ChibiOS source)
+        run: |
+            # required fixes for current devcontainer
+            # Move into the .devcontainer directory
+            pushd .devcontainer
+            # We could target the chibios container for a quicker build
+            # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "Dockerfile.ChibiOS"|g' devcontainer.json
+            # But we actually require a change to the available devcontainer image, so we target the source instead (which takes a little longer to build).
+            sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.ChibiOS"|g' devcontainer.json
+            # For the CI, we need to remove the unsupported (azure cli) mount directive.
+            sed -i -- 's|"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"|//"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind",|g' devcontainer.json
+            # Move out of the .devcontainer directory
+            popd
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
+        uses: devcontainers/ci@v0.3
+        with:
+          # The ChibiOS container
+          cacheFrom: ghcr.io/nanoframework/dev-container-chibios
+          push: never
+          runCmd: |
+            # Build target:
+            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+            cmake --build build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Firmware ${{ matrix.target }}-${{ matrix.build-type }}
+          path: |
+            ./build/*.map
+            ./build/*.elf
+            ./build/*.hex
+            ./build/*.bin
+            ./build/*.dfu
