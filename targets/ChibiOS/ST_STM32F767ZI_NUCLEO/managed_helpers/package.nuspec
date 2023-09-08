@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>nanoFramework.Targets.ST_STM32F769I_DISCOVERY</id>
-    <title>nanoFramework.Targets.ST_STM32F769I_DISCOVERY</title>
+    <id>nanoFramework.Targets.ST_STM32F767ZI_NUCLEO</id>
+    <title>nanoFramework.Targets.ST_STM32F767ZI_NUCLEO</title>
     <version>1.0.0</version>
     <authors>nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
-      Helper classes to use ST_STM32F769I_DISCOVERY target in C# applications.
+      Helper classes to use ST_STM32F767ZI_NUCLEO target in C# applications.
     </description>
     <releaseNotes>
     </releaseNotes>
