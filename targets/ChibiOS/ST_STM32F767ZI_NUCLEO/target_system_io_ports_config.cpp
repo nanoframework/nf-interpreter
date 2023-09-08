@@ -15,14 +15,14 @@
 // port for RX pin is: GPIOC
 // TX pin: is GPIOC_4
 // RX pin: is GPIOC_5
-// GPIO alternate pin function is 8 (see alternate function mapping table in device datasheet)
-UART_CONFIG_PINS(1, GPIOC, GPIOC, 4, 5, 8)
+// GPIO alternate pin function is 7 (see alternate function mapping table in device datasheet)
+// UART_CONFIG_PINS(1, GPIOC, GPIOC, 4, 5, 4)
 
-// initialization for UART1
-UART_INIT(1)
+// // initialization for UART1
+// UART_INIT(1)
 
-// un-initialization for UART1
-UART_UNINIT(1)
+// // un-initialization for UART1
+// UART_UNINIT(1)
 
 ///////////
 // UART2 //
@@ -33,8 +33,8 @@ UART_UNINIT(1)
 // port for RX pin is: GPIOD
 // TX pin: is GPIOD_5
 // RX pin: is GPIOC_6
-// GPIO alternate pin function is 8 (see alternate function mapping table in device datasheet)
-UART_CONFIG_PINS(2, GPIOD, GPIOD, 5, 6, 8)
+// GPIO alternate pin function is 7 (see alternate function mapping table in device datasheet)
+UART_CONFIG_PINS(2, GPIOD, GPIOD, 5, 6, 7)
 
 // initialization for UART2
 UART_INIT(2)

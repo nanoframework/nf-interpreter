@@ -8,11 +8,11 @@
 // ///////////
 
 // enable UART1
-#define NF_SERIAL_COMM_STM32_UART_USE_UART1     TRUE
+// #define NF_SERIAL_COMM_STM32_UART_USE_UART1     TRUE
 
-// ///////////
-// // UART2 //
-// ///////////
+///////////
+// UART2 //
+///////////
 
 // enable UART2
 #define NF_SERIAL_COMM_STM32_UART_USE_UART2     TRUE

@@ -13,11 +13,11 @@
 
 // pin configuration for CAN1
 // port for TX pin is: GPIOD
-// TX pin: is GPIOB_01
+// TX pin: is GPIOD_01
 // port for RX pin is: GPIOD
-// RX pin: is GPIOB_00
-// GPIO alternate pin function is 8 (see alternate function mapping table in device datasheet)
-CAN_CONFIG_PINS(1, GPIOD, GPIOD, 1, 0, 8)
+// RX pin: is GPIOD_00
+// GPIO alternate pin function is 9 (see alternate function mapping table in device datasheet)
+CAN_CONFIG_PINS(1, GPIOD, GPIOD, 1, 0, 9)
 
 // buffer
 CANRxFrame Can1_MsgBuffer[CAN1_RX_BUFFER_SIZE];
