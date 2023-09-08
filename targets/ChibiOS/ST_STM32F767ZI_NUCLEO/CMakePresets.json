@@ -50,9 +50,9 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "ST_STM32F769I_DISCOVERY",
-            "displayName": "ST_STM32F769I_DISCOVERY",
-            "configurePreset": "ST_STM32F769I_DISCOVERY"
+            "name": "ST_STM32F767ZI_NUCLEO",
+            "displayName": "ST_STM32F767ZI_NUCLEO",
+            "configurePreset": "ST_STM32F767ZI_NUCLEO"
         }
     ]
 }

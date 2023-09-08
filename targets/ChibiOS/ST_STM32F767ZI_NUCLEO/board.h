@@ -33,8 +33,8 @@
 /*
  * Board identifier.
  */
-#define BOARD_ST_STM32F769I_DISCOVERY
-#define BOARD_NAME                  "STMicroelectronics STM32F769I-Discovery"
+#define BOARD_ST_STM32F767ZI_NUCLEO
+#define BOARD_NAME                  "STMicroelectronics STM32F767ZI-NUCLEO"
 
 /*
  * Ethernet PHY type.
