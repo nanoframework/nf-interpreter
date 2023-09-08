@@ -78,36 +78,26 @@ int main(void)
     // start kernel, after this main() will behave like a thread with priority osPriorityNormal
     osKernelStart();
 
-    // // initialize block storage list and devices
-    // // in CLR this is called in nanoHAL_Initialize()
-    // // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
-    // BlockStorageList_Initialize();
-    // BlockStorage_AddDevices();
+    // initialize block storage list and devices
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it in order to provide the flash map for Monitor_FlashSectorMap command
+    BlockStorageList_Initialize();
+    BlockStorage_AddDevices();
 
-    // // initialize configuration manager
-    // // in CLR this is called in nanoHAL_Initialize()
-    // // for nanoBooter we have to init it here to have access to network configuration blocks
-    // ConfigurationManager_Initialize();
+    // initialize configuration manager
+    // in CLR this is called in nanoHAL_Initialize()
+    // for nanoBooter we have to init it here to have access to network configuration blocks
+    ConfigurationManager_Initialize();
 
-    // // report successfull nanoBooter execution
-    // ReportSuccessfullNanoBooter();
+    // report successfull nanoBooter execution
+    ReportSuccessfullNanoBooter();
 
     //  Normal main() thread
     while (true)
     {
-        if (!palReadLine(LINE_BUTTON))
-        {
-            palSetLine(GPIOB_LED1);
-            osDelay(500);
-            palClearLine(GPIOB_LED1);
-            osDelay(500);
-        }
-        else
-        {
-            palSetLine(GPIOB_LED2);
-            osDelay(500);
-            palClearLine(GPIOB_LED2);
-            osDelay(500);
-        }
+
+        palSetLine(GPIOB_LED1);
+        osDelay(500);
+        palClearLine(GPIOB_LED1);
+        osDelay(500);
     }
-}
