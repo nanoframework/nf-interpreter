@@ -34,7 +34,7 @@
                 "API_System.Device.Spi": "OFF",
                 "API_System.Device.I2c": "OFF",
                 "API_System.Device.Pwm": "OFF",
-                "API_System.IO.Ports": "ON",
+                "API_System.IO.Ports": "OFF",
                 "API_System.Device.Adc": "OFF",
                 "API_System.Device.Dac": "OFF",
                 "API_System.Net": "OFF",
