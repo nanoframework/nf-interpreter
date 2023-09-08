@@ -18,21 +18,11 @@
 #include <nanoHAL_v2.h>
 #include <targetPAL.h>
 
-extern uint8_t hal_spiffs_config();
 
 // need to declare the Receiver thread here
 osThreadDef(ReceiverThread, osPriorityHigh, 2048, "ReceiverThread");
 // declare CLRStartup thread here
 osThreadDef(CLRStartupThread, osPriorityNormal, 4096, "CLRStartupThread");
-
-#if HAL_USE_SDC
-// declare SD Card working thread here
-osThreadDef(SdCardWorkingThread, osPriorityNormal, 1024, "SDCWT");
-#endif
-#if HAL_USBH_USE_MSD
-// declare USB MSD thread here
-osThreadDef(UsbMsdWorkingThread, osPriorityNormal, 1024, "USBMSDWT");
-#endif
 
 //  Application entry point.
 int main(void)
@@ -54,7 +44,7 @@ int main(void)
     osKernelInitialize();
 
     // start watchdog
-    Watchdog_Init();
+    // FIXME: Watchdog_Init(); !!!
 
 #if (HAL_NF_USE_STM32_CRC == TRUE)
     // startup crc
@@ -64,11 +54,6 @@ int main(void)
     // config and init external memory
     // this has to be called after osKernelInitialize, otherwise an hard fault will occur
     Target_ExternalMemoryInit();
-
-#if (NF_FEATURE_USE_SPIFFS == TRUE)
-    // config and init SPIFFS
-    hal_spiffs_config();
-#endif
 
     // starts the serial driver
     sdStart(&SERIAL_DRIVER, NULL);
@@ -86,16 +71,6 @@ int main(void)
 
     // create the CLR Startup thread
     osThreadCreate(osThread(CLRStartupThread), &clrSettings);
-
-#if HAL_USE_SDC
-    // creates the SD card working thread
-    osThreadCreate(osThread(SdCardWorkingThread), NULL);
-#endif
-
-#if HAL_USBH_USE_MSD
-    // create the USB MSD working thread
-    osThreadCreate(osThread(UsbMsdWorkingThread), &MSBLKD[0]);
-#endif
 
     // start kernel, after this main() will behave like a thread with priority osPriorityNormal
     osKernelStart();

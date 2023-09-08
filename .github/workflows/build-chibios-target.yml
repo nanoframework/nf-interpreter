@@ -16,7 +16,7 @@ jobs:
 
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
-          { target: ST_STM32F767ZI_NUCLEO, build-type: MinSizeRel },
+          # { target: ST_STM32F767ZI_NUCLEO, build-type: MinSizeRel },
           { target: ST_STM32F767ZI_NUCLEO, build-type: Debug },
 
           # { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel },
