@@ -89,13 +89,13 @@
 // RX pin: is GPIOC_12
 // GPIO alternate pin function is 8 (see "Table 13. STM32F765xx, STM32F767xx, STM32F768Ax and STM32F769xx alternate
 // function mapping" in STM32F769I datasheet)
-UART_CONFIG_PINS(5, GPIOD, GPIOC, 2, 12, 8)
+// UART_CONFIG_PINS(5, GPIOD, GPIOC, 2, 12, 8)
 
-// initialization for UART5
-UART_INIT(5)
+// // initialization for UART5
+// UART_INIT(5)
 
-// un-initialization for UART5
-UART_UNINIT(5)
+// // un-initialization for UART5
+// UART_UNINIT(5)
 
 ///////////
 // UART6 //
@@ -108,13 +108,13 @@ UART_UNINIT(5)
 // RX pin: is GPIOC_7
 // GPIO alternate pin function is 8 (see "Table 13. STM32F765xx, STM32F767xx, STM32F768Ax and STM32F769xx alternate
 // function mapping" in STM32F769I datasheet)
-UART_CONFIG_PINS(6, GPIOC, GPIOC, 6, 7, 8)
+// UART_CONFIG_PINS(6, GPIOC, GPIOC, 6, 7, 8)
 
-// initialization for UART6
-UART_INIT(6)
+// // initialization for UART6
+// UART_INIT(6)
 
-// un-initialization for UART6
-UART_UNINIT(6)
+// // un-initialization for UART6
+// UART_UNINIT(6)
 
 // ///////////
 // // UART7 //

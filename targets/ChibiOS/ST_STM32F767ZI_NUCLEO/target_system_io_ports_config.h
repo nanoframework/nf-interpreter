@@ -36,14 +36,14 @@
 ///////////
 
 // enable UART5
-#define NF_SERIAL_COMM_STM32_UART_USE_UART5 TRUE
+// #define NF_SERIAL_COMM_STM32_UART_USE_UART5 TRUE
 
 ///////////
 // UART6 //
 ///////////
 
 // enable USART6
-#define NF_SERIAL_COMM_STM32_UART_USE_USART6 TRUE
+// #define NF_SERIAL_COMM_STM32_UART_USE_USART6 TRUE
 
 // ///////////
 // // UART7 //

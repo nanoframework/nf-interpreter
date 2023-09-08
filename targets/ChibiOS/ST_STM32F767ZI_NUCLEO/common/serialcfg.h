@@ -7,7 +7,7 @@
 #define SERIALCFG_H
 
 // define which serial driver the Wire Protocol will be using 
-#define SERIAL_DRIVER           SD1
+#define SERIAL_DRIVER           SD3
 
 #endif  /* SERIALCFG_H */
 
