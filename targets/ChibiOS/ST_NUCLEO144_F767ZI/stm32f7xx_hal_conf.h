@@ -7,7 +7,7 @@
 #ifndef STM32F7xx_HAL_CONF_H
 #define STM32F7xx_HAL_CONF_H
 
-#define STM32F769xx
+#define STM32F767xx
 
 #ifdef __cplusplus
  extern "C" {
