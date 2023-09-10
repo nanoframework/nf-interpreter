@@ -41,7 +41,7 @@
 /////////////////////////////////////
 
 /////////////////////////////////////
-//#define EVENTS_HEART_BEAT       palToggleLine(LINE_LED2_GREEN)
+//#define EVENTS_HEART_BEAT       palToggleLine(LINE_LED2)
 /////////////////////////////////////
 
 #endif // TARGET_COMMON_H
