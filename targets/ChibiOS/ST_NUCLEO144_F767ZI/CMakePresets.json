@@ -31,7 +31,7 @@
                 "API_System.Math": "ON",
                 "API_Hardware.Stm32": "ON",
                 "API_System.Device.Gpio": "ON",
-                "API_System.Device.Spi": "OFF",
+                "API_System.Device.Spi": "ON",
                 "API_System.Device.I2c": "OFF",
                 "API_System.Device.Pwm": "OFF",
                 "API_System.IO.Ports": "OFF",
