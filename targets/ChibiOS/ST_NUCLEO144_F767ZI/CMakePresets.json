@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "ST_STM32F767ZI_NUCLEO",
+            "name": "ST_NUCLEO144_F767ZI",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -51,9 +51,9 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "ST_STM32F767ZI_NUCLEO",
-            "displayName": "ST_STM32F767ZI_NUCLEO",
-            "configurePreset": "ST_STM32F767ZI_NUCLEO"
+            "name": "ST_NUCLEO144_F767ZI",
+            "displayName": "ST_NUCLEO144_F767ZI",
+            "configurePreset": "ST_NUCLEO144_F767ZI"
         }
     ]
 }

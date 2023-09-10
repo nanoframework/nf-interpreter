@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>nanoFramework.Targets.ST_STM32F767ZI_NUCLEO</id>
-    <title>nanoFramework.Targets.ST_STM32F767ZI_NUCLEO</title>
+    <id>nanoFramework.Targets.ST_NUCLEO144_F767ZI</id>
+    <title>nanoFramework.Targets.ST_NUCLEO144_F767ZI</title>
     <version>1.0.0</version>
     <authors>nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>
-      Helper classes to use ST_STM32F767ZI_NUCLEO target in C# applications.
+      Helper classes to use ST_NUCLEO144_F767ZI target in C# applications.
     </description>
     <releaseNotes>
     </releaseNotes>

@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "ST_STM32F767ZI_NUCLEO nanoBooter",
+            "name": "ST_NUCLEO144_F767ZI nanoBooter",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",
@@ -53,7 +53,7 @@
             }
         },
         {
-            "name": "ST_STM32F767ZI_NUCLEO nanoCLR",
+            "name": "ST_NUCLEO144_F767ZI nanoCLR",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "<absolute-path-to-the-toolchain-folder-mind-the-forward-slashes>/bin/arm-none-eabi-gdb.exe",

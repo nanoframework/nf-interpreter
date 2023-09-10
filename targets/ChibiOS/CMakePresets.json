@@ -5,6 +5,6 @@
         "ST_NUCLEO64_F091RC/CMakePresets.json",
         "ST_STM32F429I_DISCOVERY/CMakePresets.json",
         "ST_STM32F769I_DISCOVERY/CMakePresets.json",
-        "ST_STM32F767ZI_NUCLEO/CMakePresets.json"
+        "ST_NUCLEO144_F767ZI/CMakePresets.json"
     ]
 }
