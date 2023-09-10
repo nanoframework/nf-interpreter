@@ -276,6 +276,14 @@ jobs:
         NeedsSRECORD: true
         CMakePreset: ST_NUCLEO64_F091RC
 
+      ST_NUCLEO144_F767ZI:
+        TargetBoard: ST_NUCLEO144_F767ZI
+        TargetSeries: 'stm32f7xx'
+        BuildOptions: 
+        NeedsDFU: false
+        NeedsSRECORD: true
+        CMakePreset: ST_NUCLEO144_F767ZI
+
   variables:
     DOTNET_NOLOGO: true
     # creates a counter and assigns it to the revision variable
