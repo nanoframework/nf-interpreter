@@ -9,24 +9,7 @@ In _halconf.g_ (in both nanoBooter and nanoCLR folders), when compared with a de
 - SERIAL_DEFAULT_BITRATE to 921600
 
 In _mcuconf.h_ (in both nanoBooter and nanoCLR folders), when compared with a default file available from (https://github.com/ChibiOS/ChibiOS/tree/master/demos/STM32/RT-STM32F769I-DISCOVERY):
-- STM32_SERIAL_USE_USART1 to TRUE
+- STM32_SERIAL_USE_USART3 to TRUE
 
 NOTE: this configuration was successfully tested in an ST_NUCLEO144_F767ZI board using the Serial port through the onboard ST Link USB connection.
 
-## ADC configurations
-
-The following ADC channels (and respective GPIO pins) are available to the managed API, in the respective index:
-- PA6, ADC1 IN6
-- PA4  ADC1 IN4
-- PC2  ADC1 IN12
-- PF10 ADC1 IN8
-- PF8  ADC3 IN6
-- PB8  ADC3 IN7
-- Temp Sensor ADC1
-- VrefInt ADC1
-- Vbatt ADC1
-
-## Floating point
-
-The current build is set to add support for single-precision floating point.
-Meaning that `System.Math` API supports only the `float` overloads. The `double` ones will throw a `NotImplementedException`.

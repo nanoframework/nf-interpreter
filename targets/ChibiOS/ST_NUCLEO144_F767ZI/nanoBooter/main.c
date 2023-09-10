@@ -95,9 +95,9 @@ int main(void)
     //  Normal main() thread
     while (true)
     {
-        palSetLine(GPIOB_LED1);
+        palSetLine(LINE_LED1);
         osDelay(500);
-        palClearLine(GPIOB_LED1);
+        palClearLine(LINE_LED1);
         osDelay(500);
     }
 }
