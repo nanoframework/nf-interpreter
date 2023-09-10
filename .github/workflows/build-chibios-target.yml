@@ -132,8 +132,8 @@ jobs:
           push: never
           runCmd: |
             # Build target:
-            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} ${{ matrix.extra-build-options }}
-            cmake --build build
+            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+            cmake --build build ${{ matrix.extra-build-options }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
