@@ -17,7 +17,7 @@ jobs:
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
           # { target: ST_NUCLEO144_F767ZI, build-type: MinSizeRel },
-          { target: ST_NUCLEO144_F767ZI, build-type: Debug, extra-build-options: '-DBUILD_VERBOSE' },
+          { target: ST_NUCLEO144_F767ZI, build-type: Debug }, # extra-build-options: '-DBUILD_VERBOSE'
 
           # { target: ST_STM32F769I_DISCOVERY, build-type: MinSizeRel },
           # { target: ST_STM32F769I_DISCOVERY, build-type: Debug },
@@ -132,8 +132,8 @@ jobs:
           push: never
           runCmd: |
             # Build target:
-            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
-            cmake --build build ${{ matrix.extra-build-options }}
+            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} # ${{ matrix.extra-build-options }}
+            cmake --build build --verbose
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
