@@ -723,7 +723,6 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
             else if (dt == DATATYPE_SZARRAY)
             {
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
-                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
                 PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
                 PackAndWriteBits(array->ReflectionDataConst().m_levels);
 
