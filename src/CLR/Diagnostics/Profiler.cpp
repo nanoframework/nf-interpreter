@@ -17,7 +17,8 @@ HRESULT CLR_PRF_Profiler::CreateInstance()
     g_CLR_PRF_Profiler.m_packetSeqId = 0;
     g_CLR_PRF_Profiler.m_stream = NULL;
     g_CLR_PRF_Profiler.m_lastTimestamp =
-        (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >> CLR_PRF_CMDS::Bits::TimestampShift);
+        (CLR_UINT32)((CLR_UINT64)(HAL_Time_CurrentTime() + ((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1)) >>
+                     CLR_PRF_CMDS::Bits::TimestampShift);
     g_CLR_PRF_Profiler.m_currentAssembly = 0;
     g_CLR_PRF_Profiler.m_currentThreadPID = 0;
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_MemoryStream::CreateInstance(g_CLR_PRF_Profiler.m_stream, NULL, 0));
@@ -543,7 +544,8 @@ void CLR_PRF_Profiler::Timestamp()
     NATIVE_PROFILE_CLR_DIAGNOSTICS();
     // Send Profiling Timestamp
     CLR_UINT32 time =
-        (CLR_UINT32)((HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))) >> CLR_PRF_CMDS::Bits::TimestampShift);
+        (CLR_UINT32)((HAL_Time_CurrentTime() + ((CLR_UINT64)((1ull << CLR_PRF_CMDS::Bits::TimestampShift) - 1))) >>
+                     CLR_PRF_CMDS::Bits::TimestampShift);
     if (time > m_lastTimestamp)
     {
         m_stream->WriteBits(CLR_PRF_CMDS::c_Profiling_Timestamp, CLR_PRF_CMDS::Bits::CommandHeader);
@@ -676,6 +678,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
         CLR_PROF_HANDLER_CALLCHAIN_VOID(perf);
 
         CLR_UINT8 dt = ptr->DataType();
+
         if (dt != DATATYPE_STACK_FRAME && dt != DATATYPE_BINARY_BLOB_HEAD)
         {
             Timestamp();
@@ -720,6 +723,7 @@ void CLR_PRF_Profiler::TrackObjectCreation(CLR_RT_HeapBlock *ptr)
             else if (dt == DATATYPE_SZARRAY)
             {
                 CLR_RT_HeapBlock_Array *array = (CLR_RT_HeapBlock_Array *)ptr;
+                CLR_RT_TypeDef_Index elementIdx = array->ReflectionDataConst().m_data.m_type;
                 PackAndWriteBits(array->ReflectionDataConst().m_data.m_type);
                 PackAndWriteBits(array->ReflectionDataConst().m_levels);
 
@@ -795,6 +799,26 @@ void CLR_PRF_Profiler::TrackObjectDeletion(CLR_RT_HeapBlock *ptr)
             DumpPointer(ptr);
             Stream_Send();
         }
+
+#ifdef NANOCLR_TRACE_PROFILER_MESSAGES
+        CLR_UINT16 dataSize = ptr->DataSize();
+
+#ifdef _WIN64
+        CLR_Debug::Printf(
+            "\r\n    Profiler info: * (0x0x%I64X | %d) %d bytes\r\n",
+            (size_t)((CLR_UINT8 *)ptr),
+            (CLR_UINT32)((size_t *)ptr - s_CLR_RT_Heap.m_location),
+            (dataSize * sizeof(CLR_RT_HeapBlock)));
+
+#else
+        CLR_Debug::Printf(
+            "\r\n    Profiler info: * (0x%08X | %d) %d bytes\r\n",
+            (CLR_UINT32)((CLR_UINT8 *)ptr),
+            (CLR_UINT32)((CLR_UINT8 *)ptr - s_CLR_RT_Heap.m_location),
+            (dataSize * sizeof(CLR_RT_HeapBlock)));
+#endif
+
+#endif // NANOCLR_TRACE_PROFILER_MESSAGES
     }
 }
 

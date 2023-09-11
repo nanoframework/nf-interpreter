@@ -93,6 +93,12 @@ typedef enum __nfpack Sleep_WakeupMode
     Sleep_WakeupMode_AnyHigh = 1,
 } Sleep_WakeupMode;
 
+typedef enum __nfpack Sleep_WakeUpPort
+{
+    Sleep_WakeUpPort_COM1 = 0,
+    Sleep_WakeUpPort_COM2 = 1,
+} Sleep_WakeUpPort;
+
 typedef enum __nfpack DenoiseCapacitance
 {
     DenoiseCapacitance_Cap5pf = 0,
@@ -293,6 +299,8 @@ struct Library_nanoFramework_hardware_esp32_native_nanoFramework_Hardware_Esp32_
     NANOCLR_NATIVE_DECLARE(
         NativeEnableWakeupByMultiPins___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeupGpioPin__nanoFrameworkHardwareEsp32SleepWakeupMode);
     NANOCLR_NATIVE_DECLARE(NativeEnableWakeupByTouchPad___STATIC__nanoFrameworkHardwareEsp32EspNativeError__I4__I4__U1);
+    NANOCLR_NATIVE_DECLARE(
+        NativeEnableWakeupByUart___STATIC__nanoFrameworkHardwareEsp32EspNativeError__nanoFrameworkHardwareEsp32SleepWakeUpPort__I4);
     NANOCLR_NATIVE_DECLARE(NativeStartLightSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeStartDeepSleep___STATIC__nanoFrameworkHardwareEsp32EspNativeError);
     NANOCLR_NATIVE_DECLARE(NativeGetWakeupCause___STATIC__nanoFrameworkHardwareEsp32SleepWakeupCause);

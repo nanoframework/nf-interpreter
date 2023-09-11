@@ -199,10 +199,6 @@ void CLR_RT_HeapCluster::RecoverFromGC()
             {
                 ValidateBlock(next);
 
-#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-                g_CLR_PRF_Profiler.TrackObjectDeletion(next);
-#endif
-
                 NANOCLR_CHECK_EARLY_COLLECTION(next);
 
                 int len = next->DataSize();
@@ -217,6 +213,9 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 
             ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
 
+#if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
+            g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
+#endif
             //
             // Link to the free list.
             //
@@ -231,9 +230,16 @@ void CLR_RT_HeapCluster::RecoverFromGC()
         else
         {
             if (ptr->IsEvent() == false)
+            {
                 ptr->MarkDead();
+            }
 
-            ptr += ptr->DataSize();
+            int len = ptr->DataSize();
+
+            // length of the block can not be 0, so something very wrong happened
+            _ASSERTE(len > 0);
+
+            ptr += len;
         }
     }
 
