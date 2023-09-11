@@ -59,6 +59,8 @@ void CLR_RT_GarbageCollector::Heap_Compact()
     RelocationRegion relocHelper[c_minimumSpaceForCompact];
     const size_t relocMax = ARRAYSIZE(relocHelper);
 
+    memset(relocHelper, 0, sizeof(relocHelper));
+
     Heap_Relocate_Prepare(relocHelper, relocMax);
 
     RelocationRegion *relocBlocks = relocHelper;
@@ -69,7 +71,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
     TestPointers_PopulateOld();
 
     CLR_RT_HeapCluster *freeRegion_hc = NULL;
-    ;
+
     CLR_RT_HeapBlock_Node *freeRegion = NULL;
 
     CLR_RT_HeapCluster *currentSource_hc = (CLR_RT_HeapCluster *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode();
@@ -164,7 +166,15 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
                 relocCurrent->m_destination = (CLR_UINT8 *)freeRegion;
                 relocCurrent->m_start = (CLR_UINT8 *)currentSource;
-                relocCurrent->m_offset = (CLR_UINT32)(relocCurrent->m_destination - relocCurrent->m_start);
+
+                if (relocCurrent->m_destination < relocCurrent->m_start)
+                {
+                    relocCurrent->m_offset = -(CLR_INT32)(relocCurrent->m_start - relocCurrent->m_destination);
+                }
+                else
+                {
+                    relocCurrent->m_offset = (CLR_INT32)(relocCurrent->m_destination - relocCurrent->m_start);
+                }
 
                 //
                 // Are the free block and the last moved block adjacent?
