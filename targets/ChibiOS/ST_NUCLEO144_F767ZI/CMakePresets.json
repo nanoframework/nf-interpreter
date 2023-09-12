@@ -32,7 +32,7 @@
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.Spi": "ON",
                 "API_System.Device.I2c": "ON",
-                "API_System.Device.Pwm": "OFF",
+                "API_System.Device.Pwm": "ON",
                 "API_System.IO.Ports": "ON",
                 "API_System.Device.Adc": "ON",
                 "API_System.Device.Dac": "OFF",
