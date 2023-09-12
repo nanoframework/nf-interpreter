@@ -19,4 +19,10 @@
 #define STM32_SDRAM_USE_FSMC_SDRAM1         TRUE
 #define STM32_SDRAM_USE_FSMC_SDRAM2         FALSE
 
+/*
+ * PWM driver system settings.
+ */
+ #define STM32_PWM_USE_ADVANCED             TRUE
+
+
 #endif // MCUCONF_NF_H
