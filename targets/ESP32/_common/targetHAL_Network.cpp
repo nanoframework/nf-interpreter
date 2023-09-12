@@ -15,7 +15,7 @@ extern "C" void set_signal_sock_function(void (*funcPtr)());
 
 #define WIFI_EVENT_TYPE_SCAN_COMPLETE 1
 
-//#define 	PRINT_NET_EVENT 	1
+// #define 	PRINT_NET_EVENT 	1
 
 // buffer with host name
 char hostName[18] = "nanodevice_";
@@ -34,18 +34,27 @@ __nfweak void InitialiseEthernet()
 {
 }
 
+static void SignalSocketEvent()
+{
+    Events_Set(SYSTEM_EVENT_FLAG_SOCKET);
+    Events_Set(SYSTEM_EVENT_FLAG_NETWORK);
+}
+
 static void PostAddressChanged(uint netIndex)
 {
+    SignalSocketEvent();
     Network_PostEvent(NetworkChange_NetworkEventType_AddressChanged, 0, netIndex);
 }
 
 static void PostAvailabilityOn(uint netIndex)
 {
+    SignalSocketEvent();
     Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 1, netIndex);
 }
 
 static void PostAvailabilityOff(uint netIndex)
 {
+    SignalSocketEvent();
     Network_PostEvent(NetworkChange_NetworkEventType_AvailabilityChanged, 0, netIndex);
 }
 
@@ -56,6 +65,7 @@ static void PostScanComplete(uint netIndex)
 
 static void PostAPStationChanged(uint connect, uint netInfo)
 {
+    SignalSocketEvent();
     Network_PostEvent(NetworkChange_NetworkEventType_APStationChanged, connect, netInfo);
 }
 

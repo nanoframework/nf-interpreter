@@ -3,7 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#include <nanoCLR_headers.h>
+#include <nanoCLR_Headers.h>
 #include <cmsis_os.h>
 
 void RtosYield()
