@@ -15,7 +15,7 @@
 ///////////
 
 // enable UART2
-#define NF_SERIAL_COMM_STM32_UART_USE_UART2     TRUE
+#define NF_SERIAL_COMM_STM32_UART_USE_USART2     TRUE
 
 // ///////////
 // // UART3 //
