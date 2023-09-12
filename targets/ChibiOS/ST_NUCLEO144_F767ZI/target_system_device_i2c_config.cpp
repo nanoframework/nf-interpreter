@@ -28,7 +28,7 @@ I2C_CONFIG_PINS(1, GPIOB, GPIOB, 8, 9, 4)
 // SCL pin: is GPIOF_1
 // SDA pin: is GPIOB_0
 // GPIO alternate pin function is 4 (see alternate function mapping table in device datasheet)
-I2C_CONFIG_PINS(1, GPIOB, GPIOB, 1, 0, 4)
+I2C_CONFIG_PINS(2, GPIOB, GPIOB, 1, 0, 4)
 
 
 //////////
