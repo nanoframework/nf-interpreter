@@ -17,7 +17,7 @@
 		// Keep command history 
 		"source=nano-bashhistory,target=/home/vscode/commandhistory,type=volume",
 		// OPTIONAL: Mount .azure folder for seamless az cli auth
-		"source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"
+		// "source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure,type=bind"
 	],
 	// Set the *default* container specific settings.json values on container create.
 	"customizations": {
