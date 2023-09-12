@@ -15,6 +15,9 @@ void LaunchCLR(uint32_t address)
     // function pointer to load nanoCLR ResetHandler address
     irq_vector_t JumpToNanoCLR;
 
+    // report successfull nanoBooter execution
+    ReportSuccessfullNanoBooter();
+
     // load nanoCLR vector table
     const vectors_t *nanoCLRVectorTable = (vectors_t *)address;
 
