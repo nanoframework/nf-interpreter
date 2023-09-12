@@ -8,6 +8,7 @@
 #include <hal.h>
 #include <vectors.h>
 #include <target_common.h>
+#include <targetHAL.h>
 
 void LaunchCLR(uint32_t address)
 {
