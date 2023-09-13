@@ -110,6 +110,10 @@ message(STATUS "Build  directory is '${CMAKE_BINARY_DIR}'.")
 message(STATUS "")
 #######################
 
+#####################################
+# include CLR Profiler build options
+include(ClrProfilerOptions)
+#####################################
 
 #################################################################
 # ouput RTM build option
