@@ -25,6 +25,8 @@
                 "NF_FEATURE_HAS_SDCARD": "OFF",
                 "NF_FEATURE_HAS_CONFIG_BLOCK": "ON",
                 "NF_FEATURE_WATCHDOG": "OFF",
+                "NF_PROFILE_NEW_ALLOCATIONS": "ON",
+                "NF_TRACE_MEMORY_STATS": "ON",
                 "NF_CLR_NO_IL_INLINE": "ON",
                 "API_System.Math": "ON",
                 "API_Hardware.GiantGecko": "ON",
@@ -60,7 +62,9 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "SKY_EEVB_Release",
-                "NF_BUILD_RTM": "ON"
+                "NF_BUILD_RTM": "ON",
+                "NF_PROFILE_NEW_ALLOCATIONS": "OFF",
+                "NF_TRACE_MEMORY_STATS": "OFF"
             }
         }
     ],
