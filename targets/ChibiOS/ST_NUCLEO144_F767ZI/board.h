@@ -19,7 +19,7 @@
  * generator plugin. Do not edit manually.
  */
 
- // clang-format off
+// clang-format off
 
 #ifndef BOARD_H
 #define BOARD_H
