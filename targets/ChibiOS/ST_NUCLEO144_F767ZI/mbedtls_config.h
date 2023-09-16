@@ -25,7 +25,7 @@
 // #define MBEDTLS_VERSION_C
 
 // uncomment the defines below to enable static memory allocation feature
-#if 0 
+#if 0
 #define MBEDTLS_MEMORY_BUFFER_ALLOC_C
 #define MBEDTLS_PLATFORM_MEMORY
 #endif
@@ -35,7 +35,7 @@
 #define MBEDTLS_PLATFORM_PRINTF_MACRO LCD_UsrLog
 #endif
 
-// uncomment the defines bellow to generate debug output 
+// uncomment the defines bellow to generate debug output
 // set below the threshold level for debug messages
 // check Mbed TLS mbedtls/debug.h header for details.
 // Debug levels:

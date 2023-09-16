@@ -3,6 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
+// clang-format off
+
 #include <nanoHAL_Types.h>
 #include <nanoPAL_BlockStorage.h>
 
@@ -104,3 +106,5 @@ MEMORY_MAPPED_NOR_BLOCK_CONFIG Device_BlockStorageConfig =
 };
 
 BlockStorageDevice    Device_BlockStorage;
+
+// clang-format on

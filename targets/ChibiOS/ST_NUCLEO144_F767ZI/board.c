@@ -19,6 +19,8 @@
  * generator plugin. Do not edit manually.
  */
 
+// clang-format off
+
 #include "hal.h"
 #include "stm32_gpio.h"
 
@@ -264,3 +266,5 @@ bool mmc_lld_is_write_protected(MMCDriver *mmcp) {
 void boardInit(void) {
 
 }
+
+// clang-format on

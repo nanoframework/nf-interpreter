@@ -19,6 +19,8 @@
  * generator plugin. Do not edit manually.
  */
 
+ // clang-format off
+
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -1860,3 +1862,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* BOARD_H */
+
+// clang-format on
