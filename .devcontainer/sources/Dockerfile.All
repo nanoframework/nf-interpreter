@@ -7,7 +7,7 @@ RUN apt-get update \
     unzip \
     wget 
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
     && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
