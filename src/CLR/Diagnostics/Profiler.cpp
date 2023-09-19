@@ -848,7 +848,7 @@ void CLR_PRF_Profiler::TrackObjectRelocation()
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
+#ifdef _WIN64
             CLR_Debug::Printf(
                 "\r\n    Profiler msg: u 0x%I64X 0x%I64X %d\r\n",
                 relocBlocks[i].m_start,
@@ -887,7 +887,7 @@ void CLR_PRF_Profiler::RecordGarbageCollectionBegin()
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
+#ifdef _WIN64
         CLR_Debug::Printf(
             "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
@@ -925,7 +925,7 @@ void CLR_PRF_Profiler::RecordGarbageCollectionEnd()
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
+#ifdef _WIN64
         NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
         {
             CLR_Debug::Printf("\r\n    Profiler msg: v 0x%I64X 0\r\n", (CLR_UINT32)hc->m_payloadStart);
@@ -975,7 +975,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionBegin()
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
+#ifdef _WIN64
         CLR_Debug::Printf(
             "\r\n    Profiler msg: b 1 0 0 0x%I64X 0x%I64X %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
@@ -1013,7 +1013,7 @@ void CLR_PRF_Profiler::RecordHeapCompactionEnd()
 
 #ifdef NANOCLR_TRACE_PROFILER_MESSAGES
 
-#if _WIN64
+#ifdef _WIN64
         CLR_Debug::Printf(
             "\r\n    Profiler msg: b 0 0 0 0x%I64X 0x%I64X %d 0\r\n",
             (CLR_UINT32)s_CLR_RT_Heap.m_location,
