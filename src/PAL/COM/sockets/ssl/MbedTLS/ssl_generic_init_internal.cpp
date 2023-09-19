@@ -279,6 +279,8 @@ bool ssl_generic_init_internal(
     else
     {
         // no PK, need to set it to NULL
+        mbedtls_pk_free(context->pk);
+        platform_free(context->pk);
         context->pk = NULL;
     }
 
