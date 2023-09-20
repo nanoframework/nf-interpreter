@@ -427,18 +427,20 @@ bool CPU_GPIO_EnableInputPin(
 
     GPIO_Port_TypeDef port;
     uint32_t portPin;
+    int interruptId;
     GetIoLine(pinNumber, &port, &portPin);
 
     // Link ISR ptr supplied and not already set up
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
     if (pinISR != NULL && (pState->isrPtr == NULL))
     {
+        // register nanoFramework callback and store associated interrupt ID
+        interruptId = CallbackRegisterExt(portPin, pState);
+
         // there are callbacks registered and...
         // the drive mode is input so need to setup the interrupt
-        GPIO_ExtIntConfig(port, portPin, portPin, 1, 1, true);
-
-        // TODO
-        CallbackRegisterExt(portPin, pState);
+        // need to use the interrupt ID to setup the interrupt
+        GPIO_ExtIntConfig(port, portPin, interruptId, 1, 1, true);
 
         // store parameters & configs
         pState->isrPtr = pinISR;
