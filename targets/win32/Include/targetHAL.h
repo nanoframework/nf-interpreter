@@ -83,8 +83,10 @@ inline bool RequestToLaunchProprietaryBootloader()
     return false;
 };
 
-inline bool RequestToLaunchNanoBooter()
+inline bool RequestToLaunchNanoBooter(int32_t errorCode)
 {
+    (void)errorCode;
+
     return false;
 };
 

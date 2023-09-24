@@ -1066,7 +1066,7 @@ bool CLR_DBG_Debugger::Monitor_Reboot(WP_Message *msg)
     if (CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter ==
         (cmd->m_flags & CLR_DBG_Commands::Monitor_Reboot::c_EnterNanoBooter))
     {
-        success = RequestToLaunchNanoBooter();
+        success = RequestToLaunchNanoBooter(0);
     }
     else if (
         CLR_DBG_Commands::Monitor_Reboot::c_EnterProprietaryBooter ==
