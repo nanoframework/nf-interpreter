@@ -349,7 +349,15 @@ void CLR_RT_GarbageCollector::Heap_Relocate_AddBlock(CLR_UINT8 *dst, CLR_UINT8 *
     reloc->m_start = src;
     reloc->m_end = &src[length];
     reloc->m_destination = dst;
-    reloc->m_offset = (CLR_UINT32)(dst - src);
+
+    if (reloc->m_destination < reloc->m_start)
+    {
+        reloc->m_offset = -(CLR_INT32)(reloc->m_start - reloc->m_destination);
+    }
+    else
+    {
+        reloc->m_offset = (CLR_INT32)(reloc->m_destination - reloc->m_start);
+    }
 
     if (++m_relocCount == m_relocTotal)
     {
