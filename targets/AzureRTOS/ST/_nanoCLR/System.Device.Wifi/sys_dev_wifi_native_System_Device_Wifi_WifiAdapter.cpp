@@ -6,7 +6,7 @@
 
 #include <sys_dev_wifi_native.h>
 #include <nf_rt_events_native.h>
-//#include <esp_wifi_types.h>
+// #include <esp_wifi_types.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // !!! KEEP IN SYNC WITH System.Device.WiFi (in managed code) !!! //
@@ -19,7 +19,6 @@ struct ScanRecord
     uint8_t authMode;
     uint8_t cypherType;
 };
-
 
 // //
 // //  Stores Ap records to target string.
@@ -113,7 +112,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
         int reconnectionKind;
         int netIndex;
         CLR_RT_HeapBlock hbTimeout;
-        //CLR_INT64 *timeout;
+        // CLR_INT64 *timeout;
         bool eventResult = true;
         WifiConnectionStatus Status = WifiConnectionStatus_UnspecifiedFailure;
 
@@ -147,49 +146,50 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::
         // Wait for connect to finish
         while (eventResult)
         {
-        //     int connectResult = Network_Interface_Connect_Result(netIndex);
-        //     if (connectResult >= 0)
-        //     {
-        //         // Map ESP32 wifi reason code to WifiConnectionStatus
-        //         switch (connectResult)
-        //         {
-        //             case 0:
-        //                 Status = WifiConnectionStatus_Success;
-        //                 break;
+            //     int connectResult = Network_Interface_Connect_Result(netIndex);
+            //     if (connectResult >= 0)
+            //     {
+            //         // Map ESP32 wifi reason code to WifiConnectionStatus
+            //         switch (connectResult)
+            //         {
+            //             case 0:
+            //                 Status = WifiConnectionStatus_Success;
+            //                 break;
 
-        //             case WIFI_REASON_NO_AP_FOUND:
-        //                 Status = WifiConnectionStatus_NetworkNotAvailable;
-        //                 break;
+            //             case WIFI_REASON_NO_AP_FOUND:
+            //                 Status = WifiConnectionStatus_NetworkNotAvailable;
+            //                 break;
 
-        //             case WIFI_REASON_AUTH_EXPIRE:
-        //             case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
-        //             case WIFI_REASON_BEACON_TIMEOUT:
-        //             case WIFI_REASON_AUTH_FAIL:
-        //             case WIFI_REASON_ASSOC_FAIL:
-        //             case WIFI_REASON_HANDSHAKE_TIMEOUT:
-        //                 Status = WifiConnectionStatus_InvalidCredential;
-        //                 break;
+            //             case WIFI_REASON_AUTH_EXPIRE:
+            //             case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:
+            //             case WIFI_REASON_BEACON_TIMEOUT:
+            //             case WIFI_REASON_AUTH_FAIL:
+            //             case WIFI_REASON_ASSOC_FAIL:
+            //             case WIFI_REASON_HANDSHAKE_TIMEOUT:
+            //                 Status = WifiConnectionStatus_InvalidCredential;
+            //                 break;
 
-        //             default:
-        //                 Status = WifiConnectionStatus_UnspecifiedFailure;
-        //                 break;
-        //         }
-        //         break;
-        //     }
+            //             default:
+            //                 Status = WifiConnectionStatus_UnspecifiedFailure;
+            //                 break;
+            //         }
+            //         break;
+            //     }
 
-        //     // Get timeout
-        //     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
+            //     // Get timeout
+            //     NANOCLR_CHECK_HRESULT(stack.SetupTimeoutFromTicks(hbTimeout, timeout));
 
-        //     // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
-        //     NANOCLR_CHECK_HRESULT(
-        //         g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Wifi_Station, eventResult));
+            //     // non-blocking wait allowing other threads to run while we wait for the Spi transaction to complete
+            //     NANOCLR_CHECK_HRESULT(
+            //         g_CLR_RT_ExecutionEngine.WaitEvents(stack.m_owningThread, *timeout, Event_Wifi_Station,
+            //         eventResult));
 
-        //     if (!eventResult)
-        //     {
-        //         // Timeout
-        //         Status = WifiConnectionStatus_Timeout;
-        //         break;
-        //     }
+            //     if (!eventResult)
+            //     {
+            //         // Timeout
+            //         Status = WifiConnectionStatus_Timeout;
+            //         break;
+            //     }
         }
 
         // Return value to the managed application
@@ -241,7 +241,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
     // // Temporary ap record storage
     // wifi_ap_record_t *ap_records = 0;
     // {
-    //CLR_RT_HeapBlock &top = stack.PushValueAndClear();
+    // CLR_RT_HeapBlock &top = stack.PushValueAndClear();
     //     CLR_RT_HeapBlock_Array *array;
     //     CLR_UINT8 *buf;
     //     uint16_t number = 0;
@@ -288,7 +288,7 @@ HRESULT Library_sys_dev_wifi_native_System_Device_Wifi_WifiAdapter::GetNativeSca
     //     platform_free(ap_records);
     // }
 
-    //NANOCLR_CLEANUP_END();
+    // NANOCLR_CLEANUP_END();
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
