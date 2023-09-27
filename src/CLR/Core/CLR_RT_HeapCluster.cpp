@@ -211,11 +211,11 @@ void CLR_RT_HeapCluster::RecoverFromGC()
 
             } while (next < end && next->IsAlive() == false);
 
-            ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
-
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
             g_CLR_PRF_Profiler.TrackObjectDeletion(ptr);
 #endif
+            ptr->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, lenTot));
+
             //
             // Link to the free list.
             //
