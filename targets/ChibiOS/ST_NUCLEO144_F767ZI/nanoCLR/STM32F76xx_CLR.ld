@@ -40,7 +40,6 @@ MEMORY
     ram5         (wx) : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6         (wx) : org = 0x00000000, len = 0
     ram7         (wx) : org = 0x00000000, len = 0
-    ext_ram      (wx) : org = 0xD0000000, len = 8M                        /* external SDRAM */
 
     config       (rw) : org = 0x08008000, len = 32k                       /* address space reserved for configuration block */
     deployment   (rx) : org = 0x08100000, len = 1024k                     /* address space reserved for application deployment */
@@ -92,7 +91,7 @@ REGION_ALIAS("BSS_RAM", ram3);
 REGION_ALIAS("HEAP_RAM", ram0);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
-REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
+REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ram0);
 
 /* Stack rules inclusion.*/
 INCLUDE rules_stacks.ld
