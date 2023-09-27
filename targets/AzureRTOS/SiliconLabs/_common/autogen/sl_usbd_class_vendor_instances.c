@@ -28,7 +28,7 @@ extern void PostManagedEvent(uint8_t category, uint8_t subCategory, uint16_t dat
 extern sl_status_t sl_usbd_vendor_update_device_product_string(const char *product_string);
 
 // storage for USB class vendor description
-char UsbClassVendorDescription[32 + 1];
+char UsbClassVendorDescription[GECKO_DEVICE_CLASS_VENDOR_DESCRIPTION_PROPERTY_LEN + 1];
 char UsbClassVendorDeviceInterfaceGuid[DEVICE_CLASS_GUID_PROPERTY_LEN];
 
 // flag for USB WinUSB intialized

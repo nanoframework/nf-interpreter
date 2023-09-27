@@ -407,6 +407,12 @@ HRESULT Library_sys_dev_usbstream_native_System_Device_Usb_UsbStream::NativeOpen
     deviceDescription = stack.Arg2().RecoverString();
     FAULT_ON_NULL(deviceDescription);
 
+    // validate device description length
+    if (hal_strlen_s(deviceDescription) > sizeof(UsbClassVendorDescription) - 1)
+    {
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+    }
+
     // store device description
     hal_strcpy_s(UsbClassVendorDescription, sizeof(UsbClassVendorDescription), deviceDescription);
 

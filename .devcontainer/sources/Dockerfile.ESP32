@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
+FROM ubuntu:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -17,7 +17,7 @@ RUN wget $CMAKE_SCRIPT \
       && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
       && rm /tmp/cmake-install.sh
 
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
+FROM ubuntu:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -37,10 +37,15 @@ RUN apt-get update \
     curl \
     ninja-build \
     srecord \
-    python3 \
-    python3-pip \
     nodejs \
     libffi-dev
+
+# Set Python 10 as the default version
+RUN apt-get install -y software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y python3.10 \
+    python3-pip
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc
@@ -49,7 +54,7 @@ RUN mkdir -p /usr/local/bin/gcc
 RUN git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
-RUN git clone --branch v4.4.4 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
+RUN git clone --branch v4.4.5 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
 
 # Creating static link python for pyhton3
 RUN ln -fs /usr/bin/python3 /usr/bin/python \
@@ -63,10 +68,11 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 # Install ESP-IDF
 ENV IDF_PATH=/sources/esp-idf
 ENV ESP_PATCH_VER=esp-2021r2-patch5-8.4.0
-RUN python -m pip install -r $IDF_PATH/requirements.txt
+# This is now taking care in the following line
+# RUN python -m pip install -r $IDF_PATH/requirements.txt
 RUN $IDF_PATH/install.sh
 
-ENV PATH=$PATH:\
+ENV PATH=/root/.espressif/python_env/idf4.4_py3.10_env/bin:$PATH:\
 $IDF_PATH/components/esptool_py/esptool:\
 $IDF_PATH/components/espcoredump:\ 
 $IDF_PATH/components/partition_table/:\

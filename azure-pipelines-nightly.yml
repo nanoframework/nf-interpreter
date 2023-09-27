@@ -14,7 +14,7 @@ resources:
       type: github
       name: espressif/esp-idf
       endpoint: nanoframework
-      ref: refs/tags/v4.4.4
+      ref: refs/tags/v4.4.5
     
 # scheduled build
 # the schedule is defined at the AZDO web interface because of inconsistencies with time zones
@@ -433,6 +433,16 @@ jobs:
         TargetName: M5Core2
         PackageName: M5Core2
         CMakePreset: M5Core2
+
+      AtomS3:
+        TargetBoard: ESP32_S3
+        TargetPlatform: 'esp32'
+        TargetSeries: 'esp32s3'
+        BuildOptions: 
+        IDF_Target: esp32s3
+        TargetName: AtomS3
+        PackageName: AtomS3
+        CMakePreset: AtomS3
 
       ESP32_C3_REV3:
         TargetBoard: ESP32_C3

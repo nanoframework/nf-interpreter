@@ -112,6 +112,8 @@ void nanoCLR_Run(NANO_CLR_SETTINGS nanoClrSettings)
     clrSettings.MaxContextSwitches = nanoClrSettings.MaxContextSwitches;
     clrSettings.WaitForDebugger = nanoClrSettings.WaitForDebugger;
     clrSettings.EnterDebuggerLoopAfterExit = nanoClrSettings.EnterDebuggerLoopAfterExit;
+    clrSettings.PerformGarbageCollection = nanoClrSettings.PerformGarbageCollection;
+    clrSettings.PerformHeapCompaction = nanoClrSettings.PerformHeapCompaction;
 
     ClrStartup(clrSettings);
 
@@ -178,7 +180,7 @@ const char *nanoCLR_GetVersion()
         const std::string_view str{buffer, result.out};
 
         std::memcpy(pszVersion, buffer, result.size);
-
-        return pszVersion;
     }
+
+    return pszVersion;
 }

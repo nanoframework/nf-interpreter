@@ -7,7 +7,7 @@ RUN apt-get update \
     unzip \
     wget 
 
-ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi.tar.xz
+ARG GCC_URI=https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-x86_64-arm-none-eabi.tar.xz
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && curl -o /tmp/dc-downloads/gcc-arm.tar.xz  $GCC_URI \
     && xz -d /tmp/dc-downloads/gcc-arm.tar.xz \
@@ -74,7 +74,7 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 # Putting hex2dfu in the container
 ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
 
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v2.0.9/hex2dfu
+ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/v3.0.2/hex2dfu
 RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu

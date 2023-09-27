@@ -2600,7 +2600,7 @@ struct CLR_RT_GarbageCollector
         CLR_UINT8 *m_start;
         CLR_UINT8 *m_end;
         CLR_UINT8 *m_destination;
-        CLR_UINT32 m_offset;
+        CLR_INT32 m_offset;
     };
 
     //--//
@@ -3161,12 +3161,12 @@ struct CLR_RT_Thread : public CLR_RT_ObjectToEvent_Destination // EVENT HEAP - N
 
 ////////////////////////////////////////////////////////////////////////////////
 
-extern size_t LinkArraySize();
-extern size_t LinkMRUArraySize();
-extern size_t PayloadArraySize();
-extern size_t InterruptRecords();
+extern uint32_t LinkArraySize();
+extern uint32_t LinkMRUArraySize();
+extern uint32_t PayloadArraySize();
+extern uint32_t InterruptRecords();
 #ifndef NANOCLR_NO_IL_INLINE
-extern size_t InlineBufferCount();
+extern uint32_t InlineBufferCount();
 #endif
 
 extern CLR_UINT32 g_scratchVirtualMethodTableLink[];
@@ -3388,6 +3388,7 @@ CT_ASSERT(sizeof(CLR_RT_EventCache::Payload) == 12)
 
 #include <nanoCLR_Debugging.h>
 #include <nanoCLR_Profiling.h>
+#include <nanoCLR_Application.h>
 // #include <nanoCLR_Messaging.h>
 
 //--//
@@ -3666,7 +3667,11 @@ struct CLR_RT_ExecutionEngine
 
     //--//
 
+#if defined(VIRTUAL_DEVICE)
+    static HRESULT CreateInstance(CLR_SETTINGS params);
+#else
     static HRESULT CreateInstance();
+#endif
 
     HRESULT ExecutionEngine_Initialize();
 
