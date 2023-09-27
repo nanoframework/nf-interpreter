@@ -349,7 +349,15 @@ void CLR_RT_GarbageCollector::Heap_Relocate_AddBlock(CLR_UINT8 *dst, CLR_UINT8 *
     reloc->m_start = src;
     reloc->m_end = &src[length];
     reloc->m_destination = dst;
-    reloc->m_offset = (CLR_UINT32)(dst - src);
+
+    if (reloc->m_destination < reloc->m_start)
+    {
+        reloc->m_offset = -(CLR_INT32)(reloc->m_start - reloc->m_destination);
+    }
+    else
+    {
+        reloc->m_offset = (CLR_INT32)(reloc->m_destination - reloc->m_start);
+    }
 
     if (++m_relocCount == m_relocTotal)
     {
@@ -370,9 +378,14 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
         for (size_t i = 0; i < m_relocCount; i++, relocBlocks++)
         {
             if (relocMinimum > relocBlocks->m_start)
+            {
                 relocMinimum = relocBlocks->m_start;
+            }
+
             if (relocMaximum < relocBlocks->m_end)
+            {
                 relocMaximum = relocBlocks->m_end;
+            }
         }
 
         m_relocMinimum = relocMinimum;
@@ -439,6 +452,10 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8 *dst = (CLR_UINT8 *)*ref;
 
+#if NANOCLR_VALIDATE_HEAP == NANOCLR_VALIDATE_HEAP_0_None
+    void *destinationAddress;
+#endif
+
 #if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     if (g_CLR_RT_GarbageCollector.m_relocWorker)
     {
@@ -468,7 +485,11 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
                 }
                 else
                 {
-                    *ref = (void *)(dst + relocCurrent.m_offset);
+                    destinationAddress = (void *)(dst + relocCurrent.m_offset);
+                    _ASSERTE(destinationAddress >= (void *)s_CLR_RT_Heap.m_location);
+                    _ASSERTE(destinationAddress < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+
+                    *ref = destinationAddress;
 
                     return;
                 }
