@@ -40,7 +40,7 @@ MEMORY
     ram5         (wx) : org = 0x40024000, len = 4k                        /* BCKP SRAM */
     ram6         (wx) : org = 0x00000000, len = 0
     ram7         (wx) : org = 0x00000000, len = 0
-    ext_ram      (wx) : org = 0xC0000000, len = 13631488                  /* external SDRAM */
+    ext_ram      (wx) : org = 0xD0000000, len = 8M                        /* external SDRAM */
 
     config       (rw) : org = 0x08008000, len = 32k                       /* address space reserved for configuration block */
     deployment   (rx) : org = 0x08100000, len = 1024k                     /* address space reserved for application deployment */
