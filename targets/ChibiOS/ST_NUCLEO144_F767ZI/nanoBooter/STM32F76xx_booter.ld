@@ -7,7 +7,7 @@
 */
 
 /*
- * STM32F76xx generic setup.
+ * STM32F76xxI generic setup.
  * 
  * RAM0 - Data, Heap.
  * RAM3 - Main Stack, Process Stack, BSS, NOCACHE, ETH.
@@ -17,26 +17,34 @@
  */
 MEMORY
 {
-    flash0     (rx) : org = 0x08000000, len = 32k     /* space reserved for nanoBooter (1st sector 0x08000000 to 0x08008000)*/
-    flash1     (rx) : org = 0x00200000, len = 32k
-    flash2     (rx) : org = 0x00000000, len = 0
-    flash3     (rx) : org = 0x00000000, len = 0
-    flash4     (rx) : org = 0x00000000, len = 0
-    flash5     (rx) : org = 0x00000000, len = 0
-    flash6     (rx) : org = 0x00000000, len = 0
-    flash7     (rx) : org = 0x00000000, len = 0
-    config     (rw) : org = 0x08008000, len = 32k     /* space reserved for configuration block */
-    deployment (rx) : org = 0x00000000, len = 0       /* space reserved for application deployment */
-    ramvt      (wx) : org = 0x00000000, len = 0       /* initial RAM address is reserved for a copy of the vector table */
-    ram0       (wx) : org = 0x20020000, len = 384k    /* SRAM1 + SRAM2 */
-    ram1       (wx) : org = 0x20020000, len = 368k    /* SRAM1 */
-    ram2       (wx) : org = 0x2007C000, len = 16k     /* SRAM2 */
-    ram3       (wx) : org = 0x20000030, len = 128k-48 /* DTCM-RAM */
-    ram4       (wx) : org = 0x00000000, len = 16k     /* ITCM-RAM */
-    ram5       (wx) : org = 0x40024000, len = 4k      /* BCKP SRAM */
-    ram6       (wx) : org = 0x00000000, len = 0
-    ram7       (wx) : org = 0x00000000, len = 0
-    bootclpbrd (wx) : org = 0x20000000, len = 48      /* boot clipboard area */
+    /* for flash0 and flash1 regions
+     * they are the same flash but accessed through different addresses 
+     * taking into account:
+     * only the booter region to use the first 32k
+     * the config region is already using 32k
+     * the application deployment region needs to use 1024k
+     */
+    flash0       (rx) : org = 0x08000000, len = 32k                        /* Flash region as AXIM (writable) */
+    flash1       (rx) : org = 0x00200000, len = 32k                        /* Flash region as ITCM */
+    flash2       (rx) : org = 0x00000000, len = 0
+    flash3       (rx) : org = 0x00000000, len = 0
+    flash4       (rx) : org = 0x00000000, len = 0
+    flash5       (rx) : org = 0x00000000, len = 0
+    flash6       (rx) : org = 0x00000000, len = 0
+    flash7       (rx) : org = 0x00000000, len = 0
+    ram0         (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
+    ram1         (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */
+    ram2         (wx) : org = 0x2007C000, len = 16k                       /* SRAM2 */
+    ram3         (wx) : org = 0x20000030, len = 128k-48                   /* DTCM-RAM */
+    ram4         (wx) : org = 0x00000000, len = 16k                       /* ITCM-RAM */
+    ram5         (wx) : org = 0x40024000, len = 4k                        /* BCKP SRAM */
+    ram6         (wx) : org = 0x00000000, len = 0
+    ram7         (wx) : org = 0x00000000, len = 0
+
+    config       (rw) : org = 0x08008000, len = 32k                       /* address space reserved for configuration block */
+    deployment   (rx) : org = 0x08100000, len = 1024k                     /* address space reserved for application deployment */
+    ramvt        (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table (should use chibios) */
+    bootclpbrd   (wx) : org = 0x20000000, len = 48                        /* boot clipboard area */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -86,7 +94,7 @@ REGION_ALIAS("HEAP_RAM", ram0);
 /* RAM region to be used for the boot clipboard.*/
 REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
 
-/* rules inclusion.*/
+/* Stack rules inclusion.*/
 INCLUDE rules_stacks.ld
 
 /*===========================================================================*/

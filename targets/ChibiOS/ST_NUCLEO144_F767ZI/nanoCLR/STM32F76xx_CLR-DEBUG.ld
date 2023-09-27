@@ -14,21 +14,24 @@
  *
  * Notes:
  * BSS is placed in DTCM RAM in order to simplify DMA buffers management.
- * When updating the flash0 address below make sure to update the address in nf_generate_bin_package 
  */
 MEMORY
 {
-    flash0       (rx) : org = 0x08010000, len = 2M - 32k - 32k - 1024k    /* flash size less the space reserved for nanoBooter, configuration block and application deployment*/
-    flash1       (rx) : org = 0x00210000, len = 2M - 32k - 32k - 1024k
+    /* for flash0 and flash1 regions
+     * they are the same flash but accessed through different addresses 
+     * taking into account:
+     * the booter region is already using the first 32k
+     * the config region is already using 32k
+     * the application deployment region needs to use 1024k
+     */
+    flash0       (rx) : org = 0x08010000, len = 2M - 32k - 32k - 1024k    /* Flash region as AXIM (writable) */
+    flash1       (rx) : org = 0x00210000, len = 2M - 32k - 32k - 1024k    /* Flash region as ITCM */
     flash2       (rx) : org = 0x00000000, len = 0
     flash3       (rx) : org = 0x00000000, len = 0
     flash4       (rx) : org = 0x00000000, len = 0
     flash5       (rx) : org = 0x00000000, len = 0
     flash6       (rx) : org = 0x00000000, len = 0
     flash7       (rx) : org = 0x00000000, len = 0
-    config       (rw) : org = 0x08008000, len = 32k                       /* space reserved for configuration block */
-    deployment   (rx) : org = 0x08100000, len = 1024k                     /* space reserved for application deployment */
-    ramvt        (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table */
     ram0         (wx) : org = 0x20020000, len = 384k                      /* SRAM1 + SRAM2 */
     ram1         (wx) : org = 0x20020000, len = 368k                      /* SRAM1 */
     ram2         (wx) : org = 0x2007C000, len = 16k                       /* SRAM2 */
@@ -38,9 +41,10 @@ MEMORY
     ram6         (wx) : org = 0x00000000, len = 0
     ram7         (wx) : org = 0x00000000, len = 0
     ext_ram      (wx) : org = 0xC0000000, len = 13631488                  /* external SDRAM */
-    graphics_ram (wx) : org = 0xC0D00000, len = 2377728                  /* external graphics ram for frame buffer and bitmaps*/
-    graphics_vfb (wx) : org = 0xC0F44800, len = 768000                   /* Frame buffer for video output mode  800*480*2 bytes ( 16 bits RGB565 )*/
-    bootclpbrd   (wx) : org = 0x20000000, len = 48                        /* boot clipboard area */
+
+    config       (rw) : org = 0x08008000, len = 32k                       /* address space reserved for configuration block */
+    deployment   (rx) : org = 0x08100000, len = 1024k                     /* address space reserved for application deployment */
+    ramvt        (wx) : org = 0x00000000, len = 0                         /* initial RAM address is reserved for a copy of the vector table (should use chibios) */
 }
 
 /* For each data/text section two region are defined, a virtual region
@@ -90,16 +94,7 @@ REGION_ALIAS("HEAP_RAM", ram0);
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
 REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
 
-/* RAM region to be used for the nanoFramework graphics heap.*/
-REGION_ALIAS("GRAPHICS_HEAP_RAM", graphics_ram);
-
-/* RAM region to be used for the nanoFramework graphics heap.*/
-REGION_ALIAS("GRAPHICS_VIDEO_FRAME_BUFFER", graphics_vfb);
-
-/* RAM region to be used for the boot clipboard.*/
-REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);
-
-/* rules inclusion.*/
+/* Stack rules inclusion.*/
 INCLUDE rules_stacks.ld
 
 /*===========================================================================*/
@@ -148,9 +143,3 @@ INCLUDE rules_memory.ld
 
 /* nanoCLR rules inclusion.*/
 INCLUDE rules_clr.ld
-
-/* Graphics rules inclusion.*/
-INCLUDE rules_graphics.ld
-
-/* boot clipboard rules inclusion.*/
-INCLUDE rules_bootclipboard.ld
