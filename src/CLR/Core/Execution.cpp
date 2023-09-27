@@ -176,7 +176,7 @@ HRESULT CLR_RT_ExecutionEngine::AllocateHeaps()
 
         CLR_Debug::Printf("Heap Cluster information\r\n");
 
-#if _WIN64
+#ifdef _WIN64
         CLR_Debug::Printf("Start:       0x%I64X\r\n", (size_t)heapFirstFree);
         CLR_Debug::Printf("Free:        0x%I64X\r\n", (size_t)heapFree);
         CLR_Debug::Printf("Block size:  %d\r\n", sizeof(CLR_RT_HeapBlock));

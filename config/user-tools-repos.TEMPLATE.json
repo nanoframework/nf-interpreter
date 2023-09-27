@@ -44,7 +44,7 @@
                 "TI_XDCTOOLS_SOURCE": "/usr/local/bin/titools",
                 "TI_SYSCONFIG_SOURCE": "/sources/TI_SysConfig",
                 "AZURERTOS_SOURCE_FOLDER": "/sources/AzureRTOS",
-                "NETXDUO_SOURCE_FOLDER": "/sources/NextDuo"
+                "NETXDUO_SOURCE_FOLDER": "/sources/NetxDuo"
             }
         },
         {
