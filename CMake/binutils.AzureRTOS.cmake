@@ -12,7 +12,7 @@ function(nf_set_optimization_options target)
         $<$<CONFIG:Debug>:-Og -ggdb>
         $<$<CONFIG:Release>:-O3 -flto -ffat-lto-objects>
         $<$<CONFIG:MinSizeRel>:-Os -flto -ffat-lto-objects>
-        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -g3-ggdb>
+        $<$<CONFIG:RelWithDebInfo>:-Os -femit-class-debug-always -ggdb>
     )
 
 endfunction()
