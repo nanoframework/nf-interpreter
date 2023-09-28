@@ -378,9 +378,14 @@ void CLR_RT_GarbageCollector::Heap_Relocate()
         for (size_t i = 0; i < m_relocCount; i++, relocBlocks++)
         {
             if (relocMinimum > relocBlocks->m_start)
+            {
                 relocMinimum = relocBlocks->m_start;
+            }
+
             if (relocMaximum < relocBlocks->m_end)
+            {
                 relocMaximum = relocBlocks->m_end;
+            }
         }
 
         m_relocMinimum = relocMinimum;
