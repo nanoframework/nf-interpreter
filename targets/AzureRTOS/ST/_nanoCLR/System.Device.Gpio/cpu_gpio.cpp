@@ -98,7 +98,6 @@ void GpioEventCallback(void *arg)
         if (pGpio->waitingDebounce)
         {
             // Ignore any pin changes during debounce
-            continue;
         }
         else
         {
