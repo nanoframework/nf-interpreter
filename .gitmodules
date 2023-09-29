@@ -2,3 +2,4 @@
 	path = targets-community
 	url = https://github.com/nanoframework/nf-Community-Targets.git
 	shallow = true
+	ignore = dirty
