@@ -37,6 +37,50 @@ void Com_Sky_Spi_Callback(int busIndex)
     Events_Set(SYSTEM_EVENT_FLAG_SPI_MASTER);
 }
 
+void ConfigureAndInitSpiBus(
+    int8_t busIndex,
+    SPI_DEVICE_CONFIGURATION *&spiDeviceConfig,
+    const CLR_RT_HeapBlock *baseConfig)
+{
+    NF_PAL_SPI *palSpi = NULL;
+
+    // CS is always active low
+    spiDeviceConfig->ChipSelectActiveState = false;
+    // CS is controled by the Gecko SDK driver
+    spiDeviceConfig->DeviceChipSelect = -1;
+    // always bus master
+    spiDeviceConfig->BusMode = SpiBusMode_master;
+
+    // SPI bus index is 1 based, but the array is 0 based
+    spiDeviceConfig->Spi_Bus = busIndex + 1;
+
+    // this comes from Com.SkyworksInc.NanoFramework.Devices.Spi.SpiWireMode
+    // which is stored at _spiPhasePolarityMode
+    spiDeviceConfig->Spi_Mode =
+        (SpiMode)baseConfig[SpiBaseConfiguration::FIELD___spiPhasePolarityMode].NumericByRefConst().s4;
+    spiDeviceConfig->DataOrder16 =
+        (DataBitOrder)baseConfig[SpiBaseConfiguration::FIELD___dataFlow].NumericByRefConst().s4;
+    spiDeviceConfig->Clock_RateHz = baseConfig[SpiBaseConfiguration::FIELD___clockFrequency].NumericByRefConst().s4;
+    spiDeviceConfig->ByteTime = (1.0 / spiDeviceConfig->Clock_RateHz) * 1000 * 8;
+    // this comes from Com.SkyworksInc.NanoFramework.Devices.Spi.SpiWireMode
+    // which is stored at _spiWireMode field
+    spiDeviceConfig->BusConfiguration =
+        (SpiBusConfiguration)baseConfig[SpiBaseConfiguration::FIELD___spiWireMode].NumericByRefConst().s4;
+    spiDeviceConfig->DataIs16bits =
+        baseConfig[SpiBaseConfiguration::FIELD___databitLength].NumericByRefConst().s4 == 16 ? true : false;
+
+    // get PAL SPI
+    palSpi = GetNfPalfromBusIndex(busIndex);
+
+    // store this here too
+    palSpi->BufferIs16bits = spiDeviceConfig->DataIs16bits;
+
+    CPU_SPI_Initialize_Extended(busIndex, *spiDeviceConfig, true);
+
+    // lower changes pending flag
+    BusConfigChangesPending[busIndex] = false;
+}
+
 // duplicated from src\System.Device.Spi\sys_dev_spi_native_System_Device_Spi_SpiDevice.cpp
 // estimate the time required to perform the SPI transaction
 // TODO doesn't take into account of full duplex or sequential ( assumes sequential at the moment )
@@ -79,7 +123,7 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-    CLR_RT_HeapBlock *config = NULL;
+    CLR_RT_HeapBlock *baseConfig = NULL;
     CLR_RT_HeapBlock_Array *writeBuffer;
     CLR_RT_HeapBlock_Array *readBuffer;
     CLR_RT_HeapBlock *writeSpanByte;
@@ -125,39 +169,9 @@ HRESULT ExecuteTransfer(CLR_RT_StackFrame &stack)
 
             // compose SPI_DEVICE_CONFIGURATION
             // get SpiBaseConfiguration from argument
-            config = stack.Arg5().Dereference();
+            baseConfig = stack.Arg5().Dereference();
 
-            // CS is always active low
-            spiDeviceConfig->ChipSelectActiveState = false;
-            // CS is controled by the Gecko SDK driver
-            spiDeviceConfig->DeviceChipSelect = -1;
-            // always bus master
-            spiDeviceConfig->BusMode = SpiBusMode_master;
-
-            // SPI bus index is 1 based, but the array is 0 based
-            spiDeviceConfig->Spi_Bus = busIndex + 1;
-
-            // this comes from Com.SkyworksInc.NanoFramework.Devices.Spi.SpiWireMode
-            // which is stored at _spiPhasePolarityMode
-            spiDeviceConfig->Spi_Mode =
-                (SpiMode)config[SpiBaseConfiguration::FIELD___spiPhasePolarityMode].NumericByRef().s4;
-            spiDeviceConfig->DataOrder16 =
-                (DataBitOrder)config[SpiBaseConfiguration::FIELD___dataFlow].NumericByRef().s4;
-            spiDeviceConfig->Clock_RateHz = config[SpiBaseConfiguration::FIELD___clockFrequency].NumericByRef().s4;
-            spiDeviceConfig->ByteTime = (1.0 / spiDeviceConfig->Clock_RateHz) * 1000 * 8;
-            // this comes from Com.SkyworksInc.NanoFramework.Devices.Spi.SpiWireMode
-            // which is stored at _spiWireMode field
-            spiDeviceConfig->BusConfiguration =
-                (SpiBusConfiguration)config[SpiBaseConfiguration::FIELD___spiWireMode].NumericByRef().s4;
-            spiDeviceConfig->DataIs16bits =
-                config[SpiBaseConfiguration::FIELD___databitLength].NumericByRef().s4 == 16 ? true : false;
-            // store this here too
-            palSpi->BufferIs16bits = spiDeviceConfig->DataIs16bits;
-
-            CPU_SPI_Initialize_Extended(busIndex, *spiDeviceConfig, true);
-
-            // lower changes pending flag
-            BusConfigChangesPending[busIndex] = false;
+            ConfigureAndInitSpiBus(busIndex, spiDeviceConfig, baseConfig);
         }
 
         // dereference the write and read SpanByte from the arguments
@@ -539,6 +553,8 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     uint32_t clockDivValue;
     uint32_t refFreq;
     uint32_t realClk;
+    CLR_RT_HeapBlock *baseConfig = NULL;
+    SPI_DEVICE_CONFIGURATION *spiDeviceConfig = NULL;
 
     // get a pointer to the managed object instance and check that it's not NULL
     CLR_RT_HeapBlock *pThis = stack.This();
@@ -600,7 +616,11 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     if (palSpi->Handle == NULL || BusConfigChangesPending[busIndex])
     {
         // the configuration has not been set yet, or there are pending changes
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_OPERATION);
+        // compose SPI_DEVICE_CONFIGURATION
+        // get SpiBaseConfiguration from argument
+        baseConfig = stack.Arg5().Dereference();
+
+        ConfigureAndInitSpiBus(busIndex, spiDeviceConfig, baseConfig);
     }
 
     // The divider field of the USART->CLKDIV register is of the following form:
