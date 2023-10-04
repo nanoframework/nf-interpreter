@@ -543,8 +543,8 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::NativeGetBusSpeed___I4__I4(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_Spi_SpiBus::
+    NativeGetBusSpeed___I4__I4__ComSkyworksIncNanoFrameworkDevicesSpiSpiBaseConfiguration(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -563,6 +563,8 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
     // get bus index
     // Gecko SPI bus index is 0 based
     busIndex = (int8_t)stack.Arg1().NumericByRef().s4 - 1;
+
+    spiDeviceConfig = &SpiConfigs[busIndex];
 
     // get the PAL struct for the SPI bus
     switch (busIndex)
@@ -618,7 +620,7 @@ HRESULT Library_com_sky_nf_dev_spi_native_Com_SkyworksInc_NanoFramework_Devices_
         // the configuration has not been set yet, or there are pending changes
         // compose SPI_DEVICE_CONFIGURATION
         // get SpiBaseConfiguration from argument
-        baseConfig = stack.Arg5().Dereference();
+        baseConfig = stack.Arg2().Dereference();
 
         ConfigureAndInitSpiBus(busIndex, spiDeviceConfig, baseConfig);
     }
