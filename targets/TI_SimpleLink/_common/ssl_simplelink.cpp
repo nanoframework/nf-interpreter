@@ -31,12 +31,14 @@ bool ssl_parse_certificate_internal(void *buf, size_t size, void *pwd, void *x50
     (void)x509;
 }
 
-bool ssl_get_public_key_raw_internal(void *buf, size_t size, void *pwd, void *x509)
+bool ssl_get_public_key_raw_internal(void *certificate, size_t size, void *x509RawData)
 {
-    (void)buf;
+    (void)certificate;
     (void)size;
-    (void)pwd;
-    (void)x509;
+    (void)x509RawData;
+
+    // can't really do anything here, so just return false
+    return false;
 }
 
 int ssl_decode_private_key_internal(

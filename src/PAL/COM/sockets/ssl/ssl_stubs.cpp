@@ -167,7 +167,7 @@ __nfweak bool SSL_GetPublicKeyRaw(const char *certificate, size_t certLength, X5
 
     NATIVE_PROFILE_PAL_COM();
 
-    return TRUE;
+    return FALSE;
 }
 
 __nfweak int SSL_DecodePrivateKey(
