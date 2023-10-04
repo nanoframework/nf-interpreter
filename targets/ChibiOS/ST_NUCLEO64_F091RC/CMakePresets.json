@@ -1,0 +1,48 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ST_NUCLEO64_F091RC",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "TARGET_SERIES": "STM32F0xx",
+                "RTOS": "ChibiOS",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "NF_PLATFORM_NO_CLR_TRACE": "ON",
+                "NF_CLR_NO_IL_INLINE": "ON",
+                "NF_FEATURE_BINARY_SERIALIZATION": "OFF",
+                "USE_RNG": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_Hardware.Stm32": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ST_NUCLEO64_F091RC",
+            "displayName": "ST_NUCLEO64_F091RC",
+            "configurePreset": "ST_NUCLEO64_F091RC"
+        }
+    ]
+}

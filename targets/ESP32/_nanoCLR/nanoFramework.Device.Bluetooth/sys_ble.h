@@ -71,6 +71,17 @@ struct bleServicesContext
     // The device name
     char *pDeviceName;
 
+    // True if using extended advertisements (Bluetooth 5.0)
+    bool useExtendedAdvert;
+
+    // Ptr & length of advertisement packet
+    int advertDataLen;
+    uint8_t *advertData;
+
+    // Ptr & length of scanresponse packet (Legacy)
+    int scanResponseLen;
+    uint8_t *scanResponse;
+
     // Number of services in service definition
     int serviceCount;
 
@@ -81,11 +92,16 @@ struct bleServicesContext
     ble_context *bleSrvContexts;
 };
 
-void StartBleTask(char *deviceName);
+void StartBleTask(char *deviceName, uint16_t appearance);
 bool DeviceBleInit();
 void Device_ble_dispose();
 int Esp32GapEvent(struct ble_gap_event *event, void *arg);
 int ConnectionCount();
+void SetSecuritySettings(
+    DevicePairingIOCapabilities IOCaps,
+    DevicePairingProtectionLevel protectionLevel,
+    bool allowBonding,
+    bool allowOob);
 
 extern bleServicesContext bleContext;
 extern device_ble_event_data ble_event_data;

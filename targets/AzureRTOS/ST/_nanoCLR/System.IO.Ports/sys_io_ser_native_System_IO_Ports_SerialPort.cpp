@@ -1119,7 +1119,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeWriteString_
 
     bool isNewAllocation = false;
     char *buffer = NULL;
-    uint32_t bufferLength;
+    uint32_t bufferLength = 0;
     int32_t length = 0;
 
     // get a pointer to the managed object instance and check that it's not NULL

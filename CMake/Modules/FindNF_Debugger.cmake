@@ -18,9 +18,9 @@ set(NF_Debugger_SRCS
 
 # add the debugger source file according to the build flavor
 if(NF_BUILD_RTM)
-    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_minimal.cpp)
+    list(APPEND NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_minimal.cpp)
 else()
-    set(NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_full.cpp)
+    list(APPEND NF_Debugger_SRCS ${NF_Debugger_SRCS} Debugger_full.cpp)
 endif()
 
 
@@ -86,7 +86,7 @@ macro(nf_add_lib_debugger)
         )
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALD_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

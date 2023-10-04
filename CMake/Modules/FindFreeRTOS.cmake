@@ -27,7 +27,9 @@ include(FreeRTOS_${TARGET_SERIES}_sources)
 # and here the GCC options tuned for the target series 
 include(FreeRTOS_${TARGET_SERIES}_GCC_options)
 
-# message("FreeRTOS board series is ${TARGET_SERIES}") # debug helper
+if (BUILD_VERBOSE)
+    message("FreeRTOS board series is ${TARGET_SERIES}")
+endif()
 
 # set include directories for FreeRTOS
 list(APPEND FreeRTOS_INCLUDE_DIRS ${freertos_SOURCE_DIR}/include)
@@ -60,7 +62,7 @@ foreach(SRC_FILE ${FreeRTOS_SRCS})
     )
 
     if (BUILD_VERBOSE)
-        message("${SRC_FILE} >> ${FreeRTOS_SRC_FILE}") # debug helper
+        message("${SRC_FILE} >> ${FreeRTOS_SRC_FILE}")
     endif()
      
     list(APPEND FreeRTOS_SOURCES ${FreeRTOS_SRC_FILE})

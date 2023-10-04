@@ -57,9 +57,9 @@ extern "C"
         nanoHAL_Initialize();
     }
 
-    void nanoHAL_Uninitialize_C()
+    void nanoHAL_Uninitialize_C(bool isPoweringDown)
     {
-        nanoHAL_Uninitialize();
+        nanoHAL_Uninitialize(isPoweringDown);
     }
 }
 
@@ -110,8 +110,10 @@ void nanoHAL_Initialize()
     // SOCKETS_DbgInitialize( 0 );
 }
 
-void nanoHAL_Uninitialize()
+void nanoHAL_Uninitialize(bool isPoweringDown)
 {
+    (void)isPoweringDown;
+
     // check for s_rebootHandlers
     for (unsigned int i = 0; i < ARRAYSIZE(s_rebootHandlers); i++)
     {
@@ -136,7 +138,10 @@ void nanoHAL_Uninitialize()
     nanoSPI_Uninitialize();
 #endif
 
-    CPU_GPIO_Uninitialize();
+    if (!isPoweringDown)
+    {
+        CPU_GPIO_Uninitialize();
+    }
 
 #if (HAL_USE_I2C_OPTION == TRUE)
     I2C_close(I2C1_PAL.i2c);
@@ -149,15 +154,6 @@ void nanoHAL_Uninitialize()
 #if (HAL_USE_EASYLINK == ON)
     EasyLink_abort();
 #endif
-
-    // disable UART pins and ADC
-    PIN_Config BoardGpioInitTable[] = {
-        12 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        13 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        24 | PIN_INPUT_EN | PIN_NOPULL | PIN_IRQ_DIS,
-        PIN_TERMINATE};
-
-    PIN_init(BoardGpioInitTable);
 
     Events_Uninitialize();
 

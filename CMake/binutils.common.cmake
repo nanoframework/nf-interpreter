@@ -49,7 +49,7 @@ macro(nf_common_compiler_definitions)
     endif()
 
     # build types that have debugging capabilities AND are NOT RTM have to have the define 'NANOCLR_ENABLE_SOURCELEVELDEBUGGING'
-    if((NOT NF_BUILD_RTM) OR NF_FEATURE_DEBUGGER)
+    if((NOT NF_BUILD_RTM) AND NF_FEATURE_DEBUGGER)
         target_compile_definitions(${NFCCF_TARGET} PUBLIC -DNANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     endif()
 
@@ -108,17 +108,17 @@ endmacro()
 # To be called from target CMakeList.txt
 macro(nf_add_common_dependencies target)
 
+    configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
+                   ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/target_platform.h @ONLY)
+
     # dependencies specific to nanoBooter
     if("${target}" STREQUAL "${NANOBOOTER_PROJECT_NAME}")
 
     endif()
-    
+
     # dependencies specific to nanoCLR
     if("${target}" STREQUAL "${NANOCLR_PROJECT_NAME}")
-    
-        configure_file(${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/target_platform.h.in
-                       ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/target_platform.h @ONLY)
-
+        
     endif()
 
 endmacro()
@@ -221,11 +221,18 @@ macro(nf_add_common_sources)
         target_link_libraries(${NFACS_TARGET}.elf
             nano::NF_CoreCLR
             nano::NF_NativeAssemblies
-            nano::NF_Debugger
             nano::WireProtocol
             
             ${NFACS_EXTRA_LIBRARIES}
         )
+
+        if(NF_FEATURE_DEBUGGER)
+
+            target_link_libraries(${NFACS_TARGET}.elf
+                nano::NF_Debugger
+            )
+
+        endif()  
 
         target_sources(${NFACS_TARGET}.elf PUBLIC
 
@@ -298,7 +305,9 @@ function(nf_generate_bin_package file1 file2 offset outputfilename)
         ${file2} -Binary -offset 0x${offset}
         -o ${outputfilename} -Binary
 
-        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX} 
+        WORKING_DIRECTORY ${TOOL_SRECORD_PREFIX}
+
+        BYPRODUCTS ${CMAKE_BINARY_DIR}/${outputfilename}
 
         COMMENT "exporting hex files to one binary file" 
     )
@@ -315,33 +324,32 @@ function(nf_generate_build_output_files target)
     string(SUBSTRING ${target} 0 ${TARGET_EXTENSION_DOT_INDEX} TARGET_SHORT)
 
     set(TARGET_HEX_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.hex)
-    set(TARGET_S19_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.s19)
     set(TARGET_BIN_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.bin)
     set(TARGET_DUMP_FILE ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.lst)
 
-    if(CMAKE_BUILD_TYPE EQUAL "Release" OR CMAKE_BUILD_TYPE EQUAL "MinSizeRel")
+    if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
 
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
-                # copy target image to other formats
-                COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_HEX_FILE}
-                COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
-                COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
+            # copy target image to other formats
+            COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.elf
+            COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_HEX_FILE}
+            COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
-                # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
-                COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
+            BYPRODUCTS 
+                ${TARGET_HEX_FILE} 
+                ${TARGET_BIN_FILE}
 
-                COMMENT "Generate nanoBooter HEX and BIN files for deployment")
+            COMMENT "Generate nanoBooter HEX and BIN files for deployment")
 
     else()
 
         add_custom_command(TARGET ${TARGET_SHORT}.elf POST_BUILD
                 # copy target image to other formats
                 COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_HEX_FILE}
-                COMMAND ${CMAKE_OBJCOPY} -Osrec $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_S19_FILE}
                 COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${TARGET_SHORT}.elf> ${TARGET_BIN_FILE}
 
                 # copy target file to build folder (this is only useful for debugging in VS Code because of path in launch.json)
-                COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_SOURCE_DIR}/build/${TARGET_SHORT}.elf
+                COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE:${TARGET_SHORT}.elf> ${CMAKE_BINARY_DIR}/${TARGET_SHORT}.elf
 
                 # dump target image as source code listing 
                 # ONLY when DEBUG info is available, this is on 'Debug' and 'RelWithDebInfo'
@@ -350,8 +358,6 @@ function(nf_generate_build_output_files target)
                 COMMENT "Generate nanoBooter HEX and BIN files for deployment, LST file for debug")
 
     endif()
-
-    nf_add_hex_bin_dump_targets(${target})
         
     # add this to print the size of the output targets
     nf_print_target_size(${target})
@@ -578,10 +584,10 @@ macro(nf_setup_target_build_common)
 
     if(USE_SECURITY_MBEDTLS_OPTION AND NOT RTOS_ESP32_CHECK)
 
-        # mbedTLS requires setting a compiler definition in order to pass a config file
-        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS/nf_mbedtls_config.h\"")
+        # MbedTLS requires setting a compiler definition in order to pass a config file
+        target_compile_definitions(mbedcrypto PUBLIC "-DMBEDTLS_CONFIG_FILE=\"${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS/nf_mbedtls_config.h\"")
         
-        # need to add extra include directories for mbedTLS
+        # need to add extra include directories for MbedTLS
         target_include_directories(
             mbedcrypto PUBLIC
             ${CMAKE_SOURCE_DIR}/src/CLR/Include
@@ -589,7 +595,7 @@ macro(nf_setup_target_build_common)
             ${CMAKE_SOURCE_DIR}/src/PAL
             ${CMAKE_SOURCE_DIR}/src/PAL/Include
             ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets
-            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/mbedTLS
+            ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS
             ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp
             ${CMAKE_SOURCE_DIR}/targets/${RTOS}/_include
             ${TARGET_BASE_LOCATION}/nanoCLR
@@ -598,9 +604,9 @@ macro(nf_setup_target_build_common)
         # platform implementation of hardware random provider
         target_sources(mbedcrypto PRIVATE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/mbedtls_entropy_hardware_pool.c)
 
-        nf_set_compile_options(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_compile_options(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
-        nf_set_compile_options(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET mbedcrypto)
+        nf_set_compile_options(TARGET mbedx509)
+        nf_set_compile_options(TARGET mbedtls)
         nf_set_compile_definitions(TARGET mbedcrypto BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET mbedx509 BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_compile_definitions(TARGET mbedtls BUILD_TARGET ${NANOCLR_PROJECT_NAME})

@@ -14,12 +14,12 @@
 // Must wait at least 15 sec to retry NTP server (RFC 4330)
 #define SNTP_UPDATE_DELAY (60 * 60)
 
-// no startup delay for SNTP
+// better have a startup delay because we can have DHCP enabled (default 2 seconds)
 // value in seconds
-#define SNTP_STARTUP_DELAY (0)
+#define SNTP_STARTUP_DELAY (2)
 
-// retry timeout
+// retry timeout (15 minutes)
 // value in seconds
-#define SNTP_RETRY_TIMEOUT (10)
+#define SNTP_RETRY_TIMEOUT (15 * 60)
 
 #endif // TARGET_SNTP_OPTS_H

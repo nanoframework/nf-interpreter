@@ -3,8 +3,8 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using System.Collections.Generic;
 using CommandLine;
+using System.Collections.Generic;
 
 namespace nanoFramework.nanoCLR.CLI
 {
@@ -89,9 +89,31 @@ namespace nanoFramework.nanoCLR.CLI
         [Option(
             "loopafterexit",
             Required = false,
-            Default = true,
+            Default = false,
             HelpText = "Option to remain in loop waiting for a debugger connection after the program exits.")]
         public bool EnterDebuggerLoopAfterExit { get; set; }
+
+        [Option(
+            "forcegc",
+            Required = false,
+            Default = false,
+            HelpText = "Option to force GC before each allocation.")]
+        public bool PerformGarbageCollection { get; set; }
+
+        [Option(
+            "compactionaftergc",
+            Required = false,
+            Default = false,
+            HelpText = "Option to force heap compaction after each GC run.")]
+        public bool PerformHeapCompaction { get; set; }
+
+        [Option(
+            "localinstance",
+            Required = false,
+            Default = null,
+            Hidden = true,
+            HelpText = "Path to a local instance of the nanoCLR.")]
+        public string LocalInstance { get; set; }
 
         /// <summary>
         /// Allowed values:
@@ -105,7 +127,7 @@ namespace nanoFramework.nanoCLR.CLI
             'v',
             "verbosity",
             Required = false,
-            Default = "d",
+            Default = "n",
             HelpText = "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command; see specific command page to determine if this option is available.")]
         public string Verbosity { get; set; }
     }

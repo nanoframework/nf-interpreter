@@ -3,7 +3,7 @@
 /zips/
 
 # ignore build folder
-/build/
+/build**/
 /out/
 /build/.gitkeep
 
@@ -376,5 +376,7 @@ ASALocalRun/
 # ESP32 sdkconfig file
 sdkconfig
 
-# CMake user presets
+# CMake user presets and local presets
 CMakeUserPresets.json
+config/user-tools-repos.json
+config/user-prefs.json

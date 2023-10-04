@@ -108,20 +108,20 @@
 
 //--//
 
-size_t LinkArraySize()
+uint32_t LinkArraySize()
 {
     return (PLATFORM_DEPENDENT_ENTRY_SIZE + PLATFORM_DEPENDENT_HASH_TABLE_SIZE);
 }
-size_t LinkMRUArraySize()
+uint32_t LinkMRUArraySize()
 {
     return (PLATFORM_DEPENDENT_ENTRY_SIZE + 1);
 }
-size_t PayloadArraySize()
+uint32_t PayloadArraySize()
 {
     return PLATFORM_DEPENDENT_ENTRY_SIZE;
 }
 #ifndef NANOCLR_NO_IL_INLINE
-size_t InlineBufferCount()
+uint32_t InlineBufferCount()
 {
     return PLATFORM_DEPENDENT_INLINE_BUFFER_SIZE;
 }
@@ -141,7 +141,7 @@ unsigned int
 
 //--//
 
-size_t InterruptRecords()
+uint32_t InterruptRecords()
 {
     return PLATFORM_DEPENDENT_INTERRUPT_RECORDS;
 }

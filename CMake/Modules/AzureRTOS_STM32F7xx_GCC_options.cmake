@@ -30,7 +30,7 @@ macro(nf_set_compile_options)
     # include any extra options coming from any extra args?
     # STMF7 cores have SP and DP, the default is SP. DP can be set if developer realy needs that.
     # disabling -Wshadow for now as it's causing issues with TX_INTERRUPT_SAVE_AREA
-    target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO__EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -Wall -Wextra -Werror -Wundef -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
+    target_compile_options(${NFSCO_TARGET} PUBLIC ${NFSCO_EXTRA_COMPILE_OPTIONS} -mthumb -mcpu=cortex-m7 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mabi=aapcs -Wall -Wextra -Werror -Wundef -Wimplicit-fallthrough -fshort-wchar -fno-builtin -fno-common -mno-long-calls -fno-exceptions -fcheck-new )
 
     # enable:
     # - FPU 
@@ -64,7 +64,7 @@ macro(nf_set_link_options)
     nf_include_libraries_in_build(${NFSLO_TARGET})
 
     # set extra linker flags
-    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO__EXTRA_LINK_FLAGS} ")
+    set_property(TARGET ${NFSLO_TARGET} APPEND_STRING PROPERTY LINK_FLAGS " ${NFSLO_EXTRA_LINK_FLAGS} ")
  
     # set optimization flags
     nf_set_optimization_options(${NFSLO_TARGET})

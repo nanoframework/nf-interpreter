@@ -51,7 +51,7 @@ void Events_SetBoolTimer(bool *timerCompleteFlag, uint32_t millisecondsFromNow)
 
         // need to stop the timer first
         tx_timer_deactivate(&boolEventsTimer);
-        tx_timer_change(&boolEventsTimer, 0, TX_TICKS_PER_MILLISEC(millisecondsFromNow));
+        tx_timer_change(&boolEventsTimer, TX_TICKS_PER_MILLISEC(millisecondsFromNow), 0);
         tx_timer_activate(&boolEventsTimer);
     }
 }
@@ -100,7 +100,7 @@ uint32_t Events_WaitForEvents(uint32_t powerLevel, uint32_t wakeupSystemEvents, 
         }
 
         // no events, pass control to the OS
-        tx_thread_sleep(TX_TICKS_PER_MILLISEC(100));
+        tx_thread_sleep(TX_TICKS_PER_MILLISEC(1));
 
         // check if reboot or exit flags were set when the other OS threads executed
         if (CLR_EE_DBG_IS(RebootPending) || CLR_EE_DBG_IS(ExitPending))

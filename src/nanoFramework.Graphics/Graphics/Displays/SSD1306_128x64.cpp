@@ -121,12 +121,12 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 {
     switch (orientation)
     {
-        case PORTRAIT:
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             return false;
 
-        case LANDSCAPE:
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
 
@@ -139,7 +139,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 
 void DisplayDriver::SetDefaultOrientation()
 {
-    ChangeOrientation(LANDSCAPE);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Landscape);
 }
 
 bool DisplayDriver::SetWindow(CLR_INT16 x1, CLR_INT16 y1, CLR_INT16 x2, CLR_INT16 y2)

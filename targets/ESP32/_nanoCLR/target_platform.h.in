@@ -14,6 +14,8 @@
 #define HAL_USE_SPI                           @HAL_USE_SPI_OPTION@
 #define HAL_USE_SDC                           @HAL_USE_SDC_OPTION@
 #define HAL_USE_BLE                           @HAL_USE_BLE_OPTION@
+#define HAL_WP_USE_SERIAL                     @HAL_WP_USE_SERIAL_OPTION@
+#define HAL_WP_USE_USB_CDC                    @HAL_WP_USE_USB_CDC_OPTION@
 
 #if (HAL_USE_SDC == TRUE)
 #define SDC_MAX_OPEN_FILES 5

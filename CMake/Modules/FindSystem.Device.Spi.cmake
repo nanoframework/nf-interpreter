@@ -35,7 +35,11 @@ foreach(SRC_FILE ${System.Device.Spi_SRCS})
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${System.Device.Spi_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${System.Device.Spi_SRC_FILE}")
+    endif()
+
     list(APPEND System.Device.Spi_SOURCES ${System.Device.Spi_SRC_FILE})
 endforeach()
 

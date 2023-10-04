@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace nanoFramework.nanoCLR.Host.Interop
@@ -13,6 +14,21 @@ namespace nanoFramework.nanoCLR.Host.Interop
         internal const uint ClrOk = 0;
         internal const uint ClrErrorFail = 0xFF000000;
         private const string NativeLibraryName = "nanoFramework.nanoCLR";
+        private const string _nanoClrDllName = "nanoFramework.nanoCLR.dll";
+        private static string _dllPath;
+
+        internal static string DllPath
+        {
+            get => _dllPath;
+
+            set
+            {
+                _dllPath = value;
+
+                // set path to search nanoCLR DLL
+                _ = SetDllDirectory(_dllPath);
+            }
+        }
 
         internal delegate uint ConfigureDelegate();
 
@@ -77,11 +93,13 @@ namespace nanoFramework.nanoCLR.Host.Interop
         [DllImport("kernel32", SetLastError = true)]
         private static extern bool FreeLibrary(IntPtr hModule);
 
-        public static void UnloadNanoClrImageDll(string path)
+        public static void UnloadNanoClrImageDll()
         {
+            string nanoClrDllLocation = Path.Combine(DllPath, _nanoClrDllName);
+
             foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
             {
-                if (mod.FileName.Equals(path, StringComparison.OrdinalIgnoreCase))
+                if (mod.FileName.Equals(nanoClrDllLocation, StringComparison.OrdinalIgnoreCase))
                 {
                     FreeLibrary(mod.BaseAddress);
 
@@ -90,5 +108,25 @@ namespace nanoFramework.nanoCLR.Host.Interop
                 }
             }
         }
+
+        public static string FindNanoClrDll()
+        {
+            // perform dummy call to load DLL, in case it's not loaded
+            _ = nanoCLR_GetVersion();
+
+            // sweep processes and look for a DLL with the nanoCLR namme
+            foreach (System.Diagnostics.ProcessModule mod in System.Diagnostics.Process.GetCurrentProcess().Modules)
+            {
+                if (mod.FileName.EndsWith(_nanoClrDllName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return mod.FileName;
+                }
+            }
+
+            return "";
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool SetDllDirectory(string lpPathName);
     }
 }

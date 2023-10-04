@@ -233,7 +233,7 @@ HRESULT Library_sys_dev_pwm_native_System_Device_Pwm_PwmChannel::NativeSetDesire
     // Working from 15 bit duty resolution down until we have a valid divisor
     optimumDutyResolution = 1;
 
-    for (int dutyResolution = 15; dutyResolution > 0; dutyResolution--)
+    for (int dutyResolution = SOC_LEDC_TIMER_BIT_WIDE_NUM - 1; dutyResolution > 0; dutyResolution--)
     {
         precision = (0x1 << dutyResolution); // 2**depth
 

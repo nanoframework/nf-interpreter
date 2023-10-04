@@ -7,6 +7,8 @@
 #define DISPLAY_INTERFACE_H
 
 #include "nanoCLR_Types.h"
+#include "nanoCLR_Interop.h"
+#include "Core.h"
 
 // Display configuration
 struct DisplayInterfaceConfig
@@ -34,6 +36,26 @@ struct DisplayInterfaceConfig
         CLR_UINT16 width;
         CLR_UINT16 height;
     } Screen;
+    struct
+    {
+        CLR_UINT32 Width;
+        CLR_UINT32 Height;
+        CLR_UINT8 BitsPerPixel;
+        CLR_RT_HeapBlock_Array *InitializationSequence;
+        CLR_UINT8 MemoryWrite;
+        CLR_UINT8 SetColumnAddress;
+        CLR_UINT8 SetRowAddress;
+        CLR_RT_HeapBlock_Array *PowerModeNormal;
+        CLR_RT_HeapBlock_Array *PowerModeSleep;
+        CLR_RT_HeapBlock_Array *OrientationPortrait;
+        CLR_RT_HeapBlock_Array *OrientationPortrait180;
+        CLR_RT_HeapBlock_Array *OrientationLandscape;
+        CLR_RT_HeapBlock_Array *OrientationLandscape180;
+        CLR_RT_HeapBlock_Array *Clear;
+        CLR_UINT8 Brightness;
+        CLR_UINT8 DefaultOrientation;
+        CLR_UINT8 SetWindowType;
+    } GenericDriverCommands;
 };
 
 struct DisplayInterface

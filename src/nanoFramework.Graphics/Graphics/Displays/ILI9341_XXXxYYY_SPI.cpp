@@ -220,13 +220,13 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     // define logic resolution
     switch (orientation)
     {
-        case PORTRAIT:
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             Attributes.Height = Attributes.LongerSide;
             Attributes.Width = Attributes.ShorterSide;
             break;
-        case LANDSCAPE:
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             Attributes.Height = Attributes.ShorterSide;
             Attributes.Width = Attributes.LongerSide;
             break;
@@ -235,16 +235,16 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
     // set physical resolution
     switch (orientation)
     {
-        case PORTRAIT:
+        case DisplayOrientation::DisplayOrientation_Portrait:
             dMAC |= dmac_PORTRAIT000;
             break;
-        case PORTRAIT180:
+        case DisplayOrientation::DisplayOrientation_Portrait180:
             dMAC |= dmac_PORTRAIT180;
             break;
-        case LANDSCAPE:
+        case DisplayOrientation::DisplayOrientation_Landscape:
             dMAC |= dmac_LANDSCAPE000;
             break;
-        case LANDSCAPE180:
+        case DisplayOrientation::DisplayOrientation_Landscape180:
             dMAC |= dmac_LANDSCAPE180;
             break;
     }
@@ -261,8 +261,7 @@ bool DisplayDriver::ChangeOrientation(DisplayOrientation orientation)
 void DisplayDriver::SetDefaultOrientation()
 {
     // Change default orientation to display defaults
-    // ChangeOrientation(LANDSCAPE);
-    ChangeOrientation(PORTRAIT);
+    ChangeOrientation(DisplayOrientation::DisplayOrientation_Portrait);
 }
 
 bool DisplayDriver::Uninitialize()

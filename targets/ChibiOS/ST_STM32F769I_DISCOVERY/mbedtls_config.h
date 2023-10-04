@@ -37,7 +37,7 @@
 
 // uncomment the defines bellow to generate debug output 
 // set below the threshold level for debug messages
-// check mbed TLS mbedtls/debug.h header for details.
+// check Mbed TLS mbedtls/debug.h header for details.
 // Debug levels:
 // 0 No debug
 // 1 Error

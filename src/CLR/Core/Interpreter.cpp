@@ -438,7 +438,7 @@ bool CLR_RT_Thread::FindEhBlock(
     // processed.
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-    if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+    if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
         if (!onlyFinallys || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
@@ -497,7 +497,7 @@ bool CLR_RT_Thread::FindEhBlock(
             }
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-            if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+            if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
             {
                 if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                 {
@@ -534,7 +534,8 @@ bool CLR_RT_Thread::FindEhBlock(
                     if (ptrEhExt->IsFinally() && (!to || (to < ptrEhExt->m_tryStart || to >= ptrEhExt->m_tryEnd)))
                     {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
+                        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                            s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
                         {
                             CLR_Debug::Printf("Found match for a 'finally'\r\n");
                         }
@@ -549,7 +550,8 @@ bool CLR_RT_Thread::FindEhBlock(
                     if (ptrEhExt->IsCatchAll())
                     {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+                        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                            s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                         {
                             CLR_Debug::Printf("Found match for a 'catch all'\r\n");
                         }
@@ -564,7 +566,8 @@ bool CLR_RT_Thread::FindEhBlock(
                             CLR_RT_ExecutionEngine::IsInstanceOf(m_currentException, ptrEhExt->m_typeFilter))
                         {
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-                            if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+                            if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) &&
+                                s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
                             {
                                 if (ptrEhExt->IsFilter())
                                 {
@@ -589,7 +592,7 @@ bool CLR_RT_Thread::FindEhBlock(
     }
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS)
-    if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+    if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
     {
         if (to == NULL || s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Obnoxious)
         {
@@ -629,7 +632,7 @@ HRESULT CLR_RT_Thread::Execute()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     _ASSERTE(!CLR_EE_DBG_IS(Stopped));
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
     ::Events_SetBoolTimer((bool *)&m_timeQuantumExpired, CLR_RT_Thread::c_TimeQuantum_Milliseconds);
 
@@ -690,14 +693,14 @@ HRESULT CLR_RT_Thread::Execute()
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (CLR_EE_DBG_IS(Stopped))
             break;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         NANOCLR_CHECK_HRESULT(ProcessException());
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         if (CLR_EE_DBG_IS(Stopped))
             break;
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_currentException.Dereference() != NULL)
         {
@@ -750,7 +753,7 @@ HRESULT CLR_RT_Thread::Execute_Inner()
             {
                 NANOCLR_SET_AND_LEAVE(CLR_E_FAIL);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             //
             // Thread cannot run if a lock request is still pending...
@@ -858,8 +861,12 @@ HRESULT CLR_RT_Thread::Execute_Inner()
 
                 if (hr == CLR_E_OUT_OF_MEMORY && (stack->m_flags & CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory))
                 {
+                    // if we have an out of memory exception, perform a compaction and restart
                     stack->m_flags &= ~CLR_RT_StackFrame::c_CompactAndRestartOnOutOfMemory;
 
+#if defined(NANOCLR_GC_VERBOSE)
+                    CLR_Debug::Printf("\r\nGoing for heap compaction and restart.\r\n\r\n");
+#endif
                     g_CLR_RT_ExecutionEngine.PerformHeapCompaction();
                 }
                 else
@@ -1002,10 +1009,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
         {
             NANOCLR_SET_AND_LEAVE(CLR_S_QUANTUM_EXPIRED);
         }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
 #if defined(NANOCLR_TRACE_EXCEPTIONS) && defined(VIRTUAL_DEVICE)
-        if (s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
+        if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions) && s_CLR_RT_fTrace_Exceptions >= c_CLR_RT_Trace_Annoying)
         {
             CLR_PROF_HANDLER_SUSPEND_TIME();
 
@@ -2782,6 +2789,11 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         // if we have an out of memory exception, perform a compaction and try again.
                         if (hr == CLR_E_OUT_OF_MEMORY && pass == 0)
                         {
+#if defined(NANOCLR_GC_VERBOSE)
+                            CLR_Debug::Printf(
+                                "\r\nGoing for heap compaction and trying to create array again.\r\n\r\n");
+#endif
+
                             WRITEBACK(stack, evalPos, ip, fDirty);
                             g_CLR_RT_ExecutionEngine.PerformHeapCompaction();
                             READCACHE(stack, evalPos, ip, fDirty);
@@ -3424,7 +3436,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             continue;
 
@@ -3506,7 +3518,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
             continue;
 
             //--//
@@ -3532,7 +3544,7 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
             {
                 g_CLR_RT_ExecutionEngine.Breakpoint_StackFrame_Step(stack, ip);
             }
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
             if (th->m_timeQuantumExpired)
             {

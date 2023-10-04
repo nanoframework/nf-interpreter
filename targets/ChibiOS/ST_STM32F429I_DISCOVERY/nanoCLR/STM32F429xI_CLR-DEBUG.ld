@@ -32,6 +32,8 @@ MEMORY
     ram6       (wx) : org = 0x00000000, len = 0
     ram7       (wx) : org = 0x00000000, len = 0
     ext_ram    (wx) : org = 0xD0000000, len = 8M                    /* external SDRAM */
+    graphics_ram (wx) : org = 0xD0D00000, len = 2377728                /* external graphics ram for frame buffer and bitmaps*/
+    graphics_vfb (wx) : org = 0xD0F44800, len = 153600                 /* Frame buffer for video output mode 240*320*2 bytes ( 16 bits RGB565 )*/
     bootclpbrd (wx) : org = 0x20000000, len = 48                    /* boot clipboard area */
 }
 
@@ -81,6 +83,15 @@ REGION_ALIAS("HEAP_RAM", ram4);
 
 /* RAM region to be used for the nanoFramework CLR managed heap.*/
 REGION_ALIAS("CLR_MANAGED_HEAP_RAM", ext_ram);
+
+/* RAM region to be used for the nanoFramework graphics heap.*/
+REGION_ALIAS("GRAPHICS_HEAP_RAM", graphics_ram);
+
+/* RAM region to be used for the nanoFramework graphics heap.*/
+REGION_ALIAS("GRAPHICS_VIDEO_FRAME_BUFFER", graphics_vfb);
+
+/* Graphics rules inclusion.*/
+INCLUDE rules_graphics.ld 
 
 /* RAM region to be used for the boot clipboard.*/
 REGION_ALIAS("SECTION_FOR_BOOTCLIPBOARD", bootclpbrd);

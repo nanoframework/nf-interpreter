@@ -42,7 +42,7 @@ typedef struct __nfpack BootClipboard
     BootRequest_Options BootRequest;
     uint32_t BootParameters;
     BootExecution_Options BootExecution;
-    uint32_t ErrorCode;
+    int32_t ErrorCode;
 
     VersionInfo BooterVersion;
     VersionInfo CLRVersion;
@@ -73,9 +73,9 @@ extern "C"
     // Returns true if the there is a request to remain in nanoBooter
     bool IsToRemainInBooter();
 
-    // Request to launch nanoBooter
+    // Request to launch nanoBooter and set an error code
     // Returns false in case it's not supported (which is considered the default).
-    bool RequestToLaunchNanoBooter();
+    bool RequestToLaunchNanoBooter(int32_t errorCode);
 
     // Request to launch proprietary bootloader
     // Returns false in case it's not supported (which is considered the default).

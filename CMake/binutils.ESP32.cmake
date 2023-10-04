@@ -284,7 +284,7 @@ macro(nf_add_platform_dependencies target)
 
         add_dependencies(${target}.elf nano::NF_Network)
 
-        # security provider is mbedTLS
+        # security provider is MbedTLS
         if(USE_SECURITY_MBEDTLS_OPTION)
             add_dependencies(NF_Network mbedtls)
         endif()
@@ -470,7 +470,7 @@ macro(nf_setup_partition_tables_generator)
     # create command line for partition table generator
     set(gen_partition_table "python" "${ESP32_PARTITION_TABLE_UTILITY}")
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32c3" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -481,7 +481,7 @@ macro(nf_setup_partition_tables_generator)
 
     endif()
 
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         add_custom_command( TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
             COMMAND ${gen_partition_table} 
@@ -590,12 +590,12 @@ macro(nf_add_idf_as_library)
         list(APPEND IDF_LIBRARIES_TO_ADD idf::esp_eth)
     endif()
 
-    # handle specifics for ESP32S2 series
-    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2")
+    # handle specifics for ESP32S2/S3 series
+    if(${TARGET_SERIES_SHORT} STREQUAL "esp32s2" OR ${TARGET_SERIES_SHORT} STREQUAL "esp32s3")
 
         if(ESP32_USB_CDC)
 
-            # add IDF components specific to ESP32S2 series
+            # add IDF components specific to ESP32S2/S3 series
             list(APPEND IDF_COMPONENTS_TO_ADD tinyusb)
             list(APPEND IDF_LIBRARIES_TO_ADD idf::tinyusb)
 
@@ -703,6 +703,7 @@ macro(nf_add_idf_as_library)
     add_executable(
         ${NANOCLR_PROJECT_NAME}.elf
         ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/${TARGET_SERIES_SHORT}/app_main.c
+        ${CMAKE_SOURCE_DIR}/targets/ESP32/_IDF/project_elf_src_${TARGET_SERIES_SHORT}.c
     )
 
     #Restore original sdkconfig back to defaults
@@ -817,10 +818,12 @@ macro(nf_add_idf_as_library)
 
     # find out if there is support for PSRAM
     set(SPIRAM_SUPPORT_PRESENT -1)
-    if(TARGET_SERIES_SHORT STREQUAL "esp32" OR TARGET_SERIES_SHORT STREQUAL "esp32s2")
+    if(TARGET_SERIES_SHORT STREQUAL "esp32")
         string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
     elseif(TARGET_SERIES_SHORT STREQUAL "esp32s2")
         string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S2_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
+    elseif(TARGET_SERIES_SHORT STREQUAL "esp32s3")
+        string(FIND ${SDKCONFIG_DEFAULT_CONTENTS} "CONFIG_ESP32S3_SPIRAM_SUPPORT=y" SPIRAM_SUPPORT_PRESENT)
     endif()
 
     # set variable
@@ -875,6 +878,24 @@ macro(nf_add_idf_as_library)
     if(${CONFIG_BT_ENABLED_POS} GREATER -1)
         set(BLE_INFO ", support for BLE")
     endif()    
+
+    ############################################################
+    # output component size summary for the nanoCLR executable #
+    # more on this here: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/performance/size.html#size-summary-idf-py-size
+    
+    # set the map file with the components
+    set(nanoCLRMapfile "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map")
+    target_link_libraries(${NANOCLR_PROJECT_NAME}.elf "-Wl,--cref" "-Wl,--Map=\"${nanoCLRMapfile}\"")
+
+    # setup the call to the python script to generate the size summary
+    set(ESP32_IDF_SIZE_UTILITY ${IDF_PATH_CMAKED}/tools/idf_size.py)
+    set(output_idf_size "python" "${ESP32_IDF_SIZE_UTILITY}")
+
+    add_custom_command(
+        TARGET ${NANOCLR_PROJECT_NAME}.elf POST_BUILD
+        COMMAND ${output_idf_size}
+        --archives --target ${TARGET_SERIES_SHORT} ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.map
+        COMMENT "Ouptut IDF size summary")
 
 endmacro()
 

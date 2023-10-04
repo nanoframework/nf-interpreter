@@ -1,0 +1,6 @@
+speed auto
+Halt
+LoadFile nanobooter-nanoclr.bin,0
+Reset
+Go
+Exit

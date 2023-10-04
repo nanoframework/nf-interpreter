@@ -1,0 +1,35 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "user-prefs",
+            "description": "Cache variables with user preferences general to all builds and targets.",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_VERSION": "0.9.99.999",
+                "BUILD_VERBOSE": "OFF",
+                "NF_WP_TRACE_ERRORS": "OFF",
+                "NF_WP_TRACE_HEADERS": "OFF",
+                "NF_WP_TRACE_STATE": "OFF",
+                "NF_WP_TRACE_NODATA": "OFF",
+                "NF_WP_TRACE_ALL": "OFF",
+                "NF_WP_IMPLEMENTS_CRC32": "OFF",
+                "NF_PLATFORM_NO_CLR_TRACE": "OFF",
+                "NF_CLR_NO_IL_INLINE": "OFF",
+                "NF_FEATURE_WATCHDOG": "ON",
+                "SWO_OUTPUT": "OFF",
+                "RADIO_FREQUENCY": "CHANGE_ME_TO_A_VALID_VALUE_868_OR_915"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "cleanFirst": false,
+            "configuration": "Debug",
+            "hidden": true,
+            "name": "base-user",
+            "verbose": false
+        }
+    ]
+}

@@ -7,10 +7,10 @@
 set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/nanoFramework.Device.Bluetooth)
 
 # set include directories
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Core)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/CLR/Include)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/HAL/Include)
-list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/PAL/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Core)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/HAL/Include)
+list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/PAL/Include)
 list(APPEND nanoFramework.Device.Bluetooth_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
 
 # set include directories for Esp32 IDF
@@ -30,18 +30,19 @@ set(nanoFramework.Device.Bluetooth_SRCS
     
     sys_dev_ble_native.cpp
 
-    # Client
+    # Server
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattServiceProvider.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattReadRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattWriteRequest.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_GenericAttributeProfile_GattLocalCharacteristic.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEAdvertisementWatcher.cpp
  
-    # Central
+    # Client / Central
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothLEDevice.cpp
     sys_dev_ble_native_nanoFramework_Device_Bluetooth_BluetoothNanoDevice.cpp
 
     # Others
+    sys_dev_ble_native_nanoFramework_Device_Bluetooth_Security.cpp
     esp32_nimble.cpp
     nimble_utils.cpp
 )
@@ -52,11 +53,15 @@ foreach(SRC_FILE ${nanoFramework.Device.Bluetooth_SRCS})
         PATHS
 	        ${BASE_PATH_FOR_THIS_MODULE}
 	        ${TARGET_BASE_LOCATION}
-            ${PROJECT_SOURCE_DIR}/src/nanoFramework.Device.Bluetooth
+            ${CMAKE_SOURCE_DIR}/src/nanoFramework.Device.Bluetooth
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )
-    # message("${SRC_FILE} >> ${nanoFramework.Device.Bluetooth_SRC_FILE}") # debug helper
+
+    if (BUILD_VERBOSE)
+        message("${SRC_FILE} >> ${nanoFramework.Device.Bluetooth_SRC_FILE}")
+    endif()
+
     list(APPEND nanoFramework.Device.Bluetooth_SOURCES ${nanoFramework.Device.Bluetooth_SRC_FILE})
 endforeach()
 

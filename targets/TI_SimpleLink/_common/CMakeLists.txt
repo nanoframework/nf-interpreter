@@ -15,6 +15,7 @@ list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sys
 # append nanoHAL
 list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/platformHAL.c")
 list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/platformHAL_Time.cpp")
+list(APPEND TARGET_TI_SimpleLink_COMMON_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/targetHAL_Rtos.c")
 
 # append configuration manager according to target
 if("${TARGET_SERIES}" STREQUAL "CC32xx")

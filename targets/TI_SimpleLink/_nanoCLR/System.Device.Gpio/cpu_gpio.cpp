@@ -98,37 +98,6 @@ gpio_input_state *GetInputStateByConfigIndex(uint8_t pinConfigIndex)
     return NULL;
 }
 
-// find a free slot in the pin config array
-int8_t FindFreePinConfig()
-{
-    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
-    {
-        if ((uint16_t)gpioPinConfigs[index] == GPIO_CFG_NO_DIR)
-        {
-            // found a free slot!
-            return index;
-        }
-    }
-
-    return -1;
-}
-
-// find a pin number in the pin config array
-int8_t FindPinConfig(GPIO_PIN pinNumber)
-{
-    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
-    {
-        // need to mask the gpioPinConfigs item to get only the 8 LSbits where the pin number is stored
-        if ((uint8_t)gpioPinConfigs[index] == pinNumber)
-        {
-            // found a free slot!
-            return index;
-        }
-    }
-
-    return -1;
-}
-
 // Allocate a new gpio_input_state and add to end of list
 // if already exist then just return current ptr
 gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
@@ -164,13 +133,12 @@ void UnlinkInputState(gpio_input_state *pState)
 
     // Remove interrupt associated with pin
     // it's OK to do always this, no matter if interrupts are enabled or not
-    GPIO_disableInt(pState->pinConfigIndex);
 
-    // disable pin
-    GPIO_setConfig(pState->pinConfigIndex, GPIO_CFG_IN_NOPULL);
+    // clear pin config array
+    gpioPinConfigs[pState->pinConfigIndex] = GPIO_CFG_NO_DIR;
 
-    // remove callback
-    gpioCallbackFunctions[pState->pinConfigIndex] = NULL;
+    // reset pin
+    GPIO_resetConfig(pState->pinConfigIndex);
 
     // unlink from list
     pState->Unlink();
@@ -264,11 +232,18 @@ bool CPU_GPIO_Initialize()
     // clear GPIO pin configs
     for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
     {
+        // except if the pin is NOT available...
+        // ... or it's reserved for Wire Protocol UART
+        if (gpioPinConfigs[index] == 0 || index == CONFIG_GPIO_UART0_TX_CONST || index == CONFIG_GPIO_UART0_RX_CONST)
+        {
+            continue;
+        }
+
         gpioPinConfigs[index] == GPIO_CFG_NO_DIR;
     }
 
     // clear callbacks
-    memset(gpioCallbackFunctions, 0, (GPIO_pinUpperBound + 1) * sizeof(GPIO_CallbackFxn));
+    memset(&gpioCallbackFunctions[0], 0, (GPIO_pinUpperBound + 1) * sizeof(GPIO_CallbackFxn));
 
     return true;
 }
@@ -280,6 +255,23 @@ bool CPU_GPIO_Uninitialize()
         UnlinkInputState(pGpio);
     }
     NANOCLR_FOREACH_NODE_END();
+
+    // clear GPIO pin configs
+    for (uint8_t index = 0; index < GPIO_pinUpperBound + 1; index++)
+    {
+        // except if the pin is NOT available...
+        // ... or it's reserved for Wire Protocol UART
+        if (gpioPinConfigs[index] == 0 || index == CONFIG_GPIO_UART0_TX_CONST || index == CONFIG_GPIO_UART0_RX_CONST)
+        {
+            continue;
+        }
+
+        // store config
+        gpioPinConfigs[index] = GPIO_CFG_NO_DIR;
+
+        // reset pin
+        GPIO_resetConfig(index);
+    }
 
     return true;
 }
@@ -293,43 +285,16 @@ bool CPU_GPIO_ReservePin(GPIO_PIN pinNumber, bool fReserve)
         return false;
     }
 
-    GLOBAL_LOCK();
-
-    uint8_t index = FindPinConfig(pinNumber);
-
-    if (fReserve)
-    {
-        if (index < 0)
-        {
-            // pin already in use
-
-            GLOBAL_UNLOCK();
-
-            return false;
-        }
-        else
-        {
-            // pin not being used, get the next free slot
-            index = FindFreePinConfig();
-
-            // reserve pin
-            gpioPinConfigs[index] = pinNumber;
-        }
-    }
-    else
-    {
-        gpioPinConfigs[index] == GPIO_CFG_NO_DIR;
-    }
-
-    GLOBAL_UNLOCK();
-
-    return true;
+    return !CPU_GPIO_PinIsBusy(pinNumber);
 }
 
 // Return if Pin is reserved
 bool CPU_GPIO_PinIsBusy(GPIO_PIN pinNumber)
 {
-    return (FindPinConfig(pinNumber) >= 0);
+    uint32_t noDirConfig = GPIO_CFG_NO_DIR;
+    uint32_t currentConfig = gpioPinConfigs[pinNumber];
+
+    return currentConfig > 0 && currentConfig != noDirConfig;
 }
 
 // Return maximum number of pins
@@ -341,36 +306,19 @@ int32_t CPU_GPIO_GetPinCount()
 // Get current state of pin
 GpioPinValue CPU_GPIO_GetPinState(GPIO_PIN pinNumber)
 {
-    // get index of pin in config array
-    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
-
-    if (pinConfigIndex >= 0)
-    {
-        return (GpioPinValue)GPIO_read(pinConfigIndex);
-    }
+    return (GpioPinValue)GPIO_read(pinNumber);
 }
 
 // Set Pin state
 void CPU_GPIO_SetPinState(GPIO_PIN pinNumber, GpioPinValue pinState)
 {
-    // get index of pin in config array
-    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
-
-    if (pinConfigIndex >= 0)
-    {
-        GPIO_write(pinConfigIndex, pinState);
-    }
+    GPIO_write(pinNumber, pinState);
 }
 
 // Toggle pin state
 void CPU_GPIO_TogglePinState(GPIO_PIN pinNumber)
 {
-    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
-
-    if (pinConfigIndex >= 0)
-    {
-        GPIO_toggle(pinConfigIndex);
-    }
+    GPIO_toggle(pinNumber);
 }
 
 // Enable gpio pin for input
@@ -392,13 +340,13 @@ bool CPU_GPIO_EnableInputPin(
 
     pState = AllocateGpioInputState(pinNumber);
 
-    // get the index of this GPIO in pin config array
-    // and store it
-    pState->pinConfigIndex = FindPinConfig(pinNumber);
+    // store index of this GPIO
+    pState->pinConfigIndex = pinNumber;
 
     // set default input config for GPIO pin
-    gpioPinConfigs[pState->pinConfigIndex] |=
-        GPIO_CFG_INPUT_INTERNAL | GPIO_CFG_IN_INT_NONE | GPIO_CFG_PULL_NONE_INTERNAL;
+    gpioPinConfigs[pState->pinConfigIndex] = GPIO_CFG_INPUT | GPIO_CFG_IN_INT_NONE;
+
+    GPIO_setConfig(pState->pinConfigIndex, gpioPinConfigs[pState->pinConfigIndex]);
 
     if (!CPU_GPIO_SetDriveMode(pState->pinConfigIndex, driveMode))
     {
@@ -409,16 +357,11 @@ bool CPU_GPIO_EnableInputPin(
     // CPU_GPIO_EnableInputPin could be called a 2nd time with changed parameters
     if (pinISR != NULL && (pState->isrPtr == NULL))
     {
-        // get current config
-        GPIO_PinConfig currentPinConfig;
-        GPIO_getConfig(pState->pinConfigIndex, &currentPinConfig);
-
-        // set interrupt on both edges
-        GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_BOTH_EDGES);
         // set callback
         GPIO_setCallback(pState->pinConfigIndex, GpioEventCallback);
-        // enable INT
-        GPIO_enableInt(pState->pinConfigIndex);
+
+        // set interrupt on both edges and enable interrupt
+        GPIO_setInterruptConfig(pState->pinConfigIndex, GPIO_CFG_IN_INT_BOTH_EDGES | GPIO_CFG_INT_ENABLE);
 
         // store parameters & configs
         pState->isrPtr = pinISR;
@@ -473,16 +416,10 @@ bool CPU_GPIO_EnableInputPin(
         // there is no managed handler setup anymore
         // remove INT handler
 
-        // get current config
-        GPIO_PinConfig currentPinConfig;
-        GPIO_getConfig(pState->pinConfigIndex, &currentPinConfig);
-
         // disable interrupt
         GPIO_disableInt(pState->pinConfigIndex);
         // remove callback
         GPIO_setCallback(pState->pinConfigIndex, NULL);
-        // remove interrupt config
-        GPIO_setConfig(pState->pinConfigIndex, currentPinConfig | GPIO_CFG_IN_INT_NONE);
 
         // clear parameters & configs
         pState->isrPtr = NULL;
@@ -509,16 +446,20 @@ bool CPU_GPIO_EnableOutputPin(GPIO_PIN pinNumber, GpioPinValue InitialState, Pin
         return false;
     }
 
+    // check if pin is already in use
+    if (CPU_GPIO_PinIsBusy(pinNumber))
+    {
+        return false;
+    }
     // If this is currently an input pin then clean up
     DeleteGpioInputState(pinNumber);
 
-    // get free slot in pin config array
-    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
-
     // set the GPIO pin as output
-    gpioPinConfigs[pinConfigIndex] |= GPIO_CFG_OUT_STD;
+    gpioPinConfigs[pinNumber] = GPIO_CFG_OUT_STD;
 
-    if (CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode) == false)
+    GPIO_setConfig(pinNumber, gpioPinConfigs[pinNumber]);
+
+    if (CPU_GPIO_SetDriveMode(pinNumber, driveMode) == false)
     {
         return false;
     }
@@ -532,62 +473,58 @@ void CPU_GPIO_DisablePin(GPIO_PIN pinNumber, PinMode driveMode, uint32_t alterna
 {
     GLOBAL_LOCK();
 
-    uint8_t pinConfigIndex = FindPinConfig(pinNumber);
+    DeleteGpioInputState(pinNumber);
 
-    if (pinConfigIndex >= 0)
+    CPU_GPIO_SetDriveMode(pinNumber, driveMode);
+
+    if (alternateFunction)
     {
-        DeleteGpioInputState(pinNumber);
-
-        CPU_GPIO_SetDriveMode(pinConfigIndex, driveMode);
-
-        if (alternateFunction)
-        {
-            GPIO_setConfig(pinConfigIndex, alternateFunction);
-        }
-
-        GLOBAL_UNLOCK();
-
-        CPU_GPIO_ReservePin(pinNumber, false);
+        GPIO_setConfig(pinNumber, alternateFunction);
     }
+
+    GLOBAL_UNLOCK();
+
+    // clear pin config
+    gpioPinConfigs[pinNumber] = GPIO_CFG_NO_DIR;
 }
 
 // Set drive mode
 // pinNumber is the index of the corresponding PIN config in array
 // return true if ok
-bool CPU_GPIO_SetDriveMode(GPIO_PIN pinConfigIndex, PinMode driveMode)
+bool CPU_GPIO_SetDriveMode(GPIO_PIN pinNumber, PinMode driveMode)
 {
     // get current config
     GPIO_PinConfig currentPinConfig;
-    GPIO_getConfig(pinConfigIndex, &currentPinConfig);
+    GPIO_getConfig(pinNumber, &currentPinConfig);
 
     switch (driveMode)
     {
         case PinMode_Input:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_NOPULL);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_IN_NOPULL);
             break;
 
         case PinMode_InputPullDown:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PD);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_IN_PD);
             break;
 
         case PinMode_InputPullUp:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_IN_PU);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_IN_PU);
             break;
 
         case PinMode_Output:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_MED);
             break;
 
         case PinMode_OutputOpenDrain:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_NOPULL);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_OUT_OD_NOPULL);
             break;
 
         case PinMode_OutputOpenDrainPullUp:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PU);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_OUT_OD_PU);
             break;
 
         case PinMode_OutputOpenSourcePullDown:
-            GPIO_setConfig(pinConfigIndex, currentPinConfig | GPIO_CFG_OUT_OD_PD);
+            GPIO_setConfig(pinNumber, currentPinConfig | GPIO_CFG_OUT_OD_PD);
             break;
 
         default:

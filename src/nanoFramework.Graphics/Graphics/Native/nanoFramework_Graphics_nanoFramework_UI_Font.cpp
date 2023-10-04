@@ -7,6 +7,42 @@
 #include "Graphics.h"
 #include "nanoFramework_Graphics.h"
 
+// Used internally by DrawText and DrawTextInRect
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(CLR_RT_HeapBlock *pThis, CLR_GFX_Font *&font)
+{
+    NANOCLR_HEADER();
+
+    CLR_RT_HeapBlock_BinaryBlob *blob;
+
+    if (pThis)
+        pThis = pThis->Dereference();
+    FAULT_ON_NULL(pThis);
+
+#if defined(NANOCLR_APPDOMAINS)
+    if (pThis->DataType() == DATATYPE_TRANSPARENT_PROXY)
+    {
+        NANOCLR_CHECK_HRESULT(pThis->TransparentProxyValidate());
+        pThis = pThis->TransparentProxyDereference();
+    }
+#endif
+
+    blob = pThis[CLR_GFX_Font::FIELD__m_font].DereferenceBinaryBlob();
+
+    if (!blob || blob->DataType() != DATATYPE_BINARY_BLOB_HEAD)
+        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
+
+    font = (CLR_GFX_Font *)blob->GetData();
+
+    NANOCLR_NOCLEANUP();
+}
+
+// TODO: ? Internally used by DrawTextInRect
+
+HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(CLR_RT_StackFrame &stack, CLR_GFX_Font *&font)
+{
+    return GetFont(&stack.Arg0(), font);
+}
+
 HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::CharWidth___I4__CHAR(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
@@ -197,40 +233,4 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::
     NANOCLR_CHECK_HRESULT(hbHeight.StoreToReference(pArgs[2], 0));
 
     NANOCLR_NOCLEANUP();
-}
-
-// Used internally by DrawText and DrawTextInRect
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(CLR_RT_HeapBlock *pThis, CLR_GFX_Font *&font)
-{
-    NANOCLR_HEADER();
-
-    CLR_RT_HeapBlock_BinaryBlob *blob;
-
-    if (pThis)
-        pThis = pThis->Dereference();
-    FAULT_ON_NULL(pThis);
-
-#if defined(NANOCLR_APPDOMAINS)
-    if (pThis->DataType() == DATATYPE_TRANSPARENT_PROXY)
-    {
-        NANOCLR_CHECK_HRESULT(pThis->TransparentProxyValidate());
-        pThis = pThis->TransparentProxyDereference();
-    }
-#endif
-
-    blob = pThis[CLR_GFX_Font::FIELD__m_font].DereferenceBinaryBlob();
-
-    if (!blob || blob->DataType() != DATATYPE_BINARY_BLOB_HEAD)
-        NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
-
-    font = (CLR_GFX_Font *)blob->GetData();
-
-    NANOCLR_NOCLEANUP();
-}
-
-// TODO: ? Internally used by DrawTextInRect
-
-HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Font::GetFont(CLR_RT_StackFrame &stack, CLR_GFX_Font *&font)
-{
-    return GetFont(&stack.Arg0(), font);
 }

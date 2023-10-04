@@ -170,6 +170,10 @@ const char *HAL_SOCK_IPAddressToString(uint32_t address)
 
 void HAL_SOCK_EventsSet(uint32_t events)
 {
+#ifdef BUILD_RTM
+    (void)events;
+#endif
+
     NATIVE_PROFILE_PAL_NETWORK();
     ASSERT((events == SOCKET_EVENT_FLAG_SOCKET) || (events == SOCKET_EVENT_FLAG_SOCKETS_READY));
 

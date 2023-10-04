@@ -1,0 +1,27 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "general-preset",
+            "description": "Preset with general configurations common to all presets",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "architecture": {
+                "value": "unspecified",
+                "strategy": "external"
+            },
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "intelliSenseMode": "linux-gcc-arm"
+                }
+            },
+            "warnings": {
+                "deprecated": true,
+                "dev": true,
+                "uninitialized": false,
+                "unusedCli": false
+            }
+        }
+    ]
+}

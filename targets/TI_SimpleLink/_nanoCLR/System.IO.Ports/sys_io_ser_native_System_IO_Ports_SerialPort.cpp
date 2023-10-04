@@ -1055,7 +1055,7 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::NativeReceivedByte
     portIndex = (int)pThis[FIELD___portIndex].NumericByRef().s4;
 
     // Choose the driver for this SerialDevice
-    palUart = GetUartPAL(portIndex);
+    palUart = GetPalUartFromUartNum(portIndex);
     if (palUart == NULL)
     {
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
@@ -1085,11 +1085,11 @@ HRESULT Library_sys_io_ser_native_System_IO_Ports_SerialPort::GetDeviceSelector_
     // declare the device selector string whose max size is "COM2," + terminator
     // and init with the terminator
     static char deviceSelectorString[] =
-
 #if defined(NF_SERIAL_COMM_TI_USE_UART1) && (NF_SERIAL_COMM_TI_USE_UART1 == TRUE)
-        "COM2,"
+        "COM2,";
+#else
+        ",";
 #endif
-        ;
 
     // replace the last comma with a terminator
     if (deviceSelectorString[hal_strlen_s(deviceSelectorString) - 1] == ',')

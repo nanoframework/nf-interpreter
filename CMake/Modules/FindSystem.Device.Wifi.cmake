@@ -9,7 +9,7 @@ set(BASE_PATH_FOR_THIS_MODULE ${BASE_PATH_FOR_CLASS_LIBRARIES_MODULES}/System.De
 
 # set include directories
 list(APPEND System.Device.Wifi_INCLUDE_DIRS ${BASE_PATH_FOR_THIS_MODULE})
-list(APPEND System.Device.Wifi_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/src/System.Device.Wifi)
+list(APPEND System.Device.Wifi_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/System.Device.Wifi)
 
 
 # source files

@@ -1,0 +1,51 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "TI_CC1352R1_LAUNCHXL",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "RTOS": "TI_SimpleLink",
+                "TARGET_SERIES": "CC13X2",
+                "SUPPORT_ANY_BASE_CONVERSION": "OFF",
+                "NF_TARGET_HAS_NANOBOOTER": "OFF",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_WATCHDOG": "OFF",
+                "NF_FEATURE_RTC": "ON",
+                "NF_FEATURE_HAS_SDCARD": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_System.Math": "OFF",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "OFF",
+                "API_System.Device.I2c": "OFF",
+                "API_System.Device.Pwm": "OFF",
+                "API_System.Device.Adc": "ON",
+                "API_System.IO.Ports": "OFF",
+                "API_nanoFramework.ResourceManager": "OFF",
+                "API_nanoFramework.System.Collections": "OFF",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.TI.EasyLink": "ON",
+                "API_nanoFramework.Hardware.TI": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "TI_CC1352R1_LAUNCHXL",
+            "displayName": "TI_CC1352R1_LAUNCHXL",
+            "configurePreset": "TI_CC1352R1_LAUNCHXL"
+        }
+    ]
+}

@@ -155,7 +155,11 @@ bool Storage_MountSpi(int spiBus, uint32_t csPin, int driveIndex)
     ESP_LOGI(TAG, "Initializing SPI SD card");
 
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S3)
+    host.slot = spiBus;
+#else
     host.slot = spiBus + HSPI_HOST;
+#endif
 
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = false,

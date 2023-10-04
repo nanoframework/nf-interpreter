@@ -22,3 +22,11 @@ To choose the dev container you want to use, adjust `devcontainer.json` and chan
 * `./sources/Dockerfile.ChibiOS` to build the container image from the source with all the elements to build ChibiOS based devices
 * `./sources/Dockerfile.ESP32` to build the container image from the source with all the elements to build ESP32 based devices
 * `./sources/Dockerfile.TI` to build the container image from the source with all the elements to build TI SimpleLink based devices
+
+
+## Building and releasing Docker images in a fork
+
+Add a "repository variable" called `PUBLISH_DOCKER_IMAGE` with the value `true` in your forked repository
+See: https://docs.github.com/en/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository for further help.
+
+**Note:** by default, the build and publish of the devcontainer docker images will still only happen when the docker source files change and are "pushed" to the `main` branch.

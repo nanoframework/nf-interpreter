@@ -342,6 +342,9 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
             config->SpecificConfigId = 0;
+
+            // get default MAC for interface
+            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_STA);
             break;
 
         case 1: // Wireless AP
@@ -352,17 +355,20 @@ bool InitialiseNetworkDefaultConfig(HAL_Configuration_NetworkInterface *config, 
             // config->IPv4Address
             // config->IPv4NetMask
             // config->IPv4GatewayAddress
+
+            // get default MAC for interface
+            esp_read_mac(config->MacAddress, ESP_MAC_WIFI_SOFTAP);
             break;
 
         case 2: // Ethernet
             config->InterfaceType = NetworkInterfaceType_Ethernet;
             config->StartupAddressMode = AddressMode_DHCP;
             config->AutomaticDNS = 1;
+
+            // get default MAC for interface
+            esp_read_mac(config->MacAddress, ESP_MAC_ETH);
             break;
     }
-
-    // get default MAC
-    esp_efuse_mac_get_default(config->MacAddress);
 
     // always good
     return TRUE;

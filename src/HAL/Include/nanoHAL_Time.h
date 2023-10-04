@@ -51,6 +51,8 @@ extern "C"
     /// exception if you are to create that date. To stay safe side 1/1/1601 is taken as origin, as was done for
     /// Windows.
 
+    // this function, because it is called VERY VERY often, is implemented as inlined on each platform
+    // in the targetHAL_Time.h file
     uint64_t HAL_Time_SysTicksToTime(uint64_t sysTicks);
 
     /// <summary>

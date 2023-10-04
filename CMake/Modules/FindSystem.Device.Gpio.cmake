@@ -23,13 +23,7 @@ set(System.Device.Gpio_SRCS
 
     sys_dev_gpio_native_System_Device_Gpio_GpioController.cpp
     sys_dev_gpio_native_System_Device_Gpio_GpioPin.cpp
-    
-    # core source files
-    AsyncCompletions.cpp
-    AsyncContinuations.cpp
-    NativeEventDispatcher.cpp
-    InterruptHandler.cpp
-    Hardware.cpp
+
 )
 
 foreach(SRC_FILE ${System.Device.Gpio_SRCS})
@@ -41,12 +35,6 @@ foreach(SRC_FILE ${System.Device.Gpio_SRCS})
 	        ${BASE_PATH_FOR_THIS_MODULE}
             ${TARGET_BASE_LOCATION}
             ${CMAKE_SOURCE_DIR}/src/System.Device.Gpio
-
-            # core source files
-            ${CMAKE_SOURCE_DIR}/src/PAL/AsyncProcCall
-            ${CMAKE_SOURCE_DIR}/src/CLR/Core/NativeEventDispatcher
-            ${CMAKE_SOURCE_DIR}/src/CLR/Core/InterruptHandler
-            ${CMAKE_SOURCE_DIR}/src/CLR/Core/Hardware
 
 	    CMAKE_FIND_ROOT_PATH_BOTH
     )

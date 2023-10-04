@@ -144,7 +144,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("    Memory: Start %s\r\n", HAL_Time_CurrentDateTimeToString());
+        CLR_Debug::Printf("\r\n\r\n    Memory: Start %s\r\n", HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
@@ -154,7 +154,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 
 #if defined(NANOCLR_TRACE_MEMORY_STATS)
 
-    CLR_UINT32 stats_start = HAL_Time_CurrentSysTicks();
+    CLR_UINT64 stats_start = HAL_Time_CurrentSysTicks();
 
 #endif
 
@@ -176,7 +176,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                        TIME_CONVERSION__TICKUNITS;
 
         CLR_Debug::Printf(
-            "GC: %dmsec %d bytes used, %d bytes available\r\n",
+            "\r\nGC: %dmsec %d bytes used, %d bytes available\r\n\r\n",
             milliSec,
             m_totalBytes - m_freeBytes,
             m_freeBytes);
@@ -227,12 +227,14 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
         }
         NANOCLR_FOREACH_NODE_END();
 
+#if defined(NANOCLR_GC_VERBOSE)
+
         for (dt = DATATYPE_VOID; dt < DATATYPE_FIRST_INVALID; dt++)
         {
             if (countBlocks[dt])
             {
                 CLR_Debug::Printf(
-                    "Type %02X (%-20s): %6d bytes\r\n",
+                    "Type %02X (%-20s): %8d bytes\r\n",
                     dt,
                     c_CLR_RT_DataTypeLookup[dt].m_name,
                     countBlocks[dt] * sizeof(CLR_RT_HeapBlock));
@@ -244,7 +246,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                         if (countArryBlocks[dt2])
                         {
                             CLR_Debug::Printf(
-                                "   Type %02X (%-17s): %6d bytes\r\n",
+                                "   Type %02X (%-17s): %8d bytes\r\n",
                                 dt2,
                                 c_CLR_RT_DataTypeLookup[dt2].m_name,
                                 countArryBlocks[dt2] * sizeof(CLR_RT_HeapBlock));
@@ -253,6 +255,8 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
                 }
             }
         }
+
+#endif
     }
 #endif
 
@@ -265,7 +269,7 @@ CLR_UINT32 CLR_RT_GarbageCollector::ExecuteGarbageCollection()
 #if defined(NANOCLR_GC_VERBOSE)
     if (s_CLR_RT_fTrace_GC >= c_CLR_RT_Trace_Info)
     {
-        CLR_Debug::Printf("    Memory: End %s\r\n", HAL_Time_CurrentDateTimeToString());
+        CLR_Debug::Printf("\r\n\r\n    Memory: End %s\r\n", HAL_Time_CurrentDateTimeToString());
     }
 #endif
 
@@ -398,7 +402,7 @@ void CLR_RT_GarbageCollector::Mark()
 
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
         CheckSingleBlock_Force(g_CLR_RT_ExecutionEngine.m_scratchPadArray);
-#endif //#if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
+#endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
 
         if (m_fOutOfStackSpaceForGC)
         {

@@ -46,7 +46,7 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // wdgStop(&WDGD1);
 
             // gracefully shutdown everything
-            nanoHAL_Uninitialize_C();
+            nanoHAL_Uninitialize_C(true);
 
             // chSysDisable();
             // disable interrupts
@@ -59,9 +59,9 @@ void CPU_SetPowerMode(PowerLevel_type powerLevel)
             // set power control register to: power down deep sleep
             /////////////////////////////////////////////////////
 
-            // TODO 
+            // TODO
             // need review here to use ST HAL HAL_PWREx_EnterSTOP2Mode
-            
+
             // set SLEEPDEEP bit of Cortex SCR
             SCB->SCR |= (uint32_t)SCB_SCR_SLEEPDEEP_Msk;
 

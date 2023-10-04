@@ -449,7 +449,7 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
     lst.m_blocks.LinkAtBack(ptr);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    g_CLR_PRF_Profiler.TrackObjectDeletion(node);
+    g_CLR_PRF_Profiler.TrackObjectCreation(node);
 #endif
 }
 
@@ -571,13 +571,28 @@ CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node_Bytes(CLR_UINT32 dataType, CLR
 CLR_RT_HeapBlock *CLR_RT_EventCache::Extract_Node(CLR_UINT32 dataType, CLR_UINT32 flags, CLR_UINT32 blocks)
 {
     NATIVE_PROFILE_CLR_CORE();
+
 #if defined(NANOCLR_FORCE_GC_BEFORE_EVERY_ALLOCATION)
     return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
 #else
-    if (blocks > 0 && blocks < c_maxFastLists)
-        return Extract_Node_Fast(dataType, flags, blocks);
+
+#if !defined(BUILD_RTM) || defined(VIRTUAL_DEVICE)
+    if (g_CLR_RT_ExecutionEngine.m_fPerformGarbageCollection)
+    {
+        return g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForEvents(dataType, flags, blocks);
+    }
     else
-        return Extract_Node_Slow(dataType, flags, blocks);
+#endif
+    {
+        if (blocks > 0 && blocks < c_maxFastLists)
+        {
+            return Extract_Node_Fast(dataType, flags, blocks);
+        }
+        else
+        {
+            return Extract_Node_Slow(dataType, flags, blocks);
+        }
+    }
 #endif
 }
 

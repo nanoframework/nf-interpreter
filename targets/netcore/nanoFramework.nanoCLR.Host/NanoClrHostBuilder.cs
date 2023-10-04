@@ -26,6 +26,20 @@ namespace nanoFramework.nanoCLR.Host
         public bool WaitForDebugger { get; set; } = false;
         public bool EnterDebuggerLoopAfterExit { get; set; } = false;
 
+        public bool PerformGarbageCollection { get; set; } = false;
+
+        public bool PerformHeapCompaction { get; set; } = false;
+
+        public nanoCLRHostBuilder()
+        {
+            Interop.nanoCLR.DllPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "NanoCLR");
+        }
+
+        public nanoCLRHostBuilder(string dllPath)
+        {
+            Interop.nanoCLR.DllPath = dllPath;
+        }
+
         public nanoCLRHostBuilder LoadAssembly(string name, byte[] data)
         {
             _configureSteps.Add(() => Interop.nanoCLR.nanoCLR_LoadAssembly(name, data, data.Length));
@@ -108,7 +122,9 @@ namespace nanoFramework.nanoCLR.Host
             {
                 MaxContextSwitches = (ushort)MaxContextSwitches,
                 WaitForDebugger = WaitForDebugger,
-                EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit
+                EnterDebuggerLoopAfterExit = EnterDebuggerLoopAfterExit,
+                PerformGarbageCollection = PerformGarbageCollection,
+                PerformHeapCompaction = PerformHeapCompaction
             };
 
             return s_nanoClrHost;
@@ -116,9 +132,12 @@ namespace nanoFramework.nanoCLR.Host
 
         public void UnloadNanoClrDll()
         {
-            string nanoClrDllLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "nanoFramework.nanoCLR.dll");
+            Interop.nanoCLR.UnloadNanoClrImageDll();
+        }
 
-            Interop.nanoCLR.UnloadNanoClrImageDll(nanoClrDllLocation);
+        public void OutputNanoClrDllInfo()
+        {
+            Console.WriteLine($"nanoCLR loaded from '{Interop.nanoCLR.FindNanoClrDll()}'");
         }
     }
 }

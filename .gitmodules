@@ -1,3 +1,5 @@
 [submodule "targets-community"]
 	path = targets-community
-	url = ../nf-Community-Targets.git
+	url = https://github.com/nanoframework/nf-Community-Targets.git
+	shallow = true
+	ignore = dirty

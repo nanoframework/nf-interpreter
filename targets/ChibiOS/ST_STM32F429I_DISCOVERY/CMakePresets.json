@@ -1,0 +1,58 @@
+{
+    "version": 4,
+    "include": [
+        "../../../CMake/arm-gcc.json",
+        "../../../config/user-tools-repos.json",
+        "../../../config/user-prefs.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "ST_STM32F429I_DISCOVERY",
+            "inherits": [
+                "arm-gcc-cortex-preset",
+                "user-tools-repos",
+                "user-prefs"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_BOARD": "${presetName}",
+                "RTOS": "ChibiOS",
+                "TARGET_SERIES": "STM32F4xx",
+                "CHIBIOS_CONTRIB_REQUIRED": "OFF",
+                "STM32_CUBE_PACKAGE_REQUIRED": "OFF",
+                "SUPPORT_ANY_BASE_CONVERSION": "ON",
+                "NF_FEATURE_DEBUGGER": "ON",
+                "NF_FEATURE_RTC": "ON",
+                "SWO_OUTPUT": "OFF",
+                "NF_BUILD_RTM": "OFF",
+                "API_System.Math": "ON",
+                "API_Hardware.Stm32": "ON",
+                "API_System.Device.Gpio": "ON",
+                "API_System.Device.Spi": "ON",
+                "API_System.Device.I2c": "ON",
+                "API_System.Device.Pwm": "ON",
+                "API_System.IO.Ports": "ON",
+                "API_System.Device.Adc": "ON",
+                "API_nanoFramework.Device.OneWire": "ON",
+                "API_nanoFramework.Device.Can": "ON",
+                "API_nanoFramework.ResourceManager": "ON",
+                "API_nanoFramework.System.Collections": "ON",
+                "API_nanoFramework.System.Text": "ON",
+                "API_nanoFramework.Graphics": "ON",
+                "GRAPHICS_MEMORY": "Graphics_Memory.cpp",
+                "GRAPHICS_DISPLAY": "ILI9341_240x320_SPI.cpp",
+                "GRAPHICS_DISPLAY_INTERFACE": "Spi_To_Display.cpp",
+                "TOUCHPANEL_DEVICE": "STMPE811QTR_I2C.cpp",
+                "TOUCHPANEL_INTERFACE": "I2C_To_TouchPanel.cpp"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "inherits": "base-user",
+            "name": "ST_STM32F429I_DISCOVERY",
+            "displayName": "ST_STM32F429I_DISCOVERY",
+            "configurePreset": "ST_STM32F429I_DISCOVERY"
+        }
+    ]
+}

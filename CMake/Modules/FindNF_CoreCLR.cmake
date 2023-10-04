@@ -24,14 +24,16 @@ list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Debugger)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Events)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.Runtime.Native)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/nanoFramework.System.Collections)
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION})
 list(APPEND NF_CoreCLR_INCLUDE_DIRS ${TARGET_BASE_LOCATION}/nanoCLR)
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD})
-list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_BOARD}/nanoCLR)
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD})
+list(APPEND NF_CoreCLR_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/targets/${RTOS}/${TARGET_VENDOR}/${TARGET_BOARD}/nanoCLR)
 
 # source files for nanoFramework Core, CoreLib and CLR startup
 set(NF_CoreCLR_SRCS
@@ -138,10 +140,12 @@ set(NF_CoreCLR_SRCS
 
     # CLR stubs
     Debugger_stub.cpp
-    
+    Messaging_stub.cpp
+
     # Helpers
     nanoprintf.c
     nanoRingBuffer.c
+    Info_Safeprintf.cpp
 
     # HAL
     nanoHAL_Time.cpp
@@ -155,9 +159,14 @@ set(NF_CoreCLR_SRCS
     nanoPAL_PerformanceCounters_stubs.cpp
 
     # PAL stubs
-    Async_stubs.cpp
     COM_stubs.c
     GenericPort_stubs.c
+
+    # other features
+    AsyncCompletions.cpp
+    NativeEventDispatcher.cpp
+    InterruptHandler.cpp
+    Hardware.cpp
 )
 
 # append CRC32, if not already included with Wire Protocol
@@ -254,6 +263,7 @@ foreach(SRC_FILE ${NF_CoreCLR_SRCS})
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/nanoprintf
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/NanoRingBuffer
             ${CMAKE_SOURCE_DIR}/src/CLR/Helpers/Base64
+            ${CMAKE_SOURCE_DIR}/src/CLR/Diagnostics
 
             # HAL
             ${CMAKE_SOURCE_DIR}/src/HAL
@@ -326,7 +336,7 @@ macro(nf_add_lib_coreclr)
         )
 
     else() 
-        nf_set_compile_options(TARGET ${LIB_NAME} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
+        nf_set_compile_options(TARGET ${LIB_NAME})
         nf_set_compile_definitions(TARGET ${LIB_NAME} EXTRA_COMPILE_DEFINITIONS ${NFALC_EXTRA_COMPILE_DEFINITIONS} BUILD_TARGET ${NANOCLR_PROJECT_NAME})
         nf_set_link_options(TARGET ${LIB_NAME})
     endif()

@@ -193,6 +193,7 @@ macro(nf_add_platform_include_directories target)
 
             ${TARGET_NXP_NANOCLR_INCLUDE_DIRS}
             ${NANOCLR_PROJECT_INCLUDE_DIRS}
+            ${TARGET_FREERTOS_COMMON_INCLUDE_DIRS}
             ${TARGET_FREERTOS_NANOCLR_INCLUDE_DIRS}
             ${LWIP_INCLUDE_DIRS}
             ${CMAKE_CURRENT_BINARY_DIR}
