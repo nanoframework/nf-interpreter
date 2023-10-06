@@ -523,8 +523,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
 {
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64 *pRes;
+    CLR_INT64 *value;
 
     char *str = (char *)stack.Arg0().RecoverString();
     char *conversionResult = NULL;
@@ -539,13 +538,10 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     // check string parameter for null
     FAULT_ON_NULL_ARG(str);
 
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
+    ref.ClearData();
 
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
+    value = (CLR_INT64 *)&ref.NumericByRef().s8;
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
     conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
@@ -575,7 +571,7 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     }
     else
     {
-        *pRes = ticks;
+        *value = ticks;
     }
 
     NANOCLR_CLEANUP();
