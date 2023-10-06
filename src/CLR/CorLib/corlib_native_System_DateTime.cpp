@@ -151,25 +151,14 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    CLR_INT64 *val = NewObject(stack);
 
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    val = GetValuePtr(ref);
-    
     // load with full date&time
     // including UTC flag
     *val = HAL_Time_CurrentDateTime(false) | s_UTCMask;
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime(CLR_RT_StackFrame &stack)
@@ -177,27 +166,27 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
-
-    CLR_RT_HeapBlock& ref = stack.PushValue();
-
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( ref, dtType.m_handlerCls));
-
-    val = GetValuePtr( ref );
+    CLR_INT64 *val = NewObject(stack);
 
     // load with date part only
     // including UTC flag
     *val = HAL_Time_CurrentDateTime(true) | s_UTCMask;
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
+
+CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
+    ref.ClearData();
+
+    return (CLR_INT64 *)&ref.NumericByRef().s8;
+}
 
 CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_StackFrame &stack)
 {
