@@ -203,7 +203,9 @@
 // /**
 //  * LWIP_IPV6==1: Enable IPv6
 //  */
-// #define LWIP_IPV6 0
+#ifndef LWIP_IPV6
+#define LWIP_IPV6 0
+#endif
 
 /*
    ------------------------------------------------
