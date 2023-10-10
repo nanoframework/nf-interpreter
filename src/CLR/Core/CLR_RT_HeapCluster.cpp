@@ -107,6 +107,10 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
             if (available >= length)
             {
                 res = ptr;
+
+                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.m_location);
+                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+
                 break;
             }
         }
@@ -120,6 +124,11 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
 
         available -= length;
 
+        _ASSERTE((void *)next >= (void *)s_CLR_RT_Heap.m_location);
+        _ASSERTE((void *)next < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+        _ASSERTE((void *)prev >= (void *)s_CLR_RT_Heap.m_location);
+        _ASSERTE((void *)prev < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+
         if (available != 0)
         {
             if (flags & CLR_RT_HeapBlock::HB_Event)
@@ -127,10 +136,16 @@ CLR_RT_HeapBlock *CLR_RT_HeapCluster::ExtractBlocks(CLR_UINT32 dataType, CLR_UIN
                 res->SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_FREEBLOCK, CLR_RT_HeapBlock::HB_Pinned, available));
 
                 res += available;
+
+                _ASSERTE((void *)res >= (void *)s_CLR_RT_Heap.m_location);
+                _ASSERTE((void *)res < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
             }
             else
             {
                 CLR_RT_HeapBlock_Node *ptr = &res[length];
+
+                _ASSERTE((void *)ptr >= (void *)s_CLR_RT_Heap.m_location);
+                _ASSERTE((void *)ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
 
                 //
                 // Relink to the new free block.
