@@ -452,9 +452,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8 *dst = (CLR_UINT8 *)*ref;
 
-#if NANOCLR_VALIDATE_HEAP == NANOCLR_VALIDATE_HEAP_0_None
     void *destinationAddress;
-#endif
 
 #if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     if (g_CLR_RT_GarbageCollector.m_relocWorker)
