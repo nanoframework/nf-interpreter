@@ -113,7 +113,7 @@ jobs:
             ${{ github.workspace }}/build/build-info.txt
 
       - name: Tag the build
-        if: ${{ github.event.pull_request.number == 'null' }}
+        if: ${{ github.event.pull_request.number == null }}
         uses: actions/github-script@v6
         with:
           script: |
