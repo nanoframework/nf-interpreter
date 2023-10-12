@@ -209,6 +209,54 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 
 endif()
 
+# if LWIP is enabled add it to the build
+if(USE_NETWORKING_OPTION)
+
+    # check if LWIP_SOURCE was specified or if it's empty (default is empty)
+    set(NO_LWIP_SOURCE TRUE)
+
+    if(LWIP_SOURCE)
+        if(NOT ${LWIP_SOURCE} STREQUAL "")
+            set(NO_LWIP_SOURCE FALSE)
+        endif()
+    endif()
+
+    # set tag for currently supported version
+    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
+    set(LWIP_GIT_TAG "STABLE-2_1_2_RELEASE")
+
+    if(NO_LWIP_SOURCE)
+        # no LWIP source specified, download it from it's repo
+        message(STATUS "LWIP ${LWIP_GIT_TAG} from Git repo")
+
+        FetchContent_Declare(
+            lwip
+            GIT_REPOSITORY https://git.savannah.gnu.org/git/lwip.git
+            GIT_TAG ${LWIP_GIT_TAG}
+        )
+
+    else()
+        # LWIP source was specified
+
+        message(STATUS "LWIP ${LWIP_GIT_TAG} (source from: ${LWIP_SOURCE})")
+            
+        FetchContent_Declare(
+            lwip
+            SOURCE_DIR ${LWIP_SOURCE}
+        )
+
+    endif()
+
+    # Check if population has already been performed
+    FetchContent_GetProperties(lwip)
+    if(NOT lwip_POPULATED)
+        # Fetch the content using previously declared details
+        FetchContent_Populate(lwip)
+    endif()
+
+endif()
+
+
 # if Mbed TLS is enabled add it to the build
 if(USE_SECURITY_MBEDTLS_OPTION)
 

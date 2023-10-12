@@ -13,6 +13,7 @@
                 "CHIBIOS_CONTRIB_SOURCE": "<path-to-local-ChibiOS-contrib-source-mind-the-forward-slash>",
                 "CHIBIOS_HAL_SOURCE": "<path-to-ChibiOS-source-folder-if-supported-mind-the-forward-slash>",
                 "STM32_CUBE_PACKAGE_SOURCE": "<path-to-stm32-cubemx-package-mind-the-forward-slash>",
+                "LWIP_SOURCE": "<path-to-lwip-source-mind-the-forward-slashes>",
                 "MBEDTLS_SOURCE": "<path-to-mbedtls-source-mind-the-forward-slashes>",
                 "FATFS_SOURCE": "<path-to-local-FATFS-source-mind-the-forward-slash>",
                 "SPIFFS_SOURCE": "<path-to-local-SPIFFS-source-mind-the-forward-slash>",
@@ -20,7 +21,9 @@
                 "TI_SL_CC32xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC32xx-SDK-source-mind-the-forward-slash>",
                 "TI_SL_CC13xx_26xx_SDK_SOURCE": "<path-to-local-TI_SimpleLink-CC13xx_26xx-SDK-source-mind-the-forward-slash>",
                 "TI_XDCTOOLS_SOURCE": "<path-to-local-TI-XDC-Tools-source-mind-the-forward-slash>",
-                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>"
+                "TI_SYSCONFIG_SOURCE": "<path-to-local-TI-SYSCONFIG-Tool-source-mind-the-forward-slash>",
+                "AZURERTOS_SOURCE_FOLDER": "<path-to-local-AzureRTOS-source-mind-the-forward-slash>",
+                "NETXDUO_SOURCE_FOLDER": "<path-to-local-NetxDuo-source-mind-the-forward-slash>"
             }
         },
         {
@@ -35,6 +38,7 @@
                 "CHIBIOS_CONTRIB_SOURCE": "/sources/ChibiOs-Contrib",
                 "CHIBIOS_HAL_SOURCE": "/sources/ChibiOs",
                 "STM32_CUBE_PACKAGE_SOURCE": "/sources/STM32CubeL4",
+                "LWIP_SOURCE": "/sources/lwip",
                 "MBEDTLS_SOURCE": "/sources/mbedtls",
                 "FATFS_SOURCE": "/sources/fatfs",
                 "SPIFFS_SOURCE": "/sources/spiffs",

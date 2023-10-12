@@ -81,9 +81,9 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
     && git clone --branch 5.5.1 https://github.com/ARM-software/CMSIS_5.git --depth 1 ./sources/CMSIS_5 \
     && git clone --branch nf-build https://github.com/nanoframework/spiffs.git --depth 1 ./sources/spiffs
 
-# The certificate of this one is not prolely propagated in the base image, ignoring the verification of this clone
+# The certificate of this one is not properly propagated in the base image, ignoring the verification of this clone
 ENV GIT_SSL_NO_VERIFY=1
-RUN git clone --branch STABLE-2_0_3_RELEASE https://git.savannah.nongnu.org/git/lwip.git --depth 1 ./sources/lwip
+RUN git clone --branch STABLE-2_1_2_RELEASE https://git.savannah.gnu.org/git/lwip.git --depth 1 ./sources/lwip
 ENV GIT_SSL_NO_VERIFY=0
 
 # Clone ESP-IDF
