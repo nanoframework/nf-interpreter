@@ -496,6 +496,7 @@ struct Library_corlib_native_System_DateTime
 
     //--//
 
+    static CLR_INT64 *NewObject(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_StackFrame &stack);
     static CLR_INT64 *GetValuePtr(CLR_RT_HeapBlock &ref);
 

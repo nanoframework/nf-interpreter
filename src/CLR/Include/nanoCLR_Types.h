@@ -351,16 +351,16 @@ enum CLR_DataType // KEEP IN SYNC WITH nanoCLR_DataType enum in nanoFramework.To
     DATATYPE_I8,       // 8 bytes
     DATATYPE_U8,       // 8 bytes
     DATATYPE_R8,       // 8 bytes
-    DATATYPE_DATETIME, // 8 bytes     // Shortcut for System.DateTime
-    DATATYPE_TIMESPAN, // 8 bytes     // Shortcut for System.TimeSpan
+    DATATYPE_DATETIME, // NOT USED, just kept for compatibility with initial version and MDP
+    DATATYPE_TIMESPAN, // NOT USED, just kept for compatibility with initial version and MDP
     DATATYPE_STRING,
 
-    DATATYPE_LAST_NONPOINTER = DATATYPE_TIMESPAN,      // This is the last type that doesn't need to be relocated.
+    DATATYPE_LAST_NONPOINTER = DATATYPE_R8,            // This is the last type that doesn't need to be relocated.
     DATATYPE_LAST_PRIMITIVE_TO_PRESERVE = DATATYPE_R8, // All the above types don't need fix-up on assignment.
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
     DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_STRING, // All the above types can be marshaled by assignment.
 #else
-    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_TIMESPAN, // All the above types can be marshaled by assignment.
+    DATATYPE_LAST_PRIMITIVE_TO_MARSHAL = DATATYPE_R8, // All the above types can be marshaled by assignment.
 #endif
     DATATYPE_LAST_PRIMITIVE = DATATYPE_STRING, // All the above types don't need fix-up on assignment.
 

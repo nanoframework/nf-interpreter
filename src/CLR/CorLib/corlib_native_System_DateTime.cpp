@@ -151,25 +151,14 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    CLR_INT64 *val = NewObject(stack);
 
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    val = GetValuePtr(ref);
-    
     // load with full date&time
     // including UTC flag
-    *val = HAL_Time_CurrentDateTime(false) | s_UTCMask;
+    *val = (CLR_INT64)(HAL_Time_CurrentDateTime(false) | s_UTCMask);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime(CLR_RT_StackFrame &stack)
@@ -177,27 +166,33 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
-
-    CLR_RT_HeapBlock& ref = stack.PushValue();
-
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( ref, dtType.m_handlerCls));
-
-    val = GetValuePtr( ref );
+    CLR_INT64 *val = NewObject(stack);
 
     // load with date part only
     // including UTC flag
-    *val = HAL_Time_CurrentDateTime(true) | s_UTCMask;
+    *val = (CLR_INT64)(HAL_Time_CurrentDateTime(true) | s_UTCMask);
 
-    NANOCLR_NOCLEANUP();
+    NANOCLR_NOCLEANUP_NOLABEL();
 }
 
 //--//
+
+CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+
+    CLR_RT_TypeDescriptor dtType;
+
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    // initialize <DateTime> type descriptor
+    dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime);
+
+    // create an instance of <DateTime>
+    g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls);
+
+    return GetValuePtr(ref);
+}
 
 CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_StackFrame &stack)
 {
@@ -221,17 +216,16 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
 
     // after dereferencing the object if it's pointing to another Object
     // need to do it again because this DateTime instance is most likely boxed
-    if (dt == DATATYPE_OBJECT)
+    if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
     {
         obj = obj->Dereference();
-        if (!obj)
-            return NULL;
-        dt = obj->DataType();
-    }
 
-    if (dt == DATATYPE_DATETIME)
-    {
-        return (CLR_INT64 *)&obj->NumericByRef().s8;
+        if (!obj)
+        {
+            return NULL;
+        }
+
+        dt = obj->DataType();
     }
 
     if (dt == DATATYPE_I8)
