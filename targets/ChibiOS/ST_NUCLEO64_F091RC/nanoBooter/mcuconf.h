@@ -33,11 +33,11 @@
 #define STM32_HSI14_ENABLED                 TRUE
 #define STM32_HSI48_ENABLED                 FALSE
 #define STM32_LSI_ENABLED                   TRUE
-#define STM32_HSE_ENABLED                   TRUE
+#define STM32_HSE_ENABLED                   FALSE
 #define STM32_LSE_ENABLED                   FALSE
 #define STM32_SW                            STM32_SW_PLL
-#define STM32_PLLSRC                        STM32_PLLSRC_HSE
-#define STM32_PREDIV_VALUE                  2
+#define STM32_PLLSRC                        STM32_PLLSRC_HSI_DIV2
+#define STM32_PREDIV_VALUE                  1
 #define STM32_PLLMUL_VALUE                  12
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE                          STM32_PPRE_DIV1
@@ -57,12 +57,15 @@
 #define STM32_IRQ_EXTI4_15_IRQ_PRIORITY     3
 #define STM32_IRQ_EXTI16_IRQ_PRIORITY       3
 #define STM32_IRQ_EXTI17_20_IRQ_PRIORITY    3
+#define STM32_IRQ_USART1_PRIORITY           3
+#define STM32_IRQ_USART2_PRIORITY           3
+#define STM32_IRQ_USART3_8_PRIORITY         3
 
 /*
  * ADC driver system settings.
  */
 #define STM32_ADC_USE_ADC1                  FALSE
-#define STM32_ADC_ADC1_CKMODE               STM32_ADC_CKMODE_ADCCLK
+#define STM32_ADC_ADC1_CFGR2                ADC_CFGR2_CKMODE_ADCCLK
 #define STM32_ADC_ADC1_DMA_PRIORITY         2
 #define STM32_ADC_ADC1_DMA_IRQ_PRIORITY     2
 #define STM32_ADC_ADC1_DMA_STREAM           STM32_DMA_STREAM_ID(1, 1)
@@ -170,9 +173,6 @@
 #define STM32_SERIAL_USE_USART6             FALSE
 #define STM32_SERIAL_USE_UART7              FALSE
 #define STM32_SERIAL_USE_UART8              FALSE
-#define STM32_SERIAL_USART1_PRIORITY        3
-#define STM32_SERIAL_USART2_PRIORITY        3
-#define STM32_SERIAL_USART3_8_PRIORITY      3
 
 /*
  * SPI driver system settings.
@@ -206,9 +206,6 @@
 #define STM32_UART_USE_USART6               FALSE
 #define STM32_UART_USE_UART7                FALSE
 #define STM32_UART_USE_UART8                FALSE
-#define STM32_UART_USART1_IRQ_PRIORITY      3
-#define STM32_UART_USART2_IRQ_PRIORITY      3
-#define STM32_UART_USART3_8_IRQ_PRIORITY    3
 #define STM32_UART_USART1_DMA_PRIORITY      0
 #define STM32_UART_USART2_DMA_PRIORITY      0
 #define STM32_UART_USART3_DMA_PRIORITY      0

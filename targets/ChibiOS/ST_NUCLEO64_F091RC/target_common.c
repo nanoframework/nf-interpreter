@@ -14,7 +14,7 @@ HAL_SYSTEM_CONFIG HalSystemConfig =
 
     1,  //ConvertCOM_DebugHandle(1),
     0,  //ConvertCOM_DebugHandle(0),
-    921600,
+    460800,
     0,  // STDIO = COM2 or COM1
 
     { RAM1_MEMORY_StartAddress, RAM1_MEMORY_Size },
