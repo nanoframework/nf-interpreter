@@ -17,7 +17,7 @@ set(nanoFramework.Hardware.GiantGecko_SRCS
 
     nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_GpioConfiguration.cpp
     nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_Power.cpp
-    nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_Rtc.cpp
+    nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_RTC.cpp
     nf_hardware_giantgecko_nanoFramework_Hardware_GiantGecko_Utilities.cpp
 
 )

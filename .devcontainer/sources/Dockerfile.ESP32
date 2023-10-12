@@ -9,7 +9,7 @@ RUN apt-get update \
 
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
       -q -O /tmp/cmake-install.sh \
       && chmod u+x /tmp/cmake-install.sh \

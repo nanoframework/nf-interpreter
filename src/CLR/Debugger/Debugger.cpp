@@ -1803,8 +1803,6 @@ static bool FillValues(
         case DATATYPE_I8:
         case DATATYPE_U8:
         case DATATYPE_R8:
-        case DATATYPE_DATETIME:
-        case DATATYPE_TIMESPAN:
         case DATATYPE_REFLECTION:
             //
             // Primitives or optimized value types.
@@ -2777,7 +2775,6 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
     CLR_DBG_Commands::Debugging_Value_GetField *cmd = (CLR_DBG_Commands::Debugging_Value_GetField *)msg->m_payload;
     CLR_RT_HeapBlock *blk = cmd->m_heapblock;
     CLR_RT_HeapBlock *reference = NULL;
-    CLR_RT_HeapBlock tmp;
     CLR_RT_TypeDescriptor desc;
     CLR_RT_TypeDef_Instance td;
     CLR_RT_TypeDef_Instance *pTD = NULL;
@@ -2848,19 +2845,7 @@ bool CLR_DBG_Debugger::Debugging_Value_GetField(WP_Message *msg)
                 break;
         }
 
-        switch (blk->DataType())
-        {
-            case DATATYPE_DATETIME: // Special case.
-            case DATATYPE_TIMESPAN: // Special case.
-                tmp.SetInteger((CLR_INT64)blk->NumericByRefConst().s8);
-                reference = blk;
-                blk = &tmp;
-                break;
-
-            default:
-                blk = &blk[cmd->m_offset];
-                break;
-        }
+        blk = &blk[cmd->m_offset];
     }
 
     if (IsBlockEnumMaybe(blk))

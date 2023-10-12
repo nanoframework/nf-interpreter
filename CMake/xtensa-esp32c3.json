@@ -27,7 +27,7 @@
                 "API_System.Device.Dac": "OFF",
                 "API_System.Device.Gpio": "ON",
                 "API_System.Device.I2c": "ON",
-                "API_System.Device.I2s": "OFF",
+                "API_System.Device.I2s": "ON",
                 "API_System.Device.Spi": "ON",
                 "API_System.Device.Pwm": "ON",
                 "API_System.Device.Wifi": "ON",

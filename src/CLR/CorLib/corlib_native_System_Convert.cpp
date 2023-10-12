@@ -523,29 +523,18 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
 {
     NANOCLR_HEADER();
 
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64 *pRes;
+    uint64_t ticks;
+    CLR_INT64 *value;
 
     char *str = (char *)stack.Arg0().RecoverString();
     char *conversionResult = NULL;
     // char *str = (char *)"1999-10-31 10:00:00Z";
-    uint64_t ticks;
 
     // grab parameter with flag to throw on failure
     bool throwOnFailure = (bool)stack.Arg1().NumericByRefConst().u1;
 
-    CLR_RT_HeapBlock &ref = stack.PushValue();
-
     // check string parameter for null
     FAULT_ON_NULL_ARG(str);
-
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
-
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
 
     // try 'u' Universal time with sortable format (yyyy-MM-dd' 'HH:mm:ss)
     conversionResult = Nano_strptime(str, "%Y-%m-%d %H:%M:%SZ", &ticks);
@@ -570,12 +559,12 @@ HRESULT Library_corlib_native_System_Convert::NativeToDateTime___STATIC__SystemD
     if (conversionResult == NULL)
     {
         // failed to parse string
-
         NANOCLR_SET_AND_LEAVE(CLR_E_FORMAT_EXCEPTION);
     }
     else
     {
-        *pRes = ticks;
+        value = Library_corlib_native_System_DateTime::NewObject(stack);
+        *value = ticks;
     }
 
     NANOCLR_CLEANUP();

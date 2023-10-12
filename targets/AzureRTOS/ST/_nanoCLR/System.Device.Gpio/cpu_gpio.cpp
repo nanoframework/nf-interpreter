@@ -9,20 +9,20 @@
 #define GPIO_MAX_PIN     256
 #define TOTAL_GPIO_PORTS ((GPIO_MAX_PIN + 15) / 16)
 
-// Double linkedlist to hold the state of each Input pin
+// Double linked list to hold the state of each Input pin
 struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
 {
-    // Pin number
+    // pin number
     GPIO_PIN pinNumber;
-    // debounce timer for this Pin
+    // debounce timer for this pin
     TX_TIMER debounceTimer;
-    // Ptr to user ISR or null
+    // pointer to user ISR or null
     GPIO_INTERRUPT_SERVICE_ROUTINE isrPtr;
-    // debounce Millsecs, no debonce=0
+    // debounce milliseconds, NO debounce set to 0
     uint32_t debounceMs;
     // Interrupt mode
     uint8_t mode;
-    // Param to user isr call
+    // Param to user ISR call
     void *param;
     // Expected state for debounce handler
     bool expected;
@@ -30,8 +30,10 @@ struct gpio_input_state : public HAL_DblLinkedNode<gpio_input_state>
     bool waitingDebounce;
 };
 
-static HAL_DblLinkedList<gpio_input_state> gpioInputList; // Double Linked list for GPIO input status
-static uint16_t pinReserved[TOTAL_GPIO_PORTS];            //  reserved - 1 bit per pin
+// Double Linked list for GPIO input status
+static HAL_DblLinkedList<gpio_input_state> gpioInputList;
+//  reserved - 1 bit per pin
+static uint16_t pinReserved[TOTAL_GPIO_PORTS];
 
 // this is an utility function to get a ChibiOS PAL IoLine from our "encoded" pin number
 static ioline_t GetIoLine(int16_t pinNumber)
@@ -52,6 +54,7 @@ bool IsValidGpioPin(GPIO_PIN pinNumber)
 gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
 {
     gpio_input_state *ptr = gpioInputList.FirstNode();
+
     while (ptr->Next() != NULL)
     {
         if (GPIO_PIN(ptr->pinNumber) == gpioPin)
@@ -65,24 +68,20 @@ gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
     return NULL;
 }
 
-static void DebounceTimerCallback(uint32_t id)
+static void DebounceTimerCallback(ULONG pinState)
 {
-    gpio_input_state *pState = (gpio_input_state *)id;
+    gpio_input_state *pState = (gpio_input_state *)pinState;
 
     // get current pin state
     bool actual = palReadLine(GetIoLine(pState->pinNumber));
 
     if (actual == pState->expected)
     {
+        // call ISR
         pState->isrPtr(pState->pinNumber, actual, pState->param);
-        if (pState->mode == GPIO_INT_EDGE_BOTH)
-        {
-            // both edges
-            // update expected state
-            pState->expected ^= 1;
-        }
     }
 
+    // reset flag
     pState->waitingDebounce = false;
 }
 
@@ -96,30 +95,30 @@ void GpioEventCallback(void *arg)
 
     if (pGpio != NULL)
     {
-        // Ignore any pin changes during debounce
-        if (!pGpio->waitingDebounce)
+        if (pGpio->waitingDebounce)
+        {
+            // Ignore any pin changes during debounce
+        }
+        else
         {
             // check if there is a debounce time set
             if (pGpio->debounceMs > 0)
             {
+                // stop timer, just in case
+                tx_timer_deactivate(&pGpio->debounceTimer);
                 // Set flag we are waiting for debounce on this pin
                 pGpio->waitingDebounce = true;
 
+                // expecting same state as current one
+                pGpio->expected = CPU_GPIO_GetPinState(pGpio->pinNumber);
+
                 // setup timer
-                tx_timer_deactivate(&pGpio->debounceTimer);
-                tx_timer_change(&pGpio->debounceTimer, 0, pGpio->debounceMs / 10);
+                tx_timer_change(&pGpio->debounceTimer, TX_TICKS_PER_MILLISEC(pGpio->debounceMs), 0);
                 tx_timer_activate(&pGpio->debounceTimer);
             }
             else
             {
-                // get IoLine from pin number
-                ioline_t ioLine = GetIoLine(pGpio->pinNumber);
-
-                TX_RESTORE
-
-                pGpio->isrPtr(pGpio->pinNumber, palReadLine(ioLine), pGpio->param);
-
-                TX_DISABLE
+                pGpio->isrPtr(pGpio->pinNumber, CPU_GPIO_GetPinState(pGpio->pinNumber), pGpio->param);
             }
         }
     }
@@ -168,9 +167,9 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
                 &ptr->debounceTimer,
                 (char *)"GPIO debounce timer",
                 DebounceTimerCallback,
-                0,
-                0,
+                (ULONG)ptr,
                 1,
+                0,
                 TX_NO_ACTIVATE);
 
             gpioInputList.LinkAtBack(ptr);

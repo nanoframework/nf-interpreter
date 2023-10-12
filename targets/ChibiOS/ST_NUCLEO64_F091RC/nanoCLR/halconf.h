@@ -405,7 +405,7 @@
  *          default configuration.
  */
 #if !defined(SERIAL_DEFAULT_BITRATE) || defined(__DOXYGEN__)
-#define SERIAL_DEFAULT_BITRATE              921600
+#define SERIAL_DEFAULT_BITRATE              460800
 #endif
 
 /**

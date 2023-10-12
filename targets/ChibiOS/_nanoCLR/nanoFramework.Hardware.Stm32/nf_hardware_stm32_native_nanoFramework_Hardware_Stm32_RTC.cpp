@@ -4,128 +4,128 @@
 //
 
 #include "nf_hardware_stm32_native.h"
+#include <corlib_native.h>
 
 // we are using always Alarm 0 (alarm A, if there are two alarms)
-#define ALARM_ID    0
+#define ALARM_ID 0
 
-
-HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::
+    Native_RTC_SetAlarm___STATIC__VOID__U1__U1__U1__U1(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-      #if (HAL_USE_RTC == TRUE)
+#if (HAL_USE_RTC == TRUE)
 
-        RTCAlarm alarmTime;
+    RTCAlarm alarmTime;
 
-        uint32_t value = 0;
-        uint32_t alarmRegister = 0;
+    uint32_t value = 0;
+    uint32_t alarmRegister = 0;
 
-      #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || \
-          defined(STM32F4XX) || defined(STM32L0XX) ||  defined(STM32L4XX) || \
-          defined(STM32H7XX)
-        
-        // these series are using driver RTCv2
-        // the alarm is set on a register with the various values BCD coded
-        // to keep the configuration simple, it's assumed that 
-        // it's only possible to set seconds, minutes, hours and date (day)
+#if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32L0XX) ||      \
+    defined(STM32L4XX) || defined(STM32H7XX)
 
-        // to set the alarm, it has to be stoped first (in case there is one already set)
-        rtcSetAlarm(&RTCD1, ALARM_ID, NULL);
+    // these series are using driver RTCv2
+    // the alarm is set on a register with the various values BCD coded
+    // to keep the configuration simple, it's assumed that
+    // it's only possible to set seconds, minutes, hours and date (day)
 
-        // alarm date (day) tens and units
-        value = stack.Arg0().NumericByRef().u1;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_DU_Pos);
-        value /= 10;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_DT_Pos);
+    // to set the alarm, it has to be stoped first (in case there is one already set)
+    rtcSetAlarm(&RTCD1, ALARM_ID, NULL);
 
-        // alarm hours tens and units
-        value = stack.Arg1().NumericByRef().u1;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_HU_Pos);
-        value /= 10;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_HT_Pos);
+    // alarm date (day) tens and units
+    value = stack.Arg0().NumericByRef().u1;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_DU_Pos);
+    value /= 10;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_DT_Pos);
 
-        // alarm minutes tens and units
-        value = stack.Arg2().NumericByRef().u1;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_MNU_Pos);
-        value /= 10;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_MNT_Pos);
+    // alarm hours tens and units
+    value = stack.Arg1().NumericByRef().u1;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_HU_Pos);
+    value /= 10;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_HT_Pos);
 
-        // alarm seconds tens and units
-        value = stack.Arg3().NumericByRef().u1;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_SU_Pos);
-        value /= 10;
-        alarmRegister |= ((value % 10) << RTC_ALRMAR_ST_Pos);
+    // alarm minutes tens and units
+    value = stack.Arg2().NumericByRef().u1;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_MNU_Pos);
+    value /= 10;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_MNT_Pos);
 
-        alarmTime.alrmr = alarmRegister;
+    // alarm seconds tens and units
+    value = stack.Arg3().NumericByRef().u1;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_SU_Pos);
+    value /= 10;
+    alarmRegister |= ((value % 10) << RTC_ALRMAR_ST_Pos);
 
-      #else
-        #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
-      #endif
+    alarmTime.alrmr = alarmRegister;
 
-      #if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || \
-      defined(STM32F3XX) ||defined(STM32F4XX) || defined(STM32L0XX) || defined(STM32L1XX)
-        // clear PWR wake up Flag
-        PWR->CR |=  PWR_CSR_WUF;
-      #endif
+#else
+#error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
+#endif
 
-      #if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
+#if defined(STM32F0XX) || defined(STM32F1XX) || defined(STM32F2XX) || defined(STM32F3XX) || defined(STM32F4XX) ||      \
+    defined(STM32L0XX) || defined(STM32L1XX)
+    // clear PWR wake up Flag
+    PWR->CR |= PWR_CSR_WUF;
+#endif
 
-        CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
-        CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
-  
-      #endif 
+#if defined(STM32F7XX) || defined(STM32H7XX) || defined(STM32L4XX)
 
-        rtcSetAlarm(&RTCD1, ALARM_ID, &alarmTime);
+    CLEAR_BIT(RTC->CR, RTC_CR_ALRAIE);
+    CLEAR_BIT(RTC->ISR, RTC_ISR_ALRAF);
 
-        NANOCLR_NOCLEANUP_NOLABEL();
+#endif
 
-      #else
+    rtcSetAlarm(&RTCD1, ALARM_ID, &alarmTime);
 
-        (void)stack;
+    NANOCLR_NOCLEANUP_NOLABEL();
 
-        NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
+#else
 
-        NANOCLR_NOCLEANUP();
+    (void)stack;
 
-      #endif // (HAL_USE_RTC == TRUE)
+    NANOCLR_SET_AND_LEAVE(CLR_E_NOT_SUPPORTED);
 
+    NANOCLR_NOCLEANUP();
+
+#endif // (HAL_USE_RTC == TRUE)
 }
 
-HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__SystemDateTime( CLR_RT_StackFrame& stack )
+HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAlarm___STATIC__SystemDateTime(
+    CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
-  #if (HAL_USE_RTC == TRUE)
+#if (HAL_USE_RTC == TRUE)
 
     RTCAlarm alarmValue;
     RTCDateTime currentTime;
     SYSTEMTIME alarmTime;
     uint32_t value;
+    CLR_INT64 *timeValue;
 
     rtcGetAlarm(&RTCD1, ALARM_ID, &alarmValue);
 
-    #if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || \
-        defined(STM32F4XX) || defined(STM32L0XX) ||  defined(STM32L4XX) || \
-        defined(STM32H7XX)
+#if defined(STM32F7XX) || defined(STM32F3XX) || defined(STM32F0XX) || defined(STM32F4XX) || defined(STM32L0XX) ||      \
+    defined(STM32L4XX) || defined(STM32H7XX)
 
     // these series are using driver RTCv2
     // the alarm is set on a register with the various values BCD coded
-    // to keep the configuration simple, it's assumed that 
+    // to keep the configuration simple, it's assumed that
     // it's only possible to set seconds, minutes, hours and date (day)
 
     // convert from BCD assuming the alarm is always set for a future date/time
-    
+
     // get current time from RTC
     rtcGetTime(&RTCD1, &currentTime);
 
     // fill in alarmTime struct
-    alarmTime.wYear = (unsigned short) (currentTime.year + 1980);   // ChibiOS is counting years since 1980
-    alarmTime.wMonth = (unsigned short) currentTime.month;
+    alarmTime.wYear = (unsigned short)(currentTime.year + 1980); // ChibiOS is counting years since 1980
+    alarmTime.wMonth = (unsigned short)currentTime.month;
 
     // date (day) tens and units
     value = alarmValue.alrmr & RTC_ALRMAR_DT_Msk;
     value = value >> RTC_ALRMAR_DT_Pos;
-    alarmTime.wDay =  value * 10;
+    alarmTime.wDay = value * 10;
 
     value = alarmValue.alrmr & RTC_ALRMAR_DU_Msk;
     value = value >> RTC_ALRMAR_DU_Pos;
@@ -163,33 +163,28 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
     alarmTime.wDayOfWeek = 0;
 
     // if alarm day is lower than the current day, means that the alarm was set for a date on the next month
-    if(alarmTime.wDay < currentTime.day)
+    if (alarmTime.wDay < currentTime.day)
     {
         alarmTime.wMonth++;
 
         // check for December + 1
-        if(alarmTime.wMonth > 12)
+        if (alarmTime.wMonth > 12)
         {
             // adjust to January
             alarmTime.wMonth = 1;
         }
     }
 
-    #else
-    #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
-    #endif
+#else
+#error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
+#endif
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    timeValue = Library_corlib_native_System_DateTime::NewObject(stack);
+    *timeValue = HAL_Time_ConvertFromSystemTime(&alarmTime);
 
-    ref.SetDataId( CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1) );
-    ref.ClearData();
-
-    CLR_INT64* pRes = (CLR_INT64*)&ref.NumericByRef().s8;
-    *pRes = HAL_Time_ConvertFromSystemTime( &alarmTime );
-  
     NANOCLR_NOCLEANUP_NOLABEL();
 
-  #else
+#else
 
     (void)stack;
 
@@ -197,6 +192,5 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
 
     NANOCLR_NOCLEANUP();
 
-  #endif // (HAL_USE_RTC == TRUE)
-
+#endif // (HAL_USE_RTC == TRUE)
 }

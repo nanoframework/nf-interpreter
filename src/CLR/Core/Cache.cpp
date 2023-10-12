@@ -449,7 +449,7 @@ void CLR_RT_EventCache::Append_Node(CLR_RT_HeapBlock *node)
     lst.m_blocks.LinkAtBack(ptr);
 
 #if defined(NANOCLR_PROFILE_NEW_ALLOCATIONS)
-    g_CLR_PRF_Profiler.TrackObjectDeletion(node);
+    g_CLR_PRF_Profiler.TrackObjectCreation(node);
 #endif
 }
 

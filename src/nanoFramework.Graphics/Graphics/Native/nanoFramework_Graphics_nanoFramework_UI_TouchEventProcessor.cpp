@@ -14,6 +14,8 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
     NANOCLR_HEADER();
     hr = S_OK;
 
+    CLR_INT64 *value;
+
     CLR_UINT32 data1 = stack.Arg1().NumericByRef().u4;
     CLR_UINT32 numTouches = data1 >> 16;
     TouchPoint *touchPoint = (TouchPoint *)stack.Arg2().NumericByRef().u4;
@@ -38,10 +40,12 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_TouchEventProcessor::
         (CLR_UINT16)0);
     touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport::FIELD__EventMessage]
         .SetInteger((CLR_UINT8)data1 & 0x00ff);
-    touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent::FIELD__Time].SetInteger(
-        stack.Arg3().NumericByRef().s8);
-    touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent::FIELD__Time].ChangeDataType(
-        DATATYPE_DATETIME);
+
+    value = Library_corlib_native_System_DateTime::GetValuePtr(
+        touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_Input_RawTouchInputReport::FIELD__EventMessage]);
+    FAULT_ON_NULL(value);
+
+    *value = (CLR_UINT64)stack.Arg3().NumericByRef().s8;
 
     NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_Array::CreateInstance(
         touchEvent[Library_nanoFramework_Graphics_nanoFramework_UI_TouchEvent::FIELD__Touches],

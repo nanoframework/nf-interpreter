@@ -20,7 +20,7 @@ RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
-ARG CMAKE_SCRIPT=https://cmake.org/files/v3.24/cmake-3.24.0-linux-x86_64.sh
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
       -q -O /tmp/cmake-install.sh \
       && chmod u+x /tmp/cmake-install.sh \
@@ -69,8 +69,8 @@ RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeH7.git --depth 1 ./sources/STM32CubeH7 \
-    && git clone --branch v6.1.12_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
-    && git clone --branch v6.1.12_rel --recursive https://github.com/azure-rtos/netxduo.git --depth 1 ./sources/NextDuo \
+    && git clone --branch v6.2.0_rel --recursive https://github.com/azure-rtos/threadx.git --depth 1 ./sources/AzureRTOS \
+    && git clone --branch v6.2.0_rel --recursive https://github.com/azure-rtos/netxduo.git --depth 1 ./sources/NetxDuo \
     && git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs \
     && git clone --branch nanoframework https://github.com/nanoframework/ChibiOS-Contrib.git --depth 1 ./sources/ChibiOs-Contrib
 # Clone mbedtls and fatfs

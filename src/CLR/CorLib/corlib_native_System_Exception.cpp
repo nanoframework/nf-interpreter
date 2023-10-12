@@ -240,7 +240,10 @@ HRESULT Library_corlib_native_System_Exception::SetStackTrace(CLR_RT_HeapBlock &
             if (!g_CLR_RT_ExecutionEngine.m_fShuttingDown)
 #endif
             {
-                CLR_RT_DUMP::EXCEPTION(*stack, ref);
+                if (CLR_EE_DBG_IS_NOT(NoStackTraceInExceptions))
+                {
+                    CLR_RT_DUMP::EXCEPTION(*stack, ref);
+                }
             }
         }
 
