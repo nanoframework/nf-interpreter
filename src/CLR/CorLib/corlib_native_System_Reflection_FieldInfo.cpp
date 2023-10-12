@@ -74,17 +74,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 #endif
     }
 
-    switch(obj->DataType())
-    {
-        case DATATYPE_DATETIME: // Special case.
-        case DATATYPE_TIMESPAN: // Special case.
-            obj->NumericByRef().s8 = val.NumericByRefConst().s8;
-            break;
-
-        default:
-            obj->Assign( val );
-            break;
-    }
+    obj->Assign(val);
 
     NANOCLR_NOCLEANUP();
 }
