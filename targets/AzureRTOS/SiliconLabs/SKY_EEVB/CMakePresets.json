@@ -55,6 +55,17 @@
             }
         },
         {
+            "name": "SKY_EEVB_Watchdog_Debug",
+            "inherits": [
+                "SKY_EEVB_Debug"
+            ],
+            "hidden": false,
+            "cacheVariables": {
+                "TARGET_NAME": "SKY_EEVB_Watchdog_Debug",
+                "NF_FEATURE_WATCHDOG": "ON",
+            }
+        },
+        {
             "name": "SKY_EEVB_Release",
             "inherits": [
                 "SKY_EEVB_Debug"
@@ -74,6 +85,12 @@
             "name": "SKY_EEVB_Debug",
             "displayName": "SKY_EEVB_Debug",
             "configurePreset": "SKY_EEVB_Debug"
+        },
+        {
+            "inherits": "base-user",
+            "name": "SKY_EEVB_Watchdog_Debug",
+            "displayName": "SKY_EEVB_Watchdog_Debug",
+            "configurePreset": "SKY_EEVB_Watchdog_Debug"
         },
         {
             "inherits": "base-user",
