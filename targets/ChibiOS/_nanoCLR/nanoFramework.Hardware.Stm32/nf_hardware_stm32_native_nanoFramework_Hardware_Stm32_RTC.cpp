@@ -177,11 +177,11 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
 #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
 #endif
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    CLR_RT_HeapBlock &ref = stack.PushValue();
     ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
     ref.ClearData();
 
-    CLR_INT64 *pRes = (CLR_INT64*)&ref.NumericByRef().s8;
+    CLR_INT64 *pRes = (CLR_INT64 *)&ref.NumericByRef().s8;
     *pRes = HAL_Time_ConvertFromSystemTime(&alarmTime);
 
     NANOCLR_NOCLEANUP_NOLABEL();
