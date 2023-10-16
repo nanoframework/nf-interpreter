@@ -1,0 +1,11 @@
+name: Build SKY_EEVB_Watchdog_Debug
+
+on:
+  workflow_dispatch
+
+jobs:
+  build_SKY_EEVB_Watchdog_Debug:
+    name: Build SKY_EEVB_Watchdog_Debug
+    uses: ./.github/workflows/skyworks_evb_build.yaml
+    with:
+      targetName: 'SKY_EEVB_Watchdog_Debug'
