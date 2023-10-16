@@ -95,7 +95,7 @@ endif()
 
 if(NO_LWIP_SOURCE)
 
-    message(STATUS "lwIP ${LWIP_GIT_TAG} from savannah.gnu.org repo")
+    message(STATUS "lwIP ${LWIP_GIT_TAG} from github.com/lwip-tcpip/lwip repo")
 
     FetchContent_Declare(
         lwip
