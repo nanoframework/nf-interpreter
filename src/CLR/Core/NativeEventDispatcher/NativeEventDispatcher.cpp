@@ -6,7 +6,6 @@
 #include "stdafx.h"
 #include <nanoCLR_Hardware.h>
 #include <nf_rt_events_native.h>
-#include <corlib_native.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -224,13 +223,11 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch(
 
     NANOCLR_HEADER();
 
-    CLR_INT64 *value;
-
     CLR_RT_StackFrame *stackTop;
     CLR_RT_HeapBlock *args;
     CLR_RT_HeapBlock_Delegate *dlg;
     CLR_RT_HeapBlock *event;
-    const CLR_UINT64 c_UTCMask = ULONGLONGCONSTANT(0x8000000000000000);
+    const CLR_UINT64 c_UTCMask = 0x8000000000000000ULL;
 
     InterruptPortInterrupt &interrupt = appInterrupt->m_interruptPortInterrupt;
 
@@ -255,11 +252,8 @@ HRESULT CLR_RT_HeapBlock_NativeEventDispatcher::StartDispatch(
     //
     args[0].SetInteger(interrupt.data1);
     args[1].SetInteger(interrupt.data2);
-
-    value = Library_corlib_native_System_DateTime::GetValuePtr(args[2]);
-    FAULT_ON_NULL(value);
-
-    *value = (CLR_UINT64)interrupt.time | c_UTCMask;
+    args[2].SetInteger((CLR_UINT64)interrupt.time | c_UTCMask);
+    args[2].ChangeDataType(DATATYPE_DATETIME);
 
     th->m_terminationCallback = CLR_RT_HeapBlock_NativeEventDispatcher::ThreadTerminationCallback;
     th->m_terminationParameter = appInterrupt;
