@@ -62,7 +62,7 @@
             "hidden": false,
             "cacheVariables": {
                 "TARGET_NAME": "SKY_EEVB_Watchdog_Debug",
-                "NF_FEATURE_WATCHDOG": "ON",
+                "NF_FEATURE_WATCHDOG": "ON"
             }
         },
         {
