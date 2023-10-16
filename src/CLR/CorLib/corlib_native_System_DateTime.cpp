@@ -151,20 +151,20 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
-    
-    CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    CLR_RT_TypeDescriptor dtType;
+    CLR_INT64 *val;
+
+    CLR_RT_HeapBlock &ref = stack.PushValue();
 
     // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT( dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
 
     // create an instance of <DateTime>
     NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
 
     val = GetValuePtr(ref);
-    
+
     // load with full date&time
     // including UTC flag
     *val = HAL_Time_CurrentDateTime(false) | s_UTCMask;
@@ -178,17 +178,17 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NANOCLR_HEADER();
 
     CLR_RT_TypeDescriptor dtType;
-    CLR_INT64*            val;
+    CLR_INT64 *val;
 
-    CLR_RT_HeapBlock& ref = stack.PushValue();
+    CLR_RT_HeapBlock &ref = stack.PushValue();
 
     // initialize <DateTime> type descriptor
     NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
 
     // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject( ref, dtType.m_handlerCls));
+    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
 
-    val = GetValuePtr( ref );
+    val = GetValuePtr(ref);
 
     // load with date part only
     // including UTC flag

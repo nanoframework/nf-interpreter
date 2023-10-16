@@ -74,7 +74,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
 #endif
     }
 
-    switch(obj->DataType())
+    switch (obj->DataType())
     {
         case DATATYPE_DATETIME: // Special case.
         case DATATYPE_TIMESPAN: // Special case.
@@ -82,7 +82,7 @@ HRESULT Library_corlib_native_System_Reflection_FieldInfo::SetValue___VOID__OBJE
             break;
 
         default:
-            obj->Assign( val );
+            obj->Assign(val);
             break;
     }
 
