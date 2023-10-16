@@ -180,6 +180,8 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference(CLR_RT_HeapBlock *&obj)
             {
                 case DATATYPE_CLASS:
                 case DATATYPE_VALUETYPE:
+                case DATATYPE_DATETIME: // Special case.
+                case DATATYPE_TIMESPAN: // Special case.
                     NANOCLR_SET_AND_LEAVE(S_OK);
 
                 default:
@@ -188,6 +190,11 @@ HRESULT CLR_RT_HeapBlock::EnsureObjectReference(CLR_RT_HeapBlock *&obj)
             }
         }
         break;
+
+        case DATATYPE_DATETIME: // Special case.
+        case DATATYPE_TIMESPAN: // Special case.
+            obj = this;
+            NANOCLR_SET_AND_LEAVE(S_OK);
 
         default:
             // the remaining data types aren't to be handled
@@ -351,11 +358,24 @@ void CLR_RT_HeapBlock::FixArrayReferenceForValueTypes()
     NATIVE_PROFILE_CLR_CORE();
     CLR_RT_HeapBlock_Array *array = m_data.arrayReference.array;
 
+    //
     // ValueTypes are implemented as pointers to objects,
     // so getting an array reference to a ValueType has to be treated like assigning a pointer!
-    if (array->m_typeOfElement == DATATYPE_VALUETYPE)
+    //
+    // DateTime and TimeSpan are optimized as primitive types,
+    // so getting an array reference to them is like getting a reference to them.
+    //
+    switch (array->m_typeOfElement)
     {
-        this->SetReference(*(CLR_RT_HeapBlock *)array->GetElement(m_data.arrayReference.index));
+        case DATATYPE_VALUETYPE:
+            this->SetReference(*(CLR_RT_HeapBlock *)array->GetElement(m_data.arrayReference.index));
+            break;
+
+        case DATATYPE_DATETIME:
+        case DATATYPE_TIMESPAN:
+            m_id.raw = CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_BYREF, 0, 1);
+            m_data.objectReference.ptr = (CLR_RT_HeapBlock *)array->GetElement(m_data.arrayReference.index);
+            break;
     }
 }
 
@@ -811,6 +831,18 @@ HRESULT CLR_RT_HeapBlock::PerformBoxing(const CLR_RT_TypeDef_Instance &cls)
                 g_CLR_RT_ExecutionEngine.ExtractHeapBlocksForClassOrValueTypes(DATATYPE_VALUETYPE, HB_Boxed, cls, 2);
             FAULT_ON_NULL(ptr);
 
+            switch (dataType)
+            {
+                case DATATYPE_DATETIME: // Special case.
+                case DATATYPE_TIMESPAN: // Special case.
+                    dataType = DATATYPE_I8;
+                    break;
+
+                default:
+                    // the remaining data types aren't to be handled
+                    break;
+            }
+
             ptr[1].SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(dataType, 0, 1));
             ptr[1].AssignData(*this);
 
@@ -1176,9 +1208,11 @@ CLR_UINT32 CLR_RT_HeapBlock::GetAtomicDataUsedBytes() const
             return 4;
             break;
 
-        case DATATYPE_I8: // Fall through, hashDataSize = 8
-        case DATATYPE_U8: // Fall through, hashDataSize = 8
-        case DATATYPE_R8: // Fall through, hashDataSize = 8
+        case DATATYPE_I8:       // Fall through, hashDataSize = 8
+        case DATATYPE_U8:       // Fall through, hashDataSize = 8
+        case DATATYPE_R8:       // Fall through, hashDataSize = 8
+        case DATATYPE_DATETIME: // Fall through, hashDataSize = 8
+        case DATATYPE_TIMESPAN:
             return 8;
             break;
 
@@ -1686,6 +1720,8 @@ CLR_INT32 CLR_RT_HeapBlock::Compare_Values(const CLR_RT_HeapBlock &left, const C
 
             case DATATYPE_I8:
             case DATATYPE_U8:
+            case DATATYPE_DATETIME:
+            case DATATYPE_TIMESPAN:
                 return CompareValues_Numeric(left, right, fSigned, c_CLR_RT_DataTypeLookup[leftDataType].m_sizeInBytes);
 
             default:
