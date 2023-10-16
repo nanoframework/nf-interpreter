@@ -99,7 +99,7 @@ if(NO_LWIP_SOURCE)
 
     FetchContent_Declare(
         lwip
-        GIT_REPOSITORY https://git.savannah.gnu.org/git/lwip.git
+        GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
         GIT_TAG ${LWIP_GIT_TAG}
     )
 
