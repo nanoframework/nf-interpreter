@@ -2513,7 +2513,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case DATATYPE_VALUETYPE:
                             evalPos[0].Assign(obj[fieldInst.CrossReference().m_offset]);
                             goto Execute_LoadAndPromote;
-
+                        case DATATYPE_DATETIME:
+                        case DATATYPE_TIMESPAN:
+                            evalPos[0].SetInteger((CLR_INT64)obj->NumericByRefConst().s8);
+                            break;
 #if defined(NANOCLR_APPDOMAINS)
                         case DATATYPE_TRANSPARENT_PROXY:
                         {
@@ -2561,6 +2564,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     {
                         evalPos[0].SetReference(obj[fieldInst.CrossReference().m_offset]);
                     }
+                    else if (dt == DATATYPE_DATETIME || dt == DATATYPE_TIMESPAN) // Special case.
+                    {
+                        NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE); // NOT SUPPORTED.
+                    }
                     else
                     {
                         NANOCLR_SET_AND_LEAVE(CLR_E_WRONG_TYPE);
@@ -2592,6 +2599,10 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                         case DATATYPE_CLASS:
                         case DATATYPE_VALUETYPE:
                             obj[fieldInst.CrossReference().m_offset].AssignAndPreserveType(evalPos[2]);
+                            break;
+                        case DATATYPE_DATETIME: // Special case.
+                        case DATATYPE_TIMESPAN: // Special case.
+                            obj->NumericByRef().s8 = evalPos[2].NumericByRefConst().s8;
                             break;
 
 #if defined(NANOCLR_APPDOMAINS)
@@ -3473,11 +3484,16 @@ HRESULT CLR_RT_Thread::Execute_IL(CLR_RT_StackFrame &stackArg)
                     break;
                 case DATATYPE_R4:
                     break;
+
                 case DATATYPE_I8:
                     break;
                 case DATATYPE_U8:
                     break;
                 case DATATYPE_R8:
+                    break;
+                case DATATYPE_DATETIME:
+                    break;
+                case DATATYPE_TIMESPAN:
                     break;
                 case DATATYPE_STRING:
                     break;
