@@ -4,7 +4,6 @@
 //
 
 #include "nf_hardware_stm32_native.h"
-#include <corlib_native.h>
 
 // we are using always Alarm 0 (alarm A, if there are two alarms)
 #define ALARM_ID 0
@@ -101,7 +100,6 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
     RTCDateTime currentTime;
     SYSTEMTIME alarmTime;
     uint32_t value;
-    CLR_INT64 *timeValue;
 
     rtcGetAlarm(&RTCD1, ALARM_ID, &alarmValue);
 
@@ -179,8 +177,12 @@ HRESULT Library_nf_hardware_stm32_native_nanoFramework_Hardware_Stm32_RTC::GetAl
 #error "Setting an alarm for this series in not supported. Care to look into it and submit a PR?"
 #endif
 
-    timeValue = Library_corlib_native_System_DateTime::NewObject(stack);
-    *timeValue = HAL_Time_ConvertFromSystemTime(&alarmTime);
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_DATETIME, 0, 1));
+    ref.ClearData();
+
+    CLR_INT64 *pRes = (CLR_INT64 *)&ref.NumericByRef().s8;
+    *pRes = HAL_Time_ConvertFromSystemTime(&alarmTime);
 
     NANOCLR_NOCLEANUP_NOLABEL();
 
