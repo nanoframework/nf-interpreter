@@ -177,15 +177,19 @@ HRESULT Library_corlib_native_System_TimeSpan::Equals___STATIC__BOOLEAN__SystemT
 
 //--//
 
-CLR_INT64 *Library_corlib_native_System_TimeSpan::NewObject(CLR_RT_StackFrame &stack)
+CLR_INT64 *Library_corlib_native_System_TimeSpan::NewObject(CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_CORE();
-    CLR_RT_HeapBlock &ref = stack.PushValue();
 
-    ref.SetDataId(CLR_RT_HEAPBLOCK_RAW_ID(DATATYPE_TIMESPAN, 0, 1));
-    ref.ClearData();
+    CLR_RT_TypeDescriptor dtType;
 
-    return (CLR_INT64 *)&ref.NumericByRef().s8;
+    // initialize <DateTime> type descriptor
+    dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_TimeSpan);
+
+    // create an instance of <TimeSpan>
+    g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls);
+
+    return GetValuePtr(ref);
 }
 
 CLR_INT64 *Library_corlib_native_System_TimeSpan::GetValuePtr(CLR_RT_StackFrame &stack)
