@@ -451,13 +451,11 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
     NANOCLR_HEADER();
 
     SYSTEMTIME fileInfoTime;
-    CLR_RT_TypeDescriptor dtType;
     struct stat fileInfo;
     char *vfsPath = NULL;
     CLR_INT64 *pRes;
 
     CLR_RT_HeapBlock &ref = stack.PushValue();
-    ;
 
     const char *folderPath = stack.Arg0().RecoverString();
     FAULT_ON_NULL_ARG(folderPath);
@@ -473,13 +471,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_Directory::GetLastWriteTimeNative
     // get the date time details and return it on Stack as DateTime object
     fileInfoTime = GetDateTimeFromStat(&fileInfo.st_mtime);
 
-    // initialize <DateTime> type descriptor
-    NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+    pRes = Library_corlib_native_System_DateTime::NewObject(ref);
+    FAULT_ON_NULL(pRes);
 
-    // create an instance of <DateTime>
-    NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-    pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
     *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
 
     NANOCLR_CLEANUP();
