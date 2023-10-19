@@ -818,13 +818,6 @@ jobs:
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
-  - task: UseDotNet@2
-    displayName: Install .NET SDK
-    inputs:
-      packageType: sdk
-      version: 6.x
-      performMultiLevelLookup: true
-
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
     inputs:
@@ -1030,13 +1023,6 @@ jobs:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
-
-  - task: UseDotNet@2
-    displayName: Install .NET SDK
-    inputs:
-      packageType: sdk
-      version: 6.x
-      performMultiLevelLookup: true
 
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
