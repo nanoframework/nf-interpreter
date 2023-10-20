@@ -21,11 +21,12 @@ RUN  mkdir -p /tmp/dc-extracted/titools \
     && unzip -d /tmp/dc-extracted/titools /tmp/dc-downloads/titools.zip
 
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
-RUN wget $CMAKE_SCRIPT -q -O /tmp/cmake-install.sh \
-    && chmod u+x /tmp/cmake-install.sh \
-    && mkdir /tmp/dc-extracted/cmake \
-    && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
-    && rm /tmp/cmake-install.sh
+RUN wget $CMAKE_SCRIPT \
+      -q -O /tmp/cmake-install.sh \
+      && chmod u+x /tmp/cmake-install.sh \
+      && mkdir /tmp/dc-extracted/cmake \
+      && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+      && rm /tmp/cmake-install.sh
 
 
 FROM ubuntu:latest AS devcontainer
@@ -51,8 +52,7 @@ RUN apt-get update \
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
-    && mkdir -p /usr/local/bin/titools \
-    && mkdir -p /usr/local/gcc/bin
+    && mkdir -p /usr/local/bin/titools
 
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
@@ -63,7 +63,7 @@ RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC
     && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
 
 # set gcc location
-ENV ARM_GCC_PATH=/usr/local/gcc
+ENV ARM_GCC_PATH=/usr/local/bin/gcc
 ENV PATH=$ARM_GCC_PATH/bin:${PATH}
 
 # Copy from our other container
