@@ -189,7 +189,7 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
     NANOCLR_HEADER();
     {
         SYSTEMTIME fileInfoTime;
-        CLR_RT_TypeDescriptor dtType;
+        CLR_INT64 *pRes;
         FILINFO fileInfo;
 
         const char *filePath = stack.Arg0().RecoverString();
@@ -207,13 +207,9 @@ HRESULT Library_nf_sys_io_filesystem_System_IO_File::GetLastWriteTimeNative___ST
 
         CLR_RT_HeapBlock &ref = stack.PushValue();
 
-        // initialize <DateTime> type descriptor
-        NANOCLR_CHECK_HRESULT(dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime));
+        pRes = Library_corlib_native_System_DateTime::NewObject(ref);
+        FAULT_ON_NULL(pRes);
 
-        // create an instance of <DateTime>
-        NANOCLR_CHECK_HRESULT(g_CLR_RT_ExecutionEngine.NewObject(ref, dtType.m_handlerCls));
-
-        CLR_INT64 *pRes = Library_corlib_native_System_DateTime::GetValuePtr(ref);
         *pRes = HAL_Time_ConvertFromSystemTime(&fileInfoTime);
     }
     NANOCLR_NOCLEANUP();

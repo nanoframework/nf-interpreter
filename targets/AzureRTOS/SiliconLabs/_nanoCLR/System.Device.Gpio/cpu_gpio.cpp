@@ -117,9 +117,9 @@ gpio_input_state *GetGpioWithInterrupt(uint16_t gpioPin)
     return NULL;
 }
 
-static void DebounceTimerCallback(uint32_t id)
+static void DebounceTimerCallback(ULONG pinState)
 {
-    gpio_input_state *pState = (gpio_input_state *)id;
+    gpio_input_state *pState = (gpio_input_state *)pinState;
 
     GPIO_Port_TypeDef port;
     uint32_t portPin;
@@ -130,23 +130,22 @@ static void DebounceTimerCallback(uint32_t id)
 
     if (actual == pState->expected)
     {
+        // call ISR
         pState->isrPtr(pState->pinNumber, actual, pState->param);
-        if (pState->mode == GPIO_INT_EDGE_BOTH)
-        {
-            // both edges
-            // update expected state
-            pState->expected ^= 1;
-        }
     }
 
+    // reset flag
     pState->waitingDebounce = false;
 }
 
 static void GpioEventCallback(uint32_t intFlags)
 {
-    // TX_DISABLE
     uint32_t irqIdx;
     gpio_input_state *pGpio;
+
+    NATIVE_INTERRUPT_START
+
+    TX_DISABLE
 
     // check for all flags set in IF register
     while (intFlags != 0U)
@@ -160,39 +159,40 @@ static void GpioEventCallback(uint32_t intFlags)
 
         if (pGpio != NULL)
         {
-            // Ignore any pin changes during debounce
-            if (!pGpio->waitingDebounce)
+            if (pGpio->waitingDebounce)
+            {
+                // Ignore any pin changes during debounce
+                continue;
+            }
+            else
             {
                 // check if there is a debounce time set
                 if (pGpio->debounceMs > 0)
                 {
+                    // stop timer, just in case
+                    tx_timer_deactivate(&pGpio->debounceTimer);
+
                     // Set flag we are waiting for debounce on this pin
                     pGpio->waitingDebounce = true;
 
+                    // expecting same state as current one
+                    pGpio->expected = CPU_GPIO_GetPinState(pGpio->pinNumber);
+
                     // setup timer
-                    tx_timer_deactivate(&pGpio->debounceTimer);
-                    tx_timer_change(&pGpio->debounceTimer, 0, pGpio->debounceMs / 10);
+                    tx_timer_change(&pGpio->debounceTimer, TX_TICKS_PER_MILLISEC(pGpio->debounceMs), 0);
                     tx_timer_activate(&pGpio->debounceTimer);
                 }
                 else
                 {
-                    GPIO_Port_TypeDef port;
-                    uint32_t portPin;
-                    GetIoLine(pGpio->pinNumber, &port, &portPin);
-
-                    TX_RESTORE
-
-                    pGpio->isrPtr(pGpio->pinNumber, GPIO_PinInGet(port, portPin), pGpio->param);
-
-                    TX_DISABLE
+                    pGpio->isrPtr(pGpio->pinNumber, CPU_GPIO_GetPinState(pGpio->pinNumber), pGpio->param);
                 }
             }
         }
-
-        TX_RESTORE
-
-        NATIVE_INTERRUPT_END
     }
+
+    TX_RESTORE
+
+    NATIVE_INTERRUPT_END
 }
 
 // Get pointer to gpio_input_state for GPIO pin
@@ -234,9 +234,9 @@ gpio_input_state *AllocateGpioInputState(GPIO_PIN pinNumber)
                 &ptr->debounceTimer,
                 (char *)"GPIO debounce timer",
                 DebounceTimerCallback,
-                0,
-                0,
+                (ULONG)ptr,
                 1,
+                0,
                 TX_NO_ACTIVATE);
 
             gpioInputList.LinkAtBack(ptr);
