@@ -33,7 +33,7 @@ endif()
 ########################################################
 # check availability of SRecord tool, if specified
 if(DEFINED TOOL_SRECORD_PREFIX)
-    if(NOT ((EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe) OR (EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)))
+    if(NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat.exe AND NOT EXISTS ${TOOL_SRECORD_PREFIX}/srec_cat)
         message(STATUS "")
         message(STATUS "Couldn't find the srec_cat tool at the specified path: ${TOOL_SRECORD_PREFIX}/srec_cat.exe")
         message(STATUS "Make sure that the CMake option TOOL_SRECORD_PREFIX has the correct path.")
