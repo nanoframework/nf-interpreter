@@ -818,13 +818,6 @@ jobs:
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
 
-  - task: UseDotNet@2
-    displayName: Install .NET SDK
-    inputs:
-      packageType: sdk
-      version: 6.x
-      performMultiLevelLookup: true
-
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
     inputs:
@@ -885,26 +878,8 @@ jobs:
       )
 
   - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        startsWith(variables['Build.SourceBranchName'], 'main')
-      )
-    displayName: Pack nanoCLR WIN32 (stable)
-    inputs:
-      command: 'custom' 
-      arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion).$(TARGET_BUILD_COUNTER)'
-
-  - task: NuGetCommand@2
-    condition: >-
-      and(
-        succeeded(),
-        or(
-          startsWith(variables['Build.SourceBranchName'], 'develop'),
-          startsWith(variables['Build.SourceBranchName'], 'release')
-        )
-      )
-    displayName: Pack nanoCLR WIN32 (preview)
+    condition: succeeded()
+    displayName: Pack nanoCLR WIN32
     inputs:
       command: 'custom' 
       arguments: 'pack targets\win32\nanoFramework.nanoCLR.Win32.nuspec -Version $(NBGV_NuGetPackageVersion)'
@@ -1048,13 +1023,6 @@ jobs:
   - template: azure-pipelines-templates/nb-gitversioning.yml
 
   - template: azure-pipelines-templates/install-nuget.yml@templates
-
-  - task: UseDotNet@2
-    displayName: Install .NET SDK
-    inputs:
-      packageType: sdk
-      version: 6.x
-      performMultiLevelLookup: true
 
   - task: DotNetCoreCLI@2
     displayName: Restore NuGet packages
