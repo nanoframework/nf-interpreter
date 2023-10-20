@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
+FROM ubuntu:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -22,7 +22,7 @@ RUN wget $CMAKE_SCRIPT \
       && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
       && rm /tmp/cmake-install.sh
 
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
+FROM ubuntu:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -45,14 +45,14 @@ RUN apt-get update \
     srecord
 
 # Create needed directories
-RUN mkdir -p /usr/local/bin/gcc \
-    && mkdir -p /usr/local/bin/xtensa \
-    && mkdir -p /usr/local/bin/titools
+RUN mkdir -p /usr/local/bin/GCC_URI
 
-# Clone ChibiOS SVN
-RUN git svn clone https://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
+# Clone ChibiOS repo
+RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
+# Alternative source for those having issues with git svn downloads:
+# RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
-# Clone repos for STM32
+# Clone support repos for STM32 including AzureRTOS
 RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF7.git --depth 1 ./sources/STM32CubeF7 \
     && git clone --branch nf-build https://github.com/nanoframework/STM32CubeF4.git --depth 1 ./sources/STM32CubeF4 \
