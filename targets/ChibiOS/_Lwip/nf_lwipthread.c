@@ -400,7 +400,7 @@ static THD_FUNCTION(lwip_thread, p)
 #if SNTP_SERVER_DNS
     sntp_stop();
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_servermode_dhcp(1); //try to get the ntp server from dhcp
+    sntp_servermode_dhcp(1); // try to get the ntp server from dhcp
     sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
     sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
     sntp_init();
