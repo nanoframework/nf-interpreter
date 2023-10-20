@@ -21,7 +21,7 @@
  * @brief   Default network interface hostname.
  */
 #if !defined(LWIP_NETIF_HOSTNAME_STRING) || defined(__DOXYGEN__)
-#define LWIP_NETIF_HOSTNAME_STRING "lwip"
+#define LWIP_NETIF_HOSTNAME_STRING "nf-chibios-lwip"
 #endif
 
 /**
@@ -91,42 +91,42 @@
  * @brief   MAC Address byte 0.
  */
 #if !defined(LWIP_ETHADDR_0) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_0 0xC2
+#define LWIP_ETHADDR_0 0x00
 #endif
 
 /**
  * @brief   MAC Address byte 1.
  */
 #if !defined(LWIP_ETHADDR_1) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_1 0xAF
+#define LWIP_ETHADDR_1 0x80
 #endif
 
 /**
  * @brief   MAC Address byte 2.
  */
 #if !defined(LWIP_ETHADDR_2) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_2 0x51
+#define LWIP_ETHADDR_2 0xE1
 #endif
 
 /**
  * @brief   MAC Address byte 3.
  */
 #if !defined(LWIP_ETHADDR_3) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_3 0x03
+#define LWIP_ETHADDR_3 0x01
 #endif
 
 /**
  * @brief   MAC Address byte 4.
  */
 #if !defined(LWIP_ETHADDR_4) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_4 0xCF
+#define LWIP_ETHADDR_4 0x35
 #endif
 
 /**
  * @brief   MAC Address byte 5.
  */
 #if !defined(LWIP_ETHADDR_5) || defined(__DOXYGEN__)
-#define LWIP_ETHADDR_5 0x46
+#define LWIP_ETHADDR_5 0xD1
 #endif
 
 /**
@@ -248,6 +248,7 @@ extern "C"
     void lwipDefaultLinkDownCB(void *p);
     void lwipInit(const lwipthread_opts_t *opts);
     void lwipReconfigure(const lwipreconf_opts_t *opts);
+    static void initialize_sntp(void);
 #ifdef __cplusplus
 }
 #endif

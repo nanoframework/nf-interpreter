@@ -255,9 +255,7 @@ void lwipDefaultLinkUpCB(void *p)
     }
 #endif
 
-#if SNTP_SERVER_DNS
-    sntp_init();
-#endif
+    initialize_sntp();
 }
 
 void lwipDefaultLinkDownCB(void *p)
@@ -279,9 +277,7 @@ void lwipDefaultLinkDownCB(void *p)
     }
 #endif
 
-#if SNTP_SERVER_DNS
     sntp_stop();
-#endif
 }
 
 /**
@@ -335,6 +331,8 @@ static THD_FUNCTION(lwip_thread, p)
     }
     else
     {
+        // FIXME: this is set to the default lwIP address which might not be the same as the opts.
+        // It currently defaults to the STM32 developer MAC.
         thisif.hwaddr[0] = LWIP_ETHADDR_0;
         thisif.hwaddr[1] = LWIP_ETHADDR_1;
         thisif.hwaddr[2] = LWIP_ETHADDR_2;
@@ -396,15 +394,8 @@ static THD_FUNCTION(lwip_thread, p)
     chThdResume(&lwip_trp, MSG_OK);
     chThdSetPriority(LWIP_THREAD_PRIORITY);
 
-// setup SNTP
-#if SNTP_SERVER_DNS
-    sntp_stop();
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_servermode_dhcp(1); //try to get the ntp server from dhcp
-    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
-    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
-    sntp_init();
-#endif
+    // setup SNTP
+    initialize_sntp();
 
     while (true)
     {
@@ -546,6 +537,18 @@ static void do_reconfigure(void *p)
     }
 
     chSemSignal(&reconf->completion);
+}
+
+static void initialize_sntp()
+{
+    sntp_stop();
+    sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    sntp_servermode_dhcp(1); //try to get the ntp server from dhcp
+#if SNTP_SERVER_DNS
+    sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
+    sntp_setservername(1, SNTP_SERVER1_DEFAULT_ADDRESS);
+#endif
+    sntp_init();
 }
 
 void lwipReconfigure(const lwipreconf_opts_t *opts)
