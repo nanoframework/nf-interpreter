@@ -435,10 +435,6 @@
 #define LWIP_DHCP 1
 #endif
 
-#if !defined SNTP_GET_SERVERS_FROM_DHCP
-#define SNTP_GET_SERVERS_FROM_DHCP 1
-#endif
-
 /*
    ------------------------------------
    ---------- AUTOIP options ----------

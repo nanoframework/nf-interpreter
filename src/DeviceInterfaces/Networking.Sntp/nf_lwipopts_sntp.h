@@ -25,7 +25,15 @@ extern "C"
 #endif
 
 // SNTP servers can be IP or full address and are resolved at
-#define SNTP_SERVER_DNS 1
+#if !defined SNTP_SERVER_DNS
+#define SNTP_SERVER_DNS            1
+#endif
+
+// SNTP servers can be discovered from DHCP
+#if !defined SNTP_GET_SERVERS_FROM_DHCP
+#define SNTP_GET_SERVERS_FROM_DHCP 1
+#endif
+
 
 // use two servers
 #define SNTP_MAX_SERVERS 2
