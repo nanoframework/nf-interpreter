@@ -543,7 +543,7 @@ static void initialize_sntp()
 {
     sntp_stop();
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-   // try to get the ntp server from dhcp
+    // try to get the ntp server from dhcp
     sntp_servermode_dhcp(1);
 #if SNTP_SERVER_DNS
     sntp_setservername(0, SNTP_SERVER0_DEFAULT_ADDRESS);
