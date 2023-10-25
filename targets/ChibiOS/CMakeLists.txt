@@ -223,7 +223,7 @@ if(USE_SECURITY_MBEDTLS_OPTION)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.2")
+    set(MBEDTLS_GIT_TAG "mbedtls-2.28.5")
 
     # set options for Mbed TLS
     option(ENABLE_TESTING "no testing when building Mbed TLS." OFF)
