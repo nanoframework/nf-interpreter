@@ -51,6 +51,11 @@ option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardwa
 option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
 option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko")
 
+###################################
+# add options for private APIs here
+
+###################################
+
 #################################################################
 # macro to perform individual settings to add an API to the build
 macro(PerformSettingsForApiEntry apiNamespace)
@@ -377,6 +382,10 @@ endif()
 # Interop assemblies
 ParseInteropAssemblies()
 
+##################################
+# add parsing of private APIs here
+
+##################################
 
 # parse the declarations to have new lines and ';'
 string(REPLACE ";;" ";\n" CLR_RT_NativeAssemblyDataDeclarations "${CLR_RT_NativeAssemblyDataList}")
