@@ -16,6 +16,9 @@ uint32_t SUPPORT_ComputeCRC(const void* rgBlock, const uint32_t nLength, const u
 {
 	crcAquireModule();
 
+	crcStart(NULL);
+    crcReset();
+
 	uint32_t myCrc = crcCompute(rgBlock, nLength, crc);
 
 	crcReleaseModule();
