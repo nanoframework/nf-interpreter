@@ -32,8 +32,6 @@ option(API_Windows.Storage                      "option for Windows.Storage")
 option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
 option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
 option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
-option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option for Skyworks I2C API")
-option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 
 # Esp32 only
 option(API_Hardware.Esp32                       "option for Hardware.Esp32")
@@ -53,7 +51,8 @@ option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko"
 
 ###################################
 # add options for private APIs here
-
+option(API_Com.SkyworksInc.NanoFramework.Devices.I2c                   "option for Skyworks I2C API")
+option(API_Com.SkyworksInc.NanoFramework.Devices.Spi                   "option for Skyworks SPI API")
 ###################################
 
 #################################################################
@@ -367,6 +366,12 @@ if(API_Windows.Storage)
     PerformSettingsForApiEntry("Windows.Storage")
 endif()
 
+# Interop assemblies
+ParseInteropAssemblies()
+
+##################################
+# add parsing of private APIs here
+
 # Com.SkyworksInc.NanoFramework.Devices.I2c
 if(API_Com.SkyworksInc.NanoFramework.Devices.I2c)
     ##### API name here (doted name)
@@ -378,12 +383,6 @@ if(API_Com.SkyworksInc.NanoFramework.Devices.Spi)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("Com.SkyworksInc.NanoFramework.Devices.Spi")
 endif()
-
-# Interop assemblies
-ParseInteropAssemblies()
-
-##################################
-# add parsing of private APIs here
 
 ##################################
 
