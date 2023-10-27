@@ -42,7 +42,7 @@ HRESULT Library_nf_sys_io_hashing_System_IO_Hashing_Crc32::ComputeHash___STATIC_
 
     // this series has ROM support for CRC32
 
-    if(bufferSize == 0)
+    if (bufferSize == 0)
     {
         hash = 0xFFFFFFFF;
     }
