@@ -31,7 +31,7 @@ uint32_t SUPPORT_ComputeCRC(const void *rgBlock, const uint32_t nLength, const u
     // Initialize GPCRC
     GPCRC_Init(GPCRC, &init);
 
-    if(crc == 0)
+    if (crc == 0)
     {
         // this is NOT continuing a previous CRC calculation
 
