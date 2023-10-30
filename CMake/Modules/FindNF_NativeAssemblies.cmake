@@ -278,6 +278,9 @@ endif()
 if(API_nanoFramework.System.Security.Cryptography)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.System.Security.Cryptography")
+
+    # enable adding Mbed TLS to the build
+    set(NF_REQUIRES_MBEDTLS TRUE CACHE BOOL "Enable Mbed TLS for nanoFramework.System.Security.Cryptography" FORCE)
 endif()
 
 # nanoFramework.Runtime.Events
