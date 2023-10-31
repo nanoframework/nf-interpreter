@@ -45,10 +45,10 @@ typedef struct crcConfig
     uint32_t FinalValue;
 
     // Specifies input data inversion mode
-    bool InputDataInversionMode;
+    uint32_t InputDataInversionMode;
 
     // Specifies output data (i.e. CRC) inversion mode
-    bool OutputDataInversionMode;
+    uint32_t OutputDataInversionMode;
 
 } crcConfig;
 
