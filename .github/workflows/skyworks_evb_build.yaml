@@ -49,7 +49,6 @@ jobs:
 
           echo "SRECORD_PATH=$srecPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
 
-
       - name: Install arm-none-eabi-gcc
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
@@ -64,6 +63,10 @@ jobs:
             
             echo "ARM_NONE_EABI_GCC_PATH=$fixedPath" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
           }
+
+      - name: Enable long paths
+        run: |
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
 
       - name: Rename CMake presets
         working-directory: ${{ github.workspace }}/config
