@@ -91,13 +91,17 @@ void crc_lld_start(const crcConfig *config)
     // set generating polynomial
     WRITE_REG(CRCD1.Instance->POL, CRCD1.Config->GeneratingPolynomial);
 
+    // reset CRC configuration register
     CRCD1.Instance->CR = 0;
 
     // set generating polynomial size
     MODIFY_REG(CRCD1.Instance->CR, CRC_CR_POLYSIZE, CRCD1.Config->CRCLength);
 
+    // set input format
+    MODIFY_REG(CRCD1.Instance->CR, CRC_CR_REV_OUT, CRCD1.Config->InputDataFormat);
+
     // set input data inversion mode
-    MODIFY_REG(CRCD1.Instance->CR, CRC_CR_REV_IN, CRCD1.Config->OutputDataInversionMode);
+    MODIFY_REG(CRCD1.Instance->CR, CRC_CR_REV_IN, CRCD1.Config->InputDataInversionMode);
 
     // set output data inversion mode
     MODIFY_REG(CRCD1.Instance->CR, CRC_CR_REV_OUT, CRCD1.Config->OutputDataInversionMode);
@@ -134,7 +138,7 @@ crc_lld_compute(const void *buffer, const uint32_t size, const uint32_t initialC
     // anything to do here?
     if (size == 0)
     {
-        return initialCrc;
+        return DEFAULT_CRC_INITVALUE;
     }
 
     // we'll be reading the buffer in steps of 4 bytes, so the size must be recalculated accordingly

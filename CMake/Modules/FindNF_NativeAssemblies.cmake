@@ -9,45 +9,52 @@
 # and the namespace designation is 'System.Device.Gpio'
 ###########################################################################################
 
-option(API_nanoFramework.Device.Can             "option for nanoFramework.Device.Can")
-option(API_nanoFramework.Device.OneWire         "option for nanoFramework.Device.OneWire")
-option(API_nanoFramework.Networking.Sntp        "option for nanoFramework.Networking.Sntp")
-option(API_nanoFramework.Runtime.Events         "option for nanoFramework.Runtime.Events API")
-option(API_nanoFramework.ResourceManager        "option for nanoFramework.ResourceManager")
-option(API_nanoFramework.System.Collections     "option for nanoFramework.System.Collections")
-option(API_nanoFramework.System.Text            "option for nanoFramework.System.Text")
-option(API_System.IO.FileSystem                 "option for System.IO.FileSystem")
-option(API_System.Math                          "option for System.Math")
-option(API_System.Net                           "option for System.Net")
-option(API_System.Device.Adc                    "option for System.Device.Adc API")
-option(API_System.Device.Dac                    "option for System.Device.Dac API")
-option(API_System.Device.Gpio                   "option for System.Device.Gpio API")
-option(API_System.Device.I2c                    "option for System.Device.I2c API")
-option(API_System.Device.I2s                    "option for System.Device.I2s API")
-option(API_System.Device.Pwm                    "option for System.Device.Pwm API")
-option(API_System.IO.Ports                      "option for System.IO.Ports API")
-option(API_System.Device.Spi                    "option for System.Device.Spi API")
-option(API_System.Runtime.Serialization         "option for System.Runtime.Serialization API")
-option(API_Windows.Storage                      "option for Windows.Storage")
-option(API_nanoFramework.Graphics               "option for nanoFramework.Graphics")
-option(API_nanoFramework.Device.Bluetooth       "option for nanoFramework.Device.Bluetooth")
-option(API_System.Device.UsbStream              "option for System.Device.UsbStream API")
+option(API_nanoFramework.Device.Can                     "option for nanoFramework.Device.Can")
+option(API_nanoFramework.Device.OneWire                 "option for nanoFramework.Device.OneWire")
+option(API_nanoFramework.Networking.Sntp                "option for nanoFramework.Networking.Sntp")
+option(API_nanoFramework.Runtime.Events                 "option for nanoFramework.Runtime.Events API")
+option(API_nanoFramework.ResourceManager                "option for nanoFramework.ResourceManager")
+option(API_nanoFramework.System.Collections             "option for nanoFramework.System.Collections")
+option(API_nanoFramework.System.Text                    "option for nanoFramework.System.Text")
+option(API_System.IO.FileSystem                         "option for System.IO.FileSystem")
+option(API_System.Math                                  "option for System.Math")
+option(API_System.Net                                   "option for System.Net")
+option(API_System.Device.Adc                            "option for System.Device.Adc API")
+option(API_System.Device.Dac                            "option for System.Device.Dac API")
+option(API_System.Device.Gpio                           "option for System.Device.Gpio API")
+option(API_System.Device.I2c                            "option for System.Device.I2c API")
+option(API_System.Device.I2s                            "option for System.Device.I2s API")
+option(API_System.Device.Pwm                            "option for System.Device.Pwm API")
+option(API_System.IO.Ports                              "option for System.IO.Ports API")
+option(API_System.Device.Spi                            "option for System.Device.Spi API")
+option(API_System.Runtime.Serialization                 "option for System.Runtime.Serialization API")
+option(API_Windows.Storage                              "option for Windows.Storage")
+option(API_nanoFramework.Graphics                       "option for nanoFramework.Graphics")
+option(API_nanoFramework.Device.Bluetooth               "option for nanoFramework.Device.Bluetooth")
+option(API_System.Device.UsbStream                      "option for System.Device.UsbStream API")
+option(API_nanoFramework.System.IO.Hashing              "option for nanoFramework.System.IO.Hashing API")
+option(API_nanoFramework.System.Security.Cryptography   "option for nanoFramework.System.Security.Cryptography API")
 
 # Esp32 only
-option(API_Hardware.Esp32                       "option for Hardware.Esp32")
-option(API_nanoFramework.Hardware.Esp32.Rmt     "option for nanoFramework.Hardware.Esp32.Rmt")
+option(API_Hardware.Esp32                               "option for Hardware.Esp32")
+option(API_nanoFramework.Hardware.Esp32.Rmt             "option for nanoFramework.Hardware.Esp32.Rmt")
 
 
 # Stm32 only
-option(API_Hardware.Stm32                       "option for Hardware.Stm32")
+option(API_Hardware.Stm32                               "option for Hardware.Stm32")
 
 # TI CC13xxCC26xx
-option(API_nanoFramework.TI.EasyLink            "option for nanoFramework.TI.EasyLink API")
-option(API_nanoFramework.Hardware.TI            "option for nanoFramework.Hardware.TI API")
+option(API_nanoFramework.TI.EasyLink                    "option for nanoFramework.TI.EasyLink API")
+option(API_nanoFramework.Hardware.TI                    "option for nanoFramework.Hardware.TI API")
 
 # Silabs Giant Gecko only
-option(API_nanoFramework.GiantGecko.Adc         "option for nanoFramework.GiantGecko.Adc")
-option(API_Hardware.GiantGecko                  "option for Hardware.GiantGecko")
+option(API_nanoFramework.GiantGecko.Adc                 "option for nanoFramework.GiantGecko.Adc")
+option(API_Hardware.GiantGecko                          "option for Hardware.GiantGecko")
+
+###################################
+# add options for private APIs here
+
+###################################
 
 ###################################
 # add options for private APIs here
@@ -259,6 +266,21 @@ endif()
 if(API_Hardware.GiantGecko)
     ##### API name here (doted name)
     PerformSettingsForApiEntry("nanoFramework.Hardware.GiantGecko")
+endif()
+
+# nanoFramework.System.IO.Hashing
+if(API_nanoFramework.System.IO.Hashing)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.IO.Hashing")
+endif()
+
+# nanoFramework.System.Security.Cryptography
+if(API_nanoFramework.System.Security.Cryptography)
+    ##### API name here (doted name)
+    PerformSettingsForApiEntry("nanoFramework.System.Security.Cryptography")
+
+    # enable adding Mbed TLS to the build
+    set(NF_REQUIRES_MBEDTLS TRUE CACHE BOOL "Enable Mbed TLS for nanoFramework.System.Security.Cryptography" FORCE)
 endif()
 
 # nanoFramework.Runtime.Events
