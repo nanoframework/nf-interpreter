@@ -103,7 +103,6 @@ extern "C"
 #define MBEDTLS_CMAC_C
 
 /* Mbed TLS modules */
-#define MBEDTLS_AESNI_C
 #define MBEDTLS_AES_C
 #define MBEDTLS_ASN1_PARSE_C
 #define MBEDTLS_ASN1_WRITE_C

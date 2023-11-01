@@ -160,6 +160,10 @@ macro(nf_add_platform_dependencies target)
 
         endif()
 
+        if(API_nanoFramework.System.Security.Cryptography)
+            FetchContent_GetProperties(mbedtls)
+        endif()
+    
         nf_add_lib_native_assemblies(
             EXTRA_INCLUDES
                 ${CHIBIOS_INCLUDE_DIRS}
@@ -171,7 +175,9 @@ macro(nf_add_platform_dependencies target)
                 ${SPIFFS_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_COMMON_INCLUDE_DIRS}
                 ${TARGET_CHIBIOS_NANOCLR_INCLUDE_DIRS}
-                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD})
+                ${chibios_SOURCE_DIR}/os/hal/boards/${TARGET_BOARD}
+                ${mbedtls_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/src/PAL/COM/sockets/ssl/MbedTLS)
         
         add_dependencies(${target}.elf nano::NF_NativeAssemblies)
         

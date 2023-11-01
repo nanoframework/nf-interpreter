@@ -431,7 +431,7 @@ int GetChannelPwm(int pin, int timerId)
             break;
     }
 #endif
-#if defined(STM32F769xx) || defined(STM32F765xx)
+#if defined(STM32F769xx) || defined(STM32F765xx) || defined(STM32F767xx)
     switch (timerId)
     {
         case 1:

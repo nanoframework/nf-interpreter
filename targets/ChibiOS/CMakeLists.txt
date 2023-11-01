@@ -210,59 +210,9 @@ if(NF_FEATURE_HAS_SDCARD OR NF_FEATURE_HAS_USB_MSD)
 endif()
 
 # if Mbed TLS is enabled add it to the build
-if(USE_SECURITY_MBEDTLS_OPTION)
+if(USE_SECURITY_MBEDTLS_OPTION OR NF_REQUIRES_MBEDTLS)
 
-    # check if MBEDTLS_SOURCE was specified or if it's empty (default is empty)
-    set(NO_MBEDTLS_SOURCE TRUE)
-
-    if(MBEDTLS_SOURCE)
-        if(NOT ${MBEDTLS_SOURCE} STREQUAL "")
-            set(NO_MBEDTLS_SOURCE FALSE)
-        endif()
-    endif()
-
-    # set tag for currently supported version
-    # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(MBEDTLS_GIT_TAG "mbedtls-2.28.2")
-
-    # set options for Mbed TLS
-    option(ENABLE_TESTING "no testing when building Mbed TLS." OFF)
-
-    if(NO_MBEDTLS_SOURCE)
-        # no Mbed TLS source specified, download it from it's repo
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} from GitHub repo")
-
-        FetchContent_Declare(
-            mbedtls
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls
-            GIT_TAG ${MBEDTLS_GIT_TAG}
-        )
-
-    else()
-        # MbedTLS source was specified
-
-        message(STATUS "MbedTLS ${MBEDTLS_GIT_TAG} (source from: ${MBEDTLS_SOURCE})")
-            
-        FetchContent_Declare(
-            mbedtls
-            SOURCE_DIR ${MBEDTLS_SOURCE}
-        )
-
-    endif()
-
-    # Check if population has already been performed
-    FetchContent_GetProperties(mbedtls)
-    if(NOT mbedtls_POPULATED)
-        # Fetch the content using previously declared details
-        FetchContent_Populate(mbedtls)
-    endif()
-
-    # don't include tests or programs, only build libraries
-    set(ENABLE_TESTING CACHE BOOL OFF)
-    set(ENABLE_PROGRAMS CACHE BOOL OFF)
-
-    cmake_policy(SET CMP0048 NEW)
-    add_subdirectory(${mbedtls_SOURCE_DIR} mbedtls_build)
+    nf_add_mbedtls_library()
 
 endif()
 
