@@ -7,7 +7,7 @@
     ],
     "configurePresets": [
         {
-            "name": "Field_Programmer_Debug",
+            "name": "FIELD_PROG_Debug",
             "inherits": [
                 "arm-gcc-cortex-preset",
                 "user-tools-repos",
@@ -17,8 +17,8 @@
             "cacheVariables": {
                 "CMAKE_OBJECT_PATH_MAX": "260",
                 "CMAKE_OBJECT_NAME_MAX": "250",
-                "TARGET_BOARD": "Field_Programmer",
-                "TARGET_NAME": "Field_Programmer_Debug",
+                "TARGET_BOARD": "FIELD_PROG",
+                "TARGET_NAME": "FIELD_PROG_Debug",
                 "RTOS": "AzureRTOS",
                 "TARGET_SERIES": "EFM32GG11",
                 "SUPPORT_ANY_BASE_CONVERSION": "OFF",
@@ -56,13 +56,13 @@
             }
         },
         {
-            "name": "Field_Programmer_Release",
+            "name": "FIELD_PROG_Release",
             "inherits": [
-                "Field_Programmer_Debug"
+                "FIELD_PROG_Debug"
             ],
             "hidden": false,
             "cacheVariables": {
-                "TARGET_NAME": "Field_Programmer_Release",
+                "TARGET_NAME": "FIELD_PROG_Release",
                 "NF_BUILD_RTM": "ON",
                 "NF_PROFILE_NEW_ALLOCATIONS": "OFF",
                 "NF_TRACE_MEMORY_STATS": "OFF"
@@ -72,15 +72,15 @@
     "buildPresets": [
         {
             "inherits": "base-user",
-            "name": "Field_Programmer_Debug",
-            "displayName": "Field_Programmer_Debug",
-            "configurePreset": "Field_Programmer_Debug"
+            "name": "FIELD_PROG_Debug",
+            "displayName": "FIELD_PROG_Debug",
+            "configurePreset": "FIELD_PROG_Debug"
         },
         {
             "inherits": "base-user",
-            "name": "Field_Programmer_Release",
-            "displayName": "Field_Programmer_Release",
-            "configurePreset": "Field_Programmer_Release"
+            "name": "FIELD_PROG_Release",
+            "displayName": "FIELD_PROG_Release",
+            "configurePreset": "FIELD_PROG_Release"
         }
     ]
 }

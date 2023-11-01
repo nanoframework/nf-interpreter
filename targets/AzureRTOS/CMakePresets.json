@@ -5,7 +5,7 @@
         "SiliconLabs/SKY_EEVB/CMakePresets.json",
         "SiliconLabs/Si5575_CEVB/CMakePresets.json",
         "SiliconLabs/STB_Interposer/CMakePresets.json",
-        "SiliconLabs/Field_Programmer/CMakePresets.json",
+        "SiliconLabs/FIELD_PROG/CMakePresets.json",
         "ST/ORGPAL_PALTHREE/CMakePresets.json",
         "ST/ST_B_L475E_IOT01A/CMakePresets.json"
     ]

@@ -1,11 +1,11 @@
-name: Build Field_Programmer_Debug
+name: Build FIELD_PROG_Debug
 
 on:
   workflow_dispatch
 
 jobs:
-  build_Field_Programmer_Debug:
-    name: Build Field_Programmer_Debug
+  build_FIELD_PROG_Debug:
+    name: Build FIELD_PROG_Debug
     uses: ./.github/workflows/skyworks_evb_build.yaml
     with:
-      targetName: 'Field_Programmer_Debug'
+      targetName: 'FIELD_PROG_Debug'
