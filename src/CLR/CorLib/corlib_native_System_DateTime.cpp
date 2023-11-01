@@ -152,13 +152,18 @@ HRESULT Library_corlib_native_System_DateTime::get_UtcNow___STATIC__SystemDateTi
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64 *val = NewObject(stack);
+    CLR_INT64 *val;
+
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    val = Library_corlib_native_System_DateTime::NewObject(ref);
+    FAULT_ON_NULL(val);
 
     // load with full date&time
     // including UTC flag
     *val = (CLR_INT64)(HAL_Time_CurrentDateTime(false) | s_UTCMask);
 
-    NANOCLR_NOCLEANUP_NOLABEL();
+    NANOCLR_NOCLEANUP();
 }
 
 HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTime(CLR_RT_StackFrame &stack)
@@ -166,7 +171,9 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    CLR_INT64 *val = NewObject(stack);
+    CLR_RT_HeapBlock &ref = stack.PushValue();
+
+    CLR_INT64 *val = NewObject(ref);
 
     // load with date part only
     // including UTC flag
@@ -177,13 +184,11 @@ HRESULT Library_corlib_native_System_DateTime::get_Today___STATIC__SystemDateTim
 
 //--//
 
-CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &stack)
+CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_HeapBlock &ref)
 {
     NATIVE_PROFILE_CLR_CORE();
 
     CLR_RT_TypeDescriptor dtType;
-
-    CLR_RT_HeapBlock &ref = stack.PushValue();
 
     // initialize <DateTime> type descriptor
     dtType.InitializeFromType(g_CLR_RT_WellKnownTypes.m_DateTime);
@@ -193,6 +198,8 @@ CLR_INT64 *Library_corlib_native_System_DateTime::NewObject(CLR_RT_StackFrame &s
 
     return GetValuePtr(ref);
 }
+
+//--//
 
 CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_StackFrame &stack)
 {
@@ -216,16 +223,17 @@ CLR_INT64 *Library_corlib_native_System_DateTime::GetValuePtr(CLR_RT_HeapBlock &
 
     // after dereferencing the object if it's pointing to another Object
     // need to do it again because this DateTime instance is most likely boxed
-    if (dt == DATATYPE_OBJECT || dt == DATATYPE_BYREF)
+    if (dt == DATATYPE_OBJECT)
     {
         obj = obj->Dereference();
-
         if (!obj)
-        {
             return NULL;
-        }
-
         dt = obj->DataType();
+    }
+
+    if (dt == DATATYPE_DATETIME)
+    {
+        return (CLR_INT64 *)&obj->NumericByRef().s8;
     }
 
     if (dt == DATATYPE_I8)

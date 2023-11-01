@@ -3909,10 +3909,18 @@ CT_ASSERT(sizeof(CLR_RT_HeapBlock_Raw) == sizeof(CLR_RT_HeapBlock))
 #if defined(__GNUC__) // Gcc compiler uses 8 bytes for a function pointer
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 20 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 
-#elif defined(PLATFORM_WINDOWS_EMULATOR) || defined(NANOCLR_TRACE_MEMORY_STATS)
+#elif defined(VIRTUAL_DEVICE) && defined(NANOCLR_TRACE_MEMORY_STATS)
 
 #ifdef _WIN64
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 24 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#else
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
+#endif // _WIN64
+
+#elif defined(VIRTUAL_DEVICE) && !defined(NANOCLR_TRACE_MEMORY_STATS)
+
+#ifdef _WIN64
+CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 32 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #else
 CT_ASSERT(sizeof(CLR_RT_DataTypeLookup) == 16 + NANOCLR_TRACE_MEMORY_STATS_EXTRA_SIZE)
 #endif // _WIN64
