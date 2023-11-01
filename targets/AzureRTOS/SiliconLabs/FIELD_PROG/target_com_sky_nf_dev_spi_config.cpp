@@ -5,6 +5,7 @@
 
 #include <com_sky_nf_dev_spi_native_target.h>
 
+/*
 //////////
 // SPI0 //
 //////////
@@ -18,6 +19,8 @@
 
 // NOT ENABLED
 INIT_SPI_CONFIG(0, 0, 0, 0, 0)
+
+*/
 
 //////////
 // SPI1 //
@@ -33,6 +36,7 @@ INIT_SPI_CONFIG(0, 0, 0, 0, 0)
 // !ENABLED!
 INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 
+/*
 //////////
 // SPI2 //
 //////////
@@ -46,3 +50,5 @@ INIT_SPI_CONFIG(1, 1, 1, 1, 1)
 
 // NOT ENABLED
 INIT_SPI_CONFIG(2, 1, 1, 1, 1)
+
+*/
