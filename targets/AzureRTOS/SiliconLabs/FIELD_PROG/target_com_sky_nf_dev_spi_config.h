@@ -3,6 +3,5 @@
 // See LICENSE file in the project root for full license information.
 //
 
-#define GECKO_USE_SPI0 FALSE
+// DUT SPI on USART1
 #define GECKO_USE_SPI1 TRUE
-#define GECKO_USE_SPI2 FALSE

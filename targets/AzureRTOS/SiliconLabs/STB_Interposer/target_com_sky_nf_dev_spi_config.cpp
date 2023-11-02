@@ -5,6 +5,9 @@
 
 #include <com_sky_nf_dev_spi_native_target.h>
 
+// INIT_SPI_CONFIG(num, sck_port_location, mosi_port_location, miso_port_location, cs_port_location)
+// num is the USART index. For example, if using USART0 use 0.
+
 //////////
 // SPI0 //
 //////////
