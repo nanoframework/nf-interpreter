@@ -15,8 +15,6 @@
             ],
             "hidden": false,
             "cacheVariables": {
-                "CMAKE_OBJECT_PATH_MAX": "260",
-                "CMAKE_OBJECT_NAME_MAX": "250",
                 "TARGET_BOARD": "FIELD_PROG",
                 "TARGET_NAME": "FIELD_PROG_Debug",
                 "RTOS": "AzureRTOS",
