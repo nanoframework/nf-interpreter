@@ -50,19 +50,16 @@ $gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://dl.cloudsmith.io/public/net-nanoframework/internal-build-tools/raw/names/gcc-arm-none-eabi/versions/$Version/gcc-arm-none-eabi-$Version.7z"
-    $output = "$zipRoot\gcc-arm.7z"
+    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$Version/binrel/arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip"
+    $output = "$zipRoot\arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip"
 
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
         "Download URL is: '$url'" | Write-Host -ForegroundColor White
 
         "Downloading ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
-
-        # Stop security tripping us up
-        [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
             
-        # download 7zip with toolchain
+        # download Zip with toolchain
         (New-Object Net.WebClient).DownloadFile($url, $output)
 
         "OK" | Write-Host -ForegroundColor Green
@@ -70,13 +67,11 @@ If ($gnuGccPathExists -eq $False -or $force) {
 
     # unzip to install path, if not on Azure
     if ($IsAzurePipelines -eq $False) {
-        # Install 7Zip4PowerShell module from PSGallery if not already installed
-        Install-Module -Name 7Zip4Powershell -RequiredVersion 1.10.0 -Scope CurrentUser
 
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # unzip toolchain
-        Expand-7Zip -ArchiveFileName $output -TargetPath $Path > $null
+        Expand-Archive $output -DestinationPath $Path > $null
 
         "OK" | Write-Host -ForegroundColor Green
     }
