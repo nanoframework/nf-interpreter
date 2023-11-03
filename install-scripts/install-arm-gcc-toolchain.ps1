@@ -12,7 +12,7 @@ param (
 
 # set default GNU GCC version
 if ([string]::IsNullOrEmpty($Version)) {
-    $Version = "12.3.rel1"
+    $Version = "13.2.rel1"
 }
 
 # check if running on Azure Pipelines by looking at this two environment variables
@@ -50,8 +50,8 @@ $gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/$Version/binrel/arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip"
-    $output = "$zipRoot\arm-gnu-toolchain-$Version-mingw-w64-i686-arm-none-eabi.zip"
+    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/'$Version'/binrel/arm-gnu-toolchain-'$Version'-mingw-w64-i686-arm-none-eabi.zip"
+    $output = "$zipRoot\arm-gnu-toolchain-'$Version'-mingw-w64-i686-arm-none-eabi.zip"
 
     # Don't download again if already exists
     if (![System.IO.File]::Exists($output) -or $force) {
