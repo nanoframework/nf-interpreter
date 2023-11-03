@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS downloader
+FROM ubuntu:latest AS downloader
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils \
     && apt-get install -y \
@@ -14,7 +14,7 @@ RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc \
     && tar -xvf /tmp/dc-downloads/gcc-arm.tar -C /tmp/dc-extracted/gcc --strip-components 1 \
     && rm -rf /tmp/dc-extracted/gcc/share/doc/ /tmp/dc-extracted/gcc/share/gcc-arm-none-eabi/samples/
 
-# This is TI XDC tools for linux. Cheack all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
+# This is TI XDC tools for linux. Check all versions here: https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/index.html
 ARG TI_TOOL_URL=https://software-dl.ti.com/dsps/dsps_public_sw/sdo_sb/targetcontent/rtsc/3_62_00_08/exports/xdccore/xdctools_3_62_00_08_core_linux.zip
 RUN  mkdir -p /tmp/dc-extracted/titools \
     && curl -o /tmp/dc-downloads/titools.zip $TI_TOOL_URL -L \
@@ -28,7 +28,8 @@ RUN wget $CMAKE_SCRIPT \
       && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
       && rm /tmp/cmake-install.sh
 
-FROM ghcr.io/linuxcontainers/debian-slim:latest AS devcontainer
+
+FROM ubuntu:latest AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -56,7 +57,7 @@ RUN mkdir -p /usr/local/bin/gcc \
 # Clone what is needed for TI
 RUN git clone --branch 4.10.00.07 https://github.com/nanoframework/SimpleLink_CC32xx_SDK.git --depth 1 ./sources/SimpleLinkCC32 \
     # you can't use the nanoFramework repository as it's Windows only
-    # && git clone --branch 3.61.00.16 https://github.com/nanoframework/TI_XDCTools.git --depth 1 ./sources/TI_XDCTools \
+    # && git clone --branch 3.62.01.15 https://github.com/nanoframework/TI_XDCTools.git --depth 1 ./sources/TI_XDCTools \
     && git clone --branch 5.40.00.40 https://github.com/nanoframework/SimpleLink_CC13xx_26xx_SDK.git --depth 1 ./sources/SimpleLinkCC13 \
     && git clone --branch 1.10.0 https://github.com/nanoframework/TI_SysConfig.git --depth 1 ./sources/TI_SysConfig \
     && chmod +x ./sources/TI_SysConfig/sysconfig_cli.sh
