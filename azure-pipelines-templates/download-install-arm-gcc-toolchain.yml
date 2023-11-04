@@ -17,14 +17,14 @@ steps:
     inputs:
         targetType: 'filePath'
         filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
-        arguments: '-Version "$(variables.GccArm_Version)"'
+        arguments: '-Version "$(GccArm_Version)"'
         failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Extracting ARM GCC toolchain
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-$(GccArm_Version)-mingw-w64-i686-arm-none-eabi.zip' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-"$(GccArm_Version)"-mingw-w64-i686-arm-none-eabi.zip' 
       destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
 
   - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded\bin"
