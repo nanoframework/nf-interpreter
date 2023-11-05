@@ -13,7 +13,6 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
     // This matches the IEEE 754:2019 `maximum` function
     //
     // It propagates NaN inputs back to the caller and
@@ -39,10 +38,9 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val2) ? val1 : val2;
-
-        stack.SetResult_R8(val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        double res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
     }
 
 #else
@@ -59,15 +57,14 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
         }
         else
         {
-            stack.SetResult_R8((float)val1);
+            stack.SetResult_R8(val1);
         }
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val2) ? val1 : val2;
-
-        stack.SetResult_R8((float)val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
     }
 
 #endif
@@ -80,7 +77,6 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
     // This matches the IEEE 754:2019 `maximum` function
     //
     // It propagates NaN inputs back to the caller and
@@ -99,15 +95,14 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_
         }
         else
         {
-            stack.SetResult_R4((float)val1);
+            stack.SetResult_R4(val1);
         }
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val2) ? val1 : val2;
-
-        stack.SetResult_R4((float)val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R4(res);
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -118,12 +113,11 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
-    // This matches the IEEE 754:2019 `maximum` function
-    //
-    // It propagates NaN inputs back to the caller and
-    // otherwise returns the greater of the inputs. It
-    // treats +0 as greater than -0 as per the specification.
+            // This matches the IEEE 754:2019 `minimum` function
+            //
+            // It propagates NaN inputs back to the caller and
+            // otherwise returns the lesser of the inputs. It
+            // treats +0 as lesser than -0 as per the specification.
 
 #if (DP_FLOATINGPOINT == TRUE)
 
@@ -144,10 +138,9 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val1) ? val1 : val2;
-
-        stack.SetResult_R8(val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        double res = (__signbitd(val1) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
     }
 
 #else
@@ -169,10 +162,9 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val1) ? val1 : val2;
-
-        stack.SetResult_R8((float)val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        float res = (__signbitd(val1) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
     }
 
 #endif
@@ -185,12 +177,11 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
-    // This matches the IEEE 754:2019 `maximum` function
-    //
-    // It propagates NaN inputs back to the caller and
-    // otherwise returns the greater of the inputs. It
-    // treats +0 as greater than -0 as per the specification.
+            // This matches the IEEE 754:2019 `minimum` function
+            //
+            // It propagates NaN inputs back to the caller and
+            // otherwise returns the lesser of the inputs. It
+            // treats +0 as lesser than -0 as per the specification.
 
     float val1 = (float)stack.Arg0().NumericByRefConst().r4;
     float val2 = (float)stack.Arg1().NumericByRefConst().r4;
@@ -209,10 +200,9 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
     }
     else
     {
-        // TODO: Implement double.IsNegative
-        // return double.IsNegative(val1) ? val1 : val2;
-
-        stack.SetResult_R4(val1);
+        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
+        float res = (__signbitd(val1) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
