@@ -113,11 +113,11 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-            // This matches the IEEE 754:2019 `minimum` function
-            //
-            // It propagates NaN inputs back to the caller and
-            // otherwise returns the lesser of the inputs. It
-            // treats +0 as lesser than -0 as per the specification.
+    // This matches the IEEE 754:2019 `minimum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the lesser of the inputs. It
+    // treats +0 as lesser than -0 as per the specification.
 
 #if (DP_FLOATINGPOINT == TRUE)
 
@@ -177,11 +177,11 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-            // This matches the IEEE 754:2019 `minimum` function
-            //
-            // It propagates NaN inputs back to the caller and
-            // otherwise returns the lesser of the inputs. It
-            // treats +0 as lesser than -0 as per the specification.
+    // This matches the IEEE 754:2019 `minimum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the lesser of the inputs. It
+    // treats +0 as lesser than -0 as per the specification.
 
     float val1 = (float)stack.Arg0().NumericByRefConst().r4;
     float val2 = (float)stack.Arg1().NumericByRefConst().r4;
