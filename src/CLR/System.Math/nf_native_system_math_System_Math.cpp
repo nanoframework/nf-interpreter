@@ -40,7 +40,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val2) ? val1 : val2;
+        // return double.IsNegative(val2) ? val1 : val2;
 
         stack.SetResult_R8(val1);
     }
@@ -59,15 +59,15 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
         }
         else
         {
-            stack.SetResult_R8((float) val1);
+            stack.SetResult_R8((float)val1);
         }
     }
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val2) ? val1 : val2;
+        // return double.IsNegative(val2) ? val1 : val2;
 
-        stack.SetResult_R8((float) val1);
+        stack.SetResult_R8((float)val1);
     }
 
 #endif
@@ -99,15 +99,15 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_
         }
         else
         {
-            stack.SetResult_R4((float) val1);
+            stack.SetResult_R4((float)val1);
         }
     }
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val2) ? val1 : val2;
+        // return double.IsNegative(val2) ? val1 : val2;
 
-        stack.SetResult_R4((float) val1);
+        stack.SetResult_R4((float)val1);
     }
 
     NANOCLR_NOCLEANUP_NOLABEL();
@@ -145,7 +145,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val1) ? val1 : val2;
+        // return double.IsNegative(val1) ? val1 : val2;
 
         stack.SetResult_R8(val1);
     }
@@ -164,15 +164,15 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
         }
         else
         {
-            stack.SetResult_R8((float) val1);
+            stack.SetResult_R8((float)val1);
         }
     }
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val1) ? val1 : val2;
+        // return double.IsNegative(val1) ? val1 : val2;
 
-        stack.SetResult_R8((float) val1);
+        stack.SetResult_R8((float)val1);
     }
 
 #endif
@@ -210,7 +210,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
     else
     {
         // TODO: Implement double.IsNegative
-        //return double.IsNegative(val1) ? val1 : val2;
+        // return double.IsNegative(val1) ? val1 : val2;
 
         stack.SetResult_R4(val1);
     }
@@ -960,7 +960,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
@@ -980,7 +980,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame &stack )
+HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
