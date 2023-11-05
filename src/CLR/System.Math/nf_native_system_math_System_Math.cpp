@@ -13,38 +13,61 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
 #if (DP_FLOATINGPOINT == TRUE)
 
-    double x = stack.Arg0().NumericByRefConst().r8;
-    double y = stack.Arg1().NumericByRefConst().r8;
+    double val1 = stack.Arg0().NumericByRefConst().r8;
+    double val2 = stack.Arg1().NumericByRefConst().r8;
 
-    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    if (val1 != val2)
     {
-        stack.SetResult_R8(NAN);
+        if (!System::Double::IsNaN(val1))
+        {
+            double res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8(val1);
+        }
     }
     else
     {
-        double res = x >= y ? x : y;
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val2) ? val1 : val2;
 
-        stack.SetResult_R8(res);
+        stack.SetResult_R8(val1);
     }
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
+    float val1 = (float)stack.Arg0().NumericByRefConst().r8;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r8;
 
-    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    if (val1 != val2)
     {
-        stack.SetResult_R8(NAN);
+        if (!System::Double::IsNaN(val1))
+        {
+            float res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8((float) val1);
+        }
     }
     else
     {
-        float res = x >= y ? x : y;
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val2) ? val1 : val2;
 
-        stack.SetResult_R8(res);
+        stack.SetResult_R8((float) val1);
     }
 
 #endif
@@ -57,21 +80,62 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
 #if (DP_FLOATINGPOINT == TRUE)
 
-    double x = stack.Arg0().NumericByRefConst().r8;
-    double y = stack.Arg1().NumericByRefConst().r8;
-    double res = x <= y ? x : y;
+    double val1 = stack.Arg0().NumericByRefConst().r8;
+    double val2 = stack.Arg1().NumericByRefConst().r8;
 
-    stack.SetResult_R8(res);
+    if (val1 != val2)
+    {
+        if (!System::Double::IsNaN(val1))
+        {
+            double res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8(val1);
+        }
+    }
+    else
+    {
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val1) ? val1 : val2;
+
+        stack.SetResult_R8(val1);
+    }
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
-    float res = x <= y ? x : y;
+    float val1 = (float)stack.Arg0().NumericByRefConst().r8;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r8;
 
-    stack.SetResult_R8(res);
+    if (val1 != val2)
+    {
+        if (!System::Double::IsNaN(val1))
+        {
+            float res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8((float) val1);
+        }
+    }
+    else
+    {
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val1) ? val1 : val2;
+
+        stack.SetResult_R8((float) val1);
+    }
 
 #endif
 
