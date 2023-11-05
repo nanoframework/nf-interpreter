@@ -75,6 +75,44 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NANOCLR_NOCLEANUP_NOLABEL();
 }
 
+HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
+    float val1 = (float)stack.Arg0().NumericByRefConst().r4;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r4;
+
+    if (val1 != val2)
+    {
+        if (!System::Double::IsNaN(val1))
+        {
+            float res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R4(res);
+        }
+        else
+        {
+            stack.SetResult_R4((float) val1);
+        }
+    }
+    else
+    {
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val2) ? val1 : val2;
+
+        stack.SetResult_R4((float) val1);
+    }
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
 HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
@@ -138,6 +176,44 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     }
 
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // TODO: The last part of this spec is not currently possible to implement (unless I'm missing something)
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
+    float val1 = (float)stack.Arg0().NumericByRefConst().r4;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r4;
+
+    if (val1 != val2)
+    {
+        if (!System::Double::IsNaN(val1))
+        {
+            float res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R4(res);
+        }
+        else
+        {
+            stack.SetResult_R4(val1);
+        }
+    }
+    else
+    {
+        // TODO: Implement double.IsNegative
+        //return double.IsNegative(val1) ? val1 : val2;
+
+        stack.SetResult_R4(val1);
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -884,7 +960,27 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4( CLR_RT_StackFrame &stack )
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4( CLR_RT_StackFrame &stack )
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();

@@ -31,10 +31,10 @@ static const CLR_RT_MethodHandler method_lookup[] =
     Library_nf_native_system_math_System_Math::Log10___STATIC__R8__R8,
     NULL,
     Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8,
-    NULL,
+    Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4,
     NULL,
     Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8,
-    NULL,
+    Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4,
     Library_nf_native_system_math_System_Math::Pow___STATIC__R8__R8__R8,
     Library_nf_native_system_math_System_Math::Round___STATIC__R8__R8,
     Library_nf_native_system_math_System_Math::Sign___STATIC__I4__R8,
@@ -50,9 +50,9 @@ static const CLR_RT_MethodHandler method_lookup[] =
 const CLR_RT_NativeAssemblyData g_CLR_AssemblyNative_System_Math =
 {
     "System.Math",
-    0x46092CB1,
+    0x9F9E2A7E,
     method_lookup,
-    { 100, 0, 5, 4 }
+    { 100, 0, 5, 5 }
 };
 
 // clang-format on
