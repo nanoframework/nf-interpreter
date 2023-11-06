@@ -1,19 +1,19 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-name: Push devcontainer Docker image [ChibiOS]
+name: Push devcontainer Docker image [FreeRTOS_NXP]
 
 env:
   CONTAINER_REPO: ghcr.io
-  CONTAINER_NAME: dev-container-chibios
-  CONTAINER_SRC_FILE: .devcontainer/ChibiOS/Dockerfile.ChibiOS.SRC
+  CONTAINER_NAME: dev-container-freertos-nxp
+  CONTAINER_SRC_FILE: .devcontainer/FreeRTOS_NXP/Dockerfile.NXP.SRC
 
 on:
   push:
     # branches:
     #   - main
     # paths:
-    #   - '**Dockerfile.ChibiOS.SRC'
+    #   - '**Dockerfile.NXP.SRC'
     
   workflow_dispatch:
 

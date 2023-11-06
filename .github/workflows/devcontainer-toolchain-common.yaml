@@ -1,19 +1,19 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-name: Push devcontainer Docker image [ChibiOS]
+name: Push devcontainer Docker image [Toolchain Common]
 
 env:
   CONTAINER_REPO: ghcr.io
-  CONTAINER_NAME: dev-container-chibios
-  CONTAINER_SRC_FILE: .devcontainer/ChibiOS/Dockerfile.ChibiOS.SRC
+  CONTAINER_NAME: dev-container-toolchain-common
+  CONTAINER_SRC_FILE: .devcontainer/Dockerfile.Toolchain.Common
 
 on:
   push:
     # branches:
     #   - main
     # paths:
-    #   - '**Dockerfile.ChibiOS.SRC'
+    #   - '**Dockerfile.Toolchain.Common'
     
   workflow_dispatch:
 
