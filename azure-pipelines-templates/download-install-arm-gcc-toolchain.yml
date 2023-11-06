@@ -13,7 +13,7 @@ steps:
     inputs:
       key: 'gcc-13_2_rel1 | gccUpdateKey'
       restoreKeys: gccUpdateKey
-      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+      path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
 
   - task: PowerShell@2
