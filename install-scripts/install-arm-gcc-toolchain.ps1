@@ -34,23 +34,23 @@ if ([string]::IsNullOrEmpty($Path) -or $force) {
     # no path requested
     # check for NF_TOOLS_PATH
     if ($env:NF_TOOLS_PATH) {
-        $Path = $env:NF_TOOLS_PATH
+        $toolPath = $env:NF_TOOLS_PATH
     }
     else {
         # use default
-        $Path = 'C:\nftools'
+        $toolPath = 'C:\nftools'
     }
 
     # append the tool path
-    $Path = $Path + "\GNU_Tools_ARM_Embedded\$Version"
+    $toolPath = $toolPath + "\GNU_Tools_ARM_Embedded\$Version"
 }
 
 # check if path already exists
-$gnuGccPathExists = Test-Path $Path -ErrorAction SilentlyContinue    
+$gnuGccPathExists = Test-Path $toolPath -ErrorAction SilentlyContinue    
 
 # download, if needed
 If ($gnuGccPathExists -eq $False -or $force) {
-    $url = "https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu/" + $Version + "/binrel/arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi.zip"
+    $url = "https://developer.arm.com/-/media/Files/downloads/gnu/" + $Version + "/binrel/arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi.zip"
     $output = "$zipRoot\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi.zip"
 
     # Don't download again if already exists
@@ -65,13 +65,16 @@ If ($gnuGccPathExists -eq $False -or $force) {
         "OK" | Write-Host -ForegroundColor Green
     }
 
-    # unzip to install path, if not on Azure
+    # unzip to tool path, if not on Azure
     if ($IsAzurePipelines -eq $False) {
 
         "Installing ARM GNU GCC toolchain..." | Write-Host -ForegroundColor White -NoNewline
 
         # unzip toolchain
-        Expand-Archive $output -DestinationPath $Path > $null
+        Expand-Archive $output -DestinationPath $toolPath > $null
+
+        # update tool path to include versioned toolchain folder
+        $toolPath = $toolPath + "\arm-gnu-toolchain-" + $Version + "-mingw-w64-i686-arm-none-eabi"
 
         "OK" | Write-Host -ForegroundColor Green
     }
@@ -83,11 +86,11 @@ else {
 # set env variable, if not on Azure
 if ($IsAzurePipelines -eq $False) {
     # need to replace forward slash for paths to work with GCC and CMake
-    $Path = "$Path".Replace('\', '/')
+    $toolPath = "$toolPath".Replace('\', '/')
 
     "Setting User Environment Variable ARM_GCC_PATH='" + $env:ARM_GCC_PATH + "'" | Write-Host -ForegroundColor Yellow
 
-    $env:ARM_GCC_PATH = $Path
+    $env:ARM_GCC_PATH = $toolPath
 
     try {
         # this call can fail if the script is not run with appropriate permissions
