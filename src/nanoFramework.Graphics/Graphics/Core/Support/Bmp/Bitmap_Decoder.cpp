@@ -291,5 +291,5 @@ CLR_UINT32 BmpDecoder::BmpOutputHelper(int x, int y, CLR_UINT32 flags, CLR_UINT1
             break;
     }
 
-    return r | (g << 8) | (b << 16);
+    return (r << 16) | (g << 8) | b;
 }
