@@ -51,7 +51,7 @@ RUN apt-get install -y software-properties-common \
 RUN mkdir -p /usr/local/bin/gcc
 
 # Clone fatfs
-RUN git clone --branch R0.14b https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
+RUN git clone --branch R0.15 https://github.com/abbrev/fatfs.git --depth 1 ./sources/fatfs
 
 # Clone ESP-IDF
 RUN git clone --branch v4.4.6 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
