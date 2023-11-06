@@ -941,8 +941,6 @@ HRESULT Library_corlib_native_System_Number::
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
-    char *ret;
-
     CLR_RT_HeapBlock *value;
     bool isInteger;
     char *format;
@@ -974,34 +972,33 @@ HRESULT Library_corlib_native_System_Number::
 
     if (!GetFormatSpec(format, isInteger, &formatChar, &precision))
     {
-        ret = format;
+        NANOCLR_SET_AND_LEAVE(stack.SetResult_String(format));
     }
     else
     {
-        char result[FORMAT_RESULT_BUFFER_SIZE];
-
+        char resultType[FORMAT_RESULT_BUFFER_SIZE];
         int resultLength;
         switch (formatChar)
         {
             case 'g':
             case 'G':
-                resultLength = Format_G(result, value, formatChar, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_G(resultType, value, formatChar, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'x':
             case 'X':
-                resultLength = Format_X(result, value, formatChar, precision);
+                resultLength = Format_X(resultType, value, formatChar, precision);
                 break;
 
             case 'f':
             case 'F':
-                resultLength = Format_F(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_F(resultType, value, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'n':
             case 'N':
                 resultLength = Format_N(
-                    result,
+                    resultType,
                     value,
                     precision,
                     negativeSign,
@@ -1012,12 +1009,12 @@ HRESULT Library_corlib_native_System_Number::
 
             case 'd':
             case 'D':
-                resultLength = Format_D(result, value, precision, negativeSign, numberDecimalSeparator);
+                resultLength = Format_D(resultType, value, precision, negativeSign, numberDecimalSeparator);
                 break;
 
             case 'e':
             case 'E':
-                resultLength = Format_E(result, value, precision, formatChar);
+                resultLength = Format_E(resultType, value, precision, formatChar);
                 break;
 
             default:
@@ -1026,7 +1023,7 @@ HRESULT Library_corlib_native_System_Number::
 
         if (resultLength > 0)
         {
-            ret = result;
+            NANOCLR_SET_AND_LEAVE(stack.SetResult_String(resultType));
         }
         else
         {
@@ -1034,6 +1031,5 @@ HRESULT Library_corlib_native_System_Number::
         }
     }
 
-    NANOCLR_SET_AND_LEAVE(stack.SetResult_String(ret));
     NANOCLR_NOCLEANUP();
 }
