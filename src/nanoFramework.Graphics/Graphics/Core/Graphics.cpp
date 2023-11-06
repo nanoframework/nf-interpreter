@@ -464,7 +464,7 @@ void CLR_GFX_Bitmap::Bitmap_Initialize()
     m_palBitmap.width = m_bm.m_width;
     m_palBitmap.height = m_bm.m_height;
     m_palBitmap.data = (CLR_UINT32 *)&this[1];
-    m_palBitmap.transparentColor = PAL_GFX_Bitmap::c_TransparentColorNotSet;
+    m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorNotSet;
 
     PAL_GFX_Bitmap::ResetClipping(m_palBitmap);
 }
