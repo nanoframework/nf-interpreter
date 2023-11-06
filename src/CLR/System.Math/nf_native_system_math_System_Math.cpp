@@ -26,7 +26,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             double res = val2 < val1 ? val1 : val2;
             stack.SetResult_R8(res);
@@ -38,7 +38,6 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
         double res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
@@ -50,7 +49,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             float res = val2 < val1 ? val1 : val2;
             stack.SetResult_R8(res);
@@ -62,7 +61,6 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
         float res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
@@ -88,7 +86,7 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             float res = val2 < val1 ? val1 : val2;
             stack.SetResult_R4(res);
@@ -100,7 +98,6 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
         float res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R4(res);
     }
@@ -126,7 +123,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             double res = val1 < val2 ? val1 : val2;
             stack.SetResult_R8(res);
@@ -138,8 +135,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
-        double res = (__signbitd(val1) != 0) ? val1 : val2;
+        double res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
 
@@ -150,7 +146,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             float res = val1 < val2 ? val1 : val2;
             stack.SetResult_R8(res);
@@ -162,8 +158,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
-        float res = (__signbitd(val1) != 0) ? val1 : val2;
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
 
@@ -188,7 +183,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
 
     if (val1 != val2)
     {
-        if (!System::Double::IsNaN(val1))
+        if (!__isnand(val1))
         {
             float res = val1 < val2 ? val1 : val2;
             stack.SetResult_R4(res);
@@ -200,8 +195,7 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_
     }
     else
     {
-        // TODO: Replace with double.IsNegative / float.IsNegative when implemented
-        float res = (__signbitd(val1) != 0) ? val1 : val2;
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
 
