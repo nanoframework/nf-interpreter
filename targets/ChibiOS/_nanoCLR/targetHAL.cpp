@@ -142,7 +142,7 @@ void nanoHAL_Initialize()
     DisplayInterfaceConfig config; // not used for DSI display
     g_DisplayInterface.Initialize(config);
     g_DisplayDriver.Initialize();
-    
+
     CLR_UINT32 reserved_user_graphics_memory = 2377728;
     g_GraphicsMemoryHeap.Initialize(reserved_user_graphics_memory);
 
