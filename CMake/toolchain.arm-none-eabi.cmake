@@ -18,7 +18,7 @@ endif(WIN32)
 
 find_program(COMPILER_ON_PATH "${TARGET_TRIPLET}gcc${TOOLCHAIN_EXT}" CMAKE_FIND_ROOT_PATH_BOTH)
 
-if(DEFINED $ENV{ARM_GCC_PATH}) 
+if(DEFINED ENV{ARM_GCC_PATH}) 
     # try to find GCC using the environment variable first    
     file(TO_CMAKE_PATH $ENV{ARM_GCC_PATH} ARM_TOOLCHAIN_PATH)
     message(STATUS "Using ENV variable ARM_GCC_PATH = '${ARM_TOOLCHAIN_PATH}'")
