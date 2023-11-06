@@ -258,6 +258,8 @@ if("${TARGET_SERIES}" STREQUAL "EFM32GG11")
 
     # unset this warning as error required for this source file
     set_source_files_properties(${gecko_sdk_SOURCE_DIR}/protocol/usb/src/sl_usbd_driver_dwc_otg_fs.c PROPERTIES COMPILE_FLAGS -Wno-undef)
+    # this is required until a declaration is fixed in Gecko SDK (reported https://community.silabs.com/s/question/0D58Y0000AUTvt2SQD)
+    set_source_files_properties(${gecko_sdk_SOURCE_DIR}/platform/service/power_manager/src/sl_power_manager.c PROPERTIES COMPILE_FLAGS -Wno-implicit-function-declaration)
 
     list(REMOVE_DUPLICATES Gecko_SDK_INCLUDE_DIRS)
 
