@@ -68,6 +68,13 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 
     //--//
 
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Heap relocate prepare\r\n");
+    }
+#endif
+
     TestPointers_PopulateOld();
 
     CLR_RT_HeapCluster *freeRegion_hc = NULL;
@@ -86,21 +93,31 @@ void CLR_RT_GarbageCollector::Heap_Compact()
             // Move to the next first free region.
             //
             freeRegion_hc = (CLR_RT_HeapCluster *)g_CLR_RT_ExecutionEngine.m_heap.FirstNode();
+
             while (true)
             {
                 CLR_RT_HeapCluster *freeRegion_hcNext = (CLR_RT_HeapCluster *)freeRegion_hc->Next();
+
                 if (!freeRegion_hcNext)
+                {
                     break;
+                }
 
                 freeRegion = freeRegion_hc->m_freeList.FirstNode();
+
                 if (freeRegion->Next())
+                {
                     break;
+                }
 
                 freeRegion = NULL;
                 freeRegion_hc = freeRegion_hcNext;
             }
+
             if (!freeRegion)
+            {
                 break;
+            }
         }
 
         while (true)
@@ -121,13 +138,15 @@ void CLR_RT_GarbageCollector::Heap_Compact()
             }
 
             if (currentSource == currentSource_end)
+            {
                 break;
+            }
 
-                //////////////////////////////////////////////////////
-                //
-                // At this point, we have at least ONE movable block.
-                //
-                //////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////
+            //
+            // At this point, we have at least ONE movable block.
+            //
+            //////////////////////////////////////////////////////
 
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, freeRegion, true) == false)
@@ -320,6 +339,14 @@ void CLR_RT_GarbageCollector::Heap_Compact()
 void CLR_RT_GarbageCollector::Heap_Relocate_Prepare(RelocationRegion *blocks, size_t total)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Relocation - prepare\r\n");
+    }
+#endif
+
     m_relocBlocks = blocks;
     m_relocTotal = total;
     m_relocCount = 0;
@@ -368,6 +395,14 @@ void CLR_RT_GarbageCollector::Heap_Relocate_AddBlock(CLR_UINT8 *dst, CLR_UINT8 *
 void CLR_RT_GarbageCollector::Heap_Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Relocating Heap\r\n");
+    }
+#endif
+
     if (m_relocCount)
     {
         RelocationRegion *relocBlocks = m_relocBlocks;
@@ -417,13 +452,30 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass(RelocateFtn ftn)
     (void)ftn;
 #endif
 
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Relocation - pass\r\n");
+    }
+#endif
+
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, g_CLR_RT_ExecutionEngine.m_heap)
     {
         CLR_RT_HeapBlock_Node *ptr = hc->m_payloadStart;
         CLR_RT_HeapBlock_Node *end = hc->m_payloadEnd;
 
+        // check pointers
+        _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.m_location);
+        _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+        _ASSERTE(end >= (void *)s_CLR_RT_Heap.m_location);
+        _ASSERTE(end <= (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+
         while (ptr < end)
         {
+            // check pointer
+            _ASSERTE(ptr >= (void *)s_CLR_RT_Heap.m_location);
+            _ASSERTE(ptr < (void *)(s_CLR_RT_Heap.m_location + s_CLR_RT_Heap.m_size));
+
             CLR_RT_HEAPBLOCK_RELOCATE(ptr);
 
             ptr += ptr->DataSize();
@@ -439,6 +491,14 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass(RelocateFtn ftn)
 void CLR_RT_GarbageCollector::Heap_Relocate(CLR_RT_HeapBlock *lst, CLR_UINT32 len)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Relocating\r\n");
+    }
+#endif
+
     while (len--)
     {
         CLR_RT_HEAPBLOCK_RELOCATE(lst);
@@ -457,11 +517,27 @@ void CLR_RT_GarbageCollector::Heap_Relocate(void **ref)
 #if NANOCLR_VALIDATE_HEAP > NANOCLR_VALIDATE_HEAP_0_None
     if (g_CLR_RT_GarbageCollector.m_relocWorker)
     {
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: Relocating with worker\r\n");
+        }
+#endif
+
         g_CLR_RT_GarbageCollector.m_relocWorker(ref);
     }
     else
 #endif
     {
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: Relocating Heap\r\n");
+        }
+#endif
+
         if (dst >= g_CLR_RT_GarbageCollector.m_relocMinimum && dst < g_CLR_RT_GarbageCollector.m_relocMaximum)
         {
             RelocationRegion *relocBlocks = g_CLR_RT_GarbageCollector.m_relocBlocks;
@@ -502,6 +578,13 @@ bool CLR_RT_GarbageCollector::Relocation_JustCheck(void **ref)
 {
     NATIVE_PROFILE_CLR_CORE();
     CLR_UINT8 *dst = (CLR_UINT8 *)*ref;
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Relocation - just checking\r\n");
+    }
+#endif
 
     if (dst)
     {
