@@ -40,6 +40,7 @@
 #include "sli_usbd_driver.h"
 
 #include <nanoHAL_v2.h>
+#include <targetHAL.h>
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -5542,6 +5543,8 @@ void sli_usbd_core_task_handler(void)
   sl_status_t status;
 
 #if SL_USBD_AUTO_START_USB_DEVICE == 1
+  sl_usbd_core_stop_device();
+  tx_thread_sleep(TX_TICKS_PER_MILLISEC(50));
   sl_usbd_core_start_device();
 #endif
 
