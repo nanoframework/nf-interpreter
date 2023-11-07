@@ -1,14 +1,19 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
+parameters:
+  - name: gccArmVersion
+    type: string
+    default: "13.2.rel1"
+
 steps:
   - task: Cache@2
     condition: eq(variables.GccArm_Version, '')
     displayName: Cache latest ARM GCC toolchain
     inputs:
-      key: 'gcc-12_3_rel1 | gccUpdateKey'
+      key: 'gcc-13_2_rel1 | gccUpdateKey'
       restoreKeys: gccUpdateKey
-      path: $(Agent.TempDirectory)\GNU_Tools_ARM_Embedded
+      path: $(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi
       cacheHitVar: GCC_CACHE_RESTORED
 
   - task: PowerShell@2
@@ -17,17 +22,18 @@ steps:
     inputs:
         targetType: 'filePath'
         filePath: '$(Build.Repository.LocalPath)\install-scripts\install-arm-gcc-toolchain.ps1'
-        arguments: '-Version "$(GccArm_Version)"'
+        arguments: '-Version "${{ parameters.gccArmVersion }}"'
         failOnStderr: true
 
   - task: ExtractFiles@1
     displayName: Extracting ARM GCC toolchain
     condition: ne(variables.GCC_CACHE_RESTORED, 'true')
     inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\gcc-arm.7z' 
-      destinationFolder: '$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded' 
+      archiveFilePatterns: '$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi.zip'
+      destinationFolder: '$(Agent.TempDirectory)'
+      cleanDestinationFolder: false
 
-  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\GNU_Tools_ARM_Embedded\bin"
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\arm-gnu-toolchain-${{ parameters.gccArmVersion }}-mingw-w64-i686-arm-none-eabi\bin"
     displayName: Add GCC to PATH
 
   - script: |
