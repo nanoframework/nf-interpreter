@@ -10,6 +10,8 @@
 CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, CLR_UINT32 length)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+    // compute required size for the string object (header + string length + null terminator)
     CLR_UINT32 totLength = sizeof(CLR_RT_HeapBlock_String) + length + 1;
     CLR_RT_HeapBlock_String *str;
 
@@ -18,8 +20,11 @@ CLR_RT_HeapBlock_String *CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBloc
     str = (CLR_RT_HeapBlock_String *)g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(DATATYPE_STRING, 0, totLength);
     if (str)
     {
+        // grab a pointer to the string storage area (after the CLR_RT_HeapBlock_String header)
         char *szText = (char *)&str[1];
-        szText[0] = 0;
+
+        // zero out the string storage area
+        memset(szText, 0, CONVERTFROMSIZETOHEAPBLOCKS(totLength - sizeof(CLR_RT_HeapBlock_String)));
 
 #if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
         str->SetStringText(szText);
@@ -39,7 +44,9 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, con
     NANOCLR_HEADER();
 
     if (!szText)
+    {
         szText = "";
+    }
 
     NANOCLR_SET_AND_LEAVE(CLR_RT_HeapBlock_String::CreateInstance(reference, szText, (CLR_UINT32)hal_strlen_s(szText)));
 
@@ -57,8 +64,10 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, con
     str = CreateInstance(reference, length);
     CHECK_ALLOCATION(str);
 
+    // grab a pointer to the string storage area (after the CLR_RT_HeapBlock_String header)
     szTextDst = (char *)str->StringText();
 
+    // copy the string to the storage area
     memcpy(szTextDst, szText, length);
     szTextDst[length] = 0;
 
@@ -70,21 +79,27 @@ HRESULT CLR_RT_HeapBlock_String::CreateInstance(CLR_RT_HeapBlock &reference, con
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
+
+    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(reference, szText));
+
+#else
+
     CLR_RT_HeapBlock_String *str;
 
     reference.SetObjectReference(NULL);
 
+    // get heap block for the string object
+    // only the header is required as we're just pointing to the string stored in the assembly
     str = (CLR_RT_HeapBlock_String *)
               g_CLR_RT_ExecutionEngine.ExtractHeapBytesForObjects(DATATYPE_STRING, 0, sizeof(CLR_RT_HeapBlock_String));
     CHECK_ALLOCATION(str);
 
     reference.SetObjectReference(str);
 
-#if defined(NANOCLR_NO_ASSEMBLY_STRINGS)
-
-    NANOCLR_CHECK_HRESULT(CLR_RT_HeapBlock_String::CreateInstance(reference, szText));
-#else
+    // store the pointers to the string and assembly
     str->SetStringText(szText, assm);
+
 #endif
 
     NANOCLR_NOCLEANUP();
