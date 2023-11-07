@@ -2689,6 +2689,12 @@ struct CLR_RT_GarbageCollector
 
     void ValidatePointers()
     {
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+        if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+        {
+            CLR_Debug::Printf("\r\nGC: ValidatePointers\r\n");
+        }
+#endif
         Heap_Relocate_Pass(Relocation_JustCheck);
     }
 
