@@ -104,7 +104,7 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 }
 
                 freeRegion = freeRegion_hc->m_freeList.FirstNode();
-                
+
                 if (freeRegion->Next())
                 {
                     break;
@@ -142,11 +142,11 @@ void CLR_RT_GarbageCollector::Heap_Compact()
                 break;
             }
 
-                //////////////////////////////////////////////////////
-                //
-                // At this point, we have at least ONE movable block.
-                //
-                //////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////
+            //
+            // At this point, we have at least ONE movable block.
+            //
+            //////////////////////////////////////////////////////
 
 #if NANOCLR_VALIDATE_HEAP >= NANOCLR_VALIDATE_HEAP_4_CompactionPlus
             if (IsBlockInFreeList(g_CLR_RT_ExecutionEngine.m_heap, freeRegion, true) == false)
@@ -452,7 +452,7 @@ void CLR_RT_GarbageCollector::Heap_Relocate_Pass(RelocateFtn ftn)
     (void)ftn;
 #endif
 
-    #if defined(NANOCLR_TRACE_MEMORY_STATS)
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
     if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
     {
         CLR_Debug::Printf("\r\nGC: Relocation - pass\r\n");
