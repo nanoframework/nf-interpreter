@@ -281,7 +281,6 @@ jobs:
     # creates a counter and assigns it to the revision variable
     REVISION: $[counter('STM32_1_8_1_versioncounter', 0)]
     HelperPackageVersion: $[counter('HelperPackageVersioncounter', 0)]
-    GccArm_Version: ''
     TargetPlatform: 'stm32'
 
   steps:
@@ -565,7 +564,6 @@ jobs:
         TargetSeries: 'CC13X2'
         BuildOptions: >-
           -DRADIO_FREQUENCY=868
-        GccArm_Version:
         CMakePreset: TI_CC1352R1_LAUNCHXL
 
   variables:
@@ -615,7 +613,6 @@ jobs:
         TargetBoard: SL_STK3701A_REVB
         TargetSeries: 'efm32gg11'
         BuildOptions:
-        GccArm_Version: 
         NeedsDFU: false
         NeedsSRECORD: false
         TargetName: SL_STK3701A_REVB
