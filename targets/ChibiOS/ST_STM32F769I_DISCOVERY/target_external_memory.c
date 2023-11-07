@@ -69,7 +69,6 @@
 #define SDRAM_SIZE  (16 * 1024 * 1024)
 #define SDRAM_START ((void *)FSMC_Bank5_MAP_BASE)
 
-
 void SetupDeviceMemoryToEliminateUnalignedAccess();
 
 // SDRAM driver configuration structure.
