@@ -80,7 +80,7 @@ ENV PATH=/usr/bin/cmake/bin:${PATH}
 # Putting hex2dfu in the container
 ENV HEX2DFU_PATH=/usr/local/bin/hex2dfu
 
-ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/download/latest/hex2dfu
+ARG HEX2DFU=https://github.com/nanoframework/hex2dfu/releases/latest/download/hex2dfu
 RUN mkdir -p  $HEX2DFU_PATH \
     && curl -o  $HEX2DFU_PATH/hex2dfu $HEX2DFU -L \
     && chmod +x  $HEX2DFU_PATH/hex2dfu
