@@ -14,3 +14,10 @@ void sli_sleeptimer_set_pm_em_requirement(void)
 {
 }
 #endif
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) &&                                                         \
+    !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
+void sli_sleeptimer_hal_power_manager_integration_init(void)
+{
+}
+#endif
