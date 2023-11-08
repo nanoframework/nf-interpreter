@@ -40,7 +40,7 @@ RUN apt-get update \
     nodejs \
     libffi-dev
 
-# Set Python 10 as the default version
+# Set Python 3.10 as the default version
 RUN apt-get install -y software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update \
