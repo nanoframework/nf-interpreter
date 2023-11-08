@@ -463,7 +463,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent_
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
     bitmap->m_palBitmap.transparentColor = stack.Arg1().NumericByRef().u4;
-    bitmap->m_palBitmap.transparentColorSet =  PAL_GFX_Bitmap::c_TransparentColorSet;
+    bitmap->m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorSet;
 
     NANOCLR_NOCLEANUP();
 }
