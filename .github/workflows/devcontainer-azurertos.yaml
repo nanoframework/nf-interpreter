@@ -1,7 +1,7 @@
 # Copyright (c) .NET Foundation and Contributors
 # See LICENSE file in the project root for full license information.
 
-name: Push devcontainer Docker image [AzureRTOS]
+name: Push devcontainer Docker image [AzureRTOS-STM32]
 
 env:
   CONTAINER_REPO: ghcr.io
@@ -37,7 +37,7 @@ jobs:
         images: ${{ env.CONTAINER_REPO }}/${{ github.repository_owner }}/${{ env.CONTAINER_NAME }}
 
     - name: Login to GitHub Container Registry
-      if: github.event_name != 'pull_request'
+      if: ${{ github.event_name != 'pull_request' }}
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
