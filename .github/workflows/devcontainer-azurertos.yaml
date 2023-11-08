@@ -6,20 +6,20 @@ name: Push devcontainer Docker image [AzureRTOS]
 env:
   CONTAINER_REPO: ghcr.io
   CONTAINER_NAME: dev-container-azure-rtos
-  CONTAINER_SRC_FILE: .devcontainer/AzureRTOS/Dockerfile.AzureRTOS.SRC
+  CONTAINER_SRC_FILE: .devcontainer/AzureRTOS_STM32/Dockerfile.AzureRTOS.STM32.SRC
 
 on:
   push:
     # branches:
     #   - main
-    # paths:
-    #   - '**Dockerfile.AzureRTOS.SRC'
+    paths:
+      - '**Dockerfile.AzureRTOS.STM32.SRC'
     
   workflow_dispatch:
 
 jobs:
   build:
-    # if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
+    if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

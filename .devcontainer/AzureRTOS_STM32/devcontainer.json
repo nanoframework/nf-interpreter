@@ -1,10 +1,10 @@
 {
-	"name": "nanoFramework-AzureRTOS",
-	// Adjust this file to choose use of cached containers:
-	// 
-	// "image": "ghcr.io/nanoframework/dev-container-azure-rtos:latest",
-	"dockerFile": "Dockerfile.AzureRTOS.SRC",
-	"context": ".",
+	"name": "nanoFramework-AzureRTOS-STM32",
+	// Adjust this file to choose use of cached containers
+	// or the source docker file.
+	"image": "ghcr.io/nanoframework/dev-container-azure-rtos:latest",
+	// "dockerFile": "Dockerfile.AzureRTOS.STM32.SRC",
+	// "context": ".",
 	"mounts": [
 		// Bind the Unix socket the Docker daemon listens on by default
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",

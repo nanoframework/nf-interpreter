@@ -1,10 +1,10 @@
 {
 	"name": "nanoFramework-ChibiOS",
-	// Adjust this file to choose use of cached containers:
-	// 
-	// "image": "ghcr.io/nanoframework/dev-container-chibios:latest",
-	"dockerFile": "Dockerfile.ChibiOS.SRC",
-	"context": ".",
+	// Adjust this file to choose use of cached containers
+	// or the source docker file.
+	"image": "ghcr.io/nanoframework/dev-container-chibios:latest",
+	// "dockerFile": "Dockerfile.ChibiOS.SRC",
+	// "context": ".",
 	"mounts": [
 		// Bind the Unix socket the Docker daemon listens on by default
 		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
@@ -36,8 +36,8 @@
 				"xaver.clang-format"
 			]
 		}
-	}
-	// You can pull all the repos with the latest changes, this is only valid if you are using the ./sources/Dockerfile.All containers
+	},
+	// You can pull all the dependent repos with the latest changes when starting the dev container
 	// "postAttachCommand": "/usr/local/git-pull-repos.sh"
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],

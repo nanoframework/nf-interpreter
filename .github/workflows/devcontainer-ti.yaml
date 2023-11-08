@@ -12,14 +12,14 @@ on:
   push:
     # branches:
     #   - main
-    # paths:
-    #   - '**Dockerfile.TI.SRC'
+    paths:
+      - '**Dockerfile.TI.SRC'
     
   workflow_dispatch:
 
 jobs:
   build:
-    # if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
+    if: ${{ vars.PUBLISH_DOCKER_IMAGE == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
