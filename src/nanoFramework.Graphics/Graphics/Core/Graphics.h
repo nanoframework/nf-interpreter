@@ -28,9 +28,7 @@
 #include "nf_errors_exceptions.h"
 
 #include "Display.h"
-
-#define UNUSED(X) (void)X /* To avoid gcc/g++ warnings */
-
+#include "Gestures.h"
 // ???? Redefined below but gets past the compile error of not defined
 // CLR_GFX_Font needs CLR_GFX_Bitmap  and CLR_GFX_Bitmap needs CLR_GFX_Font
 struct CLR_GFX_Bitmap;
@@ -422,8 +420,11 @@ struct PAL_GFX_Bitmap
     CLR_UINT32 *data;
     GFX_Rect clipping;
     CLR_UINT32 transparentColor;
+    CLR_UINT16 transparentColorSet;
 
     static const CLR_UINT32 c_InvalidColor = 0xFF000000;
+    static const CLR_UINT16 c_TransparentColorNotSet = 0x00000000;
+    static const CLR_UINT16 c_TransparentColorSet = 0x00000001;
     static const CLR_UINT16 c_OpacityTransparent = 0;
     static const CLR_UINT16 c_OpacityOpaque = 256;
     static const CLR_UINT32 c_SetPixels_None = 0x00000000;
@@ -481,7 +482,7 @@ struct CLR_GFX_Bitmap
     static HRESULT CreateInstanceGif(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size);
     static HRESULT CreateInstanceBmp(CLR_RT_HeapBlock &ref, const CLR_UINT8 *data, const CLR_UINT32 size);
 
-    static HRESULT GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap);
+    static HRESULT GetInstanceFromManagedCSharpReference(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap);
     static HRESULT DeleteInstance(CLR_RT_HeapBlock &ref);
 
     static CLR_UINT32 CreateInstanceJpegHelper(int x, int y, CLR_UINT32 flags, CLR_UINT16 &opacity, void *param);
@@ -776,10 +777,10 @@ struct GraphicsDriver
     }
     __inline static CLR_UINT32 ColorFromRGB(CLR_UINT8 r, CLR_UINT8 g, CLR_UINT8 b)
     {
-        return (b << 16) | (g << 8) | r;
+        return (r << 16) | (g << 8) | b;
     }
 
-    __inline static CLR_UINT32 ConvertNativeToColor(CLR_UINT32 nativeColor)
+    __inline static CLR_UINT32 ConvertNativeToARGB(CLR_UINT32 nativeColor)
     {
         int r = NativeColorRValue(nativeColor) << 3;
         if ((r & 0x8) != 0)
@@ -790,7 +791,8 @@ struct GraphicsDriver
         int b = NativeColorBValue(nativeColor) << 3;
         if ((b & 0x8) != 0)
             b |= 0x7; // Copy LSB
-        return ColorFromRGB(r, g, b);
+        CLR_UINT32 opaque = 0xff000000;
+        return ColorFromRGB(r, g, b) | opaque;
     }
     __inline static CLR_UINT32 ConvertColorToNative(CLR_UINT32 color)
     {

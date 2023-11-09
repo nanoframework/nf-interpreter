@@ -150,28 +150,16 @@ struct Library_nf_sys_io_filesystem_System_IO_Directory
     //--//
 };
 
-struct Library_nf_sys_io_filesystem_System_IO_File
-{
-    NANOCLR_NATIVE_DECLARE(ExistsNative___STATIC__BOOLEAN__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(MoveNative___STATIC__VOID__STRING__STRING);
-    NANOCLR_NATIVE_DECLARE(DeleteNative___STATIC__VOID__STRING);
-    NANOCLR_NATIVE_DECLARE(GetAttributesNative___STATIC__U1__STRING);
-    NANOCLR_NATIVE_DECLARE(SetAttributesNative___STATIC__VOID__STRING__U1);
-    NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
-
-    //--//
-};
-
 struct Library_nf_sys_io_filesystem_System_IO_FileStream
 {
-    static const int FIELD___canRead = 2;
-    static const int FIELD___canWrite = 3;
-    static const int FIELD___canSeek = 4;
-    static const int FIELD___seekLimit = 5;
-    static const int FIELD___position = 6;
-    static const int FIELD___disposed = 7;
-    static const int FIELD___name = 8;
-    static const int FIELD___path = 9;
+    static const int FIELD___canRead = 1;
+    static const int FIELD___canWrite = 2;
+    static const int FIELD___canSeek = 3;
+    static const int FIELD___seekLimit = 4;
+    static const int FIELD___position = 5;
+    static const int FIELD___disposed = 6;
+    static const int FIELD___name = 7;
+    static const int FIELD___path = 8;
 
     NANOCLR_NATIVE_DECLARE(OpenFileNative___VOID__STRING__STRING__I4);
     NANOCLR_NATIVE_DECLARE(ReadNative___I4__STRING__STRING__I8__SZARRAY_U1__I4);
@@ -181,11 +169,25 @@ struct Library_nf_sys_io_filesystem_System_IO_FileStream
     //--//
 };
 
+struct Library_nf_sys_io_filesystem_System_IO_File
+{
+    static const int FIELD_STATIC__EmptyBytes = 2;
+
+    NANOCLR_NATIVE_DECLARE(DeleteNative___STATIC__VOID__STRING);
+    NANOCLR_NATIVE_DECLARE(ExistsNative___STATIC__BOOLEAN__STRING__STRING);
+    NANOCLR_NATIVE_DECLARE(GetAttributesNative___STATIC__U1__STRING);
+    NANOCLR_NATIVE_DECLARE(GetLastWriteTimeNative___STATIC__SystemDateTime__STRING);
+    NANOCLR_NATIVE_DECLARE(MoveNative___STATIC__VOID__STRING__STRING);
+    NANOCLR_NATIVE_DECLARE(SetAttributesNative___STATIC__VOID__STRING__U1);
+
+    //--//
+};
+
 struct Library_nf_sys_io_filesystem_System_IO_Path
 {
-    static const int FIELD_STATIC__DirectorySeparatorChar = 2;
-    static const int FIELD_STATIC__InvalidPathChars = 3;
-    static const int FIELD_STATIC__m_illegalCharacters = 4;
+    static const int FIELD_STATIC__DirectorySeparatorChar = 3;
+    static const int FIELD_STATIC__InvalidPathChars = 4;
+    static const int FIELD_STATIC__m_illegalCharacters = 5;
 
     //--//
 };
