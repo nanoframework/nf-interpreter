@@ -47,7 +47,7 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Ink::
         // we are drawing on the object in the PAL therefore it should not move
         m_InkPinnedBitmap->Pin();
 
-        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(
+        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(
             m_InkPinnedBitmap[CLR_GFX_Bitmap::FIELD__m_bitmap],
             bitmap));
 
