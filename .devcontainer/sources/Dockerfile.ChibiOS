@@ -45,7 +45,7 @@ RUN apt-get update \
     srecord
 
 # Create needed directories
-RUN mkdir -p /usr/local/bin/GCC_URI
+RUN mkdir -p /usr/local/bin/gcc
 
 # Clone ChibiOS repo
 RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
