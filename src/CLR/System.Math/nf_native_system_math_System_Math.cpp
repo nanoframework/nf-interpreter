@@ -13,41 +13,94 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
 #if (DP_FLOATINGPOINT == TRUE)
 
-    double x = stack.Arg0().NumericByRefConst().r8;
-    double y = stack.Arg1().NumericByRefConst().r8;
+    double val1 = stack.Arg0().NumericByRefConst().r8;
+    double val2 = stack.Arg1().NumericByRefConst().r8;
 
-    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    if (val1 != val2)
     {
-        stack.SetResult_R8(NAN);
+        if (!__isnand(val1))
+        {
+            double res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8(val1);
+        }
     }
     else
     {
-        double res = x >= y ? x : y;
-
+        double res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
+    float val1 = (float)stack.Arg0().NumericByRefConst().r8;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r8;
 
-    // from .NET spec: If val1, val2, or both val1 and val2 are equal to NaN, NaN is returned.
-    if (System::Double::IsNaN(x) || System::Double::IsNaN(y))
+    if (val1 != val2)
     {
-        stack.SetResult_R8(NAN);
+        if (!__isnand(val1))
+        {
+            float res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8(val1);
+        }
     }
     else
     {
-        float res = x >= y ? x : y;
-
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
         stack.SetResult_R8(res);
     }
 
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // This matches the IEEE 754:2019 `maximum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the greater of the inputs. It
+    // treats +0 as greater than -0 as per the specification.
+
+    float val1 = (float)stack.Arg0().NumericByRefConst().r4;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r4;
+
+    if (val1 != val2)
+    {
+        if (!__isnand(val1))
+        {
+            float res = val2 < val1 ? val1 : val2;
+            stack.SetResult_R4(res);
+        }
+        else
+        {
+            stack.SetResult_R4(val1);
+        }
+    }
+    else
+    {
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R4(res);
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -57,23 +110,94 @@ HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
 
+    // This matches the IEEE 754:2019 `minimum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the lesser of the inputs. It
+    // treats +0 as lesser than -0 as per the specification.
+
 #if (DP_FLOATINGPOINT == TRUE)
 
-    double x = stack.Arg0().NumericByRefConst().r8;
-    double y = stack.Arg1().NumericByRefConst().r8;
-    double res = x <= y ? x : y;
+    double val1 = stack.Arg0().NumericByRefConst().r8;
+    double val2 = stack.Arg1().NumericByRefConst().r8;
 
-    stack.SetResult_R8(res);
+    if (val1 != val2)
+    {
+        if (!__isnand(val1))
+        {
+            double res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8(val1);
+        }
+    }
+    else
+    {
+        double res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
+    }
 
 #else
 
-    float x = (float)stack.Arg0().NumericByRefConst().r8;
-    float y = (float)stack.Arg1().NumericByRefConst().r8;
-    float res = x <= y ? x : y;
+    float val1 = (float)stack.Arg0().NumericByRefConst().r8;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r8;
 
-    stack.SetResult_R8(res);
+    if (val1 != val2)
+    {
+        if (!__isnand(val1))
+        {
+            float res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R8(res);
+        }
+        else
+        {
+            stack.SetResult_R8((float)val1);
+        }
+    }
+    else
+    {
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
+    }
 
 #endif
+
+    NANOCLR_NOCLEANUP_NOLABEL();
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    // This matches the IEEE 754:2019 `minimum` function
+    //
+    // It propagates NaN inputs back to the caller and
+    // otherwise returns the lesser of the inputs. It
+    // treats +0 as lesser than -0 as per the specification.
+
+    float val1 = (float)stack.Arg0().NumericByRefConst().r4;
+    float val2 = (float)stack.Arg1().NumericByRefConst().r4;
+
+    if (val1 != val2)
+    {
+        if (!__isnand(val1))
+        {
+            float res = val1 < val2 ? val1 : val2;
+            stack.SetResult_R4(res);
+        }
+        else
+        {
+            stack.SetResult_R4(val1);
+        }
+    }
+    else
+    {
+        float res = (__signbitd(val2) != 0) ? val1 : val2;
+        stack.SetResult_R8(res);
+    }
 
     NANOCLR_NOCLEANUP_NOLABEL();
 }
@@ -820,7 +944,27 @@ HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R8__R8__R8(CLR_
     NANOCLR_NOCLEANUP();
 }
 
+HRESULT Library_nf_native_system_math_System_Math::Max___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
 HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R8__R8__R8(CLR_RT_StackFrame &stack)
+{
+    NATIVE_PROFILE_CLR_CORE();
+    NANOCLR_HEADER();
+
+    NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
+
+    NANOCLR_NOCLEANUP();
+}
+
+HRESULT Library_nf_native_system_math_System_Math::Min___STATIC__R4__R4__R4(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_CORE();
     NANOCLR_HEADER();
