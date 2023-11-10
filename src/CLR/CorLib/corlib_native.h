@@ -653,8 +653,6 @@ struct Library_corlib_native_System_Guid
 struct Library_corlib_native_System_MathInternal
 {
     NANOCLR_NATIVE_DECLARE(Abs___STATIC__I4__I4);
-    NANOCLR_NATIVE_DECLARE(Min___STATIC__I4__I4__I4);
-    NANOCLR_NATIVE_DECLARE(Max___STATIC__I4__I4__I4);
 
     //--//
 };
