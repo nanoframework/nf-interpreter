@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - '.devcontainer/sources/*'
+      - '.github/workflows/*'
 
 jobs:
   build-target:
