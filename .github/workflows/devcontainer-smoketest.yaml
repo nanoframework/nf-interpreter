@@ -15,8 +15,8 @@ jobs:
           { target: SL_STK3701A, build-type: Debug, rtos: AzureRTOS},
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, rtos: ChibiOS },
           { target: M5Core2, build-type: Debug, rtos: ESP32 }
-          # { target: NXP_MIMXRT1060_EVK, build-type: Debug, rtos: FreeRTOS },
-          # { target: TI_CC1352R1_LAUNCHXL, build-type: Debug, radio-freq: 915, rtos: TI }
+#          { target: NXP_MIMXRT1060_EVK, build-type: Debug, rtos: FreeRTOS },
+#          { target: TI_CC1352R1_LAUNCHXL, build-type: Debug, radio-freq: 915, rtos: TI }
         ]
 
     runs-on: ubuntu-latest
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Adjust config template for devcontainer
+      - name: Adjust config templates for a devcontainer
         run: |
             # Move into the config directory
             pushd config
