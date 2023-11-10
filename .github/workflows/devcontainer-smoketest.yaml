@@ -5,6 +5,10 @@ on:
     paths:
       - '.devcontainer/sources/*'
       - '.github/workflows/*'
+  push:
+    paths:
+      - '.devcontainer/sources/*'
+      - '.github/workflows/*'
 
 jobs:
   build-target:
