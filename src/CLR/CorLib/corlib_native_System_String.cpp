@@ -630,7 +630,6 @@ HRESULT Library_corlib_native_System_String::IndexOf(CLR_RT_StackFrame &stack, i
     inputIterator.SetInputUTF8(szText);
     inputLen = inputIterator.CountNumberOfCharacters();
 
-    // If input is string.Empty bail early
     if (0 == inputLen)
     {
         pos = -1;
