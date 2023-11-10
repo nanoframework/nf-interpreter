@@ -50,7 +50,7 @@ jobs:
           pushd .devcontainer
 
           # Target the dockerfile source.
-          sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.'${{ matrix.rtos }}'"|g' devcontainer.json
+          sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.${{ matrix.rtos }}"|g' devcontainer.json
 
           # Move out of the .devcontainer directory
           popd
