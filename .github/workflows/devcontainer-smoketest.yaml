@@ -12,11 +12,11 @@ jobs:
 
       matrix: # Add the target and build type you wish to generate firmware for:
         include: [
-          { target: SL_STK3701A, build-type: Debug, rtos: AzureRTOS},
+          { target: SL_STK3701A,             build-type: Debug, rtos: AzureRTOS},
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, rtos: ChibiOS },
-          { target: M5Core2, build-type: Debug, rtos: ESP32 }
-#          { target: NXP_MIMXRT1060_EVK, build-type: Debug, rtos: FreeRTOS },
-#          { target: TI_CC1352R1_LAUNCHXL, build-type: Debug, radio-freq: 915, rtos: TI }
+          { target: M5Core2,                 build-type: Debug, rtos: ESP32 },
+#          { target: NXP_MIMXRT1060_EVK,      build-type: Debug, rtos: FreeRTOS },
+#          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, rtos: TI radio-freq: 915 }
         ]
 
     runs-on: ubuntu-latest
@@ -26,29 +26,29 @@ jobs:
 
       - name: Adjust config templates for a devcontainer
         run: |
-            # Move into the config directory
-            pushd config
+          # Move into the config directory
+          pushd config
 
-            # Rename the templates
-            mv user-prefs.TEMPLATE.json user-prefs.json
-            mv user-tools-repos.TEMPLATE.json user-tools-repos.json
+          # Rename the templates
+          mv user-prefs.TEMPLATE.json user-prefs.json
+          mv user-tools-repos.TEMPLATE.json user-tools-repos.json
 
-            # Adjust the file content for a devcontainer
-            # sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
+          # Adjust the file content for a devcontainer
+          sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
 
-            # Move out of the config directory
-            popd
+          # Move out of the config directory
+          popd
 
       - name: Adjust devcontainer.json for ${{ matrix.rtos }} source
         run: |
-            # Move into the .devcontainer directory
-            pushd .devcontainer
+          # Move into the .devcontainer directory
+          pushd .devcontainer
 
-            # Target the dockerfile source.
-            sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.'${{ matrix.rtos }}'"|g' devcontainer.json
+          # Target the dockerfile source.
+          # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.'${{ matrix.rtos }}'"|g' devcontainer.json
 
-            # Move out of the .devcontainer directory
-            popd
+          # Move out of the .devcontainer directory
+          popd
 
       - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
         uses: devcontainers/ci@v0.3
