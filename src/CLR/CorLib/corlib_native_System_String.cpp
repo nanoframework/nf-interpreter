@@ -628,6 +628,12 @@ HRESULT Library_corlib_native_System_String::IndexOf( CLR_RT_StackFrame& stack, 
     inputIterator.SetInputUTF8( szText );
     inputLen = inputIterator.CountNumberOfCharacters();
 
+    // If input is string.Empty bail early
+    if (0 == inputLen) {
+        pos = -1;
+        goto Exit;
+    }
+
     // calculate start index
     if(mode & c_IndexOf__StartIndex)
     {
