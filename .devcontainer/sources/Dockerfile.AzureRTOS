@@ -72,7 +72,7 @@ ARG TMP_GCC_PATH=/usr/local/bin/gcc
 ENV ARM_GCC_PATH=$TMP_GCC_PATH/bin
 
 # Copy from our other container
-COPY --from=downloader /tmp/dc-extracted/gcc $ARM_GCC_PATH
+COPY --from=downloader /tmp/dc-extracted/gcc $TMP_GCC_PATH
 COPY --from=downloader /tmp/dc-extracted/cmake /usr/bin/cmake
 
 ENV PATH=/usr/bin/cmake/bin:${PATH}
