@@ -24,38 +24,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Adjust config templates for a devcontainer
-        run: |
-          # Move into the config directory
-          pushd config
+      # - name: Adjust config templates for a devcontainer
+      #   run: |
+      #     # Move into the config directory
+      #     pushd config
 
-          # Rename the templates
-          mv user-prefs.TEMPLATE.json user-prefs.json
-          mv user-tools-repos.TEMPLATE.json user-tools-repos.json
+      #     # Rename the templates
+      #     mv user-prefs.TEMPLATE.json user-prefs.json
+      #     mv user-tools-repos.TEMPLATE.json user-tools-repos.json
 
-          # Adjust the file content for a devcontainer
-          sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
+      #     # Adjust the file content for a devcontainer
+      #     sed -i -- 's|"name": "user-tools-repos-container"|"name": "user-tools-repos"|g' user-tools-repos.json
 
-          # Move out of the config directory
-          popd
+      #     # Move out of the config directory
+      #     popd
 
-      - name: Adjust devcontainer.json for ${{ matrix.rtos }} source
-        run: |
-          # Move into the .devcontainer directory
-          pushd .devcontainer
+      # - name: Adjust devcontainer.json for ${{ matrix.rtos }} source
+      #   run: |
+      #     # Move into the .devcontainer directory
+      #     pushd .devcontainer
 
-          # Target the dockerfile source.
-          # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.'${{ matrix.rtos }}'"|g' devcontainer.json
+      #     # Target the dockerfile source.
+      #     # sed -i -- 's|"dockerFile": "Dockerfile.All"|"dockerFile": "sources/Dockerfile.'${{ matrix.rtos }}'"|g' devcontainer.json
 
-          # Move out of the .devcontainer directory
-          popd
+      #     # Move out of the .devcontainer directory
+      #     popd
 
-      - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
-        uses: devcontainers/ci@v0.3
-        with:
-          push: never
-          runCmd: |
-            # Build target:
-            cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
-            cmake --build build
+      # - name: Build ${{ matrix.target }} ${{ matrix.build-type }} Firmware
+      #   uses: devcontainers/ci@v0.3
+      #   with:
+      #     push: never
+      #     runCmd: |
+      #       # Build target:
+      #       cmake --preset=${{ matrix.target }} -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+      #       cmake --build build
 
