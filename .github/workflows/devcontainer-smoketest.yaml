@@ -28,6 +28,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Update repo submodules
+        run: |
+          git submodule update --init
 
       - name: Adjust config templates for a devcontainer
         run: |
