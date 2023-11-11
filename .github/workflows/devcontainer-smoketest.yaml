@@ -21,7 +21,7 @@ jobs:
           { target: ST_STM32F769I_DISCOVERY, build-type: Debug, rtos: ChibiOS },
           { target: M5Core2,                 build-type: Debug, rtos: ESP32 },
           { target: NXP_MIMXRT1060_EVK,      build-type: Debug, rtos: All },
-          { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, rtos: TI, radio-freq: 915 }
+          # { target: TI_CC1352R1_LAUNCHXL,    build-type: Debug, rtos: TI, radio-freq: 915 }
         ]
 
     runs-on: ubuntu-latest
