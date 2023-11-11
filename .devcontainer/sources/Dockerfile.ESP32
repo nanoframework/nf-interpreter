@@ -10,7 +10,8 @@ RUN apt-get update \
 RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc
 
 ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
-RUN wget $CMAKE_SCRIPT -q -O /tmp/cmake-install.sh \
+RUN wget $CMAKE_SCRIPT \
+    -q -O /tmp/cmake-install.sh \
     && chmod u+x /tmp/cmake-install.sh \
     && mkdir /tmp/dc-extracted/cmake \
     && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
