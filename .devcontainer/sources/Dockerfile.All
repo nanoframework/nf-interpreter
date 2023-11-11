@@ -28,7 +28,7 @@ RUN wget $CMAKE_SCRIPT \
       && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
       && rm /tmp/cmake-install.sh
 
-FROM ubuntu:latest AS devcontainer
+FROM python:3.10 AS devcontainer
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -52,13 +52,6 @@ RUN apt-get update \
     srecord \
     nodejs \
     libffi-dev
-
-# Set Python 3.10 as the default version
-RUN apt-get install -y software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update \
-    && apt-get install -y python3.10 \
-    python3-pip
 
 # Create needed directories
 RUN mkdir -p /usr/local/bin/gcc \
