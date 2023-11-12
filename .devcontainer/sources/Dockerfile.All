@@ -58,9 +58,9 @@ RUN mkdir -p /usr/local/bin/gcc \
     && mkdir -p /usr/local/bin/titools
 
 # Clone ChibiOS repo
-RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
+#RUN git svn clone http://svn.code.sf.net/p/chibios/code/branches/stable_21.11.x -rHEAD ./sources/ChibiOs
 # Alternative source for those having issues with git svn downloads:
-# RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
+RUN git clone --branch stable_21.11.x https://github.com/ArduPilot/ChibiOS.svn.git --depth 1 ./sources/ChibiOs
 
 # Clone support repos for STM32 including AzureRTOS
 RUN git clone --branch nf-build https://github.com/nanoframework/STM32CubeL4.git --depth 1 ./sources/STM32CubeL4 \
