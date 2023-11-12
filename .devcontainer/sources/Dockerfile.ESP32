@@ -7,15 +7,16 @@ RUN apt-get update \
     unzip \
     wget 
 
-RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted/gcc
+RUN mkdir -p /tmp/dc-downloads /tmp/dc-extracted
 
-ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
+ARG CMAKE_VERSION=3.27.6
+ARG CMAKE_SCRIPT=https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION-linux-x86_64.sh
 RUN wget $CMAKE_SCRIPT \
-    -q -O /tmp/cmake-install.sh \
-    && chmod u+x /tmp/cmake-install.sh \
-    && mkdir /tmp/dc-extracted/cmake \
-    && /tmp/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
-    && rm /tmp/cmake-install.sh
+    -q -O /tmp/dc-downloads/cmake-install.sh \
+    && chmod u+x /tmp/dc-downloads/cmake-install.sh \
+    && mkdir -p /tmp/dc-extracted/cmake \
+    && /tmp/dc-downloads/cmake-install.sh --skip-license --prefix=/tmp/dc-extracted/cmake \
+    && rm /tmp/dc-downloads/cmake-install.sh
 
 FROM python:3.10 AS devcontainer
 
