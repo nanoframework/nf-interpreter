@@ -4,22 +4,16 @@
 #
 
 include(FetchContent)
+FetchContent_GetProperties(lwip)
 FetchContent_GetProperties(chibios)
-
-# extract LwIP source files
-execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${chibios_SOURCE_DIR}/ext/lwip-2.1.2.7z
-    WORKING_DIRECTORY ${chibios_SOURCE_DIR}/ext/
-)
 
 # List of the required lwIp include files.
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Lwip)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/various)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/os/various/lwip_bindings)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include/lwip)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include/netif)
-list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${chibios_SOURCE_DIR}/ext/lwip/src/include/posix)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/lwip)
+list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${lwip_SOURCE_DIR}/src/include/netif)
 list(APPEND CHIBIOS_LWIP_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src/DeviceInterfaces/Networking.Sntp)
 
 set(LWIP_SRCS
@@ -103,16 +97,16 @@ foreach(SRC_FILE ${LWIP_SRCS})
     find_file(LWIP_SRC_FILE ${SRC_FILE}
         PATHS 
             ${chibios_SOURCE_DIR}/os/various
-            ${chibios_SOURCE_DIR}/ext/lwip/src/core
-            ${chibios_SOURCE_DIR}/ext/lwip/src/core/ipv4
-            ${chibios_SOURCE_DIR}/ext/lwip/src/core/ipv6
-            ${chibios_SOURCE_DIR}/ext/lwip/src/api
-            ${chibios_SOURCE_DIR}/ext/lwip/src/netif
+            ${lwip_SOURCE_DIR}/src/core
+            ${lwip_SOURCE_DIR}/src/core/ipv4
+            ${lwip_SOURCE_DIR}/src/core/ipv6
+            ${lwip_SOURCE_DIR}/src/api
+            ${lwip_SOURCE_DIR}/src/netif
 
             ${CMAKE_SOURCE_DIR}/targets/ChibiOS/_Lwip
 
             # APPS:
-            ${chibios_SOURCE_DIR}/ext/lwip/src/apps/sntp
+            ${lwip_SOURCE_DIR}/src/apps/sntp
 
         CMAKE_FIND_ROOT_PATH_BOTH
     )
@@ -128,15 +122,3 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CHIBIOS_LWIP DEFAULT_MSG CHIBIOS_LWIP_INCLUDE_DIRS CHIBIOS_LWIP_SOURCES)
-
-# setup target to unzip ChibiOS external network components
-add_custom_target( CHIBIOS_NETWORK_COMPONENTS ALL )
-
-add_custom_command(TARGET CHIBIOS_NETWORK_COMPONENTS
-PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E tar xf ${chibios_SOURCE_DIR}/ext/lwip-2.1.2.7z
-    WORKING_DIRECTORY ${chibios_SOURCE_DIR}/ext/
-    DEPENDS ${chibios_SOURCE_DIR}/ext/lwip-2.1.2.7z
-
-    VERBATIM
-)
