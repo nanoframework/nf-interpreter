@@ -17,7 +17,7 @@ git pull origin nanoframework
 cd /sources/mbedtls
 git pull origin mbedtls-2.28.5
 cd /sources/fatfs
-git pull origin R0.14b
+git pull origin R0.15
 cd /sources/FreeRTOS
 git pull origin V10.4.1-kernel-only
 cd /sources/CMSIS_5

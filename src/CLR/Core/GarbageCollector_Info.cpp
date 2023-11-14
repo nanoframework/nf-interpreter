@@ -110,10 +110,19 @@ void CLR_RT_GarbageCollector::ValidateCluster(CLR_RT_HeapCluster *hc)
 void CLR_RT_GarbageCollector::ValidateHeap(CLR_RT_DblLinkedList &lst)
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Validating Heap\r\n");
+    }
+#endif
+
     NANOCLR_FOREACH_NODE(CLR_RT_HeapCluster, hc, lst)
     {
         ValidateCluster(hc);
     }
+
     NANOCLR_FOREACH_NODE_END();
 }
 
@@ -258,6 +267,12 @@ void CLR_RT_GarbageCollector::TestPointers_PopulateOld()
     s_mapNewToRecord.clear();
 
     //--//
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: Testing pointers, populating 'old' objects\r\n");
+    }
+#endif
 
     Heap_Relocate_Pass(TestPointers_PopulateOld_Worker);
 }

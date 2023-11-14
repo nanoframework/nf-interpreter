@@ -93,7 +93,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceJpeg(CLR_RT_HeapBlock &ref, const CLR_UINT
     // Allocate the memory that the decompressed bitmap would need
     NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, bm));
 
-    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(ref, bitmap));
+    NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(ref, bitmap));
 
     // Do the actual decompression
     rect.left = 0;
