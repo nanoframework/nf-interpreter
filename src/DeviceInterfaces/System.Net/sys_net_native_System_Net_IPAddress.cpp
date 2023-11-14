@@ -15,14 +15,13 @@ HRESULT Library_sys_net_native_System_Net_IPAddress::IPv4ToString___STATIC__STRI
     NANOCLR_NOCLEANUP();
 }
 
-
-HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRING__SZARRAY_U2( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRING__SZARRAY_U2(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
 #if LWIP_IPV6
     // Get address of ushort array with ipv6 address
-    CLR_UINT16 *  addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
+    CLR_UINT16 *addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
 
     // get IP v6 address in numeric format
     NANOCLR_CHECK_HRESULT(stack.SetResult_String(SOCK_IPV6AddressToString(addr)));

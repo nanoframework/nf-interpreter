@@ -293,8 +293,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV4AddressFromString___STATIC__I8__STRING(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV4AddressFromString___STATIC__I8__STRING(CLR_RT_StackFrame &stack)
 {
     NATIVE_PROFILE_CLR_NETWORK();
     NANOCLR_HEADER();
@@ -310,7 +310,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV6AddressFromString___STATIC__SZARRAY_U2__STRING( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV6AddressFromString___STATIC__SZARRAY_U2__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -320,13 +321,13 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     NANOCLR_CHECK_HRESULT(SOCK_IPV6AddressFromString(ipString, address));
 
-    // Return array of uint16[8] 
+    // Return array of uint16[8]
     NANOCLR_CHECK_HRESULT(
         CLR_RT_HeapBlock_Array::CreateInstance(stack.PushValueAndClear(), 8, g_CLR_RT_WellKnownTypes.m_UInt16));
-        {
-            uint16_t *p = (uint16_t *)stack.TopValue().DereferenceArray()->GetFirstElement();
-            memcpy(p, address, sizeof(address));
-        }
+    {
+        uint16_t *p = (uint16_t *)stack.TopValue().DereferenceArray()->GetFirstElement();
+        memcpy(p, address, sizeof(address));
+    }
 #else
     NANOCLR_SET_AND_LEAVE(stack.NotImplementedStub());
 #endif

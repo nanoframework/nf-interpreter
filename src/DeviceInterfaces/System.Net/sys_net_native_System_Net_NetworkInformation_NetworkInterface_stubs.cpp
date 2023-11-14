@@ -55,8 +55,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV4AddressFromString___STATIC__I8__STRING(
-    CLR_RT_StackFrame &stack)
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV4AddressFromString___STATIC__I8__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -65,7 +65,8 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
     NANOCLR_NOCLEANUP();
 }
 
-HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::IPV6AddressFromString___STATIC__SZARRAY_U2__STRING( CLR_RT_StackFrame &stack )
+HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::
+    IPV6AddressFromString___STATIC__SZARRAY_U2__STRING(CLR_RT_StackFrame &stack)
 {
     NANOCLR_HEADER();
 
@@ -73,4 +74,3 @@ HRESULT Library_sys_net_native_System_Net_NetworkInformation_NetworkInterface::I
 
     NANOCLR_NOCLEANUP();
 }
-
