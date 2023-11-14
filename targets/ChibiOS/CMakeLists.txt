@@ -223,7 +223,7 @@ if(USE_NETWORKING_OPTION)
 
     # set tag for currently supported version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(LWIP_GIT_TAG "STABLE-2_1_2_RELEASE")
+    set(LWIP_GIT_TAG "STABLE-2_1_3_RELEASE")
 
     if(NO_LWIP_SOURCE)
         # no LWIP source specified, download it from it's repo

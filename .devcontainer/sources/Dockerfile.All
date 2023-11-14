@@ -90,7 +90,7 @@ RUN git clone --branch V10.4.1-kernel-only https://github.com/FreeRTOS/FreeRTOS-
 # Clone lwIP for NXP
 RUN git clone --branch STABLE-2_0_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip-2_0_3
 # Clone lwIP for STM32
-RUN git clone --branch STABLE-2_1_2_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
+RUN git clone --branch STABLE-2_1_3_RELEASE https://github.com/lwip-tcpip/lwip.git --depth 1 ./sources/lwip
 
 # Clone ESP-IDF
 RUN git clone --branch v4.4.6 https://github.com/espressif/esp-idf --depth 1 --recursive ./sources/esp-idf
