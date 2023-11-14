@@ -39,7 +39,7 @@ HRESULT Library_sys_net_native_System_Net_IPAddress::IPv6ToString___STATIC__STRI
 
 #if LWIP_IPV6
     // Get address of ushort array with ipv6 address
-    CLR_UINT16 *  addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
+    CLR_UINT16 *addr = (CLR_UINT16 *)stack.Arg0().DereferenceArray()->GetFirstElement();
 
     // get IP v6 address in numeric format
     NANOCLR_CHECK_HRESULT(stack.SetResult_String(SOCK_IPV6AddressToString(addr)));
