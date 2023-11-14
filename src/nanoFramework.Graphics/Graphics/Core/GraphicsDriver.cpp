@@ -77,7 +77,7 @@ bool GraphicsDriver::ChangeOrientation(DisplayOrientation newOrientation)
 
 CLR_UINT32 GraphicsDriver::GetPixel(const PAL_GFX_Bitmap &bitmap, int x, int y)
 {
-    return ConvertNativeToColor(GetPixelNative(bitmap, x, y));
+    return ConvertNativeToARGB(GetPixelNative(bitmap, x, y));
 }
 
 void GraphicsDriver::SetPixel(const PAL_GFX_Bitmap &bitmap, int x, int y, CLR_UINT32 color)
@@ -777,6 +777,9 @@ void GraphicsDriver::RotateImage(
     if (degree < 0)
         degree = 360 + degree;
 
+    CLR_UINT16 nativeTransparentColor = ConvertColorToNative(src.transparentColor);
+    bool srcHasTransparentColor = (src.transparentColorSet == PAL_GFX_Bitmap::c_TransparentColorSet);
+
     // If it's just a translation, do the BitBlt instead
     if (degree == 0)
     {
@@ -849,7 +852,10 @@ void GraphicsDriver::RotateImage(
                 {
                     CLR_UINT32 mask, shift;
                     CLR_UINT32 *pbyteSrc = ComputePosition(src, xSrc, ySrc, mask, shift);
-                    if ((CLR_UINT32)pbyteSrc >= sourceMemoryBlockStart && (CLR_UINT32)pbyteSrc <= sourceMemoryBlockEnd)
+                    CLR_UINT16 rgb565Color = (*pbyteSrc & mask) >> shift;
+                    bool transparentSrcColour = srcHasTransparentColor && (nativeTransparentColor == rgb565Color);
+                    if ((CLR_UINT32)pbyteSrc >= sourceMemoryBlockStart &&
+                        (CLR_UINT32)pbyteSrc <= sourceMemoryBlockEnd && !transparentSrcColour)
                     {
                         *pbyteDst &= ~maskDst;
                         *pbyteDst |= ((*pbyteSrc & mask) >> shift) << shiftDst;
@@ -898,7 +904,7 @@ void GraphicsDriver::DrawImage(
 
         int type = 0x0;
         CLR_UINT32 nativeTransparentColor = 0;
-        if (bitmapSrc.transparentColor != PAL_GFX_Bitmap::c_InvalidColor)
+        if (bitmapSrc.transparentColorSet == PAL_GFX_Bitmap::c_TransparentColorSet)
         {
             type |= Transparent;
             nativeTransparentColor = g_GraphicsDriver.ConvertColorToNative(bitmapSrc.transparentColor);
@@ -1033,7 +1039,7 @@ void GraphicsDriver::DrawImage(
 
             CLR_UINT16 color = *ps;
             CLR_UINT32 nativeTransparentColor = g_GraphicsDriver.ConvertColorToNative(bitmapSrc.transparentColor);
-            bool noTransparent = bitmapSrc.transparentColor == PAL_GFX_Bitmap::c_InvalidColor;
+            bool noTransparent = bitmapSrc.transparentColorSet == PAL_GFX_Bitmap::c_TransparentColorNotSet;
             bool transparent = (noTransparent == false) && (color == nativeTransparentColor);
 
             for (int x = 0; x < croppedWidth; x++, pd++)
@@ -1586,8 +1592,6 @@ void GraphicsDriver::Screen_Flush(
     if (bitmap.m_bm.m_height > (CLR_UINT32)heightMax)
         return;
     if (bitmap.m_bm.m_bitsPerPixel != CLR_GFX_BitmapDescription::c_NativeBpp)
-        return;
-    if (bitmap.m_palBitmap.transparentColor != PAL_GFX_Bitmap::c_InvalidColor)
         return;
 
     g_DisplayDriver.BitBlt(srcX, srcY, width, height, bitmap.m_bm.m_width, screenX, screenY, bitmap.m_palBitmap.data);

@@ -424,6 +424,14 @@ void CLR_RT_ExecutionEngine::PerformHeapCompaction()
 void CLR_RT_ExecutionEngine::Relocate()
 {
     NATIVE_PROFILE_CLR_CORE();
+
+#if defined(NANOCLR_TRACE_MEMORY_STATS)
+    if (s_CLR_RT_fTrace_MemoryStats >= c_CLR_RT_Trace_Verbose)
+    {
+        CLR_Debug::Printf("\r\nGC: performing EE relocation\r\n");
+    }
+#endif
+
 #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)
     CLR_RT_GarbageCollector::Heap_Relocate((void **)&m_scratchPadArray);
 #endif // #if defined(NANOCLR_ENABLE_SOURCELEVELDEBUGGING)

@@ -28,7 +28,7 @@ endif()
 # check if build was requested with a specifc FatFS version
 if(FATFS_VERSION_EMPTY)
     # no FatFS version actualy specified, must be empty which is fine, we'll default to a known good version
-    set(FATFS_VERSION_TAG "R0.14b")
+    set(FATFS_VERSION_TAG "R0.15")
 else()
     # set version 
     set(FATFS_VERSION_TAG "${FATFS_VERSION}")
@@ -95,11 +95,11 @@ endif()
 
 if(NO_LWIP_SOURCE)
 
-    message(STATUS "lwIP ${LWIP_GIT_TAG} from savannah.nongnu.org repo")
+    message(STATUS "lwIP ${LWIP_GIT_TAG} from github.com/lwip-tcpip/lwip repo")
 
     FetchContent_Declare(
         lwip
-        GIT_REPOSITORY https://git.savannah.nongnu.org/git/lwip.git
+        GIT_REPOSITORY https://github.com/lwip-tcpip/lwip.git
         GIT_TAG ${LWIP_GIT_TAG}
     )
 

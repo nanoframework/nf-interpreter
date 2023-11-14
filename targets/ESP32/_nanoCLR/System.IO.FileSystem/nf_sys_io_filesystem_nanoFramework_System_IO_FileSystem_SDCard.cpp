@@ -97,7 +97,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     {
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
-            bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+            bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
 
             int count;
             int8_t *pPins;
@@ -180,7 +180,8 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
         // Unreserve MMC pins. I suppose they could be used for something else
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
-            bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+            bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
+
             int count;
             int8_t *pPins;
 
@@ -223,7 +224,7 @@ HRESULT Library_nf_sys_io_filesystem_nanoFramework_System_IO_FileSystem_SDCard::
     {
         case SDCard_SDInterfaceType::SDCard_SDInterfaceType_Mmc:
         {
-            bool bit1Mode = (bool)(pThis[FIELD___dataWidth].NumericByRef().s4);
+            bool bit1Mode = pThis[FIELD___dataWidth].NumericByRef().s4 == SDCard_SDDataWidth::SDCard_SDDataWidth__1_bit;
 
             if (!Storage_MountMMC(bit1Mode, 0))
             {

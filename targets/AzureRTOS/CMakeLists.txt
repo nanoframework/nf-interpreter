@@ -77,7 +77,7 @@ endif()
 if(RTOS_VERSION_EMPTY)
     # no AzureRTOS version actualy specified, must be empty which is fine, we'll default to a known good version
     # WHEN CHANGING THIS MAKE SURE TO UPDATE THE DEV CONTAINERS
-    set(RTOS_VERSION "v6.2.0_rel")
+    set(RTOS_VERSION "v6.3.0_rel")
 endif()
 
 if(NO_AZURERTOS_SOURCE_FOLDER)

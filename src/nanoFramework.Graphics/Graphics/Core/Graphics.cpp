@@ -31,9 +31,6 @@ bool CLR_GFX_BitmapDescription::BitmapDescription_Initialize(int width, int heig
     m_flags = 0;
     m_type = CLR_GFX_BitmapDescription::c_Type_nanoCLRBitmap;
 
-    if (GetTotalSize() < 0)
-        return false;
-
     return true;
 }
 
@@ -162,7 +159,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
 
         NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(refUncompressed, bmUncompressed));
 
-        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(refUncompressed, bitmap));
+        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(refUncompressed, bitmap));
 
         bitmap->Decompress(data, size);
 
@@ -182,7 +179,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
 
         NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::CreateInstance(ref, bmNative));
 
-        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(ref, bitmapNative));
+        NANOCLR_CHECK_HRESULT(CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(ref, bitmapNative));
 
         bitmapNative->ConvertToNative(bm, (CLR_UINT32 *)data);
     }
@@ -201,7 +198,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstance(
     NANOCLR_CLEANUP_END();
 }
 
-HRESULT CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap)
+HRESULT CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(const CLR_RT_HeapBlock &ref, CLR_GFX_Bitmap *&bitmap)
 {
     HRESULT hr;
     CLR_RT_HeapBlock *blob;
@@ -254,7 +251,7 @@ HRESULT CLR_GFX_Bitmap::CreateInstanceBmp(CLR_RT_HeapBlock &ref, const CLR_UINT8
     // Allocate the memory that the decoded bitmap would need
     NANOCLR_CHECK_HRESULT(CreateInstance(ref, bm));
 
-    NANOCLR_CHECK_HRESULT(GetInstanceFromGraphicsHeapBlock(ref, bitmap));
+    NANOCLR_CHECK_HRESULT(GetInstanceFromManagedCSharpReference(ref, bitmap));
 
     NANOCLR_CHECK_HRESULT(decoder.BmpStartOutput(bitmap));
 
@@ -421,7 +418,7 @@ CLR_UINT32 CLR_GFX_Bitmap::ConvertToNative16BppHelper(int x, int y, CLR_UINT32 f
     myParam->srcCur16BppPixel++;
     opacity = PAL_GFX_Bitmap::c_OpacityOpaque;
 
-    return (r << 16 | g << 8 | b);
+    return (r << 16) | (g << 8) | b;
 }
 
 CLR_UINT32 CLR_GFX_Bitmap::GetPixel(int xPos, int yPos) const
@@ -466,7 +463,7 @@ void CLR_GFX_Bitmap::Bitmap_Initialize()
     m_palBitmap.width = m_bm.m_width;
     m_palBitmap.height = m_bm.m_height;
     m_palBitmap.data = (CLR_UINT32 *)&this[1];
-    m_palBitmap.transparentColor = PAL_GFX_Bitmap::c_InvalidColor;
+    m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorNotSet;
 
     PAL_GFX_Bitmap::ResetClipping(m_palBitmap);
 }
@@ -735,7 +732,7 @@ HRESULT CLR_GFX_Bitmap::GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_G
     FAULT_ON_NULL(pThis);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
+        CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
 
     if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
