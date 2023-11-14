@@ -460,13 +460,10 @@ HRESULT Library_nanoFramework_Graphics_nanoFramework_UI_Bitmap::MakeTransparent_
     NANOCLR_HEADER();
 
     CLR_GFX_Bitmap *bitmap;
-    CLR_UINT32 color;
 
     NANOCLR_CHECK_HRESULT(GetBitmap(stack, true, bitmap));
-
-    color = stack.Arg1().NumericByRef().u4;
-
-    bitmap->m_palBitmap.transparentColor = (color & 0xFF000000) ? PAL_GFX_Bitmap::c_InvalidColor : color;
+    bitmap->m_palBitmap.transparentColor = stack.Arg1().NumericByRef().u4;
+    bitmap->m_palBitmap.transparentColorSet = PAL_GFX_Bitmap::c_TransparentColorSet;
 
     NANOCLR_NOCLEANUP();
 }
@@ -1177,7 +1174,7 @@ HRESULT GetBitmap(CLR_RT_HeapBlock *pThis, bool fForWrite, CLR_GFX_Bitmap *&bitm
     FAULT_ON_NULL(pThis);
 
     NANOCLR_CHECK_HRESULT(
-        CLR_GFX_Bitmap::GetInstanceFromGraphicsHeapBlock(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
+        CLR_GFX_Bitmap::GetInstanceFromManagedCSharpReference(pThis[CLR_GFX_Bitmap::FIELD__m_bitmap], bitmap));
 
     if ((bitmap->m_bm.m_flags & CLR_GFX_BitmapDescription::c_ReadOnly) && fForWrite)
         NANOCLR_SET_AND_LEAVE(CLR_E_INVALID_PARAMETER);
